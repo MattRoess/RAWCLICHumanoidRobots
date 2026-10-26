@@ -1114,6 +1114,51 @@ as before, read 2026-10-26.
 - robot type 1's battery enclosure as PC/ABS without flame retardant (the workbook does not call it flame-retardant);
 - pigments and stabilisers are not itemised: no source gives them.
 
+#### E1.8d The nine open points of the plastics recipe, verified on the web
+
+Matthias, 2026-10-26: "Have you verified as much as possible with your own investigation in the internet. Add alwaus
+the references". Then, choosing the answer offered: "Yes, verify the nine open plastics points on the web now, read
+every source yourself, and show me the results with their references before anything is entered."
+
+Every source below was opened and read on 2026-10-26: PDFs as text through PDFKit, web pages through the fetch tool
+or in the browser.
+
+| # | Point | Source read | Kind | What it says | Verdict |
+|---|---|---|---|---|---|
+| 1 | ABS proportions | Rutkowski, J.V., Levin, B.C. (1986). Acrylonitrile-Butadiene-Styrene Copolymers (ABS): Pyrolysis and Combustion Products and their Toxicity — A Review of the Literature. *Fire and Materials* 10: 93–105. https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=101640 | Review, US National Bureau of Standards | The SAN "can be composed of 65-76% styrene and 24-35% acrylonitrile"; "formulations of ABS plastics are rarely the same and poorly defined" | Wikipedia's ranges hold. With about 20 % rubber, 24–35 % of the SAN is 19–28 % of the ABS |
+| 1 | ABS proportions | Bärwinkel, S., Seidel, A., Hobeika, S., Hufen, R., Mörl, M., Altstädt, V. (2016). Morphology Formation in PC/ABS Blends during Thermal Processing and the Effect of the Viscosity Ratio of Blend Partners. *Materials* 9(8): 659. https://pmc.ncbi.nlm.nih.gov/articles/PMC5509270/ | Peer-reviewed; three authors from Covestro, a PC/ABS maker | Emulsion-ABS of "50 wt % of polybutadiene" with a shell of 28 % acrylonitrile and 72 % styrene, mixed 1:1 with SAN of 24 % acrylonitrile and 76 % styrene | Its ABS is 25 % butadiene, 19 % acrylonitrile, 56 % styrene (computed) |
+| 2 | Glass in PA66-GF | DuPont, *Zytel 70G13HS1L BK031* datasheet (copy at https://Protolabs.com/media/fclldzar/zytel-70g13hs1l.pdf) | Maker's datasheet | "13% glass fiber reinforced ... polyamide 66"; PA66-GF13 | The lowest grade read: 13 % |
+| 2 | Glass in PA66-GF | BASF, *Ultramid A3WG10 CR BK00564*, Product Information 09/2026 (https://download.basf.com/p1/8a8081c57fd4b609017fd65cc5d26e20/en/ULTRAMID%25C2%25AE_A3WG10_CR_BLACK_00564) | Maker's datasheet | PA66-GF50 | The highest grade read: 50 %. With BASF's 30 % (E1.8b): 13 / 30 / 50 % |
+| 3 | Carbon fibre in CF-PEEK | Victrex, *Product portfolio summary* (https://www.victrex.com/-/media/downloads/literature/en/victrex_productportfoliosummaryus.pdf) and *VICTREX PEEK 90HMF40* datasheet (https://cdn.victrex.com/-/media/downloads/datasheets/victrextds_90hmf40.pdf) | Maker's documents | Grades with 20 % (450CA20, 90HMF20), 30 % (90CA30, 150CA30, 450CA30, 650CA30) and 40 % carbon fibre (450CA40, 90HMF40) | **Confirmed:** 20 / 30 / 40 % |
+| 4 | What carbon fibre holds besides carbon | US patent 4,814,157 (1989), Mitsubishi Rayon. https://patents.google.com/patent/US4814157A/en | Patent of a carbon fibre maker | "average nitrogen content in the whole carbon fibers which is measured by elementary analysis is 0.5-4.5% by weight" | The rest is mostly nitrogen, but only 0.5–4.5 %, not the 3–7 % of E1.8c |
+| 4 | | Kim, M.-A., Jang, D., Tejima, S., Cruz-Silva, R., Joh, H.-I., Kim, H.C., Lee, S., Endo, M. (2016). Strengthened PAN-based carbon fibers obtained by slow heating rate carbonization. *Scientific Reports* 6: 22988. https://doi.org/10.1038/srep22988 | Peer-reviewed, read in the browser | Carbonisation removes "nitrogen, oxygen, and hydrogen ... leaving a material with at least 93 wt% of carbon content"; its measured numbers are in its supplement, not read | The rest is nitrogen, oxygen and hydrogen; agrees with Toray's ">93%" |
+| 5 | The flame retardant BDP | PubChem, CID 9874825. https://pubchem.ncbi.nlm.nih.gov/compound/9874825 (read through its interface: https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/bisphenol%20A%20bis(diphenyl%20phosphate)/property/MolecularFormula,MolecularWeight,IUPACName/JSON) | Chemical database of the US National Library of Medicine | C39H34O8P2, 692.6 g/mol | **Confirmed** |
+| 6 | PC:ABS ratio | Bärwinkel et al. 2016 (row 1) | As above | "60 wt % of the polycarbonate, 20 wt % of the emulsion-ABS, and 20 wt % of the chosen SAN"; cites a 90/10 blend | 60 % PC, below E1.8c's lowest 65 % |
+| 7 | TPU hard segment | Santiago-Calvo, M. et al. (2021). Analysis of the Foaming Window for Thermoplastic Polyurethane with Different Hard Segment Contents. *Polymers* 13(18): 3143. https://pmc.ncbi.nlm.nih.gov/articles/PMC8472128/ | Peer-reviewed | Cites "three different commercial TPU grades ... HS contents of 38.6 wt.%, 48.9 wt.%, and 56.9 wt.%" (Nofar et al. 2019) | Commercial grades: 38.6 / 48.9 / 56.9 % |
+| 7 | TPU soft segments | Wikipedia, *Polytetrahydrofuran*. https://en.wikipedia.org/wiki/Polytetrahydrofuran | Encyclopedia | "(C4H8O)n"; "a starting material for thermoplastic polyurethane" | **Confirmed** |
+| 7 | | SONGWON, *Polyester Diols* technical sheet V3.1. https://www.songwon.com/assets/images/contentModelImages/SONGWON_Technical_Sheet_Polyester-Diols_V3.1.pdf | Maker's sheet | Poly(1,4-butylene adipate), CAS 25103-87-1, from adipic acid and butanediol; "'S' Grade: Thermoplastic polyurethane" | The polyester soft segment is confirmed |
+| 7 | | ChemicalBook, *Poly(1,4-butylene adipate)*. https://www.chemicalbook.com/ChemicalProductProperty_EN_CB0154123.htm | Chemical database | "(C6H10O4.C4H10O2)x", CAS 25103-87-1 | The repeat unit, minus two water, is C10H16O4 (computed): **confirmed** |
+| 8 | Silica in silicone rubber | Ouyang, L., Wang, Z., Gong, D., Zhang, C. (2026). Preparation of Heat-Resistant Methyl Vinyl Phenyl Silicone Rubber and Study on Its Flexible Strain-Sensing Performance. *Polymers* 18(10): 1149. https://pmc.ncbi.nlm.nih.gov/articles/PMC13211187/ | Peer-reviewed, a phenyl silicone (a related kind) | Best at "30 phr SiO2 (Fumed silica)" with 100 phr rubber, 2 phr oil, 3 phr Si69 | About 22 % silica by mass (computed): agrees with E1.8c's mode of 20 % |
+| 9 | UHMWPE | Wikipedia, *Polyethylene*. https://en.wikipedia.org/wiki/Polyethylene | Encyclopedia | "(C2H4)n"; "UHMWPE is polyethylene with a molecular weight numbering in the millions" | **Confirmed** |
+
+**Seen only in search summaries, not used:** two patents naming commercial ABS with 15.6 % and about 22 % butadiene;
+retailer and distributor listings of PA66-GF15 grades.
+
+**What the verification would change in E1.8c** (not applied: the agreed recipe stays until Matthias decides):
+
+| Point | Agreed (E1.8c) | From the sources read |
+|---|---|---|
+| ABS acrylonitrile, mode | 25 % | 21 % (Bärwinkel 19 %, NIST 19–28 %) |
+| ABS butadiene, mode | 17.5 % | 20 % (Bärwinkel 25 %, Wikipedia 5–30 %) |
+| PC in PC/ABS, minimum | 65 % | 60 % (Bärwinkel) |
+| Glass in PA66-GF, minimum | 15 % | 13 % (DuPont) |
+| Carbon fibre | C 93 / 95 / 97 %, N the rest | N 0.5 / 2 / 4.5 % (Mitsubishi Rayon), C the rest |
+| TPU hard segment | 30 / 40 / 50 % | 38.6 / 48.9 / 56.9 % (the three commercial grades) |
+| CF-PEEK 20 / 30 / 40 %; BDP; PTMEG and PBA; silica 5 / 20 / 35 %; UHMWPE | — | Confirmed, unchanged |
+
+At the modes, these changes move no element of any robot type's row by more than 0.5 percentage points (V25): for
+example robot type 5's composites C 64.2 → 64.7 % and N 5.1 → 4.6 %, robot type 1's polymers N 6.3 → 6.0 %.
+
 ---
 
 ### E1.9 Fibre composites

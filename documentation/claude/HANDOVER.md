@@ -77,7 +77,9 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
      the other materials.
 3. **The materials still to go through:** plastics (what the robots use and the sources, E1.8b; the recipe proposed
    on "Propose the plastics recipe per robot type, min / mode / max ...", E1.8c, V24; **agreed**: "I agree with the
-   plastics recipe as proposed in E1.8c, including its four choices."; not entered yet),
+   plastics recipe as proposed in E1.8c, including its four choices."; not entered yet; then, on his question
+   whether everything was verified, the nine open points were checked on the web, E1.8d, V25: six values would
+   move slightly, his decision),
    fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 

@@ -5,6 +5,19 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V25. The nine open points of the plastics recipe, against sources read on the web
+
+- **What:** the nine values of E1.8c that rested on one source, a formula from a name, a picture or an estimate
+  ([EVIDENCE.md](EVIDENCE.md), E1.8d).
+- **How:** each searched on the web; every source used was opened and read (makers' datasheets and patents as PDF
+  text, peer-reviewed articles in the browser, PubChem through its interface). The agreed recipe was redrawn in the
+  sandbox of V24 with the values the sources give, 20,000 draws per row, to see what they would change.
+- **Result:** four points confirmed as they were (CF-PEEK, BDP, the TPU soft segments, UHMWPE; silica agrees). Six
+  values would move: ABS's acrylonitrile and butadiene modes, PC/ABS's and PA66-GF's minimums, the carbon fibre's
+  nitrogen, TPU's hard segment. At the modes no element of any row moves by more than 0.5 percentage points.
+- **Not covered:** the agreed recipe is unchanged until Matthias decides; how each row splits among its polymers
+  cannot be verified on the web.
+
 ### V24. The proposed plastics recipes, drawn in a sandbox
 
 - **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.8c, for the nine plastics rows of the six robot types.
