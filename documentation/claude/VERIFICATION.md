@@ -5,6 +5,17 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V21. The number of cells from each pack's voltage and capacity
+
+- **What:** the revision of the cell mass Matthias asked for ([EVIDENCE.md](EVIDENCE.md), E1.7j).
+- **How:** the pack voltages and capacities were read from the workbook and from AgiBot's own pages (in the
+  browser) and a dealer's page; two further LFP datasheets were read as text. The cells in series, in parallel, the
+  pack capacity each build reaches and the cell mass were computed by script for every cell type of E1.7c.
+- **Result:** robot types 1, 4 and 5 come out within about 0.15 kg of E1.7d. Robot type 3's only fitting builds
+  weigh 95 to 100 % of its packs, so the cells read do not represent its pack.
+- **Not covered:** robot type 5's voltage and capacity were not found; robot type 4's 13 or 14 cells in series
+  rests on a charging voltage. Nothing is entered.
+
 ### V20. The proposed element recipes of the cylindrical cells, drawn in a sandbox
 
 - **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.7i, for the NMC and the LFP cell.

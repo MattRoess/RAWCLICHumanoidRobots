@@ -862,6 +862,58 @@ by a sum.
   this is only noted. Matthias's reason for the one grade is in E1.7e: the car file's high nickel already mixes two
   high-nickel chemistries.
 
+#### E1.7j The cell mass from the number of cells: the pack's voltage and capacity
+
+Matthias, 2026-10-26, after the plan to enter the battery data was agreed and before anything was built: "The number
+of cells, which also defines the cell mass depends on the voltage, which these batteries have and the robots use".
+The build is paused until he agrees to this revision of E1.7d.
+
+**The rule proposed:** cells in series = the pack's voltage / the cell's voltage; cells in parallel = the pack's
+capacity / the cell's capacity, to the nearest whole number. A cell type builds the pack only if its whole cells come
+within ±12 % of the stated capacity (E). Cell mass = number of cells × the mass of one cell, from its datasheet.
+Each draw picks one of the cell builds that fit, all equally likely (E): a build is a discrete state, so it is drawn,
+not blended into a triangle.
+
+**What the packs are** (read 2026-10-26):
+
+| Robot type | Pack | Source |
+|---|---|---|
+| 1, Unitree G1 | 13 cells in series, 9 Ah | The workbook ("9,000 mAh, 13S"); EEWorld (E1.7c) |
+| 2, Unitree H2 | Maximum 75.6 V, so 18 cells in series (75.6 / 4.2 V); 15 Ah | Global Drone HQ (E1.7e) |
+| 3, UBTECH Walker S2 | 48 V, so 15 LFP cells in series (48 / 3.2 V); 9 Ah; two packs | The workbook ("48 V, 9 Ah", "LiFePO4") |
+| 4, AgiBot A2 | 14.4 Ah; "Charging Voltage 48V DC", so 13 or 14 NMC cells in series (700 Wh / 14.4 Ah = 48.6 V lies between) | AgiBot's own store, *AGIBOT A2 Ultra*, https://store.agibot.com/products/a2-ultra (69 kg, 169 cm, like the anchor robot); AgiBot's product page, https://agibot.com/products/A2: "Battery 700 wh", 69 kg. Read in the browser |
+| 5, Boston Dynamics Atlas | About 2.5 kWh (the workbook); voltage and capacity not found | Searched: Boston Dynamics gives runtimes and a 3-minute swap, no voltage or capacity |
+| 6, Guardian-X | Kept as in the workbook (decided, E1.7d) | — |
+
+**Two further LFP cell sheets read for robot type 3:**
+
+| Cell | Source | Kind | What it says |
+|---|---|---|---|
+| Enix Energies (NX) 26650, LFP | https://docs.rs-online.com/4ad1/0900766b812fdd10.pdf (part ACL9013) | Brand's sheet via a distributor | 2300 mAh, 3.2 V, 80 g |
+| Antbatt 26650, LFP | https://www.antbatt.com/wp-content/uploads/2019/09/26650-3.2V-3800mAh-datasheet.pdf | Maker's sheet | 3800 mAh, 3.2 V, 87.5 g, "139.0Wh/kg" |
+| Not used: a 3200 mAh LFP 26650 sheet (86 g) | Posted on a TI forum | Maker's sheet | Marked by its maker "strictly confidential", so not used in this public project |
+
+**The cell builds, and the cell mass they give:**
+
+| Robot type | Builds that fit (cells; pack capacity against stated) | Cell mass, kg: min / mode / max | E1.7d, from the energy |
+|---|---|---|---|
+| 1 | 35E 13S3P (39; +12 %), 50E 13S2P (26; +9 %), P45B 13S2P (26; 0 %) | 1.74 / 1.81 / 1.95 | 1.64 / 1.74 / 1.81 |
+| 2 | 35E 18S4P (72; −11 %), 50E 18S3P (54; −2 %), P45B 18S3P (54; −10 %) | 3.60 / 3.61 / 3.75 | Kept as the workbook's 2.5 / 4.5 / 6.0 (decided); shown as a check only |
+| 3 | A123 15S4P (120 over both packs; +11 %), Enix 15S4P (120; +2 %) | 9.12 / — / 9.60 | 4.75 / 6.35 / 8.31 |
+| 4 | 35E 4P, 50E 3P and P45B 3P, each with 13 or 14 in series (39 to 56; −7 to +2 %) | 2.60 / 2.76 / 2.92 | 2.73 / 2.90 / 3.01 |
+| 5 | No voltage or capacity: whole cells for 2.5 kWh. 35E 208, 50E 141, P45B 155, 4680 31 | 9.80 / 10.39 / 11.03 | 9.77 / 10.35 / 10.75 |
+
+The mode is the median of the builds (E); the draws pick a build, so the mode only summarises.
+
+**Robot type 3 does not fit:** the only cells read that build a 48 V, 9 Ah pack weigh 9.1 to 9.6 kg, 95 to 100 % of
+the two packs' 9.6 kg in the parts list. That leaves nothing for the BMS, the wiring and the enclosure the parts list
+names. The other LFP cells read miss the capacity (Antbatt −16 %, Keeppower +33 %, EVE +69 %). A cell of about 3 Ah
+(three in parallel) would give about 7.7 kg, 80 % of the packs, but the only such sheet found is marked
+confidential. So the cells read do not represent robot type 3's pack; that is Matthias's decision.
+
+**What changes for the rest of each row** (E1.7d): robot type 1's rest 0.69 kg at the mode (was 0.76); robot type 4's
+rest 6.7 kg to Not allocated (was 6.6); robot type 5's missing cell parts 3.4 kg from Not allocated (was 3.35).
+
 ---
 
 ### E1.8 Plastics
