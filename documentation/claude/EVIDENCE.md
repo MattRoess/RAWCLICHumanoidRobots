@@ -783,7 +783,9 @@ Matthias, 2026-10-26, choosing the answer offered: "Yes, propose the element rec
 cells, min / mode / max, from these sources, with estimates (E) for the gaps. Show it to me before anything is
 entered."
 
-**Status: proposed to Matthias, not agreed, nothing entered.**
+**Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the element recipe of the NMC
+and LFP cylindrical cells as proposed in E1.7i." Not entered yet: it goes in together with the cell masses (E1.7d),
+where and how is still his decision.**
 
 **Level 1, the parts of an NMC cell** (robot types 1, 2, 4, 5, 6), % of the cell's mass:
 

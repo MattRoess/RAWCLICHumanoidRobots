@@ -35,7 +35,7 @@ Where the work stands, newest first: what was decided, by whom, and what is open
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
 | Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |
 | Magnets | "There is a material composition sheet available for magnets. It is with the cars. Check it there. There are all the different composition, which allow also higher temperatures"; then "Yes use the high temperature once for the joins, which are often use like knees, elbows etc." | Checked: E1.6b, V15 |
-| Battery materials | "There are a full composition of battery materials in the batteries for cars. Check them"; then he chose the answer offered: "Battery materials should be the cells only in every robot type; the housing, BMS and busbars belong to the other materials." | Checked: E1.7b, V16. The robots' cells: E1.7c, V17. The cell mass per robot type: E1.7d, V18, agreed |
+| Battery materials | "There are a full composition of battery materials in the batteries for cars. Check them"; then he chose the answer offered: "Battery materials should be the cells only in every robot type; the housing, BMS and busbars belong to the other materials." | Checked: E1.7b, V16. The robots' cells: E1.7c, V17. The cell mass per robot type: E1.7d, V18, agreed. Chemistry, grade, format, silicon: E1.7e to E1.7g, decided. The cells' element recipe: E1.7i, V20, agreed. Not entered yet |
 
 No recipe is proposed and nothing is entered: each waits for his agreement.
 
@@ -58,8 +58,10 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
    - the cell format (E1.7f): decided, "Cylindrical for all";
    - the Si in the anodes (E1.7g): decided, 0 / 1 / 7.3 % as silicon oxide, graphite the remainder, in every NMC
      robot type;
-   - the cells' element recipe: the sources in E1.7h; the proposal in E1.7i, shown to him, waiting for his
-     agreement.
+   - the cells' element recipe: the sources in E1.7h; the proposal in E1.7i, **agreed**: "I agree with the element
+     recipe of the NMC and LFP cylindrical cells as proposed in E1.7i."
+   - All battery points are settled. Open: where and how the cell masses and the recipe are entered, together, as he
+     asked ("Enter the cell masses later, together with the battery element recipe").
 3. **The materials still to go through:** plastics, fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 
