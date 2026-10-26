@@ -1258,7 +1258,8 @@ Matthias, 2026-10-26, choosing the answer offered: "Propose the fibre-composite 
 max, from these sources, with estimates (E) for the gaps, verified on the web with references. Show it to me before
 anything is entered."
 
-**Status: proposed to Matthias, not agreed, nothing entered.**
+**Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the fibre-composite recipe as
+proposed in E1.9c, including its four choices." Not entered yet.**
 
 **The gaps, checked on the web first (2026-10-26):**
 
