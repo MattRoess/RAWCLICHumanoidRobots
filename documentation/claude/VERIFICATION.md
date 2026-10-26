@@ -5,6 +5,17 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V22. LFP cells for robot type 3's packs
+
+- **What:** which LFP cells build two 48 V, 9 Ah packs within their 9.6 kg ([EVIDENCE.md](EVIDENCE.md), E1.7k).
+- **How:** three further makers' datasheets downloaded and read as text (PDFKit); checked that none is marked
+  confidential. For each of the eight LFP cells read, the cells in parallel, the pack capacity and the cell mass were
+  computed by script, with the capacity test (±12 %) and the mass test (at most 85 % of the packs).
+- **Result:** three cells pass both tests and agree within 0.13 kg: 7.20 to 7.33 kg for both packs, 75 to 76 % of
+  their mass.
+- **Not covered:** the cells UBTECH uses are not known; the 85 % rests on van de Ven et al.'s few consumer modules.
+  Nothing is entered.
+
 ### V21. The number of cells from each pack's voltage and capacity
 
 - **What:** the revision of the cell mass Matthias asked for ([EVIDENCE.md](EVIDENCE.md), E1.7j).

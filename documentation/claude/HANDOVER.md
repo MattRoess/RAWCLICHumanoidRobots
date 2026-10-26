@@ -64,8 +64,9 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
      asked ("Enter the cell masses later, together with the battery element recipe").
    - He agreed the plan to enter them ("Yes, build the battery entry as laid out ..."), then, before anything was
      built: "The number of cells, which also defines the cell mass depends on the voltage, which these batteries
-     have and the robots use". The build is paused; the revised cell mass is E1.7j, shown to him. Robot type 3 does
-     not fit the cells read: his decision.
+     have and the robots use". The build is paused; the revised cell mass is E1.7j, shown to him. Robot type 3 did
+     not fit the cells read; he asked: "Search for a citable LFP cell sheet that builds a 48 V, 9 Ah pack within the
+     packs' 9.6 kg ...". Three makers' cells fit (E1.7k): 7.20 / 7.33 / 7.33 kg, shown to him for his agreement.
 3. **The materials still to go through:** plastics, fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 

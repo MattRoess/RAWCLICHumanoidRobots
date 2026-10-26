@@ -914,6 +914,44 @@ confidential. So the cells read do not represent robot type 3's pack; that is Ma
 **What changes for the rest of each row** (E1.7d): robot type 1's rest 0.69 kg at the mode (was 0.76); robot type 4's
 rest 6.7 kg to Not allocated (was 6.6); robot type 5's missing cell parts 3.4 kg from Not allocated (was 3.35).
 
+#### E1.7k Robot type 3: LFP cells that build its 48 V, 9 Ah packs
+
+Matthias, 2026-10-26, choosing the answer offered: "Search for a citable LFP cell sheet that builds a 48 V, 9 Ah pack
+within the packs' 9.6 kg (for example about 3 Ah, three in parallel), and show me the sources."
+
+**New sheets read, all public, none marked confidential:**
+
+| Cell | Source | Kind | What it says |
+|---|---|---|---|
+| Antbatt 26650, LFP, 3.2 Ah | https://www.antbatt.com/wp-content/uploads/2019/09/26650-3.2V-3200mAh-datasheet.pdf | Maker's datasheet (Antbatt Co. Ltd.) | 3200 mAh, 3.2 V, 81.5 g, "125.6Wh/kg", 9.6 A continuous |
+| Antbatt 26650MP, LFP, 3.0 Ah, high power | https://www.antbatt.com/wp-content/uploads/2019/09/26650MP-3.2V-3000mAh-datasheet.pdf | Maker's datasheet | 3000 mAh, 3.2 V, 81.5 g, "117.8Wh/kg", 30 A continuous |
+| Power-Sonic PSL-FP-IFR18650EC, LFP, 1.5 Ah | https://cdn.power-sonic.com/documents/PSL-FP-IFR18650EC_Data_Sheet.pdf | Maker's datasheet (Power-Sonic Corporation) | 1.5 Ah, 3.2 V, 4.8 Wh, "Approximate Weight 0.09 lbs (40g)", an "energy cell" |
+
+Seen only in shop listings, not used: 26650 LFP cells of 3.0 to 3.3 Ah at 81 to 88 g, and 32650 cells of 5 Ah at 137 to
+150 g. They agree with the sheets above.
+
+**Two tests for each cell, for two packs of 15 cells in series (48 V):**
+- **Capacity:** its whole cells in parallel come within ±12 % of 9 Ah (E1.7j).
+- **Mass:** its cells weigh at most 85 % of the packs' 9.6 kg, so that the BMS, wiring and enclosure the parts list
+  names still fit. The 85 % is the largest share of cells van de Ven et al. weighed in battery modules (laptops 85 %,
+  power banks 71 %, E1.7b), E. Robot types 1, 2 and 5 pass it with 65 to 79 %.
+
+| Cell | Build (both packs) | Pack capacity | Cells, kg | Share of the 9.6 kg packs | Capacity | Mass |
+|---|---|---|---|---|---|---|
+| Antbatt 26650, 3.2 Ah | 15S3P × 2 = 90 | 9.6 Ah (+7 %) | 7.33 | 76 % | yes | yes |
+| Antbatt 26650MP, 3.0 Ah | 15S3P × 2 = 90 | 9.0 Ah (0 %) | 7.33 | 76 % | yes | yes |
+| Power-Sonic 18650, 1.5 Ah | 15S6P × 2 = 180 | 9.0 Ah (0 %) | 7.20 | 75 % | yes | yes |
+| A123 26650, 2.5 Ah | 15S4P × 2 = 120 | 10.0 Ah (+11 %) | 9.12 | 95 % | yes | **no** |
+| Enix 26650, 2.3 Ah | 15S4P × 2 = 120 | 9.2 Ah (+2 %) | 9.60 | 100 % | yes | **no** |
+| Antbatt 26650, 3.8 Ah | 15S2P × 2 = 60 | 7.6 Ah (−16 %) | 5.25 | 55 % | **no** | yes |
+| Keeppower 32700, 6 Ah | 15S2P × 2 = 60 | 12.0 Ah (+33 %) | 8.46 | 88 % | **no** | **no** |
+| EVE 33140, 15.2 Ah | 15S1P × 2 = 30 | 15.2 Ah (+69 %) | 8.01 | 83 % | **no** | yes |
+
+**Proposal for Matthias:** robot type 3's cells from the three builds that pass both tests, each drawn equally likely
+(E): **7.20 / 7.33 / 7.33 kg** (min / mode / max). Against the workbook's row 7.5 / 8.5 / 9.5 kg, the rest is
+1.17 kg at the mode, to Not allocated (E1.7d). The three cells agree closely, so the spread is narrow; the cells robot
+type 3 really uses are not known (E1.7c).
+
 ---
 
 ### E1.8 Plastics
