@@ -5,6 +5,16 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V24. The proposed plastics recipes, drawn in a sandbox
+
+- **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.8c, for the nine plastics rows of the six robot types.
+- **How:** a throw-away script in the session's scratch folder, using 01's `composition` and atomic masses (plus the
+  five further CIAAW masses), 20,000 draws per row (seed 1); nothing written to the project. Each group was checked
+  for one remainder or alternatives adding to 1, shares in order, and its largest shares adding up to at most 1.
+- **Result:** every row's elements add up to 1; no element falls below zero in any draw; the shares are those in
+  E1.8c.
+- **Not covered:** the draws are independent; the split of the rows is an estimate throughout. Nothing is entered.
+
 ### V23. The battery entry: the sheet Battery cells, element_recipes.xlsx, 01's checks and the robot pages
 
 - **What:** the battery as cells only and the element recipes of the cells, entered on Matthias's word ("Yes, build

@@ -74,9 +74,9 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
      check found the coatings could reach 101 %; he chose "Lower active max" (E1.7i).
    - **Not done, his to decide:** whether the shared-lists pages should also show the battery as cells; the recipes of
      the other materials.
-3. **The materials still to go through:** plastics (begun: what the robots use and the sources, E1.8b, shown to
-   him on "Yes, go on to material 8, plastics: show me what the robots use and the sources first"), fibre
-   composites, electronics (with the silver), ceramics.
+3. **The materials still to go through:** plastics (what the robots use and the sources, E1.8b; the recipe proposed
+   on "Propose the plastics recipe per robot type, min / mode / max ...", E1.8c, V24, waiting for his agreement),
+   fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 
 ## 2026-10-26, night: the sources of the element recipes, checked on the web

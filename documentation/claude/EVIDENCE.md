@@ -1050,7 +1050,68 @@ E-glass at the middle of ASTM D578's ranges holds O 47.8, Si 25.2, Ca 14.6, Al 7
   - silicone rubber's silica (5 to 35 %, from a supplier only);
   - pigments and stabilisers, which no source here gives;
   - aramid against UHMWPE in robot type 6's ballistic fibres.
-- **No recipe is proposed yet.**
+- **No recipe is proposed yet.** Proposed since: E1.8c.
+
+#### E1.8c Proposal: the plastics recipe of each robot type
+
+Matthias, 2026-10-26, choosing the answer offered: "Propose the plastics recipe per robot type, min / mode / max,
+from these sources, with estimates (E) for the gaps. Show it to me before anything is entered."
+
+**Status: proposed to Matthias, not agreed, nothing entered.**
+
+**Level 1, how each row splits among the polymers it names (E: no source gives it).** The first polymer the workbook
+names is the remainder. Each of the other k − 1 polymers takes 1/(2k) / 1/k / 1/(k − 1) of the row, so all are
+equal at the mode and the remainder never falls below zero.
+
+| Robot type | Row | Remainder | The others, each (min / mode / max) |
+|---|---|---|---|
+| 1 | Engineering polymers | PA66 | ABS, PC: 17 / 33 / 50 % |
+| 1 | The battery pack's enclosure, glue and pads (E1.7d) | PC/ABS, all of it | — |
+| 2 | Engineering plastics | PEEK | CF-PEEK, PC/ABS, PA66-GF: 12.5 / 25 / 33 % |
+| 3 | Engineering plastics | PC/ABS, flame-retardant | PA66-GF: 25 / 50 / 75 % |
+| 4 | Polymers & elastomers | PC/ABS | TPU, PA66-GF: 17 / 33 / 50 % |
+| 5 | Composites & polymers | CF-PEEK | PA66-GF: 25 / 50 / 75 % |
+| 5 | Sealing elastomers | TPU | Silicone rubber: 25 / 50 / 75 % |
+| 6 | Reinforced polymers | CF-PEEK | PA66-GF: 25 / 50 / 75 % |
+| 6 | Protective ballistic fibers | Aramid | UHMWPE: 25 / 50 / 75 % |
+
+**Level 2, what each polymer is made of:**
+
+| Polymer | Its parts, min / mode / max | Basis |
+|---|---|---|
+| PA66, PC, PEEK, aramid, UHMWPE | Their formulas | E1.8b |
+| ABS | Acrylonitrile 15 / 25 / 35 %, butadiene 5 / 17.5 / 30 %, styrene the remainder | Wikipedia's ranges, the mode their middle (E) |
+| PC/ABS | PC 65 / 70 / 90 %, ABS the remainder | The PC:ABS of the studies in Zhang et al. 2025 (65:35, 7:3, 9:1), E |
+| PC/ABS, flame-retardant (robot type 3 only, whose battery enclosures the workbook calls flame-retardant) | BDP 10 / 11 / 12 %, PC/ABS the remainder | Zhang et al. 2025: organophosphorus 10–12 % for UL94 V-0; BDP, a phosphate (C39H34O8P2, from its name), E |
+| PA66-GF | Glass fibre 15 / 30 / 50 %, PA66 the remainder | BASF's 30 % as the mode; the other glass contents are E |
+| E-glass | CaO 16 / 20.5 / 25, Al2O3 12 / 14 / 16, B2O3 5 / 7.5 / 10, MgO 0 / 2.5 / 5, Na2O 0 / 1 / 2, TiO2 0 / 0.4 / 0.8, Fe2O3 0.05 / 0.225 / 0.4, F 0 / 0.5 / 1 %, SiO2 the remainder (53.4 % at the modes) | ASTM D578 through US 8,586,491; the mode the middle of each range (E) |
+| CF-PEEK | Carbon fibre 20 / 30 / 40 %, PEEK the remainder | Victrex's 30 % as the mode; the bounds E |
+| Carbon fibre | C 93 / 95 / 97 %, N the remainder | Toray T700S: "Carbon >93%" (E1.9); the rest taken as nitrogen, E |
+| TPU | Hard segment (MDI + butanediol, C19H20N2O4) 30 / 40 / 50 %; soft segment the remainder: polyester (adipate, C10H16O4) or polyether (PTMEG, C4H8O), drawn half and half | Ernzen et al. 2022 (50 %) as the top; Wikipedia names the two soft segments; the rest E |
+| Silicone rubber | Silica (SiO2) 5 / 20 / 35 %, PDMS the remainder | The silica supplier's 5–35 % |
+
+The further atomic masses (N 14.007, B 10.81, Ca 40.078, Mg 24.305, Ti 47.867) are from the same IUPAC CIAAW table
+as before, read 2026-10-26.
+
+**The result, % of each row** (at the modes; in brackets the 95 % of 20,000 draws in a sandbox, V24):
+
+| Robot type, row | C | O | H | N | Si | Ca | Al | P | Others |
+|---|---|---|---|---|---|---|---|---|---|
+| 1, Engineering polymers | 74.9 (71.7–78.3) | 11.0 | 7.7 | 6.3 (4.4–8.2) | | | | | |
+| 1, battery pack enclosure | 78.6 | 13.2 | 6.2 | 2.0 | | | | | |
+| 2, Engineering plastics | 71.6 (67.7–75.0) | 16.4 | 5.1 | 3.0 | 1.9 | 1.1 | 0.6 | | B 0.2, Mg 0.1, Na 0.1 |
+| 3, Engineering plastics | 61.0 (51.5–67.4) | 19.0 | 6.5 | 5.2 | 3.7 (1.9–6.6) | 2.2 | 1.1 | 0.5 (0.3–0.7) | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 4, Polymers & elastomers | 62.0 (55.8–67.6) | 21.4 | 6.8 | 4.6 | 2.5 | 1.5 | 0.7 | | B 0.2, Mg 0.2, Na 0.1, F 0.1 |
+| 5, Composites & polymers | 64.2 (53.9–72.3) | 17.9 | 4.9 | 5.1 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 5, Sealing elastomers | 44.4 (37.2–53.4) | 27.3 | 6.9 | 1.6 | 19.8 (12.2–27.6) | | | | |
+| 6, Reinforced polymers | 64.2 (53.9–72.1) | 17.9 | 4.9 | 5.1 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 6, Protective ballistic fibers | 78.1 (75.2–81.1) | 6.7 | 9.3 | 5.9 | | | | | |
+
+**Choices in this proposal that are Matthias's:**
+- the equal split of each row, with the first-named polymer as the remainder;
+- the flame retardant only in robot type 3, and phosphorus-based (the review also names brominated ones, 10–15 %);
+- robot type 1's battery enclosure as PC/ABS without flame retardant (the workbook does not call it flame-retardant);
+- pigments and stabilisers are not itemised: no source gives them.
 
 ---
 
