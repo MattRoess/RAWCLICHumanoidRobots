@@ -1188,6 +1188,70 @@ example robot type 5's composites C 64.2 → 64.7 % and N 5.1 → 4.6 %, robot t
 - **What no source gives:** the share of fibre and resin in the robots' composites. Usual laminates have 50–60 %
   fibre by volume, but no source here states it for the robots, so it would be an estimate.
 
+#### E1.9b Fibre composites: what the robots use, and the sources, verified on the web
+
+Matthias, 2026-10-26, choosing the answer offered: "Yes, go on to material 9, fibre composites: show me what the robots
+use and the sources first, verified on the web with references."
+
+**What the robots use: the workbook's rows placed in Fibre composites** (sheet Materials of the shared lists). Robot
+types 5 and 6's CF-PEEK went to Plastics (E1.8c).
+
+| Robot type | Row in the workbook | Grade, as the workbook writes it | kg, min / mode / max | Where, from the parts list |
+|---|---|---|---|---|
+| 1 | Carbon-fiber composite | CFRP, unspecified grade | 0.8 / 1.2 / 1.6 | Shell segments of the external shell |
+| 2 | Carbon-fiber composite | CFRP, T700 / T800 assumption | 0.5 / 1.5 / 3.0 | Selective reinforcement of the structural frame |
+| 3 | Fiber composites | CFRP / GFRP | 3.0 / 4.5 / 6.0 | Reinforcements of the main structural frame |
+
+**Sources read, 2026-10-26** (PDFs as text through PDFKit, web pages through the fetch tool or in the browser):
+
+| Part | Source | Kind | What it says |
+|---|---|---|---|
+| Carbon fibre | Toray, *TORAYCA T700S* data sheet (E1.9). https://www.toraycma.com/wp-content/uploads/T700S-Data-Sheet.pdf | Maker's datasheet | "Chemical Composition: Carbon >93%" |
+| Carbon fibre | Toray, *TORAYCA T800S* data sheet. https://www.toraycma.com/wp-content/uploads/T800S-Data-Sheet.pdf | Maker's datasheet | "Chemical Composition: Carbon >96%" |
+| Carbon fibre | Mitsubishi Rayon, US 4,814,157 (E1.8d). https://patents.google.com/patent/US4814157A/en | A carbon fibre maker's patent | Nitrogen 0.5–4.5 % by elemental analysis; already the recipe 'Carbon fibre' in element_recipes.xlsx (N 0.5 / 2 / 4.5 %, C the rest) |
+| Fibre and resin in CFRP | Hexcel, *HexPly 8552* product data sheet. https://www.hexcel.com/wp-content/uploads/2026/01/HexPly_8552_us_DataSheet-1.pdf | Maker's datasheet | "an amine cured, toughened epoxy resin system supplied with unidirectional or woven carbon or glass fibers"; resin content 33–38 % (carbon tapes) and 32–42 % (carbon fabrics) of the prepreg, so 58–68 % fibre by mass |
+| Epoxy resin | PubChem, bisphenol A diglycidyl ether (DGEBA), CID 2286. https://pubchem.ncbi.nlm.nih.gov/compound/2286 | Chemical database | C21H24O4, 340.4 g/mol |
+| Hardener, aromatic | PubChem, dapsone (4,4'-diaminodiphenyl sulfone, DDS), CID 2955. https://pubchem.ncbi.nlm.nih.gov/compound/2955 | Chemical database | C12H12N2O2S, 248.30 g/mol |
+| Hardener, cycloaliphatic | PubChem, 4,4'-methylenebis(2-methylcyclohexylamine), CID 91555. https://pubchem.ncbi.nlm.nih.gov/compound/91555 | Chemical database | C15H30N2, 238.41 g/mol |
+| Mix ratio | Huntsman, *ARALDITE LY 564 / ARADUR 2954*. https://products.huntsman.com/products/araldite-ly-564-aradur-2954 (read in the browser) | Maker's product page | "a low-viscosity epoxy resin, formulated liquid amine hardener. Used in aerospace and industrial composites"; "Mix Ratio 0.35 %(W) Hardener : Resin", that is 35 parts hardener per 100 resin |
+| Glass fibre | ASTM D578 through US 8,586,491 (E1.8b); already the recipe 'E-glass' in element_recipes.xlsx | Patent quoting the standard | E-glass oxides |
+| Glass in GFRP | Avient, *Glasforms Pultruded Rods, Tubes & Custom Profiles*. https://www.avient.com/node/10713 | Maker's page | Glass-fibre profiles: "Glass Content, % by weight" 65–75 (ASTM D2584); resins polyester, vinyl ester and epoxy |
+| Glass in GFRP | Łukasiewicz Institute of Electrical Engineering, *Profiles glass-epoxy*. https://iel.lukasiewicz.gov.pl/wp-content/uploads/sites/24/2024/10/Profiles-glass-epoxy.pdf | Maker's datasheet | Epoxy resin, E-glass; "Glass content in the plastic (by weight) >79 %" (PN-EN ISO 1172) |
+| Atomic mass of S | IUPAC CIAAW 2024. https://www.ciaaw.org/abridged-atomic-weights.htm | Standard table | S 32.06 |
+
+**Checks made with the numbers read:**
+- At the stoichiometric ratio (two epoxy groups per DGEBA, four amine hydrogens per diamine), DGEBA takes 36.5
+  parts DDS or 35.0 parts of the cycloaliphatic diamine per 100. The 35 parts agree with Huntsman's mix ratio.
+- Elements, computed from the formulas (%):
+
+| | C | O | H | N | S | Others |
+|---|---|---|---|---|---|---|
+| Epoxy, DGEBA + DDS | 69.8 | 17.2 | 6.5 | 3.0 | 3.5 | |
+| Epoxy, DGEBA + cycloaliphatic diamine | 74.5 | 13.9 | 8.6 | 3.0 | | |
+| CFRP, 62 % carbon fibre (the middle of Hexcel's 58–68 %) in the second epoxy | 89.1 | 5.3 | 3.2 | 2.4 | | |
+| GFRP, 70 % E-glass (the middle of Avient's 65–75 %) in the second epoxy | 22.3 | 37.4 | 2.6 | 0.9 | | Si 17.5, Ca 10.3, Al 5.2, B 1.6, Mg 1.1, Na 0.5 |
+
+**Not read, or seen only in search summaries, and not used:**
+- the safety data sheet of HexPly 8552S (its page came back empty); a search summary says it lists an epoxy
+  (TGMDA) at 15–40 % and dapsone at 1–15 %;
+- distributors' Toray T700S and T800S prepregs with 37 and 43 % resin (the pages could not be opened);
+- that ARADUR 2954 is this cycloaliphatic diamine: only a search summary of a recycling study says so; Huntsman's
+  page names only "formulated liquid amine hardener".
+
+**Verdict:**
+- **The fibres are known first-hand:** carbon fibre over 93 % (T700S) and over 96 % carbon (T800S), the rest mainly
+  nitrogen; E-glass by ASTM D578. Both recipes already exist in element_recipes.xlsx.
+- **The fibre content is known from makers:** CFRP prepregs 58–68 % carbon fibre by mass (Hexcel); GFRP profiles 65 to
+  over 79 % glass (Avient, Łukasiewicz).
+- **The matrix is known only by its kind:** "amine cured epoxy" (Hexcel, Huntsman). Which hardener, aromatic (with
+  sulphur) or cycloaliphatic, no source says for robots.
+- **Gaps, before any recipe:**
+  - the robots' resin and hardener (the robots' makers publish neither);
+  - CFRP against GFRP in robot type 3's row;
+  - the fibre sizing (a thin coating), which no source here gives;
+  - whether robot shells use the prepreg's fibre content or a lower one (wet lay-up, short fibres).
+- **No recipe is proposed yet.**
+
 ---
 
 ### E1.10 Electronics
