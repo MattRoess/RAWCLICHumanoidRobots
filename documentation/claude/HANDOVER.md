@@ -26,7 +26,10 @@ Where the work stands, newest first: what was decided, by whom, and what is open
 - **Documents:** METHODOLOGY ("What 02 draws", "What 02 writes", "What 03 draws"), README, SHARED_LISTS, VERIFICATION
   V29 to V34.
 
-### Choices made while building, for Matthias to confirm or reverse
+### Choices made while building, confirmed by Matthias
+
+Matthias, 2026-10-26, choosing the answer offered: "I confirm the eight choices made while building 02 and 03, as listed in
+HANDOVER.md."
 
 1. **The kept battery rows name their cells' recipe.** No input said that robot types 2 and 6 follow the NMC recipe,
    which he decided in E1.7e, so 02 could not draw their elements. 'NMC cylindrical' is now in the column "Cell or
