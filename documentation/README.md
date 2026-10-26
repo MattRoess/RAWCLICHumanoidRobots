@@ -18,7 +18,7 @@ top of the project in order.
 | [HANDOVER.md](claude/HANDOVER.md) | Where the work stands, newest first: the decisions, who made them, what is open. |
 | [EVIDENCE.md](claude/EVIDENCE.md) | The check of the inputs against sources outside the project: every web source with its URL, its kind, what was read and what it says. E1: the element recipes of the materials. |
 | [VERIFICATION.md](claude/VERIFICATION.md) | Every verification and validation: what, how, against what, the result, the date, what it does not cover. |
-| [PARAMETER_REFERENCE.md](claude/PARAMETER_REFERENCE.md) | Every setting and what it does. **Generated** by `00_parameters.py` from `src/params_schema.py`; do not edit. |
+| [PARAMETER_REFERENCE.md](claude/PARAMETER_REFERENCE.md) | Every setting and what it does. **Generated** by `00_parameters.py` from `src/params_schema.py`; do not edit. Not in the GitHub repository: run 00 to write it. |
 | [SHARED_LISTS.md](claude/SHARED_LISTS.md) | The shared part groups, body regions and materials that make the six robots comparable, with where each of the 68 parts and 35 material names goes. Decided by Matthias on 2026-10-26, point by point. The placements themselves are in `data/researched/shared_lists.xlsx`. |
 
 ## `sources/`: Matthias's sources

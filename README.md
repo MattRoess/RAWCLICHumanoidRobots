@@ -62,8 +62,9 @@ Python 3.14.4 from pyenv, in a virtual environment in the project folder. No con
 ## What is on GitHub
 
 https://github.com/MattRoess/RAWCLICHumanoidRobots, public, branch `main`. It holds the code and the documents
-only. Not in the repository, by `.gitignore`: the workbooks and every other `.xlsx`, the figures, and the earlier
-model `HumanoidRobotsMC/`. A fresh clone cannot run 01 until `data/raw/humanoid_robots_2040_workbook.xlsx` and
+only. Not in the repository, by `.gitignore`: the workbooks and every other `.xlsx`, everything the stages write
+(the figures, `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md`), and the earlier model
+`HumanoidRobotsMC/`. A fresh clone cannot run 01 until `data/raw/humanoid_robots_2040_workbook.xlsx` and
 `data/researched/shared_lists.xlsx` are supplied separately.
 
 ## Licence
