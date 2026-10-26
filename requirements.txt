@@ -1,0 +1,37 @@
+# Humanoid-robot dependencies. Python 3.14.4, no conda.
+#
+# Setup (from the project root):
+#   ~/.pyenv/versions/3.14.4/bin/python3 -m venv .venv
+#   ./.venv/bin/pip install -r requirements.txt
+#
+# Then select .venv as the interpreter in Positron (it is already the default --
+# see .vscode/settings.json).
+#
+# Versions are pinned. Packages are added here when code needs them, not before.
+# The pins are those of RAWCLICVehicleBattery; tqdm, which Battery does not use,
+# is pinned as in RAWCLICDataCenters.
+
+# The register of the settings written by 00_parameters.py (pandas); the Monte
+# Carlo of HumanoidRobotsMC/HumanoidRobotsMC.py: the draws (numpy) and the
+# tables of components and materials (pandas).
+pandas==3.0.5
+numpy==2.5.3
+
+# The density curves of the figures (scipy.stats.gaussian_kde) and the Spearman
+# sensitivity analysis (scipy.stats.spearmanr) in HumanoidRobotsMC.py.
+scipy==1.18.1
+
+# Reading data/raw/humanoid_robots_2040_workbook.xlsx (01_schemas.py) and
+# data/02_HumanoidlRobots.xlsx (HumanoidRobotsMC.py); writing params.xlsx and
+# the statistics workbooks.
+openpyxl==3.1.5
+
+# The schemas of 01_schemas.py and the figures of HumanoidRobotsMC.py.
+matplotlib==3.11.1
+
+# The progress bar of the Monte Carlo in HumanoidRobotsMC.py.
+tqdm==4.67.3
+
+# Required by Positron to start a Python console or run a notebook cell.
+# Same version as RAWCLICVehicleBattery.
+ipykernel==7.3.0

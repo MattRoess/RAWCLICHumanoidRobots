@@ -1,0 +1,38 @@
+### PYTHON & ENVIRONMENT
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+
+### POSITRON / JUPYTER
+.ipynb_checkpoints/
+.positron/
+
+### SYSTEM FILES
+.DS_Store
+Thumbs.db
+
+### DATA
+# Same rule as the sibling projects: no data file goes to GitHub. The workbooks and params.xlsx stay on disk and
+# in iCloud, not in the repository. A fresh clone gets the CODE and the DOCUMENTS only and cannot run until the
+# workbooks are supplied separately. See README.md.
+*.xlsx
+*.csv
+*.zip
+*.pkl
+*.npy
+*.png
+
+### FIGURES
+# Drawn by 01_schemas.py; a committed copy is stale the moment a setting or the workbook changes.
+figures/
+
+### THE EARLIER MODEL
+# Matthias, 2026-10-26: left out of the repository until he decides whether it stays (documentation/claude/HANDOVER.md).
+HumanoidRobotsMC/
+
+### DOCUMENTATION DIAGRAMS
+# The one place a picture IS the source: Matthias's component diagram, drawn by hand, not by a script.
+!documentation/sources/*.png

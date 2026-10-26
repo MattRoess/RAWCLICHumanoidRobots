@@ -1,0 +1,227 @@
+# Handover
+
+Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
+
+## 2026-10-26: the project on GitHub
+
+- **Asked, in Matthias's words:** "Generate a new repository on GitHub, which is public. and start to commit and
+  push".
+- **Done:** https://github.com/MattRoess/RAWCLICHumanoidRobots, public, branch `main`. The git folder lives in
+  `$HOME/gitdirs/RAWCLICHumanoidRobots.git`, like the siblings'; the project folder holds only the `.git` pointer.
+- **Left out, by `.gitignore`:** every data file (`.xlsx`, `.csv`, `.png` except the diagram in
+  `documentation/sources/`), `figures/`, `.venv/`, `.DS_Store`, and the earlier model `HumanoidRobotsMC/`. Asked, he
+  chose "Leave it out" for the earlier model, until he decides whether it stays, and "Commit them" for the sources in
+  `documentation/sources/` (reports and diagram), which the licence does not cover.
+
+## 2026-10-26, late night: the materials one at a time, with Matthias's comments
+
+### Asked, in Matthias's words
+
+- "Can we go through the material compostion. I want to comment on some of them", then, on a list of all materials at
+  once: "Not in this way!!!" and "I want to comment on each material separetely damit!!". One material per message
+  since then.
+
+### His comments, material by material
+
+| Material | His words | Done since |
+|---|---|---|
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Nothing yet |
+| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
+| Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
+| Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
+| Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |
+| Magnets | "There is a material composition sheet available for magnets. It is with the cars. Check it there. There are all the different composition, which allow also higher temperatures"; then "Yes use the high temperature once for the joins, which are often use like knees, elbows etc." | Checked: E1.6b, V15 |
+| Battery materials | "There are a full composition of battery materials in the batteries for cars. Check them"; then he chose the answer offered: "Battery materials should be the cells only in every robot type; the housing, BMS and busbars belong to the other materials." | Checked: E1.7b, V16. The robots' cells: E1.7c, V17. The cell mass per robot type: E1.7d, V18, agreed |
+
+No recipe is proposed and nothing is entered: each waits for his agreement.
+
+### Open
+
+1. **Battery materials, cells only.** In robot types 2 and 6 the row is cells already. In 1 it is the whole pack, in 3
+   a "system", in 4 cells whose kg contradict the 700 Wh, and in 5 active materials only. He chose: "Set the cell
+   mass from each robot's energy, with the kg per kWh of the cells robots actually use. Research those robot cells
+   first and show me the sources. The rest of each row goes to the other materials or to Not allocated." The
+   sources are in E1.7c and were shown to him. Then: "Yes, propose the cell mass min / mode / max for each robot
+   type from these sources, and where the rest of each row goes. Show it to me before anything is entered." The
+   proposal is E1.7d. **Agreed**, choosing the answer offered: "I agree with the cell-mass proposal as written in
+   E1.7d, for robot types 1, 3, 4 and 5, with robot types 2 and 6 kept as in the workbook." Then: "Enter the cell
+   masses later, together with the battery element recipe. Continue with the open battery points first."
+2. **Battery materials, further, one point at a time:**
+   - the chemistry of robot types 2 and 6 (E1.7e): decided, "Robot types 2 and 6 both get NMC cells with a liquid
+     electrolyte, using the car file's NMC recipe.";
+   - the NMC grade (E1.7e): decided, high nickel with the car file's liquid electrolyte, the same recipe in every NMC
+     robot type; robot type 3 stays LFP;
+   - the cell format (E1.7f): decided, "Cylindrical for all";
+   - the Si in the anodes (E1.7g): decided, 0 / 1 / 7.3 % as silicon oxide, graphite the remainder, in every NMC
+     robot type;
+   - the cells' element recipe (E1.7h: the sources, shown to him; no recipe proposed yet).
+3. **The materials still to go through:** plastics, fibre composites, electronics (with the silver), ceramics.
+4. **The decisions listed in the section below**, as far as his comments have not settled them.
+
+## 2026-10-26, night: the sources of the element recipes, checked on the web
+
+### Asked, in Matthias's words
+
+- "Yes, start researching the element recipes of the 13 materials, and show me the sources first".
+- "Confirm your work with indepenedet research in the internet".
+- "Document in detail the verification with your own internet research".
+
+### Done
+
+- The siblings' element data were found and checked against web sources read first-hand.
+- The details are in [EVIDENCE.md](EVIDENCE.md) E1, and the summary in [VERIFICATION.md](VERIFICATION.md) V14.
+- No recipe is proposed and nothing is entered.
+
+### Open: Matthias's decisions, before any min / mode / max
+
+1. **Magnets:** the siblings exceed the literature on Co and the total rare earths. Which basis, and which Dy content
+   for each robot type?
+2. **Circuit boards:** VehicleComposition's EVA2 copper against measured boards. Which basis?
+3. **Battery materials:** what they hold in each robot type, and which chemistry where the workbook names several.
+   Argonne could not be read.
+4. **Grade shares:** 6061 against 7075; GCr15 against 42CrMo and 20CrMnTi; alumina against SiC. No source gives them.
+5. **Plastics and fibre composites:** elements or not, and the fibre shares.
+6. **Steels without a grade:** robot type 1's "high-strength steel" and robot type 3's "fastener steel".
+
+## 2026-10-26, evening: a page per robot type to verify, and the robot in one view
+
+### Decided, in Matthias's words
+
+- **"I need schema for each of the six types of robots, so that I can verify them".** He chose two things:
+  - one extra page per robot type, drawn by 01, with every part and material and its place on the shared lists;
+  - the placements in `data/researched/shared_lists.xlsx`, a workbook he can correct in Excel.
+
+  Since then this workbook is the one place that holds the placements, and 01 checks it.
+- **"The lists under schemas are OK, but for me this is not a schema, which explains things in details. I want theat
+  one can understand the robot and its compostion and parts in one vew".** A robot page per type: the robot drawn to
+  its height, at one scale for all six, with its parts where they sit, its body regions and its motors.
+- **For the materials**, first "No I want to see it as a robot. Be more inovbative and visual" (drawn as layers in a
+  robot outline), then, on seeing it: "It looks better as robot, but the material compsotion as bar plat". The
+  materials are now bars beside the robot, on one kg scale for all six pages.
+
+### Where it stands
+
+- 01 reads the third sheet of the workbook (`Material Composition per Cat`) and checks it: no fault.
+- It draws 3 pages per robot type, 18 in all, plus the overview and the faults.
+- 55 tests pass (V11), and every page was read (V12).
+- Nothing is committed.
+
+### Open
+
+1. **Matthias's check of the placements**, on the shared-lists and robot pages. Seen on 2026-10-26: "The robot pages
+   work."
+2. **Point 9: done the same evening.** Robot 3's "Electrical & magnetics group" is split by an estimate: magnets
+   15.5 / 30 / 30.1 %, electronics 12 / 20 / 24.6 %, copper the remainder, from robot types 2, 4 and 5. At the mode
+   that is copper 2.1, magnets 1.26 and electronics 0.84 kg. Matthias's words: "Robots 2, 4 and 5", "Copper as the
+   remainder", "A sheet 'Splits' in shared_lists.xlsx". Found: for 52 motors the 4.2 kg is light, so part of the
+   copper and magnets may sit in the 7.4 kg "Not allocated", which stays as it is (SHARED_LISTS.md, point 9; V13).
+3. **The element recipes**, and the stages 02 to 08.
+
+## 2026-10-26, later: the aim of the comparison, and the shared lists decided
+
+### The aim, in Matthias's words
+
+- "I want that it is possible to compare on a material level between the 6 types of roboy".
+- Then, the start of the message cut off: "…ts and also on a component or parts level". Read as: by materials, by
+  elements, and by parts.
+- "So come up with a proposition, which I can understand as 20 year old, not familiar with the topic".
+
+### Proposed, and taken up by Matthias
+
+Describe all six robots with the same shared lists, then compare them side by side.
+
+1. **Shared lists** of part groups, body regions and materials. Matthias asked for them to be drafted, adding "But
+   whats about legs etc." (body regions) and "Whats about addining more degree of freedome, which means additional
+   electrical motors" (a motor count per robot).
+2. **An element recipe for each material**, with min / mode / max from sources, agreed before it is entered.
+3. **One stage per robot type, 02 to 07.** Each draws its parts and materials (Monte Carlo) and translates them to the
+   shared lists.
+4. **One comparison stage, 08**, showing the six robots side by side.
+
+### Decided
+
+- [SHARED_LISTS.md](SHARED_LISTS.md) was drafted: 11 part groups, 6 body regions, 13 materials, and the motors per
+  robot. Every one of the 68 parts and 35 material names is placed once (V10).
+- Matthias went through its eleven points one by one and chose the recommended answer each time. The decisions are
+  listed in SHARED_LISTS.md, "Decided".
+
+### Category 1, gone through
+
+- Its report agrees with the workbook on every number (V9).
+- The report also holds a material table (10 families, 28.9 / 35 / 41.3 kg) and an outlook to 2040 (mass 35 → 22 kg).
+- What its stage computes follows from the shared lists above; it is not built yet.
+
+### Open
+
+1. **Point 9:** done the same evening; see the section above.
+2. **The element recipes** of the 13 materials: research, sources, min / mode / max, Matthias's agreement.
+3. **Where the shared lists live** once code reads them (for example a workbook in `data/researched/`), and the
+   stages 02 to 08.
+4. **Later steps:**
+   - a range of motors per robot (point 11);
+   - a better split by body region (point 5).
+
+## 2026-10-26: the project set up like RAWCLICDataCenters, and the schema of the six categories
+
+### Where it stands
+
+- `00_parameters.py` and `01_schemas.py` exist and run. 01 reads the six categories and their 68 parts from
+  `data/raw/humanoid_robots_2040_workbook.xlsx`, finds no fault, and draws `figures/schemas/`: the overview, one page
+  per category and the faults.
+- 25 tests pass (`./.venv/bin/python -m unittest discover -s tests`). Every check is recorded in
+  [VERIFICATION.md](VERIFICATION.md).
+- Nothing is committed: the project has no git repository yet.
+
+### Decided today, in Matthias's words
+
+- **Python in Positron.** "Prepare it so it works in Positron with Python and its virual environment". Python 3.14.4
+  from pyenv in `.venv` inside the project folder. Packages: at first only ipykernel. Then he asked to "add numpy,
+  pandas, matplotlib, scipy, openpyxl and tqdm to requirements.txt, pinned like the siblings": the pins of
+  RAWCLICVehicleBattery, and tqdm as in RAWCLICDataCenters. He confirmed that Positron's console and terminal use the
+  `.venv`.
+- **Copied from the Empa folder.** "I had in my Empa folder a previous project concerning humanoid robots and their
+  composition can you copy it content here". He chose three of the four parts on offer:
+  - the model code and its input workbook (`HumanoidRobotsMC/HumanoidRobotsMC.py`, now
+    `data/02_HumanoidlRobots.xlsx`);
+  - the research folder;
+  - the component diagram.
+
+  He did not take the model's outputs. The three research scripts were removed afterwards on his word: they could not
+  run here (fixed paths `/home/ubuntu/...`), and their originals stay in `Empa/RAWCLIC/Robots/HumanoidRobots/`.
+- **Documents together.** "Move all documents into the documents source folder. I want them united there": the
+  research reports, the two research workbooks and the diagram.
+- **The layout of RAWCLICDataCenters.** "We will follow the code, as it is in the datacenter folder so 00 for
+  parameters and 01 prodcing schema and documenting everything in thos project". Asked about the open points, he
+  chose:
+  - the 2040 workbook, not the old HRC workbook;
+  - folders like DataCenters: `Documents/Source/` became `documentation/sources/`, the workbook the code reads moved to
+    `data/raw/`, and `Data/` became `data/`;
+  - an overview, one page per category, and a page of faults.
+- **Six categories.** "As far as I understand the new research there are four or five different type of categrories
+  for humanoid robots. Draw a repective schema and the we will go through and do separate code for each of the
+  different categories". The research has six. Asked, he chose to draw all six.
+
+### Found today
+
+- The workbook agrees with itself: no fault in any of the nine checks.
+- Category 5, Boston Dynamics Atlas: the parts add up to 103.4 kg at the mode, against a stated mass of 90 kg
+  (+13.4 kg, +14.9 %). The workbook states this itself. Category 3 is +2.4 kg (+3.4 %), category 6 +3.6 kg (+4.0 %),
+  and categories 1, 2 and 4 match exactly.
+- Category 6's anchor robot, "Guardian-X", is notional, and its stated 90 kg is a target labelled Estimate.
+- Categories 5 and 6 have no report of their own in `documentation/sources/`. The workbook's last row names "Reports
+  00–06", so reports 05 and 06 may exist elsewhere.
+- In category 5 the subsystem "Structure & Protection" is split over rows 71 and 75 to 76. The page groups the rows;
+  the workbook is unchanged.
+
+### Open: Matthias's decisions
+
+1. **The stages of the categories.** "we will go through and do separate code for each of the different
+   categories". Which category first, and what each stage computes.
+2. **The earlier model.** `HumanoidRobotsMC/HumanoidRobotsMC.py` and `data/02_HumanoidlRobots.xlsx` describe four
+   classes (HRC-1 to HRC-4), a different classification from the six categories. Neither is part of the stages, and
+   nothing reads them. Whether a category stage takes the model over, or it goes, is his decision.
+   The model reads `../Data/02_HumanoidlRobots.xlsx` with a capital D. That works on both Macs, whose file system
+   ignores case, but would fail on one that does not.
+3. **Reports 05 and 06.** Whether they exist, and whether they belong in `documentation/sources/`.
+4. **Git.** The project has no repository, no `.gitignore` and no remote yet.
+5. **`.md` and `*_original.md` pairs** among the earlier research. What the difference is has not been looked at.

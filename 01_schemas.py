@@ -1,0 +1,1866 @@
+"""
+01_schemas.py
+=============
+
+**Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
+**Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
+at the root of the repository.
+
+The schemas of this project: what the workbook defines for each category of humanoid robot, before
+anything is drawn at random. Press Run. No arguments; every setting is in `src/params_schema.py`. Run
+`00_parameters.py` first.
+
+Matthias, 2026-10-26: "As far as I understand the new research there are four or five different type of
+categrories for humanoid robots. Draw a repective schema and the we will go through and do separate code
+for each of the different categories." The research has six categories; asked the same day, he chose to
+draw all six.
+
+WHAT IT READS
+-------------
+The workbook named by the setting `data.workbook` (`data/raw/humanoid_robots_2040_workbook.xlsx`), only
+reading it:
+
+  Taxonomy                  the definition of each category: what it is for, its height and mass, its
+                            joints (degrees of freedom) and payload, its anchor robot (the robot whose
+                            parts list stands for the category).
+  Components & Materials    the parts list of each anchor robot: per part the quantity, the mass of one
+                            unit and of all units (minimum, mode, maximum, in kg), the main material and
+                            the evidence (Direct, Derived, Estimate); per category the sum of the parts,
+                            the stated mass of the anchor robot and the difference between the two.
+  Material Composition per Cat
+                            the materials of each anchor robot: per material its grade, minimum, mode and
+                            maximum in kg, its share of the category and its evidence; per category their sum
+                            and the kilograms they leave unallocated against the parts list and against the
+                            stated mass.
+
+It also reads `data.shared_lists` (`data/researched/shared_lists.xlsx`): where every part and every material
+name goes in the shared part groups, body regions and materials (decided by Matthias on 2026-10-26,
+documentation/claude/SHARED_LISTS.md). And it looks in `data.sources_dir` (`documentation/sources/`) for the
+report of each category.
+
+WHAT IT CHECKS
+--------------
+Before drawing, `check_workbook` tests that the workbook agrees with itself, and `check_shared_lists` that every
+part and material name is placed once, under its own name, on the shared lists (the list is in `CHECKS_DONE`):
+every minimum, mode and maximum in order, every mass of all units equal to the number times the mass of one,
+every sum row equal to the sum of its rows, every difference and unallocated row equal to what it should be, the
+colour of every row matching its evidence, the same categories in every sheet. A fault does not stop the drawing:
+it is drawn in red, listed on faults.png and counted on the overview.
+
+WHAT IT DRAWS
+-------------
+Into `output.schemas_dir` (`figures/schemas/`):
+
+  overview.png                 how the project models a humanoid robot: the stages, how every mass
+                               carries its minimum, mode and maximum, the six categories with their anchor
+                               robots and masses, the faults found, what is still open.
+  categories/<n>_<name>.png    one page per category: its definition, the anchor robot, height and mass,
+                               joints and payload, the sum of the parts against the stated mass, whether
+                               it has a report; then the parts list, grouped by subsystem.
+  categories/<n>_<name>_shared_lists.png
+                               one page per robot type in the shared lists, for Matthias to verify the
+                               placements: every part with its part group and body region, every material
+                               with its shared material, bars of the kg at the mode by part group, body region
+                               and material, and the number of motors. Matthias, 2026-10-26: "I need schema for
+                               each of the six types of robots, so that I can verify them". Not drawn when
+                               the shared lists are not on disk.
+  categories/<n>_<name>_robot.png
+                               the robot type in one view (Matthias, 2026-10-26: "I want theat one can
+                               understand the robot and its compostion and parts in one vew"): the robot drawn
+                               to its height, at the same scale on all six pages, with its parts where they sit,
+                               its body regions and its motors; beside it, its materials as bars on the same kg
+                               scale on all six pages. Not drawn when the shared lists are not on disk.
+  faults.png                   every fault found in the workbook and the shared lists, in red, or "No fault
+                               found", with the list of what was checked and what was not.
+
+The numbers are the workbook's minimum, mode and maximum, not draws. It needs no Monte Carlo run.
+
+Where it sits: after 00_parameters.py. The stages of the categories will follow it, and will read the
+workbook through the functions here (`read_workbook`, `check_workbook`), so that what they compute is
+what these pages show.
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import sys
+import textwrap
+from dataclasses import dataclass, field
+
+# Run from anywhere, and put the project root on the path, so that `src` imports. Must come before any
+# import of src.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import matplotlib  # noqa: E402
+
+matplotlib.use('Agg')  # draw into files only: no window opens, also in a terminal without a screen
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.patches import FancyArrowPatch, Rectangle  # noqa: E402
+from openpyxl import load_workbook  # noqa: E402
+
+from src.params_schema import ParameterError, Params, absolute, current  # noqa: E402
+
+# ------------------------------------------------------------------------------------------------------
+# What the overview says about the project
+# ------------------------------------------------------------------------------------------------------
+
+# The stages of the project, in the order they are run, as the overview page shows them. A test
+# (tests/test_schemas.py) compares this list with the numbered files at the top of the project, so that a
+# stage cannot be added without the overview saying what it does.
+STAGES = [
+    ('00_parameters.py', 'The settings: checks them and writes their register.'),
+    ('01_schemas.py', 'What the workbook defines, before anything is drawn at random, and each robot type in '
+                      'the shared lists: these pages.'),
+]
+
+# What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
+CHECKS_DONE = [
+    'Every part has a number above zero and a minimum, mode and maximum for the mass of one unit and of '
+    'all units.',
+    'Every minimum is at most its mode, and every mode at most its maximum.',
+    'For every part, the mass of all units is the number times the mass of one unit (minimum, mode and '
+    'maximum).',
+    "Every row's evidence is Direct, Derived or Estimate, and its colour is the one the workbook's colour "
+    'key gives that evidence.',
+    "For every category, the sum row equals the sum of the parts' masses and of their numbers.",
+    "For every category, the difference row equals the sum's mode minus the stated mass of the anchor "
+    'robot, in kg and as a share.',
+    "The last row equals the sum of the categories' sum rows.",
+    'The number of parts equals the number stated at the top of the sheet.',
+    'The same categories, with the same numbers and names, are in all three sheets, and every category has its '
+    'parts, its materials and their closing rows.',
+    "Materials: every minimum is at most its mode and every mode at most its maximum; the sum row equals the sum "
+    "of the materials; every share equals the material's mode over the sum's mode.",
+    "Materials: the unallocated row equals the parts' sum minus the materials' sum at the mode, and the stated "
+    "mass minus the materials' sum.",
+    'Shared lists: every part of the workbook is placed exactly once, under its own name and robot type, in a '
+    'part group and a body region of the sheet Lists; a split adds up to the units of the part; the number of '
+    'motors is a whole number from 0 to the units.',
+    'Shared lists: every material name of the workbook is placed exactly once, in a material of the sheet Lists.',
+    "Shared lists: every material name marked 'Split' has its pieces in the sheet Splits: exactly one remainder, "
+    'the shares of the others in order between 0 and 1 and their largest adding up to at most 1, each piece '
+    "labelled E and in a material of the sheet Lists.",
+]
+
+# What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
+NOT_CHECKED = ('The checks test whether the workbook agrees with itself and whether every part and material is '
+               'placed on the shared lists. They do not test whether the numbers are right, which needs the '
+               'sources, report by report, nor whether a placement is right, which is Matthias\'s check of the '
+               'shared-lists pages.')
+
+# ------------------------------------------------------------------------------------------------------
+# How the workbook is laid out
+# ------------------------------------------------------------------------------------------------------
+
+# The headings of the sheet 'Components & Materials' that the parse needs, by the start of their text (the
+# workbook writes the unit after some of them, as in 'Per-Unit Min (kg)'). Each must start exactly one
+# heading of the header row.
+PART_COLUMNS = {
+    'category': 'Category', 'anchor': 'BOM Anchor Robot', 'subsystem': 'Subsystem',
+    'component': 'Component', 'location': 'Location', 'quantity': 'Qty',
+    'unit_min': 'Per-Unit Min', 'unit_mode': 'Per-Unit Mode', 'unit_max': 'Per-Unit Max',
+    'total_min': 'Total Min', 'total_mode': 'Total Mode', 'total_max': 'Total Max',
+    'material': 'Primary Material', 'evidence': 'Evidence', 'sources': 'Source',
+}
+
+# The headings of the sheet 'Taxonomy' that the parse needs, by the start of their text.
+TAXONOMY_COLUMNS = {
+    'category': 'Category', 'definition': 'Dominant Requirement', 'height_and_mass': 'Working Boundary',
+    'joints_and_payload': 'Articulation', 'anchor': 'BOM Anchor Robot',
+}
+
+# The labels in the column 'Subsystem' of the three rows that close each category's parts list, and the
+# start of the label of the last row of the sheet, the sum over all categories.
+SUM_ROW, STATED_MASS_ROW, DIFFERENCE_ROW = 'CATEGORY SUBTOTAL', 'REPORTED ANCHOR MASS', 'RECONCILIATION CHECK'
+ALL_CATEGORIES_ROW = 'GRAND TOTAL'
+
+# The headings of the sheet 'Material Composition per Cat' that the parse needs, by the start of their text, and
+# the labels in its column 'Material Family' of the two rows that close each category's materials.
+MATERIAL_COLUMNS = {
+    'category': 'Category', 'family': 'Material Family', 'grade': 'Proposed Grade', 'min': 'Min',
+    'mode': 'Mode', 'max': 'Max', 'share': 'Share', 'evidence': 'Evidence', 'sources': 'Source',
+}
+MATERIAL_SUM_ROW, UNALLOCATED_ROW = 'CATEGORY MATERIAL SUBTOTAL', 'UNALLOCATED MATERIAL RESIDUAL'
+
+# The shared lists (data/researched/shared_lists.xlsx): its sheets and the headings of each, exactly as written.
+# 'Lists' names the shared part groups, body regions and materials; 'Parts' places every part of the workbook;
+# 'Materials' places every material name.
+LISTS_SHEET, PARTS_SHEET, MATERIALS_SHEET = 'Lists', 'Parts', 'Materials'
+LIST_HEADINGS = ['List', 'Name', 'What it holds']
+PART_HEADINGS = ['Robot type', 'Row', 'Part', 'Part group', 'Body region', 'Split by units', 'Motors', 'Why']
+MATERIAL_HEADINGS = ['Material name in the workbook', 'Shared material', 'Why']
+PART_GROUP, BODY_REGION, MATERIAL = 'Part group', 'Body region', 'Material'
+NOT_ALLOCATED = 'Not allocated'   # the shared material that holds the kilograms the materials leave out
+# A material name the workbook gives for several materials together can be split by an estimate (point 9 of
+# SHARED_LISTS.md): its row in 'Materials' says 'Split', and the sheet 'Splits' gives one row per piece, each a share
+# of the name's kilograms (minimum, mode, maximum), one of them the remainder.
+SPLITS_SHEET, SPLIT = 'Splits', 'Split'
+SPLIT_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared material', 'Share min', 'Share mode',
+                  'Share max', 'Remainder', 'Label', 'Basis', 'Decided']
+
+# How the workbook marks the evidence of each row: the label in the column 'Evidence' and the fill colour
+# of the row (its colour key, row 4 of 'Components & Materials': no fill, light yellow, light orange). The
+# pages use the same colours, so a row looks the same in the workbook and on the page.
+EVIDENCE_FILL = {'Direct': None, 'Derived': 'FFFFF2CC', 'Estimate': 'FFFCE4D6'}
+EVIDENCE_COLOUR = {'Direct': '#FFFFFF', 'Derived': '#FFF2CC', 'Estimate': '#FCE4D6'}
+EVIDENCE_MEANING = {
+    'Direct': 'reported in a manufacturer or sensor datasheet',
+    'Derived': 'calculated from other numbers (number × mass of one, a sum, or a derived input)',
+    'Estimate': 'engineering reconstruction, teardown or scenario model',
+}
+
+# ------------------------------------------------------------------------------------------------------
+# What is read from the workbook
+# ------------------------------------------------------------------------------------------------------
+
+
+class WorkbookError(Exception):
+    """Raised when the workbook cannot be read at all: a sheet or a heading the parse needs is missing."""
+
+
+@dataclass
+class Fault:
+    """One place where the workbook does not agree with itself, or a part or material is not placed right."""
+
+    sheet: str        # the sheet of the workbook, or of the shared lists
+    row: int          # the row in that sheet, as Excel numbers it; 0 when the fault is about the sheet as a whole
+    text: str         # what is wrong, in plain words
+    part_row: int = 0  # for a placement of the shared lists: the row of its part in 'Components & Materials'
+
+
+@dataclass
+class Category:
+    """One category of humanoid robot, as the sheet 'Taxonomy' defines it."""
+
+    number: int               # 1 to 6, the number the workbook gives the category
+    name: str                 # the name without its number, e.g. 'Compact Research & Developer'
+    definition: str           # what the category is for
+    height_and_mass: str      # its working boundary, as the workbook writes it
+    joints_and_payload: str   # its degrees of freedom and payload, as the workbook writes them
+    anchor: str               # its anchor robot, as the workbook writes it
+    row: int                  # its row in 'Taxonomy'
+
+
+@dataclass
+class Part:
+    """One row of a parts list (sheet 'Components & Materials')."""
+
+    row: int
+    subsystem: str                      # the group of parts, e.g. 'Actuation & Power'
+    component: str                      # the part, e.g. 'Knee actuator module (120 Nm class)'
+    location: str                       # where in the robot, e.g. 'Knees (L/R pitch)'
+    quantity: float | None              # how many of the part one robot has
+    unit_kg: tuple                      # minimum, mode, maximum mass of one unit, kg (None where empty)
+    total_kg: tuple                     # minimum, mode, maximum mass of all units, kg
+    material: str                       # the main material, as the workbook writes it
+    evidence: str                       # Direct, Derived or Estimate
+    fill: str | None                    # the fill colour of the row in the workbook, None for no fill
+    sources: str                        # the workbook's source references, e.g. '[S01, S12, S15]'
+
+
+@dataclass
+class PartsList:
+    """The parts list of one category, with the three rows that close it."""
+
+    number: int                         # the category's number
+    name: str                           # the category's name as this sheet writes it, without the number
+    anchor: str                         # the anchor robot as this sheet writes it
+    first_row: int                      # the first row of the category in the sheet
+    parts: list = field(default_factory=list)
+    sum_row: int = 0                    # 0 until the row is found
+    sum_quantity: float | None = None
+    sum_kg: tuple = (None, None, None)
+    stated_row: int = 0
+    stated_mass_kg: float | None = None
+    stated_evidence: str = ''
+    stated_fill: str | None = None
+    difference_row: int = 0
+    difference_kg: float | None = None      # the workbook's difference, sum's mode minus stated mass
+    difference_share: float | None = None   # the same as a share of the stated mass
+    rows_with_evidence: list = field(default_factory=list)   # (row, evidence, fill) of the closing rows
+
+
+@dataclass
+class Material:
+    """One row of a category's materials (sheet 'Material Composition per Cat')."""
+
+    row: int
+    family: str            # the workbook's name of the material, e.g. 'Aluminum alloys'
+    grade: str             # the grade the workbook gives, e.g. 'Al 6061-T6 / 7075-T6'
+    kg: tuple              # minimum, mode, maximum, kg (None where empty)
+    share: float | None    # the workbook's share of the category's materials at the mode, 0 to 1
+    evidence: str
+    fill: str | None
+
+
+@dataclass
+class MaterialsList:
+    """The materials of one category, with the two rows that close them."""
+
+    number: int
+    name: str
+    first_row: int
+    materials: list = field(default_factory=list)
+    sum_row: int = 0
+    sum_kg: tuple = (None, None, None)
+    unallocated_row: int = 0
+    unallocated_parts_kg: float | None = None    # the parts' sum at the mode minus the materials' sum at the mode
+    unallocated_stated_kg: float | None = None   # the stated mass minus the materials' sum at the mode
+    rows_with_evidence: list = field(default_factory=list)
+
+
+@dataclass
+class Workbook:
+    """Everything 01 reads from the workbook."""
+
+    categories: list            # Category, in the order of 'Taxonomy'
+    parts_lists: dict           # category number -> PartsList
+    all_row: int                # the row of the sum over all categories, 0 if the sheet has none
+    all_quantity: float | None
+    all_kg: tuple
+    stated_part_count: int | None   # the number of parts the top of the sheet states ('COVERAGE: 68 ...')
+    faults: list                # Fault, found while reading
+    materials_lists: dict = field(default_factory=dict)   # category number -> MaterialsList
+
+
+@dataclass
+class Placement:
+    """Where one part of the workbook goes in the shared lists (sheet 'Parts' of shared_lists.xlsx)."""
+
+    row: int               # the row in the sheet 'Parts'
+    robot: int             # the robot type the shared lists give the part
+    part_row: int          # the row of the part in 'Components & Materials'
+    part: str              # the name of the part, as the shared lists write it
+    group: str             # its part group
+    region: str            # its body region, '' when it is split
+    split: dict            # body region -> units, for a part split by the units its location names
+    motors: float | None   # how many electric motors the part holds
+    why: str               # why it sits there, with the point of SHARED_LISTS.md that decided it
+
+
+@dataclass
+class SplitPiece:
+    """One piece of a material name split by an estimate (sheet 'Splits' of shared_lists.xlsx)."""
+
+    row: int               # the row in the sheet 'Splits'
+    robot: int             # the robot type the row gives
+    shared: str            # the shared material of the piece
+    share: tuple           # its share of the name's kilograms: minimum, mode, maximum (None for the remainder)
+    remainder: bool        # True for the piece that takes 1 minus the shares of the others
+    label: str             # 'E': an estimate
+    basis: str             # how the shares were found
+
+
+@dataclass
+class SharedLists:
+    """Everything 01 reads from shared_lists.xlsx."""
+
+    names: dict            # 'Part group', 'Body region', 'Material' -> the names of that list, in order
+    parts: dict            # row of the part in 'Components & Materials' -> Placement
+    materials: dict        # material name of the workbook -> (shared material, why, row in the sheet 'Materials')
+    faults: list           # Fault, found while reading
+    splits: dict = field(default_factory=dict)   # material name of the workbook -> [SplitPiece], from 'Splits'
+
+
+def number(value) -> float | None:
+    """A cell as a number, or None for an empty cell, a dash ('—' stands for 'not applicable') or text."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    try:
+        return float(str(value).strip())
+    except ValueError:
+        return None
+
+
+def text(value) -> str:
+    """A cell as text, without the spaces at its ends; '' for an empty cell."""
+    return '' if value is None else str(value).strip()
+
+
+def numbered(value) -> tuple[int, str] | None:
+    """'3. Industrial Logistics & Warehousing' -> (3, 'Industrial Logistics & Warehousing'); else None."""
+    match = re.match(r'^(\d+)\.\s*(.+)$', text(value), re.S)
+    return (int(match.group(1)), match.group(2).strip()) if match else None
+
+
+def fill_of(cell) -> str | None:
+    """The fill colour of a cell as ARGB text ('FFFFF2CC'), None for no fill or a white fill."""
+    if cell.fill is None or cell.fill.fill_type != 'solid':
+        return None
+    colour = cell.fill.fgColor.rgb
+    return None if not isinstance(colour, str) or colour.upper() in ('FFFFFFFF', '00000000') else colour.upper()
+
+
+def find_header(sheet, first: str, needed: dict) -> tuple[int, dict]:
+    """The row of a table's header (its first cell is `first`) and the column of each needed heading."""
+    for row in sheet.iter_rows():
+        if text(row[0].value) != first:
+            continue
+        columns = {}
+        for key, start in needed.items():
+            matches = [cell.column for cell in row if text(cell.value).startswith(start)]
+            if len(matches) != 1:
+                raise WorkbookError(f"sheet '{sheet.title}', row {row[0].row}: {len(matches)} headings "
+                                    f"start with '{start}', where the schema needs exactly one.")
+            columns[key] = matches[0]
+        return row[0].row, columns
+    raise WorkbookError(f"sheet '{sheet.title}': no header row whose first cell is '{first}'.")
+
+
+def read_taxonomy(sheet) -> list[Category]:
+    """The categories of the sheet 'Taxonomy': one per row after the header, until the first empty row."""
+    header, columns = find_header(sheet, 'Category', TAXONOMY_COLUMNS)
+    categories = []
+    for row in sheet.iter_rows(min_row=header + 1):
+        cell = {key: row[column - 1].value for key, column in columns.items()}
+        named = numbered(cell['category'])
+        if named is None:
+            break  # the first table ends here; the sheet's second table (emphasis by category) is not read
+        categories.append(Category(number=named[0], name=named[1], definition=text(cell['definition']),
+                                   height_and_mass=text(cell['height_and_mass']),
+                                   joints_and_payload=text(cell['joints_and_payload']),
+                                   anchor=text(cell['anchor']), row=row[0].row))
+    return categories
+
+
+def read_parts(sheet) -> tuple:
+    """The parts lists of the sheet 'Components & Materials', the sum over all categories, the stated
+    number of parts and the faults met while reading."""
+    header, columns = find_header(sheet, 'Category', PART_COLUMNS)
+    faults, lists = [], {}
+    all_row, all_quantity, all_kg = 0, None, (None, None, None)
+
+    # The top of the sheet states how many parts it lists: 'COVERAGE: 68 leaf component assemblies ...'.
+    stated_part_count = None
+    for row in sheet.iter_rows(max_row=header - 1):
+        found = re.search(r'COVERAGE:\s*(\d+)', text(row[0].value))
+        if found:
+            stated_part_count = int(found.group(1))
+
+    for row in sheet.iter_rows(min_row=header + 1):
+        cell = {key: row[column - 1].value for key, column in columns.items()}
+        if all(value is None for value in cell.values()):
+            continue
+        r = row[0].row
+        label = text(cell['subsystem'])
+        unit = (number(cell['unit_min']), number(cell['unit_mode']), number(cell['unit_max']))
+        total = (number(cell['total_min']), number(cell['total_mode']), number(cell['total_max']))
+        evidence = text(cell['evidence'])
+        fill = fill_of(row[columns['component'] - 1])
+
+        if label.upper().startswith(ALL_CATEGORIES_ROW):
+            all_row, all_quantity, all_kg = r, number(cell['quantity']), total
+            continue
+
+        named = numbered(cell['category'])
+        if named is None:
+            faults.append(Fault(sheet.title, r, f"the category '{text(cell['category'])}' has no number "
+                                                '("1." to "6.") in front of its name.'))
+            continue
+        parts_list = lists.setdefault(named[0], PartsList(number=named[0], name=named[1],
+                                                          anchor=text(cell['anchor']), first_row=r))
+
+        if label == SUM_ROW:
+            parts_list.sum_row, parts_list.sum_quantity, parts_list.sum_kg = r, number(cell['quantity']), total
+        elif label == STATED_MASS_ROW:
+            parts_list.stated_row, parts_list.stated_mass_kg = r, total[1]
+            parts_list.stated_evidence, parts_list.stated_fill = evidence, fill
+        elif label == DIFFERENCE_ROW:
+            # The difference row writes the difference in kg in the column 'Total Mode' and the share of
+            # the stated mass in the column 'Total Max' (the workbook's note on the row says so).
+            parts_list.difference_row, parts_list.difference_kg, parts_list.difference_share = r, total[1], total[2]
+        else:
+            parts_list.parts.append(Part(row=r, subsystem=label, component=text(cell['component']),
+                                         location=text(cell['location']), quantity=number(cell['quantity']),
+                                         unit_kg=unit, total_kg=total, material=text(cell['material']),
+                                         evidence=evidence, fill=fill, sources=text(cell['sources'])))
+            continue
+        parts_list.rows_with_evidence.append((r, evidence, fill))
+    return lists, all_row, all_quantity, all_kg, stated_part_count, faults
+
+
+def read_materials(sheet) -> tuple[dict, list]:
+    """The materials of each category (sheet 'Material Composition per Cat') and the faults met reading them."""
+    header, columns = find_header(sheet, 'Category', MATERIAL_COLUMNS)
+    lists, faults = {}, []
+    for row in sheet.iter_rows(min_row=header + 1):
+        cell = {key: row[column - 1].value for key, column in columns.items()}
+        if all(value is None for value in cell.values()):
+            continue
+        r = row[0].row
+        named = numbered(cell['category'])
+        if named is None:
+            faults.append(Fault(sheet.title, r, f"the category '{text(cell['category'])}' has no number "
+                                                '("1." to "6.") in front of its name.'))
+            continue
+        materials = lists.setdefault(named[0], MaterialsList(number=named[0], name=named[1], first_row=r))
+        family, evidence = text(cell['family']), text(cell['evidence'])
+        kg_ = (number(cell['min']), number(cell['mode']), number(cell['max']))
+        fill = fill_of(row[columns['family'] - 1])
+        if family == MATERIAL_SUM_ROW:
+            materials.sum_row, materials.sum_kg = r, kg_
+        elif family == UNALLOCATED_ROW:
+            # The unallocated row writes the gap to the parts list in the column 'Mode (kg)' and the gap to the
+            # stated mass in the column 'Max (kg)' (the workbook's note on the row: "Col G = Gap vs BOM; Col H =
+            # Gap vs Stated Mass").
+            materials.unallocated_row = r
+            materials.unallocated_parts_kg, materials.unallocated_stated_kg = kg_[1], kg_[2]
+        else:
+            materials.materials.append(Material(row=r, family=family, grade=text(cell['grade']), kg=kg_,
+                                                share=number(cell['share']), evidence=evidence, fill=fill))
+            continue
+        materials.rows_with_evidence.append((r, evidence, fill))
+    return lists, faults
+
+
+def read_workbook(path: str, params: Params) -> Workbook:
+    """Read the categories, the parts lists and the materials from the workbook; never writes to it."""
+    if not os.path.exists(path):
+        raise WorkbookError(f'{path}: the workbook is not there. 00_parameters.py says which input files '
+                            'are on disk.')
+    book = load_workbook(path, data_only=True)  # data_only: the values Excel computed, not the formulas
+    for name in (params.data.taxonomy_sheet, params.data.components_sheet, params.data.materials_sheet):
+        if name not in book.sheetnames:
+            raise WorkbookError(f"{path}: no sheet '{name}'. Its sheets are: {', '.join(book.sheetnames)}.")
+    categories = read_taxonomy(book[params.data.taxonomy_sheet])
+    lists, all_row, all_quantity, all_kg, stated, faults = read_parts(book[params.data.components_sheet])
+    materials, material_faults = read_materials(book[params.data.materials_sheet])
+    return Workbook(categories, lists, all_row, all_quantity, all_kg, stated, faults + material_faults,
+                    materials)
+
+
+def read_shared_lists(path: str) -> SharedLists:
+    """Read the shared lists (data/researched/shared_lists.xlsx); never writes to them."""
+    if not os.path.exists(path):
+        raise WorkbookError(f'{path}: the shared lists are not there.')
+    book = load_workbook(path, data_only=True)
+    sheets = {}
+    for name, headings in ((LISTS_SHEET, LIST_HEADINGS), (PARTS_SHEET, PART_HEADINGS),
+                           (MATERIALS_SHEET, MATERIAL_HEADINGS)):
+        if name not in book.sheetnames:
+            raise WorkbookError(f"{path}: no sheet '{name}'. Its sheets are: {', '.join(book.sheetnames)}.")
+        found = [text(cell.value) for cell in book[name][1]][:len(headings)]
+        if found != headings:
+            raise WorkbookError(f"{path}, sheet '{name}': the first row must be {headings}, not {found}.")
+        sheets[name] = [(row[0].row, [cell.value for cell in row]) for row in book[name].iter_rows(min_row=2)
+                        if any(cell.value is not None for cell in row)]
+    where = f'{os.path.basename(path)}: '
+    faults, names = [], {PART_GROUP: [], BODY_REGION: [], MATERIAL: []}
+    for r, (kind, name, _) in ((r, values[:3]) for r, values in sheets[LISTS_SHEET]):
+        if text(kind) not in names:
+            faults.append(Fault(where + LISTS_SHEET, r, f"'{text(kind)}' is not one of {', '.join(names)}."))
+        else:
+            names[text(kind)].append(text(name))
+
+    parts = {}
+    for r, values in sheets[PARTS_SHEET]:
+        robot, part_row, part, group, region, split, motors, why = (values + [None] * 8)[:8]
+        units = {}
+        for item in filter(None, (piece.strip() for piece in text(split).split(';'))):
+            found = re.match(r'^(.+?)\s+(\d+(?:\.\d+)?)$', item)
+            if found:
+                units[found.group(1).strip()] = float(found.group(2))
+            else:
+                faults.append(Fault(where + PARTS_SHEET, r, f"the split '{item}' is not a region and a number "
+                                                            "of units, as in 'Legs 4'."))
+        placement = Placement(row=r, robot=int(number(robot) or 0), part_row=int(number(part_row) or 0),
+                              part=text(part), group=text(group), region=text(region), split=units,
+                              motors=number(motors), why=text(why))
+        if placement.part_row in parts:
+            faults.append(Fault(where + PARTS_SHEET, r, f'the part of row {placement.part_row} is placed a second '
+                                                        f'time (first in row {parts[placement.part_row].row}).',
+                                placement.part_row))
+            continue
+        parts[placement.part_row] = placement
+
+    materials = {}
+    for r, values in sheets[MATERIALS_SHEET]:
+        name, shared, why = (values + [None] * 3)[:3]
+        if text(name) in materials:
+            faults.append(Fault(where + MATERIALS_SHEET, r, f"the material name '{text(name)}' is placed a second "
+                                                            f'time (first in row {materials[text(name)][2]}).'))
+            continue
+        materials[text(name)] = (text(shared), text(why), r)
+
+    # The splits by estimate, when the sheet is there.
+    splits = {}
+    if SPLITS_SHEET in book.sheetnames:
+        found = [text(cell.value) for cell in book[SPLITS_SHEET][1]][:len(SPLIT_HEADINGS)]
+        if found != SPLIT_HEADINGS:
+            raise WorkbookError(f"{path}, sheet '{SPLITS_SHEET}': the first row must be {SPLIT_HEADINGS}, not {found}.")
+        for row in book[SPLITS_SHEET].iter_rows(min_row=2):
+            values = [cell.value for cell in row]
+            if all(value is None for value in values):
+                continue
+            robot, name, shared, low, mode, high, remainder, label, basis = (values + [None] * 9)[:9]
+            splits.setdefault(text(name), []).append(SplitPiece(
+                row=row[0].row, robot=int(number(robot) or 0), shared=text(shared),
+                share=(number(low), number(mode), number(high)), remainder=text(remainder).lower() == 'yes',
+                label=text(label), basis=text(basis)))
+    return SharedLists(names, parts, materials, faults, splits)
+
+
+# ------------------------------------------------------------------------------------------------------
+# Whether the workbook agrees with itself
+# ------------------------------------------------------------------------------------------------------
+
+WHICH = ('minimum', 'mode', 'maximum')
+
+
+def kg(value: float | None) -> str:
+    """A mass for a page or a fault: at most three decimals, without trailing zeros (0.409, 2.5, 35)."""
+    if value is None:
+        return '—'
+    shown = f'{value:.3f}'.rstrip('0').rstrip('.')
+    return '0' if shown in ('-0', '') else shown
+
+
+def check_workbook(book: Workbook, params: Params) -> list[Fault]:
+    """Every place where the workbook does not agree with itself (the checks of CHECKS_DONE)."""
+    tolerance = params.checks.tolerance_kg
+    sheet = params.data.components_sheet
+    faults = list(book.faults)
+
+    def close(a, b, allowed=tolerance):
+        return a is not None and b is not None and abs(a - b) <= allowed
+
+    def evidence_faults(row, evidence, fill, on=sheet):
+        if evidence not in EVIDENCE_FILL:
+            return [Fault(on, row, f"the evidence '{evidence}' is not one of Direct, Derived, Estimate.")]
+        if fill != EVIDENCE_FILL[evidence]:
+            return [Fault(on, row, f'the row is coloured {fill or "without fill"}, but its evidence, '
+                                   f'{evidence}, is coloured {EVIDENCE_FILL[evidence] or "without fill"} '
+                                   "in the workbook's colour key.")]
+        return []
+
+    for parts_list in book.parts_lists.values():
+        n = parts_list.number
+        for part in parts_list.parts:
+            here = lambda what: Fault(sheet, part.row, f'{part.component}: {what}')  # noqa: E731
+            if part.quantity is None or part.quantity <= 0:
+                faults.append(here('the number of units is missing or not above zero.'))
+            for masses, of in ((part.unit_kg, 'one unit'), (part.total_kg, 'all units')):
+                if None in masses:
+                    missing = ', '.join(w for w, m in zip(WHICH, masses) if m is None)
+                    faults.append(here(f'the {missing} of the mass of {of} is missing.'))
+                    continue
+                low, mode, high = masses
+                if not low <= mode <= high:
+                    faults.append(here(f'the mass of {of} is not in order: minimum {kg(low)}, mode '
+                                       f'{kg(mode)}, maximum {kg(high)} kg.'))
+            if part.quantity is not None and None not in part.unit_kg and None not in part.total_kg:
+                for which, unit, total in zip(WHICH, part.unit_kg, part.total_kg):
+                    if not close(total, part.quantity * unit):
+                        faults.append(here(f'the {which} mass of all units, {kg(total)} kg, is not the number '
+                                           f'{kg(part.quantity)} times the mass of one, {kg(unit)} kg '
+                                           f'(= {kg(part.quantity * unit)} kg).'))
+            faults += evidence_faults(part.row, part.evidence, part.fill)
+
+        for row, evidence, fill in parts_list.rows_with_evidence:
+            faults += evidence_faults(row, evidence, fill)
+
+        # The three closing rows: present, and in agreement with the parts and with each other.
+        for row, label in ((parts_list.sum_row, 'sum'), (parts_list.stated_row, 'stated mass'),
+                           (parts_list.difference_row, 'difference')):
+            if not row:
+                faults.append(Fault(sheet, parts_list.first_row, f'category {n} has no {label} row.'))
+        if parts_list.sum_row:
+            for i, which in enumerate(WHICH):
+                parts_sum = sum(p.total_kg[i] for p in parts_list.parts if p.total_kg[i] is not None)
+                if not close(parts_list.sum_kg[i], parts_sum):
+                    faults.append(Fault(sheet, parts_list.sum_row,
+                                        f'category {n}: the {which} of the parts adds up to {kg(parts_sum)} kg, '
+                                        f'but the sum row says {kg(parts_list.sum_kg[i])} kg.'))
+            units = sum(p.quantity for p in parts_list.parts if p.quantity is not None)
+            if not close(parts_list.sum_quantity, units, 0):
+                faults.append(Fault(sheet, parts_list.sum_row,
+                                    f'category {n}: the parts add up to {kg(units)} units, but the sum row '
+                                    f'says {kg(parts_list.sum_quantity)}.'))
+        if parts_list.sum_row and parts_list.stated_row and parts_list.difference_row:
+            stated, mode = parts_list.stated_mass_kg, parts_list.sum_kg[1]
+            if stated is None or mode is None:
+                faults.append(Fault(sheet, parts_list.difference_row,
+                                    f'category {n}: the stated mass or the mode of the sum is missing.'))
+            else:
+                if not close(parts_list.difference_kg, mode - stated):
+                    faults.append(Fault(sheet, parts_list.difference_row,
+                                        f'category {n}: the difference row says {kg(parts_list.difference_kg)} '
+                                        f'kg, but the mode of the sum minus the stated mass is '
+                                        f'{kg(mode)} - {kg(stated)} = {kg(mode - stated)} kg.'))
+                # The share may differ by the tolerance in kg, taken as a share of the stated mass.
+                if not close(parts_list.difference_share, (mode - stated) / stated, tolerance / stated):
+                    shown = ('—' if parts_list.difference_share is None
+                             else f'{parts_list.difference_share:.2%}')
+                    faults.append(Fault(sheet, parts_list.difference_row,
+                                        f'category {n}: the difference row says {shown} of the stated mass, '
+                                        f'but the difference is {(mode - stated) / stated:.2%} of it.'))
+
+    # The last row against the six sum rows.
+    if not book.all_row:
+        faults.append(Fault(sheet, 0, 'the sheet has no last row with the sum over all categories.'))
+    else:
+        lists = book.parts_lists.values()
+        for i, which in enumerate(WHICH):
+            total = sum(pl.sum_kg[i] for pl in lists if pl.sum_kg[i] is not None)
+            if not close(book.all_kg[i], total):
+                faults.append(Fault(sheet, book.all_row,
+                                    f'the {which} of the sum rows adds up to {kg(total)} kg, but the last row '
+                                    f'says {kg(book.all_kg[i])} kg.'))
+        units = sum(pl.sum_quantity for pl in lists if pl.sum_quantity is not None)
+        if not close(book.all_quantity, units, 0):
+            faults.append(Fault(sheet, book.all_row, f'the sum rows add up to {kg(units)} units, but the last '
+                                                     f'row says {kg(book.all_quantity)}.'))
+
+    # The number of parts against what the top of the sheet states.
+    count = sum(len(pl.parts) for pl in book.parts_lists.values())
+    if book.stated_part_count is not None and count != book.stated_part_count:
+        faults.append(Fault(sheet, 0, f'the top of the sheet states {book.stated_part_count} parts, but the '
+                                      f'sheet lists {count}.'))
+
+    # The categories of the two sheets against each other.
+    taxonomy = {c.number: c for c in book.categories}
+    for number_, category in taxonomy.items():
+        parts_list = book.parts_lists.get(number_)
+        if parts_list is None:
+            faults.append(Fault(params.data.taxonomy_sheet, category.row,
+                                f'category {number_} is in this sheet but has no parts list in '
+                                f"'{sheet}'."))
+        elif parts_list.name != category.name:
+            faults.append(Fault(sheet, parts_list.first_row,
+                                f"category {number_} is called '{category.name}' in "
+                                f"'{params.data.taxonomy_sheet}' but '{parts_list.name}' here."))
+    for number_, parts_list in book.parts_lists.items():
+        if number_ not in taxonomy:
+            faults.append(Fault(sheet, parts_list.first_row, f"category {number_} has a parts list but is not "
+                                                             f"in '{params.data.taxonomy_sheet}'."))
+
+    # The materials of each category: in order, summed, shared out and closed as the workbook states.
+    on = params.data.materials_sheet
+    for materials in book.materials_lists.values():
+        n = materials.number
+        for m in materials.materials:
+            if None in m.kg:
+                faults.append(Fault(on, m.row, f'{m.family}: the minimum, mode or maximum is missing.'))
+            elif not m.kg[0] <= m.kg[1] <= m.kg[2]:
+                faults.append(Fault(on, m.row, f'{m.family}: not in order: minimum {kg(m.kg[0])}, mode '
+                                               f'{kg(m.kg[1])}, maximum {kg(m.kg[2])} kg.'))
+            faults += evidence_faults(m.row, m.evidence, m.fill, on)
+        for row, evidence, fill in materials.rows_with_evidence:
+            faults += evidence_faults(row, evidence, fill, on)
+
+        if not materials.sum_row:
+            faults.append(Fault(on, materials.first_row, f'category {n} has no sum row of its materials.'))
+        else:
+            for i, which in enumerate(WHICH):
+                total = sum(m.kg[i] for m in materials.materials if m.kg[i] is not None)
+                if not close(materials.sum_kg[i], total):
+                    faults.append(Fault(on, materials.sum_row, f'category {n}: the {which} of the materials adds '
+                                                               f'up to {kg(total)} kg, but the sum row says '
+                                                               f'{kg(materials.sum_kg[i])} kg.'))
+            mode = materials.sum_kg[1]
+            for m in materials.materials if mode else []:
+                # A share may differ by the tolerance in kg, taken as a share of the sum.
+                if m.kg[1] is not None and not close(m.share, m.kg[1] / mode, tolerance / mode):
+                    shown = '—' if m.share is None else f'{m.share:.2%}'
+                    faults.append(Fault(on, m.row, f'{m.family}: the share says {shown}, but its mode is '
+                                                   f'{m.kg[1] / mode:.2%} of the sum.'))
+
+        parts_list = book.parts_lists.get(n)
+        if not materials.unallocated_row:
+            faults.append(Fault(on, materials.first_row, f'category {n} has no unallocated row.'))
+        elif materials.sum_kg[1] is not None and parts_list and parts_list.sum_kg[1] is not None:
+            mode = materials.sum_kg[1]
+            for stated, against, against_kg in (
+                    (materials.unallocated_parts_kg, "the parts' sum", parts_list.sum_kg[1]),
+                    (materials.unallocated_stated_kg, 'the stated mass', parts_list.stated_mass_kg)):
+                if against_kg is not None and not close(stated, against_kg - mode):
+                    faults.append(Fault(on, materials.unallocated_row,
+                                        f'category {n}: the unallocated row says {kg(stated)} kg against '
+                                        f"{against}, but {against} minus the materials' sum is {kg(against_kg)} "
+                                        f'- {kg(mode)} = {kg(against_kg - mode)} kg.'))
+
+    for number_, category in taxonomy.items():
+        materials = book.materials_lists.get(number_)
+        if materials is None:
+            faults.append(Fault(params.data.taxonomy_sheet, category.row,
+                                f"category {number_} is in this sheet but has no materials in '{on}'."))
+        elif materials.name != category.name:
+            faults.append(Fault(on, materials.first_row, f"category {number_} is called '{category.name}' in "
+                                                         f"'{params.data.taxonomy_sheet}' but '{materials.name}' "
+                                                         'here.'))
+    for number_, materials in book.materials_lists.items():
+        if number_ not in taxonomy:
+            faults.append(Fault(on, materials.first_row, f'category {number_} has materials but is not in '
+                                                         f"'{params.data.taxonomy_sheet}'."))
+    return faults
+
+
+def check_shared_lists(book: Workbook, lists: SharedLists, params: Params) -> list[Fault]:
+    """Every part and material name of the workbook placed exactly once, under its own name, in the shared lists
+    (the last two checks of CHECKS_DONE)."""
+    faults = list(lists.faults)
+    where = os.path.basename(params.data.shared_lists) + ': '
+    parts = {p.row: (n, p) for n, pl in book.parts_lists.items() for p in pl.parts}
+
+    for part_row, (n, part) in parts.items():
+        if part_row not in lists.parts:
+            faults.append(Fault(where + PARTS_SHEET, 0, f"{part.component} (row {part_row} of "
+                                                        f"'{params.data.components_sheet}'): not placed.", part_row))
+    for part_row, place in lists.parts.items():
+        here = lambda what: Fault(where + PARTS_SHEET, place.row, what, part_row)  # noqa: E731
+        if part_row not in parts:
+            faults.append(here(f'row {part_row} of the workbook is not a part.'))
+            continue
+        n, part = parts[part_row]
+        if place.robot != n:
+            faults.append(here(f'{part.component}: robot type {place.robot}, but the workbook has it in {n}.'))
+        if place.part != part.component:
+            faults.append(here(f"row {part_row} is '{part.component}' in the workbook, not '{place.part}'."))
+        if place.group not in lists.names[PART_GROUP]:
+            faults.append(here(f"{part.component}: the part group '{place.group}' is not in the sheet Lists."))
+        if bool(place.region) == bool(place.split):
+            faults.append(here(f'{part.component}: give either one body region or a split by units.'))
+        for region in [place.region] if place.region else list(place.split):
+            if region not in lists.names[BODY_REGION]:
+                faults.append(here(f"{part.component}: the body region '{region}' is not in the sheet Lists."))
+        if place.split and part.quantity is not None and sum(place.split.values()) != part.quantity:
+            faults.append(here(f'{part.component}: the split adds up to {kg(sum(place.split.values()))} units, '
+                               f'but the part has {kg(part.quantity)}.'))
+        if (place.motors is None or place.motors != int(place.motors) or not
+                0 <= place.motors <= (part.quantity or 0)):
+            faults.append(here(f'{part.component}: the number of motors must be a whole number from 0 to its '
+                               f'{kg(part.quantity)} units.'))
+
+    names = {m.family for ml in book.materials_lists.values() for m in ml.materials}
+    for name in sorted(names - set(lists.materials)):
+        faults.append(Fault(where + MATERIALS_SHEET, 0, f"the material name '{name}' of "
+                                                        f"'{params.data.materials_sheet}': not placed."))
+    for name, (shared, _, row) in lists.materials.items():
+        if name not in names:
+            faults.append(Fault(where + MATERIALS_SHEET, row, f"'{name}' is not a material name of the workbook."))
+        elif shared == SPLIT:
+            if name not in lists.splits:
+                faults.append(Fault(where + MATERIALS_SHEET, row, f"{name}: it says '{SPLIT}', but the sheet "
+                                                                  f'{SPLITS_SHEET} has no rows for it.'))
+        elif shared not in lists.names[MATERIAL] or shared == NOT_ALLOCATED:
+            faults.append(Fault(where + MATERIALS_SHEET, row, f"{name}: the shared material '{shared}' is not a "
+                                                              f'material of the sheet Lists (other than '
+                                                              f"'{NOT_ALLOCATED}')."))
+
+    # The splits by estimate: one remainder, shares in order between 0 and 1 that leave the remainder above zero,
+    # each piece an estimate in a material of the sheet Lists, under the robot type of its material name.
+    robot_of = {m.family: n for n, ml in book.materials_lists.items() for m in ml.materials}
+    for name, pieces in lists.splits.items():
+        on = where + SPLITS_SHEET
+        if lists.materials.get(name, ('',))[0] != SPLIT:
+            faults.append(Fault(on, pieces[0].row, f"{name}: split here, but its row in the sheet Materials does not "
+                                                   f"say '{SPLIT}'."))
+        remainders = [p for p in pieces if p.remainder]
+        if len(remainders) != 1:
+            faults.append(Fault(on, pieces[0].row, f'{name}: a split needs exactly one remainder, not '
+                                                   f'{len(remainders)}.'))
+        if len({p.shared for p in pieces}) != len(pieces):
+            faults.append(Fault(on, pieces[0].row, f'{name}: a shared material appears twice in its split.'))
+        for p in pieces:
+            if p.robot != robot_of.get(name, p.robot):
+                faults.append(Fault(on, p.row, f'{name}: robot type {p.robot}, but the workbook has it in '
+                                               f'{robot_of[name]}.'))
+            if p.shared not in lists.names[MATERIAL] or p.shared in (NOT_ALLOCATED, 'Mixed'):
+                faults.append(Fault(on, p.row, f"{name}: the piece '{p.shared}' is not a material of the sheet Lists "
+                                               f"(other than 'Mixed' and '{NOT_ALLOCATED}')."))
+            if p.label != 'E':
+                faults.append(Fault(on, p.row, f"{name}: a split is an estimate and is labelled 'E', not "
+                                               f"'{p.label}'."))
+            if not p.remainder and (None in p.share or not 0 <= p.share[0] <= p.share[1] <= p.share[2] <= 1):
+                faults.append(Fault(on, p.row, f'{name}, {p.shared}: the shares must be in order between 0 and 1: '
+                                               f"{', '.join(kg(s) for s in p.share)}."))
+        largest = sum(p.share[2] for p in pieces if not p.remainder and p.share[2] is not None)
+        if largest > 1:
+            faults.append(Fault(on, pieces[0].row, f'{name}: the largest shares add up to {kg(largest)}, which leaves '
+                                                   'the remainder below zero.'))
+    return faults
+
+
+def material_pieces(materials: MaterialsList, lists: SharedLists) -> list:
+    """Every material of one robot as (shared material, (minimum, mode, maximum) kg, estimated, workbook name). A
+    name split by the sheet Splits gives one piece per shared material, each its share of the name's kilograms:
+    the minimum at the smallest share, the maximum at the largest, and the remainder 1 minus the others, so that the
+    pieces add up to the name's kilograms at the mode. Estimated pieces are marked."""
+    pieces = []
+    for m in materials.materials:
+        shared = lists.materials.get(m.family, ('',))[0]
+        if shared == SPLIT and m.family in lists.splits:
+            split = lists.splits[m.family]
+            others = [p for p in split if not p.remainder and None not in p.share]
+            for p in split:
+                if p.remainder:
+                    share = tuple(1 - sum(o.share[i] for o in others) for i in (2, 1, 0))
+                elif None in p.share:
+                    continue
+                else:
+                    share = p.share
+                kg_ = tuple(None if k is None else k * s for k, s in zip(m.kg, share))
+                pieces.append((p.shared, kg_, True, m.family))
+        elif shared and shared != SPLIT:
+            pieces.append((shared, m.kg, False, m.family))
+    return pieces
+
+
+def by_view(parts_list: PartsList, lists: SharedLists, view: str) -> dict:
+    """The kg at the mode of one robot by part group (view 'group') or body region (view 'region'). A part split by
+    units counts the mass of one unit for each unit in a region."""
+    totals: dict = {}
+    for part in parts_list.parts:
+        place = lists.parts.get(part.row)
+        if place is None or part.total_kg[1] is None:
+            continue
+        if view == 'group':
+            totals[place.group] = totals.get(place.group, 0) + part.total_kg[1]
+        elif place.split:
+            for region, units in place.split.items():
+                totals[region] = totals.get(region, 0) + units * (part.unit_kg[1] or 0)
+        else:
+            totals[place.region] = totals.get(place.region, 0) + part.total_kg[1]
+    return totals
+
+
+def by_material(materials: MaterialsList, lists: SharedLists) -> dict:
+    """The kg at the mode of one robot by shared material, with the kilograms its materials leave out of its
+    parts list as 'Not allocated'."""
+    totals: dict = {}
+    for shared, kg_, _, _ in material_pieces(materials, lists):
+        if kg_[1] is not None:
+            totals[shared] = totals.get(shared, 0) + kg_[1]
+    if materials.unallocated_parts_kg:
+        totals[NOT_ALLOCATED] = materials.unallocated_parts_kg
+    return totals
+
+
+def motors_of(parts_list: PartsList, lists: SharedLists) -> float:
+    """How many electric motors the shared lists count in one robot (outside the hands)."""
+    return sum(lists.parts[p.row].motors or 0 for p in parts_list.parts if p.row in lists.parts)
+
+
+def category_report(number_: int, sources_dir: str) -> str | None:
+    """The file name of the category's own report in the sources (e.g. '01_category_....md'), or None."""
+    if not os.path.isdir(sources_dir):
+        return None
+    reports = sorted(name for name in os.listdir(sources_dir)
+                     if name.startswith(f'{number_:02d}_category_') and name.endswith('.md'))
+    return reports[0] if reports else None
+
+
+def is_notional(anchor: str) -> bool:
+    """Whether the workbook calls the anchor robot notional: a configuration, not a robot that exists."""
+    return 'notional' in anchor.lower()
+
+
+# ------------------------------------------------------------------------------------------------------
+# Drawing
+# ------------------------------------------------------------------------------------------------------
+# Every page is laid out in inches, from the top left: an axes covers the whole figure with x from 0 to the
+# width and y from 0 (top) down to the height, so a position on the page is a position in inches.
+
+LINE = 0.19            # height of one line of 9-point text, inches
+SMALL = 9              # the size of the text of tables and boxes, points
+RED = '#C00000'        # faults
+SUBSYSTEM = '#DCE3EE'  # the band that opens each group of parts
+EDGE = '#8A8A8A'       # the edges of boxes and rows
+
+
+def wrap(value: str, width: int) -> list[str]:
+    """Text broken into lines of at most `width` characters; the workbook's own line breaks are kept."""
+    lines = []
+    for paragraph in str(value or '').split('\n'):
+        lines += textwrap.wrap(paragraph.strip(), width) or ['']
+    while len(lines) > 1 and not lines[-1]:
+        lines.pop()
+    return lines
+
+
+def wrap_name(label: str, name: str, width: int) -> list[str]:
+    """A label and a long file name, broken after underscores so that no line is longer than `width`
+    characters and no word is cut in two ('01_category_compact_' / 'research_developer_...')."""
+    lines, line = [], label
+    for piece in re.findall(r'[^_]+_?', name):
+        if line.strip() and len(line) + len(piece) > width:
+            lines.append(line.rstrip())
+            line = ''
+        line += piece
+    return lines + [line]
+
+
+def triple(values: tuple) -> str:
+    """Minimum, mode and maximum as '1.15 / 1.25 / 1.35'."""
+    return ' / '.join(kg(v) for v in values)
+
+
+def signed(value: float, unit: str) -> str:
+    """A difference with its sign: '+2.4 kg', '-1 kg'; a share in % with one decimal, as the workbook
+    writes it: '+14.9 %'."""
+    shown = f'{abs(value):.1f}' if unit == '%' else kg(abs(value))
+    return f"{'+' if value >= 0 else '-'}{shown} {unit}"
+
+
+def by_subsystem(parts: list[Part]) -> list[tuple[str, list[Part]]]:
+    """The parts grouped by subsystem, the groups in the order in which each first appears. The workbook
+    does not always keep a subsystem's rows together (category 5 has 'Structure & Protection' in rows 71
+    and 75 to 76); a page shows each subsystem once, with all its parts in their order in the sheet."""
+    groups: dict[str, list[Part]] = {}
+    for part in parts:
+        groups.setdefault(part.subsystem, []).append(part)
+    return list(groups.items())
+
+
+def new_page(width: float, height: float):
+    """A figure of the given size in inches, with one axes in which positions are inches from the top
+    left."""
+    figure = plt.figure(figsize=(width, height))
+    axes = figure.add_axes([0, 0, 1, 1])
+    axes.set_xlim(0, width)
+    axes.set_ylim(height, 0)
+    axes.axis('off')
+    return figure, axes
+
+
+def box(axes, x, y, width, height, colour='white', edge=EDGE):
+    """A rectangle with its top left corner at (x, y), in inches."""
+    axes.add_patch(Rectangle((x, y), width, height, facecolor=colour, edgecolor=edge, linewidth=0.8))
+
+
+def write(axes, x, y, lines, size=SMALL, colour='black', weight='normal', align='left'):
+    """Lines of text from (x, y) downwards; returns the y below the last line."""
+    step = LINE * size / SMALL
+    for line in lines:
+        axes.text(x, y, line, fontsize=size, color=colour, fontweight=weight, ha=align, va='top')
+        y += step
+    return y
+
+
+def save(figure, path: str, dpi: int) -> None:
+    """Write the page and close it."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    figure.savefig(path, dpi=dpi, facecolor='white')
+    plt.close(figure)
+
+
+def evidence_key(axes, x, y) -> float:
+    """The colour key of the evidence, as in the workbook; returns the y below it."""
+    write(axes, x, y, ['Evidence, coloured as in the workbook:'], weight='bold')
+    y += LINE * 1.2
+    for evidence, colour in EVIDENCE_COLOUR.items():
+        box(axes, x, y, 0.3, LINE * 0.8, colour)
+        write(axes, x + 0.4, y, [f'{evidence}: {EVIDENCE_MEANING[evidence]}'])
+        y += LINE * 1.15
+    return y
+
+
+# The columns of a parts list on a category page: (heading, x of the column in inches, characters per line
+# before the text wraps, alignment). 'Number' is right-aligned at its x.
+PART_TABLE = [
+    (['Part'], 0.3, 46, 'left'),
+    (['Where in the robot'], 3.7, 42, 'left'),
+    (['Number'], 7.25, 0, 'right'),
+    (['Mass of one, kg', 'min / mode / max'], 7.5, 0, 'left'),
+    (['Mass of all, kg', 'min / mode / max'], 9.1, 0, 'left'),
+    (['Main material'], 10.8, 58, 'left'),
+    (['Evidence'], 15.0, 0, 'left'),
+    (['Sources in the workbook'], 16.0, 30, 'left'),
+]
+PAGE_WIDTH = 19.0
+
+
+def part_cells(part: Part) -> list[list[str]]:
+    """The text of one part in the columns of PART_TABLE, already wrapped."""
+    return [wrap(part.component, 46), wrap(part.location, 42), [kg(part.quantity)],
+            [triple(part.unit_kg)], [triple(part.total_kg)], wrap(part.material, 58), [part.evidence],
+            wrap(part.sources, 30)]
+
+
+def draw_category(category: Category, parts_list: PartsList | None, report: str | None,
+                  faults: list[Fault], path: str, params: Params) -> None:
+    """One page per category: its definition and anchor robot, then its parts list by subsystem."""
+    faulty_rows = {f.row for f in faults if f.sheet == params.data.components_sheet}
+    parts = parts_list.parts if parts_list else []
+
+    # The four boxes under the title: what the workbook writes, as it writes it.
+    if parts_list and parts_list.stated_mass_kg is not None and parts_list.sum_kg[1] is not None:
+        difference = parts_list.sum_kg[1] - parts_list.stated_mass_kg
+        share = difference / parts_list.stated_mass_kg * 100
+        mass_lines = [f'Sum of the parts: {triple(parts_list.sum_kg)} kg (min / mode / max)',
+                      f'Stated mass of the anchor robot: {kg(parts_list.stated_mass_kg)} kg '
+                      f'({parts_list.stated_evidence})',
+                      f'Mode of the sum minus the stated mass: {signed(difference, "kg")} '
+                      f'({signed(share, "%")})']
+    else:
+        mass_lines = ['The workbook has no sum or no stated mass for this category.']
+    mass_lines += [''] + (wrap_name('Report of its own: ', report, 56) if report
+                          else ['No report of its own in documentation/sources/.'])
+    anchor_lines = wrap(category.anchor, 56)
+    if is_notional(category.anchor):
+        anchor_lines += [''] + wrap('The anchor robot is notional: a configuration the research assumes, '
+                                    'not a robot that exists.', 56)
+    boxes = [('Anchor robot', anchor_lines), ('Height and mass', wrap(category.height_and_mass, 56)),
+             ('Joints and payload', wrap(category.joints_and_payload, 56)),
+             ('Mass of the anchor robot', mass_lines)]
+
+    # The height of the page: title, definition, boxes, the table rows, the key at the foot.
+    definition = wrap(category.definition, 175)
+    box_lines = max(len(lines) for _, lines in boxes) + 1
+    rows = []
+    for subsystem, members in by_subsystem(parts):
+        rows.append(('subsystem', subsystem, 1))
+        rows += [('part', part, max(len(c) for c in part_cells(part))) for part in members]
+    table_height = sum(LINE * lines + 0.12 for _, _, lines in rows)
+    height = 0.55 + len(definition) * LINE * 1.2 + 0.3 + box_lines * LINE + 0.5 + 2 * LINE + 0.25 \
+        + table_height + 1.9
+    figure, axes = new_page(PAGE_WIDTH, height)
+
+    axes.text(0.3, 0.3, f'Category {category.number}: {category.name}', fontsize=16, fontweight='bold',
+              va='top')
+    y = write(axes, 0.3, 0.75, definition, size=11)
+
+    # The four boxes.
+    y += 0.25
+    box_width = (PAGE_WIDTH - 0.6 - 3 * 0.2) / 4
+    box_height = box_lines * LINE + 0.2
+    for i, (title, lines) in enumerate(boxes):
+        x = 0.3 + i * (box_width + 0.2)
+        box(axes, x, y, box_width, box_height)
+        write(axes, x + 0.12, y + 0.1, [title], weight='bold')
+        write(axes, x + 0.12, y + 0.1 + LINE * 1.2, lines)
+    y += box_height + 0.35
+
+    # The parts list: a heading row, then a band per subsystem and a row per part, coloured by evidence.
+    headings = max(len(h) for h, _, _, _ in PART_TABLE)
+    box(axes, 0.2, y, PAGE_WIDTH - 0.4, headings * LINE + 0.12, '#EEEEEE')
+    for heading, x, _, align in PART_TABLE:
+        write(axes, x, y + 0.06, heading, weight='bold', align=align)
+    y += headings * LINE + 0.12
+    for kind, item, lines in rows:
+        row_height = LINE * lines + 0.12
+        if kind == 'subsystem':
+            box(axes, 0.2, y, PAGE_WIDTH - 0.4, row_height, SUBSYSTEM)
+            write(axes, 0.3, y + 0.06, [item], weight='bold')
+        else:
+            box(axes, 0.2, y, PAGE_WIDTH - 0.4, row_height, EVIDENCE_COLOUR.get(item.evidence, '#DDDDDD'))
+            colour = RED if item.row in faulty_rows else 'black'
+            for (_, x, _, align), cell in zip(PART_TABLE, part_cells(item)):
+                write(axes, x, y + 0.06, cell, colour=colour, align=align)
+        y += row_height
+
+    # The foot of the page.
+    y += 0.25
+    own = [f for f in faults if f.sheet == params.data.components_sheet and f.row and parts_list
+           and parts_list.first_row <= f.row
+           <= max([parts_list.difference_row, parts_list.stated_row, parts_list.sum_row]
+                  + [p.row for p in parts])]
+    if own:
+        y = write(axes, 0.3, y, [f'{len(own)} fault(s) in the rows of this category, drawn in red: see '
+                                 'faults.png.'], colour=RED, weight='bold')
+    else:
+        y = write(axes, 0.3, y, ['No fault found in the rows of this category.'])
+    y = evidence_key(axes, 0.3, y + 0.1)
+    first = parts_list.first_row if parts_list else 0
+    last = parts_list.difference_row if parts_list else 0
+    write(axes, 0.3, y + 0.1, [f'Masses rounded to three decimals. Source: {params.data.workbook}, sheet '
+                               f"'{params.data.taxonomy_sheet}' row {category.row} and sheet "
+                               f"'{params.data.components_sheet}' rows {first} to {last}."])
+    save(figure, path, params.output.dpi)
+
+
+# The two tables of a shared-lists page: (heading, x of the column in inches, characters per line before the text
+# wraps, alignment). The tables end at TABLE_RIGHT; the bars sit to the right of them, their names to the left of
+# CHART_X.
+SHARED_PART_TABLE = [
+    (['Part'], 0.3, 44, 'left'),
+    (['Where in the robot (workbook)'], 3.55, 38, 'left'),
+    (['Units'], 6.75, 0, 'right'),
+    (['kg, min / mode / max'], 6.95, 0, 'left'),
+    (['Part group'], 8.55, 20, 'left'),
+    (['Body region'], 10.15, 22, 'left'),
+    (['Motors'], 12.6, 0, 'right'),
+]
+SHARED_MATERIAL_TABLE = [
+    (['Material in the workbook'], 0.3, 34, 'left'),
+    (['Grade'], 2.95, 38, 'left'),
+    (['kg, min / mode / max'], 5.75, 0, 'left'),
+    (['Evidence'], 7.5, 0, 'left'),
+    (['Shared material'], 8.35, 20, 'left'),
+    (['Why'], 9.85, 40, 'left'),
+]
+TABLE_RIGHT = 12.75
+CHART_X, CHART_WIDTH = 14.75, 3.6
+BAR_STEP = 0.24        # the height of one bar's row, inches
+BAR = '#5B7DB1'        # the bars
+GREY = '#A6A6A6'       # 'Mixed' and 'Not allocated', which are not one part group or material
+PLAIN_WHY = 'The name says the material.'   # the reason of an obvious placement, not repeated on the page
+
+
+def bars(figure, page, page_height: float, x: float, y: float, title: str, names: list, values: dict) -> float:
+    """Horizontal bars of kg at the mode, one per name of the shared list, with the value at the end of each bar;
+    a name the robot has none of shows '–'. Returns the y below the chart."""
+    write(page, x - 1.6, y, [title], weight='bold')
+    height = BAR_STEP * len(names)
+    axes = figure.add_axes([x / PAGE_WIDTH, 1 - (y + 0.3 + height) / page_height, CHART_WIDTH / PAGE_WIDTH,
+                            height / page_height])
+    shown = [values.get(name, 0) for name in names]
+    top = max(shown + [1])
+    axes.barh(range(len(names)), shown, height=0.65,
+              color=[GREY if name in ('Mixed', NOT_ALLOCATED) else BAR for name in names])
+    axes.set_ylim(len(names) - 0.5, -0.5)
+    axes.set_yticks(range(len(names)), names, fontsize=8.5)
+    axes.set_xlim(0, top * 1.3)
+    axes.set_xticks([])
+    for side in ('top', 'right', 'bottom'):
+        axes.spines[side].set_visible(False)
+    for i, value in enumerate(shown):
+        axes.text(value + top * 0.02, i, kg(value) if value else '–', va='center', fontsize=8.5)
+    return y + 0.3 + height
+
+
+def shared_part_cells(part: Part, place: Placement | None) -> list[list[str]]:
+    """The text of one part in the columns of SHARED_PART_TABLE, already wrapped."""
+    if place is None:
+        group, region, motors = ['not placed'], ['not placed'], ['—']
+    else:
+        group = wrap(place.group, 20)
+        region = wrap(', '.join(f'{r} {kg(u)}' for r, u in place.split.items()) if place.split else place.region, 22)
+        motors = [kg(place.motors)]
+    return [wrap(part.component, 44), wrap(part.location, 38), [kg(part.quantity)], [triple(part.total_kg)],
+            group, region, motors]
+
+
+def shared_material_cells(material: Material, lists: SharedLists) -> list[list[str]]:
+    """The text of one material in the columns of SHARED_MATERIAL_TABLE, already wrapped."""
+    shared, why, _ = lists.materials.get(material.family, ('not placed', '', 0))
+    return [wrap(material.family, 34), wrap(material.grade, 38), [triple(material.kg)], [material.evidence],
+            wrap(shared, 20), wrap('' if why == PLAIN_WHY else why, 40)]
+
+
+def table(page, y: float, columns: list, rows: list, colours: list) -> float:
+    """A table with a grey heading row and one row per entry of `rows` (its cells, already wrapped), each drawn in
+    its colour of `colours`. Returns the y below it."""
+    headings = max(len(h) for h, _, _, _ in columns)
+    box(page, 0.2, y, TABLE_RIGHT - 0.2, headings * LINE + 0.12, '#EEEEEE')
+    for heading, x, _, align in columns:
+        write(page, x, y + 0.06, heading, weight='bold', align=align)
+    y += headings * LINE + 0.12
+    for cells, colour in zip(rows, colours):
+        height = max(len(c) for c in cells) * LINE + 0.12
+        box(page, 0.2, y, TABLE_RIGHT - 0.2, height)
+        for (_, x, _, align), cell in zip(columns, cells):
+            write(page, x, y + 0.06, cell, colour=colour, align=align)
+        y += height
+    return y
+
+
+def draw_shared_lists(category: Category, parts_list: PartsList, materials: MaterialsList | None,
+                      lists: SharedLists, faults: list[Fault], path: str, params: Params) -> None:
+    """One page per robot type in the shared lists, for Matthias to verify every placement: the parts with their
+    part group and body region, the materials with their shared material, and the kg at the mode by part group,
+    body region and material, with the number of motors."""
+    parts = parts_list.parts
+    material_rows = materials.materials if materials else []
+    part_rows = {p.row for p in parts}
+    first = materials.first_row if materials else 0
+    last = max([m.row for m in material_rows] + [materials.unallocated_row if materials else 0, first])
+    own = [f for f in faults if f.part_row in part_rows
+           or (f.sheet == params.data.materials_sheet and first <= f.row <= last)
+           or (f.sheet.endswith(MATERIALS_SHEET) and any(f"'{m.family}'" in f.text or f.text.startswith(m.family)
+                                                         for m in material_rows))]
+    red_parts = {f.part_row for f in own if f.part_row}
+    red_materials = {f.row for f in own if f.sheet == params.data.materials_sheet}
+
+    part_cells = [shared_part_cells(p, lists.parts.get(p.row)) for p in parts]
+    # Each material, and below a split one its pieces, each an estimate (E) with its share and its basis.
+    pieces = [piece for piece in (material_pieces(materials, lists) if materials else []) if piece[2]]
+    material_cells, material_colours = [], []
+    for m in material_rows:
+        material_cells.append(shared_material_cells(m, lists))
+        material_colours.append(RED if m.row in red_materials else 'black')
+        for shared, kg_, _, family in pieces:
+            if family != m.family:
+                continue
+            piece = next(p for p in lists.splits[family] if p.shared == shared)
+            share = ('the remainder: 1 minus the shares above' if piece.remainder else
+                     f'{piece.share[0]:.1%} to {piece.share[2]:.1%} of it, most likely {piece.share[1]:.1%}')
+            material_cells.append([[f'   → {shared}'], wrap(share, 38), [triple(kg_)], ['E'], wrap(shared, 20),
+                                   wrap(piece.basis, 40)])
+            material_colours.append('black')
+    unallocated = materials.unallocated_parts_kg if materials else None
+    if unallocated:
+        material_cells.append([[NOT_ALLOCATED], wrap("The workbook's materials leave this out of the parts list",
+                                                     38),
+                               [f'— / {kg(unallocated)} / —'], ['Derived'], [NOT_ALLOCATED],
+                               wrap('Point 10: shown as its own bar; nothing is rescaled.', 40)])
+
+    # The notes at the foot: hands, the placements a point decided, faults.
+    groups = by_view(parts_list, lists, 'group')
+    notes = []
+    if not groups.get('Hands'):
+        notes.append('No hands of their own in the parts list: this robot type is not comparable for hands '
+                     '(point 2 of SHARED_LISTS.md).')
+    for p in parts:
+        place = lists.parts.get(p.row)
+        if place and place.why.startswith('Point'):
+            notes.append(f'{p.component}: {place.why}')
+    note_lines = [line for note in notes for line in wrap('• ' + note, 170)]
+
+    rows_height = lambda cells: sum(max(len(c) for c in row) * LINE + 0.12 for row in cells)  # noqa: E731
+    charts_top = BAR_STEP * (len(lists.names[PART_GROUP]) + len(lists.names[BODY_REGION])) + 0.3 * 2 + 0.35
+    parts_height = max(2 * LINE + 0.12 + rows_height(part_cells), charts_top)
+    materials_height = max(2 * LINE + 0.12 + rows_height(material_cells), BAR_STEP * len(lists.names[MATERIAL]) + 0.3)
+    height = 1.45 + 0.35 + parts_height + 0.5 + 0.35 + materials_height + 0.5 + (len(note_lines) + 6) * LINE + 0.5
+    figure, page = new_page(PAGE_WIDTH, height)
+
+    page.text(0.3, 0.3, f'Robot type {category.number} in the shared lists: {category.name}', fontsize=16,
+              fontweight='bold', va='top')
+    anchor = category.anchor.splitlines()[0] if category.anchor else '—'
+    y = write(page, 0.3, 0.75, [f'Anchor robot: {anchor}. Electric motors outside the hands: '
+                                f'{kg(motors_of(parts_list, lists))}.',
+                                'The bars are kg at the mode: the sum of the workbook\'s modes. Ranges come with the '
+                                'Monte Carlo of this robot type\'s stage.'], size=11)
+
+    # The parts, with the bars by part group and by body region beside them.
+    y += 0.3
+    write(page, 0.3, y, ['Parts'], size=11, weight='bold')
+    y += 0.35
+    bottom = table(page, y, SHARED_PART_TABLE, part_cells, [RED if p.row in red_parts else 'black' for p in parts])
+    below = bars(figure, page, height, CHART_X, y, 'By part group', lists.names[PART_GROUP], groups)
+    below = bars(figure, page, height, CHART_X, below + 0.3, 'By body region', lists.names[BODY_REGION],
+                 by_view(parts_list, lists, 'region'))
+    y = max(bottom, below) + 0.5
+
+    # The materials, with the bars by material beside them.
+    write(page, 0.3, y, ['Materials'], size=11, weight='bold')
+    y += 0.35
+    colours = material_colours + ['black'] * bool(unallocated)
+    bottom = below = table(page, y, SHARED_MATERIAL_TABLE, material_cells, colours)
+    if materials:
+        below = bars(figure, page, height, CHART_X, y, 'By material', lists.names[MATERIAL],
+                     by_material(materials, lists))
+    y = max(bottom, below) + 0.5
+
+    # The foot of the page.
+    if own:
+        y = write(page, 0.3, y, [f'{len(own)} fault(s) in the rows or placements of this robot type, drawn in red: '
+                                 'see faults.png.'], colour=RED, weight='bold')
+    else:
+        y = write(page, 0.3, y, ['No fault found in the rows or placements of this robot type.'])
+    if note_lines:
+        y = write(page, 0.3, y + 0.1, ['Notes'], weight='bold')
+        y = write(page, 0.3, y, note_lines)
+    write(page, 0.3, y + 0.15, wrap(f'Source: {params.data.workbook}, sheets \'{params.data.components_sheet}\' rows '
+                                    f'{parts_list.first_row} to {parts_list.difference_row} and '
+                                    f"'{params.data.materials_sheet}' rows {first} to {last}; the placements: "
+                                    f'{params.data.shared_lists}. Masses rounded to three decimals.', 190))
+    save(figure, path, params.output.dpi)
+
+
+# ------------------------------------------------------------------------------------------------------
+# The one-view schema of a robot type
+# ------------------------------------------------------------------------------------------------------
+# Matthias, 2026-10-26: "I want theat one can understand the robot and its compostion and parts in one vew", "No I
+# want to see it as a robot. Be more inovbative and visual", and on seeing it: "It looks better as robot, but the
+# material compsotion as bar plat". On the left the robot, drawn to the anchor robot's height at the same scale on
+# every page, with its parts where they sit; on the right its materials as bars, on the same kg scale on every page.
+
+ROBOT_SCALE = 4.2      # inches of page per metre of robot height, the same on all six pages (1.85 m = 7.8 inches)
+TALLEST = 1.85         # metres: the tallest robot of the research (categories 2, 5 and 6), which sets the page
+PARTS_X = 6.5                      # the middle of the parts robot, inches
+CHART_LEFT, CHART_RIGHT = 12.9, 17.6   # the bars of the materials, inches; their names sit to the left
+
+# The body of the schema, in units of the robot's height: across (u, 0 in the middle, negative to the robot's
+# right, which is the left of the page) and up (v, 0 at the soles, 1 at the top of the head). A schema, not the
+# robot's real shape. Every shape is drawn for the left side and mirrored.
+HEAD = ((0.0, 0.925), 0.065)
+BLOCKS = {'neck': (-0.025, 0.025, 0.835, 0.87), 'torso': (-0.13, 0.13, 0.55, 0.84),
+          'pelvis': (-0.105, 0.105, 0.465, 0.56), 'foot': (-0.115, -0.025, 0.0, 0.045)}
+LIMBS = {'upper arm': ((-0.16, 0.82), (-0.175, 0.64), 0.055), 'forearm': ((-0.175, 0.64), (-0.185, 0.475), 0.048),
+         'thigh': ((-0.06, 0.48), (-0.065, 0.27), 0.075), 'shin': ((-0.065, 0.27), (-0.065, 0.045), 0.062)}
+HAND, HAND_RADIUS = (-0.188, 0.44), 0.032
+JOINTS = {'Head': [(0.0, 0.852)], 'Torso': [(0.0, 0.56)],
+          'Arms': [(-0.16, 0.81), (-0.175, 0.64), (-0.185, 0.475)],
+          'Legs': [(-0.06, 0.475), (-0.065, 0.27), (-0.065, 0.05)]}
+MIRRORED = {'Arms', 'Legs'}
+
+# Where each part group is drawn inside the body, and where its label points.
+PART_SPOTS = {'Joint drives': (-0.065, 0.27), 'Hands': HAND, 'Battery': (-0.08, 0.615), 'Computer': (-0.055, 0.75),
+              'Sensors': (-0.04, 0.955), 'Frame': (-0.0625, 0.38), 'Shell and armour': (-0.19, 0.73),
+              'Cables': (-0.105, 0.60), 'Cooling': (-0.1, 0.79), 'Screws and bearings': (-0.06, 0.475),
+              'Mixed': (0.02, 0.69)}
+# Where the label of each body region points: on the robot's left side, which faces the middle of the page.
+REGION_SPOTS = {'Head': (0.065, 0.925), 'Arms': (0.18, 0.70), 'Hands': (0.22, 0.44), 'Torso': (0.13, 0.62),
+                'Legs': (0.095, 0.20)}
+
+# The colours of the parts robot.
+SHELL, SKELETON, MOTOR = '#E9ECEF', '#495057', '#3B5BA5'
+PART_COLOUR = {'Battery': '#E8B84A', 'Computer': '#2E8B57', 'Sensors': '#212529', 'Cables': '#C8742B',
+               'Cooling': '#4FA3D1', 'Mixed': '#BDBDBD', 'Hands': '#9AA5B1'}
+# The colour of every shared material, the same on all six pages, chosen to look like the material.
+MATERIAL_COLOUR = {'Aluminium': '#B8C4CE', 'Magnesium': '#D6E2BE', 'Titanium': '#9A93B8', 'Steel': '#5F6B73',
+                   'Copper': '#C8742B', 'Magnets (NdFeB)': '#8E3B46', 'Battery materials': '#E8B84A',
+                   'Plastics': '#EFE3C8', 'Fibre composites': '#2F2F2F', 'Electronics': '#2E8B57',
+                   'Ceramics': '#F7F7F2', 'Mixed': '#BDBDBD', NOT_ALLOCATED: '#FFFFFF'}
+
+
+def robot_height(category: Category) -> tuple[float, str]:
+    """The height the robot is drawn at, in metres, and how it was found: the anchor robot's height where the
+    workbook gives one ('1.32 m | 35.0 kg'), else the middle of the category's height range ('1.73–1.85 m')."""
+    found = re.search(r'(\d\.\d+)\s*m\b', category.anchor)
+    if found:
+        return float(found.group(1)), ''
+    found = re.search(r'(\d\.\d+)\s*[–-]\s*(\d\.\d+)\s*m', category.height_and_mass)
+    if found:
+        low, high = float(found.group(1)), float(found.group(2))
+        middle = (low + high) / 2
+        return middle, (f'The workbook gives no height for the anchor robot: drawn at the middle of the '
+                        f"category's height range, {kg(low)}–{kg(high)} m, so {kg(middle)} m.")
+    return TALLEST, f'The workbook gives no height for this robot type: drawn at {kg(TALLEST)} m.'
+
+
+def motors_by_region(parts_list: PartsList, lists: SharedLists) -> dict:
+    """How many motors sit in each body region; a part split by units shares its motors like its units."""
+    totals: dict = {}
+    for part in parts_list.parts:
+        place = lists.parts.get(part.row)
+        if not place or not place.motors:
+            continue
+        if place.split:
+            per_unit = place.motors / sum(place.split.values())
+            for region, units in place.split.items():
+                totals[region] = totals.get(region, 0) + units * per_unit
+        else:
+            totals[place.region] = totals.get(place.region, 0) + place.motors
+    return totals
+
+
+def bounds(rows: list) -> tuple[float, float]:
+    """The sum of the minimums and the sum of the maximums of (minimum, mode, maximum) triples: the bounds of
+    their total, if every one were at its minimum or every one at its maximum. Not a likely range."""
+    return (sum(r[0] for r in rows if r[0] is not None), sum(r[2] for r in rows if r[2] is not None))
+
+
+def spread(wanted: list, gap: float, top: float, bottom: float) -> list:
+    """Positions for labels as near as possible to the `wanted` ones, at least `gap` apart and between `top` and
+    `bottom`, in the order of the wanted positions."""
+    order = sorted(range(len(wanted)), key=lambda i: wanted[i])
+    placed = list(wanted)
+    previous = top - gap
+    for i in order:                                   # downwards: push each below the one above it
+        placed[i] = previous = max(wanted[i], previous + gap)
+    following = bottom + gap
+    for i in reversed(order):                         # upwards: pull back what ran off the bottom
+        placed[i] = following = min(placed[i], following - gap)
+    return placed
+
+
+def body_shapes(axes, cx: float, ground: float, size: float, **style) -> list:
+    """The shapes of the schematic body, with its middle at `cx` and its soles at `ground` (inches), `size` inches
+    tall; added to `axes` with `style`, and returned."""
+    from matplotlib.patches import Circle, Polygon
+    point = lambda u, v: (cx + u * size, ground - v * size)  # noqa: E731
+    shapes = [Circle(point(*HEAD[0]), HEAD[1] * size, **style)]
+    for name, (u0, u1, v0, v1) in BLOCKS.items():
+        sides = [(u0, u1), (-u1, -u0)] if name == 'foot' else [(u0, u1)]
+        for a, b in sides:
+            shapes.append(Polygon([point(a, v0), point(b, v0), point(b, v1), point(a, v1)], closed=True, **style))
+    for (u0, v0), (u1, v1), width in LIMBS.values():
+        for sign in (1, -1):
+            half = width / 2
+            shapes.append(Polygon([point(sign * u0 - half, v0), point(sign * u0 + half, v0),
+                                   point(sign * u1 + half, v1), point(sign * u1 - half, v1)], closed=True, **style))
+    for sign in (1, -1):
+        shapes.append(Circle(point(sign * HAND[0], HAND[1]), HAND_RADIUS * size, **style))
+    for shape in shapes:
+        axes.add_patch(shape)
+    return shapes
+
+
+def material_rows(materials: MaterialsList, lists: SharedLists) -> dict:
+    """The (minimum, mode, maximum) of each material of one robot, gathered by shared material, with the pieces of
+    a split name."""
+    rows: dict = {}
+    for shared, kg_, _, _ in material_pieces(materials, lists):
+        rows.setdefault(shared, []).append(kg_)
+    return rows
+
+
+def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsList | None, lists: SharedLists,
+               path: str, params: Params, scale_kg: float | None = None) -> None:
+    """The one-view schema of a robot type: its parts where they sit, as a robot, and what it is made of, as bars.
+    `scale_kg` is the end of the kg axis, the same for all six robots; without it the robot's own largest bound."""
+    from matplotlib.patches import Circle, Rectangle as Box
+    height_m, height_note = robot_height(category)
+    size = height_m * ROBOT_SCALE
+    groups = by_view(parts_list, lists, 'group')
+    regions = by_view(parts_list, lists, 'region')
+    motors = motors_by_region(parts_list, lists)
+    made_of = by_material(materials, lists) if materials else {}
+    total = parts_list.sum_kg[1] or 0
+
+    notes = [f'kg at the mode. Bounds: every part, or every material, at its minimum or at its maximum; the likely '
+             f'range comes with the Monte Carlo of this robot type\'s stage.',
+             'The bars show how much of each material the robot holds, not where it sits: the workbook does not link '
+             'its parts to its materials. All six pages use the same kg scale.',
+             'A schema: the shapes are not the robot\'s real shape. Its height is drawn to scale, the same on all six '
+             'pages.']
+    if height_note:
+        notes.append(height_note)
+    if not groups.get('Hands'):
+        notes.append('No hands of their own in the parts list: not comparable for hands (point 2 of '
+                     'SHARED_LISTS.md).')
+    if is_notional(category.anchor):
+        notes.append('The anchor robot is notional: a configuration the research assumes, not a robot that exists.')
+    estimated = {piece[0]: piece[3] for piece in (material_pieces(materials, lists) if materials else []) if piece[2]}
+    if estimated:
+        notes.append(f"{', '.join(estimated)} (dotted): an estimate (E), the workbook's "
+                     f"'{', '.join(sorted(set(estimated.values())))}' split by the shares of the sheet Splits (point 9 "
+                     'of SHARED_LISTS.md).')
+    note_lines = [line for note in notes for line in wrap('• ' + note, 190)]
+
+    top = 1.75
+    ground = top + TALLEST * ROBOT_SCALE + 0.15
+    height = ground + 0.75 + (len(note_lines) + 2) * LINE + 0.5
+    figure, page = new_page(PAGE_WIDTH, height)
+    point = lambda cx, u, v: (cx + u * size, ground - v * size)  # noqa: E731
+
+    # The heading: the robot, its mass and its motors.
+    page.text(0.3, 0.3, f'How robot type {category.number} is built: {category.name}', fontsize=16,
+              fontweight='bold', va='top')
+    anchor = category.anchor.splitlines()[0] if category.anchor else '—'
+    low, high = bounds([p.total_kg for p in parts_list.parts])
+    stated = (f'Stated mass {kg(parts_list.stated_mass_kg)} kg ({parts_list.stated_evidence}). '
+              if parts_list.stated_mass_kg is not None else '')
+    write(page, 0.3, 0.75, [f'Anchor robot: {anchor}, {kg(height_m)} m tall. {stated}Its parts add up to '
+                            f'{kg(total)} kg (bounds {kg(low)}–{kg(high)} kg).',
+                            f'Electric motors outside the hands: {kg(sum(motors.values()))}.'], size=11)
+    write(page, PARTS_X, top - 0.5, ['Its parts, where they sit'], size=12, weight='bold', align='center')
+    write(page, (CHART_LEFT + CHART_RIGHT) / 2, top - 0.5, ['What it is made of'], size=12, weight='bold',
+          align='center')
+
+    # The parts robot: its outline is the shell, the dark lines its frame, and the parts drawn where they sit.
+    body_shapes(page, PARTS_X, ground, size, facecolor=SHELL, edgecolor='#6C757D', linewidth=1.2)
+    at = lambda u, v: point(PARTS_X, u, v)  # noqa: E731
+    skeleton = [((0, 0.47), (0, 0.84)), ((-0.16, 0.82), (0.16, 0.82)), ((-0.06, 0.48), (0.06, 0.48))]
+    for (u0, v0), (u1, v1), _ in LIMBS.values():
+        skeleton += [((u0, v0), (u1, v1)), ((-u0, v0), (-u1, v1))]
+    if groups.get('Frame'):
+        for (u0, v0), (u1, v1) in skeleton:
+            page.plot(*zip(at(u0, v0), at(u1, v1)), color=SKELETON, linewidth=2.2, solid_capstyle='round')
+    if groups.get('Cables'):
+        route = [(-0.055, 0.73), (-0.105, 0.70), (-0.105, 0.52), (-0.075, 0.47), (-0.08, 0.28)]
+        page.plot(*zip(*[at(u, v) for u, v in route]), color=PART_COLOUR['Cables'], linewidth=1.6)
+    for group, (u0, u1, v0, v1) in (('Battery', (-0.08, 0.08, 0.58, 0.65)), ('Computer', (-0.055, 0.055, 0.725, 0.775)),
+                                    ('Mixed', (0.0, 0.05, 0.67, 0.71))):
+        if groups.get(group):
+            (x0, y1), (x1, y0) = at(u0, v0), at(u1, v1)
+            page.add_patch(Box((x0, y0), x1 - x0, y1 - y0, facecolor=PART_COLOUR[group], edgecolor='black',
+                               linewidth=0.6))
+    if groups.get('Sensors'):
+        (x0, y1), (x1, y0) = at(-0.045, 0.945), at(0.045, 0.965)
+        page.add_patch(Box((x0, y0), x1 - x0, y1 - y0, facecolor=PART_COLOUR['Sensors']))
+        for sign in (1, -1):
+            page.add_patch(Circle(at(sign * 0.025, 0.915), 0.009 * size, facecolor=PART_COLOUR['Sensors']))
+    if groups.get('Cooling'):
+        page.add_patch(Circle(at(-0.1, 0.79), 0.017 * size, facecolor=PART_COLOUR['Cooling'], edgecolor='black',
+                              linewidth=0.6))
+    if groups.get('Hands'):
+        for sign in (1, -1):
+            page.add_patch(Circle(at(sign * HAND[0], HAND[1]), HAND_RADIUS * size, facecolor=PART_COLOUR['Hands'],
+                                  edgecolor='black', linewidth=0.8))
+    # Motors: a dot on each joint of a region the workbook places motors in, a ring on the other joints where the
+    # workbook places motors in several regions without saying how many sit where.
+    spread_motors = motors.get('Whole body', 0)
+    for region, joints in JOINTS.items():
+        for u, v in joints + ([(-u, v) for u, v in joints] if region in MIRRORED else []):
+            if motors.get(region):
+                page.add_patch(Circle(at(u, v), 0.016 * size, facecolor=MOTOR, edgecolor='white', linewidth=0.8))
+            elif spread_motors:
+                page.add_patch(Circle(at(u, v), 0.016 * size, facecolor='white', edgecolor=MOTOR, linewidth=1.4))
+
+    # The labels of the part groups, to the left, each pointing at where its parts sit.
+    shown = [g for g in lists.names[PART_GROUP] if groups.get(g)]
+    wanted = [at(*PART_SPOTS.get(g, (0, 0.5)))[1] - 0.2 for g in shown]
+    ys = spread(wanted, 0.62, top + 0.1, ground - 0.5)
+    for group, y in zip(shown, ys):
+        members = [p for p in parts_list.parts if lists.parts.get(p.row) and lists.parts[p.row].group == group]
+        low, high = bounds([p.total_kg for p in members])
+        detail = f'{len(members)} part{"s" * (len(members) > 1)}'
+        if group == 'Joint drives':
+            detail += f', {kg(sum(motors.values()))} motors'
+        colour = PART_COLOUR.get(group, SKELETON if group == 'Frame' else MOTOR if group == 'Joint drives'
+                                 else '#6C757D')
+        page.add_patch(Box((0.3, y), 0.12, 0.38, facecolor=colour, edgecolor='none'))
+        write(page, 0.5, y, [f'{group}: {kg(groups[group])} kg'], weight='bold')
+        write(page, 0.5, y + LINE, [f'{detail}; bounds {kg(low)}–{kg(high)} kg'])
+        target = at(*PART_SPOTS.get(group, (0, 0.5)))
+        page.plot([3.75, target[0]], [y + 0.18, target[1]], color='#8A8A8A', linewidth=0.6, linestyle='--')
+
+    # The labels of the body regions, in the middle, pointing at the robot's left side, above the box of what is
+    # spread over the whole body.
+    label_x = PARTS_X + 0.25 * TALLEST * ROBOT_SCALE
+    whole_lines = []
+    if regions.get('Whole body'):
+        # What this robot places over the whole body, in the order of the part groups.
+        spread_out = {lists.parts[p.row].group for p in parts_list.parts if p.row in lists.parts
+                      and 'Whole body' in ([lists.parts[p.row].region] + list(lists.parts[p.row].split))}
+        what = [g.lower() for g in lists.names[PART_GROUP] if g in spread_out and g != 'Joint drives']
+        if any(lists.parts[p.row].group == 'Joint drives' and not lists.parts[p.row].motors
+               and lists.parts[p.row].region == 'Whole body' for p in parts_list.parts if p.row in lists.parts):
+            what.append('gearboxes')
+        if spread_motors:
+            what.append(f'{kg(spread_motors)} motors the workbook places in several regions without saying how many '
+                        'sit where (rings)')
+        listed = what[0] if len(what) == 1 else ', '.join(what[:-1]) + ', and ' + what[-1] if what else ''
+        whole_lines = [f'Spread over the whole body: {kg(regions["Whole body"])} kg'] + wrap(listed, 34)
+    whole_y = ground - 0.35 - len(whole_lines) * LINE
+    shown = [r for r in ('Head', 'Arms', 'Hands', 'Torso', 'Legs') if regions.get(r)]
+    wanted = [at(*REGION_SPOTS[r])[1] - 0.2 for r in shown]
+    ys = spread(wanted, 0.55, top + 0.1, whole_y - 0.6)
+    for region, y in zip(shown, ys):
+        count = motors.get(region, 0)
+        motor_line = (f'{kg(count)} motor{"s" * (count != 1)}' if count else
+                      'its motors are inside, not counted' if region == 'Hands' else 'no motors')
+        write(page, label_x, y, [f'{region}: {kg(regions[region])} kg'], weight='bold')
+        write(page, label_x, y + LINE, [motor_line])
+        target = at(*REGION_SPOTS[region])
+        page.plot([label_x - 0.08, target[0]], [y + 0.18, target[1]], color='#8A8A8A', linewidth=0.6,
+                  linestyle='--')
+    if whole_lines:
+        write(page, label_x, whole_y, whole_lines[:1], weight='bold')
+        write(page, label_x, whole_y + LINE, whole_lines[1:])
+
+    # What it is made of: one bar per shared material, in the order of the sheet Lists and on the same kg scale on
+    # all six pages (Matthias, 2026-10-26: "the material compsotion as bar plat"); the line on a bar runs from the
+    # sum of its minimums to the sum of its maximums; 'Not allocated' hatched.
+    names = lists.names[MATERIAL]
+    rows = material_rows(materials, lists) if materials else {}
+    whole = sum(made_of.values()) or 1
+    chart_top, chart_bottom = top + 0.15, ground - 0.55
+    axes = figure.add_axes([CHART_LEFT / PAGE_WIDTH, 1 - chart_bottom / height,
+                            (CHART_RIGHT - CHART_LEFT) / PAGE_WIDTH, (chart_bottom - chart_top) / height])
+    values = [made_of.get(name, 0) for name in names]
+    drawn = axes.barh(range(len(names)), values, height=0.62, linewidth=0.5, edgecolor='#6C757D',
+                      color=[MATERIAL_COLOUR.get(name, '#BDBDBD') for name in names])
+    scale = scale_kg or max([bounds(r)[1] for r in rows.values()] + values + [1])
+    for i, name in enumerate(names):
+        if name == NOT_ALLOCATED:
+            drawn[i].set_hatch('///')
+        elif name in estimated:
+            drawn[i].set_hatch('..')
+        end = values[i]
+        if rows.get(name):
+            low, high = bounds(rows[name])
+            axes.plot([low, high], [i, i], color='black', linewidth=1)
+            for at_kg in (low, high):
+                axes.plot([at_kg, at_kg], [i - 0.15, i + 0.15], color='black', linewidth=1)
+            end = max(end, high)
+        shown = f'{kg(values[i])} kg ({values[i] / whole:.0%})' + (', estimate (E)' if name in estimated else '')
+        axes.text(end + scale * 0.02, i, shown if values[i] else '–', va='center', fontsize=9)
+    axes.set_ylim(len(names) - 0.5, -0.5)
+    axes.set_yticks(range(len(names)), names, fontsize=9.5)
+    axes.set_xlim(0, scale * 1.3)
+    axes.tick_params(axis='x', labelsize=9)
+    axes.set_xlabel('kg at the mode; the line: from all minimums to all maximums (bounds)', fontsize=9)
+    for side in ('top', 'right'):
+        axes.spines[side].set_visible(False)
+    write(page, (CHART_LEFT + CHART_RIGHT) / 2, ground + 0.12,
+          [f'In all: {kg(whole)} kg, its materials and what they leave out of its parts list.'], align='center')
+
+    # The ground, the height of the tallest robot type (so that the scale shows), the notes.
+    page.plot([PARTS_X - 0.3 * size, PARTS_X + 0.3 * size], [ground, ground], color='black', linewidth=1)
+    tallest = ground - TALLEST * ROBOT_SCALE
+    page.plot([PARTS_X - 2.2, PARTS_X + 2.2], [tallest, tallest], color='#B0B0B0', linewidth=0.8, linestyle=':')
+    write(page, PARTS_X, tallest - 0.24, [f'{kg(TALLEST)} m: the tallest robot type, drawn at the same scale'],
+          colour='#8A8A8A', align='center')
+    write(page, PARTS_X, ground + 0.12, [f'{kg(height_m)} m'], align='center')
+    y = write(page, 0.3, ground + 0.55, note_lines)
+    write(page, 0.3, y + 0.1, [f'Source: {params.data.workbook} and the placements in {params.data.shared_lists}.'])
+    save(figure, path, params.output.dpi)
+
+
+def draw_overview(book: Workbook, faults: list[Fault], reports: dict, path: str, params: Params) -> None:
+    """The first page: the stages, how a mass is given, the six categories, the faults, what is open."""
+    width = PAGE_WIDTH
+    columns = 3
+    box_width = (width - 0.6 - (columns - 1) * 0.3) / columns
+
+    # The text of each category's box, to size the page before drawing it.
+    category_boxes = []
+    for category in book.categories:
+        parts_list = book.parts_lists.get(category.number)
+        lines = wrap(f'Anchor robot: {category.anchor.splitlines()[0] if category.anchor else "—"}', 70)
+        if is_notional(category.anchor):
+            lines += ['(notional: a configuration, not a robot that exists)']
+        if parts_list:
+            lines += [f'Parts list: {len(parts_list.parts)} parts, {kg(parts_list.sum_quantity)} units',
+                      f'Sum of the parts: {triple(parts_list.sum_kg)} kg (min / mode / max)',
+                      f'Stated mass of the anchor robot: {kg(parts_list.stated_mass_kg)} kg']
+        else:
+            lines += ['No parts list in the workbook.']
+        report = reports.get(category.number)
+        lines += wrap_name('Report of its own: ', report, 80) if report else ['No report of its own']
+        category_boxes.append((f'{category.number}  {category.name}', lines))
+    box_lines = max([len(lines) for _, lines in category_boxes] + [1]) + 1
+    box_rows = -(-len(category_boxes) // columns)
+
+    without_report = [str(c.number) for c in book.categories if not reports.get(c.number)]
+    notional = [str(c.number) for c in book.categories if is_notional(c.anchor)]
+    open_items = ['The stages that compute the materials of each category: not built yet (Matthias, '
+                  '2026-10-26: "we will go through and do separate code for each of the different '
+                  'categories").']
+    if without_report:
+        open_items.append(f"Categories without a report of their own in documentation/sources/: "
+                          f"{', '.join(without_report)}. The workbook's last row names reports 00 to 06.")
+    if notional:
+        open_items.append(f"Categories whose anchor robot is notional: {', '.join(notional)}.")
+    open_lines = [line for item in open_items for line in wrap('• ' + item, 175)]
+
+    stage_list = STAGES + [('Next', 'One stage per category, computing what its robots are made of. Not '
+                                    'built yet.')]
+    height = 0.6 + 0.45 + 1.0 + 0.6 + 4 * LINE + 0.45 + box_rows * (box_lines * LINE + 0.45) + 0.6 \
+        + LINE * 2 + 0.4 + len(open_lines) * LINE + 0.5
+    figure, axes = new_page(width, height)
+    axes.text(0.3, 0.3, 'Overview: how we model a humanoid robot', fontsize=16, fontweight='bold', va='top')
+
+    # The stages, as boxes joined by arrows.
+    y = 0.95
+    write(axes, 0.3, y, ['The stages, run in this order by pressing Run'], size=11, weight='bold')
+    y += 0.35
+    stage_width = (width - 0.6 - (len(stage_list) - 1) * 0.5) / len(stage_list)
+    for i, (name, what) in enumerate(stage_list):
+        x = 0.3 + i * (stage_width + 0.5)
+        box(axes, x, y, stage_width, 0.75, '#F4F4F4' if name == 'Next' else 'white')
+        write(axes, x + 0.12, y + 0.1, [name], weight='bold')
+        write(axes, x + 0.12, y + 0.1 + LINE * 1.2, wrap(what, int(stage_width / 0.07)))
+        if i:
+            axes.add_patch(FancyArrowPatch((x - 0.45, y + 0.375), (x - 0.05, y + 0.375), arrowstyle='-|>',
+                                           mutation_scale=14, color='black'))
+    y += 0.75 + 0.4
+
+    # How a mass is given.
+    write(axes, 0.3, y, ['How every mass is given'], size=11, weight='bold')
+    y = write(axes, 0.3, y + 0.3, wrap(
+        'Every mass in a parts list has a minimum, a mode and a maximum, in kg: for one unit of a part and for '
+        'all units of it in one robot. These pages show the three numbers as the workbook states them; nothing '
+        'is drawn at random yet. Each category is represented by one anchor robot, whose parts list stands for '
+        'the category.', 175))
+    y += 0.3
+
+    # The categories, three to a row.
+    write(axes, 0.3, y, [f'The {len(category_boxes)} categories of the 2026 research'], size=11, weight='bold')
+    y += 0.35
+    box_height = box_lines * LINE + 0.2
+    for i, (title, lines) in enumerate(category_boxes):
+        x = 0.3 + (i % columns) * (box_width + 0.3)
+        top = y + (i // columns) * (box_height + 0.25)
+        box(axes, x, top, box_width, box_height)
+        write(axes, x + 0.12, top + 0.1, [title], weight='bold')
+        write(axes, x + 0.12, top + 0.1 + LINE * 1.2, lines)
+    y += box_rows * (box_height + 0.25) + 0.2
+
+    # The faults and what is open.
+    if faults:
+        y = write(axes, 0.3, y, [f'{len(faults)} fault(s) found in the workbook: see faults.png.'], size=11,
+                  colour=RED, weight='bold')
+    else:
+        y = write(axes, 0.3, y, ['No fault found in the workbook (what was checked: faults.png).'], size=11)
+    y += 0.25
+    write(axes, 0.3, y, ['Open'], size=11, weight='bold')
+    y = write(axes, 0.3, y + 0.3, open_lines)
+    write(axes, 0.3, y + 0.2, [f'Source: {params.data.workbook}.'])
+    save(figure, path, params.output.dpi)
+
+
+def draw_faults(faults: list[Fault], path: str, params: Params) -> None:
+    """Every fault in red, or 'No fault found'; then what was checked and what was not."""
+    width = 15.0
+    fault_lines = []
+    for fault in faults:
+        where = f"Sheet '{fault.sheet}'" + (f', row {fault.row}' if fault.row else '')
+        fault_lines += wrap(f'{where}: {fault.text}', 150) + ['']
+    checked = [line for item in CHECKS_DONE for line in wrap('• ' + item, 150)]
+    height = 0.6 + 0.4 + max(len(fault_lines), 1) * LINE + 0.5 + 0.35 + len(checked) * LINE + 0.5 \
+        + 3 * LINE + 0.5
+    figure, axes = new_page(width, height)
+    axes.text(0.3, 0.3, 'Faults in the workbook', fontsize=16, fontweight='bold', va='top')
+    y = 0.85
+    if faults:
+        y = write(axes, 0.3, y, fault_lines, colour=RED)
+    else:
+        y = write(axes, 0.3, y, ['No fault found.'], size=12, weight='bold')
+    y += 0.3
+    write(axes, 0.3, y, ['What was checked'], size=11, weight='bold')
+    y = write(axes, 0.3, y + 0.3, checked)
+    y += 0.2
+    write(axes, 0.3, y, ['What was not checked'], size=11, weight='bold')
+    y = write(axes, 0.3, y + 0.3, wrap(NOT_CHECKED, 150))
+    write(axes, 0.3, y + 0.2, [f'Source: {params.data.workbook}.'])
+    save(figure, path, params.output.dpi)
+
+
+def file_name(category: Category) -> str:
+    """The page of a category: '1_compact_research_developer.png'."""
+    return f"{category.number}_{re.sub(r'[^a-z0-9]+', '_', category.name.lower()).strip('_')}.png"
+
+
+def main() -> int:
+    """Read and check the workbook, then draw the overview, one page per category and the faults."""
+    try:
+        params = current()
+        book = read_workbook(absolute(params.data.workbook), params)
+    except (ParameterError, WorkbookError) as error:
+        print(error, file=sys.stderr)
+        return 1
+
+    faults = check_workbook(book, params)
+    try:
+        lists = read_shared_lists(absolute(params.data.shared_lists))
+        faults += check_shared_lists(book, lists, params)
+    except WorkbookError as error:
+        lists = None
+        print(f'{error} The shared-lists pages are not drawn.')
+    sources = absolute(params.data.sources_dir)
+    reports = {c.number: category_report(c.number, sources) for c in book.categories}
+    out = absolute(params.output.schemas_dir)
+    # One kg scale for the materials of all six robots: the largest bound, or the largest kilograms not allocated.
+    scale_kg = None
+    if lists is not None:
+        scale_kg = max([bounds(rows)[1] for ml in book.materials_lists.values()
+                        for rows in material_rows(ml, lists).values()]
+                       + [ml.unallocated_parts_kg or 0 for ml in book.materials_lists.values()] + [1])
+
+    draw_overview(book, faults, reports, os.path.join(out, 'overview.png'), params)
+    for category in book.categories:
+        parts_list = book.parts_lists.get(category.number)
+        path = os.path.join(out, 'categories', file_name(category))
+        draw_category(category, parts_list, reports[category.number], faults, path, params)
+        if lists is not None and parts_list is not None:
+            draw_shared_lists(category, parts_list, book.materials_lists.get(category.number), lists, faults,
+                              path.replace('.png', '_shared_lists.png'), params)
+            draw_robot(category, parts_list, book.materials_lists.get(category.number), lists,
+                       path.replace('.png', '_robot.png'), params, scale_kg)
+    draw_faults(faults, os.path.join(out, 'faults.png'), params)
+
+    print(f'{len(book.categories)} categories, '
+          f'{sum(len(pl.parts) for pl in book.parts_lists.values())} parts and '
+          f'{sum(len(ml.materials) for ml in book.materials_lists.values())} materials read from '
+          f'{params.data.workbook}.')
+    if lists is not None:
+        print(f'{len(lists.parts)} parts and {len(lists.materials)} material names placed in '
+              f'{params.data.shared_lists}.')
+    print(f'{len(faults)} fault(s) found.' if faults else 'No fault found.')
+    for fault in faults:
+        print(f"  sheet '{fault.sheet}', row {fault.row}: {fault.text}")
+    pages = len(book.categories) * (3 if lists is not None else 1)
+    print(f'Drawn into {params.output.schemas_dir}/: overview.png, faults.png and {pages} pages in categories/.')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
