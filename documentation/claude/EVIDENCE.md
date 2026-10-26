@@ -787,8 +787,14 @@ cells, min / mode / max, from these sources, with estimates (E) for the gaps. Sh
 entered."
 
 **Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the element recipe of the NMC
-and LFP cylindrical cells as proposed in E1.7i." Not entered yet: it goes in together with the cell masses (E1.7d),
-where and how is still his decision.**
+and LFP cylindrical cells as proposed in E1.7i." Entered the same day, on his word "Yes, build the battery entry as
+laid out", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V23).**
+
+**Corrected while entering it:** the new check of 01 found that the active material and the binder could add up to
+101 % of a coating at their maxima (cathode 98 + 3 %, anode 97 + 4 %), leaving the conductive carbon below zero. The
+sandbox of V20 had not checked the coatings' remainders. Asked, Matthias chose "Lower active max": the active
+material's maximum is one point lower, cathode 94 / 96 / **97** % and anode 95 / 96 / **96** %. The modes, and so the
+table below, are unchanged.
 
 **Level 1, the parts of an NMC cell** (robot types 1, 2, 4, 5, 6), % of the cell's mass:
 
@@ -828,8 +834,8 @@ by a sum.
 | Part | Elements | Basis |
 |---|---|---|
 | Can | Drawn as one of two states, 50 / 50 (E: one source for each). **Nickel-plated steel:** Ni 0.9 / 1.8 / 2.7 %, Mn 0.1 / 0.25 / 0.4 %, C 0.02 / 0.05 / 0.08 %, Fe the remainder. **Stainless 304:** Cr 18.1, Ni 8.1, C 0.04 %, Fe the remainder | Nickel: E, 1 / 2 / 3 µm a side on a 0.25 mm wall (Ohneseit et al.: 0.23 to 0.27 mm); no source read gives the plating. Mn and C: E, a deep-drawing steel, no source read. 304: Outokumpu's typical values (E1.4b); its Mn and Si, not in those values, stay in the Fe |
-| Cathode coating | Active material 94 / 96 / 98 %, PVDF binder 1 / 2 / 3 %, conductive carbon the remainder | E: no source read gives the shares. Active: the car file's high-nickel NMC (Li 7.1, Ni 52.6, Mn 3.6, Co 3.8, O 32.8 %), or LiFePO4 by its formula. PVDF by its formula (C, H, F) |
-| Anode coating | Active material 95 / 96 / 97 %, binder 2 / 3 / 4 %, conductive carbon the remainder | E. Active, NMC cells: graphite with 0 / 1 / 7.3 % Si as SiO0.64 (decided, E1.7g). LFP cells: graphite only (Ohneseit et al.: "no silicon"). Binder: half SBR, half sodium CMC (C, H, O, Na), E |
+| Cathode coating | Active material 94 / 96 / 97 % (corrected, see above), PVDF binder 1 / 2 / 3 %, conductive carbon the remainder | E: no source read gives the shares. Active: the car file's high-nickel NMC (Li 7.1, Ni 52.6, Mn 3.6, Co 3.8, O 32.8 %), or LiFePO4 by its formula. PVDF by its formula (C, H, F) |
+| Anode coating | Active material 95 / 96 / 96 % (corrected, see above), binder 2 / 3 / 4 %, conductive carbon the remainder | E. Active, NMC cells: graphite with 0 / 1 / 7.3 % Si as SiO0.64 (decided, E1.7g). LFP cells: graphite only (Ohneseit et al.: "no silicon"). Binder: half SBR, half sodium CMC (C, H, O, Na), E |
 | Foils | Aluminium, copper | All sources |
 | Electrolyte | LiPF6 12 / 15 / 17 %, the solvents the remainder | Salt: E from EPA (about 13 %) and the car file (15 to 17 %). Solvents in Ohneseit et al.'s measured mix: NMC DMC 77.9, EMC 5.0, EC 17.1 %; LFP EMC 29.5, DEC 37.9, EC 32.6 %. Elements from the formulas |
 | Separator | Al2O3 coating 20 / 35 / 50 %, polyethylene the remainder | Coating found by Ohneseit et al.; its share is E, no source gives it |

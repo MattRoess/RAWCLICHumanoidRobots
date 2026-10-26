@@ -35,13 +35,17 @@ reading it:
 
 It also reads `data.shared_lists` (`data/researched/shared_lists.xlsx`): where every part and every material
 name goes in the shared part groups, body regions and materials (decided by Matthias on 2026-10-26,
-documentation/claude/SHARED_LISTS.md). And it looks in `data.sources_dir` (`documentation/sources/`) for the
-report of each category.
+documentation/claude/SHARED_LISTS.md), and, in its sheet 'Battery cells', each robot type's battery row as cells
+only. It reads `data.element_recipes` (`data/researched/element_recipes.xlsx`): the datasheets of the cells, the
+compounds and the recipe of each cell down to its elements (documentation/claude/EVIDENCE.md, E1.7i to E1.7k). And
+it looks in `data.sources_dir` (`documentation/sources/`) for the report of each category.
 
 WHAT IT CHECKS
 --------------
-Before drawing, `check_workbook` tests that the workbook agrees with itself, and `check_shared_lists` that every
-part and material name is placed once, under its own name, on the shared lists (the list is in `CHECKS_DONE`):
+Before drawing, `check_workbook` tests that the workbook agrees with itself, `check_shared_lists` that every
+part and material name is placed once, under its own name, on the shared lists, `check_element_recipes` that the
+recipes hold together and `check_battery_cells` that every battery is kept or built from cells that fit its packs
+(the list is in `CHECKS_DONE`):
 every minimum, mode and maximum in order, every mass of all units equal to the number times the mass of one,
 every sum row equal to the sum of its rows, every difference and unallocated row equal to what it should be, the
 colour of every row matching its evidence, the same categories in every sheet. A fault does not stop the drawing:
@@ -69,7 +73,11 @@ Into `output.schemas_dir` (`figures/schemas/`):
                                understand the robot and its compostion and parts in one vew"): the robot drawn
                                to its height, at the same scale on all six pages, with its parts where they sit,
                                its body regions and its motors; beside it, its materials as bars on the same kg
-                               scale on all six pages. Not drawn when the shared lists are not on disk.
+                               scale on all six pages. With the element recipes, the battery is drawn as cells
+                               only (Matthias, 2026-10-26: "Battery materials should be the cells only in every
+                               robot type"), counted from each pack's voltage and capacity, and the rest of its row
+                               goes where the sheet Battery cells says. Not drawn when the shared lists are not on
+                               disk.
   faults.png                   every fault found in the workbook and the shared lists, in red, or "No fault
                                found", with the list of what was checked and what was not.
 
@@ -82,8 +90,10 @@ what these pages show.
 
 from __future__ import annotations
 
+import math
 import os
 import re
+import statistics
 import sys
 import textwrap
 from dataclasses import dataclass, field
@@ -141,13 +151,22 @@ CHECKS_DONE = [
     "Shared lists: every material name marked 'Split' has its pieces in the sheet Splits: exactly one remainder, "
     'the shares of the others in order between 0 and 1 and their largest adding up to at most 1, each piece '
     "labelled E and in a material of the sheet Lists.",
+    'Element recipes: every compound can be read and its mass shares add up to 1; every item of a recipe sits within '
+    'an item of the same recipe and is a compound or a group; the items of a group are shares with exactly one '
+    'remainder, in order and leaving it above zero, or alternatives whose probabilities add up to 1; every cell has '
+    'its recipe, its mass and its energy.',
+    "Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the "
+    "sheet Cells, its cells in series within one cell's voltage of the pack's, its cells in parallel within 12 % of "
+    "the pack's capacity, its cells at most 85 % of the packs' mass; the rest of the row has exactly one remainder, "
+    'shares in order, materials of the sheet Lists, and never falls below zero where it goes to a material.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
-NOT_CHECKED = ('The checks test whether the workbook agrees with itself and whether every part and material is '
-               'placed on the shared lists. They do not test whether the numbers are right, which needs the '
-               'sources, report by report, nor whether a placement is right, which is Matthias\'s check of the '
-               'shared-lists pages.')
+NOT_CHECKED = ('The checks test whether the workbook agrees with itself, whether every part and material is '
+               'placed on the shared lists, and whether the battery cells and the element recipes hold together. '
+               'They do not test whether the numbers are right, which needs the sources, report by report '
+               '(documentation/claude/EVIDENCE.md), nor whether a placement is right, which is Matthias\'s check of '
+               'the shared-lists pages.')
 
 # ------------------------------------------------------------------------------------------------------
 # How the workbook is laid out
@@ -198,6 +217,41 @@ NOT_ALLOCATED = 'Not allocated'   # the shared material that holds the kilograms
 SPLITS_SHEET, SPLIT = 'Splits', 'Split'
 SPLIT_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared material', 'Share min', 'Share mode',
                   'Share max', 'Remainder', 'Label', 'Basis', 'Decided']
+
+# The battery as cells only (documentation/claude/EVIDENCE.md, E1.7d to E1.7k; decided by Matthias on 2026-10-26). The
+# sheet 'Battery cells' of the shared lists says, for the battery row of each robot type, either that the workbook's
+# row is kept ('Kept'), or how its packs are built from cells ('Build': one row per way to build them, all equally
+# likely) and where the rest of the row goes ('Rest': shares of shared materials, one of them the remainder; 'Not
+# allocated' may take a rest below zero, when the cells weigh more than the row).
+BATTERY_SHEET, KEPT, BUILD, REST = 'Battery cells', 'Kept', 'Build', 'Rest'
+BATTERY_HEADINGS = ['Robot type', 'Battery row in the workbook', 'Kind', 'Cell or material', 'Cells in series',
+                    'Cells in parallel', 'Packs', 'Pack voltage (V)', 'Pack capacity (Ah)', 'Pack energy (kWh)',
+                    'Pack mass (kg)', 'Share min', 'Share mode', 'Share max', 'Remainder', 'Label', 'Basis', 'Decided']
+BATTERY = 'Battery materials'   # the shared material of the workbook's battery rows
+# A build's whole cells in parallel must reach the pack's stated capacity within this share (E1.7j: an estimate, E).
+CAPACITY_TOLERANCE = 0.12
+# A build's cells may weigh at most this share of the packs' mass, so that the BMS, wiring and enclosure still fit
+# (E1.7k: the largest share of cells van de Ven et al. 2024 weighed in battery modules, laptops 85 %; an estimate, E).
+CELL_SHARE_OF_PACK = 0.85
+
+# The element recipes (data/researched/element_recipes.xlsx; EVIDENCE.md E1.7i, agreed by Matthias on 2026-10-26).
+# 'Cells' holds the datasheet of every cell a build uses; 'Compounds' the composition of every compound, as a formula
+# ('LiFePO4') or as mass shares ('C 0.905; H 0.095'); 'Recipe' the parts of each cell recipe as a tree: each item sits
+# within another ('' for the cell itself) and is either a compound or a group of items. The items of a group are either
+# shares (minimum, mode, maximum of the group's mass, exactly one of them the remainder) or alternatives (each with its
+# probability, adding up to 1), of which one is drawn.
+CELLS_SHEET, COMPOUNDS_SHEET, RECIPE_SHEET = 'Cells', 'Compounds', 'Recipe'
+CELL_HEADINGS = ['Cell', 'Chemistry', 'Format', 'Voltage (V)', 'Capacity (Ah)', 'Mass (g)', 'Energy (Wh)', 'Recipe',
+                 'Source', 'Kind']
+COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
+RECIPE_HEADINGS = ['Cell recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
+                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
+RECIPE_LABELS = {'S': 'from a source read', 'E': 'an estimate'}
+# The standard atomic weight of every element the recipes name, g/mol: IUPAC, Commission on Isotopic Abundances and
+# Atomic Weights, "Abridged Standard Atomic Weights 2024", https://www.ciaaw.org/abridged-atomic-weights.htm.
+ATOMIC_MASS = {'H': 1.0080, 'Li': 6.94, 'C': 12.011, 'O': 15.999, 'F': 18.998, 'Na': 22.990, 'Al': 26.982,
+               'Si': 28.085, 'P': 30.974, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693,
+               'Cu': 63.546}
 
 # How the workbook marks the evidence of each row: the label in the column 'Evidence' and the fill colour
 # of the row (its colour key, row 4 of 'Components & Materials': no fill, light yellow, light orange). The
@@ -353,6 +407,29 @@ class SplitPiece:
 
 
 @dataclass
+class BatteryRow:
+    """One row of the sheet 'Battery cells' of shared_lists.xlsx: a robot type's battery row kept, one way to build
+    its packs from cells, or one place the rest of the row goes."""
+
+    row: int                 # the row in the sheet 'Battery cells'
+    robot: int               # the robot type
+    family: str              # the battery row's material name in the workbook, e.g. 'Battery constituents'
+    kind: str                # 'Kept', 'Build' or 'Rest'
+    name: str                # a build's cell (sheet Cells of element_recipes.xlsx), or the shared material of a rest
+    series: float | None     # a build: cells in series in one pack
+    parallel: float | None   # a build: cells in parallel in one pack
+    packs: float | None      # a build: how many packs the robot carries
+    volts: float | None      # a build: the pack's voltage, as the sources state it
+    amp_hours: float | None  # a build: the pack's capacity, as the sources state it
+    kwh: float | None        # a build without voltage and capacity: the energy of all packs, kWh
+    pack_kg: float | None    # a build: the mass of all packs, kg, where the parts list gives it
+    share: tuple             # a rest: its share of the rest, minimum, mode, maximum (None for the remainder)
+    remainder: bool          # a rest: True for the piece that takes 1 minus the shares of the others
+    label: str               # 'E': an estimate
+    basis: str               # how it was found
+
+
+@dataclass
 class SharedLists:
     """Everything 01 reads from shared_lists.xlsx."""
 
@@ -361,6 +438,48 @@ class SharedLists:
     materials: dict        # material name of the workbook -> (shared material, why, row in the sheet 'Materials')
     faults: list           # Fault, found while reading
     splits: dict = field(default_factory=dict)   # material name of the workbook -> [SplitPiece], from 'Splits'
+    battery: list | None = None                  # BatteryRow, from 'Battery cells'; None when the sheet is not there
+
+
+@dataclass
+class Cell:
+    """One cell's datasheet (sheet 'Cells' of element_recipes.xlsx)."""
+
+    row: int
+    name: str
+    chemistry: str
+    volts: float | None       # nominal voltage
+    amp_hours: float | None   # capacity, as the datasheet states it
+    grams: float | None       # mass of one cell
+    energy_wh: float | None   # energy of one cell: voltage × capacity, or as given where those are not
+    recipe: str               # the cell recipe of the sheet 'Recipe' that its elements follow
+
+
+@dataclass
+class RecipeItem:
+    """One item of a cell recipe (sheet 'Recipe' of element_recipes.xlsx)."""
+
+    row: int
+    recipe: str               # the cell recipe, e.g. 'NMC cylindrical'
+    within: str               # the item it is part of; '' for the cell itself
+    item: str                 # its name, unique within the recipe
+    share: tuple              # its share of what it is within: minimum, mode, maximum (None for a remainder)
+    remainder: bool           # True for the item that takes 1 minus the shares of the others
+    probability: float | None # for an alternative: how likely it is drawn
+    compound: str             # the compound it is made of; '' for a group of items
+    follows_energy: bool      # its share rises and falls with the cell's energy per kg (E1.7i)
+    label: str                # 'S' from a source read, 'E' an estimate
+    basis: str
+
+
+@dataclass
+class ElementRecipes:
+    """Everything 01 reads from element_recipes.xlsx."""
+
+    cells: dict               # cell name -> Cell
+    compounds: dict           # compound name -> (composition as written, row in the sheet 'Compounds')
+    items: list               # RecipeItem, in the order of the sheet
+    faults: list              # Fault, found while reading
 
 
 def number(value) -> float | None:
@@ -600,7 +719,89 @@ def read_shared_lists(path: str) -> SharedLists:
                 row=row[0].row, robot=int(number(robot) or 0), shared=text(shared),
                 share=(number(low), number(mode), number(high)), remainder=text(remainder).lower() == 'yes',
                 label=text(label), basis=text(basis)))
-    return SharedLists(names, parts, materials, faults, splits)
+
+    # The battery as cells only, when the sheet is there.
+    battery = None
+    if BATTERY_SHEET in book.sheetnames:
+        found = [text(cell.value) for cell in book[BATTERY_SHEET][1]][:len(BATTERY_HEADINGS)]
+        if found != BATTERY_HEADINGS:
+            raise WorkbookError(f"{path}, sheet '{BATTERY_SHEET}': the first row must be {BATTERY_HEADINGS}, not "
+                                f'{found}.')
+        battery = []
+        for row in book[BATTERY_SHEET].iter_rows(min_row=2):
+            values = [cell.value for cell in row]
+            if all(value is None for value in values):
+                continue
+            (robot, family, kind, name, series, parallel, packs, volts, amp_hours, kwh, pack_kg, low, mode, high,
+             remainder, label, basis) = (values + [None] * 17)[:17]
+            battery.append(BatteryRow(
+                row=row[0].row, robot=int(number(robot) or 0), family=text(family), kind=text(kind), name=text(name),
+                series=number(series), parallel=number(parallel), packs=number(packs), volts=number(volts),
+                amp_hours=number(amp_hours), kwh=number(kwh), pack_kg=number(pack_kg),
+                share=(number(low), number(mode), number(high)), remainder=text(remainder).lower() == 'yes',
+                label=text(label), basis=text(basis)))
+    return SharedLists(names, parts, materials, faults, splits, battery)
+
+
+def composition(value: str) -> dict:
+    """The mass share of each element of a compound: from its formula, each element's atoms times its atomic mass
+    over the whole ('LiFePO4', 'SiO0.64'), or from mass shares written out ('C 0.905; H 0.095'). Raises ValueError
+    for text that is neither, or for an element without an atomic mass in ATOMIC_MASS."""
+    written = text(value)
+    if re.fullmatch(r'\s*[A-Z][a-z]?\s+\d*\.?\d+\s*(;\s*[A-Z][a-z]?\s+\d*\.?\d+\s*)*;?\s*', written):
+        return {element: float(share) for element, share in re.findall(r'([A-Z][a-z]?)\s+(\d*\.?\d+)', written)}
+    if not re.fullmatch(r'([A-Z][a-z]?(\d+(\.\d+)?)?)+', written):
+        raise ValueError(f"'{written}' cannot be read as a formula ('LiFePO4') or as mass shares ('C 0.9; H 0.1').")
+    atoms: dict = {}
+    for element, count in re.findall(r'([A-Z][a-z]?)(\d+(?:\.\d+)?)?', written):
+        if element not in ATOMIC_MASS:
+            raise ValueError(f"'{written}': the element '{element}' has no atomic mass in ATOMIC_MASS.")
+        atoms[element] = atoms.get(element, 0) + float(count or 1)
+    whole = sum(n * ATOMIC_MASS[e] for e, n in atoms.items())
+    return {e: n * ATOMIC_MASS[e] / whole for e, n in atoms.items()}
+
+
+def read_element_recipes(path: str) -> ElementRecipes:
+    """Read the cells, the compounds and the cell recipes (data/researched/element_recipes.xlsx); never writes to
+    them."""
+    if not os.path.exists(path):
+        raise WorkbookError(f'{path}: the element recipes are not there.')
+    book = load_workbook(path, data_only=True)
+    sheets = {}
+    for name, headings in ((CELLS_SHEET, CELL_HEADINGS), (COMPOUNDS_SHEET, COMPOUND_HEADINGS),
+                           (RECIPE_SHEET, RECIPE_HEADINGS)):
+        if name not in book.sheetnames:
+            raise WorkbookError(f"{path}: no sheet '{name}'. Its sheets are: {', '.join(book.sheetnames)}.")
+        found = [text(cell.value) for cell in book[name][1]][:len(headings)]
+        if found != headings:
+            raise WorkbookError(f"{path}, sheet '{name}': the first row must be {headings}, not {found}.")
+        sheets[name] = [(row[0].row, [cell.value for cell in row] + [None] * len(headings))
+                        for row in book[name].iter_rows(min_row=2) if any(cell.value is not None for cell in row)]
+    where = f'{os.path.basename(path)}: '
+    faults, cells, compounds, items = [], {}, {}, []
+    for r, values in sheets[CELLS_SHEET]:
+        name, chemistry, _, volts, amp_hours, grams, energy, recipe = values[:8]
+        volts, amp_hours, energy = number(volts), number(amp_hours), number(energy)
+        if text(name) in cells:
+            faults.append(Fault(where + CELLS_SHEET, r, f"the cell '{text(name)}' is listed a second time."))
+            continue
+        cells[text(name)] = Cell(row=r, name=text(name), chemistry=text(chemistry), volts=volts, amp_hours=amp_hours,
+                                 grams=number(grams), recipe=text(recipe),
+                                 energy_wh=volts * amp_hours if volts and amp_hours else energy)
+    for r, values in sheets[COMPOUNDS_SHEET]:
+        name, written = text(values[0]), text(values[1])
+        if name in compounds:
+            faults.append(Fault(where + COMPOUNDS_SHEET, r, f"the compound '{name}' is listed a second time."))
+            continue
+        compounds[name] = (written, r)
+    for r, values in sheets[RECIPE_SHEET]:
+        recipe, within, item, low, mode, high, remainder, probability, compound, follows, label, basis = values[:12]
+        items.append(RecipeItem(row=r, recipe=text(recipe), within=text(within), item=text(item),
+                                share=(number(low), number(mode), number(high)),
+                                remainder=text(remainder).lower() == 'yes', probability=number(probability),
+                                compound=text(compound), follows_energy=text(follows).lower() == 'yes',
+                                label=text(label), basis=text(basis)))
+    return ElementRecipes(cells, compounds, items, faults)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -884,15 +1085,258 @@ def check_shared_lists(book: Workbook, lists: SharedLists, params: Params) -> li
     return faults
 
 
-def material_pieces(materials: MaterialsList, lists: SharedLists) -> list:
+def shares_faults(pieces: list, on: str, what: str) -> list[Fault]:
+    """The faults of a group of shares (rows with .share, .remainder, .row): exactly one remainder; every other
+    share in order between 0 and 1; their largest adding up to at most 1, so that the remainder never falls below 0."""
+    remainders = [p for p in pieces if p.remainder]
+    if len(remainders) != 1:
+        return [Fault(on, pieces[0].row, f'{what}: a group of shares needs exactly one remainder, not '
+                                         f'{len(remainders)}.')]
+    faults = []
+    for p in pieces:
+        if not p.remainder and (None in p.share or not 0 <= p.share[0] <= p.share[1] <= p.share[2] <= 1):
+            faults.append(Fault(on, p.row, f"{what}: the shares must be in order between 0 and 1: "
+                                           f"{', '.join('—' if s is None else kg(s) for s in p.share)}."))
+    largest = sum(p.share[2] for p in pieces if not p.remainder and p.share[2] is not None)
+    if largest > 1 + 1e-9:
+        faults.append(Fault(on, pieces[0].row, f'{what}: the largest shares add up to {kg(largest)}, which leaves the '
+                                               'remainder below zero.'))
+    return faults
+
+
+def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault]:
+    """Every compound readable and adding up to 1; every recipe a tree of items whose shares are in order with one
+    remainder, or whose alternatives add up to a probability of 1; every compound a recipe uses listed; every cell's
+    recipe there."""
+    faults = list(recipes.faults)
+    where = os.path.basename(params.data.element_recipes) + ': '
+    for name, (written, row) in recipes.compounds.items():
+        try:
+            total = sum(composition(written).values())
+        except ValueError as error:
+            faults.append(Fault(where + COMPOUNDS_SHEET, row, f'{name}: {error}'))
+            continue
+        if abs(total - 1) > 0.001:
+            faults.append(Fault(where + COMPOUNDS_SHEET, row, f'{name}: its mass shares add up to {kg(total)}, not 1.'))
+
+    on = where + RECIPE_SHEET
+    names = {(i.recipe, i.item) for i in recipes.items}
+    groups: dict = {}
+    for i in recipes.items:
+        groups.setdefault((i.recipe, i.within), []).append(i)
+        if i.within and (i.recipe, i.within) not in names:
+            faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: it sits within '{i.within}', which is not an item "
+                                           'of this recipe.'))
+        if i.compound and i.compound not in recipes.compounds:
+            faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: the compound '{i.compound}' is not in the sheet "
+                                           f'{COMPOUNDS_SHEET}.'))
+        if i.label not in RECIPE_LABELS:
+            faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: the label must be one of "
+                                           f"{', '.join(RECIPE_LABELS)}, not '{i.label}'."))
+    for i in recipes.items:
+        has_items = (i.recipe, i.item) in groups
+        if bool(i.compound) == has_items:
+            faults.append(Fault(on, i.row, f'{i.recipe}, {i.item}: give either a compound or items within it.'))
+    for (recipe, within), members in groups.items():
+        if within and (recipe, within) not in names:
+            continue  # reported above, against the item that names it
+        what = f"{recipe}, within '{within or 'the cell'}'"
+        alternatives = [m for m in members if m.probability is not None]
+        if alternatives and len(alternatives) != len(members):
+            faults.append(Fault(on, members[0].row, f'{what}: give every item a probability, or none.'))
+        elif alternatives:
+            total = sum(m.probability for m in alternatives)
+            if abs(total - 1) > 0.001:
+                faults.append(Fault(on, members[0].row, f'{what}: the probabilities add up to {kg(total)}, not 1.'))
+        else:
+            faults += shares_faults(members, on, what)
+    for cell in recipes.cells.values():
+        if cell.recipe not in {i.recipe for i in recipes.items}:
+            faults.append(Fault(where + CELLS_SHEET, cell.row, f"{cell.name}: the recipe '{cell.recipe}' is not in the "
+                                                               f'sheet {RECIPE_SHEET}.'))
+        if not cell.grams or not cell.energy_wh:
+            faults.append(Fault(where + CELLS_SHEET, cell.row, f'{cell.name}: give its mass and its voltage and '
+                                                               'capacity, or its energy.'))
+    return faults
+
+
+def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = None) -> dict:
+    """The mass share of each element in a cell of `recipe`, with every share at its mode and each remainder 1 minus
+    the modes of the others. Where the items of a group are alternatives, `choose` names the one taken (the group's
+    name -> the item's name); without it, the first. The shares add up to 1."""
+    members: dict = {}
+    for i in recipes.items:
+        if i.recipe == recipe:
+            members.setdefault(i.within, []).append(i)
+
+    def add(within: str, weight: float, out: dict) -> None:
+        items = members.get(within, [])
+        if items and items[0].probability is not None:
+            wanted = (choose or {}).get(within, items[0].item)
+            items = [next((i for i in items if i.item == wanted), items[0])]
+            shares = {items[0].item: 1.0}
+        else:
+            others = sum(i.share[1] for i in items if not i.remainder)
+            shares = {i.item: 1 - others if i.remainder else i.share[1] for i in items}
+        for i in items:
+            if i.compound:
+                for element, share in composition(recipes.compounds[i.compound][0]).items():
+                    out[element] = out.get(element, 0) + weight * shares[i.item] * share
+            else:
+                add(i.item, weight * shares[i.item], out)
+
+    out: dict = {}
+    add('', 1.0, out)
+    return out
+
+
+def battery_row_of(materials: MaterialsList, lists: SharedLists) -> Material | None:
+    """The row of a robot type's materials that the shared lists place in 'Battery materials', or None."""
+    return next((m for m in materials.materials if lists.materials.get(m.family, ('',))[0] == BATTERY), None)
+
+
+def cells_of(build: BatteryRow, cell: Cell) -> tuple[int, float]:
+    """The number of cells of one build and their mass in kg: cells in series × in parallel × packs, or, for a build
+    given by its energy, the whole cells that hold it (rounded up)."""
+    if build.series:
+        count = int(build.series * (build.parallel or 0) * (build.packs or 0))
+    else:
+        count = math.ceil(build.kwh * 1000 / cell.energy_wh - 1e-9) if build.kwh and cell.energy_wh else 0
+    return count, count * (cell.grams or 0) / 1000
+
+
+def battery_cells(materials: MaterialsList, lists: SharedLists, recipes: ElementRecipes) -> tuple | None:
+    """The cells of one robot type in kg: the lightest build, the middle one (the median, which the pages show as the
+    mode) and the heaviest. None where its battery row is kept as the workbook gives it, or has no builds."""
+    builds = [b for b in (lists.battery or []) if b.robot == materials.number and b.kind == BUILD
+              and b.name in recipes.cells]
+    if not builds:
+        return None
+    masses = sorted(cells_of(b, recipes.cells[b.name])[1] for b in builds)
+    return masses[0], statistics.median(masses), masses[-1]
+
+
+def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementRecipes, params: Params) -> list[Fault]:
+    """Every robot type's battery row kept or built from cells (sheet 'Battery cells'): each build's cell in the sheet
+    Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
+    CAPACITY_TOLERANCE of the pack's capacity, its cells at most CELL_SHARE_OF_PACK of the packs' mass; the rest of the
+    row split by shares with one remainder, and never below zero where it goes to a material."""
+    if lists.battery is None:
+        return []
+    on = os.path.basename(params.data.shared_lists) + ': ' + BATTERY_SHEET
+    faults = []
+    rows_of: dict = {}
+    for b in lists.battery:
+        rows_of.setdefault(b.robot, []).append(b)
+    for n, materials in book.materials_lists.items():
+        battery = battery_row_of(materials, lists)
+        rows = rows_of.pop(n, [])
+        if battery is None:
+            for b in rows:
+                faults.append(Fault(on, b.row, f'robot type {n} has no material placed in {BATTERY}.'))
+            continue
+        if not rows:
+            faults.append(Fault(on, 0, f"robot type {n}: its battery row '{battery.family}' has no row in the sheet "
+                                       f"{BATTERY_SHEET}; give '{KEPT}', or its builds and where the rest goes."))
+            continue
+        for b in rows:
+            if b.family != battery.family:
+                faults.append(Fault(on, b.row, f"robot type {n}: the battery row is '{battery.family}' in the "
+                                               f"workbook, not '{b.family}'."))
+            if b.kind not in (KEPT, BUILD, REST):
+                faults.append(Fault(on, b.row, f"robot type {n}: the kind must be {KEPT}, {BUILD} or {REST}, not "
+                                               f"'{b.kind}'."))
+            elif b.kind != KEPT and b.label != 'E':
+                faults.append(Fault(on, b.row, f"robot type {n}, {b.name}: a build or a rest is an estimate and is "
+                                               f"labelled 'E', not '{b.label}'."))
+        builds = [b for b in rows if b.kind == BUILD]
+        rest = [b for b in rows if b.kind == REST]
+        if any(b.kind == KEPT for b in rows):
+            if builds or rest:
+                faults.append(Fault(on, rows[0].row, f"robot type {n}: '{battery.family}' is both kept and built."))
+            continue
+        if not builds or not rest:
+            faults.append(Fault(on, rows[0].row, f"robot type {n}: give the builds of '{battery.family}' and where its "
+                                                 'rest goes.'))
+            continue
+        for b in builds:
+            cell = recipes.cells.get(b.name)
+            if cell is None:
+                faults.append(Fault(on, b.row, f"robot type {n}: the cell '{b.name}' is not in the sheet {CELLS_SHEET} "
+                                               f'of {os.path.basename(params.data.element_recipes)}.'))
+                continue
+            if not (b.series and b.parallel and b.packs) and not (b.kwh and not b.series and not b.parallel):
+                faults.append(Fault(on, b.row, f'robot type {n}, {b.name}: give the cells in series, in parallel and '
+                                               'the packs, or only the pack energy.'))
+                continue
+            if b.series and b.volts and cell.volts and abs(b.series * cell.volts - b.volts) > cell.volts:
+                faults.append(Fault(on, b.row, f'robot type {n}, {b.name}: {kg(b.series)} cells in series give '
+                                               f'{kg(b.series * cell.volts)} V, more than one cell\'s voltage from the '
+                                               f"pack's {kg(b.volts)} V."))
+            if b.parallel and b.amp_hours and cell.amp_hours:
+                off = b.parallel * cell.amp_hours / b.amp_hours - 1
+                if abs(off) > CAPACITY_TOLERANCE + 1e-9:
+                    faults.append(Fault(on, b.row, f'robot type {n}, {b.name}: {kg(b.parallel)} cells in parallel '
+                                                   f'give {kg(b.parallel * cell.amp_hours)} Ah, which is '
+                                                   f"{abs(off) * 100:.0f} % off the pack's {kg(b.amp_hours)} Ah (at "
+                                                   f'most {CAPACITY_TOLERANCE * 100:.0f} %).'))
+            count, mass = cells_of(b, cell)
+            if b.pack_kg and mass > CELL_SHARE_OF_PACK * b.pack_kg + 1e-9:
+                faults.append(Fault(on, b.row, f'robot type {n}, {b.name}: its {count} cells weigh {kg(mass)} kg, '
+                                               f"more than {CELL_SHARE_OF_PACK * 100:.0f} % of the pack's "
+                                               f'{kg(b.pack_kg)} kg.'))
+        what = f"robot type {n}, the rest of '{battery.family}'"
+        faults += shares_faults(rest, on, what)
+        for b in rest:
+            if b.name not in lists.names[MATERIAL] or b.name in ('Mixed', BATTERY):
+                faults.append(Fault(on, b.row, f"{what}: '{b.name}' is not a material of the sheet Lists (other than "
+                                               f"'Mixed' and '{BATTERY}')."))
+        cells = battery_cells(materials, lists, recipes)
+        if (cells and any(b.name != NOT_ALLOCATED for b in rest) and battery.kg[0] is not None
+                and battery.kg[0] < cells[2] - params.checks.tolerance_kg):
+            faults.append(Fault(on, rest[0].row, f'{what} can fall below zero: its minimum is {kg(battery.kg[0])} kg, '
+                                                 f'its heaviest cells {kg(cells[2])} kg. Only {NOT_ALLOCATED} can take '
+                                                 'a rest below zero.'))
+    for n, rows in rows_of.items():
+        faults.append(Fault(on, rows[0].row, f'robot type {n} is not in the workbook.'))
+    return faults
+
+
+def battery_pieces(materials: MaterialsList, battery: Material, lists: SharedLists, recipes: ElementRecipes) -> list:
+    """The battery row of one robot type as cells only: its cells, and the rest of the row (the row minus the cells)
+    split by the shares of the sheet Battery cells, the remainder 1 minus the others. Each piece is (shared material,
+    (minimum, mode, maximum) kg, estimated, workbook name); a piece to Not allocated carries only its mode, which the
+    pages add to the kilograms not allocated."""
+    cells = battery_cells(materials, lists, recipes)
+    rest_kg = tuple(None if k is None else k - c for k, c in zip(battery.kg, (cells[2], cells[1], cells[0])))
+    rows = [b for b in lists.battery if b.robot == materials.number and b.kind == REST]
+    others = [b for b in rows if not b.remainder and None not in b.share]
+    pieces = [(BATTERY, cells, True, battery.family)]
+    for b in rows:
+        if b.remainder:
+            share = tuple(1 - sum(o.share[i] for o in others) for i in (2, 1, 0))
+        elif None in b.share:
+            continue
+        else:
+            share = b.share
+        kg_ = tuple(None if k is None else k * s for k, s in zip(rest_kg, share))
+        pieces.append((b.name, (None, kg_[1], None) if b.name == NOT_ALLOCATED else kg_, True, battery.family))
+    return pieces
+
+
+def material_pieces(materials: MaterialsList, lists: SharedLists, recipes: ElementRecipes | None = None) -> list:
     """Every material of one robot as (shared material, (minimum, mode, maximum) kg, estimated, workbook name). A
     name split by the sheet Splits gives one piece per shared material, each its share of the name's kilograms:
     the minimum at the smallest share, the maximum at the largest, and the remainder 1 minus the others, so that the
-    pieces add up to the name's kilograms at the mode. Estimated pieces are marked."""
+    pieces add up to the name's kilograms at the mode. With the element recipes, the battery row is cells only
+    (battery_pieces). Estimated pieces are marked."""
     pieces = []
+    built = recipes is not None and lists.battery is not None and battery_cells(materials, lists, recipes) is not None
     for m in materials.materials:
         shared = lists.materials.get(m.family, ('',))[0]
-        if shared == SPLIT and m.family in lists.splits:
+        if built and shared == BATTERY:
+            pieces += battery_pieces(materials, m, lists, recipes)
+        elif shared == SPLIT and m.family in lists.splits:
             split = lists.splits[m.family]
             others = [p for p in split if not p.remainder and None not in p.share]
             for p in split:
@@ -927,15 +1371,17 @@ def by_view(parts_list: PartsList, lists: SharedLists, view: str) -> dict:
     return totals
 
 
-def by_material(materials: MaterialsList, lists: SharedLists) -> dict:
+def by_material(materials: MaterialsList, lists: SharedLists, recipes: ElementRecipes | None = None) -> dict:
     """The kg at the mode of one robot by shared material, with the kilograms its materials leave out of its
-    parts list as 'Not allocated'."""
+    parts list as 'Not allocated'. With the element recipes, the battery is cells only, and the rest of its row that
+    goes to Not allocated is added there (below zero where the cells weigh more than the row)."""
     totals: dict = {}
-    for shared, kg_, _, _ in material_pieces(materials, lists):
+    for shared, kg_, _, _ in material_pieces(materials, lists, recipes):
         if kg_[1] is not None:
             totals[shared] = totals.get(shared, 0) + kg_[1]
-    if materials.unallocated_parts_kg:
-        totals[NOT_ALLOCATED] = materials.unallocated_parts_kg
+    unallocated = totals.pop(NOT_ALLOCATED, 0) + (materials.unallocated_parts_kg or 0)
+    if unallocated:
+        totals[NOT_ALLOCATED] = unallocated
     return totals
 
 
@@ -1481,27 +1927,53 @@ def body_shapes(axes, cx: float, ground: float, size: float, **style) -> list:
     return shapes
 
 
-def material_rows(materials: MaterialsList, lists: SharedLists) -> dict:
+def material_rows(materials: MaterialsList, lists: SharedLists, recipes: ElementRecipes | None = None) -> dict:
     """The (minimum, mode, maximum) of each material of one robot, gathered by shared material, with the pieces of
-    a split name."""
+    a split name and, with the element recipes, of the battery as cells only. Not allocated has no bounds and is left
+    out."""
     rows: dict = {}
-    for shared, kg_, _, _ in material_pieces(materials, lists):
-        rows.setdefault(shared, []).append(kg_)
+    for shared, kg_, _, _ in material_pieces(materials, lists, recipes):
+        if shared != NOT_ALLOCATED:
+            rows.setdefault(shared, []).append(kg_)
     return rows
 
 
+def battery_note(materials: MaterialsList, lists: SharedLists, recipes: ElementRecipes) -> str:
+    """What a robot page says about its battery as cells only: how its cells were counted, and where the rest of the
+    workbook's battery row goes."""
+    battery = battery_row_of(materials, lists)
+    builds = [b for b in lists.battery if b.robot == materials.number and b.kind == BUILD and b.name in recipes.cells]
+    cells = battery_cells(materials, lists, recipes)
+    names = sorted({b.name for b in builds})
+    how = ("counted from the packs' voltage and capacity" if all(b.series for b in builds) else
+           "counted from the packs' energy (no voltage or capacity found)")
+    rest = battery.kg[1] - cells[1]
+    places = [b.name for b in lists.battery if b.robot == materials.number and b.kind == REST]
+    where = places[0] if len(places) == 1 else ', '.join(places[:-1]) + ' and ' + places[-1]
+    rest_text = (f"The rest of the workbook's '{battery.family}' ({kg(battery.kg[1])} kg), {kg(rest)} kg at the mode, "
+                 f'goes to {where}.' if rest >= 0 else
+                 f"The workbook's '{battery.family}' ({kg(battery.kg[1])} kg) is {kg(-rest)} kg less than the cells at "
+                 f"the mode; the difference comes out of {where}.")
+    ways = f"{len(builds)} way{'s' * (len(builds) != 1)}"
+    return (f"{BATTERY} (dotted): cells only, an estimate (E), {how}: {ways} to build the packs, from "
+            f"{'; '.join(names)} (the bar is the middle one, the line the lightest to the heaviest; EVIDENCE.md E1.7j "
+            f'and E1.7k). {rest_text}')
+
+
 def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsList | None, lists: SharedLists,
-               path: str, params: Params, scale_kg: float | None = None) -> None:
+               path: str, params: Params, scale_kg: float | None = None, recipes: ElementRecipes | None = None) -> None:
     """The one-view schema of a robot type: its parts where they sit, as a robot, and what it is made of, as bars.
-    `scale_kg` is the end of the kg axis, the same for all six robots; without it the robot's own largest bound."""
+    `scale_kg` is the end of the kg axis, the same for all six robots; without it the robot's own largest bound. With
+    the element recipes, the battery is drawn as cells only (sheet Battery cells of the shared lists)."""
     from matplotlib.patches import Circle, Rectangle as Box
     height_m, height_note = robot_height(category)
     size = height_m * ROBOT_SCALE
     groups = by_view(parts_list, lists, 'group')
     regions = by_view(parts_list, lists, 'region')
     motors = motors_by_region(parts_list, lists)
-    made_of = by_material(materials, lists) if materials else {}
+    made_of = by_material(materials, lists, recipes) if materials else {}
     total = parts_list.sum_kg[1] or 0
+    built = bool(materials and recipes and lists.battery is not None and battery_cells(materials, lists, recipes))
 
     notes = [f'kg at the mode. Bounds: every part, or every material, at its minimum or at its maximum; the likely '
              f'range comes with the Monte Carlo of this robot type\'s stage.',
@@ -1521,6 +1993,18 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
         notes.append(f"{', '.join(estimated)} (dotted): an estimate (E), the workbook's "
                      f"'{', '.join(sorted(set(estimated.values())))}' split by the shares of the sheet Splits (point 9 "
                      'of SHARED_LISTS.md).')
+    if built:
+        notes.append(battery_note(materials, lists, recipes))
+    elif recipes and materials and any(b.robot == materials.number and b.kind == KEPT for b in lists.battery or []):
+        notes.append(f"{BATTERY}: the workbook's row, already cells only; kept as it is (EVIDENCE.md E1.7d).")
+    # Which bars hold an estimate: wholly (every piece of the bar) or in part (the rest of a battery row added to a
+    # material the workbook also gives).
+    pieces = material_pieces(materials, lists, recipes) if materials else []
+    flags = {}
+    for shared, _, guessed, _ in pieces:
+        flags.setdefault(shared, set()).add(guessed)
+    dotted = {name: (', estimate (E)' if marks == {True} else ', partly an estimate (E)')
+              for name, marks in flags.items() if True in marks and name != NOT_ALLOCATED}
     note_lines = [line for note in notes for line in wrap('• ' + note, 190)]
 
     top = 1.75
@@ -1639,7 +2123,7 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
     # all six pages (Matthias, 2026-10-26: "the material compsotion as bar plat"); the line on a bar runs from the
     # sum of its minimums to the sum of its maximums; 'Not allocated' hatched.
     names = lists.names[MATERIAL]
-    rows = material_rows(materials, lists) if materials else {}
+    rows = material_rows(materials, lists, recipes) if materials else {}
     whole = sum(made_of.values()) or 1
     chart_top, chart_bottom = top + 0.15, ground - 0.55
     axes = figure.add_axes([CHART_LEFT / PAGE_WIDTH, 1 - chart_bottom / height,
@@ -1651,7 +2135,7 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
     for i, name in enumerate(names):
         if name == NOT_ALLOCATED:
             drawn[i].set_hatch('///')
-        elif name in estimated:
+        elif name in dotted:
             drawn[i].set_hatch('..')
         end = values[i]
         if rows.get(name):
@@ -1660,7 +2144,7 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
             for at_kg in (low, high):
                 axes.plot([at_kg, at_kg], [i - 0.15, i + 0.15], color='black', linewidth=1)
             end = max(end, high)
-        shown = f'{kg(values[i])} kg ({values[i] / whole:.0%})' + (', estimate (E)' if name in estimated else '')
+        shown = f'{kg(values[i])} kg ({values[i] / whole:.0%})' + dotted.get(name, '')
         axes.text(end + scale * 0.02, i, shown if values[i] else '–', va='center', fontsize=9)
     axes.set_ylim(len(names) - 0.5, -0.5)
     axes.set_yticks(range(len(names)), names, fontsize=9.5)
@@ -1680,7 +2164,9 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
           colour='#8A8A8A', align='center')
     write(page, PARTS_X, ground + 0.12, [f'{kg(height_m)} m'], align='center')
     y = write(page, 0.3, ground + 0.55, note_lines)
-    write(page, 0.3, y + 0.1, [f'Source: {params.data.workbook} and the placements in {params.data.shared_lists}.'])
+    recipes_source = f'; the cells in {params.data.element_recipes}' if built else ''
+    write(page, 0.3, y + 0.1, [f'Source: {params.data.workbook} and the placements in {params.data.shared_lists}'
+                               f'{recipes_source}.'])
     save(figure, path, params.output.dpi)
 
 
@@ -1825,6 +2311,14 @@ def main() -> int:
     except WorkbookError as error:
         lists = None
         print(f'{error} The shared-lists pages are not drawn.')
+    # The element recipes, and the battery as cells only that the robot pages draw from them.
+    recipes = None
+    if lists is not None:
+        try:
+            recipes = read_element_recipes(absolute(params.data.element_recipes))
+            faults += check_element_recipes(recipes, params) + check_battery_cells(book, lists, recipes, params)
+        except WorkbookError as error:
+            print(f'{error} The robot pages show the battery rows as the workbook gives them.')
     sources = absolute(params.data.sources_dir)
     reports = {c.number: category_report(c.number, sources) for c in book.categories}
     out = absolute(params.output.schemas_dir)
@@ -1832,8 +2326,9 @@ def main() -> int:
     scale_kg = None
     if lists is not None:
         scale_kg = max([bounds(rows)[1] for ml in book.materials_lists.values()
-                        for rows in material_rows(ml, lists).values()]
-                       + [ml.unallocated_parts_kg or 0 for ml in book.materials_lists.values()] + [1])
+                        for rows in material_rows(ml, lists, recipes).values()]
+                       + [by_material(ml, lists, recipes).get(NOT_ALLOCATED, 0)
+                          for ml in book.materials_lists.values()] + [1])
 
     draw_overview(book, faults, reports, os.path.join(out, 'overview.png'), params)
     for category in book.categories:
@@ -1844,7 +2339,7 @@ def main() -> int:
             draw_shared_lists(category, parts_list, book.materials_lists.get(category.number), lists, faults,
                               path.replace('.png', '_shared_lists.png'), params)
             draw_robot(category, parts_list, book.materials_lists.get(category.number), lists,
-                       path.replace('.png', '_robot.png'), params, scale_kg)
+                       path.replace('.png', '_robot.png'), params, scale_kg, recipes)
     draw_faults(faults, os.path.join(out, 'faults.png'), params)
 
     print(f'{len(book.categories)} categories, '

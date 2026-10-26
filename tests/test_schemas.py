@@ -93,9 +93,29 @@ PLACED_MATERIALS = [('Aluminum alloys', 'Aluminium', 'The name says the material
                     ('Battery materials', 'Battery materials', 'The name says the material.')]
 
 
-def build_lists(path, parts=None, materials=None, lists=None, splits=None):
+BATTERY_HEADINGS = ['Robot type', 'Battery row in the workbook', 'Kind', 'Cell or material', 'Cells in series',
+                    'Cells in parallel', 'Packs', 'Pack voltage (V)', 'Pack capacity (Ah)', 'Pack energy (kWh)',
+                    'Pack mass (kg)', 'Share min', 'Share mode', 'Share max', 'Remainder', 'Label', 'Basis', 'Decided']
+# The battery of the small workbook's robot type 2 ('Battery materials', 3 / 4 / 5 kg), counted from its cells: a
+# 36 V, 4 Ah pack of 'Cell A' (10 in series, 2 in parallel: 20 × 50 g = 1.0 kg) or of 'Cell B' (10 × 1: 10 × 90 g =
+# 0.9 kg). The rest of the row goes to Not allocated.
+BATTERY = [(2, 'Battery materials', 'Build', 'Cell A', 10, 2, 1, 36, 4, None, None, None, None, None, '', 'E', '', ''),
+           (2, 'Battery materials', 'Build', 'Cell B', 10, 1, 1, 36, 4, None, None, None, None, None, '', 'E', '', ''),
+           (2, 'Battery materials', 'Rest', 'Not allocated', None, None, None, None, None, None, None, None, None,
+            None, 'Yes', 'E', '', '')]
+
+
+def battery_row(kind, name, series=None, parallel=None, packs=None, volts=None, amp_hours=None, kwh=None,
+                pack_kg=None, share=(None, None, None), remainder='', label='E'):
+    """One row of the sheet Battery cells for robot type 2 of the small workbook."""
+    return (2, 'Battery materials', kind, name, series, parallel, packs, volts, amp_hours, kwh, pack_kg, *share,
+            remainder, label, '', '')
+
+
+def build_lists(path, parts=None, materials=None, lists=None, splits=None, battery=None):
     """Write small shared lists to `path`: the rows of LISTS, PLACED_PARTS and PLACED_MATERIALS, or the ones
-    given instead, and a sheet Splits with the rows of `splits` when it is given."""
+    given instead, a sheet Splits with the rows of `splits` and a sheet Battery cells with the rows of `battery`,
+    each when it is given."""
     book = Workbook()
     sheet = book.active
     sheet.title = 'Lists'
@@ -115,6 +135,47 @@ def build_lists(path, parts=None, materials=None, lists=None, splits=None):
         sheet.append(['Robot type', 'Material name in the workbook', 'Shared material', 'Share min', 'Share mode',
                       'Share max', 'Remainder', 'Label', 'Basis', 'Decided'])
         for row in splits:
+            sheet.append(list(row))
+    if battery is not None:
+        sheet = book.create_sheet('Battery cells')
+        sheet.append(BATTERY_HEADINGS)
+        for row in battery:
+            sheet.append(list(row))
+    book.save(path)
+
+
+# The element recipes of the tests, in the layout of data/researched/element_recipes.xlsx: two cells, a few
+# compounds and one small recipe. 'Test recipe': a can of 20 %, either plain iron or nickel-plated (10 % nickel,
+# iron the remainder), half and half; 10 % salt (LiPF6); the rest carbon.
+CELL_HEADINGS = ['Cell', 'Chemistry', 'Format', 'Voltage (V)', 'Capacity (Ah)', 'Mass (g)', 'Energy (Wh)', 'Recipe',
+                 'Source', 'Kind']
+CELLS = [('Cell A', 'NMC', '18650', 3.6, 2.0, 50, None, 'Test recipe', 'For the tests.', 'Test'),
+         ('Cell B', 'NMC', '21700', 3.6, 4.0, 90, None, 'Test recipe', 'For the tests.', 'Test')]
+COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
+COMPOUNDS = [('Iron', 'Fe', ''), ('Nickel', 'Ni', ''), ('Carbon', 'C', ''), ('LiPF6', 'LiPF6', ''),
+             ('Half and half', 'C 0.5; H 0.5', '')]
+RECIPE_HEADINGS = ['Cell recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
+                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
+RECIPE = [('Test recipe', '', 'Can', 0.2, 0.2, 0.2, '', None, '', '', 'S', ''),
+          ('Test recipe', 'Can', 'Iron can', None, None, None, '', 0.5, 'Iron', '', 'E', ''),
+          ('Test recipe', 'Can', 'Plated can', None, None, None, '', 0.5, '', '', 'E', ''),
+          ('Test recipe', 'Plated can', 'Plating', 0.05, 0.1, 0.15, '', None, 'Nickel', '', 'E', ''),
+          ('Test recipe', 'Plated can', 'Steel', None, None, None, 'Yes', None, 'Iron', '', 'E', ''),
+          ('Test recipe', '', 'Salt', 0.05, 0.1, 0.15, '', None, 'LiPF6', 'Yes', 'E', ''),
+          ('Test recipe', '', 'Rest', None, None, None, 'Yes', None, 'Carbon', '', 'E', '')]
+
+
+def build_recipes(path, cells=None, compounds=None, recipe=None):
+    """Write small element recipes to `path`: the rows of CELLS, COMPOUNDS and RECIPE, or the ones given."""
+    book = Workbook()
+    book.active.title = 'About'
+    book.active.append(['For the tests.'])
+    for name, headings, rows in (('Cells', CELL_HEADINGS, CELLS if cells is None else cells),
+                                 ('Compounds', COMPOUND_HEADINGS, COMPOUNDS if compounds is None else compounds),
+                                 ('Recipe', RECIPE_HEADINGS, RECIPE if recipe is None else recipe)):
+        sheet = book.create_sheet(name)
+        sheet.append(headings)
+        for row in rows:
             sheet.append(list(row))
     book.save(path)
 
@@ -337,14 +398,21 @@ class TestMaterialFaults(Small):
 class SmallLists(Small):
     """Builds the small workbook and its shared lists, and checks both."""
 
-    def lists_faults(self, parts=None, materials=None, lists=None, splits=None):
+    def lists_faults(self, parts=None, materials=None, lists=None, splits=None, battery=None, cells=None):
+        """The faults of the small workbook and its shared lists; with `battery`, also of its sheet Battery cells,
+        checked against the small element recipes (with `cells` instead of CELLS when given)."""
         with tempfile.TemporaryDirectory() as folder:
             build(os.path.join(folder, 'small.xlsx'))
-            build_lists(os.path.join(folder, 'lists.xlsx'), parts, materials, lists, splits)
+            build_lists(os.path.join(folder, 'lists.xlsx'), parts, materials, lists, splits, battery)
+            build_recipes(os.path.join(folder, 'recipes.xlsx'), cells)
             self.book = schemas.read_workbook(os.path.join(folder, 'small.xlsx'), Params())
             self.lists = schemas.read_shared_lists(os.path.join(folder, 'lists.xlsx'))
-        return schemas.check_workbook(self.book, Params()) + schemas.check_shared_lists(self.book, self.lists,
-                                                                                         Params())
+            self.recipes = schemas.read_element_recipes(os.path.join(folder, 'recipes.xlsx'))
+        faults = schemas.check_workbook(self.book, Params()) + schemas.check_shared_lists(self.book, self.lists,
+                                                                                          Params())
+        if battery is not None:
+            faults += schemas.check_battery_cells(self.book, self.lists, self.recipes, Params())
+        return faults
 
     def assertFaultSays(self, faults, words):
         self.assertEqual(len(faults), 1, [f.text for f in faults])
@@ -495,6 +563,160 @@ class TestSplits(SmallLists):
                 self.assertTrue(os.path.exists(path))
 
 
+class TestElementRecipes(unittest.TestCase):
+    """The element recipes (data/researched/element_recipes.xlsx): Matthias, 2026-10-26, "I agree with the element
+    recipe of the NMC and LFP cylindrical cells as proposed in E1.7i"."""
+
+    def recipe_faults(self, compounds=None, recipe=None):
+        with tempfile.TemporaryDirectory() as folder:
+            build_recipes(os.path.join(folder, 'recipes.xlsx'), compounds=compounds, recipe=recipe)
+            self.recipes = schemas.read_element_recipes(os.path.join(folder, 'recipes.xlsx'))
+        return schemas.check_element_recipes(self.recipes, Params())
+
+    def assertFaultSays(self, faults, words):
+        self.assertEqual(len(faults), 1, [f.text for f in faults])
+        self.assertIn(words, faults[0].text)
+
+    def test_a_formula_gives_the_mass_shares_of_its_elements(self):
+        shares = schemas.composition('LiFePO4')
+        self.assertAlmostEqual(shares['Fe'], 55.845 / (6.94 + 55.845 + 30.974 + 4 * 15.999))
+        self.assertAlmostEqual(sum(shares.values()), 1)
+        self.assertAlmostEqual(schemas.composition('SiO0.64')['Si'], 28.085 / (28.085 + 0.64 * 15.999))
+        self.assertEqual(schemas.composition('C 0.9; H 0.1'), {'C': 0.9, 'H': 0.1})
+
+    def test_the_small_recipe_is_read_without_fault_and_adds_up(self):
+        self.assertEqual(self.recipe_faults(), [])
+        iron = schemas.element_shares(self.recipes, 'Test recipe', {'Can': 'Iron can'})
+        plated = schemas.element_shares(self.recipes, 'Test recipe', {'Can': 'Plated can'})
+        lipf6 = schemas.composition('LiPF6')
+        for shares in (iron, plated):
+            self.assertAlmostEqual(sum(shares.values()), 1)
+            self.assertAlmostEqual(shares['C'], 0.7)
+            self.assertAlmostEqual(shares['F'], 0.1 * lipf6['F'])
+        self.assertAlmostEqual(iron['Fe'], 0.2)
+        self.assertAlmostEqual(plated['Ni'], 0.02)
+        self.assertAlmostEqual(plated['Fe'], 0.18)
+
+    def test_a_composition_that_does_not_add_up(self):
+        compounds = COMPOUNDS[:4] + [('Half and half', 'C 0.5; H 0.4', '')]
+        self.assertFaultSays(self.recipe_faults(compounds=compounds), 'add up to 0.9, not 1')
+
+    def test_a_composition_that_cannot_be_read(self):
+        compounds = COMPOUNDS[:4] + [('Half and half', 'carbon and hydrogen', '')]
+        self.assertFaultSays(self.recipe_faults(compounds=compounds), 'cannot be read')
+
+    def test_an_element_that_has_no_atomic_mass(self):
+        compounds = COMPOUNDS[:4] + [('Half and half', 'Xy2', '')]
+        self.assertFaultSays(self.recipe_faults(compounds=compounds), "'Xy'")
+
+    def test_a_compound_not_in_the_sheet_compounds(self):
+        recipe = RECIPE[:6] + [('Test recipe', '', 'Rest', None, None, None, 'Yes', None, 'Graphene', '', 'E', '')]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), "the compound 'Graphene' is not in the sheet")
+
+    def test_a_group_with_two_remainders(self):
+        recipe = RECIPE[:5] + [('Test recipe', '', 'Salt', None, None, None, 'Yes', None, 'LiPF6', '', 'E', ''),
+                               RECIPE[6]]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), 'exactly one remainder, not 2')
+
+    def test_alternatives_whose_probabilities_do_not_add_up_to_one(self):
+        recipe = RECIPE[:1] + [RECIPE[1][:7] + (0.6,) + RECIPE[1][8:]] + RECIPE[2:]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), 'probabilities add up to 1.1')
+
+    def test_shares_out_of_order(self):
+        recipe = RECIPE[:5] + [('Test recipe', '', 'Salt', 0.15, 0.1, 0.2, '', None, 'LiPF6', '', 'E', '')] + RECIPE[6:]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), 'in order between 0 and 1')
+
+    def test_shares_that_leave_the_remainder_below_zero(self):
+        recipe = RECIPE[:5] + [('Test recipe', '', 'Salt', 0.5, 0.7, 0.9, '', None, 'LiPF6', '', 'E', '')] + RECIPE[6:]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), 'the largest shares add up to 1.1')
+
+    def test_an_item_within_an_item_that_does_not_exist(self):
+        recipe = RECIPE + [('Test recipe', 'Lid', 'Rivet', 0.1, 0.1, 0.1, '', None, 'Iron', '', 'E', '')]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), "within 'Lid', which is not an item")
+
+
+class TestBatteryCells(SmallLists):
+    """The battery as cells only, counted from each pack's voltage and capacity: Matthias, 2026-10-26, "The number of
+    cells, which also defines the cell mass depends on the voltage, which these batteries have and the robots use"."""
+
+    def test_the_cells_are_counted_and_the_rest_goes_to_not_allocated(self):
+        self.assertEqual(self.lists_faults(battery=BATTERY), [])
+        materials = self.book.materials_lists[2]
+        cells = schemas.battery_cells(materials, self.lists, self.recipes)
+        for got, want in zip(cells, (0.9, 0.95, 1.0)):
+            self.assertAlmostEqual(got, want)
+        totals = schemas.by_material(materials, self.lists, self.recipes)
+        self.assertAlmostEqual(totals['Battery materials'], 0.95)
+        self.assertAlmostEqual(totals['Not allocated'], 2 + 4 - 0.95)
+        self.assertAlmostEqual(sum(totals.values()), 6)
+        # Without the recipes, the workbook's row as it is.
+        self.assertEqual(schemas.by_material(materials, self.lists), {'Battery materials': 4, 'Not allocated': 2})
+
+    def test_a_rest_split_among_materials_adds_back_to_the_row(self):
+        rest = [battery_row('Rest', 'Copper', share=(0.1, 0.2, 0.3)), battery_row('Rest', 'Aluminium', remainder='Yes')]
+        self.assertEqual(self.lists_faults(battery=BATTERY[:2] + rest), [])
+        totals = schemas.by_material(self.book.materials_lists[2], self.lists, self.recipes)
+        self.assertAlmostEqual(totals['Copper'], 0.2 * (4 - 0.95))
+        self.assertAlmostEqual(totals['Aluminium'], 0.8 * (4 - 0.95))
+        self.assertAlmostEqual(sum(totals.values()), 6)
+        rows = schemas.material_rows(self.book.materials_lists[2], self.lists, self.recipes)
+        for got, want in zip(rows['Copper'][0], (0.1 * (3 - 1.0), 0.2 * (4 - 0.95), 0.3 * (5 - 0.9))):
+            self.assertAlmostEqual(got, want)
+
+    def test_a_cell_not_in_the_sheet_cells(self):
+        battery = [battery_row('Build', 'Cell Z', 10, 2, 1, 36, 4)] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), "the cell 'Cell Z' is not in the sheet Cells")
+
+    def test_cells_in_parallel_that_miss_the_capacity(self):
+        battery = [battery_row('Build', 'Cell A', 10, 1, 1, 36, 4)] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), 'is 50 % off the pack\'s 4 Ah')
+
+    def test_cells_in_series_that_miss_the_voltage(self):
+        battery = [battery_row('Build', 'Cell A', 12, 2, 1, 36, 4)] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), "more than one cell's voltage from the pack's 36 V")
+
+    def test_cells_heavier_than_the_pack_allows(self):
+        battery = [battery_row('Build', 'Cell A', 10, 2, 1, 36, 4, pack_kg=1.0)] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), "more than 85 % of the pack's 1 kg")
+
+    def test_a_build_with_neither_cells_in_series_nor_an_energy(self):
+        battery = [battery_row('Build', 'Cell A')] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), 'give the cells in series, in parallel and the packs')
+
+    def test_a_build_from_the_energy_counts_whole_cells(self):
+        battery = [battery_row('Build', 'Cell A', kwh=0.1)] + BATTERY[2:]   # 0.1 kWh / 7.2 Wh = 13.9: 14 cells
+        self.assertEqual(self.lists_faults(battery=battery), [])
+        self.assertAlmostEqual(schemas.battery_cells(self.book.materials_lists[2], self.lists, self.recipes)[1], 0.7)
+
+    def test_a_rest_without_a_remainder(self):
+        battery = BATTERY[:2] + [battery_row('Rest', 'Not allocated')]
+        self.assertFaultSays(self.lists_faults(battery=battery), 'exactly one remainder, not 0')
+
+    def test_a_rest_to_a_material_that_can_fall_below_zero(self):
+        cells = [('Cell A', 'NMC', '18650', 3.6, 2.0, 200, None, 'Test recipe', '', 'Test')] + CELLS[1:]
+        rest = [battery_row('Rest', 'Copper', remainder='Yes')]
+        self.assertFaultSays(self.lists_faults(battery=BATTERY[:2] + rest, cells=cells), 'can fall below zero')
+
+    def test_a_battery_row_both_kept_and_built(self):
+        battery = BATTERY + [battery_row('Kept', '')]
+        self.assertFaultSays(self.lists_faults(battery=battery), 'both kept and built')
+
+    def test_a_battery_row_without_any_row_in_the_sheet(self):
+        self.assertFaultSays(self.lists_faults(battery=[]), "no row in the sheet Battery cells")
+
+    def test_a_build_not_labelled_as_an_estimate(self):
+        battery = [battery_row('Build', 'Cell A', 10, 2, 1, 36, 4, label='Direct')] + BATTERY[2:]
+        self.assertFaultSays(self.lists_faults(battery=battery), "labelled 'E', not 'Direct'")
+
+    def test_the_robot_page_shows_the_cells(self):
+        self.lists_faults(battery=BATTERY)
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, '2_robot.png')
+            schemas.draw_robot(self.book.categories[1], self.book.parts_lists[2], self.book.materials_lists[2],
+                               self.lists, path, Params(), recipes=self.recipes)
+            self.assertTrue(os.path.exists(path))
+
+
 class TestRobotPage(SmallLists):
     """The one-view schema of a robot type: Matthias, 2026-10-26, "I want theat one can understand the robot and
     its compostion and parts in one vew"."""
@@ -578,6 +800,53 @@ class TestTheWorkbook(unittest.TestCase):
         three = schemas.by_material(book.materials_lists[3], lists)
         for name, mode in (('Magnets (NdFeB)', 1.26), ('Electronics', 0.84), ('Copper', 2.1), ('Mixed', 2.3)):
             self.assertAlmostEqual(three[name], mode, places=6, msg=name)
+
+    def test_the_element_recipes_reproduce_what_matthias_agreed(self):
+        params = Params()
+        if not os.path.exists(absolute(params.data.element_recipes)):
+            self.skipTest(f'{params.data.element_recipes} is not on disk')
+        recipes = schemas.read_element_recipes(absolute(params.data.element_recipes))
+        self.assertEqual(schemas.check_element_recipes(recipes, params), [])
+        # EVIDENCE.md E1.7i, the recipe at the modes, % of the cell, for each can.
+        expected = {('NMC cylindrical', 'Nickel-plated steel'): {'C': 29.68, 'Ni': 19.34, 'O': 14.69, 'Fe': 16.45,
+                                                                 'Cu': 8.30, 'Al': 3.68, 'Li': 2.57, 'Co': 1.35},
+                    ('NMC cylindrical', 'Stainless steel 304'): {'Ni': 20.40, 'Fe': 12.39, 'Cr': 3.04},
+                    ('LFP cylindrical', 'Nickel-plated steel'): {'Fe': 29.97, 'C': 25.40, 'O': 20.10, 'P': 7.83,
+                                                                 'Li': 1.75, 'Ni': 0.30},
+                    ('LFP cylindrical', 'Stainless steel 304'): {'Fe': 25.92, 'Ni': 1.36, 'Cr': 3.04}}
+        # The table was computed from the car file's cathode shares as EVIDENCE.md prints them (three decimals); the
+        # workbook holds them to five, which moves a share by up to 0.02 percentage points. The compounds written as
+        # mass shares are rounded to five decimals, so the elements add up to 1 within 0.00001.
+        for (recipe, can), elements in expected.items():
+            shares = schemas.element_shares(recipes, recipe, {'Can and cap': can})
+            self.assertAlmostEqual(sum(shares.values()), 1, places=5)
+            for element, percent in elements.items():
+                self.assertAlmostEqual(shares[element] * 100, percent, delta=0.03, msg=f'{recipe}, {can}, {element}')
+
+    def test_the_battery_cells_reproduce_what_matthias_agreed(self):
+        params = Params()
+        paths = [absolute(p) for p in (params.data.workbook, params.data.shared_lists, params.data.element_recipes)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the workbook, the shared lists or the element recipes are not on disk')
+        book = schemas.read_workbook(paths[0], params)
+        lists = schemas.read_shared_lists(paths[1])
+        recipes = schemas.read_element_recipes(paths[2])
+        self.assertEqual(schemas.check_battery_cells(book, lists, recipes, params), [])
+        # EVIDENCE.md E1.7j and E1.7k: min / mode (the median of the builds) / max, kg.
+        for n, expected in ((1, (1.74, 1.81, 1.95)), (3, (7.20, 7.335, 7.335)), (4, (2.60, 2.755, 2.92)),
+                            (5, (9.80, 10.39, 11.03))):
+            for got, want in zip(schemas.battery_cells(book.materials_lists[n], lists, recipes), expected):
+                self.assertAlmostEqual(got, want, delta=0.006, msg=f'robot type {n}')
+        for n in (2, 6):
+            self.assertIsNone(schemas.battery_cells(book.materials_lists[n], lists, recipes))
+        # Cells only change where the kilograms sit, never how many there are.
+        for n, parts_list in book.parts_lists.items():
+            totals = schemas.by_material(book.materials_lists[n], lists, recipes)
+            self.assertAlmostEqual(sum(totals.values()), parts_list.sum_kg[1], places=6, msg=f'robot type {n}')
+        one = schemas.by_material(book.materials_lists[1], lists, recipes)
+        rest = 2.5 - 1.81
+        self.assertAlmostEqual(one['Battery materials'], 1.81, delta=0.006)
+        self.assertAlmostEqual(one['Electronics'], 0.5 + 0.165 * rest, delta=0.006)
 
 
 if __name__ == '__main__':

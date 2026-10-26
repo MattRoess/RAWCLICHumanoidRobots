@@ -106,6 +106,17 @@ class DataParams:
         metadata={'doc': 'Where every part and material name goes in the shared part groups, body regions and '
                          'materials.'})
 
+    # The element recipes: the datasheets of the cells the battery builds use (sheet Cells), the compounds (sheet
+    # Compounds) and the parts of each cell down to its elements (sheet Recipe). Agreed by Matthias on 2026-10-26
+    # (documentation/claude/EVIDENCE.md, E1.7i to E1.7k); written by Claude, to be corrected by Matthias in Excel.
+    # 01_schemas.py checks them and counts each robot type's cells from them (sheet Battery cells of the shared lists).
+    # The recipes of the other materials will be added here.
+    # SAFE TO CHANGE: only if the file moves.
+    element_recipes: str = field(
+        default=os.path.join('data', 'researched', 'element_recipes.xlsx'),
+        metadata={'doc': 'The element recipes: the cells and their datasheets, the compounds, and the parts of each '
+                         'cell down to its elements.'})
+
 
 @dataclass
 class CheckParams:
@@ -157,7 +168,7 @@ def absolute(path: str) -> str:
 def validate(params: Params) -> None:
     """Stop with a ParameterError, in plain words, when a setting cannot be used as written."""
     data = params.data
-    for name in ('workbook', 'shared_lists'):
+    for name in ('workbook', 'shared_lists', 'element_recipes'):
         if not getattr(data, name).lower().endswith('.xlsx'):
             raise ParameterError(f'data.{name} must be an .xlsx workbook, not {getattr(data, name)!r}.')
     for name in ('taxonomy_sheet', 'components_sheet', 'materials_sheet', 'sources_dir'):
@@ -200,7 +211,7 @@ def source_status(params: Params) -> str:
     """Which of the input files and folders are on disk, one line each."""
     lines = []
     for label, path in (('workbook', params.data.workbook), ('shared lists', params.data.shared_lists),
-                        ('sources', params.data.sources_dir)):
+                        ('recipes', params.data.element_recipes), ('sources', params.data.sources_dir)):
         state = 'present' if os.path.exists(absolute(path)) else 'MISSING'
         lines.append(f'{label:<13} {path}: {state}')
     return '\n  '.join(lines)

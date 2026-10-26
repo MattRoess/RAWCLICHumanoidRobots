@@ -25,7 +25,8 @@ from src.params_schema import ParameterError, Params, current, flatten, validate
 
 # Every setting the project has; a new one must be added here, so that its arrival is a decision.
 KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.materials_sheet',
-        'data.sources_dir', 'data.shared_lists', 'checks.tolerance_kg', 'output.schemas_dir', 'output.dpi'}
+        'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'checks.tolerance_kg', 'output.schemas_dir',
+        'output.dpi'}
 
 
 class TestSettings(unittest.TestCase):
@@ -42,6 +43,7 @@ class TestSettings(unittest.TestCase):
     def test_a_setting_that_cannot_be_used_stops(self):
         for section, name, value in (('data', 'workbook', 'workbook.csv'),
                                      ('data', 'shared_lists', 'lists.csv'),
+                                     ('data', 'element_recipes', 'recipes.csv'),
                                      ('data', 'components_sheet', ' '),
                                      ('data', 'materials_sheet', ''),
                                      ('checks', 'tolerance_kg', 0),

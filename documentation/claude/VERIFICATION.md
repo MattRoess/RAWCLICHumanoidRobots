@@ -5,6 +5,39 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V23. The battery entry: the sheet Battery cells, element_recipes.xlsx, 01's checks and the robot pages
+
+- **What:** the battery as cells only and the element recipes of the cells, entered on Matthias's word ("Yes, build
+  the battery entry as laid out", then "I agree with the cell masses counted from voltage and capacity in E1.7j,
+  with robot type 3 from the three LFP cells of E1.7k. Resume the battery entry as laid out.").
+- **How:**
+  - **Tests first.** 27 new tests were written before the code and failed. 19 build small recipes and small battery
+    sheets, break one thing each and require exactly that fault: a composition that does not add up or cannot be
+    read, an element without an atomic mass, an unknown compound, two remainders, probabilities adding to 1.1,
+    shares out of order or above 1, an item within a missing item; a cell not in the sheet Cells, cells in parallel
+    50 % off the capacity, cells in series off the voltage, cells heavier than 85 % of the pack, a build with no
+    cells or energy, a rest without a remainder or able to fall below zero, a row both kept and built, a battery
+    row with no row, a build not labelled E.
+  - **The real files.** Two tests read them. The recipes must give, at the modes, E1.7i's element shares for
+    each cell and can (within 0.03 percentage points, because E1.7i used the car file's shares rounded to three
+    decimals). Each robot type must get E1.7j and E1.7k's cell masses. Every robot type's materials must still add up
+    to the mode of its parts list.
+  - **The pages.** 00 and 01 were run; the robot pages of all six robot types and faults.png were opened and read.
+- **Result:**
+  - All 92 tests pass, none skipped. 01 finds no fault.
+  - **The check caught a fault in the agreed recipe:** active material and binder could reach 101 % of a coating.
+    Matthias chose to lower the active material's maximum by one point (EVIDENCE.md E1.7i); the modes are unchanged.
+  - Cells, kg (lightest / middle / heaviest build): robot type 1 1.74 / 1.807 / 1.95; 3 7.2 / 7.335 / 7.335; 4 2.6 /
+    2.755 / 2.919; 5 9.8 / 10.388 / 11.033. Robot types 2 and 6 keep the workbook's rows.
+  - The totals stay 35, 70, 72.4, 69, 103.4 and 93.6 kg. Robot type 1's pack rest of 0.693 kg moves to plastics,
+    electronics and copper. Not allocated becomes 8.565 kg (robot type 3), 6.745 kg (4) and 15.012 kg (5).
+  - The element shares at the modes, % of the cell, nickel-plated / stainless can:
+    - NMC: Ni 19.32 / 20.38, Fe 16.45 / 12.39, Cr 0 / 3.04, C 29.68, Li 2.57, Co 1.37.
+    - LFP: Fe 29.97 / 25.92, P 7.83, Li 1.75.
+- **Not covered:** no stage draws element masses yet; the shared-lists pages still show the workbook's battery rows
+  (only the robot pages were asked for); the shares in the workbook files rest on the sources of E1.7, not on new
+  checks.
+
 ### V22. LFP cells for robot type 3's packs
 
 - **What:** which LFP cells build two 48 V, 9 Ah packs within their 9.6 kg ([EVIDENCE.md](EVIDENCE.md), E1.7k).

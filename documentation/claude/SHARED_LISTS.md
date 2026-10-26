@@ -184,3 +184,12 @@ A script placed every part and every material name, and stopped on any one missi
 and all 35 names are placed exactly once. For each of the six robots, the part groups, the body regions and the
 materials with "Not allocated" each add up to the mode of the robot's parts list. The three splits by number of
 units add up to the units of their row.
+
+## The battery as cells only
+
+Decided by Matthias on 2026-10-26 (EVIDENCE.md, E1.7d to E1.7k): "Battery materials should be the cells only in every
+robot type; the housing, BMS and busbars belong to the other materials". The sheet Battery cells of
+`data/researched/shared_lists.xlsx` holds it: robot types 2 and 6 keep the workbook's row, which is cells already;
+robot types 1, 3, 4 and 5 count their cells from each pack's voltage and capacity, and the rest of the row goes to
+plastics, electronics and copper (robot type 1) or to Not allocated (robot types 3, 4, 5). METHODOLOGY.md, "The
+battery as cells only", says how; 01 checks it (check 16).

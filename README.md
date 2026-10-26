@@ -37,7 +37,8 @@ The tests run from a terminal in the project folder:
 | `src/params_io.py` | Writes the register of the settings. |
 | `tests/` | The tests of 00 and 01. |
 | `data/raw/humanoid_robots_2040_workbook.xlsx` | The workbook the stages read. Matthias's, never changed. |
-| `data/researched/shared_lists.xlsx` | Where every part and material name goes in the shared part groups, body regions and materials, decided by Matthias on 2026-10-26. Corrected in Excel; 01 checks it. |
+| `data/researched/shared_lists.xlsx` | Where every part and material name goes in the shared part groups, body regions and materials, decided by Matthias on 2026-10-26. Corrected in Excel; 01 checks it. Its sheet Battery cells gives each robot type's battery as cells only. |
+| `data/researched/element_recipes.xlsx` | The element recipes: the datasheets of the cells, the compounds, and the NMC and LFP cylindrical cells down to their elements. Agreed by Matthias on 2026-10-26; 01 checks it. |
 | `figures/schemas/` | The pages 01 draws: the overview, per robot type its workbook page, its page in the shared lists and its robot in one view, and the faults. Outputs: redrawn by every run. |
 | `params.xlsx` | The register of the settings. An output: editing it changes nothing. |
 | `documentation/sources/` | Matthias's sources: the research reports, the earlier workbooks, the component diagram. |
@@ -64,8 +65,8 @@ Python 3.14.4 from pyenv, in a virtual environment in the project folder. No con
 https://github.com/MattRoess/RAWCLICHumanoidRobots, public, branch `main`. It holds the code and the documents
 only. Not in the repository, by `.gitignore`: the workbooks and every other `.xlsx`, everything the stages write
 (the figures, `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md`), and the earlier model
-`HumanoidRobotsMC/`. A fresh clone cannot run 01 until `data/raw/humanoid_robots_2040_workbook.xlsx` and
-`data/researched/shared_lists.xlsx` are supplied separately.
+`HumanoidRobotsMC/`. A fresh clone cannot run 01 until `data/raw/humanoid_robots_2040_workbook.xlsx`,
+`data/researched/shared_lists.xlsx` and `data/researched/element_recipes.xlsx` are supplied separately.
 
 ## Licence
 

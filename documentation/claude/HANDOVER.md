@@ -66,7 +66,14 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
      built: "The number of cells, which also defines the cell mass depends on the voltage, which these batteries
      have and the robots use". The build is paused; the revised cell mass is E1.7j, shown to him. Robot type 3 did
      not fit the cells read; he asked: "Search for a citable LFP cell sheet that builds a 48 V, 9 Ah pack within the
-     packs' 9.6 kg ...". Three makers' cells fit (E1.7k): 7.20 / 7.33 / 7.33 kg, shown to him for his agreement.
+     packs' 9.6 kg ...". Three makers' cells fit (E1.7k): 7.20 / 7.33 / 7.33 kg. He agreed: "I agree with the cell
+     masses counted from voltage and capacity in E1.7j, with robot type 3 from the three LFP cells of E1.7k. Resume
+     the battery entry as laid out."
+   - **Entered** (V23): the sheet Battery cells in `shared_lists.xlsx`, the new `element_recipes.xlsx` (setting
+     `data.element_recipes`), checks 15 and 16 in 01 with 27 new tests, the robot pages showing cells only. The new
+     check found the coatings could reach 101 %; he chose "Lower active max" (E1.7i).
+   - **Not done, his to decide:** whether the shared-lists pages should also show the battery as cells; the recipes of
+     the other materials.
 3. **The materials still to go through:** plastics, fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 

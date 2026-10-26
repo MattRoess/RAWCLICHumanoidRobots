@@ -15,7 +15,7 @@ Every setting is in `src/params_schema.py`.
 | Stage | Reads | Writes | Does |
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
-| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists. Checks that the workbook agrees with itself and that everything is placed. Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
+| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists; reads the element recipes and counts each robot type's battery cells. Checks that the workbook agrees with itself, that everything is placed, and that the recipes and the battery cells hold together. Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
 
 **Next, not built yet:** one stage per category, computing what its robots are made of. Matthias, 2026-10-26: "we
 will go through and do separate code for each of the different categories". Those stages will read the workbook
@@ -93,6 +93,35 @@ reasons are in [SHARED_LISTS.md](SHARED_LISTS.md). The rules:
   and maximum, and every page marks them E.
 - The kilograms the materials leave out of the parts list are shown as "Not allocated". Nothing is rescaled.
 
+## The battery as cells only, and the element recipes
+
+Matthias, 2026-10-26: "Battery materials should be the cells only in every robot type; the housing, BMS and busbars
+belong to the other materials", and "The number of cells, which also defines the cell mass depends on the voltage,
+which these batteries have and the robots use". The sources and every decision are in
+[EVIDENCE.md](EVIDENCE.md), E1.7b to E1.7k.
+
+- **The sheet Battery cells** of `data/researched/shared_lists.xlsx` says, for each robot type's battery row:
+  - **Kept** (robot types 2 and 6): the workbook's row is cells already and stays.
+  - **Build** (robot types 1, 3, 4, 5): one way to build the packs from a cell: cells in series (from the pack's
+    voltage) × cells in parallel (from its capacity) × packs, or, where no voltage or capacity was found (robot type
+    5), the whole cells that hold the pack's energy. The cell mass is the number of cells × the mass of one cell from
+    its datasheet. Every build of a robot type is equally likely; the pages show the middle one (the median) and the
+    lightest to the heaviest.
+  - **Rest**: where the workbook's row minus the cells goes. Robot type 1: its pack's enclosure, BMS and busbars,
+    split into plastics (the remainder), electronics and copper by shares weighed in small battery packs. Robot types
+    3, 4 and 5: Not allocated, which in robot type 5 gives up the 3.4 kg its cells weigh more than its row.
+
+  The kilograms of each robot are unchanged; only where they sit moves.
+- **The element recipes**, `data/researched/element_recipes.xlsx`:
+  - **Cells:** the datasheet of every cell a build uses.
+  - **Compounds:** each compound as a formula (atoms × the atomic masses of IUPAC 2024) or as mass shares.
+  - **Recipe:** the parts of the NMC and the LFP cylindrical cell as a tree, down to their compounds. A group's items
+    are shares with exactly one remainder, so nothing is normalised, or alternatives drawn by their probability (the
+    can: nickel-plated steel or stainless steel 304, half and half).
+
+  The recipes of the other materials will be added to the same workbook. No stage draws element masses yet: that
+  comes with the Monte Carlo stages.
+
 ## The checks
 
 Before drawing, 01 checks that the workbook agrees with itself and that the shared lists place everything. The
@@ -124,6 +153,14 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     - exactly one remainder;
     - the shares of the others in order between 0 and 1, with their largest adding up to at most 1;
     - each piece labelled E and in a material of the sheet Lists.
+15. Element recipes: every compound can be read and its mass shares add up to 1; every item of a recipe sits within
+    an item of the same recipe and is a compound or a group; the items of a group are shares with exactly one
+    remainder, in order and leaving it above zero even at the bounds, or alternatives whose probabilities add up to 1;
+    every cell has its recipe, its mass and its energy.
+16. Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the
+    sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
+    12 % of the pack's capacity, its cells at most 85 % of the packs' mass; the rest has exactly one remainder, shares
+    in order, materials of the sheet Lists, and never falls below zero where it goes to a material.
 
 Two numbers count as equal when they differ by at most `checks.tolerance_kg` (0.001 kg). A fault does not stop the
 drawing: the faulty row is drawn in red, the fault is listed on `faults.png` and counted on the overview.
@@ -160,6 +197,10 @@ report by report.
     in the middle.
   - **On the right, its materials as bars**, all 13 in the same order and on the same kg scale on all six pages,
     each with a line from the sum of its minimums to the sum of its maximums (bounds, not a likely range).
+  - **The battery as cells only** (dotted, E), from the sheet Battery cells: the bar is the middle build, its line
+    the lightest to the heaviest build; a note says how the cells were counted and where the rest of the workbook's
+    row went. A bar that takes part of that rest says "partly an estimate (E)". Robot types 2 and 6 say that their
+    row is cells already and kept.
   - The page says when the workbook gives no height for the anchor robot (categories 3, 5, 6), so that the middle of
     the category's height range is drawn.
 - **`faults.png`**: every fault in red, or "No fault found", then what was checked and what was not.
