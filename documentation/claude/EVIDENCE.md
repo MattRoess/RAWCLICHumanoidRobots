@@ -983,6 +983,75 @@ type 3 really uses are not known (E1.7c).
 - **Open, Matthias's decision:** whether plastics need elements at all, or stay "plastics". Their elements are not
   critical raw materials.
 
+#### E1.8b Plastics: what the robots use, and the sources
+
+Matthias, 2026-10-26, choosing the answer offered: "Yes, go on to material 8, plastics: show me what the robots use
+and the sources first."
+
+**What the robots use: the workbook's rows placed in Plastics** (sheet Materials of the shared lists):
+
+| Robot type | Row in the workbook | Grade, as the workbook writes it | kg, min / mode / max | Where, from the parts list |
+|---|---|---|---|---|
+| 1 | Engineering polymers | PA66 / ABS / PC | 4.5 / 5.5 / 6.5 | Covers, brackets |
+| 2 | Engineering plastics | PEEK / CF-PEEK / PC-ABS / PA66-GF | 6 / 7.5 / 11 | Shells, bushings, spacers, hand parts, bearing cages |
+| 3 | Engineering plastics | ABS/PC / PA66-GF | 5.5 / 6.5 / 7.5 | Cladding, flame-retardant battery enclosures, actuator housings |
+| 4 | Polymers & elastomers | PC/ABS / TPU / PA66-GF | 6 / 7.5 / 9.5 | Shell, soft-touch coating, hand structure, fingertip pads |
+| 5 | Composites & polymers | CF-PEEK / PA66-GF | 3 / 5 / 8 | Shell panels, hand covers |
+| 5 | Sealing elastomers | TPU / silicone | 1.5 / 2.5 / 4 | IP67 seals, boots, impact pads |
+| 6 | Reinforced polymers | CF-PEEK / PA66-GF | 8 / 10 / 12 | Armour backing matrix, covers |
+| 6 | Protective ballistic fibers | Kevlar 49 / Spectra (aramid / UHMWPE) | 2 / 3 / 5 | Spall liners, joint protection |
+
+Robot type 1 has also received its battery pack's enclosure, glue and pads (E1.7d). The polymers inside other rows
+(cable insulation of PTFE, PVC or FEP; fan impellers of PBT; Viton seals) belong to those rows, not here.
+
+**Sources read, 2026-10-26:**
+
+| Source | Kind | What it says |
+|---|---|---|
+| Wikipedia, *Nylon 66* and *Polyether ether ketone* (E1.8) | Encyclopedia | PA66 (C12H22N2O2)n; PEEK (C19H12O3)n |
+| Wikipedia, *Acrylonitrile butadiene styrene*. https://en.wikipedia.org/wiki/Acrylonitrile_butadiene_styrene | Encyclopedia | (C8H8)x·(C4H6)y·(C3H3N)z; "The proportions can vary from 15% to 35% acrylonitrile, 5% to 30% butadiene and 40% to 60% styrene" (not said to be by mass) |
+| Wikipedia, *Polycarbonate*. https://en.wikipedia.org/wiki/Polycarbonate | Encyclopedia | (C16H14O3)n; nothing on PC/ABS |
+| Wikipedia, *Polydimethylsiloxane*. https://en.wikipedia.org/wiki/Polydimethylsiloxane | Encyclopedia | Repeat unit [Si(CH3)2O]; nothing on fillers in silicone rubber |
+| Wikipedia, *Kevlar*. https://en.wikipedia.org/wiki/Kevlar | Encyclopedia | Repeat unit [-CO-C6H4-CO-NH-C6H4-NH-], that is C14H10N2O2 |
+| Wikipedia, *Ultra-high-molecular-weight polyethylene*. https://en.wikipedia.org/wiki/Ultra-high-molecular-weight_polyethylene | Encyclopedia | The polyethylene repeat unit (in a picture, so (C2H4)n by the name); Spectra and Dyneema are UHMWPE fibres |
+| Wikipedia, *Thermoplastic polyurethane*. https://en.wikipedia.org/wiki/Thermoplastic_polyurethane | Encyclopedia | Diisocyanates with short-chain diols (hard segments) and polyester or polyether soft segments; no proportions |
+| Ernzen, J.R. et al. (2022). Tuning Thermal, Morphological, and Physicochemical Properties of Thermoplastic Polyurethanes (TPUs) ... *Polymers* 14(15): 3164. https://pmc.ncbi.nlm.nih.gov/articles/PMC9371192 | Peer-reviewed study | MDI with 1,4-butanediol (and DPG), polyester polyols; "~50 wt.% HS" (hard segment). One study, not a market average |
+| US patent 8,586,491 B2 (2013), Owens Corning, quoting ASTM D578. https://patents.google.com/patent/US8586491 | Patent quoting the standard (the standard itself not read) | E-glass: SiO2 52–56, CaO 16–25, Al2O3 12–16, B2O3 5–10, MgO 0–5, Na2O+K2O 0–2, TiO2 0–0.8, Fe2O3 0.05–0.4, F 0–1.0 wt% |
+| BASF, *Ultramid A3WG6 RC BK23372*, Product Information 02/2024 (download.basf.com) | Maker's datasheet | "a Polyamide 66, reinforced with 30% of glass fiber"; PA66-GF30; 1370 kg/m³ |
+| Victrex, *VICTREX PEEK 450CA30*. https://cdn.victrex.com/en/downloads/datasheets/victrex-peek-450ca30 | Maker's datasheet | "30% carbon fibre reinforced PolyEtherEtherKetone (PEEK)"; 1.40 g/cm³ |
+| Henan Xunyu Chemical, *Fumed silica for silicone rubber*. https://fumed-silica.net/applications/silicone-rubber/ | Supplier's page, a commercial interest | Fumed silica "5.0-35" wt% in HTV silicone rubber, "5-30" in LSR |
+| Zhang, H., Yang, D., Wei, H., Yue, H., Gao, M., Shang, G. (2025). Research progress of flame retardant modified polycarbonate/acrylonitrile butadiene styrene alloys: a review. *PeerJ Materials Science*. https://doi.org/10.7717/peerj-matsci.39 | Peer-reviewed review, read in the browser | For UL94 V-0 in PC/ABS: organophosphorus (BDP, RDP, TPP) 10–12 wt%; brominated TBBPA + Sb2O3 10–15 wt%. The studies it cites use PC:ABS of 65:35, 7:3 and 9:1 |
+
+**Elements of each polymer, from its formula** (computed with the atomic masses of 01, plus N 14.007):
+
+| Polymer | C | H | O | N | Si |
+|---|---|---|---|---|---|
+| PA66 | 63.7 | 9.8 | 14.1 | 12.4 | |
+| PC | 75.6 | 5.5 | 18.9 | | |
+| PEEK | 79.2 | 4.2 | 16.6 | | |
+| ABS, at the middle of its ranges (25 / 17.5 / 57.5) | 85.6 | 7.8 | | 6.6 | |
+| Aramid (Kevlar) | 70.6 | 4.2 | 13.4 | 11.8 | |
+| UHMWPE | 85.6 | 14.4 | | | |
+| PDMS (silicone) | 32.4 | 8.2 | 21.6 | | 37.9 |
+| TPU hard segment (MDI + BDO) | 67.0 | 5.9 | 18.8 | 8.2 | |
+
+E-glass at the middle of ASTM D578's ranges holds O 47.8, Si 25.2, Ca 14.6, Al 7.4, B 2.3, Mg 1.5 % and traces.
+
+**Verdict:**
+- **The polymers are known by their formulas.** They bring C, H, O and N; silicone brings Si.
+- **The fillers are known from one grade each:** 30 % glass in PA66-GF (BASF), 30 % carbon fibre in CF-PEEK
+  (Victrex). The workbook names no grade number, so other shares (for example 15 or 50 %) are possible.
+- **Gaps, before any recipe:**
+  - how each robot's row splits among the polymers it names (for example robot type 2's PEEK / CF-PEEK / PC-ABS /
+    PA66-GF); no source gives it;
+  - the PC:ABS ratio in the robots (the studies use 65:35 to 9:1) and ABS's own monomer shares;
+  - whether the flame-retardant enclosure of robot type 3 uses phosphorus or bromine, and how much;
+  - TPU's soft segment (polyester or polyether) and its hard-segment share (one study: 50 %);
+  - silicone rubber's silica (5 to 35 %, from a supplier only);
+  - pigments and stabilisers, which no source here gives;
+  - aramid against UHMWPE in robot type 6's ballistic fibres.
+- **No recipe is proposed yet.**
+
 ---
 
 ### E1.9 Fibre composites
