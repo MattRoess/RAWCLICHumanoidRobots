@@ -1259,7 +1259,9 @@ max, from these sources, with estimates (E) for the gaps, verified on the web wi
 anything is entered."
 
 **Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the fibre-composite recipe as
-proposed in E1.9c, including its four choices." Not entered yet.**
+proposed in E1.9c, including its four choices." Entered the same day, on his word "Yes, enter the fibre-composite
+recipe now, as with the plastics", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V28). The two epoxies
+are alternatives within an item 'Epoxy system' of the recipe 'Epoxy'.**
 
 **The gaps, checked on the web first (2026-10-26):**
 

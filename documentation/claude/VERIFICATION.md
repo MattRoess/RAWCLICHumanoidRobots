@@ -5,6 +5,22 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V28. The fibre-composite entry
+
+- **What:** the recipe of E1.9c, entered on Matthias's word ("Yes, enter the fibre-composite recipe now, as with the
+  plastics: the recipes and the three rows in element_recipes.xlsx, checked by 01 with tests, and the documents.").
+- **How:**
+  - **Test first.** One new test was written before the data and failed. It reads the real workbook and must find
+    the three rows, no fault, and E1.9c's result table at the modes for each epoxy (within 0.06
+    percentage points), with sulphur only where the aromatic epoxy is chosen.
+  - **The data:** written by a throw-away script; the workbook was first copied to the session's scratch folder
+    (`element_recipes_before_composites.xlsx`). 3 compounds, 15 recipe items and 3 rows added. 01 got sulphur's
+    atomic mass (IUPAC CIAAW 2024, S 32.06), and check 17's wording names fibre composites.
+  - **The pages:** 00 and 01 were run; the checksums of all 20 pages were compared with those before.
+- **Result:** all 102 tests pass, none skipped; 01 finds no fault; the robot and shared-lists pages are byte for byte
+  unchanged; faults.png changed only in check 17's wording, and was opened and read.
+- **Not covered:** no stage draws element masses yet; the epoxy and robot type 3's split are estimates.
+
 ### V27. The proposed fibre-composite recipes, drawn in a sandbox
 
 - **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.9c, for robot types 1, 2 and 3.

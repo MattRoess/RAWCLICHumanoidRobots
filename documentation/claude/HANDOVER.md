@@ -35,7 +35,7 @@ Where the work stands, newest first: what was decided, by whom, and what is open
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
 | Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |
 | Magnets | "There is a material composition sheet available for magnets. It is with the cars. Check it there. There are all the different composition, which allow also higher temperatures"; then "Yes use the high temperature once for the joins, which are often use like knees, elbows etc." | Checked: E1.6b, V15 |
-| Fibre composites | Chose the answers offered: "Yes, go on to material 9, fibre composites: show me what the robots use and the sources first, verified on the web with references", then "Propose the fibre-composite recipe per robot type ...", then "I agree with the fibre-composite recipe as proposed in E1.9c, including its four choices." | Sources: E1.9b. Recipe: E1.9c, V27, agreed. Not entered |
+| Fibre composites | Chose the answers offered: "Yes, go on to material 9, fibre composites: show me what the robots use and the sources first, verified on the web with references", then "Propose the fibre-composite recipe per robot type ...", then "I agree with the fibre-composite recipe as proposed in E1.9c, including its four choices." | Sources: E1.9b. Recipe: E1.9c, V27, agreed. Entered: V28 |
 | Plastics | Chose the answers offered: "Yes, go on to material 8, plastics: show me what the robots use and the sources first", then "Propose the plastics recipe per robot type ...", then "I agree with the plastics recipe as proposed in E1.8c, including its four choices." | Sources: E1.8b. Recipe: E1.8c, V24, agreed. Verified on the web: E1.8d, V25; six values taken in on his word. Entered: V26 |
 | Battery materials | "There are a full composition of battery materials in the batteries for cars. Check them"; then he chose the answer offered: "Battery materials should be the cells only in every robot type; the housing, BMS and busbars belong to the other materials." | Checked: E1.7b, V16. The robots' cells: E1.7c, V17. The cell mass per robot type: E1.7d, V18, agreed. Chemistry, grade, format, silicon: E1.7e to E1.7g, decided. The cells' element recipe: E1.7i, V20, agreed. Not entered yet |
 
@@ -84,7 +84,8 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
    entered on "Yes, enter the plastics recipe now as laid out", V26),
    fibre composites (what the robots use and the sources, verified on the web, E1.9b; the recipe proposed on
    "Propose the fibre-composite recipe per robot type ...", E1.9c, V27; **agreed**: "I agree with the fibre-composite
-   recipe as proposed in E1.9c, including its four choices."; not entered yet),
+   recipe as proposed in E1.9c, including its four choices."; entered on "Yes, enter the fibre-composite recipe
+   now, as with the plastics", V28),
    electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 

@@ -932,6 +932,33 @@ class TestTheWorkbook(unittest.TestCase):
             for element, percent in elements.items():
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.06, msg=f'{recipe}, {element}')
 
+    def test_the_fibre_composite_recipes_reproduce_what_matthias_agreed(self):
+        params = Params()
+        paths = [absolute(p) for p in (params.data.workbook, params.data.shared_lists, params.data.element_recipes)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the workbook, the shared lists or the element recipes are not on disk')
+        book = schemas.read_workbook(paths[0], params)
+        lists = schemas.read_shared_lists(paths[1])
+        recipes = schemas.read_element_recipes(paths[2])
+        self.assertEqual(schemas.check_element_recipes(recipes, params), [])
+        self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
+        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Fibre composites'}
+        self.assertEqual(set(rows), {(1, 'Carbon-fiber composite'), (2, 'Carbon-fiber composite'), (3, 'Fiber composites')})
+        # EVIDENCE.md E1.9c, % of each row at the modes, with each of the two epoxies. One decimal, so within 0.06.
+        expected = {('CFRP', 'Aromatic amine'): {'C': 87.2, 'O': 6.6, 'H': 2.5, 'N': 2.4, 'S': 1.3},
+                    ('CFRP', 'Cycloaliphatic amine'): {'C': 89.0, 'O': 5.4, 'H': 3.3, 'N': 2.4},
+                    (rows[(3, 'Fiber composites')], 'Aromatic amine'): {'C': 54.1, 'O': 22.5, 'Si': 8.7, 'Ca': 5.1,
+                                                                         'S': 1.2},
+                    (rows[(3, 'Fiber composites')], 'Cycloaliphatic amine'): {'C': 55.7, 'O': 21.4, 'Si': 8.7,
+                                                                               'H': 2.9}}
+        self.assertEqual(rows[(1, 'Carbon-fiber composite')], 'CFRP')
+        for (recipe, epoxy), elements in expected.items():
+            shares = schemas.element_shares(recipes, recipe, {'Epoxy system': epoxy})
+            self.assertAlmostEqual(sum(shares.values()), 1, places=6, msg=recipe)
+            self.assertEqual('S' in shares, epoxy == 'Aromatic amine', msg=recipe)
+            for element, percent in elements.items():
+                self.assertAlmostEqual(shares[element] * 100, percent, delta=0.06, msg=f'{recipe}, {epoxy}, {element}')
+
 
 if __name__ == '__main__':
     unittest.main()
