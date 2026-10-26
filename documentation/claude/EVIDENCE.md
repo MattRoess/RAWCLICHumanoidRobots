@@ -1057,7 +1057,8 @@ E-glass at the middle of ASTM D578's ranges holds O 47.8, Si 25.2, Ca 14.6, Al 7
 Matthias, 2026-10-26, choosing the answer offered: "Propose the plastics recipe per robot type, min / mode / max,
 from these sources, with estimates (E) for the gaps. Show it to me before anything is entered."
 
-**Status: proposed to Matthias, not agreed, nothing entered.**
+**Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the plastics recipe as proposed in
+E1.8c, including its four choices." Not entered yet.**
 
 **Level 1, how each row splits among the polymers it names (E: no source gives it).** The first polymer the workbook
 names is the remainder. Each of the other k − 1 polymers takes 1/(2k) / 1/k / 1/(k − 1) of the row, so all are
