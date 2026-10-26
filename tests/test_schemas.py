@@ -154,7 +154,7 @@ CELLS = [('Cell A', 'NMC', '18650', 3.6, 2.0, 50, None, 'Test recipe', 'For the 
 COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
 COMPOUNDS = [('Iron', 'Fe', ''), ('Nickel', 'Ni', ''), ('Carbon', 'C', ''), ('LiPF6', 'LiPF6', ''),
              ('Half and half', 'C 0.5; H 0.5', '')]
-RECIPE_HEADINGS = ['Cell recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
+RECIPE_HEADINGS = ['Recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
                    'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
 RECIPE = [('Test recipe', '', 'Can', 0.2, 0.2, 0.2, '', None, '', '', 'S', ''),
           ('Test recipe', 'Can', 'Iron can', None, None, None, '', 0.5, 'Iron', '', 'E', ''),
@@ -165,14 +165,25 @@ RECIPE = [('Test recipe', '', 'Can', 0.2, 0.2, 0.2, '', None, '', '', 'S', ''),
           ('Test recipe', '', 'Rest', None, None, None, 'Yes', None, 'Carbon', '', 'E', '')]
 
 
-def build_recipes(path, cells=None, compounds=None, recipe=None):
-    """Write small element recipes to `path`: the rows of CELLS, COMPOUNDS and RECIPE, or the ones given."""
+# A small recipe within a recipe: 'Inner' is half carbon, half 'Half and half'; 'Outer' holds 40 % iron and 'Inner' as
+# its remainder.
+NESTED = [('Inner', '', 'Coal', 0.5, 0.5, 0.5, '', None, 'Carbon', '', 'E', ''),
+          ('Inner', '', 'Mix', None, None, None, 'Yes', None, 'Half and half', '', 'E', ''),
+          ('Outer', '', 'Iron part', 0.3, 0.4, 0.5, '', None, 'Iron', '', 'E', ''),
+          ('Outer', '', 'Inner part', None, None, None, 'Yes', None, 'Inner', '', 'E', '')]
+ROW_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared material', 'Recipe', 'Basis']
+
+
+def build_recipes(path, cells=None, compounds=None, recipe=None, rows=None):
+    """Write small element recipes to `path`: the rows of CELLS, COMPOUNDS and RECIPE, or the ones given, and a
+    sheet Rows with `rows` when it is given."""
     book = Workbook()
     book.active.title = 'About'
     book.active.append(['For the tests.'])
     for name, headings, rows in (('Cells', CELL_HEADINGS, CELLS if cells is None else cells),
                                  ('Compounds', COMPOUND_HEADINGS, COMPOUNDS if compounds is None else compounds),
-                                 ('Recipe', RECIPE_HEADINGS, RECIPE if recipe is None else recipe)):
+                                 ('Recipe', RECIPE_HEADINGS, RECIPE if recipe is None else recipe)) + \
+            ((('Rows', ROW_HEADINGS, rows),) if rows is not None else ()):
         sheet = book.create_sheet(name)
         sheet.append(headings)
         for row in rows:
@@ -398,13 +409,15 @@ class TestMaterialFaults(Small):
 class SmallLists(Small):
     """Builds the small workbook and its shared lists, and checks both."""
 
-    def lists_faults(self, parts=None, materials=None, lists=None, splits=None, battery=None, cells=None):
+    def lists_faults(self, parts=None, materials=None, lists=None, splits=None, battery=None, cells=None,
+                     rows=None):
         """The faults of the small workbook and its shared lists; with `battery`, also of its sheet Battery cells,
-        checked against the small element recipes (with `cells` instead of CELLS when given)."""
+        checked against the small element recipes (with `cells` instead of CELLS when given); with `rows`, also of
+        the sheet Rows of the recipes."""
         with tempfile.TemporaryDirectory() as folder:
             build(os.path.join(folder, 'small.xlsx'))
             build_lists(os.path.join(folder, 'lists.xlsx'), parts, materials, lists, splits, battery)
-            build_recipes(os.path.join(folder, 'recipes.xlsx'), cells)
+            build_recipes(os.path.join(folder, 'recipes.xlsx'), cells, recipe=RECIPE + NESTED, rows=rows)
             self.book = schemas.read_workbook(os.path.join(folder, 'small.xlsx'), Params())
             self.lists = schemas.read_shared_lists(os.path.join(folder, 'lists.xlsx'))
             self.recipes = schemas.read_element_recipes(os.path.join(folder, 'recipes.xlsx'))
@@ -412,6 +425,8 @@ class SmallLists(Small):
                                                                                           Params())
         if battery is not None:
             faults += schemas.check_battery_cells(self.book, self.lists, self.recipes, Params())
+        if rows is not None:
+            faults += schemas.check_material_recipes(self.book, self.lists, self.recipes, Params())
         return faults
 
     def assertFaultSays(self, faults, words):
@@ -634,6 +649,49 @@ class TestElementRecipes(unittest.TestCase):
         recipe = RECIPE + [('Test recipe', 'Lid', 'Rivet', 0.1, 0.1, 0.1, '', None, 'Iron', '', 'E', '')]
         self.assertFaultSays(self.recipe_faults(recipe=recipe), "within 'Lid', which is not an item")
 
+    def test_a_recipe_within_a_recipe(self):
+        self.assertEqual(self.recipe_faults(recipe=RECIPE + NESTED), [])
+        shares = schemas.element_shares(self.recipes, 'Outer')
+        self.assertAlmostEqual(shares['Fe'], 0.4)
+        self.assertAlmostEqual(shares['C'], 0.6 * (0.5 + 0.5 * 0.5))
+        self.assertAlmostEqual(shares['H'], 0.6 * 0.5 * 0.5)
+        self.assertAlmostEqual(sum(shares.values()), 1)
+
+    def test_recipes_that_contain_each_other(self):
+        recipe = RECIPE + NESTED[:1] + [('Inner', '', 'Mix', None, None, None, 'Yes', None, 'Outer', '', 'E', '')] + \
+            NESTED[2:]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), 'contain themselves')
+
+    def test_a_name_that_is_both_a_compound_and_a_recipe(self):
+        recipe = RECIPE + [('Carbon', '', 'Coal', None, None, None, 'Yes', None, 'Iron', '', 'E', '')]
+        self.assertFaultSays(self.recipe_faults(recipe=recipe), "'Carbon' is both a compound and a recipe")
+
+
+class TestMaterialRecipes(SmallLists):
+    """Which recipe each workbook row of a shared material follows (sheet Rows of element_recipes.xlsx): Matthias,
+    2026-10-26, "Yes, enter the plastics recipe now as laid out"."""
+
+    ROWS = [(1, 'Copper conductors', 'Copper', 'Outer', 'For the tests.')]
+    REST = [battery_row('Rest', 'Copper', share=(0.1, 0.2, 0.3)), battery_row('Rest', 'Not allocated', remainder='Yes')]
+
+    def test_every_piece_has_its_recipe(self):
+        self.assertEqual(self.lists_faults(rows=self.ROWS), [])
+
+    def test_a_piece_of_a_covered_material_without_a_row(self):
+        faults = self.lists_faults(battery=BATTERY[:2] + self.REST, rows=self.ROWS)
+        self.assertFaultSays(faults, "robot type 2: 'Battery materials' in Copper has no row in the sheet Rows")
+
+    def test_a_row_for_a_piece_that_does_not_exist(self):
+        rows = self.ROWS + [(1, 'Gold', 'Copper', 'Outer', '')]
+        self.assertFaultSays(self.lists_faults(rows=rows), "robot type 1 has no piece 'Gold' in Copper")
+
+    def test_a_row_naming_a_recipe_that_does_not_exist(self):
+        rows = [(1, 'Copper conductors', 'Copper', 'Bronze', '')]
+        self.assertFaultSays(self.lists_faults(rows=rows), "the recipe 'Bronze' is not in the sheet Recipe")
+
+    def test_a_piece_with_two_rows(self):
+        self.assertFaultSays(self.lists_faults(rows=self.ROWS * 2), 'has a second row')
+
 
 class TestBatteryCells(SmallLists):
     """The battery as cells only, counted from each pack's voltage and capacity: Matthias, 2026-10-26, "The number of
@@ -847,6 +905,32 @@ class TestTheWorkbook(unittest.TestCase):
         rest = 2.5 - 1.81
         self.assertAlmostEqual(one['Battery materials'], 1.81, delta=0.006)
         self.assertAlmostEqual(one['Electronics'], 0.5 + 0.165 * rest, delta=0.006)
+
+    def test_the_plastics_recipes_reproduce_what_matthias_agreed(self):
+        params = Params()
+        paths = [absolute(p) for p in (params.data.workbook, params.data.shared_lists, params.data.element_recipes)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the workbook, the shared lists or the element recipes are not on disk')
+        book = schemas.read_workbook(paths[0], params)
+        lists = schemas.read_shared_lists(paths[1])
+        recipes = schemas.read_element_recipes(paths[2])
+        self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
+        # EVIDENCE.md E1.8c with the six values of E1.8d, % of each row at the modes (the TPU's soft segment taken as
+        # the first alternative, polyester, as in the sandbox of V25). One decimal, so within 0.06.
+        expected = {'Plastics, robot type 1, Engineering polymers': {'C': 75.2, 'O': 11.0, 'H': 7.8, 'N': 6.0},
+                    'PC/ABS': {'C': 78.8, 'O': 13.2, 'H': 6.3, 'N': 1.7},
+                    'Plastics, robot type 2, Engineering plastics': {'C': 71.8, 'N': 2.7, 'Si': 1.9, 'Ca': 1.1},
+                    'Plastics, robot type 3, Engineering plastics': {'C': 61.1, 'O': 19.0, 'N': 5.1, 'P': 0.5},
+                    'Plastics, robot type 4, Polymers & elastomers': {'C': 62.3, 'O': 21.0, 'N': 4.8, 'Si': 2.5},
+                    'Plastics, robot type 5, Composites & polymers': {'C': 64.7, 'N': 4.6, 'Si': 3.7, 'Ca': 2.2},
+                    'Plastics, robot type 5, Sealing elastomers': {'C': 44.7, 'O': 26.7, 'Si': 19.8, 'N': 2.0},
+                    'Plastics, robot type 6, Reinforced polymers': {'C': 64.7, 'N': 4.6, 'Al': 1.1},
+                    'Plastics, robot type 6, Protective ballistic fibers': {'C': 78.1, 'H': 9.3, 'O': 6.7, 'N': 5.9}}
+        for recipe, elements in expected.items():
+            shares = schemas.element_shares(recipes, recipe)
+            self.assertAlmostEqual(sum(shares.values()), 1, places=6, msg=recipe)
+            for element, percent in elements.items():
+                self.assertAlmostEqual(shares[element] * 100, percent, delta=0.06, msg=f'{recipe}, {element}')
 
 
 if __name__ == '__main__':

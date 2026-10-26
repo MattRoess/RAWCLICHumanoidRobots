@@ -5,6 +5,30 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V26. The plastics entry: element_recipes.xlsx, the sheet Rows and 01's checks
+
+- **What:** the plastics recipe of E1.8c with the six values of E1.8d, entered on Matthias's word ("Yes, enter the
+  plastics recipe now as laid out: the polymer recipes and the robot rows in element_recipes.xlsx, 01 extended to
+  read and check them, with tests, and the documents.").
+- **How:**
+  - **Tests first.** 9 new tests were written before the code and failed. 6 break one thing each and require exactly
+    that fault: two recipes that contain each other, a name both a compound and a recipe, a piece of a covered
+    material without a row (the rest of a battery row), a row for a piece that does not exist, a row naming a missing
+    recipe, a piece with two rows. 2 check a recipe within a recipe and a complete sheet Rows. 1 reads the real
+    workbook and must reproduce E1.8c's result table at the modes, row by row (within 0.06 percentage points, the
+    table's rounding).
+  - **The data:** written by a throw-away script; the workbook was copied to the session's scratch folder first
+    (`element_recipes_before_plastics.xlsx`). 21 compounds, 48 recipe items and 9 rows added; the column 'Cell
+    recipe' renamed 'Recipe'.
+  - **The pages:** 00 and 01 were run; the checksums of all 20 pages were compared with those before.
+- **Result:**
+  - All 101 tests pass, none skipped. 01 finds no fault.
+  - The 9 rows reproduce E1.8c: for example robot type 3's plastics C 61.1, P 0.5 %; robot type 5's seals Si 19.8 %.
+  - The robot and shared-lists pages are byte for byte unchanged, as planned (plastics keep their kilograms);
+    faults.png changed only by the new check in its list, and was opened and read.
+- **Not covered:** no stage draws element masses yet; the split of each plastics row among its polymers is an
+  estimate throughout.
+
 ### V25. The nine open points of the plastics recipe, against sources read on the web
 
 - **What:** the nine values of E1.8c that rested on one source, a formula from a name, a picture or an estimate

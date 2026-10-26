@@ -38,7 +38,7 @@ The tests run from a terminal in the project folder:
 | `tests/` | The tests of 00 and 01. |
 | `data/raw/humanoid_robots_2040_workbook.xlsx` | The workbook the stages read. Matthias's, never changed. |
 | `data/researched/shared_lists.xlsx` | Where every part and material name goes in the shared part groups, body regions and materials, decided by Matthias on 2026-10-26. Corrected in Excel; 01 checks it. Its sheet Battery cells gives each robot type's battery as cells only. |
-| `data/researched/element_recipes.xlsx` | The element recipes: the datasheets of the cells, the compounds, and the NMC and LFP cylindrical cells down to their elements. Agreed by Matthias on 2026-10-26; 01 checks it. |
+| `data/researched/element_recipes.xlsx` | The element recipes: the datasheets of the cells, the compounds, the NMC and LFP cylindrical cells and the plastics down to their elements, and which recipe each workbook row follows. Agreed by Matthias on 2026-10-26; 01 checks it. |
 | `figures/schemas/` | The pages 01 draws: the overview, per robot type its workbook page, its page in the shared lists and its robot in one view, and the faults. Outputs: redrawn by every run. |
 | `params.xlsx` | The register of the settings. An output: editing it changes nothing. |
 | `documentation/sources/` | Matthias's sources: the research reports, the earlier workbooks, the component diagram. |

@@ -115,12 +115,18 @@ which these batteries have and the robots use". The sources and every decision a
 - **The element recipes**, `data/researched/element_recipes.xlsx`:
   - **Cells:** the datasheet of every cell a build uses.
   - **Compounds:** each compound as a formula (atoms × the atomic masses of IUPAC 2024) or as mass shares.
-  - **Recipe:** the parts of the NMC and the LFP cylindrical cell as a tree, down to their compounds. A group's items
-    are shares with exactly one remainder, so nothing is normalised, or alternatives drawn by their probability (the
-    can: nickel-plated steel or stainless steel 304, half and half).
+  - **Recipe:** the parts of each recipe as a tree, down to their compounds: the NMC and the LFP cylindrical cell;
+    the polymers (ABS, PC/ABS, flame-retardant PC/ABS, PA66-GF with its E-glass, CF-PEEK with its carbon fibre, TPU,
+    silicone rubber); and each robot type's plastics row, split among the polymers it names. An item is a compound,
+    a group, or another recipe (PA66-GF holds E-glass). A group's items are shares with exactly one remainder, so
+    nothing is normalised, or alternatives drawn by their probability (the can: nickel-plated or stainless steel; the
+    TPU's soft segment: polyester or polyether, half and half).
+  - **Rows:** which recipe each row of the workbook follows, for every shared material that has recipes; so far
+    plastics, including robot type 1's battery pack enclosure (plain PC/ABS).
 
-  The recipes of the other materials will be added to the same workbook. No stage draws element masses yet: that
-  comes with the Monte Carlo stages.
+  The plastics recipe and its sources are in [EVIDENCE.md](EVIDENCE.md), E1.8b to E1.8d. The recipes of the other
+  materials will be added to the same workbook. No stage draws element masses yet: that comes with the Monte Carlo
+  stages.
 
 ## The checks
 
@@ -154,13 +160,17 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     - the shares of the others in order between 0 and 1, with their largest adding up to at most 1;
     - each piece labelled E and in a material of the sheet Lists.
 15. Element recipes: every compound can be read and its mass shares add up to 1; every item of a recipe sits within
-    an item of the same recipe and is a compound or a group; the items of a group are shares with exactly one
-    remainder, in order and leaving it above zero even at the bounds, or alternatives whose probabilities add up to 1;
-    every cell has its recipe, its mass and its energy.
+    an item of the same recipe and is a compound, another recipe or a group; no name is both a compound and a recipe,
+    and no recipe contains itself; the items of a group are shares with exactly one remainder, in order and leaving it
+    above zero even at the bounds, or alternatives whose probabilities add up to 1; every cell has its recipe, its mass
+    and its energy.
 16. Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the
     sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
     12 % of the pack's capacity, its cells at most 85 % of the packs' mass; the rest has exactly one remainder, shares
     in order, materials of the sheet Lists, and never falls below zero where it goes to a material.
+17. Material recipes: every piece of a shared material that has recipes (so far plastics, the rest of a battery row
+    included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and every row names a piece
+    that exists.
 
 Two numbers count as equal when they differ by at most `checks.tolerance_kg` (0.001 kg). A fault does not stop the
 drawing: the faulty row is drawn in red, the fault is listed on `faults.png` and counted on the overview.

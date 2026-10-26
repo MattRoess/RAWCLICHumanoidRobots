@@ -1059,7 +1059,9 @@ from these sources, with estimates (E) for the gaps. Show it to me before anythi
 
 **Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the plastics recipe as proposed in
 E1.8c, including its four choices." After the verification of E1.8d, again choosing the answer offered: "Yes, take the
-six verified values of E1.8d into the plastics recipe." The tables below hold them. Not entered yet.**
+six verified values of E1.8d into the plastics recipe." The tables below hold them. Entered the same day, on his
+word "Yes, enter the plastics recipe now as laid out", in `data/researched/element_recipes.xlsx` (VERIFICATION.md
+V26).**
 
 **Level 1, how each row splits among the polymers it names (E: no source gives it).** The first polymer the workbook
 names is the remainder. Each of the other k − 1 polymers takes 1/(2k) / 1/k / 1/(k − 1) of the row, so all are

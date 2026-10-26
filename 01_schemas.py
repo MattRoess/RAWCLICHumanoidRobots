@@ -152,13 +152,17 @@ CHECKS_DONE = [
     'the shares of the others in order between 0 and 1 and their largest adding up to at most 1, each piece '
     "labelled E and in a material of the sheet Lists.",
     'Element recipes: every compound can be read and its mass shares add up to 1; every item of a recipe sits within '
-    'an item of the same recipe and is a compound or a group; the items of a group are shares with exactly one '
-    'remainder, in order and leaving it above zero, or alternatives whose probabilities add up to 1; every cell has '
-    'its recipe, its mass and its energy.',
+    'an item of the same recipe and is a compound, another recipe or a group; no name is both a compound and a recipe, '
+    'and no recipe contains itself; the items of a group are shares with exactly one remainder, in order and leaving '
+    'it above zero, or alternatives whose probabilities add up to 1; every cell has its recipe, its mass and its '
+    'energy.',
     "Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the "
     "sheet Cells, its cells in series within one cell's voltage of the pack's, its cells in parallel within 12 % of "
     "the pack's capacity, its cells at most 85 % of the packs' mass; the rest of the row has exactly one remainder, "
     'shares in order, materials of the sheet Lists, and never falls below zero where it goes to a material.',
+    'Material recipes: every piece of a shared material that has recipes (so far Plastics, the rest of a battery row '
+    'included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and every row names a piece '
+    'that exists.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -234,24 +238,27 @@ CAPACITY_TOLERANCE = 0.12
 # (E1.7k: the largest share of cells van de Ven et al. 2024 weighed in battery modules, laptops 85 %; an estimate, E).
 CELL_SHARE_OF_PACK = 0.85
 
-# The element recipes (data/researched/element_recipes.xlsx; EVIDENCE.md E1.7i, agreed by Matthias on 2026-10-26).
-# 'Cells' holds the datasheet of every cell a build uses; 'Compounds' the composition of every compound, as a formula
-# ('LiFePO4') or as mass shares ('C 0.905; H 0.095'); 'Recipe' the parts of each cell recipe as a tree: each item sits
-# within another ('' for the cell itself) and is either a compound or a group of items. The items of a group are either
-# shares (minimum, mode, maximum of the group's mass, exactly one of them the remainder) or alternatives (each with its
-# probability, adding up to 1), of which one is drawn.
-CELLS_SHEET, COMPOUNDS_SHEET, RECIPE_SHEET = 'Cells', 'Compounds', 'Recipe'
+# The element recipes (data/researched/element_recipes.xlsx; EVIDENCE.md E1.7i and E1.8c, agreed by Matthias on
+# 2026-10-26). 'Cells' holds the datasheet of every cell a build uses; 'Compounds' the composition of every compound, as
+# a formula ('LiFePO4') or as mass shares ('C 0.905; H 0.095'); 'Recipe' the parts of each recipe as a tree: each item
+# sits within another ('' for the recipe itself) and is a compound, another recipe (named in the column 'Compound') or a
+# group of items. The items of a group are either shares (minimum, mode, maximum of the group's mass, exactly one of
+# them the remainder) or alternatives (each with its probability, adding up to 1), of which one is drawn. 'Rows' says
+# which recipe each row of the workbook follows, for every shared material that has recipes (the battery's cells
+# follow the sheet Battery cells instead).
+CELLS_SHEET, COMPOUNDS_SHEET, RECIPE_SHEET, ROWS_SHEET = 'Cells', 'Compounds', 'Recipe', 'Rows'
 CELL_HEADINGS = ['Cell', 'Chemistry', 'Format', 'Voltage (V)', 'Capacity (Ah)', 'Mass (g)', 'Energy (Wh)', 'Recipe',
                  'Source', 'Kind']
 COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
-RECIPE_HEADINGS = ['Cell recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
+RECIPE_HEADINGS = ['Recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
                    'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
+ROW_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared material', 'Recipe', 'Basis']
 RECIPE_LABELS = {'S': 'from a source read', 'E': 'an estimate'}
 # The standard atomic weight of every element the recipes name, g/mol: IUPAC, Commission on Isotopic Abundances and
 # Atomic Weights, "Abridged Standard Atomic Weights 2024", https://www.ciaaw.org/abridged-atomic-weights.htm.
-ATOMIC_MASS = {'H': 1.0080, 'Li': 6.94, 'C': 12.011, 'O': 15.999, 'F': 18.998, 'Na': 22.990, 'Al': 26.982,
-               'Si': 28.085, 'P': 30.974, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693,
-               'Cu': 63.546}
+ATOMIC_MASS = {'H': 1.0080, 'Li': 6.94, 'B': 10.81, 'C': 12.011, 'N': 14.007, 'O': 15.999, 'F': 18.998,
+               'Na': 22.990, 'Mg': 24.305, 'Al': 26.982, 'Si': 28.085, 'P': 30.974, 'Ca': 40.078, 'Ti': 47.867,
+               'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546}
 
 # How the workbook marks the evidence of each row: the label in the column 'Evidence' and the fill colour
 # of the row (its colour key, row 4 of 'Components & Materials': no fill, light yellow, light orange). The
@@ -460,15 +467,27 @@ class RecipeItem:
     """One item of a cell recipe (sheet 'Recipe' of element_recipes.xlsx)."""
 
     row: int
-    recipe: str               # the cell recipe, e.g. 'NMC cylindrical'
+    recipe: str               # the recipe, e.g. 'NMC cylindrical' or 'PA66-GF'
     within: str               # the item it is part of; '' for the cell itself
     item: str                 # its name, unique within the recipe
     share: tuple              # its share of what it is within: minimum, mode, maximum (None for a remainder)
     remainder: bool           # True for the item that takes 1 minus the shares of the others
     probability: float | None # for an alternative: how likely it is drawn
-    compound: str             # the compound it is made of; '' for a group of items
+    compound: str             # the compound, or the other recipe, it is made of; '' for a group of items
     follows_energy: bool      # its share rises and falls with the cell's energy per kg (E1.7i)
     label: str                # 'S' from a source read, 'E' an estimate
+    basis: str
+
+
+@dataclass
+class MaterialRow:
+    """Which recipe one row of the workbook follows (sheet 'Rows' of element_recipes.xlsx)."""
+
+    row: int                  # the row in the sheet 'Rows'
+    robot: int                # the robot type
+    family: str               # the material name in the workbook, e.g. 'Engineering polymers'
+    shared: str               # its shared material, e.g. 'Plastics'
+    recipe: str               # the recipe of the sheet 'Recipe' it follows
     basis: str
 
 
@@ -480,6 +499,7 @@ class ElementRecipes:
     compounds: dict           # compound name -> (composition as written, row in the sheet 'Compounds')
     items: list               # RecipeItem, in the order of the sheet
     faults: list              # Fault, found while reading
+    rows: list | None = None  # MaterialRow, from 'Rows'; None when the sheet is not there
 
 
 def number(value) -> float | None:
@@ -801,7 +821,22 @@ def read_element_recipes(path: str) -> ElementRecipes:
                                 remainder=text(remainder).lower() == 'yes', probability=number(probability),
                                 compound=text(compound), follows_energy=text(follows).lower() == 'yes',
                                 label=text(label), basis=text(basis)))
-    return ElementRecipes(cells, compounds, items, faults)
+
+    # Which recipe each row of the workbook follows, when the sheet is there.
+    rows = None
+    if ROWS_SHEET in book.sheetnames:
+        found = [text(cell.value) for cell in book[ROWS_SHEET][1]][:len(ROW_HEADINGS)]
+        if found != ROW_HEADINGS:
+            raise WorkbookError(f"{path}, sheet '{ROWS_SHEET}': the first row must be {ROW_HEADINGS}, not {found}.")
+        rows = []
+        for row in book[ROWS_SHEET].iter_rows(min_row=2):
+            values = [cell.value for cell in row] + [None] * 5
+            if all(value is None for value in values):
+                continue
+            robot, family, shared, recipe, basis = values[:5]
+            rows.append(MaterialRow(row=row[0].row, robot=int(number(robot) or 0), family=text(family),
+                                    shared=text(shared), recipe=text(recipe), basis=text(basis)))
+    return ElementRecipes(cells, compounds, items, faults, rows)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -1104,10 +1139,32 @@ def shares_faults(pieces: list, on: str, what: str) -> list[Fault]:
     return faults
 
 
+def recipe_cycles(recipes: ElementRecipes) -> list[list[str]]:
+    """The groups of recipes that contain themselves, directly or through others (each group once, sorted): a recipe
+    may hold another recipe, but never one that holds it back."""
+    holds: dict = {}
+    names = {i.recipe for i in recipes.items}
+    for i in recipes.items:
+        if i.compound in names:
+            holds.setdefault(i.recipe, set()).add(i.compound)
+
+    def reach(start: str) -> set:
+        seen, todo = set(), list(holds.get(start, ()))
+        while todo:
+            name = todo.pop()
+            if name not in seen:
+                seen.add(name)
+                todo += list(holds.get(name, ()))
+        return seen
+
+    cycles = {frozenset(n for n in reach(name) if name in reach(n)) | {name} for name in names if name in reach(name)}
+    return sorted(sorted(c) for c in cycles)
+
+
 def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault]:
     """Every compound readable and adding up to 1; every recipe a tree of items whose shares are in order with one
-    remainder, or whose alternatives add up to a probability of 1; every compound a recipe uses listed; every cell's
-    recipe there."""
+    remainder, or whose alternatives add up to a probability of 1; every compound or recipe an item names listed, no
+    name both a compound and a recipe, no recipe containing itself; every cell's recipe there."""
     faults = list(recipes.faults)
     where = os.path.basename(params.data.element_recipes) + ': '
     for name, (written, row) in recipes.compounds.items():
@@ -1121,15 +1178,22 @@ def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault
 
     on = where + RECIPE_SHEET
     names = {(i.recipe, i.item) for i in recipes.items}
+    recipe_names = {i.recipe for i in recipes.items}
+    for name in sorted(recipe_names & set(recipes.compounds)):
+        faults.append(Fault(on, next(i.row for i in recipes.items if i.recipe == name),
+                            f"'{name}' is both a compound and a recipe; give them different names."))
+    for cycle in recipe_cycles(recipes):
+        faults.append(Fault(on, 0, f"the recipes {', '.join(cycle)} contain themselves; a recipe may hold another "
+                                   'recipe, but never one that holds it back.'))
     groups: dict = {}
     for i in recipes.items:
         groups.setdefault((i.recipe, i.within), []).append(i)
         if i.within and (i.recipe, i.within) not in names:
             faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: it sits within '{i.within}', which is not an item "
                                            'of this recipe.'))
-        if i.compound and i.compound not in recipes.compounds:
+        if i.compound and i.compound not in recipes.compounds and i.compound not in recipe_names:
             faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: the compound '{i.compound}' is not in the sheet "
-                                           f'{COMPOUNDS_SHEET}.'))
+                                           f'{COMPOUNDS_SHEET}, nor is it a recipe.'))
         if i.label not in RECIPE_LABELS:
             faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: the label must be one of "
                                            f"{', '.join(RECIPE_LABELS)}, not '{i.label}'."))
@@ -1140,7 +1204,7 @@ def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault
     for (recipe, within), members in groups.items():
         if within and (recipe, within) not in names:
             continue  # reported above, against the item that names it
-        what = f"{recipe}, within '{within or 'the cell'}'"
+        what = f"{recipe}, within '{within or 'the recipe itself'}'"
         alternatives = [m for m in members if m.probability is not None]
         if alternatives and len(alternatives) != len(members):
             faults.append(Fault(on, members[0].row, f'{what}: give every item a probability, or none.'))
@@ -1161,16 +1225,16 @@ def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault
 
 
 def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = None) -> dict:
-    """The mass share of each element in a cell of `recipe`, with every share at its mode and each remainder 1 minus
-    the modes of the others. Where the items of a group are alternatives, `choose` names the one taken (the group's
-    name -> the item's name); without it, the first. The shares add up to 1."""
+    """The mass share of each element in `recipe`, with every share at its mode and each remainder 1 minus the modes of
+    the others; an item that is another recipe adds that recipe's elements. Where the items of a group are
+    alternatives, `choose` names the one taken (the group's name -> the item's name); without it, the first. The
+    shares add up to 1. The recipes must not contain themselves (check_element_recipes)."""
     members: dict = {}
     for i in recipes.items:
-        if i.recipe == recipe:
-            members.setdefault(i.within, []).append(i)
+        members.setdefault((i.recipe, i.within), []).append(i)
 
-    def add(within: str, weight: float, out: dict) -> None:
-        items = members.get(within, [])
+    def add(name: str, within: str, weight: float, out: dict) -> None:
+        items = members.get((name, within), [])
         if items and items[0].probability is not None:
             wanted = (choose or {}).get(within, items[0].item)
             items = [next((i for i in items if i.item == wanted), items[0])]
@@ -1179,14 +1243,16 @@ def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = N
             others = sum(i.share[1] for i in items if not i.remainder)
             shares = {i.item: 1 - others if i.remainder else i.share[1] for i in items}
         for i in items:
-            if i.compound:
+            if i.compound in recipes.compounds:
                 for element, share in composition(recipes.compounds[i.compound][0]).items():
                     out[element] = out.get(element, 0) + weight * shares[i.item] * share
+            elif i.compound:
+                add(i.compound, '', weight * shares[i.item], out)    # another recipe, from its top
             else:
-                add(i.item, weight * shares[i.item], out)
+                add(name, i.item, weight * shares[i.item], out)
 
     out: dict = {}
-    add('', 1.0, out)
+    add(recipe, '', 1.0, out)
     return out
 
 
@@ -1299,6 +1365,36 @@ def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementReci
                                                  'a rest below zero.'))
     for n, rows in rows_of.items():
         faults.append(Fault(on, rows[0].row, f'robot type {n} is not in the workbook.'))
+    return faults
+
+
+def check_material_recipes(book: Workbook, lists: SharedLists, recipes: ElementRecipes,
+                           params: Params) -> list[Fault]:
+    """Every piece of a shared material that has recipes (a material named in the sheet Rows; so far Plastics) has
+    exactly one row there, naming a recipe of the sheet Recipe; and every row names a piece that exists. The pieces are
+    those the robot pages draw: with the battery as cells only, so the rest of a battery row needs its recipe too."""
+    if recipes.rows is None:
+        return []
+    on = os.path.basename(params.data.element_recipes) + ': ' + ROWS_SHEET
+    faults = []
+    covered = {r.shared for r in recipes.rows}
+    pieces = {(n, family, shared) for n, ml in book.materials_lists.items()
+              for shared, _, _, family in material_pieces(ml, lists, recipes) if shared in covered}
+    seen: dict = {}
+    for r in recipes.rows:
+        key = (r.robot, r.family, r.shared)
+        if key in seen:
+            faults.append(Fault(on, r.row, f"robot type {r.robot}: '{r.family}' in {r.shared} has a second row "
+                                           f'(first in row {seen[key]}).'))
+            continue
+        seen[key] = r.row
+        if key not in pieces:
+            faults.append(Fault(on, r.row, f"robot type {r.robot} has no piece '{r.family}' in {r.shared}."))
+        if r.recipe not in {i.recipe for i in recipes.items}:
+            faults.append(Fault(on, r.row, f"robot type {r.robot}, '{r.family}': the recipe '{r.recipe}' is not in the "
+                                           f'sheet {RECIPE_SHEET}.'))
+    for n, family, shared in sorted(pieces - set(seen)):
+        faults.append(Fault(on, 0, f"robot type {n}: '{family}' in {shared} has no row in the sheet {ROWS_SHEET}."))
     return faults
 
 
@@ -2316,7 +2412,8 @@ def main() -> int:
     if lists is not None:
         try:
             recipes = read_element_recipes(absolute(params.data.element_recipes))
-            faults += check_element_recipes(recipes, params) + check_battery_cells(book, lists, recipes, params)
+            faults += (check_element_recipes(recipes, params) + check_battery_cells(book, lists, recipes, params)
+                       + check_material_recipes(book, lists, recipes, params))
         except WorkbookError as error:
             print(f'{error} The robot pages show the battery rows as the workbook gives them.')
     sources = absolute(params.data.sources_dir)
