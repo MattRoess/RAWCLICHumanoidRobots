@@ -2,6 +2,89 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
+## 2026-10-26, end of the day: where everything stands (start here)
+
+Matthias, leaving: "Handover. I will need to go I let you work". Nothing was started after it: every next step
+below waits for his word.
+
+### What is built, and on GitHub
+
+- **The stages**, each run by pressing Run:
+  - `00_parameters.py`: the settings;
+  - `01_schemas.py`: what the workbook defines, the shared lists and the robot in one view;
+  - `02_composition.py`: the Monte Carlo draws of each robot type, for stock-and-flow;
+  - `03_comparison.py`: the robot types side by side.
+- **The inputs**, all three checked by 01 and 02:
+  - `data/raw/humanoid_robots_2040_workbook.xlsx`: Matthias's, never changed;
+  - `data/researched/shared_lists.xlsx`: placements, splits, battery cells;
+  - `data/researched/element_recipes.xlsx`: the cells, the compounds and the recipes of the battery cells, the
+    plastics and the fibre composites.
+- **Tests:** 129 pass (`./.venv/bin/python -m unittest discover -s tests`).
+- **On GitHub:** https://github.com/MattRoess/RAWCLICHumanoidRobots, `main`, last commit 9a14f83. Code and documents
+  only; the git folder is `$HOME/gitdirs/RAWCLICHumanoidRobots.git`.
+- **Not run at full size:** 02 and 03 have run only with 2,000 draws, into Claude's scratch folder. `data/consolidated/`,
+  `figures/composition/` and `figures/comparison/` do not exist yet. `figures/schemas/` was last drawn before 02
+  existed: its overview still says "not built yet" until 01 is run again.
+
+### Waiting for Matthias
+
+1. **The real run, his:** press Run on, in this order:
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+   The draws come to about 250 MB, computed, not measured. Memory is estimated at around 1 GB; the time was not
+   measured.
+2. **Not allocated below zero:** in about half of robot type 1's draws and two thirds of robot type 2's, because
+   their materials and their parts are drawn independently (V32). Whether to tie the two is his decision.
+3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
+   agreement, then the entry. His comments are in the table "His comments, material by material" below:
+   - aluminium: "a more mixed approach";
+   - magnesium: "the selection is more limited";
+   - titanium: robot types 2, 5 and 6;
+   - steel: researched in E1.4b;
+   - copper, with the silver of the circuit boards;
+   - magnets: the high-temperature grades for the joints, E1.6b;
+   - electronics;
+   - ceramics.
+
+   The decisions still open for them, from "Open: Matthias's decisions, before any min / mode / max" below:
+   - the magnets' basis and Dy content;
+   - the circuit boards' basis;
+   - the grade shares: 6061 against 7075; GCr15 against 42CrMo and 20CrMnTi; alumina against SiC;
+   - the steels without a grade.
+4. **Smaller points, all his:**
+   - whether the shared-lists pages also show the battery as cells;
+   - a range of motors per robot (SHARED_LISTS.md, point 11), and a better split by body region (point 5);
+   - whether the earlier model `HumanoidRobotsMC/` stays or goes;
+   - whether reports 05 and 06 exist;
+   - the `.md` and `*_original.md` pairs among the earlier research;
+   - rewriting the first commit (557967b), which still holds `PARAMETER_REFERENCE.md`;
+   - a reader of humanoid robots in RAWCLICStockAndFlow, which is another repository (recommendation e).
+
+**Settled since the older "Open" lists below:**
+- the repository exists;
+- the stages are 02 and 03, his choice of one stage for all six robot types, not 02 to 08;
+- the shared lists live in `data/researched/`;
+- the battery, the plastics and the fibre composites are entered (V23, V26, V28).
+
+### For the next session
+
+- Read the folder's `CLAUDE.md`, then this section, then the section below.
+- To test 02 and 03 on the real inputs without touching `data/` or `figures/`:
+  - load the stage with importlib, registered as 'composition' or 'comparison';
+  - take `current()` from `src/params_schema.py`;
+  - set `composition.draws` to a few thousand;
+  - point `output.composition_dir`, `output.composition_figures_dir` and `output.comparison_dir` at a scratch folder;
+  - call the stage's `run(params)`.
+
+  The scripts of this session (`sandbox_02.py`, `sandbox_03.py`, `mutants_02.py`, `mutants_03.py`) were in its
+  scratch folder and are gone with it.
+- The backups made before each data entry were in the same scratch folder: `shared_lists_before_battery.xlsx`,
+  `shared_lists_before_kept_recipe.xlsx`, `element_recipes_before_plastics.xlsx`,
+  `element_recipes_before_composites.xlsx`. They may be gone; git does not hold the workbooks.
+
 ## 2026-10-26: 02_composition.py and 03_comparison.py built and tested with few draws
 
 ### Asked, in Matthias's words
