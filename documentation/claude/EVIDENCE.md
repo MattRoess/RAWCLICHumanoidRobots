@@ -775,7 +775,86 @@ NMC anode (E1.7g). The car file's cells have no steel can, so the build of a cyl
 - The can: stainless steel or nickel-plated steel, and the nickel plating's thickness.
 - The build of an LFP cylindrical cell: no source read weighs its parts.
 
-**No recipe is proposed yet.**
+**No recipe is proposed yet.** Proposed since: E1.7i.
+
+#### E1.7i Proposal: the element recipe of the cylindrical cells
+
+Matthias, 2026-10-26, choosing the answer offered: "Yes, propose the element recipe of the NMC and LFP cylindrical
+cells, min / mode / max, from these sources, with estimates (E) for the gaps. Show it to me before anything is
+entered."
+
+**Status: proposed to Matthias, not agreed, nothing entered.**
+
+**Level 1, the parts of an NMC cell** (robot types 1, 2, 4, 5, 6), % of the cell's mass:
+
+| Part | Min | Mode | Max | Basis |
+|---|---|---|---|---|
+| Can and cap | 16.6 | 16.8 | 17.0 | LG M50 16.6 (Chen et al., measured) and 18650 17 (van de Ven et al., measured); mode the middle (E) |
+| Cathode coating | 35.7 | 37.1 | 39.3 | LG M50 × f |
+| Anode coating | 21.9 | 22.7 | 24.1 | LG M50 × f |
+| Aluminium foil | 3.2 | 3.3 | 3.5 | LG M50 × f |
+| Copper foil | 8.0 | 8.3 | 8.8 | LG M50 × f |
+| The rest | 7.4 | 11.8 | 14.6 | **The remainder of the cell** (11.9 % in the LG M50) |
+| — electrolyte, share of the rest | 23 % | 47 % | 70 % | E: van de Ven's "loss" 2.7 %, Sandia's 5.6 % and the car file's electrolyte in a can 8.5 %, each over 11.8 %; the top lowered from 72 to 70 % so that the last line never falls below 0 |
+| — separator, share of the rest | 9 % | 13 % | 28 % | E: 1.1 % (Chen's 12 µm × two layers of an assumed 85 × 6.7 cm × polyethylene's 0.95 g/cm³ × an assumed 60 % solid), 1.5 % (the car file in a can), 3.6 % (van de Ven), each over 11.8 %; the top lowered from 31 to 28 % for the same reason |
+| — tabs, insulators, other | | 4.7 % of the cell | | The remainder of the rest |
+
+- **f** is the cell's energy per kg in the same draw (E1.7d) divided by its mode, 241.5 Wh/kg: 0.963 to 1.060. A
+  cell that holds more energy per kg has heavier electrodes and a lighter rest. This pairs the recipe with the
+  cell mass draw by draw.
+
+**Level 1, the parts of an LFP cell** (robot type 3): no source weighs an LFP cylindrical cell, so the car file's
+LFP cell is put in the same can (E). Its parts are multiplied by 83.2 / 97.5 = 0.853: the mass beside a 16.8 % can,
+over the car cell's 97.5 % beside its own casing. This conversion is done once, on fixed numbers; no draw is divided
+by a sum.
+
+| Part | Min | Mode | Max | Basis |
+|---|---|---|---|---|
+| Can and cap | 16.6 | 16.8 | 17.0 | As for NMC |
+| Cathode coating | 35.8 | 39.8 | 43.8 | Car file × 0.853, with the car file's own ±10 % |
+| Anode coating | 17.7 | 19.7 | 21.7 | As above |
+| Copper foil | 7.6 | 8.4 | 9.2 | As above |
+| Aluminium foil | 3.2 | 3.5 | 3.9 | As above |
+| Separator | 0.9 | 1.0 | 1.1 | As above |
+| Electrolyte | 4.5 | 10.8 | 17.1 | **The remainder of the cell**; never below 0 |
+
+**Level 2, the elements of each part:**
+
+| Part | Elements | Basis |
+|---|---|---|
+| Can | Drawn as one of two states, 50 / 50 (E: one source for each). **Nickel-plated steel:** Ni 0.9 / 1.8 / 2.7 %, Mn 0.1 / 0.25 / 0.4 %, C 0.02 / 0.05 / 0.08 %, Fe the remainder. **Stainless 304:** Cr 18.1, Ni 8.1, C 0.04 %, Fe the remainder | Nickel: E, 1 / 2 / 3 µm a side on a 0.25 mm wall (Ohneseit et al.: 0.23 to 0.27 mm); no source read gives the plating. Mn and C: E, a deep-drawing steel, no source read. 304: Outokumpu's typical values (E1.4b); its Mn and Si, not in those values, stay in the Fe |
+| Cathode coating | Active material 94 / 96 / 98 %, PVDF binder 1 / 2 / 3 %, conductive carbon the remainder | E: no source read gives the shares. Active: the car file's high-nickel NMC (Li 7.1, Ni 52.6, Mn 3.6, Co 3.8, O 32.8 %), or LiFePO4 by its formula. PVDF by its formula (C, H, F) |
+| Anode coating | Active material 95 / 96 / 97 %, binder 2 / 3 / 4 %, conductive carbon the remainder | E. Active, NMC cells: graphite with 0 / 1 / 7.3 % Si as SiO0.64 (decided, E1.7g). LFP cells: graphite only (Ohneseit et al.: "no silicon"). Binder: half SBR, half sodium CMC (C, H, O, Na), E |
+| Foils | Aluminium, copper | All sources |
+| Electrolyte | LiPF6 12 / 15 / 17 %, the solvents the remainder | Salt: E from EPA (about 13 %) and the car file (15 to 17 %). Solvents in Ohneseit et al.'s measured mix: NMC DMC 77.9, EMC 5.0, EC 17.1 %; LFP EMC 29.5, DEC 37.9, EC 32.6 %. Elements from the formulas |
+| Separator | Al2O3 coating 20 / 35 / 50 %, polyethylene the remainder | Coating found by Ohneseit et al.; its share is E, no source gives it |
+| Tabs, insulators, other (NMC only) | Ni 6 %, Al 2 %, polypropylene the remainder | E: tabs of nickel and aluminium (Baazouzi et al.), the rest taken as polymer; the LG M50 does not say what this 4.7 % is |
+
+**The result, % of the cell's mass.** At the modes, for each can, and the 95 % range of 200,000 draws in a sandbox
+(V20; both cans drawn):
+
+| Element | NMC, nickel-plated can | NMC, stainless can | NMC, 95 % of draws | LFP, nickel-plated can | LFP, stainless can | LFP, 95 % of draws |
+|---|---|---|---|---|---|---|
+| C | 29.7 | 29.7 | 27.3 to 30.6 | 25.4 | 25.4 | 23.7 to 27.1 |
+| Ni | 19.3 | 20.4 | 18.8 to 21.2 | 0.3 | 1.4 | 0.2 to 1.4 |
+| Fe | 16.5 | 12.4 | 12.3 to 16.6 | 30.0 | 25.9 | 25.0 to 30.9 |
+| O | 14.7 | 14.7 | 13.9 to 15.9 | 20.1 | 20.1 | 19.4 to 20.9 |
+| Cu | 8.3 | 8.3 | 8.1 to 8.7 | 8.4 | 8.4 | 7.8 to 9.1 |
+| Al | 3.7 | 3.7 | 3.6 to 4.0 | 3.7 | 3.7 | 3.4 to 4.0 |
+| P | 0.17 | 0.17 | 0.09 to 0.24 | 7.8 | 7.8 | 7.3 to 8.3 |
+| Li | 2.6 | 2.6 | 2.5 to 2.7 | 1.75 | 1.75 | 1.6 to 1.9 |
+| Cr | 0 | 3.0 | 0 to 3.1 | 0 | 3.0 | 0 to 3.1 |
+| Co | 1.35 | 1.35 | 1.31 to 1.42 | — | — | — |
+| Mn | 1.33 | 1.28 | 1.25 to 1.39 | 0.04 | 0 | 0 to 0.06 |
+| F | 1.06 | 1.06 | 0.71 to 1.37 | 1.7 | 1.7 | 1.2 to 2.1 |
+| H | 1.14 | 1.14 | 0.79 to 1.38 | 0.80 | 0.80 | 0.59 to 1.02 |
+| Si | 0.22 | 0.22 | 0.09 to 1.37 | 0 | 0 | 0 |
+| Na | 0.03 | 0.03 | 0.02 to 0.03 | 0.02 | 0.02 | 0.02 to 0.03 |
+
+- The elements add up to 100.000 % in every draw, for both cells.
+- **To know:** the car file's high-nickel cathode holds less cobalt (3.8 %) than the NMC811 measured in 21700 cells
+  (about 6 %, E1.7h). With NMC811, the NMC cell's Co would be about 2.2 % instead of 1.35 %. The grade is decided;
+  this is only noted.
 
 ---
 

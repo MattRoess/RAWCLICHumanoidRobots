@@ -5,6 +5,21 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V20. The proposed element recipes of the cylindrical cells, drawn in a sandbox
+
+- **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.7i, for the NMC and the LFP cell.
+- **How:** a throw-away script in the session's scratch folder, run in the project's `.venv` with 200,000 draws
+  (seed 1); nothing written to `data/` or `figures/`. The compounds' element shares were computed from their
+  formulas and atomic masses. The recipe at the modes was computed separately for each can.
+- **Result:**
+  - The elements add up to 100.000 % in every draw, for both cells.
+  - The first structure let the parts of the NMC cell exceed the whole cell in 3.5 % of the draws. With the rest
+    as the cell's remainder, split by shares, no part falls below 0: the smallest "other" is 0.39 % of the cell. The
+    LFP electrolyte, its remainder, stays between 4.5 and 17.1 %.
+  - The element shares are those in E1.7i.
+- **Not covered:** the draws of the parts are independent except through f; the 50 / 50 can is an estimate. Nothing
+  is entered and no stage computes this yet.
+
 ### V19. The build of a cylindrical cell, from the LG M50 measurements
 
 - **What:** the mass of each part of an LG M50 21700 cell ([EVIDENCE.md](EVIDENCE.md), E1.7h).

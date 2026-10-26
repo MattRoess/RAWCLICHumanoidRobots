@@ -58,7 +58,8 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
    - the cell format (E1.7f): decided, "Cylindrical for all";
    - the Si in the anodes (E1.7g): decided, 0 / 1 / 7.3 % as silicon oxide, graphite the remainder, in every NMC
      robot type;
-   - the cells' element recipe (E1.7h: the sources, shown to him; no recipe proposed yet).
+   - the cells' element recipe: the sources in E1.7h; the proposal in E1.7i, shown to him, waiting for his
+     agreement.
 3. **The materials still to go through:** plastics, fibre composites, electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 
