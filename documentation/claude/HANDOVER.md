@@ -2,6 +2,78 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
+## 2026-10-26: the specification of 02_composition.py and 03_comparison.py (proposed, not built)
+
+### Asked, in Matthias's words
+
+- "When can we start with the code for the six different robot types. Do you want to keep them as separate code or as
+  one combined. The composition has the be for each of the type as there are different stock and flows for them".
+- Then, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
+  writing each type's composition separately for stock-and-flow, and a comparison stage after it. Write the
+  specification first, as a numbered checklist, before building."
+
+### The specification, for his yes; nothing is built before it
+
+**What 02 reads and checks**
+1. The workbook, the shared lists (with Splits and Battery cells) and element_recipes.xlsx, through 01's reading
+   functions (one copy of the code). It runs 01's checks first and **stops** on any fault, saying which.
+2. The settings in `src/params_schema.py`, through 00: the number of draws, the seed, the output folders (point 17).
+
+**What 02 draws, for each robot type, the same code for all six** (N draws, every one independent unless said)
+3. Each part's mass of all units: a triangle on the workbook's minimum, mode and maximum.
+4. Each material row's mass: a triangle on its minimum, mode and maximum.
+5. Splits (robot type 3's electrical group): each share a triangle, the remainder 1 minus the others.
+6. The battery as cells (E1.7j, E1.7k): one cell build drawn per draw, all builds equally likely; cells = their number ×
+   the mass of one cell; the rest = the row's draw minus the cells, split by its shares; Not allocated takes its part.
+7. The element recipes: every share a triangle, every remainder 1 minus the others, every alternative drawn as a
+   discrete state (the can, TPU's soft segment, the epoxy). The NMC cell's coatings and foils move with the drawn
+   cell's energy per kg ("Follows the energy", E1.7i).
+8. Not allocated = the parts' sum minus the materials' sum, draw by draw.
+9. Materials without a recipe yet (aluminium, magnesium, titanium, steel, copper, magnets, electronics, ceramics) and
+   Mixed: their kg are drawn; their elements are not, and the outputs say so. A recipe added later needs no code
+   change.
+
+**What 02 writes, for each robot type separately** (`data/consolidated/<n>_<name>/`, the folder another repository
+reads; not in git)
+10. The draws, kg per robot, as arrays of N rows (`.npy`, float32, like RAWCLICVehicleTractionMotor), each with the list
+    of its columns (`.txt`): by shared material; by element; by part group; by body region; the robot's total. Row i
+    is the same draw in every array, so stock-and-flow can pair them.
+11. A summary table (`.xlsx` and `.csv`): per material and per element the mean, the median and the 95 % interval,
+    and which materials are not yet in the elements.
+
+**What 02 checks, with tests first**
+12. In every draw: materials plus Not allocated equal the parts' sum; the elements add up to the materials that have
+    recipes; cells plus rest equal the battery row; no mass below zero except Not allocated.
+13. Tests on the small workbook with few draws: the same seed gives the same draws; means agree with the triangles'
+    means; a discrete state is drawn about as often as its probability; the sums of point 12 hold.
+
+**What 02 and 03 draw as figures** (`figures/`; not in git)
+14. 02, one page per robot type: kg by material and kg by element, each with its 95 % interval.
+15. 03 reads the six robot types' draws from 02, never re-deriving them, and draws them side by side: by material, by
+    element, by part group and body region, each with its 95 % interval.
+
+**Running, settings, documents**
+16. Both run by pressing Run, no arguments. The real run is Matthias's; Claude tests with few draws in a sandbox.
+17. New settings: `composition.draws`, `composition.seed`, and the output folders of 02 and 03.
+18. METHODOLOGY, README, VERIFICATION and HANDOVER updated in the same step; the parameter reference is regenerated
+    by 00.
+
+### Open, marked for his decision (each with a recommendation)
+
+- **a. A part's units:** drawn together (one triangle on all units) or each unit on its own. Recommended: together,
+  as the workbook gives one range per part.
+- **b. Not allocated below zero:** the parts and the materials are drawn independently, so in some draws the
+  materials exceed the parts. Recommended: allowed, and reported as the share of draws below zero.
+- **c. Materials without a recipe yet:** run 02 now, with their elements missing and said so, or wait for all
+  recipes. Recommended: now; the recipes come in without a code change.
+- **d. Number of draws:** 200,000, as RAWCLICVehicleTractionMotor and RAWCLICDataCenters. With float32 this is about
+  0.8 MB per column, some 50 MB per robot type. Recommended: 200,000.
+- **e. Format for stock-and-flow:** RAWCLICStockAndFlow has no humanoid robots yet. Recommended: the sibling pattern of
+  point 10, so its reader can follow `src/traction_draws.py`.
+- **f. The NMC cell's energy per kg for robot types 2 and 6**, whose battery rows are kept: drawn from the NMC triangle
+  of E1.7d (232.5 / 241.5 / 256 Wh/kg). Recommended.
+- **g. Which items go into the figures** of points 14 and 15: his decision; recommended as listed there.
+
 ## 2026-10-26: the project on GitHub
 
 - **Asked, in Matthias's words:** "Generate a new repository on GitHub, which is public. and start to commit and
