@@ -83,9 +83,9 @@ Into `output.schemas_dir` (`figures/schemas/`):
 
 The numbers are the workbook's minimum, mode and maximum, not draws. It needs no Monte Carlo run.
 
-Where it sits: after 00_parameters.py. The stages of the categories will follow it, and will read the
-workbook through the functions here (`read_workbook`, `check_workbook`), so that what they compute is
-what these pages show.
+Where it sits: after 00_parameters.py. 02_composition.py follows it and reads the workbook, the shared lists and
+the element recipes through the functions here (`read_workbook`, `read_shared_lists`, `read_element_recipes`, and
+every check), so that what it draws is what these pages show.
 """
 
 from __future__ import annotations
@@ -122,6 +122,10 @@ STAGES = [
     ('00_parameters.py', 'The settings: checks them and writes their register.'),
     ('01_schemas.py', 'What the workbook defines, before anything is drawn at random, and each robot type in '
                       'the shared lists: these pages.'),
+    ('02_composition.py', 'What each robot type is made of, drawn at random (Monte Carlo): its materials, elements, '
+                          'part groups and body regions, written for stock-and-flow, and a page per robot type.'),
+    ('03_comparison.py', 'The robot types side by side, by material, element, part group and body region, from the '
+                         'draws of 02.'),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -156,10 +160,11 @@ CHECKS_DONE = [
     'and no recipe contains itself; the items of a group are shares with exactly one remainder, in order and leaving '
     'it above zero, or alternatives whose probabilities add up to 1; every cell has its recipe, its mass and its '
     'energy.',
-    "Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the "
-    "sheet Cells, its cells in series within one cell's voltage of the pack's, its cells in parallel within 12 % of "
-    "the pack's capacity, its cells at most 85 % of the packs' mass; the rest of the row has exactly one remainder, "
-    'shares in order, materials of the sheet Lists, and never falls below zero where it goes to a material.',
+    "Battery cells: every robot type's battery row is kept or built from cells, not both; a kept row names the "
+    "recipe its cells follow; each build's cell is in the sheet Cells, its cells in series within one cell's voltage "
+    "of the pack's, its cells in parallel within 12 % of the pack's capacity, its cells at most 85 % of the packs' "
+    'mass; the rest of the row has exactly one remainder, shares in order, materials of the sheet Lists, and never '
+    'falls below zero where it goes to a material.',
     'Material recipes: every piece of a shared material that has recipes (so far plastics and fibre composites, the '
     'rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and '
     'every row names a piece that exists.',
@@ -224,9 +229,9 @@ SPLIT_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared materia
 
 # The battery as cells only (documentation/claude/EVIDENCE.md, E1.7d to E1.7k; decided by Matthias on 2026-10-26). The
 # sheet 'Battery cells' of the shared lists says, for the battery row of each robot type, either that the workbook's
-# row is kept ('Kept'), or how its packs are built from cells ('Build': one row per way to build them, all equally
-# likely) and where the rest of the row goes ('Rest': shares of shared materials, one of them the remainder; 'Not
-# allocated' may take a rest below zero, when the cells weigh more than the row).
+# row is kept ('Kept', naming the recipe its cells follow), or how its packs are built from cells ('Build': one row
+# per way to build them, all equally likely) and where the rest of the row goes ('Rest': shares of shared materials,
+# one of them the remainder; 'Not allocated' may take a rest below zero, when the cells weigh more than the row).
 BATTERY_SHEET, KEPT, BUILD, REST = 'Battery cells', 'Kept', 'Build', 'Rest'
 BATTERY_HEADINGS = ['Robot type', 'Battery row in the workbook', 'Kind', 'Cell or material', 'Cells in series',
                     'Cells in parallel', 'Packs', 'Pack voltage (V)', 'Pack capacity (Ah)', 'Pack energy (kWh)',
@@ -422,7 +427,8 @@ class BatteryRow:
     robot: int               # the robot type
     family: str              # the battery row's material name in the workbook, e.g. 'Battery constituents'
     kind: str                # 'Kept', 'Build' or 'Rest'
-    name: str                # a build's cell (sheet Cells of element_recipes.xlsx), or the shared material of a rest
+    name: str                # a build's cell (sheet Cells of element_recipes.xlsx), the recipe a kept row's cells
+                             # follow (sheet Recipe), or the shared material of a rest
     series: float | None     # a build: cells in series in one pack
     parallel: float | None   # a build: cells in parallel in one pack
     packs: float | None      # a build: how many packs the robot carries
@@ -1283,8 +1289,9 @@ def battery_cells(materials: MaterialsList, lists: SharedLists, recipes: Element
 
 
 def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementRecipes, params: Params) -> list[Fault]:
-    """Every robot type's battery row kept or built from cells (sheet 'Battery cells'): each build's cell in the sheet
-    Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
+    """Every robot type's battery row kept or built from cells (sheet 'Battery cells'): a kept row naming the recipe
+    of the sheet Recipe that its cells follow (E1.7e: the NMC recipe for robot types 2 and 6); each build's cell in the
+    sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
     CAPACITY_TOLERANCE of the pack's capacity, its cells at most CELL_SHARE_OF_PACK of the packs' mass; the rest of the
     row split by shares with one remainder, and never below zero where it goes to a material."""
     if lists.battery is None:
@@ -1320,6 +1327,11 @@ def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementReci
         if any(b.kind == KEPT for b in rows):
             if builds or rest:
                 faults.append(Fault(on, rows[0].row, f"robot type {n}: '{battery.family}' is both kept and built."))
+                continue
+            for b in rows:
+                if b.name not in {i.recipe for i in recipes.items}:
+                    faults.append(Fault(on, b.row, f'robot type {n}: a kept battery row names the recipe its cells '
+                                                   f"follow; '{b.name}' is not in the sheet {RECIPE_SHEET}."))
             continue
         if not builds or not rest:
             faults.append(Fault(on, rows[0].row, f"robot type {n}: give the builds of '{battery.family}' and where its "
@@ -2294,9 +2306,7 @@ def draw_overview(book: Workbook, faults: list[Fault], reports: dict, path: str,
 
     without_report = [str(c.number) for c in book.categories if not reports.get(c.number)]
     notional = [str(c.number) for c in book.categories if is_notional(c.anchor)]
-    open_items = ['The stages that compute the materials of each category: not built yet (Matthias, '
-                  '2026-10-26: "we will go through and do separate code for each of the different '
-                  'categories").']
+    open_items = []
     if without_report:
         open_items.append(f"Categories without a report of their own in documentation/sources/: "
                           f"{', '.join(without_report)}. The workbook's last row names reports 00 to 06.")
@@ -2304,9 +2314,11 @@ def draw_overview(book: Workbook, faults: list[Fault], reports: dict, path: str,
         open_items.append(f"Categories whose anchor robot is notional: {', '.join(notional)}.")
     open_lines = [line for item in open_items for line in wrap('• ' + item, 175)]
 
-    stage_list = STAGES + [('Next', 'One stage per category, computing what its robots are made of. Not '
-                                    'built yet.')]
-    height = 0.6 + 0.45 + 1.0 + 0.6 + 4 * LINE + 0.45 + box_rows * (box_lines * LINE + 0.45) + 0.6 \
+    # The stages' boxes, as high as the longest text needs.
+    stage_width = (width - 0.6 - (len(STAGES) - 1) * 0.5) / len(STAGES)
+    stage_texts = [wrap(what, int(stage_width / 0.07)) for _, what in STAGES]
+    stage_height = 0.1 + LINE * 1.2 + max(len(lines) for lines in stage_texts) * LINE + 0.1
+    height = 0.6 + 0.45 + stage_height + 0.25 + 0.6 + 4 * LINE + 0.45 + box_rows * (box_lines * LINE + 0.45) + 0.6 \
         + LINE * 2 + 0.4 + len(open_lines) * LINE + 0.5
     figure, axes = new_page(width, height)
     axes.text(0.3, 0.3, 'Overview: how we model a humanoid robot', fontsize=16, fontweight='bold', va='top')
@@ -2315,24 +2327,23 @@ def draw_overview(book: Workbook, faults: list[Fault], reports: dict, path: str,
     y = 0.95
     write(axes, 0.3, y, ['The stages, run in this order by pressing Run'], size=11, weight='bold')
     y += 0.35
-    stage_width = (width - 0.6 - (len(stage_list) - 1) * 0.5) / len(stage_list)
-    for i, (name, what) in enumerate(stage_list):
+    for i, ((name, _), lines) in enumerate(zip(STAGES, stage_texts)):
         x = 0.3 + i * (stage_width + 0.5)
-        box(axes, x, y, stage_width, 0.75, '#F4F4F4' if name == 'Next' else 'white')
+        box(axes, x, y, stage_width, stage_height)
         write(axes, x + 0.12, y + 0.1, [name], weight='bold')
-        write(axes, x + 0.12, y + 0.1 + LINE * 1.2, wrap(what, int(stage_width / 0.07)))
+        write(axes, x + 0.12, y + 0.1 + LINE * 1.2, lines)
         if i:
-            axes.add_patch(FancyArrowPatch((x - 0.45, y + 0.375), (x - 0.05, y + 0.375), arrowstyle='-|>',
-                                           mutation_scale=14, color='black'))
-    y += 0.75 + 0.4
+            axes.add_patch(FancyArrowPatch((x - 0.45, y + stage_height / 2), (x - 0.05, y + stage_height / 2),
+                                           arrowstyle='-|>', mutation_scale=14, color='black'))
+    y += stage_height + 0.4
 
     # How a mass is given.
     write(axes, 0.3, y, ['How every mass is given'], size=11, weight='bold')
     y = write(axes, 0.3, y + 0.3, wrap(
         'Every mass in a parts list has a minimum, a mode and a maximum, in kg: for one unit of a part and for '
-        'all units of it in one robot. These pages show the three numbers as the workbook states them; nothing '
-        'is drawn at random yet. Each category is represented by one anchor robot, whose parts list stands for '
-        'the category.', 175))
+        'all units of it in one robot. These pages show the three numbers as the workbook states them; '
+        '02_composition.py then draws each mass at random from a triangle on them (Monte Carlo). Each category is '
+        'represented by one anchor robot, whose parts list stands for the category.', 175))
     y += 0.3
 
     # The categories, three to a row.

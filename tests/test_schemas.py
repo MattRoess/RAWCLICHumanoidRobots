@@ -759,6 +759,15 @@ class TestBatteryCells(SmallLists):
         battery = BATTERY + [battery_row('Kept', '')]
         self.assertFaultSays(self.lists_faults(battery=battery), 'both kept and built')
 
+    def test_a_kept_battery_row_names_the_recipe_of_its_cells(self):
+        # Matthias, 2026-10-26: "Robot types 2 and 6 both get NMC cells with a liquid electrolyte, using the car file's
+        # NMC recipe" (EVIDENCE.md E1.7e). A kept row's cells follow the recipe it names, for 02_composition.py.
+        self.assertEqual(self.lists_faults(battery=[battery_row('Kept', 'Test recipe')]), [])
+        for name in ('', 'Bronze'):
+            faults = self.lists_faults(battery=[battery_row('Kept', name)])
+            self.assertFaultSays(faults, f"a kept battery row names the recipe its cells follow; '{name}' is not in "
+                                         'the sheet Recipe')
+
     def test_a_battery_row_without_any_row_in_the_sheet(self):
         self.assertFaultSays(self.lists_faults(battery=[]), "no row in the sheet Battery cells")
 
@@ -897,6 +906,8 @@ class TestTheWorkbook(unittest.TestCase):
                 self.assertAlmostEqual(got, want, delta=0.006, msg=f'robot type {n}')
         for n in (2, 6):
             self.assertIsNone(schemas.battery_cells(book.materials_lists[n], lists, recipes))
+            # E1.7e: their kept rows' cells follow the NMC recipe.
+            self.assertEqual([(b.kind, b.name) for b in lists.battery if b.robot == n], [('Kept', 'NMC cylindrical')])
         # Cells only change where the kilograms sit, never how many there are.
         for n, parts_list in book.parts_lists.items():
             totals = schemas.by_material(book.materials_lists[n], lists, recipes)

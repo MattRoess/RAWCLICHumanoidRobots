@@ -25,8 +25,10 @@ from src.params_schema import ParameterError, Params, current, flatten, validate
 
 # Every setting the project has; a new one must be added here, so that its arrival is a decision.
 KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.materials_sheet',
-        'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'checks.tolerance_kg', 'output.schemas_dir',
-        'output.dpi'}
+        'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'checks.tolerance_kg', 'composition.draws',
+        'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
+        'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
+        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi'}
 
 
 class TestSettings(unittest.TestCase):
@@ -48,6 +50,11 @@ class TestSettings(unittest.TestCase):
                                      ('data', 'materials_sheet', ''),
                                      ('checks', 'tolerance_kg', 0),
                                      ('checks', 'tolerance_kg', 0.08),
+                                     ('composition', 'draws', 50),
+                                     ('composition', 'draws', 2_000_000),
+                                     ('composition', 'seed', -1),
+                                     ('composition', 'nmc_wh_per_kg_mode', 300.0),
+                                     ('output', 'composition_dir', ' '),
                                      ('output', 'dpi', 10)):
             params = Params()
             setattr(getattr(params, section), name, value)

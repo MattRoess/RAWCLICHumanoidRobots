@@ -18,7 +18,7 @@ WHAT THIS PROJECT IS
 --------------------
 What a humanoid robot is made of, by category of humanoid robot, through 2040. The research of 2026
 (`documentation/sources/00_overview_categories_market_shares_2040.md` and the category reports) defines
-six categories, each with one anchor robot whose parts list stands for the category. Two stages exist:
+six categories, each with one anchor robot whose parts list stands for the category. The stages:
 
   00_parameters.py     checks the settings in this file and writes the register of them.
 
@@ -26,12 +26,17 @@ six categories, each with one anchor robot whose parts list stands for the categ
                        overview, per category its page, its page in the shared lists and its robot in one
                        view, and the faults found, into `figures/schemas/`.
 
-The stages that compute the materials of each category are not built yet. Matthias, 2026-10-26: "Draw a
-repective schema and the we will go through and do separate code for each of the different categories".
+  02_composition.py    draws what each robot type is made of, `composition.draws` times (Monte Carlo): its
+                       materials, elements, part groups and body regions, into `data/consolidated/`, one
+                       folder per robot type, for stock-and-flow; and a page per robot type.
+
+  03_comparison.py     draws the robot types side by side, by material, element, part group and body
+                       region, from the draws of 02, into `figures/comparison/`.
 
 WHAT IS IN THIS FILE
 --------------------
-One small class per group of settings (`DataParams`, `CheckParams`, `OutputParams`), gathered in `Params`.
+One small class per group of settings (`DataParams`, `CheckParams`, `CompositionParams`, `OutputParams`), gathered
+in `Params`.
 Each setting carries, in `metadata['doc']`, the one-line description that the register shows. `current()`
 returns the settings in force after checking them; `flatten()` lists them for the register;
 `source_status()` says which of the input files are on disk.
@@ -135,6 +140,42 @@ class CheckParams:
 
 
 @dataclass
+class CompositionParams:
+    """How 02_composition.py draws what each robot type is made of (Monte Carlo)."""
+
+    # How many times every robot type is drawn. 200,000, like RAWCLICVehicleTractionMotor and RAWCLICDataCenters:
+    # Matthias agreed it on 2026-10-26 (recommendation d of the specification, documentation/claude/HANDOVER.md).
+    # With float32 that is about 0.8 MB per column of the draw files, some 50 MB per robot type. The real run is
+    # Matthias's; the tests use few draws.
+    # SAFE TO CHANGE: yes, between 100 and 1,000,000 (`current()` enforces it); fewer draws give rougher intervals.
+    draws: int = field(
+        default=200_000,
+        metadata={'doc': 'How many Monte Carlo draws 02_composition.py makes for every robot type.'})
+
+    # The start of the random numbers, fixed so that a rerun gives the same draws.
+    # SAFE TO CHANGE: yes; another seed gives other draws of the same distributions.
+    seed: int = field(
+        default=1,
+        metadata={'doc': 'The seed of the random numbers, so that a rerun gives the same draws.'})
+
+    # The energy per kg of cylindrical NMC cells, Wh/kg: minimum (Tesla 4680, measured), mode (the median of the four
+    # NMC cells read) and maximum (Samsung 50E). documentation/claude/EVIDENCE.md, E1.7d, agreed 2026-10-26. The NMC
+    # cell's coatings and foils move with it (E1.7i): with a counted cell, by that cell's Wh/kg over the mode; where a
+    # robot type keeps its battery row (robot types 2 and 6), it is drawn from this triangle (recommendation f).
+    # SAFE TO CHANGE: only with new sources, in order (minimum <= mode <= maximum).
+    nmc_wh_per_kg_min: float = field(
+        default=232.5,
+        metadata={'doc': 'Energy per kg of cylindrical NMC cells, minimum (E1.7d), Wh/kg.'})
+    nmc_wh_per_kg_mode: float = field(
+        default=241.5,
+        metadata={'doc': 'Energy per kg of cylindrical NMC cells, mode (E1.7d), Wh/kg; the reference of the NMC '
+                         "cell's coatings and foils."})
+    nmc_wh_per_kg_max: float = field(
+        default=256.0,
+        metadata={'doc': 'Energy per kg of cylindrical NMC cells, maximum (E1.7d), Wh/kg.'})
+
+
+@dataclass
 class OutputParams:
     """Where the stages write. Paths are relative to the project root."""
 
@@ -143,6 +184,24 @@ class OutputParams:
         default=os.path.join('figures', 'schemas'),
         metadata={'doc': 'Where 01_schemas.py draws the overview, one page per category and the '
                          'faults.'})
+
+    # What 02_composition.py writes for stock-and-flow, one folder per robot type (<n>_<name>/): the draws and their
+    # summary. data/consolidated/ is the one folder another repository reads (the house layout of the RAWCLIC
+    # projects). Outputs: not in git.
+    composition_dir: str = field(
+        default=os.path.join('data', 'consolidated'),
+        metadata={'doc': 'Where 02_composition.py writes the draws and the summary of each robot type, one folder '
+                         'per type.'})
+
+    # The pages of 02_composition.py, one per robot type.
+    composition_figures_dir: str = field(
+        default=os.path.join('figures', 'composition'),
+        metadata={'doc': 'Where 02_composition.py draws one page per robot type.'})
+
+    # The pages of 03_comparison.py: the six robot types side by side.
+    comparison_dir: str = field(
+        default=os.path.join('figures', 'comparison'),
+        metadata={'doc': 'Where 03_comparison.py draws the six robot types side by side.'})
 
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
     # and a page small enough to open quickly.
@@ -157,6 +216,7 @@ class Params:
 
     data: DataParams = field(default_factory=DataParams)
     checks: CheckParams = field(default_factory=CheckParams)
+    composition: CompositionParams = field(default_factory=CompositionParams)
     output: OutputParams = field(default_factory=OutputParams)
 
 
@@ -181,8 +241,21 @@ def validate(params: Params) -> None:
     if not 0 < tolerance <= 0.01:
         raise ParameterError(f'checks.tolerance_kg must be above 0 and at most 0.01 kg, not {tolerance}.')
 
-    if not str(params.output.schemas_dir).strip():
-        raise ParameterError('output.schemas_dir is empty.')
+    # At least 100 draws, or no interval means anything; at most 1,000,000, or the files of six robot types reach
+    # gigabytes for nothing a figure can show.
+    composition = params.composition
+    if not 100 <= composition.draws <= 1_000_000:
+        raise ParameterError(f'composition.draws must be between 100 and 1,000,000, not {composition.draws}.')
+    if not isinstance(composition.seed, int) or composition.seed < 0:
+        raise ParameterError(f'composition.seed must be a whole number from 0 up, not {composition.seed!r}.')
+    if not 0 < composition.nmc_wh_per_kg_min <= composition.nmc_wh_per_kg_mode <= composition.nmc_wh_per_kg_max:
+        raise ParameterError('composition.nmc_wh_per_kg_min, _mode and _max must be above 0 and in order, not '
+                             f'{composition.nmc_wh_per_kg_min}, {composition.nmc_wh_per_kg_mode}, '
+                             f'{composition.nmc_wh_per_kg_max}.')
+
+    for name in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir'):
+        if not str(getattr(params.output, name)).strip():
+            raise ParameterError(f'output.{name} is empty.')
     # Below 50 dpi the small print of a page cannot be read; above 600 a page takes megabytes and
     # seconds to open, for nothing a screen can show.
     if not 50 <= params.output.dpi <= 600:

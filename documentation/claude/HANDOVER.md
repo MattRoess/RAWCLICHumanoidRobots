@@ -2,7 +2,80 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-26: the specification of 02_composition.py and 03_comparison.py (proposed, not built)
+## 2026-10-26: 02_composition.py and 03_comparison.py built and tested with few draws
+
+### Asked, in Matthias's words
+
+- "I agree with the specification of 02_composition.py and 03_comparison.py and with the recommendations a to g. Build
+  it step by step, tests first, and test with few draws only."
+
+### Built
+
+- **`02_composition.py`:** points 1 to 14 and 16 to 18 of the specification below. It reads and checks the inputs with
+  01's functions, draws each robot type, checks every draw, and only then writes, for each robot type separately,
+  `data/consolidated/<n>_<name>/` (the draws as float32 `.npy` with their columns in `.txt`, and `summary.xlsx` /
+  `summary.csv`) and a page into `figures/composition/`.
+- **`03_comparison.py`:** point 15. It reads 02's files as they are, checks that they belong together, and draws
+  `figures/comparison/materials.png`, `elements.png`, `part_groups.png`, `body_regions.png`: one small chart per item,
+  one row per robot type, each with its 95 % interval.
+- **Settings** in `src/params_schema.py`: `composition.draws` (200,000), `composition.seed` (1), the output folders,
+  and the NMC cells' energy per kg (below, point 2).
+- **Tests:** 21 of 02 and 5 of 03, written first; 129 tests pass in all. 14 deliberate faults were all caught (V31,
+  V33). 02 and 03 were run on the real inputs with 2,000 draws, outside `data/` and `figures/`, and every page read
+  (V32, V33). 01's overview names the four stages (V34).
+- **Documents:** METHODOLOGY ("What 02 draws", "What 02 writes", "What 03 draws"), README, SHARED_LISTS, VERIFICATION
+  V29 to V34.
+
+### Choices made while building, for Matthias to confirm or reverse
+
+1. **The kept battery rows name their cells' recipe.** No input said that robot types 2 and 6 follow the NMC recipe,
+   which he decided in E1.7e, so 02 could not draw their elements. 'NMC cylindrical' is now in the column "Cell or
+   material" of their two kept rows in `data/researched/shared_lists.xlsx`, and 01 requires a kept row to name a
+   recipe (check 16). The file was copied first (V29).
+2. **Three more settings than point 17 named:** `composition.nmc_wh_per_kg_min`, `_mode`, `_max` (232.5 / 241.5 /
+   256 Wh/kg, E1.7d). Recommendation f needs these numbers, and the parameter file is where a number of the code
+   lives.
+3. **A recipe is drawn once in each draw**, and used wherever it sits in the robot type. Robot type 5's two plastics
+   rows hold the same TPU, and robot type 3's CFRP and GFRP hold the same epoxy: each shares one draw. The other
+   reading, a draw for each row, narrows the band (V31).
+4. **02's own check:** an item that follows a cell's energy may sit only in the recipe of NMC cells, used as the
+   recipe of cells.
+5. **Each robot type has its own random numbers**, from the seed and its number, so that it gives the same draws
+   however many robot types are drawn.
+6. **02 writes nothing unless all six robot types pass every check.** It keeps them in memory meanwhile: around 1 GB
+   at 200,000 draws, estimated, not measured.
+7. **The summary** has, per material, "In the elements" (Yes, Partly, No, or "Not in this robot type"), and its
+   kilograms that are in the elements at the mean.
+8. **A limit, not changed:** numpy draws an alternative only when the probabilities of its group add up to 1 within
+   about 1e-8. 01 allows 0.001. An entry between the two would stop 02 with numpy's error rather than a fault line.
+   Every entry so far is 0.5 / 0.5.
+
+### A result for Matthias
+
+Not allocated is below zero in 50.8 % of robot type 1's draws and in 67.4 % of robot type 2's (2,000 draws). The
+other robot types are at 0 to 0.2 %. In the workbook, these two robot types' materials add up to their parts at the
+mode, so drawn independently the difference sits around zero. For robot type 2 the materials' triangles lean further
+right than the parts' (73.5 kg against 71.4 kg at the mean). Recommendation b allows it and reports it; whether the
+parts and the materials should be tied to each other is his decision.
+
+### The real run: his
+
+In order, each by pressing Run:
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+The draws come to about 42 MB per robot type, 250 MB in all.
+
+### Open
+
+- The element recipes of aluminium, magnesium, titanium, steel, copper, magnets, electronics (with silver) and
+  ceramics: until then their kilograms are drawn, their elements are not.
+- RAWCLICStockAndFlow has no reader of humanoid robots yet (recommendation e).
+- The earlier open points below stand.
+
+## 2026-10-26: the specification of 02_composition.py and 03_comparison.py (agreed by Matthias; built, see above)
 
 ### Asked, in Matthias's words
 
@@ -12,7 +85,7 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   writing each type's composition separately for stock-and-flow, and a comparison stage after it. Write the
   specification first, as a numbered checklist, before building."
 
-### The specification, for his yes; nothing is built before it
+### The specification, as agreed
 
 **What 02 reads and checks**
 1. The workbook, the shared lists (with Splits and Battery cells) and element_recipes.xlsx, through 01's reading
@@ -58,7 +131,7 @@ reads; not in git)
 18. METHODOLOGY, README, VERIFICATION and HANDOVER updated in the same step; the parameter reference is regenerated
     by 00.
 
-### Open, marked for his decision (each with a recommendation)
+### Recommendations a to g, agreed by Matthias
 
 - **a. A part's units:** drawn together (one triangle on all units) or each unit on its own. Recommended: together,
   as the workbook gives one range per part.

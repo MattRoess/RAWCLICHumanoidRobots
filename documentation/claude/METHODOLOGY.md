@@ -16,10 +16,13 @@ Every setting is in `src/params_schema.py`.
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists; reads the element recipes and counts each robot type's battery cells. Checks that the workbook agrees with itself, that everything is placed, and that the recipes and the battery cells hold together. Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
+| `02_composition.py` | The same three files, through 01's functions; the settings `composition.*` | `data/consolidated/<n>_<name>/`, `figures/composition/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo), the same code for all six: its materials, its elements, its part groups and its body regions. Writes the draws and a summary for each robot type separately, for stock-and-flow, and a page per robot type. |
+| `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. |
 
-**Next, not built yet:** one stage per category, computing what its robots are made of. Matthias, 2026-10-26: "we
-will go through and do separate code for each of the different categories". Those stages will read the workbook
-through the functions of 01 (`read_workbook`, `check_workbook`), so that what they compute is what the schemas show.
+Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
+them", and, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
+writing each type's composition separately for stock-and-flow, and a comparison stage after it." 02 and 03 read the
+inputs through the functions of 01, so that what they draw is what the schemas show.
 
 ## The workbook
 
@@ -101,7 +104,9 @@ which these batteries have and the robots use". The sources and every decision a
 [EVIDENCE.md](EVIDENCE.md), E1.7b to E1.7k.
 
 - **The sheet Battery cells** of `data/researched/shared_lists.xlsx` says, for each robot type's battery row:
-  - **Kept** (robot types 2 and 6): the workbook's row is cells already and stays.
+  - **Kept** (robot types 2 and 6): the workbook's row is cells already and stays. The row names the recipe its cells
+    follow: the NMC cylindrical cell, as Matthias decided ("Robot types 2 and 6 both get NMC cells with a liquid
+    electrolyte, using the car file's NMC recipe", E1.7e).
   - **Build** (robot types 1, 3, 4, 5): one way to build the packs from a cell: cells in series (from the pack's
     voltage) × cells in parallel (from its capacity) × packs, or, where no voltage or capacity was found (robot type
     5), the whole cells that hold the pack's energy. The cell mass is the number of cells × the mass of one cell from
@@ -128,8 +133,7 @@ which these batteries have and the robots use". The sources and every decision a
 
   The plastics recipe and its sources are in [EVIDENCE.md](EVIDENCE.md), E1.8b to E1.8d; the fibre composites in
   E1.9b and E1.9c. The recipes of the other
-  materials will be added to the same workbook. No stage draws element masses yet: that comes with the Monte Carlo
-  stages.
+  materials will be added to the same workbook; 02 takes them up without a change to its code.
 
 ## The checks
 
@@ -167,13 +171,18 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     and no recipe contains itself; the items of a group are shares with exactly one remainder, in order and leaving it
     above zero even at the bounds, or alternatives whose probabilities add up to 1; every cell has its recipe, its mass
     and its energy.
-16. Battery cells: every robot type's battery row is kept or built from cells, not both; each build's cell is in the
-    sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
+16. Battery cells: every robot type's battery row is kept or built from cells, not both; a kept row names the recipe
+    its cells follow; each build's cell is in the sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
     12 % of the pack's capacity, its cells at most 85 % of the packs' mass; the rest has exactly one remainder, shares
     in order, materials of the sheet Lists, and never falls below zero where it goes to a material.
 17. Material recipes: every piece of a shared material that has recipes (so far plastics and fibre composites, the
-    rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and every row names a piece
-    that exists.
+    rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and
+    every row names a piece that exists.
+
+02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
+(the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row
+of the sheet Rows, nor within another recipe, where there is no cell to take the energy from. Unlike 01, 02 stops on
+any fault, before anything is written.
 
 Two numbers count as equal when they differ by at most `checks.tolerance_kg` (0.001 kg). A fault does not stop the
 drawing: the faulty row is drawn in red, the fault is listed on `faults.png` and counted on the overview.
@@ -219,3 +228,77 @@ report by report.
 - **`faults.png`**: every fault in red, or "No fault found", then what was checked and what was not.
 
 Masses are rounded to three decimals on the pages; the checks use the workbook's full values.
+
+## What 02 draws
+
+`02_composition.py` draws each robot type `composition.draws` times (200,000; the tests and Claude's checks use a few
+thousand). The same code serves all six robot types. Matthias agreed the specification and its recommendations a to
+g on 2026-10-26 (HANDOVER.md). In each draw:
+
+1. **Each part:** the mass of all its units, one triangle on the workbook's minimum, mode and maximum (recommendation
+   a: the units of a part are drawn together, as the workbook gives one range per part). Its part group takes it,
+   and its body region; a part split by units gives each region its units' part.
+2. **Each material row:** a triangle on its minimum, mode and maximum. A row split by the sheet Splits: each share a
+   triangle, the remainder 1 minus the others.
+3. **The battery as cells:** one build drawn, all builds of the robot type equally likely; the cells are their number
+   times the mass of one cell. The rest, the row minus the cells, is split by the shares of the sheet Battery cells.
+   A kept row is cells as it is.
+4. **The elements:** each piece of a material that has a recipe, times the recipe's element shares, drawn:
+   - every share a triangle, every remainder 1 minus the others;
+   - every group of alternatives one state, drawn by its probabilities, never blended (the can, the TPU's soft
+     segment, the epoxy);
+   - a recipe drawn once in each draw and used wherever it sits in the robot type: the hard-segment share of TPU is
+     one uncertain quantity, not one per row (drawing it per row would narrow the band);
+   - the NMC cell's coatings and foils are their mode times f, the cell's energy per kg over the mode of the NMC
+     cells, 241.5 Wh/kg (E1.7i): of the drawn build's cell, or, for a kept row, drawn from the NMC triangle 232.5 /
+     241.5 / 256 Wh/kg (recommendation f; the settings `composition.nmc_wh_per_kg_min`, `_mode`, `_max`).
+5. **Not allocated:** the parts minus the materials. The two are drawn independently, so it is below zero where the
+   drawn materials weigh more than the drawn parts (recommendation b: allowed, and the summary gives the share of
+   draws).
+6. **Materials without a recipe yet** (aluminium, magnesium, titanium, steel, copper, magnets, electronics, ceramics,
+   and Mixed): their kilograms are drawn; their elements are not, and the summary and the pages say so
+   (recommendation c).
+
+Each robot type has its own random numbers, from `composition.seed` and its number, so that it gives the same draws
+however many robot types are drawn. Nothing is normalised.
+
+After drawing, 02 checks every draw (`draw_faults`), and writes nothing if one fails:
+- the materials and Not allocated add up to the parts, and so do the part groups and the body regions;
+- the elements add up to the materials that have recipes, within 0.1 %: the compounds written as mass shares are
+  rounded to five decimals, and 01 lets a compound's shares add up to 1 within 0.001;
+- the cells and the rest add up to the battery row;
+- nothing is below zero except Not allocated.
+
+## What 02 writes
+
+For each robot type, a folder `data/consolidated/<n>_<name>/` (the folder another repository reads; not in git):
+
+| File | What it holds |
+|---|---|
+| `materials.npy` | kg per robot by shared material (13 columns, Not allocated included), one row per draw, float32 |
+| `elements.npy` | kg per robot by element, for the materials that have recipes (every element the compounds hold, in the order of the periodic table) |
+| `part_groups.npy`, `body_regions.npy` | kg per robot by part group and by body region |
+| `total.npy` | the robot's mass, the sum of its parts |
+| `<name>.txt` | the columns of each `.npy`, one name per line |
+| `summary.xlsx`, `summary.csv` | per material and per element: the mean, the median, the 95 % interval (2.5 % and 97.5 %), the share of draws below zero, and whether the material is in the elements (Yes, Partly, No) with its kilograms that are |
+
+Row i is the same draw in every array of a robot type, so that stock-and-flow can pair them (the format of
+RAWCLICVehicleTractionMotor, recommendation e). With 200,000 draws that is 52 columns × 200,000 × 4 bytes, about
+42 MB per robot type.
+
+And a page per robot type, `figures/composition/<n>_<name>.png`: its kg by material (all of the robot, Not allocated
+included) and its kg by element (only the materials that have a recipe so far). Each bar is the mean; its line spans
+95 % of the draws. The numbers stand beside the bars, with three significant figures, so that a few grams of an
+element are not printed as 0.
+
+## What 03 draws
+
+`03_comparison.py` reads what 02 wrote, as it is, and draws nothing at random itself (point 15 of the specification).
+It first checks that the files belong together: every robot type with every table, the same number of draws, the same
+columns in the same order, and its materials, part groups and body regions adding up to its total in every draw.
+
+It draws one page per view into `figures/comparison/`: `materials.png`, `elements.png`, `part_groups.png`,
+`body_regions.png`. Each holds one small chart per material (element, part group, body region) with one row per robot
+type: the mean as a bar, a line over 95 % of the draws, and the mean written beside it. Each chart has its own kg
+scale, so that a material of a few grams can be read as well as one of 25 kg. Matthias, 2026-10-26: "I want that it
+is possible to compare on a material level between the 6 types of roboy".

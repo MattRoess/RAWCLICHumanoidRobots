@@ -5,6 +5,134 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V34. 01's overview with the four stages
+
+- **What:** the overview page of 01 after 02 and 03 were added to its list of stages.
+- **How:** 01 was run with its output folder moved to the session's scratch folder (not `figures/`), and the overview
+  opened and read.
+- **Result:** the first drawing showed three faults, all corrected: the text of the 01 and 02 boxes ran out of its box
+  (the boxes now take the height of the longest text); "nothing is drawn at random yet" (now: 02 draws each mass from a
+  triangle); and an open point "The stages that compute the materials of each category: not built yet" (removed).
+  Redrawn and read again: every text inside its box. 01 finds no fault.
+- **Not covered:** the other pages of 01 were drawn, not read again; only the overview's code changed.
+
+### V33. 03_comparison.py: tests, deliberate faults, and a run on the real inputs
+
+- **What:** 03, as specified in point 15 and recommendation g (HANDOVER.md).
+- **How:**
+  - **Tests first** (`tests/test_comparison.py`, 5 tests), written before 03 and seen to fail. They run 02 on the
+    small workbook (2,000 draws) and require that 03:
+    - reads 02's arrays exactly as written;
+    - gives a mean, 2.5 % and 97.5 % that agree with 02's summary within 1e-5 of the value (02 computes them in
+      float64 before writing float32);
+    - draws the four pages;
+    - stops without 02's draws;
+    - stops on draws that do not belong together: a table one draw short, materials that no longer add up to the
+      total, and columns in another order than the first robot type's.
+  - **Deliberate faults:** five, each in a scratch copy of 03 (`mutants_03.py` in the session's scratch folder). All
+    five were caught: the median shown as the mean; the order of the columns not checked; every robot type read
+    from the first folder; the sums not checked; the number of draws not checked.
+  - **The real inputs:** 03 run on the draws of V32, its pages into the scratch folder, and all four opened and read.
+- **Result:** all tests pass. The first drawing had three faults, all corrected and redrawn:
+  - Mixed and Not allocated were blue instead of grey, because the rows are robot types;
+  - the kg marks of narrow charts touched (now four at most);
+  - the key began in lower case.
+  The notes now give the shared list's own definition of Whole body, and say that the part group Battery is the packs,
+  while Battery materials is the cells.
+- **Not covered:** 03 has not read draws of 200,000.
+
+### V32. 02 on the real inputs, 2,000 draws
+
+- **What:** 02 on the real workbook, shared lists and element recipes, before the real run (which is Matthias's).
+- **How:** 02 run with 2,000 draws, seed 1, its outputs moved to the session's scratch folder (`sandbox_02.py`;
+  nothing written to `data/` or `figures/`). The summaries read, the six pages opened and read, and five results
+  checked by hand:
+  - **Robot type 1's cells:** a mean of 1.833 kg, against 1.832 kg for its three builds (1.74, 1.807, 1.95 kg) drawn
+    equally often; the interval runs from 1.74 to 1.95 kg, the lightest and the heaviest build.
+  - **Robot type 1's plastics:** 6.02 kg at the mean, against 5.5 kg for its row's triangle (4.5 / 5.5 / 6.5) plus
+    about 0.53 kg from the battery's rest (2.5 − 1.83 kg, at about 80 %).
+  - **Robot type 1's electronics:** 0.643 kg, against 0.533 kg for its row plus 16.5 % of that rest (0.11 kg).
+  - **Robot type 1's chromium:** 0.028 kg at the mean, with a median of 0: the stainless can, in half of the draws, is
+    18.1 % chromium and 16.8 % of 1.83 kg of cells, 0.056 kg, so 0.028 kg on average.
+  - **Robot type 2's nickel:** 0.87 kg, against about 0.86 kg by hand (4.33 kg of cells at the mean, about 19.9 %
+    nickel).
+  - **Robot type 3:** phosphorus 0.60 kg and no cobalt, as LFP cells have.
+  - **Time and memory:** 2.5 s, at most 166 MB, 2.6 MB written.
+- **Result:** every check of 01 and 02 passes, and every sum of point 12 holds in every draw of all six robot types.
+  The pages were corrected twice:
+  - each chart got a line saying what it covers: by element, only the materials that have a recipe so far (9.05 of
+    35.0 kg in robot type 1);
+  - small masses keep their trailing zeros ("0.150", not "0.15").
+
+  **A result for Matthias:** Not allocated is below zero in 50.8 % of the draws of robot type 1 and 67.4 % of robot
+  type 2 (robot types 3 to 6: 0.0, 0.2, 0.0, 0.0 %). In the workbook, the materials of robot types 1 and 2 add up to
+  their parts at the mode, so drawn independently the difference sits around zero. For robot type 2 the materials'
+  triangles lean further to the right than the parts': 73.5 kg of materials against 71.4 kg of parts at the mean.
+  Recommendation b allows it and reports it.
+- **Not covered:**
+  - 200,000 draws were not run (Matthias's). Its size is computed, not measured: 52 columns × 200,000 × 4 bytes, about
+    42 MB per robot type and 250 MB in all.
+  - Its memory is estimated at around 1 GB: the six robot types are kept in float64 until every draw has been checked.
+  - The time is not estimated.
+
+### V31. Deliberate faults in 02
+
+- **What:** whether the tests of 02 catch what they guard.
+- **How:** nine faults, each in a scratch copy of 02, with the tests run on it (`mutants_02.py` and the copies in the
+  session's scratch folder):
+  - the energy not followed;
+  - alternatives blended by their probability;
+  - always the first build;
+  - a kept row with f = 1;
+  - a split part counted whole in each region;
+  - the rest of a battery row dropped;
+  - a split's remainder fixed at 0.8;
+  - a recipe drawn for each row on its own (two variants).
+- **Result:** all caught. Seven were caught at once. The two recipe variants first passed, and the reason was in the
+  faults: 02 keeps a recipe's draws in two stores, its element shares and each item's share, so removing one store
+  changed nothing. With both removed, the test caught it: the iron share of two rows that follow the same recipe had a
+  standard deviation of 0.030 instead of the triangle's 0.041.
+- **Not covered:** faults no one thought of.
+
+### V30. 02_composition.py: tests first
+
+- **What:** 02, as specified in points 1 to 14 and 16 to 17, with the recommendations a to f (HANDOVER.md).
+- **How:** `tests/test_composition.py`, 21 tests, written before 02 and seen to fail. They draw the small workbook of
+  `tests/test_schemas.py` 2,000 times (seed fixed) into temporary folders. They require:
+  - **Seeds:** the same seed gives the same draws, another seed other ones.
+  - **Means:** a part, a body region, a material, a split share, a rest share and the drawn energy per kg agree with
+    their triangle's mean within four standard errors, and stay within its bounds.
+  - **Discrete states:** a build and an alternative are each drawn about half of the time (within four standard
+    errors).
+  - **One draw per recipe:** a recipe used by two rows is drawn once in each draw (the spread of the triangle itself,
+    0.041, within 0.003).
+  - **The cells follow their energy:** phosphorus, which sits only in the salt, equals the cells × 10 % × f × its
+    share of LiPF6, draw by draw, with f from the drawn build's cell or, for a kept row, from the NMC triangle.
+  - **Sums:** every sum of point 12 holds in every draw, and each of its checks, broken in one draw, is caught with
+    the right words. Not allocated may fall below zero and the summary gives the share of draws; nothing else does.
+  - **Split parts:** a part split by units gives each body region its units' part.
+  - **Faults stop it:** a cell recipe that follows the energy of a cell that is not NMC, and a row of the sheet Rows
+    whose recipe follows the energy, are faults. A fault in the workbook stops 02 before any file or page is written.
+  - **The files:** for each robot type, float32 arrays of 2,000 rows with as many columns as their lists name, adding
+    up to the total row by row, the summary in `.csv` and `.xlsx`, and a page.
+  - **The numbers on the pages:** three significant figures, trailing zeros kept.
+- **Result:** all 21 pass; with the tests of 00, 01 and 03, 129 tests pass, none skipped.
+- **Not covered:** the small workbook has two robot types and no kept battery except where a test builds one.
+
+### V29. The kept battery rows name the recipe of their cells
+
+- **What:** robot types 2 and 6 keep their battery rows (E1.7d), and Matthias decided their cells are NMC with the
+  car file's recipe (E1.7e). No input said so yet, so 02 could not draw their elements.
+- **How:**
+  - **Tests first:** two new tests of 01, seen to fail. A kept row without a recipe, or with one that is not in the
+    sheet Recipe, is a fault. The real kept rows name 'NMC cylindrical'.
+  - **The check:** check 16 in 01.
+  - **The data:** 'NMC cylindrical' entered in the two kept rows of `data/researched/shared_lists.xlsx`, with his
+    E1.7e words in their column Decided. The file was first copied to the session's scratch folder
+    (`shared_lists_before_kept_recipe.xlsx`).
+- **Result:** 01's 98 tests pass; 01 finds no fault in the real files.
+- **Not covered:** nothing else in the sheet changed.
+
 ### V28. The fibre-composite entry
 
 - **What:** the recipe of E1.9c, entered on Matthias's word ("Yes, enter the fibre-composite recipe now, as with the
