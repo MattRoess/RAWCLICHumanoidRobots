@@ -15,8 +15,9 @@ by Claude, newest first.
 - **Result:** four points confirmed as they were (CF-PEEK, BDP, the TPU soft segments, UHMWPE; silica agrees). Six
   values would move: ABS's acrylonitrile and butadiene modes, PC/ABS's and PA66-GF's minimums, the carbon fibre's
   nitrogen, TPU's hard segment. At the modes no element of any row moves by more than 0.5 percentage points.
-- **Not covered:** the agreed recipe is unchanged until Matthias decides; how each row splits among its polymers
-  cannot be verified on the web.
+- **Taken in:** Matthias, "Yes, take the six verified values of E1.8d into the plastics recipe." E1.8c now holds them;
+  the redrawn rows still add up to 1 and no element falls below zero in any draw.
+- **Not covered:** how each row splits among its polymers cannot be verified on the web.
 
 ### V24. The proposed plastics recipes, drawn in a sandbox
 

@@ -1058,7 +1058,8 @@ Matthias, 2026-10-26, choosing the answer offered: "Propose the plastics recipe 
 from these sources, with estimates (E) for the gaps. Show it to me before anything is entered."
 
 **Status: agreed by Matthias, 2026-10-26, choosing the answer offered: "I agree with the plastics recipe as proposed in
-E1.8c, including its four choices." Not entered yet.**
+E1.8c, including its four choices." After the verification of E1.8d, again choosing the answer offered: "Yes, take the
+six verified values of E1.8d into the plastics recipe." The tables below hold them. Not entered yet.**
 
 **Level 1, how each row splits among the polymers it names (E: no source gives it).** The first polymer the workbook
 names is the remainder. Each of the other k − 1 polymers takes 1/(2k) / 1/k / 1/(k − 1) of the row, so all are
@@ -1081,31 +1082,32 @@ equal at the mode and the remainder never falls below zero.
 | Polymer | Its parts, min / mode / max | Basis |
 |---|---|---|
 | PA66, PC, PEEK, aramid, UHMWPE | Their formulas | E1.8b |
-| ABS | Acrylonitrile 15 / 25 / 35 %, butadiene 5 / 17.5 / 30 %, styrene the remainder | Wikipedia's ranges, the mode their middle (E) |
-| PC/ABS | PC 65 / 70 / 90 %, ABS the remainder | The PC:ABS of the studies in Zhang et al. 2025 (65:35, 7:3, 9:1), E |
+| ABS | Acrylonitrile 15 / **21** / 35 %, butadiene 5 / **20** / 30 %, styrene the remainder | Wikipedia's ranges; the modes from Bärwinkel et al. 2016 and Rutkowski & Levin 1986 (E1.8d) |
+| PC/ABS | PC **60** / 70 / 90 %, ABS the remainder | Bärwinkel et al. 2016 (60 %, E1.8d) and the studies in Zhang et al. 2025 (65:35, 7:3, 9:1) |
 | PC/ABS, flame-retardant (robot type 3 only, whose battery enclosures the workbook calls flame-retardant) | BDP 10 / 11 / 12 %, PC/ABS the remainder | Zhang et al. 2025: organophosphorus 10–12 % for UL94 V-0; BDP, a phosphate (C39H34O8P2, from its name), E |
-| PA66-GF | Glass fibre 15 / 30 / 50 %, PA66 the remainder | BASF's 30 % as the mode; the other glass contents are E |
+| PA66-GF | Glass fibre **13** / 30 / 50 %, PA66 the remainder | DuPont Zytel 70G13 (13 %), BASF A3WG6 (30 %) and A3WG10 (50 %), E1.8d |
 | E-glass | CaO 16 / 20.5 / 25, Al2O3 12 / 14 / 16, B2O3 5 / 7.5 / 10, MgO 0 / 2.5 / 5, Na2O 0 / 1 / 2, TiO2 0 / 0.4 / 0.8, Fe2O3 0.05 / 0.225 / 0.4, F 0 / 0.5 / 1 %, SiO2 the remainder (53.4 % at the modes) | ASTM D578 through US 8,586,491; the mode the middle of each range (E) |
 | CF-PEEK | Carbon fibre 20 / 30 / 40 %, PEEK the remainder | Victrex's 30 % as the mode; the bounds E |
-| Carbon fibre | C 93 / 95 / 97 %, N the remainder | Toray T700S: "Carbon >93%" (E1.9); the rest taken as nitrogen, E |
-| TPU | Hard segment (MDI + butanediol, C19H20N2O4) 30 / 40 / 50 %; soft segment the remainder: polyester (adipate, C10H16O4) or polyether (PTMEG, C4H8O), drawn half and half | Ernzen et al. 2022 (50 %) as the top; Wikipedia names the two soft segments; the rest E |
+| Carbon fibre | **N 0.5 / 2 / 4.5 %, C the remainder** | Mitsubishi Rayon, US 4,814,157 (N 0.5–4.5 %); Toray T700S and Kim et al. 2016 (C over 93 %), E1.8d |
+| TPU | Hard segment (MDI + butanediol, C19H20N2O4) **38.6 / 48.9 / 56.9** %; soft segment the remainder: polyester (poly(butylene adipate), C10H16O4) or polyether (PTMEG, C4H8O), drawn half and half | The three commercial grades in Santiago-Calvo et al. 2021; the soft segments from SONGWON, ChemicalBook and Wikipedia (E1.8d); the half and half E |
 | Silicone rubber | Silica (SiO2) 5 / 20 / 35 %, PDMS the remainder | The silica supplier's 5–35 % |
 
 The further atomic masses (N 14.007, B 10.81, Ca 40.078, Mg 24.305, Ti 47.867) are from the same IUPAC CIAAW table
 as before, read 2026-10-26.
 
-**The result, % of each row** (at the modes; in brackets the 95 % of 20,000 draws in a sandbox, V24):
+**The result, % of each row**, with the six verified values (at the modes; in brackets the 95 % of 20,000 draws in a
+sandbox, V24 and V25):
 
 | Robot type, row | C | O | H | N | Si | Ca | Al | P | Others |
 |---|---|---|---|---|---|---|---|---|---|
-| 1, Engineering polymers | 74.9 (71.7–78.3) | 11.0 | 7.7 | 6.3 (4.4–8.2) | | | | | |
-| 1, battery pack enclosure | 78.6 | 13.2 | 6.2 | 2.0 | | | | | |
-| 2, Engineering plastics | 71.6 (67.7–75.0) | 16.4 | 5.1 | 3.0 | 1.9 | 1.1 | 0.6 | | B 0.2, Mg 0.1, Na 0.1 |
-| 3, Engineering plastics | 61.0 (51.5–67.4) | 19.0 | 6.5 | 5.2 | 3.7 (1.9–6.6) | 2.2 | 1.1 | 0.5 (0.3–0.7) | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
-| 4, Polymers & elastomers | 62.0 (55.8–67.6) | 21.4 | 6.8 | 4.6 | 2.5 | 1.5 | 0.7 | | B 0.2, Mg 0.2, Na 0.1, F 0.1 |
-| 5, Composites & polymers | 64.2 (53.9–72.3) | 17.9 | 4.9 | 5.1 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
-| 5, Sealing elastomers | 44.4 (37.2–53.4) | 27.3 | 6.9 | 1.6 | 19.8 (12.2–27.6) | | | | |
-| 6, Reinforced polymers | 64.2 (53.9–72.1) | 17.9 | 4.9 | 5.1 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 1, Engineering polymers | 75.2 (71.7–78.5) | 11.0 | 7.8 | 6.0 (4.3–8.1) | | | | | |
+| 1, battery pack enclosure | 78.8 | 13.2 | 6.3 | 1.7 | | | | | |
+| 2, Engineering plastics | 71.8 (68.0–75.4) | 16.4 | 5.1 | 2.7 | 1.9 | 1.1 | 0.6 | | B 0.2, Mg 0.1, Na 0.1 |
+| 3, Engineering plastics | 61.1 (51.7–67.8) | 19.0 | 6.5 | 5.1 | 3.7 (1.8–6.6) | 2.2 | 1.1 | 0.5 (0.3–0.7) | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 4, Polymers & elastomers | 62.3 (56.1–68.0) | 21.0 | 6.7 | 4.8 | 2.5 | 1.5 | 0.7 | | B 0.2, Mg 0.2, Na 0.1, F 0.1 |
+| 5, Composites & polymers | 64.7 (54.3–73.0) | 17.9 | 4.9 | 4.6 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
+| 5, Sealing elastomers | 44.7 (37.4–53.5) | 26.7 | 6.8 | 2.0 | 19.8 (12.2–27.6) | | | | |
+| 6, Reinforced polymers | 64.7 (54.3–72.9) | 17.9 | 4.9 | 4.6 | 3.7 | 2.2 | 1.1 | | B 0.3, Mg 0.2, Na 0.1, F 0.1 |
 | 6, Protective ballistic fibers | 78.1 (75.2–81.1) | 6.7 | 9.3 | 5.9 | | | | | |
 
 **Choices in this proposal that are Matthias's:**
@@ -1144,7 +1146,8 @@ or in the browser.
 **Seen only in search summaries, not used:** two patents naming commercial ABS with 15.6 % and about 22 % butadiene;
 retailer and distributor listings of PA66-GF15 grades.
 
-**What the verification would change in E1.8c** (not applied: the agreed recipe stays until Matthias decides):
+**What the verification changes in E1.8c** (taken in on Matthias's word, 2026-10-26: "Yes, take the six verified values
+of E1.8d into the plastics recipe."):
 
 | Point | Agreed (E1.8c) | From the sources read |
 |---|---|---|
