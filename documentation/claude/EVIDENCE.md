@@ -660,6 +660,9 @@ electrolyte exists in the sibling projects.
   all the compositons are the same". Asked what "not liquid" meant, he chose "Liquid, the car recipe": high-nickel
   NMC with the car file's liquid electrolyte, the same recipe in every NMC robot type (1, 2, 4, 5, 6). Asked about
   robot type 3, he chose "Robot 3 stays LFP".
+- **His reason, 2026-10-26:** "Nickel high is a mixture of two high containing nickel batrtery chemistries, which
+  makes it easier to just go with one chemistry". This agrees with check 1 of E1.7b: the car file's high-nickel
+  cathode lies between NMC811 and NMC955 (Ni : Mn : Co about 0.87 : 0.06 : 0.06), not on one grade.
 
 #### E1.7f Battery point 2: the cell format
 
@@ -856,7 +859,8 @@ by a sum.
 - The elements add up to 100.000 % in every draw, for both cells.
 - **To know:** the car file's high-nickel cathode holds less cobalt (3.8 %) than the NMC811 measured in 21700 cells
   (about 6 %, E1.7h). With NMC811, the NMC cell's Co would be about 2.2 % instead of 1.35 %. The grade is decided;
-  this is only noted.
+  this is only noted. Matthias's reason for the one grade is in E1.7e: the car file's high nickel already mixes two
+  high-nickel chemistries.
 
 ---
 
