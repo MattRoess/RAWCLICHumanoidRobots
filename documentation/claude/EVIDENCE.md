@@ -1250,7 +1250,63 @@ types 5 and 6's CF-PEEK went to Plastics (E1.8c).
   - CFRP against GFRP in robot type 3's row;
   - the fibre sizing (a thin coating), which no source here gives;
   - whether robot shells use the prepreg's fibre content or a lower one (wet lay-up, short fibres).
-- **No recipe is proposed yet.**
+- **No recipe is proposed yet.** Proposed since: E1.9c.
+
+#### E1.9c Proposal: the fibre-composite recipe of each robot type
+
+Matthias, 2026-10-26, choosing the answer offered: "Propose the fibre-composite recipe per robot type, min / mode /
+max, from these sources, with estimates (E) for the gaps, verified on the web with references. Show it to me before
+anything is entered."
+
+**Status: proposed to Matthias, not agreed, nothing entered.**
+
+**The gaps, checked on the web first (2026-10-26):**
+
+| Gap | Source read | Kind | What it says | Used for |
+|---|---|---|---|---|
+| Sizing on carbon fibre | Toray, *TORAYCA T700S* data sheet, Rev. 11/24/2025. https://www.toraycma.com/wp-content/uploads/T700S-Data-Sheet.pdf | Maker's datasheet | Sizing types and amounts: "50C (1.0 %) Epoxy, phenolic, polyester, vinyl ester"; "60E (0.2 %) Epoxy"; "F0E (0.6 %) Vinyl ester, compatible with epoxy" | Sizing 0.2 / 0.6 / 1.0 % of the fibre; its chemistry not given, taken as epoxy (DGEBA), E |
+| Fibre content below prepreg | Explore Composites!, *Basic Numbers and Calculations for Composites*. https://explorecomposites.com/articles/design-for-composites/basic-numbers-and-calculations-for-composites/ | A hobbyist's website: its author writes he is "not a real engineer"; weak | Fibre volume: open moulded "20-40%", vacuum-bagged wet lay-up and infusion "40-55%", prepreg "50-70%"; carbon 1.75–2, E-glass 2.55–2.6, epoxy 1.2–1.45 g/cm³ | Only for the lower bounds below, as an estimate (E) |
+| Which epoxy | none found | — | No robot maker names its resin | The two amine epoxies of E1.9b, half and half (E) |
+| CFRP against GFRP in robot type 3 | none found | — | — | The rule of the plastics (E1.8c): the first named the remainder, the other 25 / 50 / 75 % (E) |
+
+**Level 1, each robot type's row:**
+
+| Robot type | Row | Recipe |
+|---|---|---|
+| 1 | Carbon-fiber composite | CFRP, all of it |
+| 2 | Carbon-fiber composite | CFRP, all of it (T700 or T800 fibre: both over 93 % carbon, the recipe 'Carbon fibre') |
+| 3 | Fiber composites | CFRP the remainder; GFRP 25 / 50 / 75 % (E) |
+
+**Level 2, the recipes:**
+
+| Recipe | Its parts, min / mode / max | Basis |
+|---|---|---|
+| CFRP | Carbon fibre (sized) **50 / 62 / 68 %** by mass, epoxy the remainder | Mode and maximum: Hexcel HexPly 8552, resin 32–42 %, so fibre 58–68 % (E1.9b), the middle 62 %. Minimum: 40 % fibre by volume (vacuum-bagged or infused, Explore Composites!) is 50 % by mass with carbon 1.8 and epoxy 1.2 g/cm³ (computed), E |
+| Carbon fibre, sized | Sizing 0.2 / 0.6 / 1.0 %, taken as DGEBA; carbon fibre the remainder | Toray T700S (above); the sizing's chemistry E |
+| Carbon fibre | N 0.5 / 2 / 4.5 %, C the remainder | Already in element_recipes.xlsx (E1.8d) |
+| GFRP | E-glass **59 / 70 / 80 %** by mass, epoxy the remainder | Mode: Avient's 65–75 %, the middle. Maximum: Łukasiewicz "> 79 %". Minimum: 40 % by volume is 59 % by mass with glass 2.58 and epoxy 1.2 g/cm³ (computed), E. Avient also uses polyester and vinyl ester; epoxy is taken throughout, E |
+| E-glass | ASTM D578 oxides | Already in element_recipes.xlsx (E1.8c) |
+| Epoxy | Aromatic amine or cycloaliphatic amine, drawn half and half | E: no source says which robots use |
+| Epoxy, aromatic amine | DDS 36.5 parts per 100 DGEBA (26.7 %), DGEBA the remainder | The stoichiometric ratio from the PubChem formulas (E1.9b); Hexcel 8552 is "amine cured" |
+| Epoxy, cycloaliphatic amine | Diamine 35 parts per 100 DGEBA (25.9 %), DGEBA the remainder | Huntsman's mix ratio, 35 per 100, which the stoichiometry confirms (E1.9b) |
+
+Not itemised: the sizing on glass fibre; no source read gives it.
+
+**The result, % of each row, at the modes** (V27: 20,000 draws, every row adds up to 1, no element below zero):
+
+| Row | With the aromatic epoxy | With the cycloaliphatic epoxy | 95 % of the draws (both epoxies drawn) |
+|---|---|---|---|
+| CFRP, robot types 1 and 2 | C 87.2, O 6.6, H 2.5, N 2.4, S 1.3 | C 89.0, O 5.4, H 3.3, N 2.4 | C 84.5–89.9, O 4.9–8.1, N 1.7–3.6, S 0–1.6 |
+| Robot type 3, CFRP and GFRP | C 54.1, O 22.5, Si 8.7, Ca 5.1, Al 2.6, H 2.2, N 1.6, S 1.2, B 0.8, Mg 0.5 | C 55.7, O 21.4, Si 8.7, Ca 5.1, H 2.9, Al 2.6, N 1.7, B 0.8, Mg 0.5 | C 41.3–67.5, O 15.8–28.5, Si 5.2–12.5, Ca 3.0–7.6 |
+| GFRP alone, for comparison | O 38.4, C 20.9, Si 17.5, Ca 10.3, Al 5.2 | O 37.4, C 22.3, Si 17.5, Ca 10.3, Al 5.2 | — |
+
+The further atomic mass, S 32.06, is from the IUPAC CIAAW table (E1.9b).
+
+**Choices in this proposal that are Matthias's:**
+- the two epoxies, half and half;
+- robot type 3's split, CFRP the remainder and GFRP 25 / 50 / 75 %;
+- the lower bounds of fibre content, which rest on a weak source;
+- the glass fibre's sizing left out.
 
 ---
 

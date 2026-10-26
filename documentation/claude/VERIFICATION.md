@@ -5,6 +5,16 @@ by Claude, newest first.
 
 ## 2026-10-26
 
+### V27. The proposed fibre-composite recipes, drawn in a sandbox
+
+- **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.9c, for robot types 1, 2 and 3.
+- **How:** the sandbox of V24, with the recipes of E1.9c and the agreed 'Carbon fibre' and 'E-glass'; 20,000 draws
+  per row (seed 1), nothing written to the project. Each group checked for one remainder or alternatives adding to 1,
+  shares in order and largest shares at most 1. The modes were computed for each epoxy separately.
+- **Result:** both rows add up to 1; no element falls below zero in any draw; the shares are those in E1.9c.
+- **Not covered:** the draws are independent; the epoxy, robot type 3's split and the lower bounds of fibre content
+  are estimates. Nothing is entered.
+
 ### V26. The plastics entry: element_recipes.xlsx, the sheet Rows and 01's checks
 
 - **What:** the plastics recipe of E1.8c with the six values of E1.8d, entered on Matthias's word ("Yes, enter the

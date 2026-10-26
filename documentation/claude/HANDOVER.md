@@ -81,7 +81,8 @@ No recipe is proposed and nothing is entered: each waits for his agreement.
    whether everything was verified, the nine open points were checked on the web, E1.8d, V25; six values moved
    slightly and he took them in: "Yes, take the six verified values of E1.8d into the plastics recipe."; then
    entered on "Yes, enter the plastics recipe now as laid out", V26),
-   fibre composites (begun: what the robots use and the sources, verified on the web, E1.9b, shown to him),
+   fibre composites (what the robots use and the sources, verified on the web, E1.9b; the recipe proposed on
+   "Propose the fibre-composite recipe per robot type ...", E1.9c, V27, waiting for his agreement),
    electronics (with the silver), ceramics.
 4. **The decisions listed in the section below**, as far as his comments have not settled them.
 
