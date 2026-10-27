@@ -155,7 +155,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the aluminium r
 max, from the sources of E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it
 to me before anything is entered."
 
-**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Entered the same day, after E1.1d, on his word "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites.", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V39). **Under review:** Matthias's rule of the same day ("You should trust standards more than analysis performed at a university") puts the modes of 6061 and ADC12, which rest on university or institute analyses only, and the university analyses among those of 7075 and A380, in question; whether they are set again is his decision.**
+**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Entered the same day, after E1.1d, on his word "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites.", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V39). **Its modes are replaced** by E1.1e and E1.1f, entered on 2026-10-27 (V43). Before that, under review: Matthias's rule of the same day ("You should trust standards more than analysis performed at a university") puts the modes of 6061 and ADC12, which rest on university or institute analyses only, and the university analyses among those of 7075 and A380, in question; whether they are set again is his decision.**
 
 **The gaps, checked on the web (2026-10-27).** The registration records give limits; the mode of each element is the
 median of the analyses read (the mean where there are two). The analyses give the composition of the metal each study
@@ -326,7 +326,7 @@ Car-body steels and cast iron are not named for robots (E1.4b).
 
 Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
 
-**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." Not entered yet: the workbook still holds the modes of E1.1c.**
+**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." Entered the same day, with ADC12 from its combined analyses (E1.1f): Matthias, 2026-10-27: "Yes, enter both: rewrite the aluminium modes as in E1.1e, and enter the magnesium recipe of E1.2c (its AM share, AM60B or AM50A half and half, robot type 3 as AZ91D alone) with the modes of E1.2d. Tests first, as before, and the documents." (VERIFICATION.md V43).**
 
 **The order each mode follows:**
 1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
@@ -399,6 +399,35 @@ now sit in the middle of their ranges (0.25, 0.10, 0.10 %) instead of near 0.
   0.20, 0.064);
 - the reference materials' elements outside a grade's registered list (such as nickel at 0.05 in SS-6061) left in
   the aluminium.
+
+#### E1.1f ADC12 from its combined analyses (Matthias's second rule)
+
+Matthias, 2026-10-27: "If the elemental analysis of a material is only based on university analysis, then combine them and use respective large uncertainties. Except one of the analyis is for obvious reasons wrong". It came while E1.1e was being entered, before anything was written.
+
+**What it changes:** ADC12 alone; no standard nominal, reference material or producer value exists for it (E1.1e).
+- **The modes** of Si, Fe, Cu, Mn, Mg and Zn are now the mean of the two research institutes' analyses: Yeom et al.
+  2016 (KITECH) and Mizutani et al. 2018 (Gifu Prefectural Industrial Technology Research Institute), both read in
+  E1.1c.
+- **Ni** comes from Yeom et al. alone.
+- **Sn, Pb and Ti** stay the middle of the JIS ranges: no analysis gives them.
+- **Neither analysis is obviously wrong:** every value lies within the JIS limits.
+- **The uncertainty** is the JIS full range (minimum and maximum unchanged), labelled E.
+
+| Element | ADC12, wt% (min / mode / max) | Instead of (E1.1e) |
+|---|---|---|
+| Si | 9.6 / **11.44** / 12.0 | 10.8 |
+| Fe | 0 / **0.79** / 1.3 | 0.65 |
+| Cu | 1.5 / **2.09** / 3.5 | 2.5 |
+| Mn | 0 / **0.21** / 0.5 | 0.25 |
+| Mg | 0 / **0.265** / 0.3 | 0.15 |
+| Zn | 0 / **0.855** / 1.0 | 0.5 |
+| Ni | 0 / **0.07** / 0.5 | 0.25 |
+| Sn, Pb, Ti | 0 / **0.10, 0.10, 0.15** / 0.2, 0.2, 0.30 | unchanged |
+
+**% of each robot type's aluminium at the modes, with ADC12** (E1.1e's in brackets): 1: Al 92.72 (92.84); 2: 90.48
+(90.61); 3: 92.03 (92.16); 4: 91.17 (91.29); 5: 90.30 (90.42); 6: 90.86 (90.98). With A380, unchanged.
+
+**Status: entered** with E1.1e, on Matthias, 2026-10-27's word (VERIFICATION.md V43).
 ---
 
 ### E1.2 Magnesium
@@ -522,7 +551,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the magnesium r
 max, from the sources of E1.2b, with AZ91D, AM60B and AM50A, estimates (E) for the alloy shares, and the modes from
 analyses verified on the web with references. Show it to me before anything is entered."
 
-**Status: proposed; on hold.** Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs". The modes below rest on university analyses (the AM50 certificate of Jesus et al. excepted) and are to be set again by his rule; nothing is entered.
+**Status: entered, with the modes of E1.2d and E1.2e (VERIFICATION.md V43).** Before that: on hold. Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs". The modes below rest on university analyses (the AM50 certificate of Jesus et al. excepted) and are to be set again by his rule; nothing is entered.
 
 **The limits:** ASTM B94 for die castings, through ICAST's datasheets. The robots' parts are castings; the producers'
 ingot limits of E1.2b are narrower.
@@ -622,7 +651,7 @@ Silicon, copper, iron and nickel stay below 0.09 % in every draw.
 
 Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
 
-**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." It replaces the modes of E1.2c. Not entered yet. The rest of E1.2c (the AM share, AM60B or AM50A half and half, robot type 3 as AZ91D alone) was not put to him on its own.**
+**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." It replaces the modes of E1.2c. Entered the same day with E1.2c, with the university-only elements combined (E1.2e): Matthias, 2026-10-27: "Yes, enter both: rewrite the aluminium modes as in E1.1e, and enter the magnesium recipe of E1.2c (its AM share, AM60B or AM50A half and half, robot type 3 as AZ91D alone) with the modes of E1.2d. Tests first, as before, and the documents." (VERIFICATION.md V43).**
 
 **The order each mode follows:**
 1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
@@ -678,6 +707,31 @@ of the university median of 8.56.
 - AZ91D's manganese and AM60B's aluminium and manganese from Magnesium Elektron's nominal values;
 - the trace elements of AZ91D and AM60B in the middle of their ranges;
 - AM50A from a single lot's certificate.
+
+#### E1.2e The magnesium elements known only from university analyses (Matthias's second rule)
+
+Matthias, 2026-10-27: "If the elemental analysis of a material is only based on university analysis, then combine them and use respective large uncertainties. Except one of the analyis is for obvious reasons wrong".
+
+**What it changes**, against E1.2d (wt%, min / mode / max; the limits unchanged, labelled E):
+- **AZ91D's trace elements:**
+  - Si 0 / **0.0303** / 0.10: the mean of Cui et al. 2018, Dini 2017 and Wang et al. 2019, instead of 0.05;
+  - Fe 0 / **0.0023** / 0.005, Cu 0 / **0.021** / 0.030, Ni 0 / **0.0017** / 0.002: Dini 2017 alone, instead of
+    0.0025, 0.015, 0.001. Cui et al.'s "below 0.005" is not a number and is left out.
+- **AM60B's zinc:** 0 / **0.15** / 0.22, from Zheng et al. 2019, instead of 0.11. Its Si, Fe, Cu and Ni stay the
+  middle of their ranges: no analysis gives them.
+- **Nothing obviously wrong:** every value lies within the B94 limits. The AM60B table of the graphene study, which
+  only repeats B94's maxima, was already left out (E1.2c).
+
+**% of each robot type's magnesium at the modes** (E1.2d's in brackets):
+
+| Robot type | With AM60B | With AM50A |
+|---|---|---|
+| 2 | Mg 91.38 (91.39), Al 7.71, Zn 0.463, Mn 0.386 | Mg 92.00 (91.99) |
+| 3 | Mg 89.94 (89.93), Al 9.0, Zn 0.70, Mn 0.30 | the same |
+| 4 | Mg 91.42 (91.43), Al 7.68, Zn 0.458, Mn 0.388 | Mg 92.04 (92.04) |
+| 6 | Mg 91.62 (91.63), Al 7.50, Zn 0.425, Mn 0.40 | Mg 92.33 (92.32) |
+
+**Status: entered** with E1.2c and E1.2d (VERIFICATION.md V43).
 ---
 
 ### E1.3 Titanium

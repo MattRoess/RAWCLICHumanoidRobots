@@ -5,6 +5,39 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V43. Aluminium's modes rewritten and magnesium entered, and a preview of 02 and 03
+
+- **What:** E1.1e with E1.1f (aluminium) and E1.2c with E1.2d and E1.2e (magnesium), entered on Matthias's word:
+  "Yes, enter both: rewrite the aluminium modes as in E1.1e, and enter the magnesium recipe of E1.2c ... with the
+  modes of E1.2d". Mid-entry, before anything was written, he added: "If the elemental analysis of a material is only
+  based on university analysis, then combine them and use respective large uncertainties." Then: "Can we then
+  continue with the code to describe the material compsotion of the six robot types. Furthermore I want to see these
+  related figures soon."
+- **How:**
+  - **Tests first.** The aluminium test's expected table was set to E1.1e with E1.1f; a new magnesium test requires
+    no fault, a row for robot types 2, 3, 4 and 6 (robot type 3 naming 'Magnesium AZ91D'), and E1.2e's table at the
+    modes. Both failed before the entry.
+  - **The second rule:** applied in a sandbox (`modes_by_rules_sandbox.py`). Every university value was checked
+    against its limits before combining; none was outside.
+  - **The data:** the workbook was copied to the session's scratch folder
+    (`element_recipes_before_modes_and_magnesium.xlsx`) and the copy compared byte for byte. The entry script
+    (`make_modes_and_magnesium_entry.py`) took the modes from the sandbox's own code, word for word:
+    - 34 aluminium items rewritten in place (mode, label, basis), each checked to keep its limits;
+    - 33 magnesium items and 4 rows added.
+  - **01:** check 17's text names magnesium. 01 was drawn into the scratch folder before and after, and all 20 pages
+    compared byte for byte.
+  - **02 and 03:** run on the real inputs with 2,000 draws into the scratch folder. Robot type 4's page was read, and
+    all ten pages were sent to Matthias as a preview.
+- **Result:**
+  - 132 tests pass, none skipped. 01 finds no fault, and of its pages only faults.png changed (check 17's text).
+  - In 02, magnesium is in the elements of robot types 2, 3, 4 and 6.
+  - Robot type 4's element magnesium is 6.31 kg: its 6.40 kg of magnesium alloy at about 92 % Mg, plus about 0.43 kg
+    in its 28.5 kg of aluminium.
+  - Its element aluminium is 26.6 kg, and its elements now cover 45.3 of its 62.7 kg of materials.
+- **Not covered:**
+  - The 200,000-draw run, which is Matthias's; the preview has 2,000 draws.
+  - `figures/` and `data/consolidated/` were not written.
+
 ### V42. The modes set again by Matthias's rule, drawn in a sandbox
 
 - **What:** [EVIDENCE.md](EVIDENCE.md) E1.1e (aluminium) and E1.2d (magnesium), on Matthias's "Yes, redo the modes of

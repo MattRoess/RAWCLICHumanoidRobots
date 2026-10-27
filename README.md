@@ -40,7 +40,7 @@ The tests run from a terminal in the project folder:
 | `tests/` | The tests of 00 to 03. |
 | `data/raw/humanoid_robots_2040_workbook.xlsx` | The workbook the stages read. Matthias's, never changed. |
 | `data/researched/shared_lists.xlsx` | Where every part and material name goes in the shared part groups, body regions and materials, decided by Matthias on 2026-10-26. Corrected in Excel; 01 checks it. Its sheet Battery cells gives each robot type's battery as cells only. |
-| `data/researched/element_recipes.xlsx` | The element recipes: the datasheets of the cells, the compounds, the NMC and LFP cylindrical cells, the plastics, the fibre composites and the aluminium alloys down to their elements, and which recipe each workbook row follows. Agreed by Matthias on 2026-10-26 and 2026-10-27; 01 checks it. |
+| `data/researched/element_recipes.xlsx` | The element recipes: the datasheets of the cells, the compounds, the NMC and LFP cylindrical cells, the plastics, the fibre composites, the aluminium and the magnesium alloys down to their elements, and which recipe each workbook row follows. Agreed by Matthias on 2026-10-26 and 2026-10-27; 01 checks it. |
 | `data/consolidated/<n>_<name>/` | What 02 writes for each robot type, for stock-and-flow: the draws (`.npy`, float32, one row per draw, with their columns in `.txt`) and the summary. Outputs: rewritten by every run. |
 | `figures/schemas/` | The pages 01 draws: the overview, per robot type its workbook page, its page in the shared lists and its robot in one view, and the faults. Outputs: redrawn by every run. |
 | `figures/composition/`, `figures/comparison/` | The pages of 02 (one per robot type) and of 03 (one per view). Outputs: redrawn by every run. |

@@ -971,8 +971,9 @@ class TestTheWorkbook(unittest.TestCase):
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.06, msg=f'{recipe}, {epoxy}, {element}')
 
     def test_the_aluminium_recipes_reproduce_what_matthias_agreed(self):
-        # Matthias, 2026-10-27: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." and
-        # "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites."
+        # Matthias, 2026-10-27: "I agree with the aluminium recipe as proposed in E1.1c, including its choices.", then,
+        # with its modes set again by his rule (standards and commercial labs first): "I agree with the modes of E1.1e
+        # and E1.2d, including their choices." and "Yes, enter both".
         params = Params()
         paths = [absolute(p) for p in (params.data.workbook, params.data.shared_lists, params.data.element_recipes)]
         if not all(os.path.exists(p) for p in paths):
@@ -984,20 +985,20 @@ class TestTheWorkbook(unittest.TestCase):
         self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
         rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Aluminium'}
         self.assertEqual(set(rows), {(n, 'Aluminum alloys') for n in range(1, 7)})
-        # EVIDENCE.md E1.1c, % of each robot type's aluminium at the modes, with each die-cast alloy. Two decimals, so
-        # within 0.006.
-        expected = {(1, 'A380'): {'Al': 93.07, 'Si': 2.23, 'Zn': 1.59, 'Cu': 1.21, 'Mg': 1.14, 'Fe': 0.47},
-                    (1, 'ADC12'): {'Al': 92.81, 'Si': 2.69, 'Zn': 1.64, 'Mg': 1.18, 'Cu': 0.99, 'Fe': 0.43},
-                    (2, 'A380'): {'Al': 90.76, 'Zn': 3.23, 'Si': 2.10, 'Mg': 1.60, 'Cu': 1.59, 'Fe': 0.42},
-                    (2, 'ADC12'): {'Al': 90.50, 'Zn': 3.28, 'Si': 2.55, 'Mg': 1.63, 'Cu': 1.36, 'Fe': 0.37},
-                    (3, 'A380'): {'Al': 92.36, 'Si': 2.19, 'Zn': 2.09, 'Cu': 1.33, 'Mg': 1.28, 'Fe': 0.45},
-                    (3, 'ADC12'): {'Al': 92.11, 'Si': 2.65, 'Zn': 2.14, 'Mg': 1.32, 'Cu': 1.10, 'Fe': 0.41},
-                    (4, 'A380'): {'Al': 91.46, 'Zn': 2.73, 'Si': 2.14, 'Cu': 1.47, 'Mg': 1.46, 'Fe': 0.43},
-                    (4, 'ADC12'): {'Al': 91.21, 'Zn': 2.78, 'Si': 2.60, 'Mg': 1.49, 'Cu': 1.25, 'Fe': 0.39},
-                    (5, 'A380'): {'Al': 90.56, 'Zn': 3.36, 'Si': 2.08, 'Mg': 1.64, 'Cu': 1.62, 'Fe': 0.41},
-                    (5, 'ADC12'): {'Al': 90.31, 'Zn': 3.41, 'Si': 2.54, 'Mg': 1.67, 'Cu': 1.39, 'Fe': 0.37},
-                    (6, 'A380'): {'Al': 91.14, 'Zn': 2.95, 'Si': 2.12, 'Cu': 1.53, 'Mg': 1.52, 'Fe': 0.43},
-                    (6, 'ADC12'): {'Al': 90.89, 'Zn': 3.00, 'Si': 2.58, 'Mg': 1.56, 'Cu': 1.30, 'Fe': 0.38}}
+        # EVIDENCE.md E1.1e with ADC12 from its combined analyses (E1.1f), % of each robot type's aluminium at the modes,
+        # with each die-cast alloy. Two decimals, so within 0.006.
+        expected = {(1, 'A380'): {'Al': 92.94, 'Si': 2.18, 'Zn': 1.60, 'Cu': 1.28, 'Mg': 1.20, 'Fe': 0.41},
+                    (1, 'ADC12'): {'Al': 92.72, 'Si': 2.66, 'Zn': 1.65, 'Mg': 1.24, 'Cu': 0.98, 'Fe': 0.39},
+                    (2, 'A380'): {'Al': 90.70, 'Zn': 3.19, 'Si': 2.05, 'Cu': 1.66, 'Mg': 1.64, 'Fe': 0.36},
+                    (2, 'ADC12'): {'Al': 90.48, 'Zn': 3.24, 'Si': 2.53, 'Mg': 1.67, 'Cu': 1.36, 'Fe': 0.33},
+                    (3, 'A380'): {'Al': 92.25, 'Si': 2.14, 'Zn': 2.08, 'Cu': 1.40, 'Mg': 1.34, 'Fe': 0.40},
+                    (3, 'ADC12'): {'Al': 92.03, 'Si': 2.62, 'Zn': 2.13, 'Mg': 1.37, 'Cu': 1.10, 'Fe': 0.37},
+                    (4, 'A380'): {'Al': 91.38, 'Zn': 2.70, 'Si': 2.09, 'Cu': 1.54, 'Mg': 1.50, 'Fe': 0.37},
+                    (4, 'ADC12'): {'Al': 91.17, 'Zn': 2.75, 'Si': 2.57, 'Mg': 1.54, 'Cu': 1.24, 'Fe': 0.35},
+                    (5, 'A380'): {'Al': 90.52, 'Zn': 3.32, 'Si': 2.04, 'Cu': 1.69, 'Mg': 1.67, 'Fe': 0.35},
+                    (5, 'ADC12'): {'Al': 90.30, 'Zn': 3.37, 'Si': 2.52, 'Mg': 1.70, 'Cu': 1.39, 'Fe': 0.32},
+                    (6, 'A380'): {'Al': 91.07, 'Zn': 2.92, 'Si': 2.08, 'Cu': 1.60, 'Mg': 1.56, 'Fe': 0.37},
+                    (6, 'ADC12'): {'Al': 90.86, 'Zn': 2.97, 'Si': 2.55, 'Mg': 1.60, 'Cu': 1.30, 'Fe': 0.34}}
         for (n, alloy), elements in expected.items():
             shares = schemas.element_shares(recipes, rows[(n, 'Aluminum alloys')], {'Alloy': alloy})
             self.assertAlmostEqual(sum(shares.values()), 1, places=9, msg=f'robot type {n}, {alloy}')
@@ -1006,6 +1007,37 @@ class TestTheWorkbook(unittest.TestCase):
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.006,
                                        msg=f'robot type {n}, {alloy}, {element}')
 
+    def test_the_magnesium_recipes_reproduce_what_matthias_agreed(self):
+        # Matthias, 2026-10-27: "I agree with the modes of E1.1e and E1.2d, including their choices." and "Yes, enter
+        # both: ... the magnesium recipe of E1.2c (its AM share, AM60B or AM50A half and half, robot type 3 as AZ91D
+        # alone) with the modes of E1.2d."
+        params = Params()
+        paths = [absolute(p) for p in (params.data.workbook, params.data.shared_lists, params.data.element_recipes)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the workbook, the shared lists or the element recipes are not on disk')
+        book = schemas.read_workbook(paths[0], params)
+        lists = schemas.read_shared_lists(paths[1])
+        recipes = schemas.read_element_recipes(paths[2])
+        self.assertEqual(schemas.check_element_recipes(recipes, params), [])
+        self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
+        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Magnesium'}
+        self.assertEqual(set(rows), {(n, 'Magnesium alloys') for n in (2, 3, 4, 6)})
+        self.assertEqual(rows[(3, 'Magnesium alloys')], 'Magnesium AZ91D')
+        # EVIDENCE.md E1.2d with the university-only elements combined (E1.2e), % of each robot type's magnesium at the
+        # modes, with each AM alloy. Within 0.006.
+        expected = {(2, 'AM60B'): {'Mg': 91.38, 'Al': 7.71, 'Zn': 0.463, 'Mn': 0.386},
+                    (2, 'AM50A'): {'Mg': 92.00, 'Al': 7.24, 'Zn': 0.416, 'Mn': 0.300},
+                    (3, 'AM60B'): {'Mg': 89.94, 'Al': 9.00, 'Zn': 0.700, 'Mn': 0.300},
+                    (4, 'AM60B'): {'Mg': 91.42, 'Al': 7.68, 'Zn': 0.458, 'Mn': 0.388},
+                    (4, 'AM50A'): {'Mg': 92.04, 'Al': 7.20, 'Zn': 0.410, 'Mn': 0.300},
+                    (6, 'AM60B'): {'Mg': 91.62, 'Al': 7.50, 'Zn': 0.425, 'Mn': 0.400},
+                    (6, 'AM50A'): {'Mg': 92.33, 'Al': 6.96, 'Zn': 0.370, 'Mn': 0.300}}
+        for (n, alloy), elements in expected.items():
+            shares = schemas.element_shares(recipes, rows[(n, 'Magnesium alloys')], {'AM alloy': alloy})
+            self.assertAlmostEqual(sum(shares.values()), 1, places=9, msg=f'robot type {n}, {alloy}')
+            for element, percent in elements.items():
+                self.assertAlmostEqual(shares[element] * 100, percent, delta=0.006,
+                                       msg=f'robot type {n}, {alloy}, {element}')
 
 if __name__ == '__main__':
     unittest.main()

@@ -87,9 +87,19 @@ Where the work stands, newest first: what was decided, by whom, and what is open
     certificate. The trace elements of AZ91D and AM60B take the middle of their ranges (E).
   - Drawn in a sandbox (V42); nothing is entered. E1.1c stays in the workbook as it is.
 - **Agreed:** Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." Not entered yet.
-- **Next, his:**
-  - whether to enter E1.1e (rewriting the aluminium modes in the workbook);
-  - whether to enter the magnesium recipe of E1.2c with the modes of E1.2d. E1.2c's shares were not agreed on their own.
+- **Then:** "Yes, enter both: rewrite the aluminium modes as in E1.1e, and enter the magnesium recipe of E1.2c ...
+  with the modes of E1.2d."
+  - **Mid-entry, a second rule:** "If the elemental analysis of a material is only based on university analysis, then
+    combine them and use respective large uncertainties. Except one of the analyis is for obvious reasons wrong".
+    Applied to ADC12 (E1.1f) and to AZ91D's trace elements and AM60B's zinc (E1.2e).
+  - **Entered (V43).** 132 tests pass.
+- **Then:** "Can we then continue with the code to describe the material compsotion of the six robot types.
+  Furthermore I want to see these related figures soon. Only then I can start to verify your work".
+  - The code is 02 and 03, built and tested. A preview of all ten pages (2,000 draws, scratch folder) was sent to him.
+  - The real run, 200,000 draws into `data/consolidated/` and `figures/`, has not been made.
+  - Materials with elements so far: battery cells, plastics, fibre composites, aluminium, magnesium. Still without:
+    titanium, steel, copper, magnets, electronics, ceramics.
+- **Next, his:** the real run, by pressing Run on 00 to 03 (paths below), or his word that Claude runs it.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -352,8 +362,8 @@ reads; not in git)
 
 | Material | His words | Done since |
 |---|---|---|
-| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27. Car files checked: E1.1d, V38. Entered: V39 |
-| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.2b, V40. Recipe proposed: E1.2c, V41 |
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27. Car files checked: E1.1d, V38. Entered: V39. Modes set again: E1.1e, E1.1f (V42, V43) |
+| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.2b, V40. Recipe: E1.2c (V41), modes E1.2d (V42) and E1.2e; entered: V43 |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
 | Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |
