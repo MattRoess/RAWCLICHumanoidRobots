@@ -79,7 +79,14 @@ Where the work stands, newest first: what was decided, by whom, and what is open
     2. else the middle of the standard's range (E), from 0 to the maximum where only a maximum is given.
 
     For 6061 and ADC12, and for most trace elements, commercial values would be searched for first.
-- **Next, his:** whether to redo the modes of E1.2c, and of the entered E1.1c, this way.
+- **Then:** "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule ...".
+  - Aluminium: [EVIDENCE.md](EVIDENCE.md) E1.1e. The modes come from SAE's nominal compositions (6061, 7075) and from
+    certified reference materials: Arconic's SS-6061, SS-7075, KC-380 and SS-380, and NIST's SRM 1259 and 1256b.
+    ADC12 has no commercial value and takes the middle of the JIS ranges (E).
+  - Magnesium: E1.2d. The modes come from SAE's AMS4490K for AZ91D, Magnesium Elektron's nominal values, and the AM50
+    certificate. The trace elements of AZ91D and AM60B take the middle of their ranges (E).
+  - Drawn in a sandbox (V42); nothing is entered. E1.1c stays in the workbook as it is.
+- **Next, his:** whether he agrees with E1.1e and E1.2d.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 

@@ -5,6 +5,35 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V42. The modes set again by Matthias's rule, drawn in a sandbox
+
+- **What:** [EVIDENCE.md](EVIDENCE.md) E1.1e (aluminium) and E1.2d (magnesium), on Matthias's "Yes, redo the modes of
+  E1.2c and of the entered E1.1c by my rule".
+- **How:**
+  - **The sources:**
+    - SAE's pages for AMS4027P, AMS4045N and AMS4490K;
+    - Arconic's lot tables for SS-6061, SS-7075, KC-380, SS-380 and SS-383, in the built-in browser (a small reader
+      turned each tab into its certified values; SS-380's tin was read again by hand);
+    - NIST's certificate for SRM 1256b, through its text layer;
+    - searches for reference materials of ADC12, AZ91D, AM60B and AM50A, and for SAE specifications of AM60B and AM50A.
+  - **The modes:** each set by the rule's order (`modes_by_rule_sandbox.py` in the session's scratch folder), every
+    one checked to lie within its limits.
+  - **The copy:** a scratch copy of `element_recipes.xlsx` with the aluminium modes rewritten (34 items) and the
+    magnesium proposal added.
+  - **The checks:** 01's `check_element_recipes` and `check_material_recipes` on the copy; each robot type's recipe
+    at the modes and in 20,000 draws (seed 1) with 02's `RecipeDraws`.
+- **Result:**
+  - 01 finds no fault.
+  - Every recipe adds up to 1, at the modes and in every draw, and no element falls below zero.
+  - Hand checks at the modes:
+    - robot type 1's silicon: 0.2 × 9.07 + 0.8 × (0.32 × 0.160 + 0.68 × 0.60) = 2.18 %;
+    - robot type 3's magnesium: 100 − (9 + 0.7 + 0.3 + 0.05 + 0.0025 + 0.015 + 0.001) = 89.93 %.
+  - Both as drawn.
+- **Not covered:**
+  - ADC12, and the trace elements of AZ91D and AM60B, rest on the middle of the ranges (E).
+  - Arconic's lab is registered to ISO 9001; whether its reference materials are accredited to ISO 17034 was not read.
+  - Nothing is entered; E1.1c in the workbook is unchanged.
+
 ### V41. The proposed magnesium recipe, drawn in a sandbox
 
 - **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.2c.

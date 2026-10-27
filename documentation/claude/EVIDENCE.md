@@ -321,6 +321,84 @@ those files or here.
 - **circuit boards** (four kinds), **cables**, and **magnets** NdFeB1 to 3 (already E1.6b).
 
 Car-body steels and cast iron are not named for robots (E1.4b).
+
+#### E1.1e The modes of E1.1c set again by Matthias's rule
+
+Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
+
+**Status: proposed, for Matthias's yes. E1.1c stays entered as it is until he decides.**
+
+**The order each mode follows:**
+1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
+2. **Commercial analyses:** certified reference materials, and producers' certificates of analysis. Each independent
+   material counts once, as the mean of its lots; the mode is the median over the materials.
+3. **A producer's nominal composition.**
+4. **Otherwise the middle of the standard's range (E),** from 0 to the maximum where only a maximum is given.
+
+A value above the standard's maximum takes the maximum. The minimum and maximum stay the registered limits. University
+analyses are no longer used for any number (memory rule "standards over academic analyses").
+
+**The sources** (all read first-hand on 2026-10-27):
+
+| Source | Kind | Read | What it gives (wt%) |
+|---|---|---|---|
+| SAE International, AMS4027P, *Aluminum Alloy, Sheet and Plate 1.0Mg - 0.60Si - 0.28Cu - 0.20Cr (6061; -T6 Sheet, -T651 Plate)*, revised 29 April 2022, current. https://saemobilus.sae.org/content/AMS4027P | Standard (AMS D Nonferrous Alloys Committee) | Yes, the page | 6061 nominal: Mg 1.0, Si 0.60, Cu 0.28, Cr 0.20 |
+| SAE International, AMS4045N, *Aluminum Alloy Sheet and Plate, 5.6Zn - 2.5Mg - 1.6Cu - 0.23Cr, 7075 (-T6 Sheet, -T651 Plate)*, revised 21 September 2026, current. https://saemobilus.sae.org/content/AMS4045N | Standard | Yes, the page | 7075 nominal: Zn 5.6, Mg 2.5, Cu 1.6, Cr 0.23 |
+| Arconic, SS-6061, certified reference material for wrought alloy analysis. https://crms.arconic.com/hu/p/ss-6061 | Commercial; lab registered to ISO 9001 | Yes, the lot tables in the browser | Lots MM (2018), NS (2021), RX = RY (2026): Mg 1.02–1.03, Si 0.640–0.653, Fe 0.340–0.366, Cu 0.299–0.300, Cr 0.226–0.231, Zn 0.081, Mn 0.050–0.053, Ti 0.038–0.041 |
+| Arconic, SS-7075. https://crms.arconic.com/hu/p/ss-7075 | As above | Yes | Lots HR (2016), HU (2018), JD (2020), JU = JW, JX = JY, JZ = KA (2026): Zn 5.73–5.82, Mg 2.56–2.60, Cu 1.57–1.61, Cr 0.203–0.205, Si 0.159–0.164, Fe 0.139–0.158, Mn 0.079–0.082, Ti 0.038–0.045 |
+| NIST SRM 1259, *Aluminum Alloy 7075*, 1978 (E1.1c) | Certified, six laboratories | Yes | Si 0.18, Fe 0.205, Mn 0.079 (and the elements the standard sets) |
+| Castle Metals France, certificate, in Alba-Galvín et al. 2021 (E1.1c) | A producer's certificate | Yes | Si 0.08, Fe 0.13, Mn 0.02, Ti 0.04 |
+| Arconic, KC-380, certified reference material for casting alloy analysis. https://crms.arconic.com/hu/p/kc-380 | Commercial | Yes | Lots BD, BE (2023): Si 9.07, Fe 1.23–1.24, Cu 3.59, Mn 0.30, Mg 0.20, Ni 0.20, Zn 0.60, Sn 0.06 |
+| Arconic, SS-380. https://crms.arconic.com/hu/p/ss-380 | Commercial | Yes | Lots EJ (2014), FH, FJ = FK, FL = FM (2025): Si 8.87–8.89, Fe 0.90–0.93, Cu 3.59, Mn 0.40–0.41, Mg 0.20, Ni 0.30, Zn 0.35, Sn 0.0002–0.0006 |
+| NIST, *Certificate of Analysis, SRM 1256b, Aluminum Alloy 380*, 4 April 2006. https://tsapps.nist.gov/srmext/certificates/1256B.pdf | Certified (NIST and collaborating laboratories) | Yes, the PDF's text layer | Si 9.362, Fe 0.865, Cu 3.478, Mn 0.3857, Mg 0.0637, Ni 0.4135, Zn 1.011, Pb 0.1075; Sn 0.0091 (reference value) |
+
+**Not used:**
+- **Arconic SS-383** (https://crms.arconic.com/hu/p/ss-383; lots of 2019 and 2026). It is AA 383, not ADC12: its Zn
+  2.5 and Pb 0.21–0.22 lie above ADC12's limits of 1.0 and 0.2.
+- **No commercial value was found for ADC12:** no reference material, and no producer's page with a typical
+  composition.
+- **The university analyses of E1.1c** (Kazemi & Ghiasvand, Ghiasvand et al., Summers et al., Zhou et al., Samuel
+  et al., Cao et al.) and the research institutes' ADC12 analyses (Yeom et al., Mizutani et al.).
+
+**The modes**, wt% (min / mode / max; the limits unchanged), with where each comes from:
+
+| Element | 6061 | 7075 | A380 | ADC12 |
+|---|---|---|---|---|
+| Si | 0.40 / **0.60** / 0.8 standard | 0 / **0.160** / 0.40 commercial (3) | 7.5 / **9.07** / 9.5 commercial (3) | 9.6 / **10.8** / 12.0 middle (E) |
+| Fe | 0 / **0.354** / 0.7 commercial (1) | 0 / **0.148** / 0.50 commercial (3) | 0 / **0.923** / 1.3 commercial (3) | 0 / **0.65** / 1.3 middle (E) |
+| Cu | 0.15 / **0.28** / 0.40 standard | 1.2 / **1.6** / 2.0 standard | 3.0 / **3.59** / 4.0 commercial (3) | 1.5 / **2.5** / 3.5 middle (E) |
+| Mn | 0 / **0.051** / 0.15 commercial (1) | 0 / **0.079** / 0.30 commercial (3) | 0 / **0.386** / 0.50 commercial (3) | 0 / **0.25** / 0.5 middle (E) |
+| Mg | 0.8 / **1.0** / 1.2 standard | 2.1 / **2.5** / 2.9 standard | 0 / **0.10** / 0.10 commercial (3), median 0.20 above the limit: the limit | 0 / **0.15** / 0.3 middle (E) |
+| Cr | 0.04 / **0.20** / 0.35 standard | 0.18 / **0.23** / 0.28 standard | — | — |
+| Zn | 0 / **0.081** / 0.25 commercial (1) | 5.1 / **5.6** / 6.1 standard | 0 / **0.603** / 3.0 commercial (3) | 0 / **0.5** / 1.0 middle (E) |
+| Ti | 0 / **0.040** / 0.15 commercial (1) | 0 / **0.041** / 0.20 commercial (2) | — | 0 / **0.15** / 0.30 middle (E) |
+| Ni | — | — | 0 / **0.298** / 0.50 commercial (3) | 0 / **0.25** / 0.5 middle (E) |
+| Sn | — | — | 0 / **0.0091** / 0.35 commercial (3) | 0 / **0.10** / 0.2 middle (E) |
+| Pb | — | — | — | 0 / **0.10** / 0.2 middle (E) |
+
+The shares of E1.1c (die cast, 7075) are unchanged.
+
+**The result, % of each robot type's aluminium at the modes** (V42; in brackets E1.1c as entered):
+
+| Robot type | With A380 | With ADC12 |
+|---|---|---|
+| 1 | Al 92.94 (93.07), Si 2.18, Zn 1.60, Cu 1.28, Mg 1.20, Fe 0.41 | Al 92.84 (92.81), Si 2.53, Zn 1.58, Mg 1.21, Cu 1.06 |
+| 2 | Al 90.70 (90.76), Zn 3.19, Si 2.05, Cu 1.66, Mg 1.64 | Al 90.61 (90.50), Zn 3.17, Si 2.40, Mg 1.65, Cu 1.44 |
+| 3 | Al 92.25 (92.36), Si 2.14, Zn 2.08, Cu 1.40, Mg 1.34 | Al 92.16 (92.11), Si 2.49, Zn 2.06, Mg 1.35, Cu 1.18 |
+| 4 | Al 91.38 (91.46), Zn 2.70, Si 2.09, Cu 1.54, Mg 1.50 | Al 91.29 (91.21), Zn 2.68, Si 2.44, Mg 1.51, Cu 1.33 |
+| 5 | Al 90.52 (90.56), Zn 3.32, Si 2.04, Cu 1.69, Mg 1.67 | Al 90.42 (90.31), Zn 3.30, Si 2.39, Mg 1.68, Cu 1.47 |
+| 6 | Al 91.07 (91.14), Zn 2.92, Si 2.08, Cu 1.60, Mg 1.56 | Al 90.98 (90.89), Zn 2.90, Si 2.42, Mg 1.57, Cu 1.38 |
+
+The main elements move by about 0.1 percentage point. The trace elements move more: ADC12's nickel, tin and lead
+now sit in the middle of their ranges (0.25, 0.10, 0.10 %) instead of near 0.
+
+**Choices that are Matthias's:**
+- ADC12 entirely from the middle of the JIS ranges, its nickel, tin and lead included;
+- one value per independent reference material, the median over materials;
+- A380's magnesium at its limit of 0.10, although all three reference materials hold more or less than that (0.20,
+  0.20, 0.064);
+- the reference materials' elements outside a grade's registered list (such as nickel at 0.05 in SS-6061) left in
+  the aluminium.
 ---
 
 ### E1.2 Magnesium
@@ -539,6 +617,67 @@ Silicon, copper, iron and nickel stay below 0.09 % in every draw.
 - the AZ91 of Wang et al. counted as AZ91D;
 - "others" and beryllium left in the magnesium;
 - the B94 casting limits rather than the producers' ingot limits.
+
+#### E1.2d The modes of E1.2c set again by Matthias's rule
+
+Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
+
+**Status: proposed, for Matthias's yes; it replaces the modes of E1.2c. Nothing is entered.**
+
+**The order each mode follows:**
+1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
+2. **Commercial analyses:** certified reference materials, and producers' certificates of analysis. Each independent
+   material counts once, as the mean of its lots; the mode is the median over the materials.
+3. **A producer's nominal composition.**
+4. **Otherwise the middle of the standard's range (E),** from 0 to the maximum where only a maximum is given.
+
+A value above the standard's maximum takes the maximum. The minimum and maximum stay the registered limits. University
+analyses are no longer used for any number (memory rule "standards over academic analyses").
+
+**The sources** (read first-hand, 2026-10-27):
+
+| Source | Kind | Read | What it gives (wt%) |
+|---|---|---|---|
+| SAE International, AMS4490K, *Magnesium Alloy Castings, Die 9.0Al - 0.70Zn (AZ91D, Temper F) As Cast*, revised May 2017. https://saemobilus.sae.org/standards/ams4490k-magnesium-alloy-castings-die-90al-070zn-az91d-temper-f-cast | Standard (AMS D Nonferrous Alloys Committee) | Yes, the page | AZ91D nominal: Al 9.0, Zn 0.70 |
+| Magnesium Elektron, nominal compositions, compiled by TMS 2007 (E1.2b) | A producer's nominal values | Yes, the compilation | AZ91D Mn 0.3; AM60B Al 6, Mn 0.5 |
+| The maker's certificate of an AM50 lot, quoted in Jesus et al. 2026 (E1.2c) | A producer's certificate | Yes | Al 4.91, Zn 0.04, Mn 0.30, Si 0.03, Fe 0.0012, Cu 0.0029, Ni 0.0010 |
+
+**Not found:**
+- **Reference materials of AZ91D, AM60B or AM50A.** MBH lists AM60A- and AM90A-type discs, other grades with copper up
+  to 0.31.
+- **An SAE specification of AM60B or AM50A.**
+- **The university analyses of E1.2c** are no longer used.
+
+**The modes**, wt% (min / mode / max; the limits of E1.2c, ASTM B94):
+
+| Element | AZ91D | AM60B | AM50A |
+|---|---|---|---|
+| Al | 8.3 / **9.0** / 9.7 standard | 5.5 / **6.0** / 6.5 producer nominal | 4.4 / **4.91** / 5.4 certificate |
+| Zn | 0.35 / **0.70** / 1.0 standard | 0 / **0.11** / 0.22 middle (E) | 0 / **0.04** / 0.22 certificate |
+| Mn | 0.15 / **0.30** / 0.50 producer nominal | 0.24 / **0.50** / 0.60 producer nominal | 0.26 / **0.30** / 0.60 certificate |
+| Si | 0 / **0.05** / 0.10 middle (E) | 0 / **0.05** / 0.10 middle (E) | 0 / **0.03** / 0.10 certificate |
+| Fe | 0 / **0.0025** / 0.005 middle (E) | 0 / **0.0025** / 0.005 middle (E) | 0 / **0.0012** / 0.004 certificate |
+| Cu | 0 / **0.015** / 0.030 middle (E) | 0 / **0.005** / 0.010 middle (E) | 0 / **0.0029** / 0.010 certificate |
+| Ni | 0 / **0.001** / 0.002 middle (E) | 0 / **0.001** / 0.002 middle (E) | 0 / **0.0010** / 0.002 certificate |
+
+The shares of E1.2c (the AM part, AM60B or AM50A half and half, robot type 3 AZ91D alone) are unchanged.
+
+**The result, % of each robot type's magnesium at the modes** (V42; in brackets E1.2c):
+
+| Robot type | With AM60B | With AM50A |
+|---|---|---|
+| 2 | Mg 91.39 (91.94), Al 7.71, Zn 0.446, Mn 0.386 | Mg 91.99 (92.30), Al 7.24, Zn 0.416, Mn 0.30 |
+| 3 | Mg 89.93 (90.48), Al 9.0, Zn 0.70, Mn 0.30 (AZ91D alone) | the same |
+| 4 | Mg 91.43 (91.97), Al 7.68, Zn 0.440, Mn 0.388 | Mg 92.04 (92.34), Al 7.20, Zn 0.410, Mn 0.30 |
+| 6 | Mg 91.63 (92.17), Al 7.50, Zn 0.405, Mn 0.40 | Mg 92.32 (92.59), Al 6.96, Zn 0.370, Mn 0.30 |
+
+Magnesium falls by about half a percentage point, mostly because AZ91D's aluminium is now the standard's 9.0 instead
+of the university median of 8.56.
+
+**Choices that are Matthias's:**
+- AZ91D's manganese and AM60B's aluminium and manganese from Magnesium Elektron's nominal values;
+- the trace elements of AZ91D and AM60B in the middle of their ranges;
+- AM50A from a single lot's certificate.
 ---
 
 ### E1.3 Titanium
