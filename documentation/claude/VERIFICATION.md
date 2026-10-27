@@ -5,6 +5,32 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V40. Magnesium: what the robots use, the sources and the car files
+
+- **What:** the sources of [EVIDENCE.md](EVIDENCE.md) E1.2b, on Matthias's "Go on to magnesium: show me what the
+  robots use and the sources first, verified on the web with references, and check the car composition files too."
+- **How:**
+  - **The project's own files:** the workbook's magnesium rows and every part naming magnesium were listed with 01's
+    reader, and the reports in `documentation/sources/` were searched.
+  - **The car files:** every `.xlsx` of the GitHub folder was searched for a magnesium sheet, and the five found were
+    read. The two alloys' means were added up.
+  - **The web:** each source was opened and read where it is published:
+    - SURENA IV's full text on arXiv;
+    - the JOM page and TechRadar's page in the built-in browser;
+    - Magnecast, Dongrun and SMM through the fetch tool;
+    - the TMS compilation rendered by PDFKit and read as images.
+- **Result:**
+  - Every grade a source about robots names is a casting alloy: AZ91 or AZ91D, AM60B, AM50A, and ZM5 on one
+    unsourced page.
+  - The producers' ingot limits (TMS) and the casting limits (ICAST, E1.2) agree as B93 against B94.
+  - The car file's AZ91C-E adds up to 100.365 %, and its column "Co" is probably copper. Both were reported and not
+    changed.
+- **Not covered:**
+  - ASTM B93 and B94 themselves.
+  - Any grade from a robot maker.
+  - Typical contents (analyses).
+  - Nothing is proposed or entered.
+
 ### V39. The aluminium entry
 
 - **What:** the recipe of [EVIDENCE.md](EVIDENCE.md) E1.1c, entered on Matthias's word: "Keep E1.1c as agreed and

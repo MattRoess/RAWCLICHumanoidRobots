@@ -351,6 +351,92 @@ die-cast grades AZ91D and AM60B the robots use.
 - **Not confirmed first-hand:** the standard ASTM B94 itself was not read (paywalled). Its numbers come through a
   supplier.
 
+
+#### E1.2b Magnesium: what the robots use, and the sources
+
+Matthias, 2026-10-26, on magnesium: "Silar as for the aluminum alloy, but I asume here the selection is more limited".
+On 2026-10-27: "Go on to magnesium: show me what the robots use and the sources first, verified on the web with
+references, and check the car composition files too." **Sources only: no min / mode / max is proposed here.**
+
+**What the workbook says** (`data/raw/humanoid_robots_2040_workbook.xlsx`):
+
+| Robot type | Row, kg (min / mode / max) | Grade | The parts that name magnesium |
+|---|---|---|---|
+| 2 | 4.0 / 6.0 / 9.0 | AZ91D / AM60 | Outer shell and body panels ("Magnesium alloy (AZ91D / AM60) & PC-ABS / PA66-GF"); heat sinks ("Al 6061 / AZ91D Mg") |
+| 3 | 2.0 / 4.0 / 6.0 | AZ91D | Main structural frame ("Al 6061-T6 / 7075-T6 & Magnesium AZ91D") |
+| 4 | 5.0 / 6.2 / 8.0 | AZ91D / AM60 | Frame ("& Magnesium AZ91D / AM60"); controller housing ("Al & AZ91D Mg") |
+| 6 | 3.0 / 5.0 / 7.0 | AZ91D / AM60 | No part names it |
+
+Robot types 1 and 5 have none. The category reports expect more magnesium by 2040, "for lightweight housings and
+supports" (`00_overview_categories_market_shares_2040.md`).
+
+**Where magnesium is used in robots, and who says so:**
+
+| Use | Alloy | Source | Kind | Read | What it says |
+|---|---|---|---|---|---|
+| Leg structure of a research humanoid | AZ91 | Yousefi-Koma, A. et al., *SURENA IV: Towards A Cost-effective Full-size Humanoid Robot for Real-world Scenarios*, 2021. https://arxiv.org/abs/2108.13515 | Research paper (preprint), a humanoid built and run | Yes (extract), full text, §II-B | "The structural parts are made of an magnesium alloy (AZ91)", optimised by FEM; the arms aluminium and carbon fibre (§II-D) |
+| The body of Honda's ASIMO; a second, 7 kg humanoid | Not named | Byko, M., *Personification: The Materials Science and Engineering of Humanoid Robots*, JOM, November 2003. https://www.tms.org/pubs/journals/JOM/0311/Byko-0311.html | Society journal, feature by its managing editor | Yes, the page | "With a body of lightweight magnesium coated with a plastic resin"; the second robot "Made of magnesium, it is shorter than ASIMO (half a meter), weighs less (7 kg)" |
+| AgiBot's humanoids (A3, X2) | Not named | Richards, J., TechRadar, 7 July 2026, at AgiBot's event. https://www.techradar.com/tech/robots-should-understand-you-talk-to-you-and-work-for-you-chinese-robotics-company-agibot-is-heralding-a-robot-revolution-i-met-the-humanoids-up-close | Journalist's report; second-hand | Yes, the page | "The units are made mainly of magnesium alloy, with titanium reinforcements at pressure points to ensure rigidity" |
+| Robot joint, gearbox, servo and controller housings, cobot joint modules | AZ91D, AM60B, AM50A (not assigned to parts) | Magnecast (Shenzhen Shixin Metal Products Co., Ltd.), *Custom Magnesium Die Cast Components*, © 2026. https://magnecast.com/magnesium-die-casting/components/ | Die caster's page, with a commercial interest; names no robot maker | Yes (extract) | Lists the housings; "Tie AZ91D, AM60B, AM50A, HPDC, tooling, CNC machining" to each part's release |
+| Joints of Tesla Optimus and UBTECH Walker X | AZ91D, ZM5 | ZheJiang Dongrun Casting Industry Co., Ltd., *Die Casting Applications in Robotics & Automation*, 10 Feb 2026. https://www.dongruncasting.com/news/Die-Casting-Applications-in-Robotics-Automation.html | Die caster's news page; promotional; **cites no source** | Yes (extract) | "Tesla's Optimus humanoid robot uses AZ91D magnesium alloy for joint components"; "AZ91D, ZM5 (used in Tesla Optimus and UBTECH Walker X)". Not used for any number |
+| Humanoid parts, joints and actuators | Not named | Shanghai Metals Market, *Lightweight + High Performance Magnesium Alloys Lead the New Track in Automotive and Robotics Industries*, 31 Oct 2025. https://news.metal.com/newscontent/103599630/ | Market news | Yes (extract) | Lizhong to supply "high-performance magnesium alloy materials and lightweight parts" for Vision Intelligence's humanoids; Yongmaotai's magnesium actuators and joints "still in the framework stage" |
+
+**Searched and not found:**
+- A grade named by the anchor robots' makers (Unitree, UBTECH, AgiBot, Boston Dynamics) or by Tesla.
+- A wrought magnesium alloy (sheet or extrusion, such as AZ31B) named for a robot. No source about robots names
+  one; every grade named is a casting alloy.
+- AE44 and the rare-earth alloys: no source about robots names them.
+
+**The composition limits** (wt%; a single number is a maximum; Mg is the remainder):
+- **ASTM B93 (ingot) and B94 (die castings):** not read. ASTM sells them. A copy of B93 from 2004 on a university
+  server was found and not used.
+- **The producers' limits, compiled by TMS:** Materials Technology@TMS, *Magnesium Die Casting Alloy Compositions*,
+  2007. https://www.tms.org/Communities/FTAttachments/DiecastingCompositionsREV.pdf. A society's compilation of
+  producers' figures. Read: yes, the pages rendered and read as images, since the text layer scrambles the table.
+- **The casting limits (B94), through a supplier:** ICAST (E1.2), read before.
+
+| Alloy | Source | Al | Zn | Mn | Si | Cu | Ni | Fe | Others |
+|---|---|---|---|---|---|---|---|---|---|
+| AZ91D | Dead Sea Magnesium, AVISMA, Rima (TMS) | 8.5–9.5 | 0.45–0.90 | 0.17–0.40 | 0.05 | 0.025 | 0.001 | 0.004 | 0.01 each |
+| AZ91D | ICAST, ASTM B94 castings (E1.2) | 8.3–9.7 | 0.35–1.00 | 0.15–0.50 | 0.10 | 0.030 | 0.002 | 0.005 | 0.02 |
+| AZ91D, nominal | Magnesium Elektron; Kutz (ed.), *Handbook of Materials Selection*, 2002 (TMS) | 9; 9 | 0.5; 0.7 | 0.3; 0.26 | | | | | |
+| AM60B | Dead Sea Magnesium, AVISMA, Rima (TMS) | 5.6–6.4 | 0.20 | 0.26–0.50 | 0.05 | 0.008 | 0.001 | 0.004 | 0.01 each (AVISMA: Be 0.0005–0.0015) |
+| AM60B | ICAST, ASTM B94 castings (E1.2) | 5.5–6.5 | 0.22 | 0.24–0.60 | 0.10 | 0.010 | 0.002 | 0.005 | 0.02 |
+| AM60B, nominal | Magnesium Elektron; Kutz 2002 (TMS) | 6; 6.9 (a) | –; 0.22 | 0.5; 0.42 | | | | | |
+| AM50A | Dead Sea Magnesium, AVISMA, Rima (TMS) | 4.5–5.3 | 0.20 | 0.28–0.50 | 0.05 | 0.008 | 0.001 | 0.004 | 0.01 each |
+| AM50A, nominal | Magnesium Elektron; Kutz 2002 (TMS) | 5; 4.9 | –; 0.22 | 0.5; 0.32 | | | | | |
+
+(a) 6.9 lies above AM60B's range of 5.6–6.4: an error in the compilation or in the handbook.
+
+- **The two sets of limits agree:** the ingot limits (B93) are narrower than the castings' (B94) because a casting
+  is allowed what the melt takes up or loses.
+- **ZM5:** Dongrun's Chinese grade (GB/T 1177). Its limits were not read, and no other source names it.
+
+**The car composition files, checked:**
+- `VehicleComposition/Data/14_…` and `15_…`, sheet `magnesiumAlloys`, hold two alloys, each with one mean per element
+  ("ASTM International, B07, 2008"), mixed half and half (`magnesiumDefinition`):
+  - AM60A-F: Mg 93, Al 6, Mn 0.4, Si 0.01, "Co" 0.01, Zn 0.1, Ni 0.02;
+  - AZ91C-E: Mg 91, Al 8.5, Mn 0.2, Si 0.015, "Co" 0.04, Zn 0.6, Ni 0.01.
+- `34_…` (`materialsMgAlloyscomposition`) holds their average.
+- `31_ComponentMaterial.xlsx` and `2_VehicleCompositionNewData.xlsx` hold magnesium per car component and segment, not
+  compositions.
+- No other project in the GitHub folder holds a magnesium composition.
+- **Two faults in the car file, reported, not changed:**
+  - **AZ91C-E's means add up to 100.365 %**, so Mg is not the remainder.
+  - **The column "Co" (cobalt)** is probably copper: the magnesium standards set a limit for copper and none for
+    cobalt.
+- **The grades are not the robots':** AZ91C is a sand-casting grade and AM60A the older AM60. The robots name the
+  die-casting grades AZ91D and AM60B (E1.2).
+
+**For Matthias, before any proposal:**
+1. **Which alloys:** the workbook names AZ91D and AM60 (AM60B); Magnecast adds AM50A; ZM5 rests on one promotional
+   page. No source about robots names a wrought magnesium alloy, which agrees with his "the selection is more
+   limited".
+2. **AgiBot:** TechRadar's "made mainly of magnesium alloy" stands against the workbook's robot type 4 (anchor AgiBot
+   A2): 6.2 kg of magnesium and 28.5 kg of aluminium at the modes. It is a journalist's sentence, about the A3 and
+   X2 rather than the A2. The workbook is Matthias's.
+3. **Typical contents:** the sources give limits and a few nominal values; the modes would come from analyses, as
+   for aluminium.
 ---
 
 ### E1.3 Titanium
@@ -1631,7 +1717,7 @@ These are circuit boards and chips, with glass of displays and lenses in robot t
 | Material | Sibling data | Independent check | Verdict |
 |---|---|---|---|
 | Aluminium | VehicleComposition, 6061 and 7075 | Teal Sheets, Dec 2025; further alloys (E1.1b): Teal and Pink Sheets, JIS H 5302 | **Confirmed**, exactly; 6082, 5052, 5083 and five die-casting alloys (A380, 383, 384, A360, ADC12) added from robot sources |
-| Magnesium | VehicleComposition, AZ91C / AM60A | ICAST datasheets (ASTM B94) | Al and Mn agree; the **grades differ** (the robots use AZ91D / AM60B) |
+| Magnesium | VehicleComposition, AZ91C / AM60A | ICAST datasheets (ASTM B94); producers' limits compiled by TMS (E1.2b) | Al and Mn agree; the **grades differ** (the robots use AZ91D / AM60B); the car file's AZ91C adds up to 100.365 % (E1.2b) |
 | Titanium | none | voestalpine datasheet (ASTM B348) | New; the standard not read |
 | Steel | TractionMotor, electrical steel M19 | ASTM A677 scope; Alro, Astrup, Total Materia | Electrical steel **confirmed**. Bearing and gear steels new, from datasheets. Two steels have no grade. |
 | Copper | TractionMotor, ETP | KEMPER | **Confirmed** |

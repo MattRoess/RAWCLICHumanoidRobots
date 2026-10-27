@@ -43,9 +43,17 @@ Where the work stands, newest first: what was decided, by whom, and what is open
     01, and check 17's text; the three element names in 02; two new tests.
   - 131 tests pass. Of 01's pages only faults.png's text changed.
   - 02 and 03 were run with 2,000 draws in the scratch folder: aluminium is now in the elements of every robot type.
-- **Next, his:**
-  - the real run, which now includes aluminium (the four paths below);
-  - the next material.
+- **Next, his:** the real run, which now includes aluminium (the four paths below).
+- **Then, on his word** "Go on to magnesium: show me what the robots use and the sources first, verified on the web
+  with references, and check the car composition files too.": [EVIDENCE.md](EVIDENCE.md) E1.2b (V40).
+  - Every grade named for robots is a casting alloy: AZ91/AZ91D (SURENA IV, a die caster), AM60B and AM50A (a die
+    caster).
+  - The limits come from the producers (TMS compilation) and ICAST.
+  - AgiBot's humanoids are "made mainly of magnesium alloy" (TechRadar), which stands against the workbook's robot
+    type 4.
+  - In the car file, AZ91C-E's means add up to 100.365 %, and its column "Co" is probably copper. Both were reported
+    and not changed.
+- **Next, his:** whether to propose the magnesium recipe from these sources, and which alloys.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -309,7 +317,7 @@ reads; not in git)
 | Material | His words | Done since |
 |---|---|---|
 | Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27. Car files checked: E1.1d, V38. Entered: V39 |
-| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
+| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.2b, V40 |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
 | Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |
