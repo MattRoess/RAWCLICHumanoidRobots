@@ -526,7 +526,8 @@ MUTED = '#52514E'          # secondary text
 ELEMENT_NAMES = {'H': 'Hydrogen', 'Li': 'Lithium', 'B': 'Boron', 'C': 'Carbon', 'N': 'Nitrogen', 'O': 'Oxygen',
                  'F': 'Fluorine', 'Na': 'Sodium', 'Mg': 'Magnesium', 'Al': 'Aluminium', 'Si': 'Silicon',
                  'P': 'Phosphorus', 'S': 'Sulfur', 'Ca': 'Calcium', 'Ti': 'Titanium', 'Cr': 'Chromium',
-                 'Mn': 'Manganese', 'Fe': 'Iron', 'Co': 'Cobalt', 'Ni': 'Nickel', 'Cu': 'Copper'}
+                 'Mn': 'Manganese', 'Fe': 'Iron', 'Co': 'Cobalt', 'Ni': 'Nickel', 'Cu': 'Copper', 'Zn': 'Zinc',
+                 'Sn': 'Tin', 'Pb': 'Lead'}
 
 
 def mass(value: float) -> str:

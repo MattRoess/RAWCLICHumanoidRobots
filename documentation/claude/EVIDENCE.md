@@ -155,7 +155,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the aluminium r
 max, from the sources of E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it
 to me before anything is entered."
 
-**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Not entered yet.**
+**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Entered the same day, after E1.1d, on his word "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites.", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V39).**
 
 **The gaps, checked on the web (2026-10-27).** The registration records give limits; the mode of each element is the
 median of the analyses read (the mean where there are two). The analyses give the composition of the metal each study

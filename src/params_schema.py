@@ -112,10 +112,11 @@ class DataParams:
                          'materials.'})
 
     # The element recipes: the datasheets of the cells the battery builds use (sheet Cells), the compounds (sheet
-    # Compounds) and the parts of each cell down to its elements (sheet Recipe). Agreed by Matthias on 2026-10-26
-    # (documentation/claude/EVIDENCE.md, E1.7i to E1.7k); written by Claude, to be corrected by Matthias in Excel.
-    # 01_schemas.py checks them and counts each robot type's cells from them (sheet Battery cells of the shared lists).
-    # The recipes of the other materials will be added here.
+    # Compounds), the parts of each recipe down to its elements (sheet Recipe: the cells, plastics, fibre composites
+    # and aluminium alloys) and which recipe each workbook row follows (sheet Rows). Agreed by Matthias on 2026-10-26
+    # and 2026-10-27 (documentation/claude/EVIDENCE.md, E1.1c, E1.7i to E1.7k, E1.8c, E1.9c); written by Claude, to be
+    # corrected by Matthias in Excel. 01_schemas.py checks them and counts each robot type's cells from them (sheet
+    # Battery cells of the shared lists). The recipes of the other materials will be added here.
     # SAFE TO CHANGE: only if the file moves.
     element_recipes: str = field(
         default=os.path.join('data', 'researched', 'element_recipes.xlsx'),

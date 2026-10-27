@@ -165,9 +165,9 @@ CHECKS_DONE = [
     "of the pack's, its cells in parallel within 12 % of the pack's capacity, its cells at most 85 % of the packs' "
     'mass; the rest of the row has exactly one remainder, shares in order, materials of the sheet Lists, and never '
     'falls below zero where it goes to a material.',
-    'Material recipes: every piece of a shared material that has recipes (so far plastics and fibre composites, the '
-    'rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and '
-    'every row names a piece that exists.',
+    'Material recipes: every piece of a shared material that has recipes (so far aluminium, plastics and fibre '
+    'composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the '
+    'sheet Recipe, and every row names a piece that exists.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -243,9 +243,10 @@ CAPACITY_TOLERANCE = 0.12
 # (E1.7k: the largest share of cells van de Ven et al. 2024 weighed in battery modules, laptops 85 %; an estimate, E).
 CELL_SHARE_OF_PACK = 0.85
 
-# The element recipes (data/researched/element_recipes.xlsx; EVIDENCE.md E1.7i and E1.8c, agreed by Matthias on
-# 2026-10-26). 'Cells' holds the datasheet of every cell a build uses; 'Compounds' the composition of every compound, as
-# a formula ('LiFePO4') or as mass shares ('C 0.905; H 0.095'); 'Recipe' the parts of each recipe as a tree: each item
+# The element recipes (data/researched/element_recipes.xlsx; EVIDENCE.md E1.7i, E1.8c, E1.9c and E1.1c, agreed by
+# Matthias on 2026-10-26 and 2026-10-27). 'Cells' holds the datasheet of every cell a build uses; 'Compounds' the
+# composition of every compound, as a formula ('LiFePO4') or as mass shares ('C 0.905; H 0.095'); 'Recipe' the parts
+# of each recipe as a tree: each item
 # sits within another ('' for the recipe itself) and is a compound, another recipe (named in the column 'Compound') or a
 # group of items. The items of a group are either shares (minimum, mode, maximum of the group's mass, exactly one of
 # them the remainder) or alternatives (each with its probability, adding up to 1), of which one is drawn. 'Rows' says
@@ -263,7 +264,8 @@ RECIPE_LABELS = {'S': 'from a source read', 'E': 'an estimate'}
 # Atomic Weights, "Abridged Standard Atomic Weights 2024", https://www.ciaaw.org/abridged-atomic-weights.htm.
 ATOMIC_MASS = {'H': 1.0080, 'Li': 6.94, 'B': 10.81, 'C': 12.011, 'N': 14.007, 'O': 15.999, 'F': 18.998,
                'Na': 22.990, 'Mg': 24.305, 'Al': 26.982, 'Si': 28.085, 'P': 30.974, 'S': 32.06, 'Ca': 40.078,
-               'Ti': 47.867, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546}
+               'Ti': 47.867, 'Cr': 51.996, 'Mn': 54.938, 'Fe': 55.845, 'Co': 58.933, 'Ni': 58.693, 'Cu': 63.546,
+               'Zn': 65.38, 'Sn': 118.71, 'Pb': 207.2}
 
 # How the workbook marks the evidence of each row: the label in the column 'Evidence' and the fill colour
 # of the row (its colour key, row 4 of 'Components & Materials': no fill, light yellow, light orange). The
@@ -1382,10 +1384,10 @@ def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementReci
 
 def check_material_recipes(book: Workbook, lists: SharedLists, recipes: ElementRecipes,
                            params: Params) -> list[Fault]:
-    """Every piece of a shared material that has recipes (a material named in the sheet Rows; so far Plastics and
-    Fibre composites) has exactly one row there, naming a recipe of the sheet Recipe; and every row names a piece that
-    exists. The pieces are those the robot pages draw: with the battery as cells only, so the rest of a battery row
-    needs its recipe too."""
+    """Every piece of a shared material that has recipes (a material named in the sheet Rows; so far Aluminium,
+    Plastics and Fibre composites) has exactly one row there, naming a recipe of the sheet Recipe; and every row names
+    a piece that exists. The pieces are those the robot pages draw: with the battery as cells only, so the rest of a
+    battery row needs its recipe too."""
     if recipes.rows is None:
         return []
     on = os.path.basename(params.data.element_recipes) + ': ' + ROWS_SHEET

@@ -123,17 +123,22 @@ which these batteries have and the robots use". The sources and every decision a
   - **Recipe:** the parts of each recipe as a tree, down to their compounds: the NMC and the LFP cylindrical cell;
     the polymers (ABS, PC/ABS, flame-retardant PC/ABS, PA66-GF with its E-glass, CF-PEEK with its carbon fibre, TPU,
     silicone rubber); the fibre composites (two amine epoxies drawn half and half, carbon fibre with its sizing,
-    CFRP, GFRP); and each robot type's plastics row and robot type 3's composites row, split among what they name.
-    An item is a compound,
+    CFRP, GFRP); the aluminium alloys 6061, 7075, A380 and ADC12 by their elements; and each robot type's plastics
+    and aluminium rows and robot type 3's composites row, split among what they name (each aluminium row: a
+    die-cast part drawn as A380 or ADC12, the rest wrought, 7075 and 6061). An item is a compound,
     a group, or another recipe (PA66-GF holds E-glass). A group's items are shares with exactly one remainder, so
     nothing is normalised, or alternatives drawn by their probability (the can: nickel-plated or stainless steel; the
-    TPU's soft segment: polyester or polyether, half and half).
+    TPU's soft segment: polyester or polyether, half and half; the die-cast aluminium: A380 or ADC12, half and half).
   - **Rows:** which recipe each row of the workbook follows, for every shared material that has recipes; so far
-    plastics, including robot type 1's battery pack enclosure (plain PC/ABS), and fibre composites.
+    aluminium, plastics, including robot type 1's battery pack enclosure (plain PC/ABS), and fibre composites.
 
-  The plastics recipe and its sources are in [EVIDENCE.md](EVIDENCE.md), E1.8b to E1.8d; the fibre composites in
-  E1.9b and E1.9c. The recipes of the other
-  materials will be added to the same workbook; 02 takes them up without a change to its code.
+  The sources:
+  - aluminium: [EVIDENCE.md](EVIDENCE.md), E1.1 to E1.1d;
+  - plastics: E1.8b to E1.8d;
+  - fibre composites: E1.9b and E1.9c.
+
+  The recipes of the other materials will be added to the same workbook; 02 takes them up without a change to its
+  code.
 
 ## The checks
 
@@ -175,9 +180,9 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     its cells follow; each build's cell is in the sheet Cells, its cells in series within one cell's voltage of the pack's voltage, its cells in parallel within
     12 % of the pack's capacity, its cells at most 85 % of the packs' mass; the rest has exactly one remainder, shares
     in order, materials of the sheet Lists, and never falls below zero where it goes to a material.
-17. Material recipes: every piece of a shared material that has recipes (so far plastics and fibre composites, the
-    rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the sheet Recipe, and
-    every row names a piece that exists.
+17. Material recipes: every piece of a shared material that has recipes (so far aluminium, plastics and fibre
+    composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the
+    sheet Recipe, and every row names a piece that exists.
 
 02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
 (the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row
@@ -255,8 +260,8 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
 5. **Not allocated:** the parts minus the materials. The two are drawn independently, so it is below zero where the
    drawn materials weigh more than the drawn parts (recommendation b: allowed, and the summary gives the share of
    draws).
-6. **Materials without a recipe yet** (aluminium, magnesium, titanium, steel, copper, magnets, electronics, ceramics,
-   and Mixed): their kilograms are drawn; their elements are not, and the summary and the pages say so
+6. **Materials without a recipe yet** (magnesium, titanium, steel, copper, magnets, electronics, ceramics, and
+   Mixed): their kilograms are drawn; their elements are not, and the summary and the pages say so
    (recommendation c).
 
 Each robot type has its own random numbers, from `composition.seed` and its number, so that it gives the same draws

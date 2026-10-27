@@ -38,8 +38,14 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - The car files add the European die-casting grades (EN AC-46000, 46100; EN 1706 not read) and the car's mixes of
     extrusions and sheet (no source).
   - They hold no typical contents, so E1.1c's modes stand. Nothing in E1.1c is changed.
-- **Next, his:** whether E1.1c stays as agreed and is entered, or takes in A383 and A360, the European die-casting
-  grades or the car's mixes first.
+- **Then:** "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites."
+  - **Entered (V39):** 7 compounds, 65 recipe items and 6 rows in `element_recipes.xlsx`, copied first; Zn, Sn, Pb in
+    01, and check 17's text; the three element names in 02; two new tests.
+  - 131 tests pass. Of 01's pages only faults.png's text changed.
+  - 02 and 03 were run with 2,000 draws in the scratch folder: aluminium is now in the elements of every robot type.
+- **Next, his:**
+  - the real run, which now includes aluminium (the four paths below);
+  - the next material.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -81,7 +87,7 @@ below waits for his word.
 3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
    agreement, then the entry. His comments are in the table "His comments, material by material" below:
    - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b, the recipe in E1.1c,
-     agreed on 2026-10-27, not entered yet;
+     agreed and entered on 2026-10-27 (V39);
    - magnesium: "the selection is more limited";
    - titanium: robot types 2, 5 and 6;
    - steel: researched in E1.4b;
@@ -302,7 +308,7 @@ reads; not in git)
 
 | Material | His words | Done since |
 |---|---|---|
-| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27; not entered yet |
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27. Car files checked: E1.1d, V38. Entered: V39 |
 | Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |

@@ -314,6 +314,11 @@ class TestRun(Drawn):
                          ['104', '12.0', '6.11', '0.0479', '0.150', '0.460', '0.0140', '0.000474', '0.0000474',
                           '-0.0312', '0'])
 
+    def test_every_element_has_its_plain_name(self):
+        # Every element the recipes can name (01's atomic masses) is written in plain words on the pages.
+        for symbol in composition.schemas.ATOMIC_MASS:
+            self.assertIn(symbol, composition.ELEMENT_NAMES, symbol)
+
     def test_a_fault_stops_before_anything_is_written(self):
         params = self.write(changes={(5, 'Evidence'): 'Measured'})
         self.assertEqual(composition.run(params), 1)

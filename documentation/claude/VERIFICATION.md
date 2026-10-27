@@ -5,6 +5,44 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V39. The aluminium entry
+
+- **What:** the recipe of [EVIDENCE.md](EVIDENCE.md) E1.1c, entered on Matthias's word: "Keep E1.1c as agreed and
+  enter it now, as with the plastics and fibre composites."
+- **How:**
+  - **Tests first.** Two new tests, written before the data and the code; one failed, as it should.
+    - The first reads the real workbook. It requires no fault from checks 15 and 17, and a row for every robot
+      type's 'Aluminum alloys'. It also requires E1.1c's table at the modes, for each die-cast alloy, within 0.006
+      percentage points, with lead only where ADC12 is chosen.
+    - The second requires a plain name in 02 for every element 01 has an atomic mass for. It started guarding once
+      01 had Zn, Sn and Pb, and failed until 02 named them.
+  - **The data:** written by a throw-away script (`make_aluminium_entry.py` in the session's scratch folder). The
+    workbook was first copied to the same folder (`element_recipes_before_aluminium.xlsx`), and the copy compared
+    byte for byte. Added: 7 compounds, 65 recipe items, 6 rows.
+  - **01 and 02:**
+    - 01's check found that zinc, tin and lead had no atomic mass, before 01 got them (IUPAC CIAAW 2024: Zn 65.38,
+      Sn 118.71, Pb 207.2);
+    - check 17's text names aluminium;
+    - 02 got the names zinc, tin and lead.
+  - **The pages:**
+    - 01 was drawn into the scratch folder before and after the entry, and all 20 pages compared byte for byte.
+    - 02 and 03 were run with 2,000 draws into the scratch folder.
+    - Robot type 1's page and 03's page by element were opened and read.
+- **Result:**
+  - 131 tests pass, none skipped. 01 finds no fault.
+  - Of the 20 pages of 01, only faults.png changed: its check 17 now reads "so far aluminium, plastics and fibre
+    composites", as read on the page.
+  - In 02, aluminium is "In the elements: Yes" in every robot type. Robot type 1's elements now cover 21.0 of its
+    35.0 kg of materials, against 9.05 before.
+  - Robot type 1's Al is 11.19 kg: 11.97 kg of aluminium × about 92.9 %, plus about 0.07 kg of the cells' foils and
+    tabs. Its zinc is 0.20 kg, about 1.6 % of the aluminium.
+  - Robot type 5's copper is 1.21 kg: 0.87 kg of cells as before, plus 22 kg × about 1.5 %.
+  - Every page fits: the 24 elements of 03 and the 24 rows of robot type 1's element chart.
+- **Not covered:**
+  - The real run (Matthias's).
+  - The die-cast and 7075 shares stay estimates (E).
+  - `figures/` was not redrawn.
+
 ### V38. The car projects' aluminium, against the registration records
 
 - **What:** the aluminium compositions of `VehicleComposition/Data/14_…`, `15_…`, `22_…`, `34_…` and the `CastAl`
