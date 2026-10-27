@@ -5,6 +5,36 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V37. The proposed aluminium recipe, drawn in a sandbox
+
+- **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.1c.
+- **How:**
+  - **The sources:** each analysis was read where it is published, and each is cited in E1.1c:
+    - the Springer and journal tables in the built-in browser;
+    - the PMC articles through the fetch tool;
+    - the Gifu report through its text layer;
+    - NIST's scanned certificate, rendered by macOS PDFKit and read as an image.
+    - One site (springerprofessional.de) answered with a bot challenge and was left.
+  - **The shares:** the 7075 share was computed from the workbook's grade for every part. The frames' mass against the
+    aluminium rows was computed to bound the die-cast share.
+  - **The proposal:** written into a scratch copy of `element_recipes.xlsx` (`aluminium_sandbox.py` in the session's
+    scratch folder; the project unchanged). 01's atomic masses got Zn, Sn and Pb in the sandbox only.
+  - **01's checks:** `check_element_recipes` and `check_material_recipes` were run on the copy.
+  - **The draws:** each robot type's recipe was drawn 20,000 times (seed 1) with 02's `RecipeDraws`, and each was
+    computed at the modes with 01's `element_shares`, for each die-cast alloy.
+- **Result:**
+  - 01 finds no fault.
+  - Every recipe adds up to 1, at the modes and in every draw, and no element falls below zero. The tables are in
+    E1.1c.
+  - Hand check, robot type 1 at the modes with A380: silicon 0.2 × 9.146 + 0.8 × (0.32 × 0.18 + 0.68 × 0.66) =
+    2.23 %, and zinc 0.2 × 0.60 + 0.8 × (0.32 × 5.7 + 0.68 × 0.02) = 1.59 %, as drawn.
+- **Not covered:**
+  - The die-cast and 7075 shares are estimates (E).
+  - The elements of an alloy are drawn independently.
+  - Three of the eleven analyses are of one research group (6061, two lots) or not production metal (the A380
+    reference disk).
+  - Nothing is entered.
+
 ### V36. Aluminium: the further alloys and their composition limits, read first-hand
 
 - **What:** the sources of [EVIDENCE.md](EVIDENCE.md) E1.1b, for Matthias's comment that more aluminium alloys are

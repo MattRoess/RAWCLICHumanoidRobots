@@ -15,8 +15,17 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - The further alloys, where robots use them and their composition limits, are in [EVIDENCE.md](EVIDENCE.md)
     E1.1b (V36): 6082, 5052, 5083, and the die castings A380, 383, 384, A360 and ADC12.
   - The workbook names only 6061-T6 and 7075-T6. Nothing is proposed or entered.
-- **Next, his:** whether to propose the aluminium recipe per robot type from these sources: which alloys, and their
-  shares, as estimates (E). Everything else below stands.
+- **Then, on his word** "Yes, propose the aluminium recipe per robot type, min / mode / max, from the sources of
+  E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it to me before anything
+  is entered.":
+  - The proposal is [EVIDENCE.md](EVIDENCE.md) E1.1c, drawn in a sandbox (V37).
+  - Each robot type's aluminium is die cast 0 / 20 / 40 % (E), drawn as A380 or ADC12, half and half (E). The rest is
+    wrought: 7075 at a share taken from the workbook's grades, 6061 the remainder.
+  - Each alloy's elements have the registered limits as minimum and maximum, and the median of 2 or 3 analyses read
+    as the mode.
+  - The aluminium comes out 90.3 to 93.1 % Al at the modes, the rest mainly Zn, Si, Cu and Mg.
+- **Next, his:** whether he agrees with E1.1c and its choices; nothing is entered before. Everything else below
+  stands.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -57,7 +66,8 @@ below waits for his word.
    their materials and their parts are drawn independently (V32). Whether to tie the two is his decision.
 3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
    agreement, then the entry. His comments are in the table "His comments, material by material" below:
-   - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b (2026-10-27);
+   - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b, the proposed recipe in
+     E1.1c (2026-10-27), for his yes;
    - magnesium: "the selection is more limited";
    - titanium: robot types 2, 5 and 6;
    - steel: researched in E1.4b;
@@ -278,7 +288,7 @@ reads; not in git)
 
 | Material | His words | Done since |
 |---|---|---|
-| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36 |
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe proposed: E1.1c, V37 |
 | Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |

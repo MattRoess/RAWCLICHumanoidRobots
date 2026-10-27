@@ -148,6 +148,129 @@ The 6061 and 7075 rows are those E1.1 read; the December 2025 edition has not ch
 The three research humanoids are machined, from 6061 and 7075. The die castings come from manufacturers' guidance
 for housings made in quantity, the kind of production 2040 implies. The shares would be estimates (E), for
 Matthias's decision. E1.1 already left open the share of 6061 against 7075.
+
+#### E1.1c Proposal: the aluminium recipe of each robot type
+
+Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the aluminium recipe per robot type, min / mode /
+max, from the sources of E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it
+to me before anything is entered."
+
+**Status: proposed, for Matthias's yes; nothing is entered.**
+
+**The gaps, checked on the web (2026-10-27).** The registration records give limits; the mode of each element is the
+median of the analyses read (the mean where there are two). The analyses give the composition of the metal each study
+used.
+
+| Alloy | Source read | Kind | Read | What it says (wt%) |
+|---|---|---|---|---|
+| 6061 | Kazemi, M., Ghiasvand, A., *Effect of cone angle of cylindrical pin in the SFSW and DFSW on mechanical properties of AA6061-T6 alloy*, J. Mater. Sci.: Mater. Eng., 2021. https://doi.org/10.1186/s40712-021-00131-9, Table 1 | The plate a study used | Yes, the table on the journal's page | Mg 0.81, Si 0.61, Cu 0.29, Fe 0.2, Cr 0.13, Mn 0.03, Zn 0.02, Ti 0.01 |
+| 6061 | Ghiasvand, A., Kazemi, M., Mahdipour Jalilian, M., Ahmadi Rashid, H., *Effects of tool offset, pin offset, and alloys position on maximum temperature in dissimilar FSW of AA6061 and AA5086*, same journal, 2020. https://doi.org/10.1186/s40712-020-00118-y, Table 1 | The plate a study used; the same group as above, another lot | Yes, the table | Mg 0.918, Mn 0.083, Cu 0.328, Cr 0.065, Si 0.663, Fe 0.491 |
+| 6061 | Summers, P.T., Chen, Y., Rippe, C.M., Allen, B., Mouritz, A.P., Case, S.W., Lattimer, B.Y., *Overview of aluminum alloy mechanical properties during and after fires*, Fire Science Reviews, 2015. https://doi.org/10.1186/s40038-015-0007-5, Table 1 | The plate tested (6061-T651) | Yes, the table | Si 0.66, Fe 0.4, Cu 0.24, Mn 0.07, Mg 0.9, Cr 0.18, Zn 0.02, Ti 0.02 |
+| 7075 | National Bureau of Standards (now NIST), *Certificate of Analysis, Standard Reference Material 1259, Aluminum Alloy 7075*, 3 May 1978. https://tsapps.nist.gov/srmext/certificates/1259.pdf | Certified values from six laboratories | Yes, the scanned certificate, rendered and read | Si 0.18, Fe 0.205, Cu 1.60, Mn 0.079, Cr 0.173, Ni 0.063, Zn 5.44, Mg 2.48. Material of 1978: its Cr lies below today's minimum, 0.18 |
+| 7075 | Zhou, Z., Zheng, Q., Ding, C., Yu, G., Peng, G., Piao, Z., *Investigation of Two-Dimensional Ultrasonic Surface Burnishing Process on 7075-T6 Aluminum*, Chin. J. Mech. Eng., 2021. https://doi.org/10.1186/s10033-021-00540-z, Table 1 | The plate a study used | Yes, the table | Si 0.36, Fe 0.42, Cu 1.58, Zn 5.8, Ti 0.11, Mn 0.17, Mg 2.45, Cr 0.225. The group's 2022 paper (https://doi.org/10.1186/s10033-022-00828-8) prints the same values and is counted once |
+| 7075 | Alba-Galvín, J.J., González-Rovira, L., Botana, F.J., Lekka, M., Andreatta, F., Fedrizzi, L., Bethencourt, M., *Application of Commercial Surface Pretreatments on the Formation of Cerium Conversion Coating (CeCC) over High-Strength Aluminum Alloys 2024-T3 and 7075-T6*, Metals 11, 930, 2021. https://doi.org/10.3390/met11060930, Table 1 | "certified by the metal manufacturer (Castle Metals France)" | Yes, the table and the sentence | Si 0.08, Fe 0.13, Cu 1.7, Mn 0.02, Mg 2.5, Cr 0.19, Zn 5.7, Ti 0.04 |
+| A380 | Samuel, A.M., Zedan, Y., Elsharkawi, E.A., Abdelaziz, M.H., Samuel, F.H., *The Role of Mg Content and Aging Treatment on the Tensile and Fatigue Properties of Die-Cast 380 Alloy*, Materials 15, 8844, 2022. https://pmc.ncbi.nlm.nih.gov/articles/PMC9785003/, Tables 2 and 3 | An industrial A380.1 ingot; the method is not stated | Yes (extract) | Si 9.18, Cu 3.22, Fe 1.01, Mg 0.06, Mn 0.15, Zn 2.29, Ti 0.02 |
+| A380 | Cao, H., Wang, C., Che, J., Luo, Z., Wang, L., Xiao, L., Wang, J., Hu, T., *Effect of Flow State of Pure Aluminum and A380 Alloy on Porosity of High Pressure Die Castings*, Materials 12, 4219, 2019. https://pmc.ncbi.nlm.nih.gov/articles/PMC6947587/, Table 1 | Measured by X-ray fluorescence | Yes (extract) | Si 9.146, Cu 3.140, Mg 0.104, Fe 0.154, Zn 0.141, Mn 0.103, Ni 0.101, Sn 0.100 |
+| A380 | Arconic, certified reference material ALCOA-KC380, sold by LGC Standards. https://www.lgcstandards.com/GB/en/p/ALCOA-KC380, "Analyte Data" | A calibration disk, not production metal; Mg 0.20 lies above A380.0's limit | Yes, the page | Si 9.0, Fe 1.2, Cu 3.6, Mn 0.30, Mg 0.20, Cr 0.060, Ni 0.20, Zn 0.60, Ti 0.070, Sn 0.060, Pb 0.050 |
+| ADC12 | Yeom, G.-Y., Lim, H.K., Kim, S.K., Hyun, S.-K., Yoon, Y.-O., *Effects of Mg Enhancement and Heat Treatment on Microstructures and Tensile Properties of Al2Ca-Added ADC12 Die Casting Alloys*, J. Mater. Sci. Technol. 32, 1043-1048, 2016. https://doi.org/10.1016/j.jmst.2016.07.015, Table 1, "ADC12" | The conventional ADC12 die cast in the study | Yes, the table on the journal's page | Si 11.8, Fe 0.93, Cu 2.04, Mn 0.23, Mg 0.24, Zn 0.99, Ni 0.07 |
+| ADC12 | Mizutani, Y., Kodera, M., Hosono, K., Niikawa, M., *Development of manufacturing technique for aluminum die-casting due to high quality and cost reduction III*, Research report of the Gifu Prefectural Industrial Technology Research Institute, 2018. https://www.gitec.rd.pref.gifu.lg.jp/files/reports/2018/metal_2018_06.pdf | Measured with a spark emission spectrometer (Shimadzu PDA-7000) | Yes, the PDF's text layer | Si 11.08, Mg 0.29, Cu 2.14, Fe 0.65, Mn 0.19, Zn 0.72 |
+| Which parts are die cast | EMP Tech Co., Ltd. (die caster), *Humanoid Robot Die Casting: Building the Skeleton at Scale*, 16 Oct 2026. https://empcasting.com/humanoid-robot-aluminum-die-casting.html | Manufacturer's page, with a commercial interest | Yes (extract) | Joint housings and actuator cases "die cast + CNC"; arm and leg links "CNC 6061/7075, some casting"; the torso frame "extrusion + machining, 6xxx". No share is given |
+| Zn, Sn, Pb | IUPAC CIAAW, *Abridged Standard Atomic Weights 2024*. https://www.ciaaw.org/abridged-atomic-weights.htm | The standard | Yes (extract) | Zn 65.38, Sn 118.71, Pb 207.2. The other elements of the alloys agree with 01's table |
+
+**Level 1, each robot type's row 'Aluminum alloys':**
+
+| Robot type | Die cast, % of the row | Wrought | 7075, % of the wrought | 6061 |
+|---|---|---|---|---|
+| 1 | 0 / 20 / 40 (E) | The remainder | 0 / 32 / 64 (E) | The remainder of the wrought |
+| 2 | 0 / 20 / 40 (E) | The remainder | 39 / 68 / 97 (E) | The remainder |
+| 3 | 0 / 20 / 40 (E) | The remainder | 22 / 43 / 63 (E) | The remainder |
+| 4 | 0 / 20 / 40 (E) | The remainder | 29 / 57 / 84 (E) | The remainder |
+| 5 | 0 / 20 / 40 (E) | The remainder | 43 / 71 / 100 (E) | The remainder |
+| 6 | 0 / 20 / 40 (E) | The remainder | 26 / 62 / 98 (E) | The remainder |
+
+- **The die-cast share, the same in every robot type (E):**
+  - **0 %** is the three research humanoids, which machine all their aluminium (E1.1b).
+  - **40 %**, the maximum, is about the part of the aluminium outside the frames. Frames are extruded and machined
+    (EMP Tech); EMP and CharMax die cast the housings. The workbook's frame parts weigh 54, 74, 72 and 56 % of the
+    aluminium rows of robot types 1 to 4, at the modes. Those of types 2 to 4 also hold titanium or magnesium, so these
+    are upper bounds. Robot type 5's frame is about 59 %: its 25 kg less the 12 kg of titanium it names. Outside the
+    frames that leaves about 26 to 46 %.
+  - **20 %**, the mode, is half of that: half of the housings die cast by 2040.
+  - **Robot type 6** is the exception the workbook makes: it gives its frame 22 kg of aluminium, the whole row, yet
+    names 7075 housings for its actuators.
+- **The 7075 share of the wrought aluminium (E), from the workbook's grade for each part, weighted by the part's mass
+  at the mode:**
+  - the minimum counts only the parts the workbook makes of 7075 alone;
+  - the maximum adds the parts it makes of "6061 / 7075";
+  - the mode adds half of those.
+
+  Robot type 1: 0 kg of parts of 7075 alone, 9.1 kg of 6061 or 6063 alone, 16.0 kg of both. Robot type 2: 18.0 /
+  1.6 / 26.6. Robot type 3: 9.6 / 15.9 / 18.0. Robot type 4: 12.8 / 6.9 / 24.1. Robot type 5: 30.4 / 0 / 41.0.
+  Robot type 6: 13.2 / 1.2 / 36.8. The masses are of whole parts (with their steel, copper and magnets), not of
+  their aluminium: an estimate. The workbook's 6063 heat-sink fins (robot types 1 and 3) count as 6061.
+
+**Level 2, the die-cast alloy:** A380 or ADC12, drawn half and half (E). CharMax names both, for different parts;
+E-BI and EMP name A380. ADC12 is the Japanese standard's grade, used where die casters follow JIS.
+
+**Level 3, each alloy's elements**, wt%, min / mode / max; aluminium the remainder:
+
+| Element | 6061 | 7075 | A380 | ADC12 |
+|---|---|---|---|---|
+| Si | 0.40 / 0.66 / 0.8 | 0 / 0.18 / 0.40 | 7.5 / 9.146 / 9.5 | 9.6 / 11.44 / 12.0 |
+| Fe | 0 / 0.40 / 0.7 | 0 / 0.205 / 0.50 | 0 / 1.01 / 1.3 | 0 / 0.79 / 1.3 |
+| Cu | 0.15 / 0.29 / 0.40 | 1.2 / 1.60 / 2.0 | 3.0 / 3.22 / 4.0 | 1.5 / 2.09 / 3.5 |
+| Mn | 0 / 0.07 / 0.15 | 0 / 0.079 / 0.30 | 0 / 0.15 / 0.50 | 0 / 0.21 / 0.5 |
+| Mg | 0.8 / 0.90 / 1.2 | 2.1 / 2.48 / 2.9 | 0 / 0.10 / 0.10 (a) | 0 / 0.265 / 0.3 |
+| Cr | 0.04 / 0.13 / 0.35 | 0.18 / 0.19 / 0.28 | — | — |
+| Zn | 0 / 0.02 / 0.25 | 5.1 / 5.7 / 6.1 | 0 / 0.60 / 3.0 | 0 / 0.855 / 1.0 |
+| Ti | 0 / 0.015 / 0.15 | 0 / 0.075 / 0.20 | — | 0 / 0 / 0.30 (E) |
+| Ni | — | — | 0 / 0.15 / 0.50 | 0 / 0.07 / 0.5 |
+| Sn | — | — | 0 / 0.08 / 0.35 | 0 / 0 / 0.2 (E) |
+| Pb | — | — | — | 0 / 0 / 0.2 (E) |
+
+- **The minimum and maximum** are the registered limits (E1.1b); an element with only a maximum may lie anywhere
+  below it, so its minimum is 0.
+- **The mode** is the median of the analyses above, or the mean where there are two. ADC12's nickel comes from one
+  analysis.
+- **(E) where no analysis gives the element:** the mode is 0. That covers ADC12's tin, lead and titanium.
+- **(a)** A380's median, 0.104, rounds to its limit of 0.10 under the Pink Sheets' rounding rule (footnote 2), so the
+  mode is the limit.
+- **"Others"** stay in the aluminium: up to 0.15 % in the wrought alloys and 0.50 % in A380. The aluminium is
+  overstated by at most that much.
+- **Independence:** each element is drawn on its own, though an alloy's elements are not independent of each other;
+  no source gives how they vary together.
+
+**The result, % of the aluminium**, from the sandbox (V37): 20,000 draws per robot type; every draw adds up to 1 and
+no element falls below zero.
+
+| Robot type | At the modes, with A380 | At the modes, with ADC12 | 95 % of the draws |
+|---|---|---|---|
+| 1 | Al 93.07, Si 2.23, Zn 1.59, Cu 1.21, Mg 1.14, Fe 0.47 | Al 92.81, Si 2.69, Zn 1.64, Mg 1.18, Cu 0.99, Fe 0.43 | Al 90.6–95.3, Si 0.9–4.1, Zn 0.5–2.9, Cu 0.7–1.7, Mg 0.8–1.6 |
+| 2 | Al 90.76, Zn 3.23, Si 2.10, Mg 1.60, Cu 1.59, Fe 0.42 | Al 90.50, Zn 3.28, Si 2.55, Mg 1.63, Cu 1.36, Fe 0.37 | Al 88.7–92.6, Zn 2.2–4.5, Si 0.8–4.0, Cu 1.1–2.0, Mg 1.2–2.1 |
+| 3 | Al 92.36, Si 2.19, Zn 2.09, Cu 1.33, Mg 1.28, Fe 0.45 | Al 92.11, Si 2.65, Zn 2.14, Mg 1.32, Cu 1.10, Fe 0.41 | Al 90.4–94.1, Si 0.8–4.0, Zn 1.4–3.0, Cu 0.8–1.8, Mg 1.0–1.7 |
+| 4 | Al 91.46, Zn 2.73, Si 2.14, Cu 1.47, Mg 1.46, Fe 0.43 | Al 91.21, Zn 2.78, Si 2.60, Mg 1.49, Cu 1.25, Fe 0.39 | Al 89.4–93.4, Zn 1.8–3.9, Si 0.8–4.0, Cu 1.0–1.9, Mg 1.1–1.9 |
+| 5 | Al 90.56, Zn 3.36, Si 2.08, Mg 1.64, Cu 1.62, Fe 0.41 | Al 90.31, Zn 3.41, Si 2.54, Mg 1.67, Cu 1.39, Fe 0.37 | Al 88.5–92.3, Zn 2.3–4.7, Si 0.7–3.9, Cu 1.1–2.1, Mg 1.3–2.2 |
+| 6 | Al 91.14, Zn 2.95, Si 2.12, Cu 1.53, Mg 1.52, Fe 0.43 | Al 90.89, Zn 3.00, Si 2.58, Mg 1.56, Cu 1.30, Fe 0.38 | Al 88.8–93.3, Zn 1.7–4.4, Si 0.8–4.0, Cu 1.0–2.0, Mg 1.1–2.1 |
+
+In every robot type, chromium, manganese, titanium, nickel, tin and lead each stay below 0.25 %.
+
+**What entering it would add:**
+- in `element_recipes.xlsx`:
+  - seven compounds: silicon, magnesium, chromium, zinc, titanium, tin, lead;
+  - the four alloy recipes, 'Die-cast aluminium' and one recipe per robot type;
+  - six rows in the sheet Rows;
+- in 01, the atomic masses of Zn, Sn and Pb.
+
+**Choices in this proposal that are Matthias's:**
+- the die-cast share, 0 / 20 / 40 % in every robot type, robot type 6 included;
+- the 7075 share taken from the workbook's grades, weighted by whole parts' masses;
+- A380 and ADC12 drawn half and half;
+- left out of the recipe:
+  - 6082, 5052 and 5083 (named only by E-BI);
+  - A360 (named by CharMax for joints that carry heat) and 383/384;
+  - the 6063 fins, which count as 6061;
+- a mode of 0 for ADC12's tin, lead and titanium, which no analysis gives;
+- "others" left in the aluminium.
 ---
 
 ### E1.2 Magnesium
