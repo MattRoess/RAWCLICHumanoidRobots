@@ -3,6 +3,58 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-10-27
+
+### V36. Aluminium: the further alloys and their composition limits, read first-hand
+
+- **What:** the sources of [EVIDENCE.md](EVIDENCE.md) E1.1b, for Matthias's comment that more aluminium alloys are
+  used ("a more mixed approach").
+- **How:**
+  - **Where the alloys are used:** web searches, then each source opened and read. The three humanoid papers were
+    read in their full text on arXiv (Berkeley §3.3, NING §III-A, Duke §III-A), the two manufacturers' guides on
+    their pages, all through the fetch tool.
+  - **The project's own files first:** the workbook's two sheets and the reports in `documentation/sources/` name
+    only 6061-T6 and 7075-T6.
+  - **The composition limits:** the Teal Sheets (December 2025, 5.8 MB) and the Pink Sheets (August 2025, 2.0 MB)
+    were downloaded, on Matthias's yes, into the session's scratch folder, and their full text was read through
+    macOS PDFKit. The rows taken: 6061, 6082, 7075, 5052, 5083; 380.0, A380.0, 383.0, A383.0, 384.0, A384.0,
+    360.0, A360.0, all die castings (footnote 5). The footnotes that apply were read: 7075's footnote 10, the
+    castings' footnotes 5 and 8. ADC12 was read on Yamaha Motor's page reproducing JIS H 5302:2006.
+- **Result:**
+  - The 6061 and 7075 rows equal those of E1.1.
+  - ADC12's limits on Yamaha's page agree with those the search showed from ICAST and a Japanese bulletin.
+  - Five sources name the alloys robots use: three research humanoids (machined 6061 and 7075) and two
+    manufacturers' guides with a commercial interest (6082, 5052, 5083 and the die castings).
+  - No anchor robot's alloy was found.
+- **Not covered:**
+  - The share of each alloy in each robot type: no source gives it.
+  - A typical content inside each limit: the records give ranges and maxima only.
+  - The standards themselves (JIS H 5302, EN 1706) were not read; JIS H 5302 through Yamaha's reproduction.
+  - Nothing is proposed or entered.
+
+### V35. The handover checked against the files and git
+
+- **What:** the section "2026-10-26, end of the day" of HANDOVER.md, on Matthias's "Check the handover and then
+  continue".
+- **How:** each statement compared with what is on disk and in git:
+  - `git status` and `git log`; the working tree against `origin/main`;
+  - the files' modification times;
+  - the folders `data/` and `figures/`;
+  - the input files, and whether iCloud had evicted any (`stat -f %Sf`);
+  - the test suite;
+  - commit 557967b;
+  - points 5 and 11 of SHARED_LISTS.md, and V23, V26 and V28;
+  - the scratch folder;
+  - `figures/schemas/overview.png`, opened.
+- **Result:**
+  - The working tree equals `origin/main` (7133c08), with nothing uncommitted.
+  - 129 tests pass.
+  - No output of 02 or 03 exists. The overview of 15:07 still says "Next … Not built yet", as stated.
+  - Two statements were corrected:
+    - "last commit 9a14f83" had been written before the handover's own commit;
+    - the backups "may be gone": they are gone, because the scratch folder was empty.
+- **Not covered:** the older sections of the handover, which are kept as they were written.
+
 ## 2026-10-26
 
 ### V34. 01's overview with the four stages

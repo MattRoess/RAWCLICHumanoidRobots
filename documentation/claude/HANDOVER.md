@@ -2,6 +2,22 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
+## 2026-10-27: the handover checked; aluminium's further alloys researched
+
+- **Asked, in Matthias's words:** "Check the handover and then continue".
+- **The check (V35):**
+  - The working tree equals GitHub's `main` and 129 tests pass.
+  - No output of 02 or 03 exists yet.
+  - Two statements below were corrected: the commit named as the last one, and the backups, which are gone.
+- **Continued** with the first open point that is Claude's to do: point 3 below, the element recipes, beginning with
+  aluminium, at its first step (sources only).
+  - Matthias said yes to downloading the Aluminum Association's two registration records.
+  - The further alloys, where robots use them and their composition limits, are in [EVIDENCE.md](EVIDENCE.md)
+    E1.1b (V36): 6082, 5052, 5083, and the die castings A380, 383, 384, A360 and ADC12.
+  - The workbook names only 6061-T6 and 7075-T6. Nothing is proposed or entered.
+- **Next, his:** whether to propose the aluminium recipe per robot type from these sources: which alloys, and their
+  shares, as estimates (E). Everything else below stands.
+
 ## 2026-10-26, end of the day: where everything stands (start here)
 
 Matthias, leaving: "Handover. I will need to go I let you work". Nothing was started after it: every next step
@@ -20,8 +36,9 @@ below waits for his word.
   - `data/researched/element_recipes.xlsx`: the cells, the compounds and the recipes of the battery cells, the
     plastics and the fibre composites.
 - **Tests:** 129 pass (`./.venv/bin/python -m unittest discover -s tests`).
-- **On GitHub:** https://github.com/MattRoess/RAWCLICHumanoidRobots, `main`, last commit 9a14f83. Code and documents
-  only; the git folder is `$HOME/gitdirs/RAWCLICHumanoidRobots.git`.
+- **On GitHub:** https://github.com/MattRoess/RAWCLICHumanoidRobots, `main`. The stages and tests are those of commit
+  c512345; the commits after it change documents only. Code and documents only; the git folder is
+  `$HOME/gitdirs/RAWCLICHumanoidRobots.git`.
 - **Not run at full size:** 02 and 03 have run only with 2,000 draws, into Claude's scratch folder. `data/consolidated/`,
   `figures/composition/` and `figures/comparison/` do not exist yet. `figures/schemas/` was last drawn before 02
   existed: its overview still says "not built yet" until 01 is run again.
@@ -40,7 +57,7 @@ below waits for his word.
    their materials and their parts are drawn independently (V32). Whether to tie the two is his decision.
 3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
    agreement, then the entry. His comments are in the table "His comments, material by material" below:
-   - aluminium: "a more mixed approach";
+   - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b (2026-10-27);
    - magnesium: "the selection is more limited";
    - titanium: robot types 2, 5 and 6;
    - steel: researched in E1.4b;
@@ -79,11 +96,12 @@ below waits for his word.
   - point `output.composition_dir`, `output.composition_figures_dir` and `output.comparison_dir` at a scratch folder;
   - call the stage's `run(params)`.
 
-  The scripts of this session (`sandbox_02.py`, `sandbox_03.py`, `mutants_02.py`, `mutants_03.py`) were in its
-  scratch folder and are gone with it.
+  The scripts of the session of 2026-10-26 (`sandbox_02.py`, `sandbox_03.py`, `mutants_02.py`, `mutants_03.py`)
+  were in its scratch folder and are gone.
 - The backups made before each data entry were in the same scratch folder: `shared_lists_before_battery.xlsx`,
   `shared_lists_before_kept_recipe.xlsx`, `element_recipes_before_plastics.xlsx`,
-  `element_recipes_before_composites.xlsx`. They may be gone; git does not hold the workbooks.
+  `element_recipes_before_composites.xlsx`. They are gone: the folder was empty on 2026-10-27. Git does not hold the
+  workbooks, so the files in `data/` are the only copies.
 
 ## 2026-10-26: 02_composition.py and 03_comparison.py built and tested with few draws
 
@@ -260,7 +278,7 @@ reads; not in git)
 
 | Material | His words | Done since |
 |---|---|---|
-| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Nothing yet |
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36 |
 | Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |

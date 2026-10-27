@@ -66,6 +66,88 @@ rows EN AW-6061 and EN AW-7075, with the minimum and maximum of each element. No
 - **Open, Matthias's decision:** the share of 6061 and of 7075 in each robot type, which no source gives. An
   element range spanning both alloys would be an estimate.
 
+
+#### E1.1b Further aluminium alloys a humanoid robot plausibly uses
+
+Matthias, 2026-10-26, on aluminium: "I asume similar other aluminum alloys are also taken. Therefore the scope should
+be expanded and a more mixed approach taken". Researched on 2026-10-27, after "Check the handover and then continue".
+The workbook and the project's sources name only 6061-T6 and 7075-T6 (E1.1). **Sources only: no min / mode / max is
+proposed here.**
+
+**Where each alloy is used, and who says so:**
+
+| Use in the robot | Alloy | Source | Kind | Read | What it says |
+|---|---|---|---|---|---|
+| Most main components of a research humanoid | 7075, 6061 | Liao, Q., Zhang, B., Huang, X., Huang, X., Li, Z., Sreenath, K., *Berkeley Humanoid: A Research Platform for Learning-based Control*, 2024. https://arxiv.org/abs/2407.21781 | Research paper (preprint), a humanoid built and run | Yes (extract), full text, §3.3 | "We use 7075 and 6061 aluminum for building most of the main components", with SKD11 steel for the gearbox and linkage |
+| Most parts of a research humanoid | 7075 | Ning, Y., Liu, S., Yang, T., Zheng, L., Shi, L., *The NING Humanoid: The Concurrent Design and Development of a Dynamic and Agile Platform*, 2024. https://arxiv.org/abs/2408.01056 | Research paper (preprint), a humanoid built and run | Yes (extract), full text, §III-A | "most parts are manufactured as aluminum 7075 and the key stress components are machined with high stiffness steel" |
+| Body plates and legs; the upper body's outer frame | 6061; extrusions of an unnamed grade | Xia, B., Li, B., Lee, J., Scutari, M., Chen, B., *The Duke Humanoid: Design and Control For Energy Efficient Bipedal Locomotion Using Passive Dynamics*, 2024. https://arxiv.org/abs/2409.19795 | Research paper (preprint), a humanoid built and run | Yes (extract), full text, §III-A | "the body plates and legs are custom-machined from aluminum 6061"; the outer frame "built using off-the-shelf aluminum extrusions" |
+| Joint and reducer housings, arm links, base castings; covers, shrouds, gripper bodies, encoder housings; joints that carry the motor's heat | A380; ADC12; A360 | CharMax Precision (die caster, Dongguan), *Designing Robot Joint and Reducer Housings for Die Casting*, 14 Oct 2026. https://www.charmaxdiecasting.com/blog/robot-joint-reducer-housing-die-casting/ | Manufacturer's design guide, for robot joints in general, with a commercial interest; names no robot | Yes (extract) | A380 for "Joint and reducer housings" and arm links ("A380 is the default because robot castings are machined heavily"); ADC12 for covers and encoder housings; A360 for joints that are also the motor's heat path. No composition given |
+| General structure; high-load links and joint yokes; structural extrusions and rails; welded structures and panels; formed covers; die-cast housings | 6061-T6; 7075; 6082-T6; 5083; 5052; A380, A383/A384, 360/A360 | E-Business International (E-BI, contract manufacturer, Beaverton OR), *Choosing the Right Aluminum for Humanoid Robotics*, 6 Mar 2026. https://e-bi.com/choosing-the-right-aluminum-for-humanoid-robotics/ | Contract manufacturer's guide, written for humanoid robots, with a commercial interest; names no robot maker | Yes (extract) | 6061-T6 "the default for prototypes and general structure"; 7075 for "high-load links, compact joint yokes"; 6082-T6 for "structural extrusions (especially outside the US supply chain), rails, long members"; 5083 for "welded structures, panels"; covers of formed sheet "typically 5052/5xxx"; A380 for "general die cast housings and covers"; A383/A384 for "intricate housings"; 360/A360 for housings exposed to moisture or thermal cycling |
+
+**Searched and not found:**
+- **The alloys of the anchor robots** (Unitree G1 and H2, UBTECH Walker S2, AgiBot A2, the electric Atlas). For the G1,
+  retailers write "aerospace-grade aluminum alloy" and cite Unitree's user manual V1.5, which was not read. No grade
+  is named.
+- **Tesla Optimus:** Humanoid.guide (https://humanoid.guide/humanoid-actuator-supplier-landscape/, read) says only
+  that Xusheng "machines the joint housings and structural parts". It names no material and cites no source for the
+  sentence. Other pages say die-cast aluminium housings; seen only as search summaries.
+- **The hydraulic Atlas** (before 2024): 3D-printed aluminium and titanium parts, according to trade press quoting
+  Marc Raibert (IEEE Spectrum, 2016). Seen only as search summaries, and no alloy is named.
+- **AlSi10Mg and A356:** no source about robots names them. They are left out.
+- **The grade of the Duke Humanoid's off-the-shelf extrusions.**
+
+**The composition limits**, read in the registration records (wt%; a single number is a maximum; Al is the
+remainder):
+- **Wrought:** The Aluminum Association, *International Alloy Designations and Chemical Composition Limits for
+  Wrought Aluminum and Wrought Aluminum Alloys* ("Teal Sheets"), revised December 2025.
+  https://www.aluminum.org/sites/default/files/2026-01/Teal%20Sheets%20December%202025.pdf. Read: yes, the full text
+  of all 42 pages.
+- **Castings:** The Aluminum Association, *Designations and Chemical Composition Limits for Aluminum Alloys in the
+  Form of Castings and Ingot* ("Pink Sheets"), revised August 2025.
+  https://www.aluminum.org/sites/default/files/2025-10/Pink%20Sheets%202025.pdf. Read: yes, the full text of all 25
+  pages. The rows are those of die castings (footnote 5: "D = Die Casting").
+- **ADC12:** Yamaha Motor, *Japanese Industrial Standards Data – Aluminum alloy die casting*, which reproduces JIS H
+  5302:2006, Table 2. https://global.yamaha-motor.com/business/cf/data/jis/aadc.html. Read: yes (extract). The ICAST
+  datasheet for JIS H 5302 ADC12 and a Japanese technical bulletin give the same limits, seen only in search summaries.
+
+| Alloy | Si | Fe | Cu | Mn | Mg | Cr | Ni | Zn | Ti | Sn | Pb | Others each / total |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 6061 | 0.40–0.8 | 0.7 | 0.15–0.40 | 0.15 | 0.8–1.2 | 0.04–0.35 | – | 0.25 | 0.15 | – | – | 0.05 / 0.15 |
+| 6082 | 0.7–1.3 | 0.50 | 0.10 | 0.40–1.0 | 0.6–1.2 | 0.25 | – | 0.20 | 0.10 | – | – | 0.05 / 0.15 |
+| 7075 | 0.40 | 0.50 | 1.2–2.0 | 0.30 | 2.1–2.9 | 0.18–0.28 | – | 5.1–6.1 | 0.20 (a) | – | – | 0.05 / 0.15 |
+| 5052 | 0.25 | 0.40 | 0.10 | 0.10 | 2.2–2.8 | 0.15–0.35 | – | 0.10 | – | – | – | 0.05 / 0.15 |
+| 5083 | 0.40 | 0.40 | 0.10 | 0.40–1.0 | 4.0–4.9 | 0.05–0.25 | – | 0.25 | 0.15 | – | – | 0.05 / 0.15 |
+| A380.0 (380.0: Fe 2.0) | 7.5–9.5 | 1.3 | 3.0–4.0 | 0.50 | 0.10 | – | 0.50 | 3.0 | – | 0.35 | – | – / 0.50 |
+| 383.0 (A383.0: Mg 0.10–0.30) | 9.5–11.5 | 1.3 | 2.0–3.0 | 0.50 | 0.10 | – | 0.30 | 3.0 | – | 0.15 | – | – / 0.50 |
+| 384.0 (A384.0: Zn 1.0) | 10.5–12.0 | 1.3 | 3.0–4.5 | 0.50 | 0.10 | – | 0.50 | 3.0 | – | 0.35 | – | – / 0.50 |
+| A360.0 (360.0: Fe 2.0) | 9.0–10.0 | 1.3 | 0.6 | 0.35 | 0.40–0.6 | – | 0.50 | 0.50 | – | 0.15 | – | – / 0.25 |
+| ADC12 (JIS H 5302:2006) | 9.6–12.0 | 1.3 | 1.5–3.5 | 0.5 | 0.3 | – | 0.5 | 1.0 | 0.30 | 0.2 | 0.2 | not given |
+
+(a) Teal Sheets footnote 10: for extruded and forged 7075, Zr + Ti may be limited to 0.25 % instead, where supplier
+and purchaser agree.
+
+The 6061 and 7075 rows are those E1.1 read; the December 2025 edition has not changed them.
+
+**What the further alloys change**, against the 6061 and 7075 of E1.1:
+- **Silicon:** the die castings hold 7.5 to 12 %, the wrought alloys at most 1.3 %. How much of the aluminium is die
+  cast decides the silicon.
+- **Copper and zinc:** A380, 383, 384 and ADC12 hold 1.5 to 4.5 % copper and up to 3 % zinc; 7075 holds 1.2 to 2.0
+  % copper and 5.1 to 6.1 % zinc; 6082 and the 5xxx alloys hardly any of either.
+- **Magnesium:** up to 4.9 % in 5083, at most 0.10 % in most die castings (0.6 % in A360).
+- **Elements only the castings bring:** nickel (up to 0.50 %), tin (up to 0.35 %) and lead (up to 0.2 %, ADC12).
+  Zinc, tin and lead are not yet in 01's table of atomic masses.
+- **The limits are maxima and ranges, not typical contents.** A recipe needs a mode inside each range, which no
+  record gives.
+
+**What drives a robot's range:** the share of each family of alloys, which no source gives.
+- **Machined wrought 6xxx:** 6061, 6082.
+- **High-strength 7075.**
+- **Die-cast housings:** A380, 383/384, ADC12; A360 where the housing carries heat.
+- **Formed and welded 5xxx sheet:** 5052, 5083.
+
+The three research humanoids are machined, from 6061 and 7075. The die castings come from manufacturers' guidance
+for housings made in quantity, the kind of production 2040 implies. The shares would be estimates (E), for
+Matthias's decision. E1.1 already left open the share of 6061 against 7075.
 ---
 
 ### E1.2 Magnesium
@@ -1375,7 +1457,7 @@ These are circuit boards and chips, with glass of displays and lenses in robot t
 
 | Material | Sibling data | Independent check | Verdict |
 |---|---|---|---|
-| Aluminium | VehicleComposition, 6061 and 7075 | Teal Sheets, Dec 2025 | **Confirmed**, exactly |
+| Aluminium | VehicleComposition, 6061 and 7075 | Teal Sheets, Dec 2025; further alloys (E1.1b): Teal and Pink Sheets, JIS H 5302 | **Confirmed**, exactly; 6082, 5052, 5083 and five die-casting alloys (A380, 383, 384, A360, ADC12) added from robot sources |
 | Magnesium | VehicleComposition, AZ91C / AM60A | ICAST datasheets (ASTM B94) | Al and Mn agree; the **grades differ** (the robots use AZ91D / AM60B) |
 | Titanium | none | voestalpine datasheet (ASTM B348) | New; the standard not read |
 | Steel | TractionMotor, electrical steel M19 | ASTM A677 scope; Alro, Astrup, Total Materia | Electrical steel **confirmed**. Bearing and gear steels new, from datasheets. Two steels have no grade. |
