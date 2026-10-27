@@ -5,6 +5,26 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V38. The car projects' aluminium, against the registration records
+
+- **What:** the aluminium compositions of `VehicleComposition/Data/14_…`, `15_…`, `22_…`, `34_…` and the `CastAl`
+  sheet of RAWCLICVehicleTractionMotor and RAWCLICVehicleElectronics, on Matthias's "chek also there"
+  ([EVIDENCE.md](EVIDENCE.md) E1.1d).
+- **How:**
+  - Every sheet's names were listed and every aluminium sheet was read with openpyxl, only reading.
+  - The rows of 6061, 6063, 6005A, 6082, 5052, 5083, 7075, A380.0, A383.0 and A360.0 were compared, element by
+    element, with the full text of the Teal and Pink Sheets read for V36.
+  - The projects' `.py` and `.md` files were searched for a source of the sheets.
+- **Result:**
+  - All ten rows equal the records. The one exception is 6005A's condition on Mn + Cr, which the car file cannot
+    hold.
+  - No sheet names its source. The traction-motor project's audit names its housings "cast aluminium".
+  - The aggregated compositions are envelopes over fixed mixes of alloys, not analyses.
+- **Not covered:**
+  - The 53 EN AC casting alloys: EN 1706 was not read.
+  - The steels, cast irons, magnesium, boards, cables and magnets of the same files: listed in E1.1d, not checked.
+  - Nothing in E1.1c is changed.
+
 ### V37. The proposed aluminium recipe, drawn in a sandbox
 
 - **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.1c.

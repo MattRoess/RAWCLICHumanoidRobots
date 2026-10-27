@@ -271,6 +271,56 @@ In every robot type, chromium, manganese, titanium, nickel, tin and lead each st
   - the 6063 fins, which count as 6061;
 - a mode of 0 for ADC12's tin, lead and titanium, which no analysis gives;
 - "others" left in the aluminium.
+
+#### E1.1d The car projects' aluminium compositions, checked
+
+Matthias, 2026-10-27, after agreeing to E1.1c: "There are additional material element compositon in the car
+composition, chek also there". E1.1 had read only the 6061 and 7075 rows. Read on 2026-10-27; nothing changed, in
+those files or here.
+
+**What the car projects hold for aluminium.** No sheet names its source.
+
+| File | Sheets | What they hold |
+|---|---|---|
+| `VehicleComposition/Data/14_VehicleMaterialElementDefinitions.xlsx` | `castAlAlloys1` | 8 cast alloys (48000, 45000, 319, 356, 357, 43100, 42000, 46200), one value per element |
+| same | `castAlAlloys2Low`, `castAlAlloys2High` | 53 European casting alloys (EN AC-21000 to EN AC-48000), a low and a high value per element. Among them are the die-casting grades EN AC-46000 (AlSi9Cu3(Fe), the European counterpart of A380), EN AC-46100 (AlSi11Cu2(Fe), close to ADC12), EN AC-46500, EN AC-47100 and EN AC-43400 |
+| same | `Wrought1000sLow` to `Wrought7000sHigh` | Every series of wrought alloy (EN AW), a low and a high value per element: 17 alloys of the 2000s, about 60 of the 5000s, 44 of the 6000s, 29 of the 7000s |
+| same | `castAlAlloysDefinition1`, `…Definition2`, `extrusion…`, `forging…`, `sheetAlAlloysDefinition` | The car's mixes, with fixed fractions: castings 48000 and 45000 half and half, or 21000 / 21100 / 41000 / 42000 / 45400 at 0.3 / 0.3 / 0.2 / 0.1 / 0.1; extrusions 6005A, 6008, 6061, 6063, 6082 at 0.2 each; forgings 2017A / 2024 / 2219 / 2618A at 0.2 / 0.3 / 0.3 / 0.2; sheet 5182 / 5083 / 5754 / 5052 at 0.3 / 0.2 / 0.3 / 0.2 |
+| `VehicleComposition/Data/15_VehicleComonentMaterialElementDefinitions.xlsx` | `AlSiCuDefinition`, `AlSiMgDefinition`, `Al_5xxx…`, `Al_6xxx…`, `Al_7xxxAlDefinition` | The same alloys, in other mixes of equal fractions. "AlSiCu" is nine casting alloys (EN AC-46000, 46100, 46200, 46500, 43400, 43300, 42100, 42200, 47100); "7xxx" is 7003, 7020, 7021, 7075, 7108 |
+| `VehicleComposition/Data/34_MaterialElementComponentComposition.xlsx` (and `22_…`) | `materialAlSiCucomposition` and four more | One min, mean and max per element for each mix: the lowest low, an average over the mix and the highest high. Not an analysis |
+| `RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx` (the same sheet in `RAWCLICVehicleElectronics/Data/`) | `CastAl` | A380.0, A380.1, A380.2, A383.0, A383.1, A360.0, A360.1, A360.2, minimum and maximum as fractions. The motors' cast housings (TractionMotor's SOURCE_AUDIT: "cast aluminium") |
+
+**Checked against the registration records of E1.1b:**
+- **Wrought:** the car file's 6061, 6063, 6005A, 6082, 5052, 5083 and 7075 equal the Teal Sheets, element by element.
+  6005A's condition Mn + Cr 0.12–0.50 cannot be written in two columns and is missing.
+- **Castings:** the traction-motor project's A380.0, A383.0 (with Mg 0.10–0.30) and A360.0 equal the Pink Sheets,
+  element by element.
+- **Not checked:** the 53 EN AC alloys. Their standard, EN 1706, was not read (paywalled, E1.13), so their limits rest
+  on the car file alone.
+
+**What this means for E1.1c:**
+- **The limits:** a sibling project confirms independently those of the four alloys in E1.1c (6061, 7075, A380; ADC12
+  has no car row). Nothing in E1.1c is contradicted.
+- **No typical contents:** the car files hold limits only, so E1.1c's modes, from the analyses, stand alone.
+- **Alloys E1.1c leaves out:**
+  - **A383 and A360:** their limits are now in two sources (Pink Sheets, TractionMotor). Both are named for robots
+    (E1.1b: E-BI A383/A384, CharMax and E-BI A360). They were left out by Matthias's agreed choice.
+  - **The European die-casting grades** EN AC-46000 and EN AC-46100: the same family as A380 and ADC12. No source
+    about robots names them; CharMax mentions "EN AC-46000 and AlSi9Cu3 grades" only in its description of the
+    Al-Si family. Their limits are unverified.
+  - **The car's mixes of extrusions** (6005A, 6008, 6061, 6063, 6082) **and sheet** (5182, 5083, 5754, 5052): car
+    choices with no source given. Robot sources name 6061 (all), 6082 (E-BI) and 5052/5083 (E-BI) only (rule 8.1:
+    a value for one kind of thing comes from sources about that kind).
+  - **Forgings of the 2000s:** no source about robots names them.
+
+**For the materials still to come**, the same file holds:
+- **magnesium** AM60A-F and AZ91C-E (already E1.2: the robots use AZ91D and AM60B);
+- **cast irons** GG10 to GG30, GGG40 and GGG60;
+- **mild steels** AISI 1008 to 1020, S275 and S355;
+- **car-body steels** (Docol and others; HSS, UHSS, AHSS);
+- **circuit boards** (four kinds), **cables**, and **magnets** NdFeB1 to 3 (already E1.6b).
+
+Car-body steels and cast iron are not named for robots (E1.4b).
 ---
 
 ### E1.2 Magnesium

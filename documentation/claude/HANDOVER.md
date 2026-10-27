@@ -32,6 +32,14 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - in 02: the plain names zinc, tin and lead for its pages.
 
   02 draws the recipes without any other change. Everything else below stands.
+- **Then, on his word** "There are additional material element compositon in the car composition, chek also there":
+  - The car projects' aluminium was read and checked (E1.1d, V38). The limits of every alloy in E1.1c, and of A383 and
+    A360, equal the registration records.
+  - The car files add the European die-casting grades (EN AC-46000, 46100; EN 1706 not read) and the car's mixes of
+    extrusions and sheet (no source).
+  - They hold no typical contents, so E1.1c's modes stand. Nothing in E1.1c is changed.
+- **Next, his:** whether E1.1c stays as agreed and is entered, or takes in A383 and A360, the European die-casting
+  grades or the car's mixes first.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
