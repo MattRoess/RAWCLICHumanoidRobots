@@ -155,7 +155,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the aluminium r
 max, from the sources of E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it
 to me before anything is entered."
 
-**Status: proposed, for Matthias's yes; nothing is entered.**
+**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Not entered yet.**
 
 **The gaps, checked on the web (2026-10-27).** The registration records give limits; the mode of each element is the
 median of the analyses read (the mean where there are two). The analyses give the composition of the metal each study

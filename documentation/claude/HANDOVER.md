@@ -24,8 +24,14 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - Each alloy's elements have the registered limits as minimum and maximum, and the median of 2 or 3 analyses read
     as the mode.
   - The aluminium comes out 90.3 to 93.1 % Al at the modes, the rest mainly Zn, Si, Cu and Mg.
-- **Next, his:** whether he agrees with E1.1c and its choices; nothing is entered before. Everything else below
-  stands.
+- **Agreed**, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its
+  choices." Not entered yet.
+- **Next, his:** whether to enter it now. Entering it would add:
+  - in `element_recipes.xlsx`: the seven element compounds, the eleven recipes and the six rows of E1.1c;
+  - in 01: the atomic masses of Zn, Sn and Pb, and a test that reproduces E1.1c's table at the modes;
+  - in 02: the plain names zinc, tin and lead for its pages.
+
+  02 draws the recipes without any other change. Everything else below stands.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -66,8 +72,8 @@ below waits for his word.
    their materials and their parts are drawn independently (V32). Whether to tie the two is his decision.
 3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
    agreement, then the entry. His comments are in the table "His comments, material by material" below:
-   - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b, the proposed recipe in
-     E1.1c (2026-10-27), for his yes;
+   - aluminium: "a more mixed approach": the further alloys and their sources are in E1.1b, the recipe in E1.1c,
+     agreed on 2026-10-27, not entered yet;
    - magnesium: "the selection is more limited";
    - titanium: robot types 2, 5 and 6;
    - steel: researched in E1.4b;
@@ -288,7 +294,7 @@ reads; not in git)
 
 | Material | His words | Done since |
 |---|---|---|
-| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe proposed: E1.1c, V37 |
+| Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27; not entered yet |
 | Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Nothing yet |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
