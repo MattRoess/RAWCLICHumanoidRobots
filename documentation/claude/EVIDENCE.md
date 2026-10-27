@@ -155,7 +155,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the aluminium r
 max, from the sources of E1.1b, with estimates (E) for the alloy shares, verified on the web with references. Show it
 to me before anything is entered."
 
-**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Entered the same day, after E1.1d, on his word "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites.", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V39).**
+**Status: agreed by Matthias, 2026-10-27, choosing the answer offered: "I agree with the aluminium recipe as proposed in E1.1c, including its choices." Entered the same day, after E1.1d, on his word "Keep E1.1c as agreed and enter it now, as with the plastics and fibre composites.", in `data/researched/element_recipes.xlsx` (VERIFICATION.md V39). **Under review:** Matthias's rule of the same day ("You should trust standards more than analysis performed at a university") puts the modes of 6061 and ADC12, which rest on university or institute analyses only, and the university analyses among those of 7075 and A380, in question; whether they are set again is his decision.**
 
 **The gaps, checked on the web (2026-10-27).** The registration records give limits; the mode of each element is the
 median of the analyses read (the mean where there are two). The analyses give the composition of the metal each study
@@ -444,7 +444,7 @@ Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the magnesium r
 max, from the sources of E1.2b, with AZ91D, AM60B and AM50A, estimates (E) for the alloy shares, and the modes from
 analyses verified on the web with references. Show it to me before anything is entered."
 
-**Status: proposed, for Matthias's yes; nothing is entered.**
+**Status: proposed; on hold.** Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs". The modes below rest on university analyses (the AM50 certificate of Jesus et al. excepted) and are to be set again by his rule; nothing is entered.
 
 **The limits:** ASTM B94 for die castings, through ICAST's datasheets. The robots' parts are castings; the producers'
 ingot limits of E1.2b are narrower.

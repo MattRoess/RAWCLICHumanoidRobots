@@ -59,7 +59,27 @@ Where the work stands, newest first: what was decided, by whom, and what is open
     AM50.
   - The AM share comes from the workbook's grades, and the AM part is drawn as AM60B or AM50A, half and half.
   - Robot type 3 is AZ91D alone.
-- **Next, his:** whether he agrees with E1.2c and its choices; nothing is entered before.
+- **Then Matthias, on E1.2c:** "You should trust standards more than analysis performed at a university. They do NOT
+  know quality measures for analytical procedures. This is different with comercial labs".
+  - **The rule, kept as a memory for every later session:** for a composition, rank the sources as follows:
+    1. the standard or registration record;
+    2. commercial analyses (certified reference materials, producers' certificates and nominal compositions);
+    3. university analyses, as context only, never the basis of a number.
+  - **What it puts in question:**
+    - E1.2c's modes, all from university analyses except AM50A's certificate;
+    - in the entered E1.1c, the modes of 6061 and ADC12 (university or institute analyses only), and the university
+      analyses among those of 7075 and A380.
+  - **Commercial values read so far:**
+    - 7075: NIST SRM 1259 and Castle Metals France's certificate;
+    - A380: Arconic's reference material KC380 (its Mg above A380.0's limit);
+    - AZ91D, AM60B, AM50A: Magnesium Elektron's nominal Al, Zn and Mn;
+    - AM50: the maker's certificate quoted by Jesus et al. 2026.
+  - **Proposed order for a mode:**
+    1. commercial values read first-hand (certificates and reference materials, then producers' nominal values);
+    2. else the middle of the standard's range (E), from 0 to the maximum where only a maximum is given.
+
+    For 6061 and ADC12, and for most trace elements, commercial values would be searched for first.
+- **Next, his:** whether to redo the modes of E1.2c, and of the entered E1.1c, this way.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
