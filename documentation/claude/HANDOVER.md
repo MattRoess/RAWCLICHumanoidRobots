@@ -53,7 +53,13 @@ Where the work stands, newest first: what was decided, by whom, and what is open
     type 4.
   - In the car file, AZ91C-E's means add up to 100.365 %, and its column "Co" is probably copper. Both were reported
     and not changed.
-- **Next, his:** whether to propose the magnesium recipe from these sources, and which alloys.
+- **Then, on his word** "Yes, propose the magnesium recipe per robot type ... with AZ91D, AM60B and AM50A ...":
+  - The proposal is [EVIDENCE.md](EVIDENCE.md) E1.2c, drawn in a sandbox (V41).
+  - The limits are B94's for die castings. The modes come from six analyses: three of AZ91D, one of AM60, two of
+    AM50.
+  - The AM share comes from the workbook's grades, and the AM part is drawn as AM60B or AM50A, half and half.
+  - Robot type 3 is AZ91D alone.
+- **Next, his:** whether he agrees with E1.2c and its choices; nothing is entered before.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -317,7 +323,7 @@ reads; not in git)
 | Material | His words | Done since |
 |---|---|---|
 | Aluminium | "I asume similar other aluminum alloys are also taken. Therefore the scope should be expanded and a more mixed approach taken" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.1b, V36. Recipe: E1.1c, V37, agreed 2026-10-27. Car files checked: E1.1d, V38. Entered: V39 |
-| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.2b, V40 |
+| Magnesium | "Silar as for the aluminum alloy, but I asume here the selection is more limited" | Researched, 2026-10-27: [EVIDENCE.md](EVIDENCE.md) E1.2b, V40. Recipe proposed: E1.2c, V41 |
 | Titanium | "2, 5 and 6 are robots, which require titanium. It is expensive, but has strutural reasons most likely. Therefore keep in mind, if the other types of robots grow, then they might also require parts of titanium, as magnesium is not stable enough" | Nothing yet |
 | Steel | "Try to find additional posible alloys, and see what the ranges for the emental composition could be" | Researched: [EVIDENCE.md](EVIDENCE.md) E1.4b |
 | Copper | "There could be also silver for the printed cuircuit boards. This should be taken into account. It will be part of the PCB" | To be taken up with the electronics |

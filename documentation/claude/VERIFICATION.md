@@ -5,6 +5,32 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V41. The proposed magnesium recipe, drawn in a sandbox
+
+- **What:** the proposal of [EVIDENCE.md](EVIDENCE.md) E1.2c.
+- **How:**
+  - **The sources:** each analysis was read where it is published, and each is cited in E1.2c:
+    - the PMC articles through the fetch tool;
+    - the MDPI pages in the built-in browser;
+    - the thesis and ICAST's datasheets through their text layer.
+    - The OSTI report could not be reached.
+  - **The shares:** the AM share was computed from the workbook's grade for every part.
+  - **The proposal:** written into a scratch copy of `element_recipes.xlsx` (`magnesium_sandbox.py` in the session's
+    scratch folder; the project unchanged).
+  - **01's checks:** `check_element_recipes` and `check_material_recipes` were run on the copy.
+  - **The draws:** each robot type's recipe was drawn 20,000 times (seed 1) with 02's `RecipeDraws`, and each was
+    computed at the modes with 01's `element_shares`, for each AM alloy.
+- **Result:**
+  - 01 finds no fault.
+  - Every recipe adds up to 1, at the modes and in every draw, and no element falls below zero.
+  - Hand checks at the modes: robot type 2's aluminium is 0.43 × 5.71 + 0.57 × 8.56 = 7.335 %, and robot type 3's
+    magnesium is 100 − 9.525 = 90.475 %, both as drawn.
+- **Not covered:**
+  - The AM share and the choice between AM60B and AM50A are estimates (E).
+  - AM60B rests on one analysis without trace elements.
+  - One of the three AZ91D analyses is not said to be the D grade.
+  - Nothing is entered.
+
 ### V40. Magnesium: what the robots use, the sources and the car files
 
 - **What:** the sources of [EVIDENCE.md](EVIDENCE.md) E1.2b, on Matthias's "Go on to magnesium: show me what the

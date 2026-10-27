@@ -437,6 +437,108 @@ supports" (`00_overview_categories_market_shares_2040.md`).
    X2 rather than the A2. The workbook is Matthias's.
 3. **Typical contents:** the sources give limits and a few nominal values; the modes would come from analyses, as
    for aluminium.
+
+#### E1.2c Proposal: the magnesium recipe of each robot type
+
+Matthias, 2026-10-27, choosing the answer offered: "Yes, propose the magnesium recipe per robot type, min / mode /
+max, from the sources of E1.2b, with AZ91D, AM60B and AM50A, estimates (E) for the alloy shares, and the modes from
+analyses verified on the web with references. Show it to me before anything is entered."
+
+**Status: proposed, for Matthias's yes; nothing is entered.**
+
+**The limits:** ASTM B94 for die castings, through ICAST's datasheets. The robots' parts are castings; the producers'
+ingot limits of E1.2b are narrower.
+- https://icastllp.com/material_db_pdf/ANSI%20AA%20AZ91D.pdf
+- https://icastllp.com/material_db_pdf/ASTM%20B94%20AM60B.pdf
+- https://icastllp.com/material_db_pdf/ASTM%20B94%20AM50A.pdf
+
+Read: yes, the text layer of each PDF, 2026-10-27.
+
+**The analyses read for the modes:**
+
+| Alloy | Source | Kind | Read | What it says (wt%) |
+|---|---|---|---|---|
+| AZ91D | Cui, L., Liu, Z., Hu, P., Shao, J., Li, X., Du, C., Jiang, B., *The Corrosion Behavior of AZ91D Magnesium Alloy in Simulated Haze Aqueous Solution*, Materials 11, 970, 2018. https://doi.org/10.3390/ma11060970, Table 1 | As-cast AZ91D used in a study; method not stated | Yes (extract) | Al 8.56, Zn 0.54, Mn 0.22, Si 0.054; Ni, Fe and Cu each below 0.005 |
+| AZ91D | Dini, H., *As-cast AZ91D Magnesium Alloy Properties: Effects of Microstructure and Temperature*, doctoral thesis, Jönköping University, 2017. https://www.diva-portal.org/smash/get/diva2:1165186/FULLTEXT01.pdf, Table 3 | Commercial ingots; spark OES, the average of three analyses | Yes, the PDF's text layer | Al 8.5, Zn 0.67, Mn 0.25, Fe 0.0023, Ni 0.0017, Cu 0.021, Si 0.017 |
+| AZ91 | Wang, C., Deng, K., Bai, Y., *Microstructure, and Mechanical and Wear Properties of Grp/AZ91 Magnesium Matrix Composites*, Materials 12, 1190, 2019. https://doi.org/10.3390/ma12071190, Table 1 | The matrix alloy of a study; not said to be AZ91D, method not stated | Yes (extract) | Al 9.35, Zn 0.7, Mn 0.25, Si 0.02 |
+| AM60 | Zheng, T., Hu, Y., Meng, W., Tang, A., Pan, F., *Corrosion and Residual Strength Analysis of High Pressure Die Casting AM Series Mg Alloys*, Materials 12, 2624, 2019. https://doi.org/10.3390/ma12162624, Table 1 | High-pressure die cast; ICP-OES | Yes (extract) | Al 5.71, Zn 0.15, Mn 0.27; no trace elements |
+| AM50 | Yang, M., Liu, X., Xing, L., Chen, Z., *Corrosion and Mechanical Behavior of the As-Cast and Solid-Solution-Treated AM50 Magnesium Alloy in Different Media*, Materials 16, 2406, 2023. https://doi.org/10.3390/ma16062406, Table 1 | As-cast; ICP-AES | Yes (extract) | Al 4.8687, Mn 0.2823, Zn 0.1232, Si 0.0161, Cu 0.0015, Ni 0.0008 |
+| AM50 | Jesus, W., Reis, T., Marques, L., Souza, H., Lima, E., Silva, A., *Microstructural Constituents, Local Hardness Contrast, and Tensile Variability of As-Cast AM50 Magnesium Alloy*, Solids 7, 45, 2026. https://doi.org/10.3390/solids7050045, §2 | Commercial ingots; "the manufacturer's specification" | Yes, the page | Al 4.91, Zn 0.04, Mn 0.30, Cu 0.0029, Si 0.03, Fe 0.0012, Ni 0.0010, Be 0.0005 |
+
+**Not used:**
+- **The AM60B of a graphene study** (https://pmc.ncbi.nlm.nih.gov/articles/PMC11433534/): its Si 0.10, Fe 0.005, Cu 0.01
+  and Ni 0.002 are B94's maxima, so the table is limits, not an analysis.
+- **The AM50 of Braszczyńska-Malik et al. 2026** (https://doi.org/10.3390/ma19091776): only "a nominal chemical
+  composition of 5 wt.% Al and 0.45 wt.% Mn".
+- **An OSTI report** on die-cast AZ91D plates (https://www.osti.gov/pages/servlets/purl/2283885): the server refused
+  the connection.
+
+**Level 1, each robot type's row 'Magnesium alloys':**
+
+| Robot type | Workbook grade | AM part, % of the row (E) | AZ91D | AM part drawn as |
+|---|---|---|---|---|
+| 2 | AZ91D / AM60 | 0 / 43 / 86 | The remainder | AM60B or AM50A, half and half (E) |
+| 3 | AZ91D | — | All of it: the workbook names AZ91D alone | — |
+| 4 | AZ91D / AM60 | 0 / 44 / 88 | The remainder | AM60B or AM50A, half and half (E) |
+| 6 | AZ91D / AM60 | 0 / 50 / 100 | The remainder | AM60B or AM50A, half and half (E) |
+
+- **The AM share (E):** the rule of the aluminium (E1.1c), the workbook's grade for each part weighted by the part's
+  mass at the mode. No part names AM60 alone, so the minimum is 0. The maximum adds the parts that name "AZ91D / AM60";
+  the mode, half of those.
+  - Robot type 2: heat sinks of AZ91D alone 1.0 kg, panels of both 6.0 kg.
+  - Robot type 4: controller housing of AZ91D alone 2.2 kg, frame of both 16.0 kg.
+  - Robot type 6: no part names magnesium, so its row's grade "AZ91D / AM60" counts as both.
+- **AM60B or AM50A (E):** the workbook names AM60; AM50A is named by Magnecast (E1.2b). They are drawn half and half,
+  as A380 and ADC12 were for aluminium.
+
+**Level 2, each alloy's elements**, wt%, min / mode / max; magnesium the remainder:
+
+| Element | AZ91D | AM60B | AM50A |
+|---|---|---|---|
+| Al | 8.3 / 8.56 / 9.7 | 5.5 / 5.71 / 6.5 | 4.4 / 4.889 / 5.4 |
+| Zn | 0.35 / 0.67 / 1.0 | 0 / 0.15 / 0.22 | 0 / 0.0816 / 0.22 |
+| Mn | 0.15 / 0.25 / 0.50 | 0.24 / 0.27 / 0.60 | 0.26 / 0.2912 / 0.60 |
+| Si | 0 / 0.02 / 0.10 | 0 / 0 / 0.10 (E) | 0 / 0.0231 / 0.10 |
+| Fe | 0 / 0.0023 / 0.005 | 0 / 0 / 0.005 (E) | 0 / 0.0012 / 0.004 |
+| Cu | 0 / 0.021 / 0.030 | 0 / 0 / 0.010 (E) | 0 / 0.0022 / 0.010 |
+| Ni | 0 / 0.0017 / 0.002 | 0 / 0 / 0.002 (E) | 0 / 0.0009 / 0.002 |
+
+- **The minimum and maximum** are B94's limits; an element with only a maximum may lie anywhere below it, so its
+  minimum is 0.
+- **The modes:**
+  - **AZ91D:** the median of its three analyses; Fe, Cu and Ni from Dini's, the only one that measured them (Cui's
+    are "below 0.005").
+  - **AM60B:** Zheng's single analysis. Its Si, Fe, Cu and Ni are 0 (E): no analysis gives them.
+  - **AM50A:** the mean of its two analyses; Fe from Jesus et al. alone.
+- **"Others"** (B94: 0.02 at most) and beryllium (about 0.0005) stay in the magnesium.
+- **Independence:** each element is drawn on its own (as for aluminium).
+
+**The result, % of the magnesium**, from the sandbox (V41): 20,000 draws per robot type; every draw adds up to 1 and
+no element falls below zero.
+
+| Robot type | At the modes, with AM60B | At the modes, with AM50A | 95 % of the draws |
+|---|---|---|---|
+| 2 | Mg 91.94, Al 7.34, Zn 0.446, Mn 0.259 | Mg 92.30, Al 6.98, Zn 0.417, Mn 0.268 | Mg 90.4–93.4, Al 5.96–8.62, Zn 0.21–0.71, Mn 0.23–0.46 |
+| 3 | Mg 90.48, Al 8.56, Zn 0.67, Mn 0.25 (AZ91D alone) | the same | Mg 89.4–90.7, Al 8.39–9.50, Zn 0.43–0.93, Mn 0.18–0.46 |
+| 4 | Mg 91.97, Al 7.31, Zn 0.441, Mn 0.259 | Mg 92.34, Al 6.95, Zn 0.411, Mn 0.268 | Mg 90.4–93.5, Al 5.89–8.64, Zn 0.20–0.71, Mn 0.23–0.46 |
+| 6 | Mg 92.17, Al 7.14, Zn 0.410, Mn 0.260 | Mg 92.59, Al 6.72, Zn 0.376, Mn 0.271 | Mg 90.5–93.9, Al 5.50–8.56, Zn 0.16–0.69, Mn 0.24–0.47 |
+
+Silicon, copper, iron and nickel stay below 0.09 % in every draw.
+
+**What entering it would add:**
+- in `element_recipes.xlsx`:
+  - the three alloy recipes, 'AM magnesium' and the recipes of robot types 2, 4 and 6;
+  - four rows in the sheet Rows, robot type 3's naming 'Magnesium AZ91D' directly;
+  - no new compound and no new atomic mass: every element is already there.
+
+**Choices in this proposal that are Matthias's:**
+- the AM share from the workbook's grades, robot type 6 from its row's grade;
+- robot type 3 as AZ91D alone, as the workbook names it;
+- AM60B and AM50A half and half;
+- AM60B's trace elements at 0, from its one analysis without them;
+- the AZ91 of Wang et al. counted as AZ91D;
+- "others" and beryllium left in the magnesium;
+- the B94 casting limits rather than the producers' ingot limits.
 ---
 
 ### E1.3 Titanium
