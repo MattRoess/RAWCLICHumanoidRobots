@@ -86,7 +86,10 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - Magnesium: E1.2d. The modes come from SAE's AMS4490K for AZ91D, Magnesium Elektron's nominal values, and the AM50
     certificate. The trace elements of AZ91D and AM60B take the middle of their ranges (E).
   - Drawn in a sandbox (V42); nothing is entered. E1.1c stays in the workbook as it is.
-- **Next, his:** whether he agrees with E1.1e and E1.2d.
+- **Agreed:** Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." Not entered yet.
+- **Next, his:**
+  - whether to enter E1.1e (rewriting the aluminium modes in the workbook);
+  - whether to enter the magnesium recipe of E1.2c with the modes of E1.2d. E1.2c's shares were not agreed on their own.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 

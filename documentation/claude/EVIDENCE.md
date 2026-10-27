@@ -326,7 +326,7 @@ Car-body steels and cast iron are not named for robots (E1.4b).
 
 Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
 
-**Status: proposed, for Matthias's yes. E1.1c stays entered as it is until he decides.**
+**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." Not entered yet: the workbook still holds the modes of E1.1c.**
 
 **The order each mode follows:**
 1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
@@ -622,7 +622,7 @@ Silicon, copper, iron and nickel stay below 0.09 % in every draw.
 
 Matthias, 2026-10-27: "You should trust standards more than analysis performed at a university. They do NOT know quality measures for analytical procedures. This is different with comercial labs", then: "Yes, redo the modes of E1.2c and of the entered E1.1c by my rule: first search for commercial values (certificates, certified reference materials, producers' nominal compositions) for every alloy, read first-hand with references; where none exists, the middle of the standard's range (E)."
 
-**Status: proposed, for Matthias's yes; it replaces the modes of E1.2c. Nothing is entered.**
+**Status: agreed. Matthias, 2026-10-27, choosing the answer offered: "I agree with the modes of E1.1e and E1.2d, including their choices." It replaces the modes of E1.2c. Not entered yet. The rest of E1.2c (the AM share, AM60B or AM50A half and half, robot type 3 as AZ91D alone) was not put to him on its own.**
 
 **The order each mode follows:**
 1. **A standard's nominal composition.** SAE's Aerospace Material Specifications state it in their titles.
