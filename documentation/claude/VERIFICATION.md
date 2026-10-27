@@ -5,6 +5,38 @@ by Claude, newest first.
 
 ## 2026-10-27
 
+### V44. The real run: 00 to 03, 200,000 draws
+
+- **What:** on Matthias's word "Yes, run 00 to 03 with the full 200,000 draws into data/consolidated/ and figures/,
+  then tell me when the pages are there."
+- **How:**
+  - **The run:** 00, 01, 02 and 03 were run in order from the project folder with the project's `.venv`, each timed
+    with `/usr/bin/time -l`.
+  - **The outputs:**
+    - every robot type's `.npy` files were loaded and their shapes checked against their `.txt` column lists;
+    - materials, part groups and body regions were added up against the total, row by row;
+    - each total's mean was compared with the workbook's triangle;
+    - `git check-ignore` was run on the outputs.
+  - **The pages:**
+    - robot type 2's page and 03's page by material were opened and read;
+    - 01's 20 pages were compared byte for byte with the sandbox pages read in V43.
+- **Result:**
+  - **00:** 200,000 draws, seed 1; every input present.
+  - **01:** no fault; 20 pages in 9.3 s, at most 380 MB.
+  - **02:** 9.0 s, at most 1.88 GB, almost twice the estimate of about 1 GB (HANDOVER). It wrote 42 MB per robot type,
+    252 MB in all, as computed.
+  - **03:** 4.0 s, at most 495 MB.
+  - **The draws:**
+    - every file has 200,000 rows and as many columns as its list;
+    - the sums miss the total by at most 1e-7 of it, the rounding of float32;
+    - the totals' means are 35.00, 71.44, 72.90, 69.34, 103.90 and 93.99 kg, each its triangle's mean;
+    - robot type 2's magnesium is 6.33 kg, the mean of (4, 6, 9).
+  - **The pages:** 01's are unchanged against the sandbox. Not allocated is below zero in 52.2 % of robot type 1's
+    draws and 67.0 % of robot type 2's (2,000 draws: 50.8 and 67.4 %).
+  - **Git:** the outputs are ignored (`data/consolidated/` and `figures/` in `.gitignore`).
+- **Not covered:** of 02's and 03's ten pages, two were opened; the other eight are the same code as the preview pages
+  read in V43.
+
 ### V43. Aluminium's modes rewritten and magnesium entered, and a preview of 02 and 03
 
 - **What:** E1.1e with E1.1f (aluminium) and E1.2c with E1.2d and E1.2e (magnesium), entered on Matthias's word:

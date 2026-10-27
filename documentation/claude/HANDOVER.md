@@ -99,7 +99,14 @@ Where the work stands, newest first: what was decided, by whom, and what is open
   - The real run, 200,000 draws into `data/consolidated/` and `figures/`, has not been made.
   - Materials with elements so far: battery cells, plastics, fibre composites, aluminium, magnesium. Still without:
     titanium, steel, copper, magnets, electronics, ceramics.
-- **Next, his:** the real run, by pressing Run on 00 to 03 (paths below), or his word that Claude runs it.
+- **Then:** "Yes, run 00 to 03 with the full 200,000 draws into data/consolidated/ and figures/, then tell me when
+  the pages are there." Run (V44):
+  - `data/consolidated/<n>_<name>/`, 252 MB;
+  - `figures/composition/`, six pages;
+  - `figures/comparison/`, four pages;
+  - `figures/schemas/`, redrawn: its overview now names the four stages.
+  - 02 needed 1.88 GB of memory, not the estimated 1 GB.
+- **Next, his:** verifying the pages.
 
 ## 2026-10-26, end of the day: where everything stands (start here)
 
@@ -122,9 +129,8 @@ below waits for his word.
 - **On GitHub:** https://github.com/MattRoess/RAWCLICHumanoidRobots, `main`. The stages and tests are those of commit
   c512345; the commits after it change documents only. Code and documents only; the git folder is
   `$HOME/gitdirs/RAWCLICHumanoidRobots.git`.
-- **Not run at full size:** 02 and 03 have run only with 2,000 draws, into Claude's scratch folder. `data/consolidated/`,
-  `figures/composition/` and `figures/comparison/` do not exist yet. `figures/schemas/` was last drawn before 02
-  existed: its overview still says "not built yet" until 01 is run again.
+- **Run at full size on 2026-10-27** (V44), with aluminium and magnesium in the elements. That run made the
+  statement below about the overview out of date.
 
 ### Waiting for Matthias
 
@@ -134,8 +140,7 @@ below waits for his word.
    - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
    - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
 
-   The draws come to about 250 MB, computed, not measured. Memory is estimated at around 1 GB; the time was not
-   measured.
+   Measured on 2026-10-27 (V44): 252 MB of draws; 02 takes 9 s and at most 1.88 GB of memory.
 2. **Not allocated below zero:** in about half of robot type 1's draws and two thirds of robot type 2's, because
    their materials and their parts are drawn independently (V32). Whether to tie the two is his decision.
 3. **The element recipes of the other materials**, one at a time, as before: sources first, then a proposal, then his
