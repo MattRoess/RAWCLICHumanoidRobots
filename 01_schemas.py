@@ -134,8 +134,8 @@ STAGES = [
                           'part groups and body regions, written for stock-and-flow, and a page per robot type.'),
     ('03_comparison.py', 'The robot types side by side, by material, element, part group and body region, from the '
                          'draws of 02.'),
-    ('04_parts_taken_apart.py', 'Robot type 1 taken apart (G1, X1, N1), drawn at random: where its critical '
-                                'elements sit, kind of part by kind of part, and its two figures.'),
+    ('04_parts_taken_apart.py', "Robot type 1 taken apart: where its critical elements sit, kind of part by kind of "
+                                "part, its two figures drawn from 02's draws of type 1 over its robots."),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -194,6 +194,10 @@ CHECKS_DONE = [
     "(RAWCLICVehicleTractionMotor's element workbook).",
     "Robot type 1 taken apart, against the sheet Taxonomy: every robot's maker height and stated mass inside its "
     "type's defining limits (on this rule the Booster T1, 1.18 m, is out of type 1).",
+    'The register of every known humanoid robot: every number once; a robot with types has one or two different '
+    'robot types of the six, a robot without has an entry saying why (not assigned, or the same robot as an entry '
+    'with types); every form known; every mass min, mode and max or none, in order; no robot of type 1 below its '
+    'lowest mass (15 kg); the three robots taken apart in the parts file and of type 1.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -2001,6 +2005,133 @@ def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
     return faults
 
 
+# ------------------------------------------------------------------------------------------------------
+# The register of every known humanoid robot (data/researched/humanoid_register.xlsx)
+# ------------------------------------------------------------------------------------------------------
+# Built by tools/make_humanoid_register.py from the humanoid.guide catalogue and Matthias's decisions of 2026-10-28
+# (documentation/claude/EVIDENCE.md E4 to E4.11): every robot once, with at most two robot types.
+
+REGISTER_SHEET = 'Robots'
+REGISTER_HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated',
+                     'Mass min (kg)', 'Mass mode (kg)', 'Mass max (kg)', 'Mass basis', 'Types', 'Form', 'Entry',
+                     'Taken apart as', 'Decided in', 'Source']
+# How a robot moves, as read (EVIDENCE.md E4.1 to E4.10); the last six are the forms of robots not assigned, or one
+# moving by its arms (HELIOS) or a ball (Mirokaï).
+REGISTER_FORMS = ('legs', 'wheels', 'legs or wheels', 'no wheels named', 'not stated', 'an upper body', 'two arms',
+                  'two arms and a torso', 'an arm', 'four arms, no legs', 'a ball')
+# The entry of a robot without types says why: left out ("not assigned: an upper body only"), or a second entry of
+# one robot ("the same robot as 3", counted once as entry 3: "No double counting use just 1").
+NOT_ASSIGNED = 'not assigned: '
+SAME_ROBOT = 'the same robot as '
+MOST_TYPES = 2   # "Double assignment means 1 robot can be two types" (Matthias, 2026-10-28)
+
+
+@dataclass
+class RegisterRobot:
+    """One robot of the register."""
+
+    row: int                 # its row in the sheet Robots
+    number: int              # its number: the catalogue's order of reading, 350 on for the robots added
+    name: str
+    maker: str
+    mass: tuple              # (min, mode, max) kg, or (None, None, None) where no mass is stated
+    types: tuple             # its robot types, the leading one first; () where the entry says why there are none
+    types_text: str          # the cell as written, for the faults
+    form: str
+    entry: str
+    taken_apart: str         # its name in parts_taken_apart.xlsx, for the three robots of type 1 taken apart
+
+
+def read_register(path: str) -> list[RegisterRobot]:
+    """Read the register; never writes to it. A missing file, sheet or heading stops the reading (WorkbookError), as
+    with the other files 01 reads."""
+    if not os.path.exists(path):
+        raise WorkbookError(f'{path}: the register is not there.')
+    book = load_workbook(path, data_only=True)
+    if REGISTER_SHEET not in book.sheetnames:
+        raise WorkbookError(f"{path}: no sheet '{REGISTER_SHEET}'. Its sheets are: {', '.join(book.sheetnames)}.")
+    sheet = book[REGISTER_SHEET]
+    found = [text(cell.value) for cell in sheet[1]][:len(REGISTER_HEADINGS)]
+    if found != REGISTER_HEADINGS:
+        raise WorkbookError(f"{path}, sheet '{REGISTER_SHEET}': the first row must be {REGISTER_HEADINGS}, not "
+                            f'{found}.')
+    at = {name: k for k, name in enumerate(REGISTER_HEADINGS)}
+    robots = []
+    for cells in sheet.iter_rows(min_row=2):
+        v = [cell.value for cell in cells] + [None] * len(REGISTER_HEADINGS)
+        if all(x is None for x in v[:len(REGISTER_HEADINGS)]):
+            continue
+        written = text(v[at['Types']])
+        types = tuple(int(t) if t.isdigit() else t for t in (piece.strip() for piece in written.split(',')) if t)
+        mass = tuple(number(v[at[h]]) for h in ('Mass min (kg)', 'Mass mode (kg)', 'Mass max (kg)'))
+        robots.append(RegisterRobot(row=cells[0].row, number=int(number(v[at['Number']]) or 0),
+                                    name=text(v[at['Robot']]), maker=text(v[at['Maker']]), mass=mass, types=types,
+                                    types_text=written, form=text(v[at['Form']]), entry=text(v[at['Entry']]),
+                                    taken_apart=text(v[at['Taken apart as']])))
+    return robots
+
+
+def check_register(register: list, params: Params, taken_apart: list) -> list[Fault]:
+    """Whether the register holds together (EVIDENCE.md E4 to E4.11): every number once; a robot with types has one or
+    two different robot types of the six and no entry, a robot without has an entry saying why (not assigned, or the
+    same robot as an entry with types); every form known; every mass all three or none, in order from 0; no robot of
+    type 1 below its lowest mass; every robot taken apart in the parts file (`taken_apart`, its robot names) and of
+    type 1."""
+    where = os.path.basename(params.data.register) + ': ' + REGISTER_SHEET
+    lowest = params.composition.type_one_lowest_kg
+    faults = []
+    numbers = [r.number for r in register]
+    by_number = {r.number: r for r in register}
+    for r in register:
+        what = f'{r.number} {r.name}'
+        if numbers.count(r.number) > 1:
+            faults.append(Fault(where, r.row, f'{what}: the number {r.number} is given to more than one robot.'))
+        unknown = [t for t in r.types if not isinstance(t, int) or not 1 <= t <= 6]
+        for t in unknown:
+            faults.append(Fault(where, r.row, f"{what}: the robot type '{t}' is not one of the six."))
+        if len(r.types) > MOST_TYPES:
+            faults.append(Fault(where, r.row, f"{what}: at most two robot types, not '{r.types_text}'."))
+        if len(set(r.types)) < len(r.types):
+            faults.append(Fault(where, r.row, f"{what}: a robot type is given twice ('{r.types_text}')."))
+        if r.entry == '' and not r.types:
+            faults.append(Fault(where, r.row, f'{what}: no type, and no entry saying why.'))
+        elif r.entry.startswith(NOT_ASSIGNED):
+            if r.types:
+                faults.append(Fault(where, r.row, f'{what}: a robot not assigned has no types.'))
+        elif r.entry.startswith(SAME_ROBOT):
+            if r.types:
+                faults.append(Fault(where, r.row, f'{what}: a second entry of a robot has no types.'))
+            other = r.entry[len(SAME_ROBOT):].strip()
+            target = by_number.get(int(other)) if other.isdigit() else None
+            if target is None:
+                faults.append(Fault(where, r.row, f"{what}: '{r.entry}': there is no robot {other}."))
+            elif target.entry:
+                faults.append(Fault(where, r.row, f"{what}: '{r.entry}': robot {other} is itself a second entry or "
+                                                  'not assigned; name the entry with the types.'))
+        elif r.entry:
+            faults.append(Fault(where, r.row, f"{what}: the entry '{r.entry}' is not known; it is empty, starts with "
+                                              f"'{NOT_ASSIGNED}' or '{SAME_ROBOT}'."))
+        if r.form not in REGISTER_FORMS:
+            faults.append(Fault(where, r.row, f"{what}: the form '{r.form}' is not one of "
+                                              f"{', '.join(REGISTER_FORMS)}."))
+        if any(m is not None for m in r.mass):
+            if None in r.mass:
+                faults.append(Fault(where, r.row, f'{what}: give its mass as min, mode and max, or none.'))
+            elif not 0 <= r.mass[0] <= r.mass[1] <= r.mass[2]:
+                faults.append(Fault(where, r.row, f'{what}: its mass min, mode and max must be in order from 0 up: '
+                                                  f'{r.mass}.'))
+            elif 1 in r.types and r.mass[1] < lowest:
+                faults.append(Fault(where, r.row, f'{what}: {r.mass[1]:g} kg is below robot type 1\'s lowest mass, '
+                                                  f'{lowest:g} kg ("Below 15 kg not part of the type 1").'))
+        if r.taken_apart:
+            if r.taken_apart not in taken_apart:
+                faults.append(Fault(where, r.row, f"{what}: '{r.taken_apart}' is not a robot of "
+                                                  f'{os.path.basename(params.data.parts_taken_apart)}.'))
+            if 1 not in r.types:
+                faults.append(Fault(where, r.row, f'{what}: a robot taken apart is a robot of type 1.'))
+    return faults
+
+
 def battery_pieces(materials: MaterialsList, battery: Material, lists: SharedLists, recipes: ElementRecipes) -> list:
     """The battery row of one robot type as cells only: its cells, and the rest of the row (the row minus the cells)
     split by the shares of the sheet Battery cells, the remainder 1 minus the others. Each piece is (shared material,
@@ -3019,6 +3150,7 @@ def main() -> int:
         except WorkbookError as error:
             print(f'{error} The robot pages show the battery rows as the workbook gives them.')
     # Robot type 1 taken apart: read and checked here; drawn by the stage that follows it (step 5 of its plan).
+    apart = None
     if lists is not None:
         try:
             apart = read_parts_taken_apart(absolute(params.data.parts_taken_apart))
@@ -3026,6 +3158,12 @@ def main() -> int:
                        + check_robot_types(apart, book.categories))
         except WorkbookError as error:
             print(f'{error} Robot type 1 taken apart is not checked.')
+    # The register of every known humanoid robot, against the robots taken apart.
+    try:
+        register = read_register(absolute(params.data.register))
+        faults += check_register(register, params, list(apart.robots) if apart is not None else [])
+    except WorkbookError as error:
+        print(f'{error} The register is not checked.')
     sources = absolute(params.data.sources_dir)
     reports = {c.number: category_report(c.number, sources) for c in book.categories}
     out = absolute(params.output.schemas_dir)

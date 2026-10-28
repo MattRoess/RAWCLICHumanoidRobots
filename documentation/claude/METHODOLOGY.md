@@ -16,9 +16,9 @@ Every setting is in `src/params_schema.py`.
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists; reads the element recipes and counts each robot type's battery cells. Checks that the workbook agrees with itself, that everything is placed, and that the recipes and the battery cells hold together. Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
-| `02_composition.py` | The same three files, through 01's functions; the settings `composition.*` | `data/consolidated/<n>_<name>/`, `figures/composition/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo), the same code for all six: its materials, its elements, its part groups and its body regions. Writes the draws and a summary for each robot type separately, for stock-and-flow, and a page per robot type. |
+| `02_composition.py` | The same three files, through 01's functions; the register (`data/researched/humanoid_register.xlsx`); for robot type 1 the parts file, the sibling projects' board, sensor and tantalum data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/`, `figures/composition/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A robot type whose register robots include one taken apart (type 1) is drawn over its register robots from the robots taken apart; the others from the workbook. Writes the draws and a summary for each robot type separately, for stock-and-flow; type 1 taken apart for 04; the pages. |
 | `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. |
-| `04_parts_taken_apart.py` | `data/researched/parts_taken_apart.xlsx` through 01's functions; the workbook, shared lists and recipes through 02's; the sibling projects' board, sensor and tantalum data where they lie; RAWCLICVehicleTractionMotor's own magnet code, in its own environment; the settings `parts.*` | `data/parts_taken_apart/`, `figures/parts_taken_apart/` | Draws robot type 1 taken apart, `parts.draws` times (Monte Carlo): each draw one robot (G1, X1 or N1), its mass varied within type 1's limits; every material and element in every kind of part. Writes the draws at every level and a summary, and the two figures Matthias approved. |
+| `04_parts_taken_apart.py` | 02's draws of robot type 1 taken apart (`data/parts_taken_apart/`); the parts file through 01's functions (which joints run hot) | `figures/parts_taken_apart/` | Draws the two figures Matthias approved from 02's draws. Draws nothing at random itself. |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
 them", and, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
@@ -345,9 +345,33 @@ included) and its kg by element (only the materials that have a recipe so far). 
 95 % of the draws. The numbers stand beside the bars, with three significant figures, so that a few grams of an
 element are not printed as 0.
 
-## What 04 draws
+## Robot type 1 over its robots, in 02 (since 2026-10-28)
 
-`04_parts_taken_apart.py` draws robot type 1 taken apart (Matthias, 2026-10-28: "Yes, build steps 5 and 6: stage 04
+Matthias, 2026-10-28: "Do it for all the robots which are in type 1. Do the code and the figure!!", "Why is it in 04",
+"Yes in 02 it is all type 1 in.!", and on the preview "Yes, code it in 02". The drawing of robot type 1 taken apart
+moved from 04 into 02 unchanged but for the choice of robot and mass; what follows ("What 04 draws") describes that
+drawing as it was built in 04, with these changes:
+
+1. **Each draw is one of the register's robots of type 1** (`data/researched/humanoid_register.xlsx`), all equally
+   often: 31 robots on 2026-10-28; the PrimeBOT Q1 is not drawn (no mass stated); robots lighter than 15 kg are not of
+   type 1 (`composition.type_one_lowest_kg`, Matthias: "Below 15 kg not part of the type 1"; 01 checks the register).
+2. **Its mass:** a triangle on its register mass (the stated mass ± 1 kg, or its stated range). The G1, X1 and N1
+   drawn as themselves take their own mass range from the parts file.
+3. **Its parts:** those of the robot taken apart that it is, else those of the G1, X1 or N1, each as often; the factor
+   its mass over that robot's own scales what followed the varied mass before (answer B). The varied mass between 30
+   and 50 kg is gone: the register's robots give the spread between realisations.
+4. **As 02 writes every robot type:** its materials (Not allocated 0, as the frame takes the rest), its elements (all
+   it holds; every robot type now has the same element columns, 0 where none is drawn), its part groups and body
+   regions (its ten kinds placed whole: the joints in Joint drives, the battery in Battery, the torso boards in
+   Computer, the head in Sensors, the cables in Cables, the frame and shell in Frame; hips, knees, ankles in Legs,
+   waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body).
+5. **Its pages:** a notes page, then its elements nine a page, each the histogram of one robot's total over the draws,
+   median solid and mean dotted with their numbers above the panel, 95 % dashed, own scale (Matthias: "Do not repeat
+   the comments on all slides have it on a separate one"; "can you better adust the hight").
+
+## What 04 draws (as built on 2026-10-28; its drawing now in 02, above)
+
+`04_parts_taken_apart.py` drew robot type 1 taken apart (Matthias, 2026-10-28: "Yes, build steps 5 and 6: stage 04
 and its two approved figures, tests first, tried in a sandbox with few draws"; his answers A to E in HANDOVER.md,
 2026-10-28). Before drawing it makes every check 02 makes, 01's checks 18 to 20 of the data file, and its own: every
 joint, part, board and sensor goes to one of the ten kinds of part of the figures, and every part is of one material,

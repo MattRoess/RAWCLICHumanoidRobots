@@ -750,6 +750,10 @@ it is added.
 
 **Decided, 2026-10-28:** "They hold", on the five proposals below.
 
+**Decided, 2026-10-28** (type 1's lower limit): "All larger than 15 kg", then "Below 15 kg not part of the type 1". So
+the FF Nova (2.8 kg) leaves type 1 (it keeps type 1 in the register only if Matthias says so; proposed: not assigned).
+The PrimeBOT Q1 (88 cm) has no stated mass: an estimate is needed to say which side of 15 kg it lies.
+
 Matthias: "Yes, add them" ("add Fourier N1, Norinco Fuxi, Unitree H1, UBTECH Walker S and Perceptyne PR-OMNI, each
 read from its maker or source, with a proposed type"). Numbered on from the catalogue's 349. Read first-hand in the
 browser unless marked.

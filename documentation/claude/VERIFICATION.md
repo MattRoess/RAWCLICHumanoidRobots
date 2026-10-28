@@ -5,6 +5,55 @@ by Claude, newest first.
 
 ## 2026-10-28
 
+### V62. Robot type 1 drawn in 02 over all its robots of the register; 04 draws its figures from 02's draws
+
+- **What:** on "Yes in 02 it is all type 1 in.!" and "Yes, code it in 02": 04's drawing of robot type 1 taken apart
+  moved into 02_composition.py unchanged but for the choice of robot and mass (METHODOLOGY.md "Robot type 1 over its
+  robots, in 02"); 02 writes type 1 as every robot type (materials, elements, part groups, body regions, total) and
+  type 1 taken apart for 04 (`data/parts_taken_apart/`, with `register.txt` and `estimated.npy`); every robot type now
+  has the same element columns (0 where none is drawn); type 1's pages a notes page and its elements nine a page.
+  04 reads 02's draws and draws only its two figures. A robot type is drawn from robots taken apart where its register
+  robots include one (type 1 today), so 02's and 03's small-workbook tests run with a small register of their own.
+- **How, tests first where new:** tests/test_parts_taken_apart.py rewritten against 02's `draw_type_one` over a
+  register of the three robots taken apart and, where needed, a robot of 50 kg: each robot taken apart a third of the
+  draws and its own mass; a robot of the register taking each robot taken apart's parts a third of the time and its
+  own mass (49 to 51 kg); materials and parts adding up to the mass in every draw; remainders reported, not cut; a
+  stated joint mass kept; type 1 as 02 writes it passing `draw_faults` with Not allocated 0; the hand calculations at
+  the modes unchanged (the G1's cable copper 152.684 g, hip gold 10.50288 mg, hip neodymium 99.205152 g); the hip
+  joints of the 50 kg robot drawn with the G1's parts 50 / 35 times the G1's (fans not scaled), its head the same;
+  every page of 04 and 02's type 1 pages readable fit to 1920 × 1080 (18 px at least); 04's run from 02's written
+  draws. **228 tests: 226 pass**; 2 wait on Matthias's run of 00 (the three new settings in `params.xlsx` and
+  PARAMETER_REFERENCE.md), 2 are skipped until the register is built on disk (his run of the builder).
+- **Sandbox run** (5,000 draws, the real inputs, the register built in Claude's scratch folder, every output there):
+  exit 0 in 4.8 s; type 1 over 31 robots (not drawn: 236 PrimeBOT Q1, no mass), 34.0 kg at the mean (95 %: 17.3 to
+  42.7), Not allocated 0; the X1's frame below zero in 0.2 % of its draws (reported, not cut); types 2 to 6 as before.
+  The pages looked at (notes page; elements pages with the bars to about nine tenths of the panel).
+- **Faults found and fixed on the way:** type 1's Not allocated first computed as the mass less the materials showed
+  rounding noise as "below zero in 27.4 % of the draws" (now 0 by construction); the summary called the cells "not
+  in the elements" because their recipe adds up to 1 only to the compounds' rounding (now compared at 0.1 %, as
+  `draw_faults` allows; no other robot type changes).
+- **Not covered:** the real run (200,000 draws) is Matthias's; steel, titanium and mixed parts are not yet in the
+  elements (their iron, chromium, nickel are missing, as the notes page says); the grouping of type 1's kinds into
+  part groups and body regions is by whole kinds.
+
+### V61. The register of every known humanoid robot: its builder and 01's checks
+
+- **What:** `tools/make_humanoid_register.py` writes `data/researched/humanoid_register.xlsx` from the catalogue
+  (`data/raw/humanoid_guide_2026-10-28.xlsx`) and the decisions held in it (EVIDENCE.md E4 to E4.11, one line per
+  robot); 01 reads it (`read_register`) and checks it (`check_register`): every number once; one or two different
+  robot types of the six; an entry saying why where there are none (not assigned, or the same robot as an entry with
+  types); every form known; masses all three or none, in order; no robot of type 1 below 15 kg; the robots taken apart
+  in the parts file and of type 1. New settings: `data.humanoid_guide`, `data.register`,
+  `composition.type_one_lowest_kg` (15 kg, Matthias: "Below 15 kg not part of the type 1").
+- **How, tests first:** 19 tests of 01 on a small register, each breaking one thing (a number twice, three types, a
+  type 7, a type twice, no type and no entry, a robot left out with types, an unknown entry, a second entry of a
+  missing or of another second entry, an unknown form, a mass out of order or given in part, a type 1 robot of 10 kg,
+  a robot taken apart not in the parts file or not of type 1, other headings), all failing before the code; the
+  builder's 7 tests: what it writes passes 01's checks; 354 robots, 325 with types, 137 with two, 10 second entries, 19
+  not assigned; per type 32 / 97 / 181 / 135 / 12 / 5 (V60 less the FF Nova); the three robots taken apart (102 G1, 16
+  X1, 350 N1); masses as stated (G1 34 / 35 / 36, QUESTER1 20 / 25 / 30, Walker S2 72 / 73 / 74, PrimeBOT Q1 none).
+- **Not covered:** the file on disk: built by Matthias's run of the builder; until then its two comparison tests skip.
+
 ### V60. The register's counts by type, computed from the proposal tables (EVIDENCE.md E4.1 to E4.9)
 
 - **What:** the number of robots in each type, after robots listed twice were taken out, robots not assigned and

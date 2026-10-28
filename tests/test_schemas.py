@@ -1452,5 +1452,131 @@ class TestSiblingData(unittest.TestCase):
         apart = schemas.read_parts_taken_apart(paths[-1])
         self.assertEqual([f.text for f in schemas.check_sibling_data(apart, params)], [])
 
+
+# --- The register of every known humanoid robot (data/researched/humanoid_register.xlsx) ------------------------------
+
+REGISTER_HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated',
+                     'Mass min (kg)', 'Mass mode (kg)', 'Mass max (kg)', 'Mass basis', 'Types', 'Form', 'Entry',
+                     'Taken apart as', 'Decided in', 'Source']
+# A small register: (number, robot, mass min, mode, max, types, form, entry, taken apart as). Rows 2 to 6.
+REGISTER_ROWS = [
+    (1, 'Robot A', 34, 35, 36, '1', 'legs', '', 'Unitree G1'),
+    (2, 'Robot B', 59, 60, 61, '3, 4', 'wheels', '', ''),
+    (3, 'Robot B again', 59, 60, 61, '', 'wheels', 'the same robot as 2', ''),
+    (4, 'Arm C', None, None, None, '', 'two arms', 'not assigned: arms only', ''),
+    (5, 'Robot D', None, None, None, '6', 'not stated', '', ''),
+]
+
+
+def build_register(path, rows=None, headings=None):
+    """A small register in the layout of data/researched/humanoid_register.xlsx."""
+    book = Workbook()
+    book.active.title = 'About'
+    sheet = book.create_sheet('Robots')
+    sheet.append(headings or REGISTER_HEADINGS)
+    for n, robot, low, mode, high, types, form, entry, apart in (REGISTER_ROWS if rows is None else rows):
+        sheet.append([n, robot, 'Maker', 'China', 'Prototype', '150', '' if mode is None else str(mode), low, mode,
+                      high, 'the stated mass +- 1 kg', types, form, entry, apart, 'E4.1', 'https://example.org'])
+    book.save(path)
+
+
+class TestRegister(unittest.TestCase):
+    """01 reads the register and reports each fault it guards against (EVIDENCE.md E4 to E4.11)."""
+
+    def faults(self, rows=None, apart_names=('Unitree G1', 'AgiBot X1', 'Fourier N1')):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, rows)
+            register = schemas.read_register(path)
+        return schemas.check_register(register, Params(), apart_names)
+
+    def assertFaultSays(self, faults, words):
+        self.assertTrue(any(words in f.text for f in faults), msg=[f.text for f in faults])
+
+    def changed(self, k, **values):
+        rows = [list(r) for r in REGISTER_ROWS]
+        keys = ['number', 'robot', 'low', 'mode', 'high', 'types', 'form', 'entry', 'apart']
+        for key, value in values.items():
+            rows[k][keys.index(key)] = value
+        return [tuple(r) for r in rows]
+
+    def test_a_register_that_holds_together(self):
+        self.assertEqual([f.text for f in self.faults()], [])
+
+    def test_it_is_read_robot_by_robot(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path)
+            register = schemas.read_register(path)
+        self.assertEqual([r.number for r in register], [1, 2, 3, 4, 5])
+        self.assertEqual(register[1].types, (3, 4))
+        self.assertEqual(register[0].mass, (34, 35, 36))
+        self.assertEqual(register[4].mass, (None, None, None))
+        self.assertEqual(register[0].taken_apart, 'Unitree G1')
+
+    def test_other_headings_are_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, headings=REGISTER_HEADINGS[:-1] + ['Link'])
+            with self.assertRaises(schemas.WorkbookError):
+                schemas.read_register(path)
+
+    def test_a_number_given_twice(self):
+        self.assertFaultSays(self.faults(self.changed(1, number=1)), 'number 1')
+
+    def test_three_types(self):
+        self.assertFaultSays(self.faults(self.changed(1, types='3, 4, 5')), 'at most two')
+
+    def test_a_type_that_does_not_exist(self):
+        self.assertFaultSays(self.faults(self.changed(1, types='7')), "'7'")
+
+    def test_the_same_type_twice(self):
+        self.assertFaultSays(self.faults(self.changed(1, types='3, 3')), 'twice')
+
+    def test_a_robot_without_a_type_nor_why(self):
+        self.assertFaultSays(self.faults(self.changed(1, types='')), 'no type')
+
+    def test_a_robot_left_out_that_has_types(self):
+        self.assertFaultSays(self.faults(self.changed(3, types='3')), 'no types')
+
+    def test_an_entry_that_is_not_known(self):
+        self.assertFaultSays(self.faults(self.changed(3, entry='maybe later')), "'maybe later'")
+
+    def test_the_same_robot_as_one_that_is_not_there(self):
+        self.assertFaultSays(self.faults(self.changed(2, entry='the same robot as 9')), '9')
+
+    def test_the_same_robot_as_a_second_entry(self):
+        rows = self.changed(3, entry='the same robot as 3', types='', form='two arms')
+        self.assertFaultSays(self.faults(rows), 'second entry')
+
+    def test_a_form_that_is_not_known(self):
+        self.assertFaultSays(self.faults(self.changed(1, form='hovers')), "'hovers'")
+
+    def test_a_mass_out_of_order(self):
+        self.assertFaultSays(self.faults(self.changed(1, low=70)), 'in order')
+
+    def test_a_mass_given_in_part(self):
+        self.assertFaultSays(self.faults(self.changed(1, high=None)), 'min, mode and max')
+
+    def test_a_robot_of_type_1_below_its_lowest_mass(self):
+        rows = self.changed(0, low=9, mode=10, high=11)
+        self.assertFaultSays(self.faults(rows), '15')
+
+    def test_a_robot_taken_apart_that_the_parts_file_does_not_have(self):
+        self.assertFaultSays(self.faults(self.changed(0, apart='Unitree G2')), "'Unitree G2'")
+
+    def test_a_robot_taken_apart_that_is_not_type_1(self):
+        self.assertFaultSays(self.faults(self.changed(1, apart='AgiBot X1')), 'type 1')
+
+    def test_the_real_register_holds_together(self):
+        params = Params()
+        path, apart_path = absolute(params.data.register), absolute(params.data.parts_taken_apart)
+        if not all(os.path.exists(p) for p in (path, apart_path)):
+            self.skipTest('the register or the parts taken apart are not on disk')
+        apart = schemas.read_parts_taken_apart(apart_path)
+        register = schemas.read_register(path)
+        self.assertEqual([f.text for f in schemas.check_register(register, params, list(apart.robots))], [])
+
+
 if __name__ == '__main__':
     unittest.main()

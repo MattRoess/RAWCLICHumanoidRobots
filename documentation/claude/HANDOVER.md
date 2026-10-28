@@ -2,7 +2,98 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-28, night: the magnets graded by each joint's heat (start here)
+## 2026-10-28, late night: the register, and robot type 1 over all its robots in 02 (start here)
+
+Matthias: "Write a good handover I will continue tomorrow on another mac", then "everything has to be comitted and
+pushed". Everything below is committed and pushed to `main` with this handover.
+
+### Done today, after the magnets (each recorded where named)
+
+1. **The register of every known humanoid robot** (EVIDENCE.md E4 to E4.11; VERIFICATION.md V60, V61). All 349
+   robots of the humanoid.guide catalogue read, five missing robots added (Fourier N1, Norinco Fuxi, Unitree H1, UBTECH
+   Walker S, Perceptyne PR-OMNI): 354 entries; 325 robots with a type, 137 of them with two; 10 second entries of one
+   robot; 19 not assigned. Per type (a robot with two types in both): 1: 32, 2: 97, 3: 181, 4: 135, 5: 12, 6: 5.
+   - Matthias's rules, each with his words in E4: the use first, the size second; **wheels accepted, an upper body only
+     not**; **one entry per robot** ("No double counting use just 1"), also when two makers sell it under two names;
+     **at most two types** ("Double assignment means 1 robot can be two types"); **industry listed gives type 3**,
+     heavy duty in industry stays 3, type 5 only for hazardous environments, a second type where another use is as
+     strong ("Rule holds"); **security alone type 6**, security among other uses not; **below 15 kg not type 1**.
+   - Files: `data/raw/humanoid_guide_2026-10-28.xlsx` (the catalogue as read; data, not in git), the builder
+     `tools/make_humanoid_register.py` (holds every decision, one line per robot; a change is made there), its test,
+     01's `read_register` / `check_register`, the settings `data.humanoid_guide`, `data.register`,
+     `composition.type_one_lowest_kg`.
+2. **Robot type 1 drawn in 02 over all its robots** (METHODOLOGY.md "Robot type 1 over its robots, in 02"; V62).
+   Matthias: "Do it for all the robots which are in type 1", "Why is it in 04", "Yes in 02 it is all type 1 in.!",
+   "Yes, code it in 02". 04's drawing moved into `02_composition.py` (one copy of the code): each draw one of the 31
+   register robots of type 1 with a mass, its mass from the register, its parts those of the G1, X1 or N1 scaled to
+   it. 04 now only reads 02's draws (`data/parts_taken_apart/`) and draws its two figures. Types 2 to 6: unchanged
+   ("I will only focus on 1", "We talk later about 2 and so on").
+3. **Type 1's composition pages** (02, `figures/composition/1_compact_research_developer_notes.png` and `_elements_1`
+   to `_4.png`): every element as one robot's total over the draws, median solid and mean dotted with their numbers
+   above the panel, 95 % dashed, own scale; the notes once, on their own page ("Do not repeat the comments on all
+   slides have it on a separate one"); bars to about nine tenths of the panel ("can you better adust the hight ... Not
+   full but much better"). Matthias saw the sandbox previews.
+
+### On the other Mac, first
+
+- The files come through iCloud; the git folder (`$HOME/gitdirs/RAWCLICHumanoidRobots.git`) does not. In the project
+  folder run `git fetch` and `git status`. If that Mac's git is behind `origin/main` while iCloud already holds these
+  files, the files equal `origin/main`: align the index on Matthias's word with `git reset origin/main` (keeps the
+  files), then `git status` must be clean. If any file differs from `origin/main`, it is work of his: stop and ask.
+- The `.venv` there may be evicted by iCloud ("dataless" files): `KeyError: 'backend_fallback'` at `import matplotlib`
+  means that, not a bug.
+- Claude's memory notes stay on this Mac; the rules above and in `GitHub/CLAUDE.md` are what carries over.
+
+### His runs, in this order (in RAWCLICHumanoidRobots, press Run; nothing has been run into data/ or figures/)
+
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+   (writes the three new settings into `params.xlsx` and PARAMETER_REFERENCE.md; until then 2 tests fail).
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`
+   (writes `data/researched/humanoid_register.xlsx`; until then 2 tests skip and 02 stops: no register).
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+   (checks the register too).
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   (200,000 draws; type 1 now also runs RAWCLICVehicleTractionMotor's magnet code and writes `data/parts_taken_apart/`;
+   memory was 1.88 GB before type 1 was taken apart, more now: not measured at 200,000).
+5. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+6. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`
+   (reads what 02 wrote).
+
+Tests: `./.venv/bin/python -m unittest discover -s tests` from the project folder; 228 tests, 226 pass before run 1.
+
+### Waiting for Matthias (nothing to do before his word)
+
+1. **Leftovers of the move, to remove on his word** (nothing reads them): the settings `parts.draws` and `parts.seed`
+   (class `PartsParams` and its check in `src/params_schema.py`; grep finds no other reader since 02 draws type 1 with
+   `composition.draws` and `composition.seed`); the old page `figures/composition/1_compact_research_developer.png`
+   (02 no longer writes it; his output file). The old files in `data/parts_taken_apart/` are overwritten by run 4.
+2. **The PrimeBOT Q1** (88 cm, register 236, types 4 and 1): no mass stated, so it is not drawn in type 1; an estimate
+   (E) shown to him decides whether it lies above 15 kg.
+3. **Steel, titanium and the mixed parts have no element recipe yet**: in type 1 about 10 kg of steel (median), so
+   iron, chromium, nickel and manganese are missing from the element pages (the notes page says so). The steel
+   research is EVIDENCE.md E1.4; its min / mode / max wait on his decisions.
+4. **Type 1's part groups and body regions** are its ten kinds placed whole (KIND_PART_GROUP, KIND_BODY_REGION in 02):
+   confirm, or place part by part (a column in the parts file).
+5. **04's two figures** still carry a footnote on every page; his new rule (notes once, on a page of their own) would
+   apply there too: on his yes.
+6. From the register, still his: HELIOS also type 5 (space)?; Walker Tienkung and Tien Kung 2.0 one robot?; the
+   Walker S Lite (UBTECH lists it, the catalogue not); ALPHA (3; 5?), Fengxing-001 (3; 5 or 6?), MH3 (5; 6?); how a
+   robot with two types counts in the statistics (in full, split, or one drawn per Monte Carlo draw); type 6's
+   definition widened to civilian security (his workbook); 01's check 20 turned from a fault into a flag.
+7. **Types 2 to 6** after type 1 ("We talk later about 2 and so on"); type 2's open points: whether the H2 Plus is the
+   H2 with optional hands, and joint masses above 200 N·m.
+
+### Rules Matthias gave today (also in Claude's memory on this Mac)
+
+- "Composition" is one robot type's own pages (02); robot types side by side is the comparison (03): "No I said work
+  damit on the composition and NOT on the comparison!!!".
+- A figure of several pages: the notes once on their own page; the data pages only titles, panels and numbers.
+- Median and mean together, never the mean alone; pages 16 × 9 inches, text 14 pt and up, checked readable before
+  showing; Paul Tol's colours as published.
+- When type 1's robots grew to 33 in the register, the composition should have been updated without being told:
+  "As you missed that there are so many more type 1 robots. I had agai to tell you".
+
+## 2026-10-28, night: the magnets graded by each joint's heat
 
 - On "Accept as proposed" (EVIDENCE.md E2.11): heat groups in the sheet Joints, a new sheet MagnetGrades, 01's checks,
   04 drawing the classes by one draw of heat (tied), tests first (VERIFICATION.md V59). Dysprosium in one robot now

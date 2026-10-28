@@ -135,6 +135,23 @@ class DataParams:
         metadata={'doc': 'Robot type 1 taken apart: its joints, the joint module part by part, every other part, '
                          'their materials, boards and sensors, for where its critical materials sit.'})
 
+    # The humanoid.guide catalogue as read on 2026-10-28 (https://humanoid.guide/humanoid-robots-database/, "349
+    # humanoids"): each robot's attribute table, numbered in the order the robots were read (documentation/claude/
+    # EVIDENCE.md E4). Second-hand: makers may edit their entries. Read, never changed; the register is built from it.
+    # SAFE TO CHANGE: only if the file moves, or for a newer reading of the catalogue under another name.
+    humanoid_guide: str = field(
+        default=os.path.join('data', 'raw', 'humanoid_guide_2026-10-28.xlsx'),
+        metadata={'doc': 'The humanoid.guide catalogue as read on 2026-10-28: every robot\'s attribute table.'})
+
+    # The register of every known humanoid robot, each with its one or two robot types (Matthias, 2026-10-28: "I want
+    # that all know humanoid robots at the end can be assigned to types"; his rules and decisions in EVIDENCE.md E4 to
+    # E4.11). Built by tools/make_humanoid_register.py from the catalogue above and the decisions held there.
+    # 01_schemas.py checks it; 02_composition.py draws robot type 1 over its robots.
+    # SAFE TO CHANGE: only if the file moves.
+    register: str = field(
+        default=os.path.join('data', 'researched', 'humanoid_register.xlsx'),
+        metadata={'doc': 'The register of every known humanoid robot with its one or two robot types.'})
+
     # THE SIBLING PROJECTS' FILES that robot type 1 taken apart reads where they lie, never copied (Matthias,
     # 2026-09-21: "Each project owns its data"; agreed for this file 2026-10-27, open point C of its plan). Absolute
     # paths, because those projects are sibling checkouts and neither may assume where the other sits (as in
@@ -227,6 +244,14 @@ class CompositionParams:
         default=256.0,
         metadata={'doc': 'Energy per kg of cylindrical NMC cells, maximum (E1.7d), Wh/kg.'})
 
+    # Robot type 1's lowest mass, kg: a robot of the register lighter than this is not part of type 1 (Matthias,
+    # 2026-10-28: "Below 15 kg not part of the type 1"). 01 checks the register against it; 02 draws type 1 over the
+    # register's robots of type 1, all at or above it.
+    # SAFE TO CHANGE: only on Matthias's word.
+    type_one_lowest_kg: float = field(
+        default=15.0,
+        metadata={'doc': "Robot type 1's lowest mass, kg (Matthias, 2026-10-28); lighter robots are not type 1."})
+
 
 @dataclass
 class PartsParams:
@@ -274,9 +299,9 @@ class OutputParams:
         default=os.path.join('figures', 'comparison'),
         metadata={'doc': 'Where 03_comparison.py draws the six robot types side by side.'})
 
-    # What the stage that draws robot type 1 taken apart writes: its draws of every critical material in every kind
-    # of part. The project's own outputs (data/), until Matthias decides whether stock-and-flow reads them (open point F
-    # of its plan), which would move them to data/consolidated/. Outputs: not in git.
+    # What 02_composition.py writes of robot type 1 taken apart, for 04's figures: its draws of every material and
+    # element in every kind of part. The project's own outputs (data/), until Matthias decides whether stock-and-flow
+    # reads them (open point F of its plan), which would move them to data/consolidated/. Outputs: not in git.
     parts_dir: str = field(
         default=os.path.join('data', 'parts_taken_apart'),
         metadata={'doc': 'Where the draws of robot type 1 taken apart are written.'})

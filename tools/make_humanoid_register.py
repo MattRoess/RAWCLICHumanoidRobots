@@ -1,0 +1,537 @@
+"""
+Builder of data/researched/humanoid_register.xlsx: every known humanoid robot, each with its one or two robot types.
+
+**Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
+**Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
+at the root of the repository.
+
+Matthias, 2026-10-28: "I want that all know humanoid robots at the end can be assigned to types. It should be possible
+also to assign themeven they are out of limts. Nothing is left behind as the field is fluid and changes fast"; then the
+rules he set while the robots were read (documentation/claude/EVIDENCE.md E4 to E4.11): the use first, the size second;
+wheels accepted, an upper body only not; one entry for one robot ("No double counting use just 1"), also when two
+makers sell it under two names; a robot in at most two types ("Double assignment means 1 robot can be two types");
+industry listed gives type 3; security alone type 6; "Below 15 kg not part of the type 1".
+
+WHAT IT DOES
+------------
+It writes the register: one row per robot of the humanoid.guide catalogue (349, as read on 2026-10-28) and the five
+robots the catalogue lacks (numbered 350 to 354), each with its types, its form, its mass as a minimum, mode and
+maximum, and where in EVIDENCE.md it was decided. The decisions are held here, one line per robot (DECISIONS): a
+change is made in this file, not in the .xlsx, where it would be lost at the next run.
+
+WHAT IT READS AND WRITES
+------------------------
+It reads the catalogue (`data.humanoid_guide`, data/raw/humanoid_guide_2026-10-28.xlsx, sheet Catalogue) and writes one
+file, the path of `data.register` (data/researched/humanoid_register.xlsx, git-ignored), replacing the file there.
+
+WHERE IT SITS
+-------------
+It is not a stage of the model: it writes one of the model's inputs, so it stands in tools/ and has no number.
+01_schemas.py reads and checks the register; 02_composition.py draws robot type 1 over its robots. Press Run: no
+arguments. Importing this file writes nothing; tests/test_make_humanoid_register.py checks that what it writes passes
+01's checks and equals the file on disk.
+"""
+import os
+import re
+import sys
+
+import openpyxl
+from openpyxl.styles import Alignment, Font, PatternFill
+
+# The project's root, so that its settings (src/params_schema.py) can be imported when this file is run from tools/.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT not in sys.path:
+    sys.path.insert(0, ROOT)
+from src.params_schema import Params, absolute, current  # noqa: E402
+
+HEADING_FILL = PatternFill('solid', fgColor='FFEEEEEE')   # the grey of every sheet's first row
+ABOUT_WIDTH = 150                                          # the width of the About sheet's column, in characters
+
+# --- About ----------------------------------------------------------------------------------------------------------
+ABOUT = [
+    'The register of every known humanoid robot, each with its one or two robot types',
+    None,
+    'Built by tools/make_humanoid_register.py from the humanoid.guide catalogue as read on 2026-10-28 '
+    '(data/raw/humanoid_guide_2026-10-28.xlsx) and the decisions held in the builder. Every decision with its reason '
+    'and Matthias\'s words: documentation/claude/EVIDENCE.md, the section named in the column "Decided in".',
+    None,
+    'Types: the robot types of the workbook\'s sheet Taxonomy, 1 to 6, at most two, the leading one first. Entry: '
+    'empty for a robot with types; "not assigned: ..." for a robot left out, with why; "the same robot as n" for a '
+    'second entry of one robot (counted once, as entry n).',
+    'Mass: as the catalogue (or the source of an added robot) states it, second-hand; minimum, mode and maximum the '
+    'stated mass +- 1 kg (as the X1\'s and N1\'s own masses, EVIDENCE.md E2.8e) or the stated range; empty where no '
+    'mass is stated.',
+    'Taken apart as: the robot of data/researched/parts_taken_apart.xlsx that is this robot, for the three robots of '
+    'type 1 taken apart part by part.',
+]
+
+# --- Robots ---------------------------------------------------------------------------------------------------------
+HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
+            'Mass mode (kg)', 'Mass max (kg)', 'Mass basis', 'Types', 'Form', 'Entry', 'Taken apart as',
+            'Decided in', 'Source']
+WIDTHS = [8, 26, 28, 12, 22, 12, 14, 10, 10, 10, 34, 8, 16, 34, 14, 16, 50]
+
+# The robots the catalogue lacks, read from their makers or from the workbook's sources (EVIDENCE.md E4.11):
+# number -> (robot, maker, country, status, height in cm, mass in kg as stated, source).
+ADDED = {
+    350: ('N1', 'Fourier', 'China', 'In production', '130', '38',
+          'https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/Fouriern1/N1_Introduction/'),
+    351: ('Fuxi', 'NORINCO', 'China', 'Prototype', '180', '90',
+          'https://defensemirror.com/news/41857/China___s_NORINCO_Unveils____Fuxi____Humanoid_Battlefield_Robot'),
+    352: ('H1', 'Unitree Robotics', 'China', 'In production', '180', '47', 'https://www.unitree.com/h1'),
+    353: ('Walker S', 'UBTECH Robotics', 'China', 'In production', '170', '',
+          'https://www.ubtrobot.com/en/humanoid/products/walker-s'),
+    354: ('PR-OMNI', 'Perceptyne', 'India', 'Pre-order', '157', '120', 'https://www.perceptyne.com/product/omni'),
+}
+
+# The three robots of type 1 taken apart part by part: number -> their name in data/researched/parts_taken_apart.xlsx.
+TAKEN_APART = {102: 'Unitree G1', 16: 'AgiBot X1', 350: 'Fourier N1'}
+
+# The decisions, one per robot: (number, types, form, entry, decided in). Types: "4" or "3, 4", the leading one first,
+# empty where the entry says why there are none. Form: how the robot moves, as read (EVIDENCE.md E4.1 to E4.10).
+DECISIONS = [
+    (1, '4', 'no wheels named', '', 'E4.1'),
+    (2, '', 'no wheels named', 'the same robot as 3', 'E4.1'),
+    (3, '3, 4', 'legs or wheels', '', 'E4.1, E4.6'),
+    (4, '3', 'no wheels named', '', 'E4.1'),
+    (5, '3, 4', 'legs or wheels', '', 'E4.1, E4.6'),
+    (6, '4', 'no wheels named', '', 'E4.1'),
+    (7, '3, 4', 'no wheels named', '', 'E4.1, E4.6'),
+    (8, '4', 'no wheels named', '', 'E4.1'),
+    (9, '4', 'wheels', '', 'E4.1'),
+    (10, '3, 4', 'no wheels named', '', 'E4.1, E4.6'),
+    (11, '3, 4', 'legs', '', 'E4.1, E4.6'),
+    (12, '3', 'legs or wheels', '', 'E4.1'),
+    (13, '3, 2', 'wheels', '', 'E4.1, E4.6'),
+    (14, '4', 'legs', '', 'E4.1'),
+    (15, '2, 3', 'wheels', '', 'E4.1, E4.6'),
+    (16, '1', 'legs', '', 'E4.1'),
+    (17, '4, 3', 'legs', '', 'E4.1, E4.6'),
+    (18, '3', 'legs', '', 'E4.1'),
+    (19, '1', 'legs', '', 'E4.1'),
+    (20, '3, 2', 'wheels', '', 'E4.1, E4.6'),
+    (21, '3, 2', 'wheels', '', 'E4.1, E4.6'),
+    (22, '3, 4', 'legs', '', 'E4.1, E4.6'),
+    (23, '3, 1', 'legs', '', 'E4.1, E4.6'),
+    (24, '6', 'legs', '', 'E4.1'),
+    (25, '2', 'no wheels named', '', 'E4.1'),
+    (26, '3', 'wheels', '', 'E4.1'),
+    (27, '', 'an upper body', 'not assigned: an upper body only', 'E4.1'),
+    (28, '3', 'not stated', '', 'E4.1'),
+    (29, '3, 4', 'wheels', '', 'E4.1, E4.6'),
+    (30, '', 'two arms', 'not assigned: arms only', 'E4.1, E4.10'),
+    (31, '3', 'wheels', '', 'E4.1'),
+    (32, '3', 'no wheels named', '', 'E4.1'),
+    (33, '3, 4', 'legs or wheels', '', 'E4.1, E4.6'),
+    (34, '4, 2', 'wheels', '', 'E4.1, E4.6'),
+    (35, '4, 2', 'wheels', '', 'E4.1, E4.6'),
+    (36, '', 'no wheels named', 'the same robot as 37', 'E4.1'),
+    (37, '1', 'no wheels named', '', 'E4.1'),
+    (38, '1', 'no wheels named', '', 'E4.1'),
+    (39, '', 'an upper body', 'not assigned: an upper body only', 'E4.1, E4.10'),
+    (40, '2, 3', 'not stated', '', 'E4.1, E4.6'),
+    (41, '2, 3', 'wheels', '', 'E4.1, E4.6'),
+    (42, '3, 2', 'wheels', '', 'E4.1, E4.6'),
+    (43, '5, 3', 'legs', '', 'E4.1, E4.6'),
+    (44, '5', 'legs', '', 'E4.1'),
+    (45, '4, 3', 'legs', '', 'E4.1, E4.6'),
+    (46, '4', 'legs', '', 'E4.1'),
+    (47, '2', 'legs', '', 'E4.1'),
+    (48, '3', 'not stated', '', 'E4.1'),
+    (49, '2', 'wheels', '', 'E4.1'),
+    (50, '', 'two arms', 'not assigned: arms only', 'E4.1'),
+    (51, '3', 'wheels', '', 'E4.2'),
+    (52, '', 'two arms and a torso', 'not assigned: an upper body only', 'E4.2, E4.10'),
+    (53, '2', 'legs', '', 'E4.2'),
+    (54, '1', 'no wheels named', '', 'E4.2'),
+    (55, '1', 'no wheels named', '', 'E4.2'),
+    (56, '3', 'legs or wheels', '', 'E4.2'),
+    (57, '4, 1', 'no wheels named', '', 'E4.2, E4.6'),
+    (58, '3', 'no wheels named', '', 'E4.2'),
+    (59, '4', 'legs', '', 'E4.2'),
+    (60, '3, 2', 'wheels', '', 'E4.2, E4.6'),
+    (61, '4, 3', 'not stated', '', 'E4.2, E4.6'),
+    (62, '3, 4', 'wheels', '', 'E4.2, E4.6'),
+    (63, '3, 4', 'legs', '', 'E4.2, E4.6'),
+    (64, '4', 'wheels', '', 'E4.2'),
+    (65, '4', 'legs', '', 'E4.2'),
+    (66, '3, 4', 'wheels', '', 'E4.2, E4.6'),
+    (67, '3', 'wheels', '', 'E4.2'),
+    (68, '2', 'not stated', '', 'E4.2'),
+    (69, '2', 'no wheels named', '', 'E4.2'),
+    (70, '', 'no wheels named', 'the same robot as 69', 'E4.2'),
+    (71, '3, 5', 'legs', '', 'E4.2, E4.6'),
+    (72, '3, 5', 'wheels', '', 'E4.2, E4.6'),
+    (73, '3, 4', 'not stated', '', 'E4.2, E4.6'),
+    (74, '4', 'wheels', '', 'E4.2'),
+    (75, '3', 'wheels', '', 'E4.2'),
+    (76, '3', 'legs or wheels', '', 'E4.2'),
+    (77, '3', 'legs', '', 'E4.2'),
+    (78, '3', 'no wheels named', '', 'E4.2'),
+    (79, '4', 'legs', '', 'E4.2'),
+    (80, '2', 'no wheels named', '', 'E4.2'),
+    (81, '5, 3', 'no wheels named', '', 'E4.2, E4.6'),
+    (82, '2, 3', 'wheels', '', 'E4.2, E4.6'),
+    (83, '3', 'wheels', '', 'E4.2'),
+    (84, '3, 4', 'wheels', '', 'E4.2, E4.6'),
+    (85, '1, 4', 'legs', '', 'E4.2, E4.6'),
+    (86, '4, 2', 'wheels', '', 'E4.2, E4.6'),
+    (87, '', 'an upper body', 'not assigned: an upper body only', 'E4.2'),
+    (88, '3, 4', 'legs', '', 'E4.2, E4.6'),
+    (89, '3', 'wheels', '', 'E4.2'),
+    (90, '3, 4', 'wheels', '', 'E4.2, E4.6'),
+    (91, '4', 'wheels', '', 'E4.2'),
+    (92, '2, 3', 'wheels', '', 'E4.2, E4.6'),
+    (93, '3', 'legs', '', 'E4.2'),
+    (94, '4', 'not stated', '', 'E4.2'),
+    (95, '4', 'not stated', '', 'E4.2'),
+    (96, '', 'legs or wheels', 'not assigned: below 15 kg', 'E4.2, E4.11'),
+    (97, '3', 'no wheels named', '', 'E4.2'),
+    (98, '2, 3', 'no wheels named', '', 'E4.2, E4.6'),
+    (99, '4', 'wheels', '', 'E4.2'),
+    (100, '3', 'wheels', '', 'E4.2'),
+    (101, '4', 'not stated', '', 'E4.3'),
+    (102, '1, 3', 'legs', '', 'E4.3, E4.6'),
+    (103, '1, 3', 'no wheels named', '', 'E4.3, E4.6'),
+    (104, '2', 'wheels', '', 'E4.3'),
+    (105, '3, 2', 'wheels', '', 'E4.3, E4.6'),
+    (106, '3', 'wheels', '', 'E4.3'),
+    (107, '3', 'wheels', '', 'E4.3'),
+    (108, '3', 'legs', '', 'E4.3'),
+    (109, '3', 'not stated', '', 'E4.3'),
+    (110, '3', 'not stated', '', 'E4.3, E4.6'),
+    (111, '3', 'not stated', '', 'E4.3'),
+    (112, '3, 4', 'wheels', '', 'E4.3, E4.6'),
+    (113, '3', 'wheels', '', 'E4.3'),
+    (114, '3, 4', 'wheels', '', 'E4.3, E4.6'),
+    (115, '3, 4', 'wheels', '', 'E4.3, E4.6'),
+    (116, '2', 'legs', '', 'E4.3'),
+    (117, '2', 'no wheels named', '', 'E4.3'),
+    (118, '4', 'no wheels named', '', 'E4.3'),
+    (119, '2', 'no wheels named', '', 'E4.3'),
+    (120, '2, 3', 'legs', '', 'E4.3, E4.6'),
+    (121, '2', 'legs', '', 'E4.3'),
+    (122, '2', 'wheels', '', 'E4.3'),
+    (123, '2', 'no wheels named', '', 'E4.3'),
+    (124, '3', 'four arms, no legs', '', 'E4.3, E4.10'),
+    (125, '4', 'wheels', '', 'E4.3'),
+    (126, '', 'legs', 'the same robot as 127', 'E4.3'),
+    (127, '3', 'legs', '', 'E4.3'),
+    (128, '', 'an upper body', 'not assigned: an upper body only', 'E4.3, E4.10'),
+    (129, '4', 'wheels', '', 'E4.3'),
+    (130, '4', 'not stated', '', 'E4.3'),
+    (131, '4', 'legs', '', 'E4.3'),
+    (132, '2', 'legs', '', 'E4.3'),
+    (133, '3', 'wheels', '', 'E4.3'),
+    (134, '2, 3', 'legs', '', 'E4.3, E4.6'),
+    (135, '2, 3', 'not stated', '', 'E4.3, E4.6'),
+    (136, '4, 3', 'not stated', '', 'E4.3, E4.6'),
+    (137, '3, 4', 'not stated', '', 'E4.3, E4.6'),
+    (138, '', 'an upper body', 'not assigned: an upper body only', 'E4.3'),
+    (139, '4', 'wheels', '', 'E4.3'),
+    (140, '', 'legs', 'the same robot as 121', 'E4.3'),
+    (141, '3, 4', 'not stated', '', 'E4.3, E4.6'),
+    (142, '3', 'wheels', '', 'E4.3'),
+    (143, '4, 1', 'no wheels named', '', 'E4.3, E4.6'),
+    (144, '2, 4', 'legs', '', 'E4.3, E4.6'),
+    (145, '4', 'wheels', '', 'E4.3'),
+    (146, '3, 4', 'not stated', '', 'E4.3, E4.6'),
+    (147, '1', 'not stated', '', 'E4.3'),
+    (148, '1', 'no wheels named', '', 'E4.3'),
+    (149, '', 'not stated', 'the same robot as 158', 'E4.3'),
+    (150, '4, 3', 'not stated', '', 'E4.3, E4.6'),
+    (151, '2', 'legs', '', 'E4.4'),
+    (152, '3, 5', 'legs', '', 'E4.4, E4.6'),
+    (153, '2', 'legs', '', 'E4.4'),
+    (154, '3, 4', 'legs', '', 'E4.4, E4.6'),
+    (155, '4, 3', 'not stated', '', 'E4.4, E4.6'),
+    (156, '3, 4', 'legs', '', 'E4.4, E4.6'),
+    (157, '2, 3', 'not stated', '', 'E4.4, E4.6'),
+    (158, '3, 2', 'not stated', '', 'E4.4, E4.6'),
+    (159, '', 'wheels', 'the same robot as 160', 'E4.4'),
+    (160, '3', 'wheels', '', 'E4.4'),
+    (161, '4', 'wheels', '', 'E4.4'),
+    (162, '4, 3', 'wheels', '', 'E4.4, E4.6'),
+    (163, '2, 3', 'legs or wheels', '', 'E4.4, E4.6'),
+    (164, '4', 'not stated', '', 'E4.4'),
+    (165, '3', 'wheels', '', 'E4.4'),
+    (166, '4', 'legs', '', 'E4.4'),
+    (167, '3', 'legs', '', 'E4.4'),
+    (168, '1', 'legs', '', 'E4.4'),
+    (169, '', 'legs', 'the same robot as 170', 'E4.4'),
+    (170, '2, 3', 'legs', '', 'E4.4, E4.6'),
+    (171, '2', 'not stated', '', 'E4.4'),
+    (172, '', 'an arm', 'not assigned: arms only', 'E4.4'),
+    (173, '4', 'not stated', '', 'E4.4'),
+    (174, '4', 'not stated', '', 'E4.4'),
+    (175, '4, 1', 'legs', '', 'E4.4, E4.6'),
+    (176, '4, 2', 'not stated', '', 'E4.4, E4.6'),
+    (177, '2', 'not stated', '', 'E4.4'),
+    (178, '4', 'not stated', '', 'E4.4'),
+    (179, '3, 2', 'wheels', '', 'E4.4, E4.6'),
+    (180, '2, 3', 'legs', '', 'E4.4, E4.6'),
+    (181, '3, 4', 'not stated', '', 'E4.4, E4.6'),
+    (182, '4', 'not stated', '', 'E4.4'),
+    (183, '4, 3', 'wheels', '', 'E4.4, E4.6'),
+    (184, '2, 3', 'wheels', '', 'E4.4, E4.6'),
+    (185, '4, 3', 'legs', '', 'E4.4, E4.6'),
+    (186, '3', 'legs', '', 'E4.4'),
+    (187, '3, 4', 'legs', '', 'E4.4, E4.6'),
+    (188, '4', 'wheels', '', 'E4.4'),
+    (189, '3, 4', 'not stated', '', 'E4.4, E4.6'),
+    (190, '3', 'not stated', '', 'E4.4'),
+    (191, '5', 'not stated', '', 'E4.4'),
+    (192, '', 'two arms', 'not assigned: arms only', 'E4.4, E4.10'),
+    (193, '3', 'wheels', '', 'E4.4'),
+    (194, '4', 'a ball', '', 'E4.4'),
+    (195, '3, 5', 'not stated', '', 'E4.4, E4.6'),
+    (196, '', 'not stated', 'the same robot as 195', 'E4.4'),
+    (197, '3', 'wheels', '', 'E4.4'),
+    (198, '4', 'legs', '', 'E4.4'),
+    (199, '2, 3', 'legs', '', 'E4.4, E4.6'),
+    (200, '2, 4', 'not stated', '', 'E4.4, E4.6'),
+    (201, '4', 'legs', '', 'E4.5'),
+    (202, '6', 'legs', '', 'E4.5'),
+    (203, '2', 'legs', '', 'E4.5'),
+    (204, '3', 'legs', '', 'E4.5'),
+    (205, '4', 'not stated', '', 'E4.5'),
+    (206, '4, 3', 'not stated', '', 'E4.5, E4.6'),
+    (207, '4', 'not stated', '', 'E4.5'),
+    (208, '5, 3', 'not stated', '', 'E4.5, E4.6'),
+    (209, '3, 4', 'wheels', '', 'E4.5, E4.6'),
+    (210, '2', 'legs', '', 'E4.5'),
+    (211, '4', 'legs', '', 'E4.5'),
+    (212, '1', 'wheels', '', 'E4.5'),
+    (213, '3, 4', 'wheels', '', 'E4.5, E4.6'),
+    (214, '3, 4', 'not stated', '', 'E4.5, E4.6'),
+    (215, '3', 'wheels', '', 'E4.5'),
+    (216, '2, 3', 'legs', '', 'E4.5, E4.6'),
+    (217, '4', 'not stated', '', 'E4.5'),
+    (218, '', 'two arms', 'not assigned: arms only', 'E4.5'),
+    (219, '', 'an upper body', 'not assigned: an upper body only', 'E4.5'),
+    (220, '', 'not stated', 'the same robot as 222', 'E4.5'),
+    (221, '2, 3', 'no wheels named', '', 'E4.5, E4.6'),
+    (222, '2', 'no wheels named', '', 'E4.5'),
+    (223, '2, 3', 'legs', '', 'E4.5, E4.6'),
+    (224, '2', 'legs', '', 'E4.5'),
+    (225, '', 'an upper body', 'not assigned: an upper body only', 'E4.5'),
+    (226, '3', 'not stated', '', 'E4.5'),
+    (227, '3', 'wheels', '', 'E4.5'),
+    (228, '6, 3', 'not stated', '', 'E4.5, E4.6'),
+    (229, '2, 3', 'not stated', '', 'E4.5, E4.6'),
+    (230, '2, 3', 'wheels', '', 'E4.5, E4.6'),
+    (231, '1', 'not stated', '', 'E4.5'),
+    (232, '2, 3', 'not stated', '', 'E4.5, E4.6'),
+    (233, '', 'an upper body', 'not assigned: an upper body only', 'E4.5, E4.10'),
+    (234, '1', 'legs', '', 'E4.5'),
+    (235, '', 'not stated', 'not assigned: not found at its maker', 'E4.5, E4.10'),
+    (236, '4, 1', 'not stated', '', 'E4.5, E4.6'),
+    (237, '4', 'wheels', '', 'E4.5'),
+    (238, '4', 'legs', '', 'E4.5'),
+    (239, '3', 'not stated', '', 'E4.5'),
+    (240, '4, 3', 'wheels', '', 'E4.5, E4.6'),
+    (241, '3', 'legs', '', 'E4.5'),
+    (242, '3, 4', 'legs', '', 'E4.5, E4.6'),
+    (243, '', 'an upper body', 'not assigned: an upper body only', 'E4.5, E4.10'),
+    (244, '2', 'legs', '', 'E4.5'),
+    (245, '3, 4', 'wheels', '', 'E4.5, E4.6'),
+    (246, '1', 'not stated', '', 'E4.5'),
+    (247, '2, 3', 'wheels', '', 'E4.5, E4.6'),
+    (248, '2', 'wheels', '', 'E4.5'),
+    (249, '3', 'legs', '', 'E4.5'),
+    (250, '3', 'legs', '', 'E4.5'),
+    (251, '3, 2', 'wheels', '', 'E4.7'),
+    (252, '2', 'wheels', '', 'E4.7, E4.10'),
+    (253, '2, 3', 'wheels', '', 'E4.7'),
+    (254, '4, 2', 'wheels', '', 'E4.7'),
+    (255, '3, 2', 'wheels', '', 'E4.7'),
+    (256, '2', 'legs', '', 'E4.7'),
+    (257, '3', 'wheels', '', 'E4.7'),
+    (258, '3, 4', 'wheels', '', 'E4.7'),
+    (259, '4', 'not stated', '', 'E4.7'),
+    (260, '1', 'not stated', '', 'E4.7'),
+    (261, '4', 'wheels', '', 'E4.7'),
+    (262, '3', 'not stated', '', 'E4.7'),
+    (263, '3', 'wheels', '', 'E4.7'),
+    (264, '3', 'not stated', '', 'E4.7'),
+    (265, '3, 2', 'legs', '', 'E4.7'),
+    (266, '', 'an upper body', 'not assigned: an upper body only', 'E4.7'),
+    (267, '4', 'wheels', '', 'E4.7'),
+    (268, '1', 'legs', '', 'E4.7'),
+    (269, '1', 'legs', '', 'E4.7'),
+    (270, '4', 'not stated', '', 'E4.7'),
+    (271, '2', 'not stated', '', 'E4.7'),
+    (272, '2, 4', 'not stated', '', 'E4.7'),
+    (273, '3', 'wheels', '', 'E4.7'),
+    (274, '3', 'legs', '', 'E4.7'),
+    (275, '3, 4', 'not stated', '', 'E4.7'),
+    (276, '3, 2', 'legs', '', 'E4.7'),
+    (277, '4', 'wheels', '', 'E4.7'),
+    (278, '3', 'wheels', '', 'E4.7'),
+    (279, '1, 4', 'legs', '', 'E4.7'),
+    (280, '3, 4', 'legs', '', 'E4.7'),
+    (281, '1', 'legs', '', 'E4.7'),
+    (282, '4', 'wheels', '', 'E4.7'),
+    (283, '4', 'wheels', '', 'E4.7'),
+    (284, '4', 'not stated', '', 'E4.7'),
+    (285, '2', 'legs', '', 'E4.7'),
+    (286, '4', 'legs', '', 'E4.7, E4.10'),
+    (287, '3', 'not stated', '', 'E4.7'),
+    (288, '5, 6', 'no wheels named', '', 'E4.7'),
+    (289, '4, 3', 'wheels', '', 'E4.7'),
+    (290, '2', 'legs', '', 'E4.7'),
+    (291, '4, 3', 'not stated', '', 'E4.7'),
+    (292, '3', 'not stated', '', 'E4.7'),
+    (293, '4', 'not stated', '', 'E4.7'),
+    (294, '2, 3', 'legs', '', 'E4.7'),
+    (295, '2, 3', 'wheels', '', 'E4.7'),
+    (296, '3, 4', 'not stated', '', 'E4.7'),
+    (297, '2', 'legs', '', 'E4.7'),
+    (298, '4, 2', 'not stated', '', 'E4.7'),
+    (299, '2', 'legs', '', 'E4.7'),
+    (300, '2', 'legs', '', 'E4.7'),
+    (301, '3, 5', 'wheels', '', 'E4.8'),
+    (302, '2', 'legs', '', 'E4.8'),
+    (303, '3', 'wheels', '', 'E4.8'),
+    (304, '4', 'not stated', '', 'E4.8'),
+    (305, '3, 4', 'wheels', '', 'E4.8'),
+    (306, '3, 4', 'not stated', '', 'E4.8'),
+    (307, '3, 2', 'not stated', '', 'E4.8'),
+    (308, '1', 'not stated', '', 'E4.8'),
+    (309, '1', 'legs or wheels', '', 'E4.8'),
+    (310, '4', 'not stated', '', 'E4.8'),
+    (311, '1', 'legs', '', 'E4.8'),
+    (312, '2, 3', 'legs', '', 'E4.8'),
+    (313, '2, 3', 'legs', '', 'E4.8'),
+    (314, '3, 2', 'wheels', '', 'E4.8'),
+    (315, '2', 'wheels', '', 'E4.8, E4.10'),
+    (316, '3, 4', 'not stated', '', 'E4.8'),
+    (317, '4', 'legs', '', 'E4.8'),
+    (318, '2', 'wheels', '', 'E4.8'),
+    (319, '3, 4', 'wheels', '', 'E4.8'),
+    (320, '3', 'wheels', '', 'E4.8'),
+    (321, '4, 3', 'not stated', '', 'E4.8'),
+    (322, '4', 'not stated', '', 'E4.8'),
+    (323, '4, 2', 'legs', '', 'E4.8'),
+    (324, '4', 'not stated', '', 'E4.8'),
+    (325, '3', 'legs', '', 'E4.8'),
+    (326, '2', 'legs', '', 'E4.8'),
+    (327, '3', 'legs', '', 'E4.8'),
+    (328, '4, 3', 'legs', '', 'E4.8'),
+    (329, '2', 'not stated', '', 'E4.8'),
+    (330, '4, 3', 'legs', '', 'E4.8'),
+    (331, '4', 'wheels', '', 'E4.8'),
+    (332, '1, 3', 'not stated', '', 'E4.8'),
+    (333, '4', 'not stated', '', 'E4.8'),
+    (334, '4, 3', 'legs', '', 'E4.8'),
+    (335, '3, 2', 'wheels', '', 'E4.8'),
+    (336, '2, 4', 'wheels', '', 'E4.8'),
+    (337, '3, 2', 'wheels', '', 'E4.8'),
+    (338, '', 'an upper body', 'not assigned: an upper body only', 'E4.8'),
+    (339, '4', 'legs', '', 'E4.8'),
+    (340, '3, 2', 'wheels', '', 'E4.8'),
+    (341, '3, 2', 'wheels', '', 'E4.8'),
+    (342, '3, 2', 'wheels', '', 'E4.8'),
+    (343, '1', 'legs', '', 'E4.8'),
+    (344, '4', 'wheels', '', 'E4.8'),
+    (345, '4', 'legs', '', 'E4.8'),
+    (346, '4, 3', 'wheels', '', 'E4.8'),
+    (347, '4, 3', 'legs', '', 'E4.8'),
+    (348, '3', 'not stated', '', 'E4.8'),
+    (349, '3, 2', 'wheels', '', 'E4.8'),
+    (350, '1', 'legs', '', 'E4.11'),
+    (351, '6', 'not stated', '', 'E4.11'),
+    (352, '2, 5', 'legs', '', 'E4.11'),
+    (353, '3', 'legs', '', 'E4.11'),
+    (354, '3', 'wheels', '', 'E4.11'),
+]
+
+# Masses: a stated mass +- this many kg (as the X1's and N1's own masses, EVIDENCE.md E2.8e).
+MASS_SPREAD_KG = 1.0
+
+
+def mass_bounds(stated: str) -> tuple:
+    """The minimum, mode and maximum of a stated mass, kg, and how they were made: a range as it is (its middle the
+    mode), one mass +- MASS_SPREAD_KG; where two masses are given ("43, 73"), the larger (the smaller is another
+    robot's, EVIDENCE.md E4.11); (None, None, None, '') where none is stated."""
+    text = stated.replace('kg', '').replace('~', '').strip()
+    if ',' in text:
+        text = max(text.split(','), key=lambda v: float(re.match(r'\s*([\d.]+)', v).group(1))).strip()
+        basis = 'the larger of the two masses stated, +- 1 kg'
+    else:
+        basis = 'the stated mass +- 1 kg'
+    span = re.match(r'([\d.]+)\s*[\u2013-]\s*([\d.]+)', text)
+    if span:
+        low, high = float(span.group(1)), float(span.group(2))
+        return low, (low + high) / 2, high, 'the stated range, its middle the mode'
+    one = re.match(r'([\d.]+)', text)
+    if one:
+        mode = float(one.group(1))
+        return round(max(mode - MASS_SPREAD_KG, 0.0), 3), mode, round(mode + MASS_SPREAD_KG, 3), basis
+    return None, None, None, ''
+
+
+def read_catalogue(path: str) -> dict:
+    """The catalogue's robots: number -> (robot, maker, country, status, height, mass as stated, source)."""
+    sheet = openpyxl.load_workbook(path, read_only=True, data_only=True)['Catalogue']
+    rows = list(sheet.iter_rows(values_only=True))
+    at = {name: k for k, name in enumerate(rows[0])}
+    text = lambda v: '' if v is None else str(v).strip()   # noqa: E731
+    return {int(r[at['Number']]): (text(r[at['Robot']]), text(r[at['Maker']]), text(r[at['Country']]),
+                                   text(r[at['Status']]), text(r[at['Height (cm)']]), text(r[at['Mass (kg)']]),
+                                   text(r[at['Page']]))
+            for r in rows[1:] if r[at['Number']] is not None}
+
+
+def register_rows(catalogue: dict) -> list:
+    """One row per robot, in the order of HEADINGS."""
+    robots = {**catalogue, **ADDED}
+    out = []
+    for number, types, form, entry, decided in DECISIONS:
+        robot, maker, country, status, height, mass, source = robots[number]
+        low, mode, high, basis = mass_bounds(mass)
+        out.append([number, robot, maker, country, status, height, mass, low, mode, high, basis, types, form, entry,
+                    TAKEN_APART.get(number, ''), decided, source])
+    return out
+
+
+def build(path: str, params: Params) -> None:
+    """Write the register to `path`: the sheets About and Robots."""
+    book = openpyxl.Workbook()
+    about = book.active
+    about.title = 'About'
+    for line in ABOUT:
+        about.append([line])
+        about.cell(about.max_row, 1).alignment = Alignment(wrap_text=True, vertical='top')
+    about['A1'].font = Font(bold=True, size=13)
+    about.column_dimensions['A'].width = ABOUT_WIDTH
+    sheet = book.create_sheet('Robots')
+    sheet.append(HEADINGS)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+        cell.fill = HEADING_FILL
+    for row in register_rows(read_catalogue(absolute(params.data.humanoid_guide))):
+        sheet.append(row)
+    for k, width in enumerate(WIDTHS, 1):
+        sheet.column_dimensions[openpyxl.utils.get_column_letter(k)].width = width
+    sheet.freeze_panes = 'C2'
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    book.save(path)
+
+
+def output_path(params: Params) -> str:
+    """Where the register goes: 00's setting `data.register`."""
+    return absolute(params.data.register)
+
+
+def main() -> int:
+    """Press Run: build the register from 00's settings."""
+    params = current()
+    path = output_path(params)
+    build(path, params)
+    print(f'{len(DECISIONS)} robots written to {params.data.register}.')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

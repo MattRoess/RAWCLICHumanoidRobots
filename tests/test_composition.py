@@ -49,6 +49,8 @@ WH_PER_KG = (3.6 * 2 / 0.050, 3.6 * 4 / 0.090)
 # compound of the small recipes that holds phosphorus, and only in the item 'Salt', which follows the cell's energy.
 P_IN_LIPF6 = 30.974 / (6.94 + 30.974 + 6 * 18.998)
 SALT = 0.1   # the mode of the item 'Salt' in the small 'Test recipe'
+# The small register of the runs: two robots, neither taken apart (01's test register without its robot taken apart).
+SMALL_REGISTER = [(1, 'Robot A', 34, 35, 36, '1', 'legs', '', ''), (2, 'Robot B', 59, 60, 61, '2', 'wheels', '', '')]
 
 
 def triangle_mean(low: float, mode: float, high: float) -> float:
@@ -84,6 +86,9 @@ class Drawn(unittest.TestCase):
         small.build(params.data.workbook, changes)
         small.build_lists(params.data.shared_lists, parts, materials, lists, splits, battery)
         small.build_recipes(params.data.element_recipes, cells, recipe=small.RECIPE + small.NESTED, rows=rows)
+        # A small register without a robot taken apart: every robot type of the small workbook is drawn from it.
+        params.data.register = os.path.join(folder, 'register.xlsx')
+        small.build_register(params.data.register, rows=SMALL_REGISTER)
         return params
 
     def compose(self, **inputs) -> dict:
