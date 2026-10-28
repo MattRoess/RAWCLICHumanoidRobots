@@ -37,15 +37,23 @@ It also reads `data.shared_lists` (`data/researched/shared_lists.xlsx`): where e
 name goes in the shared part groups, body regions and materials (decided by Matthias on 2026-10-26,
 documentation/claude/SHARED_LISTS.md), and, in its sheet 'Battery cells', each robot type's battery row as cells
 only. It reads `data.element_recipes` (`data/researched/element_recipes.xlsx`): the datasheets of the cells, the
-compounds and the recipe of each cell down to its elements (documentation/claude/EVIDENCE.md, E1.7i to E1.7k). And
-it looks in `data.sources_dir` (`documentation/sources/`) for the report of each category.
+compounds and the recipe of each cell down to its elements (documentation/claude/EVIDENCE.md, E1.7i to E1.7k). It
+reads `data.parts_taken_apart` (`data/researched/parts_taken_apart.xlsx`): the robots of type 1, the Unitree G1, the
+AgiBot X1 and the Fourier N1, part by part (EVIDENCE.md E2.8 to E2.8e, agreed by Matthias on 2026-10-27), checks that
+each lies inside its type's height and mass in the sheet Taxonomy, and checks the file against the sibling projects'
+files it
+names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`, `data.data_center_element_composition`,
+`data.traction_motor_magnets`), read where they lie. And it looks in `data.sources_dir`
+(`documentation/sources/`) for the report of each category.
 
 WHAT IT CHECKS
 --------------
 Before drawing, `check_workbook` tests that the workbook agrees with itself, `check_shared_lists` that every
 part and material name is placed once, under its own name, on the shared lists, `check_element_recipes` that the
-recipes hold together and `check_battery_cells` that every battery is kept or built from cells that fit its packs
-(the list is in `CHECKS_DONE`):
+recipes hold together, `check_battery_cells` that every battery is kept or built from cells that fit its packs and
+`check_parts_taken_apart` that the robots of type 1 taken apart hold together, `check_robot_types` that each lies
+inside its type and `check_sibling_data` that the sibling projects' files hold what they name (the list is in
+`CHECKS_DONE`):
 every minimum, mode and maximum in order, every mass of all units equal to the number times the mass of one,
 every sum row equal to the sum of its rows, every difference and unallocated row equal to what it should be, the
 colour of every row matching its evidence, the same categories in every sheet. A fault does not stop the drawing:
@@ -126,6 +134,8 @@ STAGES = [
                           'part groups and body regions, written for stock-and-flow, and a page per robot type.'),
     ('03_comparison.py', 'The robot types side by side, by material, element, part group and body region, from the '
                          'draws of 02.'),
+    ('04_parts_taken_apart.py', 'Robot type 1 taken apart (G1, X1, N1), drawn at random: where its critical '
+                                'elements sit, kind of part by kind of part, and its two figures.'),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -168,6 +178,20 @@ CHECKS_DONE = [
     'Material recipes: every piece of a shared material that has recipes (so far aluminium, magnesium, plastics and '
     'fibre composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of '
     'the sheet Recipe, and every row names a piece that exists.',
+    "Robot type 1 taken apart (the G1, X1 and N1): every robot named in the sheet Robots and with rows of its own on "
+    'every sheet that is per robot; every min, mode and max in order, and every estimate (E) at least half to 1.5 '
+    "times its mode, cut only at 100 % for a share and at 1 for a large joint's factor; every label W, S or E; every "
+    'group of shares with exactly one remainder that never falls below zero; every material and body region on the '
+    'shared lists; every part or component of one material, of shares, or computed; for each robot its joints adding '
+    'up to its joint modules, each number once, its module masses all three or none and in order, exactly one part '
+    "taking its remainder, and its own constants there; each magnet grade class known; every sensor element of a "
+    'listed sensor; every shared constant there; the layout of one robot only refused.',
+    "Robot type 1 taken apart, against the sibling projects' files it reads where they lie: every car board category "
+    'with its gold, silver, palladium, tin and nickel (RAWCLICVehicleElectronics, 04_), every car sensor type (07_), '
+    "a tantalum row (RAWCLICDataCenters, 04_), every magnet grade class (RAWCLICVehicleTractionMotor's element "
+    'workbook).',
+    "Robot type 1 taken apart, against the sheet Taxonomy: every robot's maker height and stated mass inside its "
+    "type's defining limits (on this rule the Booster T1, 1.18 m, is out of type 1).",
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -1413,6 +1437,525 @@ def check_material_recipes(book: Workbook, lists: SharedLists, recipes: ElementR
     return faults
 
 
+# ------------------------------------------------------------------------------------------------------
+# Robot type 1 taken apart (data/researched/parts_taken_apart.xlsx)
+# ------------------------------------------------------------------------------------------------------
+# Matthias, 2026-10-27: "the slipt into parts is just to get a deeper look into the robot, so that there is
+# information on where the interesting materials are and the recycling can be optimized"; agreed in
+# documentation/claude/EVIDENCE.md, E2.8 to E2.8c, and step by step from then on ("Yes. Show me the steps and then we
+# move step by step through them"). Step 3: 01 reads the file and checks that it holds together. Step 2b ("Yes, build
+# points 1 to 8 as specified, tests first", EVIDENCE.md E2.8e): the file holds every robot of the type, each in its
+# own rows (column Robot), so that the spread between the robots of a type can be drawn ("You have just individual
+# examples. The different realisations of such a type could vary on the compositon parts etc quite a bit."). Type 1 is
+# the Unitree G1, the AgiBot X1 and the Fourier N1 ("No, the T1 is out of type 1 (1.18 m). Type 1 is informed by the
+# G1, X1 and N1.").
+
+# The sheets of the file and the first row of each, as written. A file without the column Robot (the layout before
+# step 2b, one robot only) stops the reading: the old layout goes entirely.
+APART_SHEETS = {
+    'Robots': ['Robot', 'Maker', 'Type', 'Height (m)', 'Stated mass (kg)', 'Sources'],
+    'Joints': ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
+               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Magnet grade class (base)',
+               'Magnet grade scenarios', 'Body region', 'Sources', 'Basis'],
+    'JointParts': ['Component', 'Small joint, weighed (g)', 'Small joints not weighed: times min', 'times mode',
+                   'times max', 'Material (one material only)', 'Large joint: factor min', 'factor mode', 'factor max',
+                   'Why the factor', 'Label', 'Sources'],
+    'Parts': ['Robot', 'Part', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+              'Mass of one, min (kg)', 'mode (kg)', 'max (kg)', 'Material (one material only)',
+              'Remainder of, or computed from', 'Label', 'Sources'],
+    'Shares': ['Part or component', 'Material', 'Grade', 'Share min', 'Share mode', 'Share max', 'Remainder', 'Label',
+               'Basis'],
+    'Boards': ['Robot', 'Board', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+               'Area of one, min (cm2)', 'mode (cm2)', 'max (cm2)', 'Mass from',
+               'Car board category (RAWCLICVehicleElectronics 04_)', 'Label', 'Sources'],
+    'Sensors': ['Robot', 'Sensor', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+                'Mass of one, min (g)', 'mode (g)', 'max (g)', 'Label', 'Sources'],
+    'SensorElements': ['Sensor', 'Car sensor type (RAWCLICVehicleElectronics 07_, sheet Sensor Details)',
+                       'Units in one sensor'],
+    'Constants': ['Robot', 'Quantity', 'Min', 'Mode', 'Max', 'Unit', 'Label', 'Source'],
+    'Sources': ['Code', 'Source', 'Link', 'What it is'],
+}
+# The sheets on which every robot has rows of its own. JointParts, Shares and SensorElements are one set for all
+# robots: the insides of the G1's two joint designs, scaled to each joint's mass, and the elements of each sensor
+# (Matthias: "We can assume, they are similar within given ranges").
+APART_ROBOT_SHEETS = ('Joints', 'Parts', 'Boards', 'Sensors')
+# What a label says: W weighed (China Post Securities' teardown), S from a source, E an estimate. A label may name
+# more than one ('W, E': a weighed part, spread over the joints not weighed by an estimate).
+APART_LABELS = {'W': 'weighed', 'S': 'from a source', 'E': 'an estimate'}
+# The NdFeB grade classes of RAWCLICVehicleTractionMotor's element workbook
+# (data/raw/10_MaterialElementDefinitions.xlsx, sheet PermanentMagnetNdFeB), from 80 °C (N) to 230 °C (AH). Whether
+# that file holds them is checked with step 4.
+MAGNET_CLASSES = ('N', 'M', 'H', 'SH', 'UH', 'EH', 'AH')
+# The numbers the stage that draws the file needs from the sheet Constants: each robot's own, and those shared by all
+# robots, given once under the robot ALL_ROBOTS.
+APART_ROBOT_CONSTANTS = ('Robot mass, with battery', 'Battery voltage', 'Battery capacity',
+                         'Cable length (four conductors)')
+APART_SHARED_CONSTANTS = ('Board mass per cm2 (boards not weighed)', "Copper share of a board's mass",
+                          'Power conductor cross-section (2 conductors)',
+                          'Signal conductor cross-section (2 conductors)', 'Copper density',
+                          'Insulation and jackets, per mass of copper')
+ALL_ROBOTS = 'all'
+# The words that mark the one part of each robot that takes its remainder (the frame), and a body region that follows
+# the joints a part sits in (the encoders).
+ROBOT_REMAINDER = 'the robot'
+AS_THEIR_JOINTS = 'as their joints'
+# An estimate (E) spans at least half to 1.5 times its mode (Matthias, 2026-10-27: "Estimates should be larger than
+# known numbers"). The agreed values are written to two or three figures, so a bound may miss the exact half or 1.5
+# times by this share of it before it counts as a fault (the gears' factor 1.17 against 2.33 / 2 = 1.165).
+WIDTH_ROUNDING = 0.01
+# A type's defining height and mass as the sheet Taxonomy writes them, e.g. 'Height: 1.20–1.45 m (defining)' and
+# 'Mass: 30–50 kg (defining)'.
+TYPE_HEIGHT = re.compile(r'Height:\s*~?\s*([\d.]+)\s*[–-]\s*([\d.]+)\s*m')
+TYPE_MASS = re.compile(r'Mass:\s*~?\s*([\d.]+)\s*[–-]\s*([\d.]+)\s*kg')
+
+
+@dataclass
+class ApartRobot:
+    """One robot of the sheet Robots: its maker's own height and stated mass decide its type."""
+
+    row: int
+    name: str
+    maker: str
+    type: int | None      # the category of the sheet Taxonomy
+    height: float | None  # m, the maker's
+    mass: float | None    # kg, the maker's stated mass
+    sources: str
+
+
+@dataclass
+class Joint:
+    """One joint kind of one robot (sheet Joints): the same joint on both sides of the robot, or the waist joints."""
+
+    row: int
+    robot: str
+    number: int
+    name: str
+    count: int        # joints of this kind in the robot
+    module: str       # 'small' or 'large': which of the G1's two joint designs its inside follows
+    torque: float     # N·m, the torque limit of the maker's model file, or its stated peak
+    module_mass: tuple    # kg of one joint, min, mode, max; (None, None, None) where JointParts give it (the G1)
+    magnet_class: str     # the NdFeB grade class of its magnets, the base case
+    scenarios: list       # the other grade classes drawn as scenarios
+    region: str
+
+
+@dataclass
+class JointPart:
+    """One component of the joint module (sheet JointParts)."""
+
+    row: int
+    name: str
+    grams: float          # in the small joint China Post Securities weighed
+    spread: tuple         # the small joints not weighed: times min, mode, max
+    material: str         # '' when its materials are in the sheet Shares
+    factor: tuple         # the large joint: the small one's grams times min, mode, max
+    label: str
+    sources: str
+
+
+@dataclass
+class ApartPart:
+    """One part of the sheet Parts, a board of Boards or a sensor of Sensors, of one robot: what the checks need of
+    each."""
+
+    sheet: str
+    row: int
+    robot: str
+    name: str
+    count: float | None
+    kind: str
+    region: str
+    bounds: tuple         # mass of one (kg), area of one (cm2) or mass of one (g): min, mode, max
+    material: str         # one material, or '' (Parts only)
+    computed: str         # what it is the remainder of, or computed from (Parts), or where its mass comes from (Boards)
+    category: str         # the car board category (Boards only)
+    label: str
+    sources: str
+
+
+@dataclass
+class ShareRow:
+    """One row of the sheet Shares; `share` and `remainder` as shares_faults reads them."""
+
+    row: int
+    item: str
+    material: str
+    grade: str
+    share: tuple
+    remainder: bool
+    label: str
+
+
+@dataclass
+class PartsTakenApart:
+    """Everything 01 reads from parts_taken_apart.xlsx."""
+
+    robots: dict          # robot name -> ApartRobot
+    joints: list          # Joint
+    joint_parts: list     # JointPart
+    parts: list           # ApartPart, sheet Parts
+    shares: list          # ShareRow
+    boards: list          # ApartPart, sheet Boards
+    sensors: list         # ApartPart, sheet Sensors
+    elements: list        # (row, sensor, car sensor type, units), sheet SensorElements
+    constants: dict       # robot name or ALL_ROBOTS -> {quantity -> (row, (min, mode, max), unit, label)}
+    sources: dict         # code -> (row, source, link)
+    faults: list          # Fault, found while reading
+
+
+def read_parts_taken_apart(path: str) -> PartsTakenApart:
+    """Read the file of the robots of type 1 taken apart; never writes to it. A missing file, sheet or heading stops
+    the reading (WorkbookError), as with the other files 01 reads."""
+    if not os.path.exists(path):
+        raise WorkbookError(f'{path}: robot type 1 taken apart is not there.')
+    book = load_workbook(path, data_only=True)
+    rows = {}
+    for name, headings in APART_SHEETS.items():
+        if name not in book.sheetnames:
+            raise WorkbookError(f"{path}: no sheet '{name}'. Its sheets are: {', '.join(book.sheetnames)}.")
+        found = [text(cell.value) for cell in book[name][1]][:len(headings)]
+        if found != headings:
+            raise WorkbookError(f"{path}, sheet '{name}': the first row must be {headings}, not {found}.")
+        rows[name] = [(row[0].row, [cell.value for cell in row] + [None] * len(headings))
+                      for row in book[name].iter_rows(min_row=2) if any(cell.value is not None for cell in row)]
+    triple_of = lambda values: tuple(number(v) for v in values)  # noqa: E731
+    robots = {text(v[0]): ApartRobot(row=r, name=text(v[0]), maker=text(v[1]),
+                                     type=None if number(v[2]) is None else int(number(v[2])), height=number(v[3]),
+                                     mass=number(v[4]), sources=text(v[5])) for r, v in rows['Robots']}
+    joints = [Joint(row=r, robot=text(v[0]), number=int(number(v[1]) or 0), name=text(v[2]),
+                    count=int(number(v[3]) or 0), module=text(v[4]), torque=number(v[5]),
+                    module_mass=triple_of(v[6:9]), magnet_class=text(v[10]),
+                    scenarios=[s.strip() for s in text(v[11]).split(';') if s.strip()], region=text(v[12]))
+              for r, v in rows['Joints']]
+    joint_parts = [JointPart(row=r, name=text(v[0]), grams=number(v[1]), spread=triple_of(v[2:5]),
+                             material=text(v[5]), factor=triple_of(v[6:9]), label=text(v[10]), sources=text(v[11]))
+                   for r, v in rows['JointParts']]
+    parts = [ApartPart('Parts', r, text(v[0]), text(v[1]), number(v[2]), text(v[3]), text(v[4]), triple_of(v[5:8]),
+                       text(v[8]), text(v[9]), '', text(v[10]), text(v[11])) for r, v in rows['Parts']]
+    boards = [ApartPart('Boards', r, text(v[0]), text(v[1]), number(v[2]), text(v[3]), text(v[4]), triple_of(v[5:8]),
+                        '', text(v[8]), text(v[9]), text(v[10]), text(v[11])) for r, v in rows['Boards']]
+    sensors = [ApartPart('Sensors', r, text(v[0]), text(v[1]), number(v[2]), text(v[3]), text(v[4]),
+                         triple_of(v[5:8]), '', '', '', text(v[8]), text(v[9])) for r, v in rows['Sensors']]
+    shares = [ShareRow(row=r, item=text(v[0]), material=text(v[1]), grade=text(v[2]), share=triple_of(v[3:6]),
+                       remainder=text(v[6]).lower() == 'yes', label=text(v[7])) for r, v in rows['Shares']]
+    elements = [(r, text(v[0]), text(v[1]), number(v[2])) for r, v in rows['SensorElements']]
+    constants: dict = {}
+    for r, v in rows['Constants']:
+        constants.setdefault(text(v[0]), {})[text(v[1])] = (r, triple_of(v[2:5]), text(v[5]), text(v[6]))
+    sources = {text(v[0]): (r, text(v[1]), text(v[2])) for r, v in rows['Sources']}
+    return PartsTakenApart(robots, joints, joint_parts, parts, shares, boards, sensors, elements, constants, sources,
+                           [])
+
+
+def label_faults(on: str, row: int, what: str, label: str) -> list[Fault]:
+    """A label must start with W, S or E (APART_LABELS)."""
+    if re.match(r'^(W|S|E)\b', label):
+        return []
+    return [Fault(on, row, f"{what}: the label must start with {', '.join(APART_LABELS)}, not '{label}'.")]
+
+
+def bounds_faults(on: str, row: int, what: str, bounds: tuple, estimate: bool, floor: float | None = None,
+                  ceiling: float | None = None) -> list[Fault]:
+    """Min, mode and max present and in order; for an estimate, at least half to 1.5 times the mode, a bound cut
+    only at a stated limit (`floor`, `ceiling`)."""
+    if None in bounds:
+        return [Fault(on, row, f'{what}: give its min, mode and max.')]
+    low, mode, high = bounds
+    if not 0 <= low <= mode <= high:
+        return [Fault(on, row, f'{what}: min, mode and max must be in order from 0 up: {low}, {mode}, {high}.')]
+    if not estimate:
+        return []
+    want_low = 0.5 * mode if floor is None else max(floor, 0.5 * mode)
+    want_high = 1.5 * mode if ceiling is None else min(ceiling, 1.5 * mode)
+    if low > want_low * (1 + WIDTH_ROUNDING) or high < want_high * (1 - WIDTH_ROUNDING):
+        return [Fault(on, row, f'{what}: an estimate must span at least half to 1.5 times its mode ({mode}), not '
+                               f'{low} to {high}.')]
+    return []
+
+
+def region_faults(on: str, row: int, what: str, region: str, lists: SharedLists) -> list[Fault]:
+    """Every body region named ('Legs 4, Arms 10' names two) is one of the shared lists, or the part follows its
+    joints."""
+    if region == AS_THEIR_JOINTS:
+        return []
+    known = set(lists.names.get('Body region', []))
+    names = [re.sub(r'\s*\d+\s*$', '', piece.strip()) for piece in region.split(',') if piece.strip()]
+    return [Fault(on, row, f"{what}: the body region '{n}' is not in the shared lists.") for n in names or ['']
+            if n not in known]
+
+
+def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: Params) -> list[Fault]:
+    """Whether the robots of type 1 taken apart hold together: every robot named in the sheet Robots and with rows of
+    its own on every sheet that is per robot; ranges in order and estimates wide enough, labels known, shares with one
+    remainder that never falls below zero, every material and body region on the shared lists, every part either of
+    one material, of shares, or computed; for each robot its joints matching its joint modules, each joint number once,
+    its module masses all three given or none, one part taking its remainder, and its own constants there; magnet
+    grade classes known, every sensor element of a listed sensor, every shared constant there."""
+    faults = list(apart.faults)
+    where = os.path.basename(params.data.parts_taken_apart) + ': '
+    materials = set(lists.names.get('Material', [])) - {NOT_ALLOCATED}
+
+    def material_fault(on, row, what, material):
+        return [] if material in materials else [Fault(on, row, f"{what}: the material '{material}' is not in the "
+                                                                'shared lists.')]
+
+    # The robots: every row names a robot of the sheet Robots, and every robot has rows of its own on every sheet that
+    # is per robot (step 2b, point 6).
+    on_sheet = {'Joints': apart.joints, 'Parts': apart.parts, 'Boards': apart.boards, 'Sensors': apart.sensors}
+    for sheet, items in on_sheet.items():
+        for item in items:
+            if item.robot not in apart.robots:
+                faults.append(Fault(where + sheet, item.row, f"'{item.robot}' is not in the sheet Robots."))
+    for robot in apart.robots:
+        for sheet in APART_ROBOT_SHEETS:
+            if not any(item.robot == robot for item in on_sheet[sheet]):
+                faults.append(Fault(where + sheet, 0, f'{robot} has no rows in the sheet {sheet}.'))
+    for robot in apart.constants:
+        if robot != ALL_ROBOTS and robot not in apart.robots:
+            faults.append(Fault(where + 'Constants', 0, f"'{robot}' is not in the sheet Robots."))
+
+    # Joints: each number once in its robot, modules and grade classes known, regions on the lists, module masses all
+    # three or none and in order, each robot's counts those of its joint modules.
+    on = where + 'Joints'
+    seen = set()
+    for j in apart.joints:
+        what = f'{j.robot}, {j.number} {j.name}'
+        if (j.robot, j.number) in seen:
+            faults.append(Fault(on, j.row, f'{what}: the number {j.number} is given twice.'))
+        seen.add((j.robot, j.number))
+        if j.module not in ('small', 'large') or j.count < 1:
+            faults.append(Fault(on, j.row, f"{what}: the module must be 'small' or 'large' and the joints at least 1."))
+        if any(m is not None for m in j.module_mass):
+            if None in j.module_mass:
+                faults.append(Fault(on, j.row, f'{what}: give its module mass min, mode and max, or none (then its '
+                                               'joint parts give it).'))
+            elif not 0 < j.module_mass[0] <= j.module_mass[1] <= j.module_mass[2]:
+                faults.append(Fault(on, j.row, f'{what}: the module mass min, mode and max must be in order from 0 up: '
+                                               f'{j.module_mass}.'))
+        for klass in [j.magnet_class] + j.scenarios:
+            if klass not in MAGNET_CLASSES:
+                faults.append(Fault(on, j.row, f"{what}: the magnet grade class '{klass}' is not one of "
+                                               f"{', '.join(MAGNET_CLASSES)}."))
+        faults += region_faults(on, j.row, what, j.region, lists)
+    for robot in apart.robots:
+        modules = {p.name: p for p in apart.parts if p.robot == robot and p.name.startswith('Joint module, ')}
+        for size in ('small', 'large'):
+            module = modules.get(f'Joint module, {size}')
+            joints = sum(j.count for j in apart.joints if j.robot == robot and j.module == size)
+            if (module is None and joints) or (module is not None and module.count != joints):
+                faults.append(Fault(on, 0, f'{robot}: {joints} {size} joints in the sheet Joints, but '
+                                           f"{'no' if module is None else int(module.count)} {size} joint modules in "
+                                           'the sheet Parts.'))
+
+    # The joint module part by part.
+    on = where + 'JointParts'
+    items_with_shares = {s.item for s in apart.shares}
+    for c in apart.joint_parts:
+        faults += label_faults(on, c.row, c.name, c.label)
+        if c.grams is None or c.grams <= 0:
+            faults.append(Fault(on, c.row, f'{c.name}: give its weighed grams.'))
+        faults += bounds_faults(on, c.row, f'{c.name}, the joints not weighed', c.spread, 'E' in c.label)
+        if c.factor[0] is not None and c.factor[0] < 1:
+            faults.append(Fault(on, c.row, f"{c.name}: the large joint's factor may not fall below 1, as a large "
+                                           f"joint's part is not lighter than the small one's: {c.factor[0]}."))
+        else:
+            faults += bounds_faults(on, c.row, f"{c.name}, the large joint's factor", c.factor, 'E' in c.label,
+                                    floor=1.0)
+        if c.material:
+            faults += material_fault(on, c.row, c.name, c.material)
+        elif c.name not in items_with_shares:
+            faults.append(Fault(on, c.row, f"'{c.name}': give its one material, or its shares in the sheet Shares."))
+
+    # The other parts, the boards and the sensors.
+    remainders: dict = {}
+    for p in apart.parts + apart.boards + apart.sensors:
+        on = where + p.sheet
+        what = f'{p.robot}, {p.name}'
+        faults += label_faults(on, p.row, what, p.label)
+        faults += region_faults(on, p.row, what, p.region, lists)
+        if p.count is None or p.count < 1 or p.count != int(p.count):
+            faults.append(Fault(on, p.row, f'{what}: the number in the robot must be a whole number from 1 up.'))
+        if p.computed.startswith(ROBOT_REMAINDER):
+            remainders.setdefault(p.robot, []).append(p)
+        if None in p.bounds and (p.computed or p.sheet == 'Sensors' and p.name in {e[1] for e in apart.elements}):
+            pass   # computed, a remainder, or a sensor known by its elements only (the encoders)
+        else:
+            faults += bounds_faults(on, p.row, what, p.bounds, p.label == 'E')
+        if p.sheet == 'Parts':
+            if p.material:
+                faults += material_fault(on, p.row, what, p.material)
+            elif not p.computed and p.name not in items_with_shares:
+                faults.append(Fault(on, p.row, f"'{what}': give its one material, its shares in the sheet Shares, or "
+                                               'what it is computed from.'))
+        if p.sheet == 'Boards' and not p.category:
+            faults.append(Fault(on, p.row, f'{what}: name the car board category its metals come from.'))
+    for robot in apart.robots:
+        found = remainders.get(robot, [])
+        if len(found) != 1:
+            faults.append(Fault(where + 'Parts', 0, f'{robot}: exactly one part takes the remainder of the robot, not '
+                                                    f"{len(found)}: {', '.join(p.name for p in found)}."))
+
+    # The shares: one remainder per part, in order, never below zero, an estimate wide enough; every part named
+    # exists; every material on the lists.
+    on = where + 'Shares'
+    names = {c.name for c in apart.joint_parts} | {p.name for p in apart.parts}
+    groups: dict = {}
+    for s in apart.shares:
+        groups.setdefault(s.item, []).append(s)
+        faults += label_faults(on, s.row, s.item, s.label)
+        faults += material_fault(on, s.row, f'{s.item}, {s.material}', s.material)
+    for item, members in groups.items():
+        if item not in names:
+            faults.append(Fault(on, members[0].row, f"'{item}' is not a component of JointParts nor a part of Parts."))
+            continue
+        found = shares_faults(members, on, item)
+        faults += found
+        if not found:
+            for s in members:
+                if not s.remainder:
+                    faults += bounds_faults(on, s.row, f'{item}, {s.material}', s.share, s.label == 'E', ceiling=1.0)
+
+    # The sensor elements; the constants, the shared ones once for all robots and each robot's own.
+    on = where + 'SensorElements'
+    sensors = {p.name for p in apart.sensors}
+    for row, sensor, car_type, units in apart.elements:
+        if sensor not in sensors:
+            faults.append(Fault(on, row, f"'{sensor}' is not a sensor of the sheet Sensors."))
+        if not car_type or units is None or units < 1 or units != int(units):
+            faults.append(Fault(on, row, f'{sensor}: name the car sensor type and its units, a whole number from 1.'))
+    on = where + 'Constants'
+    shared = apart.constants.get(ALL_ROBOTS, {})
+    for quantity in APART_SHARED_CONSTANTS:
+        if quantity not in shared:
+            faults.append(Fault(on, 0, f"'{quantity}' is missing (for {ALL_ROBOTS}); the stage that draws the file "
+                                       'needs it.'))
+    for robot in apart.robots:
+        for quantity in APART_ROBOT_CONSTANTS:
+            if quantity not in apart.constants.get(robot, {}):
+                faults.append(Fault(on, 0, f"{robot}: '{quantity}' is missing; the stage that draws the file needs "
+                                           'it.'))
+    for robot, given in apart.constants.items():
+        for quantity, (row, values, _, label) in given.items():
+            faults += label_faults(on, row, f'{robot}, {quantity}', label)
+            faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E')
+    return faults
+
+
+def type_limits(category: Category) -> tuple | None:
+    """A type's defining height (m) and mass (kg) as (low, high) pairs, read from what the sheet Taxonomy writes; None
+    where they cannot be read."""
+    height = TYPE_HEIGHT.search(category.height_and_mass)
+    mass = TYPE_MASS.search(category.height_and_mass)
+    if height is None or mass is None:
+        return None
+    return (float(height.group(1)), float(height.group(2))), (float(mass.group(1)), float(mass.group(2)))
+
+
+def check_robot_types(apart: PartsTakenApart, categories: list) -> list[Fault]:
+    """Whether every robot of the file lies inside its type: its maker's own height and stated mass inside the type's
+    defining limits of the sheet Taxonomy (Matthias, 2026-10-27: "We have to see, that there is not a mixup between
+    the different types"; on this rule the Booster T1, 1.18 m, was taken out of type 1)."""
+    faults = []
+    by_number = {c.number: c for c in categories}
+    unreadable = set()
+    for robot in apart.robots.values():
+        on = 'Robots'
+        category = by_number.get(robot.type)
+        if category is None:
+            faults.append(Fault(on, robot.row, f'{robot.name}: type {robot.type} is not in the sheet Taxonomy.'))
+            continue
+        limits = type_limits(category)
+        if limits is None:
+            if robot.type not in unreadable:
+                first = category.height_and_mass.splitlines()[0] if category.height_and_mass else ''
+                faults.append(Fault(on, robot.row, f'type {robot.type}: its height and mass limits cannot be read from '
+                                                   f"the sheet Taxonomy ('{first}')."))
+                unreadable.add(robot.type)
+            continue
+        (h_low, h_high), (m_low, m_high) = limits
+        if robot.height is None or not h_low <= robot.height <= h_high:
+            faults.append(Fault(on, robot.row, f'{robot.name}: {robot.height} m lies outside type {robot.type}, '
+                                               f'{h_low} to {h_high} m.'))
+        if robot.mass is None or not m_low <= robot.mass <= m_high:
+            faults.append(Fault(on, robot.row, f'{robot.name}: {robot.mass} kg lies outside type {robot.type}, '
+                                               f'{m_low} to {m_high} kg.'))
+    return faults
+
+
+# The sheets of the sibling projects' files and the columns read from them (step 4 of the plan): each read where it
+# lies, never written. The metals a car board category must hold for the G1's boards.
+SIBLING_SHEETS = {'vehicle_pcb_composition': 'PCPComposition', 'vehicle_sensor_composition': 'Sensor Details',
+                  'data_center_element_composition': 'BoardsAndComponents',
+                  'traction_motor_magnets': 'PermanentMagnetNdFeB'}
+BOARD_METALS = ('Au', 'Ag', 'Pd', 'Sn', 'Ni')
+
+
+def sibling_rows(path: str, sheet: str) -> list[dict]:
+    """The rows of a sibling project's sheet as dicts by heading; read only."""
+    book = load_workbook(path, read_only=True, data_only=True)
+    rows = list(book[sheet].iter_rows(values_only=True))
+    book.close()
+    header = [text(h) for h in rows[0]]
+    return [dict(zip(header, r)) for r in rows[1:] if any(v is not None for v in r)]
+
+
+def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
+    """Whether the sibling projects' files hold what the robots of type 1 taken apart name: every car board category
+    with the metals of BOARD_METALS (RAWCLICVehicleElectronics, 04_), every car sensor type (07_), a tantalum row
+    (RAWCLICDataCenters, 04_), every magnet grade class (RAWCLICVehicleTractionMotor's element workbook)."""
+    faults, rows = [], {}
+    for key, sheet in SIBLING_SHEETS.items():
+        path = getattr(params.data, key)
+        on = f'data.{key}'
+        if not os.path.exists(path):
+            faults.append(Fault(on, 0, f'data.{key} names {path}, which is not there.'))
+            continue
+        try:
+            rows[key] = sibling_rows(path, sheet)
+        except KeyError:
+            faults.append(Fault(on, 0, f"data.{key}: {os.path.basename(path)} has no sheet '{sheet}'."))
+    if 'vehicle_pcb_composition' in rows:
+        held = {}
+        for r in rows['vehicle_pcb_composition']:
+            held.setdefault(text(r.get('PCBCategory')), set()).add(text(r.get('Element')))
+        for b in apart.boards:
+            if b.category not in held:
+                pcb = os.path.basename(params.data.vehicle_pcb_composition)
+                faults.append(Fault('Boards', b.row, f"{b.robot}, {b.name}: the car board category '{b.category}' is "
+                                                     f'not in {pcb}.'))
+            elif set(BOARD_METALS) - held[b.category]:
+                lacking = ', '.join(sorted(set(BOARD_METALS) - held[b.category]))
+                faults.append(Fault('Boards', b.row, f"{b.robot}, {b.name}: the car board category '{b.category}' "
+                                                     f'has no {lacking}.'))
+    if 'vehicle_sensor_composition' in rows:
+        types = {text(r.get('SensorType')) for r in rows['vehicle_sensor_composition']}
+        for row, sensor, car_type, _ in apart.elements:
+            if car_type not in types:
+                where = os.path.basename(params.data.vehicle_sensor_composition)
+                faults.append(Fault('SensorElements', row, f"{sensor}: the car sensor type '{car_type}' is not in "
+                                                           f'{where}.'))
+    if 'data_center_element_composition' in rows:
+        tantalum = [r for r in rows['data_center_element_composition'] if text(r.get('Element')) == 'Ta']
+        values = tuple(number(tantalum[0].get(k)) for k in ('Min', 'Mode', 'Max')) if tantalum else None
+        if values is None or None in values or not 0 <= values[0] <= values[1] <= values[2]:
+            faults.append(Fault('data.data_center_element_composition', 0, 'no Ta row with min, mode and max in order '
+                                                                            'in its sheet BoardsAndComponents.'))
+    if 'traction_motor_magnets' in rows:
+        # One fault per grade class missing, naming every joint that uses it (a class is shared by many joints).
+        classes = {text(r.get('TempClass')) for r in rows['traction_motor_magnets']}
+        missing: dict = {}
+        for j in apart.joints:
+            for klass in [j.magnet_class] + j.scenarios:
+                if klass not in classes:
+                    missing.setdefault(klass, []).append(j)
+        where = os.path.basename(params.data.traction_motor_magnets)
+        for klass, joints in missing.items():
+            used_by = ', '.join(f'{j.robot} {j.number} {j.name}' for j in joints)
+            faults.append(Fault('Joints', joints[0].row, f"the magnet grade class '{klass}' is not in {where}; used by "
+                                                         f'{used_by}.'))
+    return faults
+
+
 def battery_pieces(materials: MaterialsList, battery: Material, lists: SharedLists, recipes: ElementRecipes) -> list:
     """The battery row of one robot type as cells only: its cells, and the rest of the row (the row minus the cells)
     split by the shares of the sheet Battery cells, the remainder 1 minus the others. Each piece is (shared material,
@@ -2430,6 +2973,14 @@ def main() -> int:
                        + check_material_recipes(book, lists, recipes, params))
         except WorkbookError as error:
             print(f'{error} The robot pages show the battery rows as the workbook gives them.')
+    # Robot type 1 taken apart: read and checked here; drawn by the stage that follows it (step 5 of its plan).
+    if lists is not None:
+        try:
+            apart = read_parts_taken_apart(absolute(params.data.parts_taken_apart))
+            faults += (check_parts_taken_apart(apart, lists, params) + check_sibling_data(apart, params)
+                       + check_robot_types(apart, book.categories))
+        except WorkbookError as error:
+            print(f'{error} Robot type 1 taken apart is not checked.')
     sources = absolute(params.data.sources_dir)
     reports = {c.number: category_report(c.number, sources) for c in book.categories}
     out = absolute(params.output.schemas_dir)

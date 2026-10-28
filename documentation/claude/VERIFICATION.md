@@ -3,7 +3,299 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-10-28
+
+### V54. Stage 04's figures on readable pages, with the median and the mean
+
+- **What:** Matthias, on the first previews: "Have the overview on several pages. I can not read it. too smal, you
+  should notice this before you sjhow me. Elements is an edge case. Also quite small"; then "Showing the mean is
+  wrong. It is not a good measure. Use the median or show boths" (answer "Both, median first"). The element figure on
+  2 pages, the overview on 5, each 16 × 9 inches with no text below 14 points; the median a solid line, the mean a
+  dotted one, each with its number (METHODOLOGY.md, "What 04 draws").
+- **Measured before:** fit to a 1920 × 1080 screen, scale = min(1920 / width, 1080 / height): the one-page overview
+  (3,073 × 3,205 pixels, smallest text 10 points) showed its smallest text 7.0 pixels tall, the one-page element figure
+  (2,997 × 1,821, 11 points) 13.6 pixels: his "can not read it" and "edge case".
+- **How, tests first:** `TestReadable` draws every page and fails where its smallest text, fit to that screen, is under
+  18 pixels; it failed before the change (no pages). `TestCentre` draws a panel and an overview row of skewed draws
+  (lognormal) and checks that the solid line sits at the median and the dotted one at the mean; it failed before the
+  change (no dotted line). Both pass after it.
+- **Measured after** (sandbox, 2,000 draws): every page 2,400 × 1,350 pixels, smallest text 23.3 pixels on that screen.
+  Every page opened and looked at, at screen size; fixed on the way: a two-line title where "Neodymium and
+  praseodymium (Nd+Pr)" ran into the next panel, a number and its unit kept together in the footnotes, the overview's
+  two number columns headed "median" and "mean" with the unit in the panel's title (the headers had run into each
+  other).
+- **Result:** 189 tests pass, the builder's comparison with the data file on disk included (Matthias ran the builder
+  at 11:41:27).
+- **Matthias's real run of 04, 2026-10-28, 11:41:44 to 11:41:50**, with the version before the pages: 200,000 draws;
+  `data/parts_taken_apart/` 297 MB (elements 180.8 MB, parts 76.8, materials 36.8, robots 2.4), against the 280 MB
+  extrapolated in V53; the varied mass median 38.3 kg, mean 38.6 kg. Its two one-page figures are in
+  `figures/parts_taken_apart/`; the page version writes other names, so a new run leaves them beside the pages.
+- **Not covered:** the pages of his data run itself (200,000 draws) are not drawn yet; the readability test checks text
+  size, not overlaps, which were looked at.
+
+### V53. Stage 04: robot type 1 taken apart, drawn, and its two figures (steps 5 to 7)
+
+- **What:** on Matthias's "Yes, build steps 5 and 6: stage 04 and its two approved figures, tests first, tried in a
+  sandbox with few draws" and his answers A to E (HANDOVER.md, 2026-10-28): `04_parts_taken_apart.py` (method in
+  METHODOLOGY.md, "What 04 draws") and `tests/test_parts_taken_apart.py`.
+- **How, tests first:** the 11 tests were written and run before the stage existed (they failed: no file). With the
+  stage, all pass. They check: each robot drawn about a third of the time (within four standard errors, 3,000 draws);
+  the varied mass within 30 to 50 kg and the own mass within each robot's range; the materials and the parts of every
+  draw adding up to its varied mass (to 1e-9); the frames and battery housings reported below zero, not cut; the
+  magnets' fractions from RAWCLICVehicleTractionMotor's own code adding up to 1, iron the remainder; the draws written
+  at every level and both figures drawn. **Hand calculations**, every triangle at its mode and the magnets' fractions
+  fixed, against the data file's modes (EVIDENCE.md E2.8, E2.8b): the G1's copper in its cables 152.684 g (102.144 g
+  conductors, 48.3 g XT30, 2.24 g capacitor buffer boards); its gold in its hips 10.50288 mg (six driver boards of
+  81.524 cm2 at 0.02 mg/cm2, twelve encoders at 0.06 mg); its neodymium in its hips 99.205152 g (six rotors of 76.362 g,
+  90 % NdFeB, 24 % Nd, and twelve encoders at 20 mg); each robot at its modes weighing 35, 33 and 39 kg; and answer B:
+  at 50 kg the G1's hip joints weigh 50 / 35 times as much, its hip fans and its head the same.
+- **Deliberate faults**, in scratch copies of the stage: the encoders counted per joint kind instead of per joint (the
+  gold and neodymium hand calculations failed, 3.4 % and 0.12 % off); the joints not following the varied mass (the
+  scaling test failed). Both caught.
+- **Against today's data file:** the builder wrote the file of V52 into Claude's scratch folder (not into `data/`); with
+  it, the 15 tests of 04 and of the builder all pass, the builder's comparison with the file on disk included.
+- **Sandbox run** (step 7): the project's settings, 2,000 draws, today's data file from the scratch folder, every output
+  into Claude's scratch folder; 4.5 s. Means in one robot (95 %): copper 2.3 kg (1.6 to 3.3), aluminium 13 kg (6.4 to
+  22), silver 469 mg, gold 63 mg (29 to 126), palladium 26 mg, tantalum 164 mg, neodymium and praseodymium 352 g (183 to
+  597), dysprosium 54 g (25 to 99), gallium 639 mg, indium 13 mg (0 to 53). Order of magnitude against the G1 alone
+  (E2.8c: copper 1.82 kg, gold 51 mg, Nd + Pr 312 g, Dy 49 g): higher by the heavier draws (mean about 39 kg) and the X1's
+  29 joints. Gallium 639 mg against the G1's 130 mg: the magnets' gallium of the sibling's grade bands (0 to 0.1 % of
+  NdFeB), not in E2.8c's table. Indium: 0 in about a third of the draws, the N1's (no camera in the standard robot).
+  Remainders below zero: the X1's battery housing in 1.4 % of its draws, the X1's frame in 0.9 %, the N1's battery
+  housing in 1.3 %. Both figures opened and looked at; the overview redrawn once (a mean written 9.5e-05, labels
+  running into the robot, rows too far apart), then clean. `data/` and `figures/` of the project unchanged. Its cost,
+  measured (`/usr/bin/time -l`): 2,000 draws 4.5 s, 0.36 GB peak memory, 2.9 MB written; 20,000 draws 4.9 s, 0.57 GB,
+  28 MB; 50,000 draws 5.3 s, 0.88 GB, 71 MB. For the real run, extrapolated linearly and not measured: 200,000 draws
+  about 10 s, 2.5 GB, 280 MB.
+- **Result:** 186 tests; 185 pass. One fails by design until Matthias runs the builder (V52, point C).
+- **Not covered:** the real run (200,000 draws) is Matthias's; the magnets' scenarios (UH, EH) are not drawn, only the
+  base classes; the elements of steel, titanium and the mixed parts are not drawn; the X1's phone and the N1's network
+  switch beyond the phone's board (E2.8e).
+- **Found, not changed:** the X1's and N1's battery packs were cut below at 250 Wh/kg cells (E2.8e), but 00's NMC cells
+  range from 232.5 to 256 Wh/kg (`composition.nmc_wh_per_kg_*`): where a light pack meets heavy cells, the housing
+  falls below zero. And `.gitignore` now names `data/parts_taken_apart/` (the stage's `.txt` column lists would
+  otherwise not be ignored).
+
+### V52. The X1's and N1's masses and the G1's parts carried over to them, in the builder
+
+- **What:** on Matthias's answers "X1 max 35.3 kg", "Encoders", "XT30 connectors", "Main board cooler" and then "Yes,
+  build" (EVIDENCE.md E2.8e, "Decided, 2026-10-28"), the builder `tools/make_parts_taken_apart.py` now writes: the
+  X1's mass 32 / 33 / 35.3 kg; for the X1 and N1 each, encoders (two per joint) in the sheets Parts and Sensors, XT30
+  (2+2) connectors (two per joint), a main board fan and a main board heat sink of copper heat pipes and fins; two new
+  sources (FW1, DY1).
+- **Checked first-hand, today, before entering:** the X1's two BOMs (X1a, downloaded again on his "Yes, download"
+  into Claude's scratch folder only), counted for its XT30 plugs: 19 cables with two, 12 with one, 6 terminating
+  resistors and 2 to the L28 push rods, 58; AgiBot's model file (X1c), its 58 links summed in the browser: 35.323 kg;
+  Fourier's N1 page (N1a): "双编码器 16bit/14bit", "体重38公斤", "净重 ≈39 kg"; Dynatron's I2 page: "199g ±5g";
+  Framework's kit page: "Weight: 67.5g".
+- **How, tests first:** a new test in `tests/test_make_parts_taken_apart.py` (the X1's mass; for every robot, encoders
+  and XT30 connectors twice its joints in the sheet Joints, the fan's mass; the X1's and N1's heat sink, its range,
+  copper, E) failed before the change (the X1's max 34.0, not 35.3) and passes after it. Deliberate faults in a
+  scratch copy of the builder (the X1's encoders 56 instead of 58; the N1's heat sink aluminium instead of copper) were
+  both caught. What the builder writes passes 01's checks 18 to 20 with no fault. Compared with the file on disk, it
+  differs in exactly the rows decided: 8 rows added to Parts, 2 to Sensors, 2 to Sources, the X1's mass row changed in
+  Constants; nothing else.
+- **Result:** 175 tests, 174 pass. **One fails by design:** `test_what_it_writes_equals_the_data_file_on_disk`, until
+  Matthias writes the new file by pressing Run on the builder (point C of the specification, as recommended and
+  accepted); then it passes. The data file was not written: 2026-10-27 15:14:22, 28,792 bytes, before and after.
+- **Not covered:** the heat sink's mass has no source of its own kind (no maker gives the mass of a mini PC's cooler):
+  an estimate, with a laptop's and a server's cooler as context only; its copper is an upper bound if the mini PCs'
+  fins are aluminium (point B). Whether a connector counts one half of a mated XT30 or both is still open for all three
+  robots (point A). The X1's encoders rest on "two per joint" as the G1 and N1 (E): its BOM lists the actuators as
+  bought-in units and names none.
+
+### V51. The builder of the data file, rewritten into tools/
+
+- **What:** on Matthias's "Yes, rewrite": `tools/make_parts_taken_apart.py`, the builder of
+  `data/researched/parts_taken_apart.xlsx` (the first builder, in Claude's scratch folder, was lost with it; found
+  empty on 2026-10-28). Its values were transcribed from the data file on disk, which the first builder had written
+  from EVIDENCE.md E2.8 to E2.8e on 2026-10-27 (15:14:22, 28,792 bytes): the only exact copy left.
+- **How, tests first:** `tests/test_make_parts_taken_apart.py` (written 2026-10-27) run before the builder existed:
+  it failed (the file not there). Then, with the builder: what it writes into a temporary folder passes 01's checks 18
+  to 20 with no fault; it equals the file on disk sheet by sheet and cell by cell (values); it writes where 00's
+  `data.parts_taken_apart` says. A deliberate fault in a scratch copy of the builder (copper density 8.96 / 8.97 /
+  8.98 instead of 8.96 three times) was caught: the comparison found exactly that row (Constants, row 5) and no
+  other.
+- **Result:** 174 tests pass, none skipped. Importing the builder (as the tests do) wrote nothing: the data file's
+  time and size were the same before and after the tests (2026-10-27 15:14:22, 28,792 bytes).
+- **Not covered:** cell formats (bold, fill, widths) are not compared, only values; the builder was not run into
+  `data/` (pressing Run is Matthias's); the values themselves rest on E2.8 to E2.8e.
+- **Found, not changed:** the file's own About sheet still says "Sheet Joints: the 12 joint kinds of the basic G1 (23
+  joints)", written before the X1 and N1 went in; the builder reproduces it, as the comparison demands.
+
 ## 2026-10-27
+
+### V50. Step 2b: the G1, X1 and N1 in one data file, and 01's checks of it
+
+- **What:** on Matthias's "Yes, build points 1 to 8 as specified, tests first" (EVIDENCE.md E2.8e): the data file
+  `data/researched/parts_taken_apart.xlsx` holds the Unitree G1, the AgiBot X1 and the Fourier N1 (sheet Robots; a
+  column Robot on Joints, Parts, Boards, Sensors and Constants; module masses on Joints); 01 reads it
+  (`read_parts_taken_apart`), checks it per robot (`check_parts_taken_apart`) and checks every robot against its
+  type's height and mass in the workbook's sheet Taxonomy (`check_robot_types`, new; METHODOLOGY.md check 20).
+- **How, tests first:** the small test file rewritten for two robots (one as the G1, without module masses; one as the
+  X1, with them); 12 tests added: the one-robot layout refused; a robot not in Robots; a robot without rows on a sheet;
+  a module mass given in part; a module mass out of order; a robot's own constant missing; a robot below its type's
+  height (1.18 m), above its mass (57 kg), of a type the Taxonomy lacks, of a type whose limits cannot be read; the
+  robots inside their type; the real robots inside type 1. Run against the code before the change: 36 errors. The new
+  file built into Claude's scratch folder and checked by all three of 01's checks (0 faults each) before it replaced
+  the old file (point 7: no copy).
+- **Result:** 171 tests pass, none skipped. The real file: three robots; the G1 23 joints in 12 kinds, 9 large, its
+  weighed joint parts 525 g and the large joint 1,011.717 g, unchanged; the X1 29 joints, 15 large, module masses at
+  their modes 20.27 kg (AgiBot's own); the N1 23 joints, 11 large, 14.90 kg (the fit, as E2.8e rounds it); every robot
+  inside type 1 (1.20 to 1.45 m, 30 to 50 kg); every board category, sensor type and magnet class in the sibling files.
+- **Found on the way:** the test first expected the N1's joints at 14.94 kg, the fit unrounded; the accepted table
+  gives 0.88 / 0.70 / 0.54 kg, so 14.90 kg; the test now checks the accepted values. A missing magnet grade class was
+  reported once per joint using it (twice in the small file); it is now reported once, naming every joint that uses it.
+- **Not covered:** the values themselves (E2.8e, as accepted); 01 not run (its pages are drawn when Matthias presses
+  Run); stage 04, which draws the robots, not built (step 5).
+
+### V49. The element figure of robot type 1, approved as a preview
+
+- **What:** the scratch preview "Robot type 1 (Unitree G1): critical elements in one robot", approved by Matthias
+  ("Yes, the element figure is right now"): one histogram per element of the robot's total, each bar split into the
+  weight its draws hold in each of ten kinds of part (the form of RAWCLICDataCenters' `05_data_center_elements.py`,
+  `_stacked_panel`), from the 20,000 draws of the G1 alone (`kinds_draws.npz`, Claude's scratch folder).
+- **How:**
+  - for copper, gold, aluminium and tantalum, the stacked segments of every bar summed and compared with the bar's
+    share of the draws, and the grams in all bars of a part compared with that part's grams over all draws;
+  - the bars' shares summed;
+  - the mean weight of every part compared with the approved overview figure (robot_type_1_distributions.png);
+  - the ten colours compared with Paul Tol's own file `tol_colors.py` (rainbow_discrete, lut = 10, downloaded from
+    https://sronpersonalpages.nl/~pault/data/tol_colors.py on 2026-10-27), and the one swap (frame and battery pack)
+    checked to leave the set of colours unchanged;
+  - the figure opened and looked at after every change (nothing cut off or overlapping).
+- **Result:** largest gap between a bar and its stack 9.7e-17; largest relative gap between a part's grams in the
+  bars and over all draws 5.3e-16; the bars sum to 1.000000; the part means equal the overview's (copper in the hip
+  joints 517 g, in the arm joints 449 g); the colours are Tol's ten, unchanged.
+- **Not covered:** the draws themselves (V45, E2.8); the spread between robots of type 1 (open point G), not yet in;
+  the stage that will draw the figure (step 6) is not built, so these checks are to be repeated on its output.
+- **Found on the way and corrected:** a palette search of Claude's own (scratch) first left out the LMS step of OKLab
+  and ranked colours on a wrong distance; corrected before use. Claude then graded Tol's published palettes with that
+  home-made score; Matthias objected ("You always try to trick me"); the figure now uses Tol's set as published.
+
+### V48. Step 4: the settings of robot type 1 taken apart, and the sibling projects' files checked
+
+- **What:** on Matthias's "Yes" to step 4: in 00 the absolute paths of the four sibling files and of
+  RAWCLICVehicleTractionMotor (`data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`,
+  `data.data_center_element_composition`, `data.traction_motor_magnets`, `data.traction_motor_dir`), the draws and
+  seed of the stage to come (`parts.draws` 200,000, `parts.seed` 1) and its output folders (`output.parts_dir`
+  `data/parts_taken_apart`, the project's own outputs until open point F is decided; `output.parts_figures_dir`
+  `figures/parts_taken_apart`); in 01 `check_sibling_data` (CHECKS_DONE and METHODOLOGY.md point 19).
+- **How, tests first** (`TestSiblingData`; `tests/test_parameters.py`): run failing (12), then passing. Small copies of
+  the four sibling sheets are broken one at a time: a board category not there; a category without palladium; a
+  sensor type not there; a magnet class missing; no tantalum row; a file not there. A relative sibling path, too few
+  draws, a negative seed or an empty output folder stops 00.
+- **Result:** 159 tests pass, none skipped. The real sibling files hold everything the real file names: the car board
+  categories PE_HVS, ITC, BMS and VCC with gold, silver, palladium, tin and nickel; the car sensor types laser diode
+  array, photodetector array, IMU, IR camera sensor, CMOS image sensor, MEMS microphone array and angle sensor; the
+  tantalum row 0 / 0.0001 / 0.00045; the magnet grade classes H, SH, UH and EH.
+- **Not covered:** the sibling files' numbers themselves (they are their projects'); 00 not run, so `params.xlsx` and
+  `PARAMETER_REFERENCE.md` gain the new settings at the next press of Run on 00.
+
+### V47. Step 3: 01 checks robot type 1 taken apart
+
+- **What:** on Matthias's "Yes" to step 3: the setting `data.parts_taken_apart` (00), and in 01 the reader
+  `read_parts_taken_apart`, the check `check_parts_taken_apart` (CHECKS_DONE point 18, METHODOLOGY.md point 18) and
+  their call in `main()`.
+- **How, tests first** (`tests/test_schemas.py`, class `TestPartsTakenApart`; `tests/test_parameters.py`): written
+  before the code and run failing (19 errors and failures), then passing. A small file of the same layout is broken
+  one thing at a time, and 01 must report exactly that fault: a minimum above its mode; an estimate narrower than half
+  to 1.5 times its mode; a large joint's factor below 1; a group of shares without its remainder; shares leaving the
+  remainder below zero; a material and a body region not on the shared lists; shares of a part that does not exist; a
+  component with neither one material nor shares; joints not matching the joint modules; a joint number given twice;
+  a magnet grade class that is not one; a sensor element of an unlisted sensor; a missing constant; an unknown label;
+  two parts taking the robot's remainder; a missing sheet (stops the reading). A setting not ending in .xlsx stops 00.
+- **Result:** 151 tests pass (were 132). The real file read with the real shared lists: 12 joint kinds, 14 components,
+  18 parts, 20 shares, 7 boards, 6 sensors, no fault. The test of the real file asserts 23 joints, 9 large, the small
+  joint 525.0 g and the large joint 1,011.717 g at the factors' modes.
+- **Corrected on the way:** the test first expected 1,011.744 g, a slip of mine; worked by hand (154.1 g × 1.78 +
+  155.2 g × 2.33 + 12.8 g × 3.56 + 11 g × 1.78 + 79.3 g × 1.39 + (23.7 + 50.8 + 38.1) g × 1.78 = 1,011.717 g), the
+  file was right. Two rows of the file gained what they are computed from (the encoders, the battery pack), so that 01
+  can tell they need no shares.
+- **Not covered:** whether the car board categories, car sensor types and magnet grade classes are in the sibling
+  projects' files (step 4); the parameter register and `PARAMETER_REFERENCE.md` are rewritten by 00, not run here
+  (the next press of Run on 00 writes the new setting into them).
+
+### V46. Step 2: the data file `data/researched/parts_taken_apart.xlsx` against EVIDENCE.md E2
+
+- **What:** the new workbook for robot type 1 (Matthias, "Yes" to step 2), written by a one-off builder in Claude's
+  scratch folder from E2.8, E2.8b and E2.8c with his decisions of step 1; ten sheets (About, Joints, JointParts, Parts,
+  Shares, Boards, Sensors, SensorElements, Constants, Sources).
+- **How:** the file read back with openpyxl; its numbers checked against E2.
+- **Result:**
+  - 23 joints in 12 kinds: 9 large, 14 small, as T1.
+  - The small joint's parts add up to 525.0 g, as T1 weighed; the large joint's parts at their factors' modes to
+    1,011.7 g, as E2.8 (1,012 g).
+  - Every min ≤ mode ≤ max; in every part, the shares other than its remainder add up to at most 1 at their maxima
+    (the joint's "Other": exactly 1, so its plastics remainder never falls below zero).
+  - Every value labelled E spans at least half to 1.5 times its mode, except the rotor's NdFeB, whose maximum is cut
+    at 100 % (stated, agreed).
+  - Git ignores the file (`*.xlsx`, `.gitignore` line 21).
+- **Not covered:** 01 does not check the file yet (step 3); nothing reads it yet.
+
+### V45. The proposal for robot type 1 part by part (EVIDENCE.md E2.8), checked against the measured totals
+
+- **What:** the estimates of E2.8 against the masses the sources measured and against the workbook's sheet `Material
+  Composition per Cat` (robot type 1, rows 5 to 14). Nothing in the project was changed or run; the proposal is not
+  entered.
+- **How:** a scratch script (not in the project), 20,000 draws, seed 1, each min / mode / max drawn as a triangle,
+  independently; remainders taken explicitly, never rescaled. Checked by hand: the small joint's 14 weighed parts add
+  up to 525.0 g; motor 94.3 + 42.9 = 137.2 g and gearbox 8 + 25.3 + 24.1 + 74 + 23.8 = 155.2 g, as T1 states;
+  46.8 V × 9 Ah = 421.2 Wh against T1's 0.42 kWh.
+- **Result:**
+  - **Small joint:** 497 / 525 / 552 g (2.5 % / mean / 97.5 %) against T1's 525 g.
+  - **Large joint:** modes 1,012 g; draws 1,017 / 1,097 / 1,185 g against 1,100 g (T1) and 1,085.1 g (T3k). The mode
+    is 8 % under T1, the mean 0.3 % under it.
+  - **Battery:** cells 1.67 / 1.73 / 1.79 kg; the pack's remainder 0.67 / 0.73 / 0.80 kg; never below zero.
+  - **Robot:** all estimated parts 20.2 / 21.1 / 22.1 kg (with the pack's remainder about 0.7 kg more); frame and shell,
+    the remainder of 35 kg, 11.9 / 13.2 / 14.4 kg, never below zero; its aluminium 6.3 / 8.1 / 9.8 kg, never below
+    zero. The materials add up to 34.2 / 35.0 / 35.8 kg.
+  - **Against the workbook's materials:** aluminium agrees (12.2 against 12 kg); copper is half the workbook's (1.8
+    against 3.8 kg); cables a third of row 18 (0.45 against 1.3 kg); steel higher (8.9 against 7.0 kg); magnets lower
+    (1.1 against 1.5 kg); the workbook has no electrical steel (1.6 kg here).
+  - **Found and fixed in the script before reporting:** the pack's 0.73 kg remainder was at first not subtracted from
+    the robot, which put the materials at 35.7 kg; counted once, they add up to 35.0 kg.
+  - **Rerun with the stator's copper share at 23 / 36 / 45 %** (Matthias, "Yes use this numberrs"; E2.10), in place of
+    30 / 40 / 55 %: copper 1.30 / 1.57 / 1.85 kg (was 1.49 / 1.78 / 2.10), electrical steel 1.50 / 1.78 / 2.11 kg (was
+    1.28 / 1.57 / 1.89); every other total unchanged; the materials still add up to 34.2 / 35.0 / 35.8 kg.
+  - **Rerun with every estimate at least half to 1.5 times its mode** (Matthias, "Estimates should be larger than
+    known numbers", then "Yes"; E2.8): the 13 unweighed small joints ± 50 % (was ± 20 %), the large joints' factors
+    from 1.0 up, the rotor's NdFeB from 0.45, the board mass per cm² 0.28 / 0.56 / 0.84, the cables from 3 m, and the
+    rest listed in E2.8. Small joint 456 / 525 / 593 g; large joint 912 / 1,034 / 1,158 g against 1,100 g (T1) and
+    1,085.1 g (T3k), its mean now 6 % under T1; frame and shell 12.0 / 13.8 / 15.5 kg and its aluminium 6.1 / 8.6 /
+    11.1 kg, never below zero; copper 1.17 / 1.52 / 1.90 kg; magnets 0.69 / 1.02 / 1.39 kg; the materials still add up
+    to 34.2 / 35.0 / 35.8 kg.
+  - **Against the workbook's parts list, rows 8 to 20** (Matthias: "Compare with already existing data"): the joints
+    agree in total (16.7 against 17.6 kg) and the battery (2.5 kg); the harness is a third, the fasteners a quarter
+    and the cooling about a sixth of the workbook's rows, and the frame and shell, the remainder, 4 kg above rows 16
+    and 17; frame, shell, harness, fasteners and cooling together 14.9 kg here, 13.75 kg in the workbook. **Found:**
+    row 14 gives the LiDAR 0.65 kg, "Direct", citing Livox (S46), whose specifications give 265 g; reported, not
+    changed. Not covered: Unitree's model file was read only approximately for this check (about 13 kg).
+  - **Where the materials sit** (a second scratch script reading the first one's draws): the knee cooling moved into
+    the knee joints (Matthias, "Is with the joins often used"); every part split over body regions by its count of
+    pieces there. Checked: the regions add up to each material's total (copper 0.83 + 0.42 + 0.08 + 0.18 = 1.52 kg);
+    the materials' totals are unchanged by the move (34.2 / 35.0 / 35.8 kg). Result: the joints hold 88 % of the
+    copper and all the NdFeB; their driver boards are 51 % of the boards' mass.
+  - **Boards and sensors to elements** (EVIDENCE.md E2.8b; a third scratch script, 20,000 draws, seed 1, reading the
+    board masses of the first and the car rows of `RAWCLICVehicleElectronics/Data/04_` and `07_`, copied to a scratch
+    file, not changed). Checked by hand: Bizzo's 14 copper values average 20.03 wt% (12.5 to 28.7); the two laser
+    diode arrays give 2 × (5 + 30 + 150) / 3 = 123 mg gallium at the mean, the photodetector 3.7 mg, together 127 mg as
+    printed. Result: gold 35 / 51 / 73 mg, copper 0.10 / 0.16 / 0.23 kg, gallium and arsenic about 0.13 g each, all in
+    the head; no germanium. Not covered: the approximation of drawing board area and mass independently.
+  - **Tantalum added, silicon dropped** (Matthias): board mass × 0 / 100 / 450 ppm (DataCenters'
+    `BoardsAndComponents`, its row read and quoted): 63 / 140 / 248 mg; every other element unchanged within the
+    draws' noise (gold 34 / 51 / 73 mg).
+  - **The complete picture** (EVIDENCE.md E2.8c; a fourth scratch script running the other three and 02's
+    `RecipeDraws` on the project's recipe 'NMC cylindrical', read-only, nothing written to the project). Checked by
+    hand: copper 1.52 (parts) + 0.16 (boards) + 1.744 × 8.36 % = 0.146 (cell foil) = 1.82 kg, as printed; lithium
+    1.744 × 2.58 % = 0.045 kg.
+  - **The magnets' elements** (a fifth scratch script, run in RAWCLICVehicleTractionMotor's own environment with its
+    `magnet_element_draws`, read-only): the grade bands printed by its `magnet_chemistry` match its METHODOLOGY § 4.2
+    table (Nd + Pr 0.29–0.32 in every class; Dy H 0.02–0.05 to EH 0.08–0.10). Checked by hand: Nd + Pr = 262 + 50 =
+    312 g of 1,021 g of NdFeB = 30.5 %, inside 0.29–0.32. Not covered: which joints run hot is a proposal; the
+    fractions use that project's fixed seed, so the scenarios share their draws.
+- **Not covered:** the estimates' own bases (E2.8 names where there is none); the 23 joints' differences beyond
+  small and large; the sensors' and boards' insides.
 
 ### V44. The real run: 00 to 03, 200,000 draws
 

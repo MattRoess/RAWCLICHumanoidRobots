@@ -32,6 +32,8 @@ figures/
 documentation/claude/PARAMETER_REFERENCE.md
 # 02_composition.py writes the draws and summaries of every robot type here, for stock-and-flow.
 data/consolidated/
+# 04_parts_taken_apart.py writes the draws of robot type 1 taken apart here (their column lists are .txt files).
+data/parts_taken_apart/
 
 ### THE EARLIER MODEL
 # Matthias, 2026-10-26: left out of the repository until he decides whether it stays (documentation/claude/HANDOVER.md).

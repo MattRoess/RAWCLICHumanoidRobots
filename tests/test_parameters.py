@@ -25,10 +25,13 @@ from src.params_schema import ParameterError, Params, current, flatten, validate
 
 # Every setting the project has; a new one must be added here, so that its arrival is a decision.
 KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.materials_sheet',
-        'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'checks.tolerance_kg', 'composition.draws',
+        'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'data.parts_taken_apart',
+        'data.vehicle_pcb_composition', 'data.vehicle_sensor_composition', 'data.data_center_element_composition',
+        'data.traction_motor_magnets', 'data.traction_motor_dir', 'checks.tolerance_kg', 'composition.draws',
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
-        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi'}
+        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'parts.draws', 'parts.seed',
+        'output.parts_dir', 'output.parts_figures_dir'}
 
 
 class TestSettings(unittest.TestCase):
@@ -46,6 +49,12 @@ class TestSettings(unittest.TestCase):
         for section, name, value in (('data', 'workbook', 'workbook.csv'),
                                      ('data', 'shared_lists', 'lists.csv'),
                                      ('data', 'element_recipes', 'recipes.csv'),
+                                     ('data', 'parts_taken_apart', 'apart.csv'),
+                                     ('data', 'vehicle_pcb_composition', 'relative/04_.xlsx'),
+                                     ('data', 'traction_motor_dir', 'relative/folder'),
+                                     ('parts', 'draws', 50),
+                                     ('parts', 'seed', -1),
+                                     ('output', 'parts_dir', ' '),
                                      ('data', 'components_sheet', ' '),
                                      ('data', 'materials_sheet', ''),
                                      ('checks', 'tolerance_kg', 0),

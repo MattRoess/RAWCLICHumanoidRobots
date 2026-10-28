@@ -8,6 +8,849 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E2. Robot type 1 taken apart: what makes up the Unitree G1, the sources, 2026-10-27
+
+### What was asked
+
+Matthias, 2026-10-27: "where the hell the materilas are in the robot", "It is kind of parts. SO one disassble the
+robost accordingly the material composition of the sensor and PCB are also messing", "What is the lenght of the
+cables etc.", "Not only this also about the different parts and motors and there strength and tpes and gear
+boxes!!", "Everything, which makes up the robot", "Start with the first one", and, on the sold Nikkei BP report, "I
+do not have the possiblity to buy it. Find other sources." Robot type 1 is Compact Research & Developer; its anchor
+robot in the workbook is the Unitree G1 (35 kg). This section is research only: nothing is entered or coded before
+Matthias has seen it.
+
+### E2.1 The sources
+
+| # | Source | What it is | Same kind / representative | Read myself |
+|---|---|---|---|---|
+| U1 | Unitree, G1 product page. https://www.unitree.com/g1/ | Manufacturer's specification (design values, claims) | The anchor robot itself | Yes |
+| U2 | Unitree, G1 developer documentation, "About G1". https://support.unitree.com/home/en/G1_developer/about_G1 | Manufacturer's documentation for developers | The anchor robot itself | Yes |
+| U3 | Unitree, `g1_29dof.urdf` (the robot's model file: every joint's torque limit, every link's mass). https://raw.githubusercontent.com/unitreerobotics/unitree_ros/master/robots/g1_description/g1_29dof.urdf | Manufacturer's model file; masses and limits as designed, not measured | The anchor robot, 29-joint EDU version | Yes |
+| U4 | Unitree, G1 brochure (Chinese), 2025. https://www.worldrobotconference.com/profile/robot/download/2025/07/08/杭州宇树-G1宣传册_20250708194541A200.pdf | Manufacturer's brochure | The anchor robot | Yes; nothing beyond U1 |
+| L1 | Livox, Mid-360 specifications. https://www.livoxtech.com/mid-360/specs | Manufacturer's datasheet | The LiDAR in the G1's head (U2) | Yes |
+| **T1** | **China Post Securities (Su Qianye, Sheng Wei, Yang Shuaibo), 《宇树G1人形机器人拆解报告》, 2026-03-30, 59 slides. https://pdf.dfcfw.com/pdf/H3_AP202603311820899944_1.pdf** | **A securities firm's own teardown of a basic G1 (23 joints): parts photographed and weighed; costs are its estimates** | **The anchor robot** | **Yes, the report itself** (East Money's report server) |
+| T2 | SemiAnalysis, "China's Unitree Will Dominate Global Robotics", 2026-06-09. https://newsletter.semianalysis.com/p/chinas-unitree-will-dominate-global | An industry analyst's design examination and supplier quotes | The anchor robot, EDU version (29 joints) | Free part only; the hardware detail is behind the paywall |
+| T3 | Munro & Associates, *Munro Live*, Unitree G1 teardown video, June 2026. https://www.youtube.com/watch?v=OXuqGuTgXGU | An engineering consultancy's teardown | The anchor robot | **No, second-hand** through Humanoid.guide: https://humanoid.guide/unitree-g1-teardown-reveals-actuator-and-cooling-tradeoffs/ |
+| T3k | Munro's knee-actuator report (by "Grant"), in Chinese on Zhihu: https://zhuanlan.zhihu.com/p/2086097814052984275 | An engineering consultancy's measured teardown of one knee joint | The anchor robot's knee | **No, second-hand**: Zhihu asks for a login; read through the summary in SMZDM: https://post.smzdm.com/p/awwo7o5g/ |
+| T4 | Nikkei BP, 『人型ロボット「Unitree G1」徹底分解・分析レポート』, 2026-07-31, 254 pages. https://info.nikkeibp.co.jp/nxt/campaign/b/291730/ | A technical publisher's full teardown, sold at 660,000 yen | The anchor robot | **No**: Matthias cannot buy it |
+| T5 | EEWorld, summary of T1 to T4. https://en.eeworld.com.cn/news/robot/eic733333.html and https://en.eeworld.com.cn/news/robot/eic733333_2.html | Trade-press summary by a platform user; second-hand | The anchor robot | Yes; replaced by T1 wherever T1 says the same |
+| C1 | "Lenz's law", 宇树G1拆解分析 - 主控部分 (main control board), 2025-10-23. https://jishuzhan.net/article/1981300479431868417 (copy of a CSDN blog) | A private person's teardown of the main control board | The anchor robot | Yes |
+| J1 | JONVER (Jiangyin; makes harnesses, busbars, connectors), G1 teardown article, 2026-04-15. https://www.jonver.cn/newsdetail_195 | A harness supplier's summary; it repeats T1 | The anchor robot | Yes; adds nothing to T1 |
+| B1 | Maverick Drone (a dealer), G1 battery. https://www.maverickdrone.com/collections/all/products/g1-battery | Dealer's product page | The anchor robot's battery | Yes |
+| G1 | Simplexity, "Unitree Go2 Motor Teardown". https://www.simplexitypd.com/blog/unitree-go2-motor-teardown/ | An engineering consultancy's teardown | **Not the same kind**: the motor of Unitree's four-legged Go2 | Yes |
+| V1 | YC Insulation (sells insulation sleeving), "Robot Wire Harness Protection". https://ycsleeve.com/news-en/news-robot-wire-harness-en-2026-05-06.html | Vendor marketing, citing "GGII Robotics data" without a reference | **Not representative**: no robot named | Yes |
+| A1 | Cui, Park, Park (Hanyang University), *Sensors* 23 (2023) 2627. https://doi.org/10.3390/s23052627 | A university model of in-robot networks | **Not representative**: no real robot | Yes |
+
+**Left out:** G1, V1 and A1 do not describe the G1. LTEC's G1 teardown (https://www.ltec-biz.com/25l-0907-1/) is sold
+at 980,000 yen or more and was not used.
+
+### E2.2 The joints
+
+The basic G1 has 23 joints, each one module of motor, two-stage planetary gearbox, two encoders and a driver board,
+with the cables running through its hollow centre (T1, slides 3 and 20; U1, U2).
+
+| Joint | Number (basic version) | Torque limit (U3) | Module (T1, slides 11, 18, 43) |
+|---|---|---|---|
+| Hip pitch, roll, yaw | 6 | 88 N·m | large: about 80 mm across, 1,100 g |
+| Knee | 2 | 139 N·m (U3); 90 N·m basic, 120 N·m EDU (U1, U2, T1) | large |
+| Waist yaw | 1 | 88 N·m | large |
+| Ankle pitch, roll (in the lower leg, driving the ankle through rods) | 4 | 35 N·m | small: about 60 mm across, 70 mm high, 525 g |
+| Shoulder pitch, roll, yaw; elbow; wrist roll | 10 | 25 N·m | small |
+| *EDU only:* waist roll, pitch | 2 | 35 N·m | — |
+| *EDU only:* wrist pitch, yaw | 4 | 5 N·m | — |
+
+9 large × 1,100 g + 14 small × 525 g = 17,250 g, 49 % of the robot (T1, slide 43). The workbook (rows 8 to 11) has
+17.6 kg at the mode.
+
+**One small joint, weighed part by part** (T1, slide 43, figure 37: a lower-leg joint of the basic G1):
+
+| Part | g | Material, as T1 gives it |
+|---|---|---|
+| Motor stator | 94.3 | "铜线+包胶", copper wire and its coating |
+| Motor rotor | 42.9 | "磁钢", permanent magnet |
+| Magnet carrier (rotor hub) | 16.9 | aluminium, and a plastic bearing |
+| Stage 1 sun gear | 8.0 | steel |
+| Stage 1 planets, carrier and stage 2 sun gear | 25.3 | steel |
+| Stage 1 ring gear | 24.1 | steel |
+| Stage 2 planets, carrier and crossed roller bearing | 74.0 | carrier aluminium, the rest steel |
+| Stage 2 ring gear | 23.8 | steel |
+| Driver board | 12.8 | PCB |
+| Two small bearings | 11.0 | steel |
+| Housing | 79.3 | aluminium |
+| Two end caps | 23.7 | aluminium |
+| Output flange | 50.8 | steel |
+| Other | 38.1 | not given |
+| **Total** | **525** | |
+
+- **Checked:** the parts add up to 525.0 g; motor 94.3 + 42.9 = 137.2 g and gearbox 8 + 25.3 + 24.1 + 74 + 23.8 =
+  155.2 g, as T1's text says.
+- **Questioned:** a stator is copper wound on an electrical-steel core, but T1 names only the copper and its coating.
+  The steel core's share of the 94.3 g is not given. The rotor's 42.9 g is called "magnet"; whether it holds a steel
+  back ring is not given. "Other" (38.1 g) is not explained.
+- **Motor:** low-inertia, high-speed, internal-rotor permanent-magnet synchronous motor, "定子绕组 + 永磁磁钢 +
+  一体化转子轮毂", up to 3,000 to 5,000 rpm (T1, slides 19, 21). The magnet grade is not given.
+- **Gearbox:** two planetary stages; stage 1 sun 18, planets 14, ring 60; stage 2 sun 16, planets 20, ring 60; "总减速比
+  ~20.58" (T1, slide 22). The ratio follows from the teeth ((1 + 60/18)(1 + 60/16) = 20.58), but the planets do not fit
+  the rings (18 + 2 × 14 = 46 and 16 + 2 × 20 = 56, not 60), so the tooth counts are doubtful.
+- **Bearing:** Luoyang Baina crossed roller bearing CRBT355A 10E4J3, 35 mm bore, the only part with a maker's logo
+  (T1, slide 23). Gear wheels from Meihu (美湖股份), by Meihu's own statement (T1, slide 15).
+- **Driver board:** round, Unitree's own, field-oriented control, every chip's marking removed (T1, slide 24); 12.8 g
+  in the small joint. Its size is not given.
+
+**The knee joint** (T3k, second-hand): 80 mm across, 64 mm thick, "含线缆 1085.1 克" (1,085.1 g with its cables); an
+18-slot, 16-pole permanent-magnet motor; two planetary stages, stage 1 sun 16, four planets 20, ring 56; stage 2 sun
+12, four planets 18, ring 48; 22.5:1. These teeth fit (16 + 2 × 20 = 56; 12 + 2 × 18 = 48) and give 4.5 × 5 = 22.5.
+An IKO crossed roller bearing; encoders on the rotor and on the output; a stack of driver boards; die-cast aluminium
+back cover; the cables run through a hollow aluminium tube with a PTFE liner. Unknown to Munro: the magnet grade, the
+chips. T3 gives "about 15:1" for the G1's joints.
+
+### E2.3 The electronics
+
+**Boards (PCBs)**
+
+| Board | Number | What the sources give |
+|---|---|---|
+| Joint driver board | 1 per joint, 23; the knee holds "a stack" (T3k) | Round; 12.8 g in a small joint (T1) |
+| Main control board, in the back | 1 | Rockchip RK3588S, two BIWIN BMW2CX32H2A-32G-X memory chips (8 GB together), one FORESEE FEMDNN064G-58AAA 64 GB storage chip; the other chips' markings removed; aluminium heat sink and fan (T1, slides 26, 27, 39). C1: a core board on a base board |
+| Development computer, NVIDIA Jetson Orin NX on Unitree's own base board, with an NVMe SSD | 1 (EDU only) | U2, T1 (slide 28), C1; module 69.6 × 45 mm (retailer pages) |
+| Head control board with its own MCU | 1 | T1, slide 37 |
+| Power distribution unit (PDU) and DC-DC converter | 1 each | T1's cost table (slide 12); no size |
+| Capacitor buffers at the end joints of the arms and legs | several | T1, slide 38 |
+| Battery management board, with NTC temperature sensors | 1 | T1, slide 42 |
+| The boards inside the LiDAR, camera and microphone array | — | Not given |
+
+**No source gives a board area.** The only board mass is the small joint's driver board, 12.8 g.
+
+**Sensors**
+
+| Sensor | Number | What the sources give |
+|---|---|---|
+| Livox Mid-360 LiDAR, head | 1 | 65 × 65 × 60 mm, 265 g, 6.5 W, built-in IMU ICM40609 (L1) |
+| Intel RealSense D435i depth camera, head | 1 | T1, U2; size and mass not yet read (Intel's site did not answer) |
+| Microphone array | 1, four silicon microphones 20 mm apart | T1, slide 33 |
+| Speaker, 5 W peak | 1 | T1, slide 33 |
+| IMU, torso and pelvis | 2 | Mounting points in U3 |
+| Joint encoders | 2 per joint, 46 | U1, U2, T3k (rotor and output) |
+| Temperature sensors (NTC) | in the main chip and the battery management | T1, slide 42 |
+
+### E2.4 The cables
+
+- **Length:** "全身线束不超过10m" (the whole-body harness is not longer than 10 m) (T1, slide 3).
+- **Layout:** power and signal cables run inside the hollow joint shafts; the motors of one arm or one leg are
+  connected in series (T1, slide 35), on XT30 connectors, "XT30 2+2 连接器上下游菊花链串接", daisy-chained (T3k).
+  The head's sensors reach the main board over high-speed differential lines through the head's MCU board (T1, slide
+  37); the LiDAR and camera data go over serial or USB, not the joint bus (T1, slide 34).
+- **Joint bus disagrees:** CAN (T1, slides 34, 36; J1); RS485, about 6 lines: 2 arms, 2 legs, head, waist (C1, from the
+  board, partly hidden under tape).
+- **Parts named:** capacitor buffers, the XT30 harness, the harness terminals (T1's cost table: 30, 90 and 150 yuan).
+- **Not given anywhere:** the cross-sections of the wires, so no copper per metre, and the length of each kind of
+  cable.
+
+### E2.5 The battery
+
+Quick-release pack of 13 lithium cells in series, 46.8 V nominal, 9,000 mAh, 0.42 kWh, about 2.5 kg (T1, slide 25);
+with its own battery management (B1, T1). 120 × 80 × 182 mm (B1). Cell format and number of cells: not given.
+
+### E2.6 The frame, the shell and the cooling
+
+- **Torso:** "躯干采用全塑料件", plastic parts throughout: engineering plastics (ABS, PA) and silicone (T1, slide 44).
+- **Limbs:** aluminium alloy links with diamond-shaped cut-outs; the lower-leg links are steel, "身体中唯一采用钢材质结构件",
+  the only steel structural part; every other structural part is aluminium (T1, slides 18, 44, 45). The hands of the
+  basic version are plastic and do not move (T1, slide 18).
+- **Back:** outer shell, then a foam cushion, then an inner plastic layer over the main board (T1, slide 26).
+- **Cooling:** main board, aluminium heat sink and fan (basic), with a vapour chamber added in the EDU version; knees,
+  copper vapour chamber and copper strip into the structure; waist joint, a small centrifugal fan (T1, slides 39 to
+  41); hips, two centrifugal fans (T3).
+- **Screws:** not given.
+
+### E2.7 What is still missing
+
+- **The large joint part by part.** Only its total (1,100 g, T1; 1,085.1 g with cables, T3k) and its make-up (T3k).
+- **Inside the parts:** the stator's steel core against its copper; the magnet grade and any steel in the rotor; what
+  "Other" (38.1 g) is.
+- **Board areas,** except that the small joint's board weighs 12.8 g.
+- **The wires' cross-sections** and the length of each kind of cable.
+- **The battery cells,** the D435i's size and mass, the screws.
+
+T1 is the only first-hand teardown with masses. T3k (Munro's knee report) is behind Zhihu's login; Munro's full video
+with Chinese subtitles is on Bilibili (https://www.bilibili.com/video/BV15jek6wEZH), and a Bilibili video on the
+G1's joint motor (https://www.bilibili.com/video/BV1oye46dEt6); neither was watched.
+
+### E2.8 Proposal: robot type 1 part by part, with estimates (E) where the reports stop. Not entered
+
+Asked, Matthias, 2026-10-27: "Can based on these reports the other parts be estimated? They would be labeled
+accordingly and have a large uncertainty", then "Yes do so. Try to avoid normalization, if there are indications
+normaization will bias all the values".
+
+**How.** Every part is estimated on its own basis; nothing is rescaled to fit a total. Where parts must make up a
+measured whole, one part is the explicit remainder, named below; which one is Matthias's decision. The sums against
+the measured totals are checks (V45), not corrections. Masses are for one piece, in g; min / mode / max.
+
+**The uncertainty of an estimate** (Matthias, 2026-10-27: "Estimates should be larger than known numbers"; applied on
+his "Yes"): every value marked E spans at least half to 1.5 times its mode, wider where its basis is wider. A bound
+is cut only at a stated limit, named where it applies. Known numbers keep their sources' ranges.
+
+**Bases added for the estimates** (read myself unless said):
+- Intel, D435i specifications: 90 × 25 × 25 mm, no mass.
+  https://www.intel.com/content/www/us/en/products/sku/190004/intel-realsense-depth-camera-d435i/specifications.html
+  The D435's 75 g is from Intel's D400 datasheet as quoted in a RealSense forum reply (second-hand):
+  https://support.realsenseai.com/hc/en-us/community/posts/19069743039891/comments/19071249439891
+- XT30 wire range 20 to 16 AWG (TME's listing of the XT30-F, second-hand through a search summary):
+  https://www.tme.com/in/en/details/xt30-f/dc-power-connectors/amass/ ; Munro: the G1's joints are joined by "XT30
+  2+2" connectors, two power and two signal contacts (T3k).
+- RK3588S whole boards 90 × 60 mm (Firefly ROC-RK3588S-PC) and 85 × 56 mm (ArmSoM Sige7s), from search summaries
+  of https://www.cnx-software.com/2023/07/01/firefly-rockchip-rk3588-sbc-32gb-ram/ and
+  https://itsfoss.com/news/armsom-sige7s/ (second-hand).
+- **The copper share of the stator:** no source of the kind (E2.10); 23 / 36 / 45 % from measured car traction
+  motors and Matthias's car auxiliary-motor workbook, agreed by Matthias on 2026-10-27 ("Yes use this numberrs").
+
+**1. Small joints, 14** (hips are not small: ankles 4, arms 10). T1 weighed one lower-leg joint part by part; the
+same part in the other 13 joints is taken as the weighed mass ± 50 % (E). The workbook's own modules differ by ± 24 %
+around T1's 525 g (rows 9 to 11: 0.65 and 0.40 kg).
+
+| Part | g (min / mode / max) | Materials (share of the part) |
+|---|---|---|
+| Stator | 47.2 / 94.3 / 141.5 | copper 0.23 / 0.36 / 0.45 (E2.10, agreed); coating 0.02 / 0.05 / 0.10 (E); **electrical steel the remainder** |
+| Rotor | 21.5 / 42.9 / 64.4 | NdFeB 0.45 / 0.90 / 1.00 (E; T1 calls it "magnet"; at most 100 %); steel the remainder |
+| Magnet carrier | 8.5 / 16.9 / 25.4 | plastic bearing 0.05 / 0.15 / 0.30 (E); aluminium the remainder |
+| Gears: stage 1 sun, stage 1 planets and carrier with stage 2 sun, both ring gears | 4.0–38.0 each; 81.2 at the mode together | steel (T1) |
+| Stage 2 planets, carrier, crossed roller bearing | 37.0 / 74.0 / 111.0 | aluminium 0.125 / 0.25 / 0.40 (E; T1: carrier aluminium); steel the remainder |
+| Driver board | 6.4 / 12.8 / 19.2 | PCB (T1) |
+| Two small bearings | 5.5 / 11.0 / 16.5 | steel (T1) |
+| Housing; two end caps | 39.7 / 79.3 / 119.0; 11.9 / 23.7 / 35.6 | aluminium (T1) |
+| Output flange | 25.4 / 50.8 / 76.2 | steel (T1) |
+| Other | 19.1 / 38.1 / 57.2 | copper 0.10 / 0.25 / 0.40, steel 0.20 / 0.40 / 0.60 (E, no basis: wires, screws, encoder magnets); plastics the remainder |
+
+**2. Large joints, 9** (hips 6, knees 2, waist 1). No part was weighed. Each part = the small joint's part × a factor
+(E) from the joints' sizes and torques: 80 against 60 mm across (area 1.78 ×), 64 against 70 mm high, the joint's
+surface 1.39 ×, the mean output torque of the large joints 99.3 against 27.9 N·m (3.56 ×; U3), and Munro's "stack"
+of driver boards in the knee (T3k). Materials as in the small joint. Limit: no factor below 1.0, as a large joint's
+part is not lighter than the small joint's.
+
+| Part | Factor (min / mode / max) | Why |
+|---|---|---|
+| Stator, rotor, magnet carrier | 1.0 / 1.78 / 2.67 | the motor's cross-section |
+| Gears and stage 2 assembly | 1.17 / 2.33 / 3.56 | from the cross-section alone to growing with the torque; mode 3.56^(2/3) |
+| Driver board | 1.78 / 3.56 / 5.33 | one, two or three boards of the larger size |
+| Two small bearings | 1.0 / 1.78 / 2.67 | the area |
+| Housing | 1.0 / 1.39 / 2.09 | the surface |
+| Two end caps, output flange, other | 1.0 / 1.78 / 2.67 | the area |
+
+Check: the large joint's modes add up to 1,012 g; its draws to 912 / 1,034 / 1,158 g (2.5 % / mean / 97.5 %), against
+1,100 g (T1) and 1,085.1 g (T3k). Nothing is scaled to meet it.
+
+**3. Battery.** Cells from the energy, as the project already does for its battery rows: 46.8 V × 9 Ah = 421.2 Wh
+(T1) over the NMC cell's 256 / 241.5 / 232.5 Wh/kg (E1.7d) = 1,645 / 1,744 / 1,812 g; kept, as both are sourced and
+the cells cannot outweigh the 2.5 kg pack. Battery management board 30 / 60 / 96 cm² (E; at most the pack's 120 × 80
+mm, B1). **The pack's housing, busbars and wires are the remainder of its 2.5 kg (T1): 0.66 / 0.73 / 0.80 kg**; their
+materials are not known.
+
+**4. Boards outside the joints.** Mass = area × 0.28 / 0.56 / 0.84 g/cm² (E): the small driver board's 12.8 g on a
+round board 54 mm across (22.9 cm²), ± 50 %.
+
+| Board | Area, cm² (E) | g | Basis |
+|---|---|---|---|
+| Main control board (RK3588S, core board on base board) | 50 / 100 / 150 | 14 / 56 / 126 | whole RK3588S boards 48 to 54 cm² as the least; C1 |
+| Head control board | 5 / 15 / 30 | 1 / 8 / 25 | none beyond T1's naming it |
+| Power distribution unit and DC-DC converter | 30 / 60 / 100 | 8 / 34 / 84 | T1's cost table names them |
+| Capacitor buffer boards, 4 | 2 / 5 / 10 each | 0.6 / 3 / 8 each | one per arm and leg end (T1) |
+| Battery management board | 30 / 60 / 96 | 8 / 34 / 81 | above |
+| Driver boards in the joints | 11.5 / 22.9 / 28.3 per small joint (at most the 60 mm joint); × 1.78 to 5.33 per large joint | weighed (T1) and above | T1, T3k |
+
+**5. Cooling** (E): main board heat sink 50 / 100 / 200 g aluminium; 4 fans 5 / 10 / 20 g each (copper 0.05 / 0.10 /
+0.20, plastics the rest); 2 knee vapour chambers with their copper strips 10 / 20 / 40 g each, copper.
+
+**6. Sensors.** LiDAR 265 g (L1); D435i 72 / 75 / 80 g (Intel's D435, 75 g, second-hand; kept as a sourced number);
+microphone array 5 / 10 / 20 g (E); speaker 17.5 / 35 / 60 g (E); 2 IMUs 1 / 2 / 5 g each (E). Their insides are not
+yet known; for now each is all "electronics".
+
+**7. Cables** (E). 3 / 6 / 10 m of four conductors (at most T1's "not over 10 m"); the body's routes (two legs about
+0.9 m, two arms about 0.6 m, waist and head about 0.5 m, plus battery and sensor leads) give about 5 to 6 m. Two power
+conductors of 0.52 / 0.82 / 1.31 mm² (20 / 18 / 16 AWG, the XT30's range, kept) and two signal conductors of 0.065 /
+0.13 / 0.20 mm². Copper 31 / 102 / 271 g; insulation and jackets 0.5 / 1 / 1.5 × the copper; 46 XT30 (2+2)
+connectors, two per joint, 1.5 / 3 / 4.5 g each, copper 0.175 / 0.35 / 0.525.
+
+**8. Others.** Fixed plastic hands of the basic version (T1), 2 × 120 / 170 / 220 g (U3: 0.170 kg each, a design
+value, kept). Screws 200 / 500 / 1,000 g steel: **no source; E**.
+
+**9. Frame and shell: the robot's remainder.** 35 kg (34 / 35 / 36, "About 35kg", U1) minus everything above: 12.0 /
+13.8 / 15.5 kg. Split by estimate: plastics (the torso's plastic parts, covers, silicone, foam; T1) 2.25 / 4.5 / 6.75
+kg; the steel lower-leg links (T1) 0.3 / 0.6 / 1.0 kg; **aluminium the remainder**, 6.1 / 8.6 / 11.1 kg, never below
+zero.
+
+**Checks against the workbook's own material sheet, robot type 1** (kg; this proposal 2.5 % / mean / 97.5 %, V45):
+
+| Material | This proposal | Workbook (min / mode / max) | Reading |
+|---|---|---|---|
+| Aluminium | 10.4 / 12.7 / 15.1 | 10.5 / 12 / 13.5 | agree |
+| Steel | 7.6 / 8.6 / 9.6 | 7.0 at the mode (bearing and gear 4.2 + structural 2.8) | the proposal is higher |
+| Plastics | 4.0 / 5.8 / 7.6 | 6.7 at the mode (polymers 5.5 + CFRP 1.2) | close; T1 names no carbon fibre |
+| Copper | 1.2 / 1.5 / 1.9 | 3 / 3.8 / 4.5 | **the workbook has about two and a half times as much** |
+| Battery cells | 1.67 / 1.73 / 1.79 | 2 / 2.5 / 3, the whole pack | the pack's rest is 0.73 kg |
+| Electrical steel | 1.2 / 1.7 / 2.2 | none | the workbook has none |
+| Electronics (boards, sensors) | 1.0 / 1.2 / 1.4 | 1.5 at the mode (0.5 + 1.0 miscellaneous and optics) | close |
+| Magnets (NdFeB) | 0.7 / 1.0 / 1.4 | 1.2 / 1.5 / 1.8 | the proposal is lower |
+| Cables (copper, insulation, connectors) | 0.27 / 0.45 / 0.66 | row 18: 1.1 / 1.3 / 1.5 | **the workbook has about three times as much** |
+
+**Checks against the workbook's own parts list, robot type 1** (sheet `Components & Materials`, rows 8 to 20; asked,
+Matthias: "Compare with already existing data. Aluminum is used also for cooling"; kg, 2.5 % / mean / 97.5 %, V45):
+
+| Workbook row | This proposal | Workbook (min / mode / max) | Reading |
+|---|---|---|---|
+| 8, knee actuators (2) | 1.82 / 2.07 / 2.32 | 2.3 / 2.5 / 2.7 | lower |
+| 9, hip and waist actuators (7) | 6.39 / 7.24 / 8.10 | 6.3 / 7.0 / 7.7 | agree |
+| 10, ankle and shoulder actuators (10) | 4.56 / 5.25 / 5.93 | 5.5 / 6.5 / 7.5 | lower: T1 gives every small joint 525 g, the workbook 650 g |
+| 11, elbow and wrist actuators (4) | 1.82 / 2.10 / 2.37 | 1.4 / 1.6 / 1.8 | higher: the workbook gives 400 g |
+| 8 to 11, all joints | 15.2 / 16.7 / 18.1 | 15.5 / 17.6 / 19.7 | agree |
+| 12, battery pack | 2.5 | 2.3 / 2.5 / 2.7 | agree |
+| 13, main compute | 0.17 / 0.25 / 0.34 (boards outside the joints and the heat sink) | 0.35 / 0.40 / 0.45 | lower |
+| 14, LiDAR | 0.265 (Livox datasheet) | 0.65, labelled "Direct", citing Livox (S46) | **the workbook's value does not match its own source** |
+| 15, depth camera | 0.072 / 0.075 / 0.080 | 0.08 / 0.10 / 0.12 | close |
+| 16 and 17, frame and shell | 12.0 / 13.8 / 15.5 (the remainder) | 8.3 / 9.7 / 11.1 | **higher by about 4 kg** |
+| 18, harness | 0.27 / 0.45 / 0.66 | 1.1 / 1.3 / 1.5 | a third |
+| 19, fasteners and structural bearings | 0.28 / 0.57 / 0.90 (screws; the bearings are inside the joints) | 1.8 / 2.2 / 2.6 | a quarter |
+| 20, cooling fans and heat pipes ("Copper heatpipes & Al 6063 fins") | 0.06 / 0.09 / 0.13, plus the heat sink in row 13 | 0.45 / 0.55 / 0.65 | **far lower** |
+| no row: microphones, speaker, IMUs; the basic version's fixed hands | 0.05; 0.34 | — | not in the workbook |
+
+- **The 4 kg in the frame and shell come from the rows above:** where this proposal is lower (harness, fasteners,
+  cooling, LiDAR, compute, joints), the remainder grows. Together, frame, shell, harness, fasteners and cooling are
+  14.9 kg here and 13.75 kg in the workbook; Unitree's model file (U3), less the joints, battery, boards and
+  sensors, leaves about 13 kg (an approximate reading of its link masses). The totals agree; the split between the
+  frame and the smaller rows does not, and the remainder carries every low estimate.
+- **Aluminium in the cooling, which this proposal undercounts:** the main board's "大面积铝制散热片+风扇" (a large
+  aluminium heat sink and fan; T1, slide 39), counted at 50 / 100 / 200 g; the knees' heat pipe has an aluminium
+  condensing section (T3) and leads the heat through a copper strip into the aluminium structure (T1, slide 40), but
+  the knees are counted as copper only; the workbook's row 20 names "Al 6063 fins".
+- **The LiDAR in the workbook:** row 14 gives 0.65 kg, min = mode = max, labelled "Direct", citing Livox's MID-360
+  specifications (S46, https://www.livoxtech.com/mid-360); Livox's specifications give 265 g
+  (https://www.livoxtech.com/mid-360/specs). Reported, not changed.
+
+**Matthias's answers to the comparison** (2026-10-27): on the aluminium in the cooling, "Is with the joins often
+used": the cooling aluminium is counted with the joints (their aluminium housings, T1 and T3), and the knees'
+vapour chambers and copper strips are now part of the knee joints; no further research on the cooling. On the harness
+and screws: "Do not go to much in detail. It is essential, where the critcal materials are": the harness and the
+screws stay as estimated, and the frame and shell stay the remainder.
+
+**Where the materials of interest sit in robot type 1** (kg, means by body region; total 2.5 % / mean / 97.5 %; V45).
+Each part is split over the regions by its count of pieces there: small joints legs 4 (ankles), arms 10; large joints
+legs 8 (hips 6, knees 2), torso 1 (waist); boards and sensors where T1 places them; cables and screws over the whole
+body.
+
+| Material | Legs | Arms | Torso | Head | Whole body | Total |
+|---|---|---|---|---|---|---|
+| Copper | 0.83 | 0.42 | 0.08 | 0 | 0.18 (cables) | 1.17 / 1.52 / 1.90 |
+| NdFeB (Nd, Pr, Dy, Tb, B) | 0.62 | 0.34 | 0.06 | 0 | 0 | 0.69 / 1.02 / 1.39 |
+| Battery cells (Li, Ni, Co, Mn, graphite) | 0 | 0 | 1.73 | 0 | 0 | 1.67 / 1.73 / 1.79 |
+| Boards and sensors (Au, Ag, Pd, Si, Ga, Ge) | 0.42 | 0.14 | 0.20 | 0.40 | 0 | 0.97 / 1.16 / 1.35 |
+| Aluminium in the joints and the heat sink | 2.40 | 1.36 | 0.35 | 0 | — | 3.47 / 4.11 / 4.78 |
+| Aluminium in the frame | — | — | — | — | 8.6 (the remainder) | 6.1 / 8.6 / 11.1 |
+| Electrical steel (Si) | 1.04 | 0.56 | 0.10 | 0 | 0 | 1.23 / 1.71 / 2.22 |
+
+- **The joints hold 88 % of the copper and all of the NdFeB**; about 60 % of each sit in the legs.
+- **Half the boards' mass (0.41 / 0.59 / 0.76 kg, 51 %) is the 23 joints' driver boards**, not the main board; the
+  head holds the LiDAR, the camera and the head board (0.40 kg).
+- **The battery metals are all in the torso**, in one quick-release pack.
+- Not yet resolved to elements: the boards' gold, silver and palladium and the sensors' gallium and germanium (no
+  composition yet), the magnets' Nd, Pr, Dy and Tb (the recipe of E1.6 exists).
+
+**Where the proposal is weakest:** "Other" in the joint, the rotor's NdFeB share (E2.10 points below 90 %), the board
+areas outside the joints, the screws and the frame-and-shell split. The two gaps marked in bold (copper and cables) both
+depend on the copper in the stators and the harness; either the workbook is high or these estimates are low.
+
+**Decided by Matthias, 2026-10-27** (step 1 of bringing robot type 1 into the project, answers chosen from the options
+offered): the remainders "Accept all" (the stator's electrical steel, the rotor's steel, the magnet carrier's
+aluminium, gear stage 2's steel, the joint's "Other" plastics, the battery pack's housing, busbars and wires, the
+robot's frame and shell, and the frame's aluminium); the rotor's NdFeB "Keep 45 / 90 / 100 %"; the other values
+marked E "Accept all"; the hot joints "Hips, knees, waist, ankles" (magnets for 150 °C as the base, 180 and 200 °C as
+scenarios; the arms 120 °C).
+
+### E2.8b The boards' and sensors' composition from Matthias's other projects (2026-10-27). Not entered
+
+Asked, Matthias: "There is information concerning the PCB composition in the data center work. There is also
+information cocnerning the sensors in the electronics of cars". Read (his workbooks, not changed):
+`RAWCLICDataCenters/data/researched/02_DataCenterPCBComposition.xlsx` (sheet `PCB`, mg per cm² by board type);
+`RAWCLICVehicleElectronics/Data/04_VehiclePCBComposition.xlsx` (mg per cm² by car board category) and
+`07_VehicleSensorComposition.xlsx` (sheet `Sensor Details`, mg per sensor element, 58 types, "not the complete module
+housing"; sources named in its sheet `Methodology`: makers' datasheets, teardowns, IMDS/GADSL, papers).
+
+**Boards: the closest board type by function.**
+
+| G1 board | Car category (`04_`) | Data-centre type (`02_`) |
+|---|---|---|
+| Joint driver boards (23; motor inverter, MCU) | PE_HVS (inverters, DC/DC; Cu 25, Au 0.02 mg/cm²) | PowerSupplyUnit (Cu 488 × 0.65 coverage, Au 0) |
+| Main control board (RK3588S) | ITC (holds the "Combined cluster+infotainment SoC"; Cu 12, Au 0.1) | ComputeMainBoard (Cu 753 × 0.65, Au 1) |
+| Power distribution, DC-DC, capacitor buffers | PE_HVS | PowerSupplyUnit |
+| Battery management | BMS | — |
+| Head control board | VCC (control units) | — |
+
+- **The two projects disagree by about 20 times on copper and 10 times on gold per cm².** On the G1's weighed driver
+  board (12.8 g on 22.9 cm², 559 mg/cm²), the car value makes copper 4.5 % of the board's mass, the data-centre value
+  57 %. For the 23 driver boards (about 1,054 cm²): copper 26 g (car) against 334 g (data centre); gold 21 mg against
+  0 mg.
+- The car gold (0.02 to 0.1 mg/cm²) is near the measured whole boards of Bizzo et al. 2014, about 0.08 mg/cm², as
+  recorded in `RAWCLICDataCenters/documentation/claude/EVIDENCE.md` (§ 10.3); that project's own audit calls its board
+  composition "constructions" (§ 10.5).
+
+**Sensors: the car sensor elements that make up the G1's sensors.**
+
+| G1 sensor | Car sensor elements (`07_`, per unit, mode) |
+|---|---|
+| LiDAR Livox Mid-360 (905 nm) | laser diode array (Ga 30, As 30, In 3, Au 0.5 mg), photodetector array (Si 60, Ga 1, As 1, Au 0.3 mg), IMU |
+| Depth camera D435i | 2 IR camera sensors, 1 CMOS image sensor, laser diode array (the IR projector), IMU |
+| Microphone array | 4 MEMS microphones (Si 4, Cu 2, Au 0.02 mg each) |
+| IMUs, torso and pelvis | 2 IMU (Si 35, Cu 12, Au 0.12 mg each) |
+| Joint encoders, 2 per joint | 46 angle sensors (Hall/AMR IC with NdFeB or ferrite magnet; Nd 20, Dy 0.5, Au 0.06 mg each) |
+
+Together about 5 mg gold, 61 mg gallium, 61 mg arsenic, 0.9 g neodymium (in the encoders), at the modes; no
+germanium. The car rows are the sensor elements only; the modules' boards, aluminium housings and glass are not in
+them. Speakers are not among the car types.
+
+**Copper of the boards: Bizzo et al. 2014, read myself** (Bizzo, Figueiredo, de Andrade, *Materials* 7 (2014)
+4555–4566, https://pmc.ncbi.nlm.nih.gov/articles/PMC5455934/; UNICAMP, a university): about 12 kg of whole PC boards
+(XT, 486, Pentium) with their components, ground, digested in aqua regia, measured by AAS and ICP, no quality control
+reported; Table 3 sets its result beside 13 other studies. Following Matthias's rule for analyses made only at
+universities ("combine them and use respective large uncertainties"), the 14 copper values are combined: **12.5 / 20.0 / 28.7
+wt%** (min / mean / max). Gold (8 studies after 2000: 29 to 420 ppm, median 111), silver (79 to 5,210 ppm, median 450)
+and palladium (33 to 220 ppm, three studies) bracket the car values (at 0.56 g/cm²: gold 36 to 179 ppm, silver 179 to
+536 ppm, palladium 9 to 89 ppm at the modes), which therefore fit; the car copper (4.5 % of the weighed board) does
+not. Asked, Matthias: "Yes if they fit, show me the results".
+
+**Result: the critical elements in the boards and sensors of robot type 1** (mg; means by region; total 2.5 % / mean
+/ 97.5 %; a scratch Monte Carlo, V45). Boards: copper = board mass × 12.5 / 20.0 / 28.7 wt%; gold, silver,
+palladium, tin, nickel = board area × the car category's mg/cm²; sensors: the car sensor elements, with their own
+ranges.
+
+| Element | Legs | Arms | Torso | Head | Total |
+|---|---|---|---|---|---|
+| Copper | 87,800 | 28,900 | 39,700 | 2,800 | 102,000 / 159,000 / 227,000 |
+| Gold | 21 | 8 | 16 | 5 | 35 / 51 / 73 |
+| Silver | 229 | 73 | 83 | 2 | 216 / 388 / 626 |
+| Palladium | 8 | 3 | 8 | 1 | 12 / 19 / 28 |
+| Tantalum | 78 | 25 | 36 | 2 | 63 / 140 / 248 |
+| Gallium | 0 | 0 | 0 | 127 | 33 / 127 / 262 |
+| Arsenic | 0 | 0 | 0 | 126 | 33 / 126 / 259 |
+| Indium | 0 | 0 | 0 | 29 | 8 / 29 / 59 |
+| Neodymium (encoder magnets) | 1,155 | 961 | 96 | 0 | 809 / 2,212 / 4,027 |
+| Dysprosium (encoder magnets) | 44 | 37 | 4 | 0 | 24 / 85 / 163 |
+| Germanium | — | — | — | — | none |
+
+- **The joints' driver boards and encoders hold 61 % of this gold and 77 % of this copper.** Gallium, arsenic and
+  indium are all in the head, in the LiDAR's and the depth camera's lasers and detectors.
+- The boards' copper adds about 0.16 kg to the robot's 1.52 kg of E2.8 (it was inside "electronics" there).
+- **Tantalum** (Matthias: "There is the tantalum for the PBC of the data center"): board mass × 0 / 100 / 450 ppm,
+  from `RAWCLICDataCenters/data/researched/04_DataCenterElementComposition.xlsx`, sheet `BoardsAndComponents` (E;
+  Fraunhofer's 445 ppm in pyrolysed board material; agreed there by Matthias on 2026-10-16). It is given per kg of
+  board, as the G1's boards are, so it fits.
+- **Silicon is left out** (Matthias: "Si is not needed even it is on the critcal").
+- **Not covered:** the sensor modules' boards and housings; the speaker. The board areas are drawn independently of
+  the board masses, which ignores that a larger board is also heavier.
+
+### E2.8c The complete picture of robot type 1 (2026-10-27). Not entered
+
+Asked, Matthias: "Show me first the complete picture". The parts (E2.8), the boards and sensors (E2.8b) and the
+battery cells resolved with the project's own recipe 'NMC cylindrical' through `02_composition.py`'s `RecipeDraws`
+(Li 2.58, Ni 19.9, Co 1.37, Mn 1.30, C 29.1, Cu 8.36 % of the cells at the mean), summed draw by draw (V45). Means by
+region; total 2.5 % / mean / 97.5 %.
+
+| Material or element | Unit | Legs | Arms | Torso | Head | Whole body | Total |
+|---|---|---|---|---|---|---|---|
+| Copper | kg | 0.92 | 0.45 | 0.26 | 0.003 | 0.18 | 1.47 / 1.82 / 2.21 |
+| NdFeB magnets | kg | 0.62 | 0.34 | 0.06 | 0 | 0 | 0.69 / 1.02 / 1.39 |
+| Aluminium in the joints and the heat sink | kg | 2.40 | 1.36 | 0.35 | 0 | 0 | 3.47 / 4.11 / 4.78 |
+| Aluminium in the frame (the remainder) | kg | — | — | — | — | 8.6 | 6.1 / 8.6 / 11.1 |
+| Lithium | kg | 0 | 0 | 0.045 | 0 | 0 | 0.042 / 0.045 / 0.047 |
+| Nickel | kg | 0.001 | 0 | 0.35 | 0 | 0 | 0.32 / 0.35 / 0.37 |
+| Cobalt | kg | 0 | 0 | 0.024 | 0 | 0 | 0.023 / 0.024 / 0.025 |
+| Manganese | kg | 0 | 0 | 0.023 | 0 | 0 | 0.021 / 0.023 / 0.024 |
+| Carbon (graphite) | kg | 0 | 0 | 0.50 | 0 | 0 | 0.47 / 0.50 / 0.54 |
+| Gold | g | 0.021 | 0.008 | 0.016 | 0.005 | 0 | 0.034 / 0.051 / 0.073 |
+| Silver | g | 0.23 | 0.07 | 0.08 | 0.002 | 0 | 0.22 / 0.39 / 0.62 |
+| Palladium | g | 0.008 | 0.003 | 0.008 | 0.001 | 0 | 0.012 / 0.019 / 0.028 |
+| Tantalum | g | 0.08 | 0.03 | 0.04 | 0.002 | 0 | 0.06 / 0.14 / 0.25 |
+| Gallium | g | 0 | 0 | 0 | 0.13 | 0 | 0.03 / 0.13 / 0.26 |
+| Indium | g | 0 | 0 | 0 | 0.03 | 0 | 0.007 / 0.029 / 0.059 |
+| Neodymium in the encoders | g | 1.15 | 0.96 | 0.10 | 0 | 0 | 0.8 / 2.2 / 4.0 |
+| Magnesium, titanium, germanium | — | none in robot type 1 (T1 names none) | | | | | |
+
+- Silicon is left out (Matthias).
+
+**The magnets' elements, the grade following the joint's heat** (Matthias: "I told you to take the NdBFe composition
+from the car traction motors. There is the temperature issue. SO heavy used joints, which can only be aircooled have
+to have high temperature NdBFe"). The fractions are drawn by RAWCLICVehicleTractionMotor's own
+`magnet_element_draws` (`src/composition.py`; grade bands from its `data/raw/10_MaterialElementDefinitions.xlsx`,
+sheet `PermanentMagnetNdFeB`; uniform between a class's bounds, Nd split into Nd and Pr, iron the balance), run in
+that project's environment, read-only. Grade classes: Nd + Pr 0.29–0.32 in every class; Dy H 0.02–0.05, SH
+0.04–0.07, UH 0.06–0.09, EH 0.08–0.10; Tb SH 0–0.005, UH and EH 0–0.01.
+
+- **Which joints run hot (proposed, Matthias's decision):** the hips (6, fans), knees (2, passive vapour chamber, "高负载关节（如承受
+  90N·m扭矩的膝关节）" derate when hot, T1 slide 42), waist (1, fan) and ankles (4, carrying the robot): heavily used
+  and air-cooled, so **SH, UH or EH**, the traction motors' three scenarios; the arms (10, at most 2 kg payload):
+  **H**.
+
+| Element, g (total 2.5 % / mean / 97.5 %) | Hot joints SH (150 °C) | UH (180 °C) | EH (200 °C) | Where |
+|---|---|---|---|---|
+| Neodymium | 175 / 262 / 359 | the same | the same | legs 160, arms 86, torso 16 |
+| Praseodymium | 30 / 50 / 75 | the same | the same | legs 31, arms 16, torso 3 |
+| Dysprosium | 28 / 49 / 77 | 38 / 63 / 95 | 46 / 73 / 106 | legs 34 to 56, arms 12, torso 3 to 6 |
+| Terbium | 0.1 / 1.7 / 3.9 | 0.2 / 3.5 / 7.8 | 0.2 / 3.5 / 7.8 | legs, torso |
+| Cobalt (in the magnets) | 32 / 55 / 83 | 42 / 68 / 102 | 51 / 82 / 120 | legs, arms, torso |
+| Boron | 7 / 11 / 16 | the same | the same | legs, arms, torso |
+
+NdFeB in all 23 joints: 0.69 / 1.02 / 1.39 kg (34 g per small joint, 61 g per large one, at the mean).
+
+### E2.8d The spread between robots of type 1: what is known so far (2026-10-27; open point G)
+
+Matthias: "You have just individual examples. The different realisations of such a type could vary on the compositon
+parts etc quite a bit. This has to be in the results." Read so far (search summaries, second-hand unless said):
+
+| Robot | What is there | Mass, joints | Source |
+|---|---|---|---|
+| Unitree G1 | the teardown, parts weighed (T1) | 35 kg, 23 joints (9 large, 14 small) | T1, U1 to U3 (read myself) |
+| AgiBot X1 | open source: its BOM list, STEP and SolidWorks files offered for download (not opened) | ≤ 33 kg; 29 joints: PowerFlow R86-2 × 9 (0.76 to 0.81 kg, 50 to 80 N·m), R86-3 × 6 (1.25 to 1.28 kg, 150 to 200 N·m), R52 × 10, L28 × 4 | https://www.agibot.com/DOCS/OS ; https://agibot.com/products/X1 |
+| Fourier N1 | open source: a complete BOM reported in its package (not opened) | about 38 kg, 1.3 m, 23 joints; FSA2.0 actuators; aluminium alloy and engineering plastics | https://www.yicaiglobal.com/news/chinese-robotics-pioneer-fourier-unveils-first-open-source-android |
+| Booster T1 | specifications only | about 30 kg, 1.2 m, 23 joints, up to about 130 N·m, 10.5 Ah | a spec sheet of unclear provenance, via https://openelab.io/blogs/learn/booster-t2-vs-t1-education-vs-pro |
+| Booster T2 | specifications only | about 1.4 m, 31 joints, 48 V 10 Ah; 125 lb (57 kg) for the T2 Pro (a dealer) | https://www.maverickdrone.com/collections/land/products/booster-t2 |
+
+- **The workbook's Taxonomy, row 2 (category 1):** defining range 1.20 to 1.45 m and 30 to 50 kg; 23 to 43 joints (28
+  to 34 across comparators); arm payload 2 to 5 kg; comparators AgiBot X1 (1.30 m, 33 kg, 34 joints), Fourier N1 (1.25 m,
+  32 kg, 28 joints), Booster T2 (1.40 m, 38 kg, 32 joints).
+- **Found, not verified:** the N1 at about 38 kg against the workbook's 32 kg; the T2 Pro at 57 kg against 38 kg.
+  Reported, not changed.
+
+**Read myself, on Matthias's "Yes go for it" (downloads into Claude's scratch folder, nothing into the project):**
+
+- **AgiBot X1, its BOM** (`智元灵犀X1_BOM清单_20241024.xlsx`, 34 kB, and `智元灵犀X1总BOM.xlsx`, 19 kB, from
+  https://github.com/AGIBOTTech/AGIBOT_x1_hardware, linked from https://www.agibot.com/DOCS/OS): every part with its
+  quantity, type (machined, plastic, bought-in, standard) and material; **no masses**.
+  - Joints: PowerFlow R86-3 × 6, R86-2 × 9, R52 × 10, linear L28 × 4 (the ankles' push rods), 2 grippers. Masses and
+    torques from AgiBot's product page (https://agibot.com/products/X1, read myself): R86-3 1.28 kg, 200 N·m peak;
+    R86-2 0.81 kg, 80 N·m; R52 0.45 kg, 19 N·m; L28 0.20 kg, 110 N. The joints weigh 20.27 kg of the X1's 33 kg (61 %;
+    the G1's 49 %).
+  - Frame of 6061-T6 machined parts; titanium-alloy ankle links (4); 40Cr steel wrist and ankle shafts; shells of
+    3D-printed resin; rubber feet and handle; a stainless-steel battery case.
+  - Electronics: an i7-13620H mini PC, a router, two data control units (Xyber-DCU), two IMUs (YIS320), an Intel D435,
+    two 48-to-24 V converters, a 5 V module, a 95 W supply. Battery: 48 V, 8 Ah, NMC ("三元"), 12 cells in series.
+  - Cables with a stated length: 10.2 m (of which 8.0 m XT30 (2+2) joint cables), plus 0.8 m to the linear actuators
+    and grippers. Screws and pins: 980.
+- **Fourier N1, its model file** (`FOURIERN1.urdf`, 34 kB, from https://github.com/FFTAI/fourier_lab, models/fouriern1;
+  Fourier's own): the links add up to 39.7 kg; 23 joints in three torque classes: 95 N·m × 4 (hip pitch, knees), 54
+  N·m × 7 (hip roll and yaw, waist, shoulder pitch), 30 N·m × 12 (ankles, shoulder roll and yaw, elbows, wrists). The
+  N1's BOM was not found on Fourier's GitHub (its software repository `fourier-grx-N1` holds documents only).
+
+**Decided by Matthias, 2026-10-27:**
+- **Types kept apart** ("We have to see, that there is not a mixup between the different types"): a robot, or a
+  configuration of it, counts for a type only where its maker's own height and mass lie inside the type's defining
+  limits of the workbook's Taxonomy (type 1: 1.20 to 1.45 m, 30 to 50 kg). Type 1 is informed by the **Unitree G1,
+  AgiBot X1 and Fourier N1**; the **Booster T2 Pro** (1.4 m, 57 kg) is outside type 1 and outside type 2's height ("2
+  question yes"). The **Booster T1** was first counted in; Booster's own page gives it 1.18 m (E2.8e, T1a), below type
+  1's 1.20 m, and Matthias took it out: "No, the T1 is out of type 1 (1.18 m). Type 1 is informed by the G1, X1 and N1."
+- **No bootstrap** ("Ok no bootstrap. I want to make sure, that we represent the samples outside als."): with n robots,
+  the next robot of the type lies outside their range with a chance of 2 / (n + 1), 50 % for three; resampling them
+  can never reach it. The method must reach beyond the robots known, within the type's limits.
+- **The method** (his choice from the options offered, "Real robot, varied"): each draw starts from one real robot of
+  the type (G1, X1 or N1), kept whole so that its joints, materials and electronics stay consistent; its mass is
+  then drawn within the type's limits around its own, and what follows mass is scaled with it.
+- **How often each robot is drawn:** "Equal". **Which parts follow the drawn mass:** "Yes" to the frame, shell, battery
+  and joints, not the electronics and sensors. **The X1, N1 and T1 where their data stop:** "We can assume, they are
+  similar within given ranges. So come up with well founded estimates" (the T1 since taken out, above).
+
+### E2.8e Step 2b: the X1, N1 and T1 as robots of type 1 (2026-10-27). Proposal, not entered
+
+Matthias: "Yes, go on with step 2b: the well-founded estimates for the X1, N1 and T1, shown to me before they enter the
+data file." Each robot needs what the G1 has in `parts_taken_apart.xlsx`: its joints (number, torque, module mass,
+which of the G1's two joint designs its inside follows, magnet class), its battery, its boards, its sensors, its cables,
+its hands, its frame and shell. Where a robot's data stop, it is taken as the G1 ("similar within given ranges").
+
+**Sources, read for this step** (first-hand unless said):
+
+| Code | What | What it is |
+|---|---|---|
+| X1a | AgiBot's X1 BOM list `智元灵犀X1_BOM清单_20241024.xlsx` and overall BOM `智元灵犀X1总BOM.xlsx`, https://github.com/AGIBOTTech/AGIBOT_x1_hardware | the maker's design lists; quantities and materials, no masses |
+| X1b | AgiBot's X1 page, https://agibot.com/products/X1 (read for E2.8d) | the maker's claims: actuator masses and peak torques, ≤ 33 kg |
+| X1c | AgiBot's X1 model file, `resources/robots/x1/urdf/x1.urdf` of https://github.com/AgibotTech/agibot_x1_train | the maker's model, legs only: 12 joints and their limits; all links 35.3 kg |
+| X1d | AgiBot's OmniPicker manual, https://cdn.robotshop.com/media/A/Agb/RB-Agb-14/pdf/omnigripper-manual.pdf | the maker's: "Weight 0.43kg" |
+| N1a | Fourier's N1 page, https://support-old.fftai.com/docs/GR-X-Humanoid-Robot/Fouriern1/N1_Introduction/ | the maker's specification table |
+| N1b | Fourier's N1 model file `FOURIERN1.urdf` (E2.8d) | the maker's model: 23 joints, 39.7 kg |
+| N1c | a teardown article on Zhihu, https://zhuanlan.zhihu.com/p/1899242762072749284 | second-hand (behind a login; through a search summary only): actuators FSA80-29E (about 96 N·m peak), FSA60-43E (about 51), FSA45-30E (about 29) |
+| T1a | Booster's T1 page, https://www.booster.tech/booster-t1/, as printed on 31/01/2026 by the RoboCup team Tech United, https://hsl.robocup.org/wp-content/uploads/2026/03/large_Tech_United-specs-697dddb13c298.pdf | the maker's claims (the live page did not show the T1 when fetched) |
+| T1b | Booster's T1 model file `resources/T1/T1_serial.urdf` of https://github.com/BoosterRobotics/booster_gym | the maker's model: 23 joints and their limits, 31.6 kg |
+| T1c | Bipedal Robotics GmbH's T1 documentation, https://docs.bipedal.de/projects/t1/html/overview.html | a reseller's, citing Booster: boards, optional LiDAR |
+| T1d | the RoboCup team Robotedge's T1 sheet, https://hsl.robocup.org/wp-content/uploads/2026/03/large_Robotedge-specs-698021eff19c7.pdf | second-hand: "Lithium-ion (24V - 48V)" |
+| NV | NVIDIA, https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin | the maker's: the AGX Orin module "100mm x 87mm" |
+
+**The joint masses, where a maker gives none (N1, T1).** AgiBot gives three rotary actuators with their mass and peak
+torque (X1b): R52 0.45 kg at 19 N·m, R86-2 0.81 kg at 80 N·m, R86-3 1.28 kg at 200 N·m. Fitted on them: mass = 0.121 kg
+× torque^0.441 (each within 3.4 %). Checked on the G1, not used to fit: its weighed small joint 0.525 kg against 0.50 to
+0.58 kg from the fit at 25 to 35 N·m; its large joint 1.1 kg against 0.87 to 1.07 kg at 88 to 139 N·m. The fit gives a
+joint's mass from its torque; its inside follows the G1's large joint above 40 N·m and the G1's small joint below
+(JointParts, scaled to the joint's mass). Magnets as for the G1: legs and waist hot and air-cooled (SH), arms and head
+H.
+
+**AgiBot X1** (1.3 m; ≤ 33 kg, X1b; the legs-only model 35.3 kg, X1c)
+
+| Item | Number | Min | Mode | Max | Label | Basis |
+|---|---|---|---|---|---|---|
+| R86-3: hip pitch, hip roll, knee | 6 | 1.22 kg | 1.28 kg | 1.34 kg | S | X1b; where they sit X1c (150 N·m in the model, 200 peak); large inside, SH |
+| R86-2: hip yaw | 2 | 0.77 kg | 0.81 kg | 0.85 kg | S | X1b; X1c (50 N·m); large inside, SH |
+| R86-2: waist | 3 | 0.77 kg | 0.81 kg | 0.85 kg | S, where E | X1a "腰部连杆组件"; 9 − 2 − 4 = 3; large inside, SH |
+| R86-2: shoulder pitch and roll | 4 | 0.77 kg | 0.81 kg | 0.85 kg | S, where E | 7 joints per arm; large inside, H |
+| R52: shoulder yaw, elbow, wrist | 10 | 0.43 kg | 0.45 kg | 0.47 kg | S, where E | X1b; small inside, H |
+| L28 push rods: ankles | 4 | 0.19 kg | 0.20 kg | 0.21 kg | S | X1b, X1c (ankles 80 N·m); small inside, SH |
+| OmniPicker grippers | 2 | 0.41 kg | 0.43 kg | 0.45 kg | S | X1d |
+| Battery: 12 cells in series, NMC ("三元"), 8 Ah | 1 | 346 Wh | 355 Wh | 384 Wh | S | X1a: "48V8AH三元电池", "12S为佳"; 12 × 3.6 V, 12 × 3.7 V, the label's 48 V |
+| Battery pack mass, stainless-steel case | 1 | 1.4 kg | 2.2 kg | 3.3 kg | E | the G1's 168 Wh/kg (2.5 kg for 421 Wh); X1a "不锈钢" case; the lower cut at 250 Wh/kg cells |
+| i7-13620H mini PC board (ITC) | 1 | 60 cm² | 120 cm² | 180 cm² | E | X1a; a 4 × 4 inch board is 104 cm² |
+| Xyber-DCU control boards (ITC) | 2 | 30 cm² | 60 cm² | 90 cm² | E | X1a |
+| Router board, GL.iNet MT2500A (ITC) | 1 | 30 cm² | 60 cm² | 90 cm² | E | X1a |
+| Power boards: 48-to-24 V × 2, 5 V module, 95 W supply, soft start × 2 (PE_HVS) | 6 | 10 cm² | 20 cm² | 30 cm² | E | X1a |
+| Battery management board (BMS) | 1 | 30 cm² | 60 cm² | 96 cm² | E | as the G1 |
+| Depth camera, Intel RealSense D435 | 1 | 72 g | 75 g | 80 g | S | X1a; as the G1 |
+| Motion sensors YIS320 | 2 | 1 g | 2 g | 5 g | E | X1a; as the G1's IMU |
+| Cables | 1 | 10 m | 11 m | 12 m | S | X1a: the lengths listed add up to 11.0 m (8.0 m XT30 2+2) |
+| Titanium (TC4) links: waist × 2, ankle × 4 | 6 | 0.2 kg | 0.4 kg | 0.6 kg | E | X1a "钛合金TC4"; masses not given |
+| Stainless 17-4PH shafts and crosses; steel pins | 9 + about 115 | 0.1 kg | 0.3 kg | 0.5 kg | E | X1a "0Cr17Ni4Cu4Nb", "40Cr" |
+| Screws (about 980) | 1 | 0.3 kg | 0.6 kg | 0.9 kg | E | X1a (M2 to M5) |
+| Bearings outside the actuators (crossed roller × 10, four-point × 9, ball × 20, rod ends × 8, spherical × 12) | 1 | 0.4 kg | 0.8 kg | 1.2 kg | E | X1a |
+| Shell: 3D-printed resin (BOM list) or ABS (overall BOM) | 1 | 1.5 kg | 3 kg | 4.5 kg | E | X1a; the two lists differ |
+| Rubber feet and handle | 3 | 0.1 kg | 0.2 kg | 0.3 kg | E | X1a "橡胶" |
+| Frame: aluminium 6061-T6 and 7075-T6 | 1 | | | | E | the remainder of the robot, as for the G1 |
+
+The X1's joints weigh 20.3 kg of its 33 kg (61 %), the G1's 49 %.
+
+**Fourier N1** (1.245 m; "≈39 kg" in N1a's table, 38 kg in its text, 39.7 kg in N1b)
+
+| Item | Number | Min | Mode | Max | Label | Basis |
+|---|---|---|---|---|---|---|
+| Joints of 90 N·m: hip pitch, knee | 4 | 0.44 kg | 0.88 kg | 1.32 kg | E | N1a (90 N·m; N1b 95); the fit; large inside, SH |
+| Joints of 54 N·m: hip roll and yaw (4), waist (1) | 5 | 0.35 kg | 0.70 kg | 1.05 kg | E | N1a; the fit; large inside, SH |
+| Joints of 54 N·m: shoulder pitch | 2 | 0.35 kg | 0.70 kg | 1.05 kg | E | N1a; the fit; large inside, H |
+| Joints of 30 N·m: ankles | 4 | 0.27 kg | 0.54 kg | 0.81 kg | E | N1a; the fit; small inside, SH |
+| Joints of 30 N·m: shoulder roll and yaw, elbow, wrist | 8 | 0.27 kg | 0.54 kg | 0.81 kg | E | N1a; the fit; small inside, H |
+| Battery: Li-ion, 39.6 V (11 cells), 475 Wh | 1 | 475 Wh | 475 Wh | 475 Wh | S | N1a: "475WH", "39.6V", "46.2V" charge limit |
+| Battery pack mass | 1 | 1.9 kg | 2.9 kg | 3.2 kg | S, E | N1a "≤3.2kg" (the upper cut); 1.9 kg at 250 Wh/kg cells |
+| Cell chemistry | | | NMC | | E | 3.6 V per cell; N1a says only "锂离子电池" |
+| Computer board, Intel Core i7-13700H (ITC) | 1 | 60 cm² | 120 cm² | 180 cm² | E | N1a |
+| Power distribution board (PE_HVS); battery management board (BMS) | 1 + 1 | | | | E | as the G1 |
+| Motion sensor, 6-axis | 1 | 1 g | 2 g | 5 g | E | N1a; N1b imu_link |
+| Cables | 1 | 5 m | 10 m | 15 m | E | between the G1's E (6 m) and the X1's 11 m, wider |
+| End pieces of the arms | 2 | 0.05 kg | 0.1 kg | 0.15 kg | S, E | N1b 0.099 kg each |
+| Shell (engineering plastics), screws | | | | | E | N1a "铝合金-工程塑料"; as the G1 |
+| Frame: aluminium alloy | 1 | | | | E | N1a; the remainder, as for the G1 |
+
+The N1's joints from the fit: 15.0 kg of 39 kg (38 %). N1c's three actuator types match N1a's three torque classes.
+
+**Booster T1** (1.18 m, ~30 kg, T1a; 31.6 kg in T1b)
+
+| Item | Number | Min | Mode | Max | Label | Basis |
+|---|---|---|---|---|---|---|
+| Knees, 60 N·m | 2 | 0.37 kg | 0.74 kg | 1.11 kg | E | T1b; the fit; large inside, SH |
+| Hip pitch, 45 N·m | 2 | 0.33 kg | 0.65 kg | 0.98 kg | E | T1b; the fit; large inside, SH |
+| Hip roll and yaw, 30 N·m; waist, 30 N·m | 4 + 1 | 0.27 kg | 0.54 kg | 0.81 kg | E | T1b; the fit; small inside, SH |
+| Ankle pitch 20 N·m, ankle roll 15 N·m | 2 + 2 | 0.20 kg | 0.40 to 0.45 kg | 0.68 kg | E | T1b; the fit; small inside, SH |
+| Arms, 18 N·m | 8 | 0.22 kg | 0.43 kg | 0.65 kg | E | T1b; the fit; small inside, H |
+| Head, 7 N·m | 2 | 0.15 kg | 0.29 kg | 0.44 kg | E | T1b; the fit; small inside, H |
+| Battery: 10.5 Ah | 1 | 378 Wh | 454 Wh | 529 Wh | S, E | T1a "Battery: 10.5Ah"; the voltage is not given: 10, 12 or 14 cells (36, 43.2, 50.4 V); T1d "24V - 48V" |
+| Battery pack mass | 1 | 1.5 kg | 2.8 kg | 4.2 kg | E | 160 Wh/kg, between the G1's 168 and the N1's ≥ 148; the lower cut at 250 Wh/kg cells |
+| Cell chemistry | | | NMC | | E | not given |
+| NVIDIA Jetson AGX Orin module (ITC) | 1 | 87 cm² | 87 cm² | 87 cm² | S | T1a; NV 100 × 87 mm |
+| Its carrier board (ITC) | 1 | 50 cm² | 100 cm² | 150 cm² | E | Booster's own; not described |
+| Motion board, Intel Core i7-1370P (ITC) | 1 | 60 cm² | 120 cm² | 180 cm² | E | T1a; T1c "Intel Express-i7" |
+| Power distribution (PE_HVS), battery management (BMS), head board (VCC) | 1 + 1 + 1 | | | | E | as the G1 |
+| Depth camera (Intel; model not given) | 1 | 72 g | 75 g | 150 g | E | T1a "Depth Camera", T1c "Intel depth camera" |
+| Motion sensor, 9-axis | 1 | 1 g | 2 g | 5 g | E | T1a |
+| Circular 6-microphone array; speaker | 1 + 1 | | | | E | T1a; as the G1's |
+| Cables | 1 | 5 m | 10 m | 15 m | E | as for the N1 |
+| Hands (without joints) | 2 | 0.16 kg | 0.33 kg | 0.49 kg | E | T1b left_hand_link 0.327 kg |
+| Shell, screws; frame: aluminium (the remainder) | | | | | E | not given; as the G1 |
+
+The T1's joints from the fit at the model's limits: 11.2 kg of 30 kg (37 %). Read as peak torques scaled like the
+knee's (130 N·m against 60 in T1b), they would weigh 15.8 kg, within the upper bounds; but then the arms' actuators
+would nearly equal the arms' links in T1b (4.1 kg), so the model's limits are taken as the mode.
+
+**Found, for Matthias to decide (nothing entered):**
+1. **The T1 is 1.18 m** (T1a: "118×47×23 cm"), below type 1's 1.20 m. By the rule of 2026-10-27 ("a robot counts for
+   a type only where its maker's own height and mass lie inside the type's limits") it falls out of type 1; its ~30 kg
+   lies on the lower limit. **Decided:** "No, the T1 is out of type 1 (1.18 m). Type 1 is informed by the G1, X1 and
+   N1." The T1's table above stays as the record of what was read; it does not enter the data file.
+
+**Decided, 2026-10-27** (Matthias's answers to points 2 to 5): the X1's R86-2 "9"; the X1's phone "Count it as a
+board (E)"; "Standard robot" (no optional parts); the makers' stated masses (X1 33 kg, N1 39 kg). Then: "Use the
+monte carlo approach for most possible". **Proposed on that, not entered:**
+- every value still fixed gets a range where a range is not invented: the N1's battery 451 / 475 / 499 Wh (E, ±5 %
+  production tolerance on Fourier's rating); the G1's battery pack 2.25 / 2.5 / 2.75 kg (E; the teardown's "~2.5kg")
+  and its capacity 8.55 / 9 / 9.45 Ah (E, ±5 %);
+- the X1's phone board: 20 / 50 / 100 cm², car category ITC, mass per cm² from Constants (E). No measured area of a
+  phone's main board found: HilPCB (https://hilpcb.com/en/blog/iphone-consumer-electronics/) gives the iPhone X's
+  two stacked halves as about 135 % of the iPhone 8 Plus board, no cm²; the 2025 study of 45 phone boards
+  (https://www.sciencedirect.com/science/article/pii/S0921344925006184) refused access. Its display (indium) and
+  battery are not covered by "a board";
+- fixed, because a range would be invented: the counts (joints, boards, screws; the spread between robots comes from
+  drawing the robot), the Orin module's 100 × 87 mm, the G1's 46.8 V (13 cells), copper's density, the cell chemistry
+  (NMC; the X1 "三元"); open: the G1's LiDAR, 265 g in Livox's specification.
+
+**Accepted, 2026-10-27:** "Yes, accept the ranges as proposed; keep the LiDAR fixed." Not yet in the data file.
+
+**Specification for entering them, proposed, waiting for his yes** (his words: "the well-founded estimates for the
+X1, N1 and T1, shown to me before they enter the data file"):
+1. One data file for the robots of type 1, `data/researched/parts_taken_apart.xlsx` (recommended; the alternative is a
+   file per robot). A new sheet `Robots`: robot, maker, type, the maker's height and stated mass, sources.
+2. A first column `Robot` on Joints, Parts, Boards, Sensors and Constants: the G1's rows as they are, the X1's and
+   N1's from this section.
+3. Joints: module mass min / mode / max (kg), new: the X1's from AgiBot (S), the N1's from the fit (E), empty for the
+   G1 (its JointParts, as now). `Module` (small, large) says which of the G1's insides a joint follows, scaled to its
+   mass.
+4. JointParts, Shares and SensorElements stay one set for all three ("similar within given ranges"); SensorElements
+   gains the X1's YIS320 (as IMU); the X1's phone is a board (ITC), not a sensor.
+5. Constants: each robot's own values (stated mass, battery, cable length) per robot; the shared ones (board g/cm²,
+   copper share of boards, cross-sections, copper density, insulation) once, for all. The G1's accepted ranges: battery
+   pack 2.25 / 2.5 / 2.75 kg, capacity 8.55 / 9 / 9.45 Ah.
+6. 01, tests first: every robot has its rows on every sheet; every robot's maker height and stated mass lie inside its
+   type's Taxonomy limits (the check that would have caught the T1); module masses positive, min ≤ mode ≤ max; a robot
+   not in `Robots` stops 01; the one-robot layout is refused (the old goes entirely).
+7. The present file is replaced by the new one, without a copy (its G1 rows are kept, changed only by the two accepted
+   ranges; the builder, Claude's scratch one-off, rebuilds it).
+8. In the same step: METHODOLOGY.md (check 18), README.md (the data file's row), VERIFICATION.md, HANDOVER.md.
+9. Not in this step: the Monte Carlo of 04 (step 5): drawing the robot, equally often, and its mass within the type's
+   limits.
+
+**Built, 2026-10-27** ("Yes, build points 1 to 8 as specified, tests first"; checks VERIFICATION.md V50). Entered for
+the X1 and N1 exactly the items of the tables above. Two things to bring to Matthias:
+- **The robots' own masses** got the G1's ± 1 kg (G1 34 / 35 / 36 kg): X1 32 / 33 / 34 kg (AgiBot's Chinese page
+  "33kg"), N1 38 / 39 / 40 kg. The heights in the sheet Robots: G1 1.32 m (U1 "1320x450x200mm"), X1 1.30 m (AgiBot,
+  "130 cm", read 2026-10-27, which also gives "31DoF": 29 body joints and 2 grippers), N1 1.245 m.
+- **The G1's parts not carried over** to the X1 and N1, as they are not in the tables above: encoders (two per
+  joint), XT30 connectors, the main board's heat sink and fan, the hip and waist fans, the knee vapour chambers, the
+  lower-leg links, the capacitor buffer boards, the microphones and speaker, a head board. The N1's page states dual
+  encoders ("双编码器"); the X1's BOM lists XT30 cables.
+2. **The X1's R86-2**: 9 in the BOM list (2024-10-24), 6 in the overall BOM. Nine is taken: 6 + 9 + 10 + 4 = 29, the
+   X1's stated 29 body joints.
+3. **The X1's head holds a mobile phone** (X1a overall BOM "手机", with a phone holder): its gold, silver, palladium and
+   tantalum are not in any sibling project's data. Count it (as a board of E area, ITC) or leave it out?
+4. **Optional parts**: the N1's depth camera ("选配") and the T1's LiDAR (T1c, "optional"). Proposed: the standard
+   robot, without them.
+5. **Masses**: the X1 ≤ 33 kg (X1b) against 35.3 kg in its legs-only model (X1c); the N1 38 / ≈39 / 39.7 kg. Proposed:
+   the makers' stated 33 kg and 39 kg as each robot's own mass, from which the method draws.
+
+**Decided, 2026-10-28** (Matthias, on the two points brought to him above: "X1 max 35.3 kg", "Encoders", "XT30
+connectors", "Main board cooler", "Yes, download"; then "Yes, build", with A to C as recommended; checks VERIFICATION.md
+V52). Read first-hand today: N1a and X1e again, X1c's 58 links summed (35.323 kg), and X1a's two BOMs downloaded again
+into Claude's scratch folder (`智元灵犀X1_BOM清单_20241024.xlsx`, 33,806 bytes; `智元灵犀X1总BOM.xlsx`, of the folder
+20250307, 18,808 bytes). AgiBot's English page (X1b) refused the connection.
+
+| Robot | The maker's figures for its mass | Entered (kg) |
+|---|---|---|
+| G1 | "About 35kg" (U1); its model file 35.115 kg (U3) | 34 / 35 / 36, unchanged |
+| X1 | "重量 33kg" (X1e); "≤ 33 kg" (X1b, 2026-10-27); its model file's links 35.32 kg (X1c) | 32 / 33 / 35.3 (S, E: the min 1 kg below, as the G1's) |
+| N1 | "体重38公斤" in the text, "净重 ≈39 kg" in the table (N1a); its model file 39.7 kg (N1b) | 38 / 39 / 40, unchanged |
+
+| The G1's part | X1 (X1a, read today) | N1 (N1a, read today) | Decided |
+|---|---|---|---|
+| Encoders, two per joint | the actuators are bought-in units ("套餐件", "执行器"); no encoder named | "双编码器 16bit/14bit" | X1 58 (E, two per joint); N1 46 (S) |
+| XT30 (2+2) connectors, two per joint, 1.5 / 3 / 4.5 g | cables "XT30(2+2)连接线": 19 with a plug at both ends, 12 at one, 6 terminating resistors, 2 to the L28: 58 plugs | none named | X1 58 (S, the count; the mass E as the G1's); N1 46 (E, as the G1) |
+| Main board heat sink and fan | none; the computer is a bought-in mini PC ("i7-13620H迷你主机", "工控机MiniPC") on a 19 V, 95 W supply ("XW-2290-19-95W") | none; an Intel Core i7-13700H computer | for both: a fan as the G1's, 5 / 10 / 20 g (E); heat pipes and fins 0.055 / 0.12 / 0.19 kg, copper (E, below) |
+| Hip and waist fans; knee vapour chambers; lower-leg links; capacitor buffer boards; microphones and speaker; head board | none (its own titanium links, steel shafts and soft-start boards are entered) | none; the head without joints, vision sensors optional ("可自主加载视觉传感器") | not carried over |
+
+**The heat sink of an Intel i7-H mini PC: the sources.** No maker or review found gives the mass of a mini PC's
+cooler (searched in English and Chinese; the reviews of the Beelink EQi13 Pro, Geekom GT13 Pro and Lenovo IdeaCentre
+Mini with these processors give the whole machine only). Two makers' figures of other coolers for mobile processors,
+as context only:
+
+| Code | Source | What it is | Same kind? Representative? | Value |
+|---|---|---|---|---|
+| FW1 | Framework, Laptop 13 Heatsink and Fan Kit, https://frame.work/products/heatsink-and-fan-kit | maker's specification, a design value | a laptop's cooler; "28W continuous processor load and up to 60W turbo", below the i7-H's class | "Weight: 67.5g" with its fan; "Copper fin pack", "Dual 5mm heat pipes" |
+| DY1 | Dynatron, I2, https://www.dynatron.co/product-page/i2 | maker's specification | a 1U server cooler for Intel's mobile socket PGA988 (Core i3 / i5 / i7 mobile); its power not on the page (45 W at retailers, second-hand) | "199g ±5g" with its 50 mm fan; "Copper 1100 Skiving Fins" |
+| — | Framework, Laptop 16 heatsink, https://frame.work/products/16-heatsink-amd-ryzen-7040-series | maker's | "up to 45W continuous processor power": the right class | no mass given; left out |
+
+Entered (E): heat pipes and fins 0.055 / 0.12 / 0.19 kg, the two figures less a 10 g fan (57.5 g and 189 g) inside
+the range, the mode between them; copper, as both makers' coolers (an upper bound for the copper if a mini PC's fins
+are aluminium, point B); the fan 5 / 10 / 20 g as the G1's main board fan, its copper winding from the sheet Shares.
+
+**Points A to C, as recommended:** A, an XT30 counted as the G1's are (one per cable end; whether a mated plug and
+socket count once or twice is open for all three robots); B, the heat sink copper; C, the data file written by
+Matthias pressing Run on `tools/make_parts_taken_apart.py`.
+
+**Found today, not entered (his decision):** N1a lists a network switch ("交换机") in the N1's chest, not in its
+Boards rows; X1a lists XT60 and XT90 plugs and cables on the battery side, 16 brass threaded inserts ("IUT铜螺母",
+"黄铜"), a stainless sensor shield ("传感器屏蔽罩") and 4 silicone dampers, none in the X1's rows; a newer BOM list,
+`智元灵犀X1_BOM清单_20250108.xlsx` (17,678 bytes), exists in X1a's repository and was not downloaded.
+
+### E2.9 What the split into parts is for, and the materials it follows (Matthias, 2026-10-27)
+
+**His words:** "if the total material declartion is a good source, then the slipt into parts is just to get a deeper
+look into the robot, so that there is information on where the interesting materials are and the recycling can be
+optimized. This means adjust your strategy accordingly." On the materials: "Add the three elements as they are
+relevant for the objective of this work".
+
+**The strategy:**
+1. Where a good material declaration of the whole robot exists (by the source rules), its totals stand; the parts
+   only show where the materials sit.
+2. Where none exists, as for robot type 1 now (the workbook's material sheet is labelled Estimate, row 2 note; no G1
+   declaration found), the parts are the best basis and the workbook's material sheet is the check.
+3. The detail goes into the parts that hold the materials below; the aluminium frame and the plastic shell stay
+   coarse.
+4. No normalisation: one named part per material takes a declared total's remainder (Matthias's decision which);
+   parts that contradict a declared total are reported as a finding.
+5. Each part says where it sits and which of the materials below it holds.
+
+**The materials followed:** the workbook's sheet `Critical Raw Materials` (EU 2024 critical and strategic raw
+materials): aluminium; copper; neodymium, praseodymium, dysprosium and terbium (in NdFeB); magnesium; titanium;
+lithium, nickel, cobalt, manganese and graphite; silicon; boron; gallium and germanium. **Added by Matthias: gold,
+silver and palladium**, for the boards and contacts.
+
+### E2.10 The copper share of a G1 stator: searched, not found (2026-10-27)
+
+Asked, Matthias: "Search once more. It is better than just estimate. Encrease this effort in general".
+
+**Searched, and what came of it:**
+- **A material declaration of the G1:** none found (Unitree, dealers, RoHS/REACH pages).
+- **The workbook's own copper row** (row 8, 3 / 3.8 / 4.5 kg): labelled "Estimate"; its sources S15
+  (https://chinabizinsider.com/unitree-g1-teardown-decoding-the-economics-and-engineering-of-the-worlds-best-selling-humanoid-robot/)
+  and S38 (https://www.winwinchip.com/blog/detail/humanoid-robot-electronics-components-design-guide-2026/80.html)
+  were read and give no copper figure.
+- **Chinese sources** (broker reports, copper-industry articles, Zhihu, CSDN): the only per-motor figure is a
+  copper-industry article's assumption for Tesla's Optimus, a 750 g frameless motor with "铜含量占总质量的 10%-15%"
+  (https://www.copperexpo.com.cn/zh-cn/media/hyzxdt/2026/2/5.html, a repost from the WeChat account 先进铜基材料). The
+  article marks its figures as assumptions and contradicts itself (100 to 200 g of winding per motor elsewhere). Not
+  used. Zhihu's teardowns of the G1 joint and of AgiBot's R86-3 joint ask for a login.
+- **Makers' data:** Kollmorgen's TBM2G frameless motors name their materials but no masses (the PDF answered 403);
+  no environmental product declaration of a frameless or servo motor with a copper mass was found.
+- **Teardowns and hobby rewinds** weighing a stator's copper and core separately: none found.
+- **Munro's actuator video:** Matthias has seen it; it does not give the share.
+
+**Indications without a number:** Munro found "unused winding space" in the G1's motors (T3, through Humanoid.guide),
+and Unitree advertises a "Low Copper Consumption Coil" (T2). Both point to the lower side.
+
+**What the physics allows (E):** a slotted stator's copper share = 8.96 s k (1 + e) / (8.96 s k (1 + e) + 7.65 (1 −
+s)), with s the slots' share of the lamination's cross-section, k the copper fill of the slots and e the end turns'
+extra copper. With s 0.35 / 0.42 / 0.50, k 0.40 / 0.50 / 0.60 (0.55 in a design study:
+https://arxiv.org/pdf/2405.00882) and e 0.2 / 0.4 / 0.6, the share is 23 / 37 / 53 %. s and e are estimates without
+a source.
+
+**Compared with car motors, from Matthias's own projects** (asked, Matthias: "Can you compare with other motor
+compositions like the car electic motors or utility motors in car"). The share is the winding's copper over copper
+plus electrical steel:
+
+| Motors | Share | Basis |
+|---|---|---|
+| Traction motors 2018–2021, all winding types | 23.9 % (5.90 kg winding, 18.77 kg lamination) | **measured** on 46 production machines: Drexler, Kampker, Born et al., *Elektrotech. Inftech.* 142, 312–345 (2025), doi:10.1007/s00502-025-01331-3, as recorded in `RAWCLICVehicleTractionMotor/documentation/METHODOLOGY.md` (§ 4.1) |
+| Traction motors 2022–2023, all winding types | 23.3 % (4.51 / 14.81 kg) | the same |
+| Traction motors 2018–2021, round wire | about 29 % (7.82 kg; lamination taken as the all-type mean) | the same; approximate |
+| Car auxiliary motors: small steppers | 27 / 36 / 45 % | `RAWCLICVehicleElectronics/Data/05_VehicleElectricMotorsWeight.xlsx`, sheet `SmallStepperMotors` (Matthias's workbook; no source named in the sheet) |
+| Car auxiliary motors: medium steppers | 30 / 37 / 44 % | the same, sheet `MediumStepperMotors` |
+| Car auxiliary DC motors | 25 to 43 %, modes 31 and 36 % | the same; their steel includes the rotor, so the stator's own share is higher |
+| Physics (above) | 23 / 37 / 53 % | E |
+
+- **What fits the G1 best:** the traction motors are the same type (permanent-magnet synchronous) and measured, but
+  hundreds of times larger, with long stacks; the auxiliary steppers are near the G1's size (150 to 1,000 g against
+  the G1's 154 g motor) but a different type, and their shares carry no source.
+- **The magnets, for comparison:** the auxiliary sheets give the magnet as "NdFeB & retentive Steel", 10 % (small) and
+  19 % (medium) of the motor; the G1's rotor, which T1 calls "magnet", is 28 % of its motor (42.9 of 154.1 g). A rotor
+  of magnets on an aluminium carrier needs a steel ring behind them, so the G1's 42.9 g likely holds steel too; this
+  points to an NdFeB share of the rotor below the 90 % proposed in E2.8.
+- **What the share does to the robot's copper:** the 23 stators weigh about 2.83 kg at the E2.8 modes; their copper
+  is 0.65 kg at 23 %, 1.02 kg at 36 %, 1.27 kg at 45 %.
+
 ## E1. The element recipes of the 13 shared materials: the sources, 2026-10-26
 
 ### What was asked, and how it was done

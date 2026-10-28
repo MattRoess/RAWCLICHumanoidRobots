@@ -1039,5 +1039,389 @@ class TestTheWorkbook(unittest.TestCase):
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.006,
                                        msg=f'robot type {n}, {alloy}, {element}')
 
+
+# Robot type 1 taken apart (data/researched/parts_taken_apart.xlsx): Matthias, 2026-10-27, "Yes. Show me the steps and
+# then we move step by step through them", step 3: 01 checks the file; then, on "Yes, build points 1 to 8 as
+# specified, tests first" (EVIDENCE.md E2.8e), one file for every robot of the type: a sheet Robots and a column Robot.
+# The headings of each sheet, as the file has them.
+APART = {
+    'Robots': ['Robot', 'Maker', 'Type', 'Height (m)', 'Stated mass (kg)', 'Sources'],
+    'Joints': ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
+               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Magnet grade class (base)',
+               'Magnet grade scenarios', 'Body region', 'Sources', 'Basis'],
+    'JointParts': ['Component', 'Small joint, weighed (g)', 'Small joints not weighed: times min', 'times mode',
+                   'times max', 'Material (one material only)', 'Large joint: factor min', 'factor mode', 'factor max',
+                   'Why the factor', 'Label', 'Sources'],
+    'Parts': ['Robot', 'Part', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+              'Mass of one, min (kg)', 'mode (kg)', 'max (kg)', 'Material (one material only)',
+              'Remainder of, or computed from', 'Label', 'Sources'],
+    'Shares': ['Part or component', 'Material', 'Grade', 'Share min', 'Share mode', 'Share max', 'Remainder', 'Label',
+               'Basis'],
+    'Boards': ['Robot', 'Board', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+               'Area of one, min (cm2)', 'mode (cm2)', 'max (cm2)', 'Mass from',
+               'Car board category (RAWCLICVehicleElectronics 04_)', 'Label', 'Sources'],
+    'Sensors': ['Robot', 'Sensor', 'Number in the robot', "Kind (the figure's row)", 'Body region',
+                'Mass of one, min (g)', 'mode (g)', 'max (g)', 'Label', 'Sources'],
+    'SensorElements': ['Sensor', 'Car sensor type (RAWCLICVehicleElectronics 07_, sheet Sensor Details)',
+                       'Units in one sensor'],
+    'Constants': ['Robot', 'Quantity', 'Min', 'Mode', 'Max', 'Unit', 'Label', 'Source'],
+    'Sources': ['Code', 'Source', 'Link', 'What it is'],
+}
+# The small file: two robots of type 1. Robot A as the G1 (its joints follow the weighed joint parts, no module
+# masses): one large joint kind (2 hips) and one small (2 ankles), four parts, one board, one sensor. Robot B as the X1
+# (module masses given): 2 large hips and 2 small arm joints, its joint modules and frame, one board, one sensor. Every
+# constant 01 needs, the shared ones once for all.
+SMALL_APART = {
+    'Robots': [('Robot A', 'Maker A', 1, 1.32, 35, 'U1'), ('Robot B', 'Maker B', 1, 1.30, 33, 'X1b')],
+    'Joints': [('Robot A', 1, 'Hip', 2, 'large', 88, None, None, None, 'fans', 'SH', 'UH; EH', 'Legs', 'U3',
+                'For the tests.'),
+               ('Robot A', 2, 'Ankle', 2, 'small', 35, None, None, None, 'passive', 'H', '', 'Legs', 'U3',
+                'For the tests.'),
+               ('Robot B', 1, 'Hip', 2, 'large', 150, 1.22, 1.28, 1.34, '', 'SH', 'UH; EH', 'Legs', 'X1b',
+                'For the tests.'),
+               ('Robot B', 2, 'Elbow', 2, 'small', 19, 0.43, 0.45, 0.47, '', 'H', '', 'Arms', 'X1b',
+                'For the tests.')],
+    'JointParts': [('Motor stator', 100, 0.5, 1, 1.5, '', 1.0, 1.78, 2.67, 'the area', 'W; E', 'T1'),
+                   ('Housing', 80, 0.5, 1, 1.5, 'Aluminium', 1.0, 1.39, 2.09, 'the surface', 'W; E', 'T1')],
+    'Parts': [('Robot A', 'Joint module, small', 2, 'Ankles', 'Legs', None, None, None, '', 'the sum of JointParts',
+               'W, E', 'T1'),
+              ('Robot A', 'Joint module, large', 2, 'Hips', 'Legs', None, None, None, '', 'the sum of JointParts', 'E',
+               'T1'),
+              ('Robot A', 'Screws', 1, 'Frame and shell', 'Whole body', 0.2, 0.5, 1.0, 'Steel', '', 'E', 'no source'),
+              ('Robot A', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium',
+               'the robot (Constants), less every other part', 'E', 'T1'),
+              ('Robot B', 'Joint module, small', 2, 'Arms', 'Arms', None, None, None, '',
+               "the Joints' module masses", 'S', 'X1b'),
+              ('Robot B', 'Joint module, large', 2, 'Hips', 'Legs', None, None, None, '',
+               "the Joints' module masses", 'S', 'X1b'),
+              ('Robot B', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium',
+               'the robot (Constants), less every other part', 'E', 'X1a')],
+    'Shares': [('Motor stator', 'Copper', 'winding', 0.23, 0.36, 0.45, '', 'S', 'For the tests.'),
+               ('Motor stator', 'Steel', 'electrical steel', None, None, None, 'Yes', 'E', 'For the tests.')],
+    'Boards': [('Robot A', 'Driver board, small joint', 2, 'Ankles', 'Legs', 11.5, 22.9, 28.3, 'JointParts', 'PE_HVS',
+                'W, E', 'T1'),
+               ('Robot B', 'Mini PC board', 1, 'Torso boards', 'Torso', 60, 120, 180,
+                'area times Constants board mass per cm2', 'ITC', 'E', 'X1a')],
+    'Sensors': [('Robot A', 'Motion sensor', 1, 'Torso boards', 'Torso', 1, 2, 5, 'E', 'U3'),
+                ('Robot B', 'Motion sensor, YIS320', 2, 'Torso boards', 'Torso', 1, 2, 5, 'E', 'X1a')],
+    'SensorElements': [('Motion sensor', 'IMU', 1), ('Motion sensor, YIS320', 'IMU', 1)],
+    'Constants': [('all', 'Board mass per cm2 (boards not weighed)', 0.28, 0.56, 0.84, 'g/cm2', 'E', 'E2.8'),
+                  ('all', "Copper share of a board's mass", 0.125, 0.2, 0.287, 'share', 'S', 'Bizzo'),
+                  ('all', 'Power conductor cross-section (2 conductors)', 0.52, 0.82, 1.31, 'mm2', 'S', 'TME'),
+                  ('all', 'Signal conductor cross-section (2 conductors)', 0.065, 0.13, 0.2, 'mm2', 'E', 'E2.8'),
+                  ('all', 'Copper density', 8.96, 8.96, 8.96, 'g/cm3', 'S', 'copper'),
+                  ('all', 'Insulation and jackets, per mass of copper', 0.5, 1.0, 1.5, 'times', 'E', 'E2.8'),
+                  ('Robot A', 'Robot mass, with battery', 34, 35, 36, 'kg', 'S', 'U1'),
+                  ('Robot A', 'Battery voltage', 46.8, 46.8, 46.8, 'V', 'S', 'T1'),
+                  ('Robot A', 'Battery capacity', 8.55, 9.0, 9.45, 'Ah', 'S', 'T1'),
+                  ('Robot A', 'Cable length (four conductors)', 3, 6, 10, 'm', 'E', 'T1'),
+                  ('Robot B', 'Robot mass, with battery', 32, 33, 34, 'kg', 'S', 'X1b'),
+                  ('Robot B', 'Battery voltage', 43.2, 44.4, 48, 'V', 'S', 'X1a'),
+                  ('Robot B', 'Battery capacity', 8, 8, 8, 'Ah', 'S', 'X1a'),
+                  ('Robot B', 'Cable length (four conductors)', 10, 11, 12, 'm', 'S', 'X1a')],
+    'Sources': [('T1', 'China Post Securities, teardown', 'https://example.org', 'A teardown')],
+}
+APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),
+               ('Body region', 'Whole body'), ('Part group', 'Joint drives'), ('Material', 'Aluminium'),
+               ('Material', 'Copper'), ('Material', 'Steel'), ('Material', 'Plastics'), ('Material', 'Mixed'),
+               ('Material', 'Not allocated')]
+# Robot type 1 as the workbook's sheet Taxonomy defines it (row 2), for the check of each robot's height and mass.
+TYPE_1 = ('Height: 1.20–1.45 m (defining)\nMass: 30–50 kg (defining)\nUnitree G1 anchor: 1.32 m, 35.0 kg')
+
+
+def build_apart(path, changes=None, drop=None, one_robot_layout=False):
+    """Write the small parts-taken-apart file to `path`. `changes` maps (sheet, row index, column index) to a new
+    value, or (sheet, row index) to None to leave the row out or to a tuple to add it; `drop` names a sheet to leave
+    out; `one_robot_layout` writes the sheet Joints without its column Robot, as the file was before it held more than
+    one robot."""
+    book = Workbook()
+    book.active.title = 'About'
+    book.active.append(['For the tests.'])
+    for name, headings in APART.items():
+        if name == drop:
+            continue
+        rows = [list(r) for r in SMALL_APART[name]]
+        for key, value in (changes or {}).items():
+            if key[0] != name:
+                continue
+            if len(key) == 3:
+                rows[key[1]][key[2]] = value
+            elif value is None:
+                rows[key[1]] = None
+            else:
+                rows.append(list(value))
+        sheet = book.create_sheet(name)
+        sheet.append(headings)
+        for row in rows:
+            if row is not None:
+                sheet.append(row)
+        if one_robot_layout and name == 'Joints':
+            sheet.delete_cols(1)
+    book.save(path)
+
+
+class TestPartsTakenApart(unittest.TestCase):
+    """01's checks of the file of robot type 1 taken apart; each test breaks one thing in the small file."""
+
+    def faults(self, changes=None):
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'), changes)
+            build_lists(os.path.join(folder, 'lists.xlsx'), parts=[], materials=[], lists=APART_LISTS)
+            apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+            lists = schemas.read_shared_lists(os.path.join(folder, 'lists.xlsx'))
+        return schemas.check_parts_taken_apart(apart, lists, Params())
+
+    def assertFaultSays(self, faults, words):
+        self.assertEqual(len(faults), 1, [f.text for f in faults])
+        self.assertIn(words, faults[0].text)
+
+    def test_the_small_file_is_read_without_fault(self):
+        self.assertEqual([f.text for f in self.faults()], [])
+
+    def test_a_missing_sheet_stops_the_reading(self):
+        for sheet in ('Shares', 'Robots'):
+            with tempfile.TemporaryDirectory() as folder:
+                build_apart(os.path.join(folder, 'apart.xlsx'), drop=sheet)
+                with self.assertRaises(schemas.WorkbookError, msg=sheet):
+                    schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+
+    def test_the_one_robot_layout_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'), one_robot_layout=True)
+            with self.assertRaises(schemas.WorkbookError):
+                schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+
+    def test_a_robot_not_in_the_sheet_robots(self):
+        self.assertFaultSays(self.faults({('Parts', 2, 0): 'Robot Z'}), "'Robot Z'")
+
+    def test_a_robot_without_its_rows_on_a_sheet(self):
+        faults = self.faults({('Boards', 1): None})
+        self.assertFaultSays(faults, 'Robot B')
+        self.assertIn('Boards', faults[0].text)
+
+    def test_a_minimum_above_the_mode(self):
+        self.assertFaultSays(self.faults({('Parts', 2, 5): 0.6}), 'in order')
+
+    def test_an_estimate_narrower_than_half_to_one_and_a_half_times_its_mode(self):
+        faults = self.faults({('Parts', 2, 5): 0.4, ('Parts', 2, 7): 0.6})
+        self.assertFaultSays(faults, 'half to 1.5 times')
+
+    def test_a_large_joint_factor_below_one_is_a_fault(self):
+        self.assertFaultSays(self.faults({('JointParts', 1, 6): 0.6}), 'below 1')
+
+    def test_a_group_of_shares_without_its_remainder(self):
+        self.assertFaultSays(self.faults({('Shares', 1, 6): ''}), 'exactly one remainder')
+
+    def test_shares_that_leave_the_remainder_below_zero(self):
+        faults = self.faults({('Shares', 2): ('Motor stator', 'Plastics', 'coating', 0.3, 0.6, 0.9, '', 'E', '')})
+        self.assertFaultSays(faults, 'below zero')
+
+    def test_a_material_not_in_the_shared_lists(self):
+        self.assertFaultSays(self.faults({('Parts', 2, 8): 'Brass'}), "'Brass'")
+
+    def test_shares_of_a_part_that_does_not_exist(self):
+        faults = self.faults({('Shares', 2): ('Rotor', 'Steel', '', None, None, None, 'Yes', 'E', '')})
+        self.assertFaultSays(faults, "'Rotor'")
+
+    def test_a_part_with_neither_one_material_nor_shares(self):
+        self.assertFaultSays(self.faults({('JointParts', 1, 5): ''}), "'Housing'")
+
+    def test_joints_that_do_not_match_the_joint_modules(self):
+        faults = self.faults({('Joints', 0, 3): 3})
+        self.assertFaultSays(faults, 'joint modules')
+        self.assertIn('Robot A', faults[0].text)
+
+    def test_a_joint_number_given_twice_in_one_robot(self):
+        self.assertFaultSays(self.faults({('Joints', 1, 1): 1}), 'number 1')
+
+    def test_a_module_mass_given_in_part(self):
+        self.assertFaultSays(self.faults({('Joints', 2, 6): None}), 'module mass')
+
+    def test_a_module_mass_out_of_order(self):
+        self.assertFaultSays(self.faults({('Joints', 2, 6): 1.5}), 'in order')
+
+    def test_a_magnet_grade_that_is_not_a_class(self):
+        self.assertFaultSays(self.faults({('Joints', 0, 10): 'XX'}), "'XX'")
+
+    def test_a_sensor_element_of_a_sensor_not_listed(self):
+        self.assertFaultSays(self.faults({('SensorElements', 0, 0): 'Camera'}), "'Camera'")
+
+    def test_a_shared_constant_that_is_missing(self):
+        self.assertFaultSays(self.faults({('Constants', 4): None}), "'Copper density'")
+
+    def test_a_robots_own_constant_that_is_missing(self):
+        faults = self.faults({('Constants', 12): None})
+        self.assertFaultSays(faults, "'Battery capacity'")
+        self.assertIn('Robot B', faults[0].text)
+
+    def test_a_label_that_is_not_known(self):
+        self.assertFaultSays(self.faults({('Parts', 2, 10): 'X'}), "'X'")
+
+    def test_two_parts_that_take_the_robots_remainder(self):
+        faults = self.faults({('Parts', 7): ('Robot A', 'Shell', 1, 'Frame and shell', 'Whole body', None, None, None,
+                                             'Plastics', 'the robot (Constants), less every other part', 'E', 'T1')})
+        self.assertFaultSays(faults, 'remainder of the robot')
+
+    def test_a_body_region_not_in_the_lists(self):
+        self.assertFaultSays(self.faults({('Sensors', 0, 4): 'Tail'}), "'Tail'")
+
+    def test_the_real_file_holds_together(self):
+        params = Params()
+        paths = [absolute(params.data.parts_taken_apart), absolute(params.data.shared_lists)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the parts taken apart or the shared lists are not on disk')
+        apart = schemas.read_parts_taken_apart(paths[0])
+        lists = schemas.read_shared_lists(paths[1])
+        self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, params)], [])
+        # EVIDENCE.md E2.8 and E2.8e, as agreed by Matthias on 2026-10-27: type 1 is the G1, X1 and N1 ("No, the T1 is
+        # out of type 1 (1.18 m). Type 1 is informed by the G1, X1 and N1."). The G1: 23 joints in 12 kinds, 9 large;
+        # the small joint's weighed parts add up to 525 g (China Post Securities, slide 43), the large joint's at the
+        # factors' modes to 1,011.717 g (by hand: 154.1 g of motor x 1.78, 155.2 g of gears x 2.33, 12.8 g of board x
+        # 3.56, 11 g of bearings x 1.78, 79.3 g of housing x 1.39, 23.7 + 50.8 + 38.1 g x 1.78). The X1: 29 joints
+        # (R86-3 x 6, R86-2 x 9, R52 x 10, L28 x 4), 15 large, their modes adding up to 20.27 kg (AgiBot). The N1: 23
+        # joints (90 N·m x 4, 54 N·m x 7, 30 N·m x 12), 11 large, their modes from the fit as E2.8e rounds them
+        # (0.88, 0.70, 0.54 kg) adding up to 4 x 0.88 + 7 x 0.70 + 12 x 0.54 = 14.90 kg.
+        self.assertEqual(sorted(apart.robots), ['AgiBot X1', 'Fourier N1', 'Unitree G1'])
+        joints = lambda robot: [j for j in apart.joints if j.robot == robot]  # noqa: E731
+        self.assertEqual((len(joints('Unitree G1')), sum(j.count for j in joints('Unitree G1'))), (12, 23))
+        self.assertEqual(sum(j.count for j in joints('Unitree G1') if j.module == 'large'), 9)
+        self.assertEqual(sum(j.count for j in joints('AgiBot X1')), 29)
+        self.assertEqual(sum(j.count for j in joints('AgiBot X1') if j.module == 'large'), 15)
+        self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in joints('AgiBot X1')), 20.27, places=6)
+        self.assertEqual(sum(j.count for j in joints('Fourier N1')), 23)
+        self.assertEqual(sum(j.count for j in joints('Fourier N1') if j.module == 'large'), 11)
+        self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in joints('Fourier N1')), 14.90, places=6)
+        self.assertAlmostEqual(sum(c.grams for c in apart.joint_parts), 525.0, places=6)
+        self.assertAlmostEqual(sum(c.grams * c.factor[1] for c in apart.joint_parts), 1011.717, places=6)
+
+
+class TestRobotTypes(unittest.TestCase):
+    """Every robot of the file lies inside its type's defining height and mass, as the sheet Taxonomy gives them
+    (Matthias, 2026-10-27: "We have to see, that there is not a mixup between the different types"; the Booster T1, at
+    1.18 m, was taken out of type 1 on this rule)."""
+
+    def faults(self, changes=None, definition=TYPE_1):
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'), changes)
+            apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+        category = schemas.Category(number=1, name='Compact Research & Developer', definition='',
+                                    height_and_mass=definition, joints_and_payload='', anchor='', row=2)
+        return schemas.check_robot_types(apart, [category])
+
+    def assertFaultSays(self, faults, words):
+        self.assertEqual(len(faults), 1, [f.text for f in faults])
+        self.assertIn(words, faults[0].text)
+
+    def test_robots_inside_their_type(self):
+        self.assertEqual([f.text for f in self.faults()], [])
+
+    def test_a_robot_below_its_types_height(self):
+        self.assertFaultSays(self.faults({('Robots', 1, 3): 1.18}), '1.18')
+
+    def test_a_robot_above_its_types_mass(self):
+        self.assertFaultSays(self.faults({('Robots', 1, 4): 57}), '57')
+
+    def test_a_type_that_the_taxonomy_does_not_have(self):
+        self.assertFaultSays(self.faults({('Robots', 1, 2): 7}), 'type 7')
+
+    def test_a_type_whose_limits_cannot_be_read(self):
+        self.assertFaultSays(self.faults(definition='Height: human-scale\nMass: varies'), 'limits')
+
+    def test_the_real_robots_lie_inside_type_1(self):
+        params = Params()
+        paths = [absolute(params.data.parts_taken_apart), absolute(params.data.workbook)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the parts taken apart or the workbook are not on disk')
+        apart = schemas.read_parts_taken_apart(paths[0])
+        book = schemas.read_workbook(paths[1], params)
+        self.assertEqual([f.text for f in schemas.check_robot_types(apart, book.categories)], [])
+
+
+# The sibling projects' files robot type 1 taken apart reads where they lie (step 4): small copies of their sheets.
+SIBLING_PCB = [(c, e, 1, 2, 3) for c in ('PE_HVS', 'ITC') for e in ('Cu', 'Ag', 'Au', 'Sn', 'Ni', 'Pd')]
+SIBLING_SENSORS = [('IMU', '6-axis MEMS'), ('angle sensor', 'Hall IC')]
+SIBLING_TANTALUM = [('Cu', 0.1, 0.18, 0.28), ('Ta', 0, 0.0001, 0.00045)]
+SIBLING_MAGNETS = [('N35H', 'max', 'H'), ('N42SH', 'max', 'SH'), ('N40UH', 'max', 'UH'), ('N38EH', 'max', 'EH')]
+
+
+def build_siblings(folder, pcb=None, sensors=None, tantalum=None, magnets=None):
+    """Write small copies of the four sibling sheets into `folder` and return Params that name them."""
+    paths = {}
+    for key, sheet_name, header, rows in (
+            ('vehicle_pcb_composition', 'PCPComposition',
+             ['PCBCategory', 'Element', 'mg_cm2_min', 'mg_cm2_mode', 'mg_cm2_max'], pcb or SIBLING_PCB),
+            ('vehicle_sensor_composition', 'Sensor Details', ['SensorType', 'Description'],
+             sensors or SIBLING_SENSORS),
+            ('data_center_element_composition', 'BoardsAndComponents', ['Element', 'Min', 'Mode', 'Max'],
+             tantalum or SIBLING_TANTALUM),
+            ('traction_motor_magnets', 'PermanentMagnetNdFeB', ['Grade'] + [''] * 11 + ['Range', 'TempClass'],
+             [(g,) + ('',) * 11 + (r, k) for g, r, k in (magnets or SIBLING_MAGNETS)])):
+        book = Workbook()
+        sheet = book.active
+        sheet.title = sheet_name
+        sheet.append(header)
+        for row in rows:
+            sheet.append(list(row))
+        paths[key] = os.path.join(folder, key + '.xlsx')
+        book.save(paths[key])
+    params = Params()
+    for key, path in paths.items():
+        setattr(params.data, key, path)
+    return params
+
+
+class TestSiblingData(unittest.TestCase):
+    """Step 4: the car board categories, car sensor types, tantalum row and magnet grade classes that robot type 1
+    taken apart names are in the sibling projects' files; each test leaves one of them out."""
+
+    def faults(self, apart_changes=None, **siblings):
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'), apart_changes)
+            apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+            params = build_siblings(folder, **siblings)
+            return schemas.check_sibling_data(apart, params)
+
+    def assertFaultSays(self, faults, words):
+        self.assertEqual(len(faults), 1, [f.text for f in faults])
+        self.assertIn(words, faults[0].text)
+
+    def test_everything_named_is_there(self):
+        self.assertEqual([f.text for f in self.faults()], [])
+
+    def test_a_board_category_the_car_file_does_not_have(self):
+        self.assertFaultSays(self.faults({('Boards', 0, 9): 'XYZ'}), "'XYZ'")
+
+    def test_a_board_category_without_one_of_its_metals(self):
+        pcb = [r for r in SIBLING_PCB if not (r[0] == 'PE_HVS' and r[1] == 'Pd')]
+        self.assertFaultSays(self.faults(pcb=pcb), 'Pd')
+
+    def test_a_sensor_type_the_car_file_does_not_have(self):
+        self.assertFaultSays(self.faults({('SensorElements', 0, 1): 'radar'}), "'radar'")
+
+    def test_a_magnet_grade_class_the_traction_motors_do_not_have(self):
+        magnets = [m for m in SIBLING_MAGNETS if m[2] != 'UH']
+        self.assertFaultSays(self.faults(magnets=magnets), "'UH'")
+
+    def test_no_tantalum_in_the_data_centre_file(self):
+        self.assertFaultSays(self.faults(tantalum=[('Cu', 0.1, 0.18, 0.28)]), 'Ta')
+
+    def test_a_sibling_file_that_is_not_there(self):
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'))
+            apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+            params = build_siblings(folder)
+            params.data.vehicle_sensor_composition = os.path.join(folder, 'gone.xlsx')
+            self.assertFaultSays(schemas.check_sibling_data(apart, params), 'data.vehicle_sensor_composition')
+
+    def test_the_real_sibling_files_hold_what_robot_type_1_names(self):
+        params = Params()
+        paths = [params.data.vehicle_pcb_composition, params.data.vehicle_sensor_composition,
+                 params.data.data_center_element_composition, params.data.traction_motor_magnets,
+                 absolute(params.data.parts_taken_apart)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('a sibling file or the parts taken apart are not on disk')
+        apart = schemas.read_parts_taken_apart(paths[-1])
+        self.assertEqual([f.text for f in schemas.check_sibling_data(apart, params)], [])
+
 if __name__ == '__main__':
     unittest.main()

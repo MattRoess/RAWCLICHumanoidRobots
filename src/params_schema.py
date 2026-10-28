@@ -123,6 +123,58 @@ class DataParams:
         metadata={'doc': 'The element recipes: the cells and their datasheets, the compounds, and the parts of each '
                          'cell down to its elements.'})
 
+    # Robot type 1 (the Unitree G1) taken apart: its 12 joint kinds and where they sit (sheet Joints), the joint
+    # module part by part as China Post Securities weighed it (JointParts), every other part (Parts), the materials of
+    # the parts that hold more than one (Shares), its circuit boards and sensors (Boards, Sensors, SensorElements), the
+    # numbers used across the sheets (Constants) and the sources (Sources). Agreed by Matthias on 2026-10-27
+    # (documentation/claude/EVIDENCE.md, E2.8 to E2.8c, and his decisions of step 1); written by Claude, to be
+    # corrected by Matthias in Excel. 01_schemas.py checks it.
+    # SAFE TO CHANGE: only if the file moves.
+    parts_taken_apart: str = field(
+        default=os.path.join('data', 'researched', 'parts_taken_apart.xlsx'),
+        metadata={'doc': 'Robot type 1 taken apart: its joints, the joint module part by part, every other part, '
+                         'their materials, boards and sensors, for where its critical materials sit.'})
+
+    # THE SIBLING PROJECTS' FILES that robot type 1 taken apart reads where they lie, never copied (Matthias,
+    # 2026-09-21: "Each project owns its data"; agreed for this file 2026-10-27, open point C of its plan). Absolute
+    # paths, because those projects are sibling checkouts and neither may assume where the other sits (as in
+    # RAWCLICStockAndFlow's `battery_composition_dir`). Nothing under them is ever written. 01_schemas.py checks that
+    # each holds what the file names.
+    # SAFE TO CHANGE: yes, when a sibling project moves.
+
+    # RAWCLICVehicleElectronics' board metals, mg per cm2 of board by car board category (sheet PCPComposition): the
+    # gold, silver, palladium, tin and nickel of each G1 board, by the category of the sheet Boards (EVIDENCE.md E2.8b).
+    vehicle_pcb_composition: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICVehicleElectronics/Data/04_VehiclePCBComposition.xlsx'),
+        metadata={'doc': "RAWCLICVehicleElectronics' board metals per cm2 by car board category; read where it lies."})
+
+    # RAWCLICVehicleElectronics' sensor elements, mg per sensor element by sensor type (sheet Sensor Details): the
+    # elements of each G1 sensor, by the car sensor types of the sheet SensorElements (EVIDENCE.md E2.8b).
+    vehicle_sensor_composition: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICVehicleElectronics/Data/07_VehicleSensorComposition.xlsx'),
+        metadata={'doc': "RAWCLICVehicleElectronics' elements per sensor element by sensor type; read where it "
+                         'lies.'})
+
+    # RAWCLICDataCenters' elements per kg of boards and components (sheet BoardsAndComponents): the tantalum of the
+    # G1's boards (Matthias, 2026-10-27: "There is the tantalum for the PBC of the data center").
+    data_center_element_composition: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICDataCenters/data/researched/04_DataCenterElementComposition.xlsx'),
+        metadata={'doc': "RAWCLICDataCenters' elements per kg of boards (tantalum); read where it lies."})
+
+    # RAWCLICVehicleTractionMotor's NdFeB grades by temperature class (sheet PermanentMagnetNdFeB of its element
+    # workbook), and the project itself, whose own code draws the magnets' elements of a grade class (Matthias,
+    # 2026-10-27: "take the NdBFe composition from the car traction motors"; one copy of the code).
+    traction_motor_magnets: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx'),
+        metadata={'doc': "RAWCLICVehicleTractionMotor's NdFeB grades by temperature class; read where it lies."})
+    traction_motor_dir: str = field(
+        default='/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICVehicleTractionMotor',
+        metadata={'doc': "RAWCLICVehicleTractionMotor, whose own code draws the NdFeB elements of a grade class."})
+
 
 @dataclass
 class CheckParams:
@@ -177,6 +229,24 @@ class CompositionParams:
 
 
 @dataclass
+class PartsParams:
+    """How the stage that draws robot type 1 taken apart draws it (Monte Carlo); step 5 of its plan."""
+
+    # How many times robot type 1 taken apart is drawn: 200,000, as 02. The real run is Matthias's; the tests and the
+    # sandbox runs use few draws.
+    # SAFE TO CHANGE: yes, between 100 and 1,000,000 (`current()` enforces it).
+    draws: int = field(
+        default=200_000,
+        metadata={'doc': 'How many Monte Carlo draws are made of robot type 1 taken apart.'})
+
+    # The start of its random numbers, fixed so that a rerun gives the same draws.
+    # SAFE TO CHANGE: yes; another seed gives other draws of the same distributions.
+    seed: int = field(
+        default=1,
+        metadata={'doc': 'The seed of the random numbers of robot type 1 taken apart.'})
+
+
+@dataclass
 class OutputParams:
     """Where the stages write. Paths are relative to the project root."""
 
@@ -204,6 +274,18 @@ class OutputParams:
         default=os.path.join('figures', 'comparison'),
         metadata={'doc': 'Where 03_comparison.py draws the six robot types side by side.'})
 
+    # What the stage that draws robot type 1 taken apart writes: its draws of every critical material in every kind
+    # of part. The project's own outputs (data/), until Matthias decides whether stock-and-flow reads them (open point F
+    # of its plan), which would move them to data/consolidated/. Outputs: not in git.
+    parts_dir: str = field(
+        default=os.path.join('data', 'parts_taken_apart'),
+        metadata={'doc': 'Where the draws of robot type 1 taken apart are written.'})
+
+    # The figure of robot type 1 taken apart, as Matthias approved it on 2026-10-27 ("Looks good to me").
+    parts_figures_dir: str = field(
+        default=os.path.join('figures', 'parts_taken_apart'),
+        metadata={'doc': 'Where the figure of robot type 1 taken apart is drawn.'})
+
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
     # and a page small enough to open quickly.
     dpi: int = field(
@@ -218,6 +300,7 @@ class Params:
     data: DataParams = field(default_factory=DataParams)
     checks: CheckParams = field(default_factory=CheckParams)
     composition: CompositionParams = field(default_factory=CompositionParams)
+    parts: PartsParams = field(default_factory=PartsParams)
     output: OutputParams = field(default_factory=OutputParams)
 
 
@@ -229,7 +312,7 @@ def absolute(path: str) -> str:
 def validate(params: Params) -> None:
     """Stop with a ParameterError, in plain words, when a setting cannot be used as written."""
     data = params.data
-    for name in ('workbook', 'shared_lists', 'element_recipes'):
+    for name in ('workbook', 'shared_lists', 'element_recipes', 'parts_taken_apart'):
         if not getattr(data, name).lower().endswith('.xlsx'):
             raise ParameterError(f'data.{name} must be an .xlsx workbook, not {getattr(data, name)!r}.')
     for name in ('taxonomy_sheet', 'components_sheet', 'materials_sheet', 'sources_dir'):
@@ -254,7 +337,21 @@ def validate(params: Params) -> None:
                              f'{composition.nmc_wh_per_kg_min}, {composition.nmc_wh_per_kg_mode}, '
                              f'{composition.nmc_wh_per_kg_max}.')
 
-    for name in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir'):
+    # The sibling projects' files: absolute, .xlsx where a file is named.
+    for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',
+                 'traction_motor_magnets', 'traction_motor_dir'):
+        value = getattr(data, name)
+        if not os.path.isabs(value) or (name != 'traction_motor_dir' and not value.lower().endswith('.xlsx')):
+            raise ParameterError(f'data.{name} must be an absolute path' + ('' if name == 'traction_motor_dir' else
+                                 ' to an .xlsx workbook') + f', not {value!r}.')
+    parts = params.parts
+    if not 100 <= parts.draws <= 1_000_000:
+        raise ParameterError(f'parts.draws must be between 100 and 1,000,000, not {parts.draws}.')
+    if not isinstance(parts.seed, int) or parts.seed < 0:
+        raise ParameterError(f'parts.seed must be a whole number from 0 up, not {parts.seed!r}.')
+
+    for name in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir', 'parts_dir',
+                 'parts_figures_dir'):
         if not str(getattr(params.output, name)).strip():
             raise ParameterError(f'output.{name} is empty.')
     # Below 50 dpi the small print of a page cannot be read; above 600 a page takes megabytes and
@@ -285,7 +382,8 @@ def source_status(params: Params) -> str:
     """Which of the input files and folders are on disk, one line each."""
     lines = []
     for label, path in (('workbook', params.data.workbook), ('shared lists', params.data.shared_lists),
-                        ('recipes', params.data.element_recipes), ('sources', params.data.sources_dir)):
+                        ('recipes', params.data.element_recipes),
+                        ('taken apart', params.data.parts_taken_apart), ('sources', params.data.sources_dir)):
         state = 'present' if os.path.exists(absolute(path)) else 'MISSING'
         lines.append(f'{label:<13} {path}: {state}')
     return '\n  '.join(lines)

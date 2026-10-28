@@ -2,6 +2,231 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
+## 2026-10-28, later afternoon: 04's figures on readable pages, median and mean (start here)
+
+- Matthias ran the builder (11:41:27) and 04 (11:41:44, 200,000 draws) himself, with the version of 04 before the
+  pages. Then: "Have the overview on several pages. I can not read it. too smal, you should notice this before you
+  sjhow me" (saved in Claude's memory as a rule: the smallest text, fit to a 1920 × 1080 screen, at least 18 pixels,
+  checked before showing), and "Showing the mean is wrong. It is not a good measure. Use the median or show boths"
+  (answer "Both, median first").
+- **Built, tests first** (VERIFICATION.md V54): the element figure on 2 pages, the overview on 5, 16 × 9 inches, text
+  14 points and up; the median solid, the mean dotted, both with numbers. **189 tests pass.** Sandbox pages sent to
+  him. **Approved:** "Pages right" ("The pages are right. I will run 04 again.").
+- **His run, to see the pages from his 200,000 draws:** press Run on
+  `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`.
+- **Left behind by the page version:** `figures/parts_taken_apart/robot_type_1_elements.png` and
+  `robot_type_1_overview.png` from his 11:41 run; nothing reads them. Removed on his "Yes, remove" (12:00); the
+  folder is empty until his next run of 04.
+- **Still waiting:** commit and push; the battery packs' 250 Wh/kg cut against 00's 232.5 Wh/kg cells; B to F's rest
+  and the 2026-10-27 run outputs; the findings of E2.8e.
+
+## 2026-10-28, afternoon: stage 04 built, its figures drawn in a sandbox
+
+- Matthias: "Yes, build steps 5 and 6: stage 04 and its two approved figures, tests first, tried in a sandbox with few
+  draws". The specification was written back first; his answers: **A** "Triangle 30 / own / 50" (the varied mass);
+  **B** "Joints whole, as listed" (what follows mass); **C and D** "As recommended" (the magnets from
+  RAWCLICVehicleTractionMotor's own `magnet_element_draws`, run where it lies; the draws to `data/parts_taken_apart/`);
+  **E** "Groups, histograms" (the overview for three robots).
+- **Built, tests first:** `04_parts_taken_apart.py`, `tests/test_parts_taken_apart.py`; 01's list of stages names 04;
+  METHODOLOGY.md ("What 04 draws"), README.md, `.gitignore` (`data/parts_taken_apart/`). Hand calculations, deliberate
+  faults and a sandbox run of 2,000 draws: VERIFICATION.md V53. **186 tests, 185 pass**; the one failing is the
+  builder's comparison with the data file on disk, until his run of the builder.
+- **The figures, sandbox preview** (Claude's scratch folder, today's data file, 2,000 draws): sent to him; not in
+  `figures/`.
+- **His runs, in this order** (in RAWCLICHumanoidRobots, press Run):
+  1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`
+     (today's values into the data file; seconds);
+  2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`
+     (200,000 draws. Measured in the sandbox: 2,000 draws 4.5 s, 0.36 GB of memory, 2.9 MB written; 50,000 draws
+     5.3 s, 0.88 GB, 71 MB. Extrapolated linearly, not measured: 200,000 draws about 10 s, 2.5 GB, 280 MB.)
+- **Found, his decision:** the X1's and N1's battery packs cut at 250 Wh/kg cells while 00's NMC cells go down to 232.5
+  Wh/kg (housing below zero in about 1.4 % of their draws); the X1's frame below zero in about 0.9 % of its draws.
+- **Still waiting:** commit and push (step 10); B to F's rest and the outputs of the 2026-10-27 run; the findings of
+  E2.8e (the N1's switch, the X1's XT60 / XT90, brass inserts, the newer BOM).
+
+## 2026-10-28, later: the X1's and N1's masses and parts
+
+- Matthias chose "Masses and parts", then answered: "X1 max 35.3 kg"; "Encoders", "XT30 connectors", "Main board
+  cooler" (the other G1 parts not carried over); "Yes, download" (the X1's BOMs again); then "Yes, build", with A to C
+  as recommended. Everything read and decided: EVIDENCE.md E2.8e, "Decided, 2026-10-28".
+- **Built, tests first:** the builder `tools/make_parts_taken_apart.py` now writes the X1's mass 32 / 33 / 35.3 kg and,
+  for the X1 and N1, encoders and XT30 connectors (two per joint), a main board fan and a copper heat sink
+  (0.055 / 0.12 / 0.19 kg, E). Two planted faults caught; 01's checks pass on what it writes (VERIFICATION.md V52).
+- **175 tests, one failing by design** (`test_what_it_writes_equals_the_data_file_on_disk`): the data file on disk is
+  still yesterday's (2026-10-27 15:14:22). **Matthias's run** writes the new file, then all pass: press Run, in
+  RAWCLICHumanoidRobots, on
+  `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`.
+  It draws no figure.
+- **Found, his decision:** the N1's network switch; the X1's XT60 / XT90 plugs, brass inserts, sensor shield and
+  dampers; a newer X1 BOM list (2025-01-08), not downloaded; whether a mated XT30 counts once or twice (point A).
+- **His question, "Tell me, when I can run it. I want to see the figures":** the two approved figures are drawn by
+  stage 04, steps 5 and 6, not built yet; each on his yes.
+- **Still waiting:** commit and push; B to F and the outputs of the 2026-10-27 run (the section below).
+
+## 2026-10-28: the builder rewritten into tools/
+
+- Matthias: "Read my rules and also the handover. I want copliance with my rules, not like yesterday." Read, checked
+  against the disk, reported; nothing changed. Claude's scratch folder was found empty: the first builder, the preview
+  scripts of the two approved figures and their draws, and the downloads are gone. The element figure's exact
+  specification is kept in the section below.
+- **Built** on "Yes, rewrite": `tools/make_parts_taken_apart.py`, the builder of the data file, values transcribed from
+  the file on disk (written from EVIDENCE.md E2.8 to E2.8e); tested first; what it writes passes 01's checks and equals
+  the file cell by cell; a deliberate fault caught; importing it writes nothing; **174 tests pass** (VERIFICATION.md
+  V51). README.md and METHODOLOGY.md say what it is. Not run into `data/` (his: press Run on
+  `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`
+  only when the values change; today it would write the same file again).
+- **Found, not changed:** the data file's About sheet still describes the sheet Joints as the G1's alone; METHODOLOGY.md's
+  table of stages does not list 01's reading of `parts_taken_apart.xlsx` and the sibling files (since step 3).
+- **Still waiting for Matthias**, unchanged: points 1, 2, 3 and 5 of the section below (the X1's and N1's ± 1 kg, the
+  G1's parts not carried over, commit and push, B to F and the run outputs). Point 4 is done.
+
+## 2026-10-27, end of the day: where everything stands
+
+**Done today, in the repository, not committed** (nine files changed since `e57699f`: `01_schemas.py`,
+`src/params_schema.py`, `tests/test_parameters.py`, `tests/test_schemas.py`, `README.md` and four documents here):
+- Steps 1 to 4 of robot type 1 taken apart (the section below): the data file, 01's checks, 00's settings.
+- **Step 2b, built** on "Yes, build points 1 to 8 as specified, tests first": `data/researched/parts_taken_apart.xlsx`
+  (git-ignored) holds the **Unitree G1, AgiBot X1 and Fourier N1**, each in its own rows; 01 checks it per robot and
+  checks each robot against its type's height and mass in the workbook's Taxonomy (METHODOLOGY.md check 20).
+  **171 tests pass**, none skipped (VERIFICATION.md V50). The values: EVIDENCE.md E2.8e, as accepted.
+- **Type 1 = G1, X1, N1.** "No, the T1 is out of type 1 (1.18 m). Type 1 is informed by the G1, X1 and N1."
+- **The element figure, approved** ("Yes, the element figure is right now"; V49): its exact specification is in the
+  section below ("A second figure, approved as an addition"). With the approved overview figure, step 6 draws both.
+
+**Waiting for Matthias** (nothing to do before his word):
+1. **The X1's and N1's own masses** got the G1's ± 1 kg (X1 32 / 33 / 34 kg, N1 38 / 39 / 40 kg): keep, or fixed?
+2. **The G1's parts not carried over to the X1 and N1** (not in E2.8e's accepted tables): encoders (two per joint;
+   the N1's page states dual encoders), XT30 connectors (the X1's BOM lists XT30 cables), the main board's heat sink
+   and fan, the hip and waist fans, the knee vapour chambers, the lower-leg links, the capacitor buffer boards, the
+   microphones and speaker, a head board. Carry over which, if any?
+3. **Commit and push** the nine files, on his word.
+4. **Claude's scratch folder vanishes with the session.** In it, and nowhere else: the builder of the data file
+   (`tools/make_parts_taken_apart.py`, needed to rebuild the file), the preview scripts of the two approved figures
+   (`g1_distributions_figure.py`, `g1_elements_stacked.py`) and their draws (`g1_kinds.py`, `kinds_draws.npz`), the
+   downloads (the X1's BOMs, the N1's model file, Tol's `tol_colors.py`). **Decided:** "Yes, put the builder in
+   tools/make_parts_taken_apart.py as proposed, with its test and documents." **Stopped half-way on his "Hand over and
+   stop":** the test is written, `tests/test_make_parts_taken_apart.py` (the builder's output passes 01's checks,
+   equals the file on disk cell by cell, writes where 00 says), and fails because `tools/make_parts_taken_apart.py`
+   does not exist yet. Still to do: put the builder there with a `build(path)` function, an `output_path()` from 00's
+   `data.parts_taken_apart`, a main guard (it must not run when imported: the scratch version runs at import and
+   takes its path from the command line), the copyright and licence lines, comments for a new user; then README.md,
+   METHODOLOGY.md, VERIFICATION.md. If the scratch folder is gone by then, the builder is rewritten from EVIDENCE.md
+   E2.8 to E2.8e and the data file on disk, which the test compares against cell by cell.
+5. Still open from before: B to F of the section below (the magnets' call, sibling data, 02/03's rejected pages,
+   `data/consolidated`), and the outputs of the morning's real run of 00 to 03 (his to keep or remove).
+
+**Next, each on his yes:** step 5, the stage `04_parts_taken_apart.py` (tests first): each draw one robot of type 1,
+equally often, kept whole; its mass drawn within the type's limits around its own; the frame, shell, battery and
+joints following mass, the electronics and sensors not; every quantity drawn from its min / mode / max ("Use the
+monte carlo approach for most possible"); its draws kept at every level. Then step 6 (the two approved figures),
+step 7 (a sandbox run, few draws), step 8 (documents), step 9 (his real run), step 10 (commit and push on his word).
+
+**His runs, when he wants the new settings and pages** (in RAWCLICHumanoidRobots, by pressing Run):
+`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+(adds the new settings to `params.xlsx` and `PARAMETER_REFERENCE.md`), then
+`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+(its pages and faults.png, with checks 18 to 20).
+
+**Learned today about figures** (also in Claude's memory, "data-scientist-figures"): his form is RAWCLICDataCenters
+05's: per element one histogram of the total, each bar split into the parts that hold it, the smaller lower, the
+same colours everywhere, the mean with its number, the 95 % interval dashed, each panel its own scale, one legend;
+weights, not shares; no violins for elements ("the violine which limits information"), no log axis across elements,
+no bubbles, no lists beside panels; colours from a published colour-blind palette as published (Paul Tol), never
+graded by a home-made score ("You always try to trick me"). Discuss a form in one or two lines before drawing it.
+
+## 2026-10-27, afternoon: robot type 1 taken apart, and the figure that shows it
+
+- **Rules of the day, in Matthias's words:** "What are my rules in terms of runing code!!!" (the real run of 00 to 03
+  on 2026-10-27 morning was Claude's breach; its outputs are still on disk, his to keep or remove); "Be always in
+  discussion with me about the figures"; "Estimates should be larger than known numbers"; "Search once more. It is
+  better than just estimate. Encrease this effort in general"; "the slipt into parts is just to get a deeper look into
+  the robot, so that there is information on where the interesting materials are and the recycling can be optimized".
+- **Robot type 1 (Unitree G1) part by part, not entered:** [EVIDENCE.md](EVIDENCE.md) E2 (sources E2.1 to E2.7; the
+  proposal E2.8; boards and sensors E2.8b; the complete picture with the magnets by joint heat E2.8c; the purpose and
+  the materials followed E2.9; the stator's copper E2.10). Checks in [VERIFICATION.md](VERIFICATION.md) V45. The main
+  source is China Post Securities' own teardown, free at https://pdf.dfcfw.com/pdf/H3_AP202603311820899944_1.pdf.
+- **Agreed by Matthias:** the stator's copper share 23 / 36 / 45 % ("Yes use this numberrs"); every estimate at least
+  half to 1.5 times its mode ("Yes"); gold, silver and palladium added to the workbook's critical raw materials;
+  silicon left out; the cooling aluminium counted with the joints; NdFeB from the car traction motors, high-temperature
+  grades for the heavily used, air-cooled joints; car board and sensor data, and Bizzo's combined analyses for the
+  boards' copper ("Yes if they fit").
+- **Step 1 done, decided by Matthias** (answers chosen from the options offered): every remainder of E2.8 "Accept all";
+  the rotor's NdFeB "Keep 45 / 90 / 100 %"; the other values marked E "Accept all"; the hot joints "Hips, knees, waist,
+  ankles". Recorded in EVIDENCE.md E2.8.
+- **The steps agreed** ("Yes. Show me the steps and then we move step by step through them"), each on his yes:
+  1. settle the open decisions (done);
+  2. the data file `data/researched/parts_taken_apart.xlsx` for robot type 1, from E2 (done on his "Yes", V46; ten
+     sheets; the builder is a one-off in Claude's scratch folder; electrical steel and the winding coating are kept
+     as grades of the shared materials Steel and Plastics, so the shared lists need no new material);
+  3. 01 checks it (tests first) (done on his "Yes", V47; 151 tests pass; 00 not run, so `params.xlsx` and
+     `PARAMETER_REFERENCE.md` gain the new setting at the next press of Run on 00);
+  4. 00's new settings: where the sibling data lie, read where they lie, the stage's draws and seed, its folders
+     (done on his "Yes", V48; 159 tests pass; the draws go to `data/parts_taken_apart` until F is decided);
+  5. a new stage `04_parts_taken_apart.py` that draws it part by part (tests first) and writes its draws;
+  6. 04 draws the approved figures (the overview and the element figure, both below);
+  7. a sandbox run with few draws, shown and recorded;
+  8. the documents in the same steps;
+  9. the real run, his;
+  10. commit and push on his word.
+
+  Open within them: B, the magnets (add `pandas` to the pins and call RAWCLICVehicleTractionMotor's
+  `magnet_element_draws` where it lies, recommended; or have that project write its grade draws to its
+  `data/consolidated`); C, the sibling data read where they lie (recommended); D, robot type 1 first (recommended);
+  E, 02's and 03's rejected pages decided once 04 works; F, 04's draws written to `data/consolidated/` (recommended).
+  B is simpler than first written: `pandas` is already in this project's pins (3.0.5).
+- **New, Matthias during step 3:** "You have just individual examples. The different realisations of such a type could
+  vary on the compositon parts etc quite a bit. This has to be in the results. Otherwise we are to accurate in terms
+  of what we know." And: "if there is overall information on the material compsotion then this will be used for
+  representing the robots". **G:** how the spread between robots of type 1 (not only the G1's own uncertainty) is
+  drawn must be proposed and agreed before step 5. Done so far (EVIDENCE.md E2.8d): the AgiBot X1's BOM and the
+  Fourier N1's model file downloaded to scratch and read; decided: types kept apart by the Taxonomy's limits, type 1
+  informed by G1, X1 and N1 (the T2 Pro out; the T1 out, 1.18 m: "No, the T1 is out of type 1 (1.18 m). Type 1 is
+  informed by the G1, X1 and N1."), no bootstrap, robots outside the known ones represented, and the
+  method "Real robot, varied" (each draw one real robot kept whole, its mass drawn within the type's limits, what
+  follows mass scaled). Then answered by Matthias: each robot drawn equally often ("Equal"); the frame, the shell,
+  the battery and the joints follow mass, the electronics and sensors do not ("Yes"); the X1, N1 and T1 "We can
+  assume, they are similar within given ranges. So come up with well founded estimates". **Step 2b, proposed and
+  shown, not entered:** EVIDENCE.md E2.8e (the X1, N1 and T1 item by item, with sources; joint masses from a fit on
+  AgiBot's published actuators, checked on the G1). All five points decided (the T1 out; 9 R86-2; the X1's phone a
+  board, E; the standard robots; the makers' stated masses), and on "Use the monte carlo approach for most possible"
+  the ranges accepted ("Yes, accept the ranges as proposed; keep the LiDAR fixed"). **Step 2b built** on "Yes, build
+  points 1 to 8 as specified, tests first" (VERIFICATION.md V50): the data file holds the G1, X1 and N1 (sheet Robots,
+  column Robot, module masses); 01 checks it per robot and each robot against its type's limits (check 20); 171 tests
+  pass. Not committed. Open for him (EVIDENCE.md E2.8e, end): the ± 1 kg on the X1's and N1's masses, and the G1's
+  parts not carried over to them (encoders, connectors, heat sinks, fans, and others).
+- **Found in his workbook, reported, not changed:** `Components & Materials` row 14 gives the LiDAR 0.65 kg, "Direct",
+  citing Livox, whose specifications give 265 g; the robot's copper there (3.8 kg, an estimate) is more than twice
+  what the weighed parts allow.
+- **The figure, approved ("Looks good to me"):** "Robot type 1 taken apart: where the critical materials sit, and how
+  sure we are". The robot with every joint numbered where it sits, and one panel per critical material with a
+  distribution per kind of part (mean, 95 % line, hatched where it rests on estimates). It is a **preview in Claude's
+  scratch folder only, drawn by scratch scripts that vanish with the session**; nothing of it is in the project.
+- **A second figure, approved as an addition** ("Yes, the element figure is right now"; checks V49): "Robot type 1
+  (Unitree G1): critical elements in one robot", the form Matthias set for RAWCLICDataCenters' 05 ("I want
+  distributions adding up to the total amount", "Keep the colors … seperate and always the same", "Have the smaler
+  contributions first so that they are at the buttom of the distribution"). To be drawn by 04 (step 6) exactly so:
+  - one panel per element, four across, in this order: copper, aluminium, silver, gold, palladium, tantalum,
+    neodymium and praseodymium, dysprosium, gallium, indium; the NdFeB magnets shown by their Nd and Pr (a line in
+    the footnote), the battery metals and silicon not shown;
+  - in each panel the histogram of the robot's total over the draws (70 bars, the height the share of the draws), each
+    bar split into the weight its draws hold in each kind of part, the part with the smaller mean lower (as 05's
+    `_stacked_panel`); the mean a solid line with its number, the 2.5th and 97.5th percentile dashed; each panel its
+    own scale and unit (mg, g, kg); a part holding the element in fewer than 2.5 % of the draws not drawn;
+  - one colour legend for the whole figure at the top (no lists of weights beside the panels: "an overkill");
+  - the colours: Paul Tol's discrete rainbow for 10 colours, as published (`tol_colors.py`, rainbow_discrete, lut =
+    10), in his order to hip joints (6) #882E72, knee joints (2) #1965B0, ankle joints (4) #7BAFDE, waist joint (1)
+    #4EB265, arm joints (10) #CAE0AB, torso boards and heat sink #F4A736, head #E8601C, cables #DC050C, with frame and
+    shell #F7F056 and battery pack #72190E swapped so that the frame stands apart from the hip joints in aluminium;
+  - the footnote in RAWCLICDataCenters' words (bars, mean, 95 % interval, own scale, the 2.5 % rule), the joints with
+    their driver boards and encoders, dysprosium with the hot joints' magnets for 150 °C.
+  Rejected on the way, never to be shown again: one grid panel per element and source (34 panels, "to many of them"),
+  violins of weights per part ("the violine which limits information"), shares of the robot's element ("I am not so
+  much interested in the share. I want to know the weights"), bubbles ("the worst you ever showed me"), one
+  logarithmic axis for all elements ("shit"), weight lists beside the panels, and colours too many, too dark or picked
+  by Claude's own score.
+- **Next, his decision:** whether and how to bring robot type 1's data and this figure into the project (a data file
+  and a numbered stage, specification first), and then the other five robot types.
+
 ## 2026-10-27: the handover checked; aluminium's further alloys researched
 
 - **Asked, in Matthias's words:** "Check the handover and then continue".
