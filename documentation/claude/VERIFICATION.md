@@ -5,6 +5,45 @@ by Claude, newest first.
 
 ## 2026-10-28
 
+### V56. The X1's and N1's battery packs cut at the model's own cells
+
+- **What:** on Matthias's "Cut at the cells" (EVIDENCE.md E2.8e, "The battery packs' lower cut"): in
+  `tools/make_parts_taken_apart.py` the X1's pack 1.75 / 2.2 / 3.3 kg (was 1.4), the N1's 2.26 / 2.9 / 3.2 kg (was 1.9).
+- **How, tests first:** a new test in `tests/test_make_parts_taken_apart.py` computes, for every robot, the pack's
+  needed lower bound from the builder's own output (largest energy over 00's `composition.nmc_wh_per_kg_min`, plus the
+  largest management board over the lightest robot's mass factor, type 1's 30 kg from the workbook's Taxonomy) and
+  checks the pack against it, and the two new values. Before the change it failed for the X1 (1.4 against 1.746) and
+  the N1 (1.9 against 2.254), not for the G1 (2.25 against 1.999); after it, it passes.
+- **Against the new data file**, written by the builder into Claude's scratch folder (not into `data/`): the 19 tests
+  of the builder and of 04 all pass. A sandbox draw of 04 (50,000 draws, outputs in the scratch folder): no battery
+  housing below zero; the lightest 0.38 kg (G1), 0.14 kg (X1), 0.14 kg (N1); medians 0.80, 0.97 and 0.82 kg (the X1's
+  was about 0.70 kg at the modes before, its pack range now narrower from below). The X1's frame below zero in 0.78 %
+  of its draws (0.68 % in Matthias's run), unchanged in kind. The elements as in V55, to their sampling spread.
+- **Result in the project:** the one test failing is the builder's comparison with the data file on disk, until
+  Matthias runs the builder.
+- **Matthias's runs, read back:** the builder at 12:11:33 (after the change of 12:09:43), 04 at 12:11:51 to 12:11:57,
+  200,000 draws (robots 0.334 / 0.333 / 0.333). No battery housing below zero: the lightest 0.330 kg (G1), 0.167 kg
+  (X1), 0.133 kg (N1), medians 0.797, 0.966, 0.820 kg. The X1's frame below zero in 0.81 % of its draws, no other
+  remainder. Elements as in V55 (copper median 2.21 kg, gold 57 mg, Nd 287 g, Pr 54 g, Dy 52 g). **190 tests pass.**
+- **Not covered:** the housing's own mass has no source (a remainder); a minimum case mass was not researched (option 2,
+  not chosen).
+
+### V55. Matthias's real run of 04 with the pages, read back
+
+- **What:** his run of `04_parts_taken_apart.py`, 12:02:34 to 12:02:41, 200,000 draws, with the code of 11:53:39 (the
+  pages, median and mean) and the data file his builder wrote at 11:41:27.
+- **How:** read from disk: `robots.npy` (200,000 rows; the G1, X1 and N1 in 0.334, 0.333 and 0.333 of the draws),
+  `summary.csv`, the seven pages (each 2,400 × 1,350 pixels; looked at side by side for anything broken).
+- **Result,** one robot of type 1, median / mean (95 % interval): varied mass 38.3 / 38.6 kg (31.6 to 47.4); copper
+  2.21 / 2.27 kg (1.61 to 3.27); aluminium 13.1 / 13.3 kg (6.3 to 21.4); silver 432 / 472 mg (184 to 981); gold 57 / 64
+  mg (29 to 127); palladium 22 / 26 mg (12 to 54); tantalum 143 / 165 mg (27 to 426); neodymium 287 / 298 g and
+  praseodymium 54 / 57 g (Nd + Pr 342 / 355 g); dysprosium 52 / 55 g (26 to 100); gallium 599 / 640 mg (142 to 1,372);
+  indium 9.0 / 13.5 mg (0 to 53). Within the sandbox's of V53 and V54 (2,000 draws) to their sampling spread.
+  Remainders below zero: the X1's battery housing in 1.00 % of its draws, its frame in 0.68 %; the N1's battery
+  housing in 0.80 %; none of the G1's.
+- **Not covered:** the finding of V53 stands: the battery packs' lower cut (250 Wh/kg cells) against 00's NMC cells
+  (232.5 to 256 Wh/kg).
+
 ### V54. Stage 04's figures on readable pages, with the median and the mean
 
 - **What:** Matthias, on the first previews: "Have the overview on several pages. I can not read it. too smal, you

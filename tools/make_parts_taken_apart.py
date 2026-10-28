@@ -371,10 +371,10 @@ PARTS_ROWS = [
      '(E2.8e)'),
     ('AgiBot X1', 'OmniPicker grippers', 2, 'Arms', 'Arms', 0.41, 0.43, 0.45, 'Mixed', None, 'S',
      'X1d "Weight 0.43kg"'),
-    ('AgiBot X1', 'Battery pack', 1, 'Battery pack', 'Torso', 1.4, 2.2, 3.3, None,
+    ('AgiBot X1', 'Battery pack', 1, 'Battery pack', 'Torso', 1.75, 2.2, 3.3, None,
      'its cells, its management board (Boards) and its housing (the rows below)', 'S, E',
-     'X1a "48V8AH三元电池", stainless-steel case; mass: the G1\'s 168 Wh/kg, the lower cut at '
-     '250 Wh/kg cells (E2.8e)'),
+     'X1a "48V8AH三元电池", stainless-steel case; mass: the G1\'s 168 Wh/kg; the lower cut where the pack holds '
+     'its heaviest cells (232.5 Wh/kg) and management board in the lightest robot (E2.8e, 2026-10-28)'),
     ('AgiBot X1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials',
      "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg", 'S',
      'X1a "12S"; element_recipes.xlsx NMC cylindrical'),
@@ -416,9 +416,10 @@ PARTS_ROWS = [
      'fan (E2.8e)'),
     ('Fourier N1', 'End pieces of the arms', 2, 'Arms', 'Arms', 0.05, 0.1, 0.15, 'Plastics', None, 'S, E',
      'N1b 0.099 kg each'),
-    ('Fourier N1', 'Battery pack', 1, 'Battery pack', 'Torso', 1.9, 2.9, 3.2, None,
+    ('Fourier N1', 'Battery pack', 1, 'Battery pack', 'Torso', 2.26, 2.9, 3.2, None,
      'its cells, its management board (Boards) and its housing (the rows below)', 'S, E',
-     'N1a "≤3.2kg" (the upper cut); the lower cut at 250 Wh/kg cells (E2.8e)'),
+     'N1a "≤3.2kg" (the upper cut); the lower cut where the pack holds its heaviest cells (232.5 Wh/kg) and '
+     'management board in the lightest robot (E2.8e, 2026-10-28)'),
     ('Fourier N1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials',
      "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg", 'S',
      'N1a "475WH", "39.6V"; NMC (E2.8e); element_recipes.xlsx NMC cylindrical'),

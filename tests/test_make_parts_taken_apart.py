@@ -68,6 +68,35 @@ class TestMakePartsTakenApart(unittest.TestCase):
                 rows = [list(r) for r in written[name].iter_rows(values_only=True)]
                 self.assertEqual(rows, [list(r) for r in present[name].iter_rows(values_only=True)], msg=name)
 
+    def test_every_battery_pack_holds_its_heaviest_cells_and_board(self):
+        """Matthias, 2026-10-28, "Cut at the cells": a pack's lower bound holds its heaviest cells (its largest energy
+        over the NMC cells' lowest energy per kg, 00's composition.nmc_wh_per_kg_min) and its largest management board,
+        in the lightest robot of type 1 (where pack and cells shrink with the mass and the board does not), so that the
+        battery housing, the pack's remainder, never falls below zero. The X1's 1.75 kg and the N1's 2.26 kg."""
+        params = Params()
+        workbook = absolute(params.data.workbook)
+        if not os.path.exists(workbook):
+            self.skipTest('the workbook is not on disk')
+        (_, _), (lightest, _) = schemas.type_limits(next(c for c in schemas.read_workbook(workbook, params).categories
+                                                         if c.number == 1))
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'parts_taken_apart.xlsx')
+            builder.build(path)
+            apart = schemas.read_parts_taken_apart(path)
+        g_per_cm2 = apart.constants[schemas.ALL_ROBOTS]['Board mass per cm2 (boards not weighed)'][1][2]
+        for robot in apart.robots:
+            constants = apart.constants[robot]
+            wh = constants['Battery voltage'][1][2] * constants['Battery capacity'][1][2]
+            cells = wh / params.composition.nmc_wh_per_kg_min
+            board = max(b.bounds[2] * b.count for b in apart.boards if b.robot == robot and b.kind == 'Battery pack')
+            factor = lightest / constants['Robot mass, with battery'][1][2]
+            needed = cells + board * g_per_cm2 / 1000 / factor
+            pack = next(p for p in apart.parts if p.robot == robot and p.name == 'Battery pack')
+            with self.subTest(robot=robot):
+                self.assertGreaterEqual(pack.bounds[0], needed - 1e-9)
+        packs = {p.robot: p.bounds for p in apart.parts if p.name == 'Battery pack'}
+        self.assertEqual((packs['AgiBot X1'], packs['Fourier N1']), ((1.75, 2.2, 3.3), (2.26, 2.9, 3.2)))
+
     def test_it_takes_no_arguments_and_writes_where_00_says(self):
         self.assertEqual(builder.output_path(), absolute(Params().data.parts_taken_apart))
 

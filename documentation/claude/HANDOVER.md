@@ -2,7 +2,20 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-28, later afternoon: 04's figures on readable pages, median and mean (start here)
+## 2026-10-28, evening: the battery packs cut at the cells (start here)
+
+- Matthias's run of 04 (12:02, 200,000 draws) read back and checked (VERIFICATION.md V55). Then, on the finding of the
+  battery cut: "Cut at the cells". The X1's pack 1.75 / 2.2 / 3.3 kg, the N1's 2.26 / 2.9 / 3.2 kg, in the builder,
+  tests first (EVIDENCE.md E2.8e; V56). No battery housing below zero in a sandbox draw of 50,000.
+- **His runs, in this order** (in RAWCLICHumanoidRobots, press Run):
+  1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`
+  2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`
+  Until the first, the builder's comparison with the data file on disk fails, by design. **Done by him at 12:11**;
+  read back (V56): no housing below zero, 190 tests pass.
+- **Found, his decision:** the X1's frame below zero in about 0.8 % of its draws.
+- **Not committed** since `dc77f98`: the builder, its test, EVIDENCE, VERIFICATION V55 and V56, this handover.
+
+## 2026-10-28, later afternoon: 04's figures on readable pages, median and mean
 
 - Matthias ran the builder (11:41:27) and 04 (11:41:44, 200,000 draws) himself, with the version of 04 before the
   pages. Then: "Have the overview on several pages. I can not read it. too smal, you should notice this before you
@@ -17,8 +30,10 @@ Where the work stands, newest first: what was decided, by whom, and what is open
 - **Left behind by the page version:** `figures/parts_taken_apart/robot_type_1_elements.png` and
   `robot_type_1_overview.png` from his 11:41 run; nothing reads them. Removed on his "Yes, remove" (12:00); the
   folder is empty until his next run of 04.
-- **Still waiting:** commit and push; the battery packs' 250 Wh/kg cut against 00's 232.5 Wh/kg cells; B to F's rest
-  and the 2026-10-27 run outputs; the findings of E2.8e.
+- **Committed and pushed** on "Yes, commit and push": `dc77f98` on `main`, 14 files (code and documents, no data),
+  confirmed on GitHub. This line of the handover came after it and is not in that commit.
+- **Still waiting:** the battery packs' 250 Wh/kg cut against 00's 232.5 Wh/kg cells; B to F's rest and the
+  2026-10-27 run outputs; the findings of E2.8e.
 
 ## 2026-10-28, afternoon: stage 04 built, its figures drawn in a sandbox
 

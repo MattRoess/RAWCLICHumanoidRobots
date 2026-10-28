@@ -775,6 +775,25 @@ Boards rows; X1a lists XT60 and XT90 plugs and cables on the battery side, 16 br
 "黄铜"), a stainless sensor shield ("传感器屏蔽罩") and 4 silicone dampers, none in the X1's rows; a newer BOM list,
 `智元灵犀X1_BOM清单_20250108.xlsx` (17,678 bytes), exists in X1a's repository and was not downloaded.
 
+**The battery packs' lower cut, decided 2026-10-28** (Matthias: "Cut at the cells", option 1; checks VERIFICATION.md
+V56). The X1's and N1's packs were cut below at 250 Wh/kg cells, but 04 draws the cells from 00's NMC range, 232.5 /
+241.5 / 256 Wh/kg (E1.7d): a light pack met heavy cells, and the battery housing, the pack's remainder, fell below
+zero (Matthias's run of 04: the X1's in 1.00 % of its draws, the N1's in 0.80 %). The rule stays (a pack weighs at least
+its cells and its management board); its numbers follow the model's own cells: the largest energy (voltage × capacity
+at their maxima) over 232.5 Wh/kg, plus the largest management board (96 cm2 × 0.84 g/cm2 = 81 g), the board divided
+by the lightest robot's mass factor (30 kg over the robot's largest own mass), as pack and cells shrink with the mass
+and the board does not.
+
+| Robot | Energy, max | Heaviest cells | Needed | Pack, entered (kg) |
+|---|---|---|---|---|
+| G1 | 442 Wh | 1.902 kg | 1.999 kg (factor 0.833) | 2.25 / 2.5 / 2.75, unchanged (the teardown's "~2.5kg" ± 10 %) |
+| X1 | 384 Wh | 1.652 kg | 1.746 kg (factor 0.850) | **1.75** / 2.2 / 3.3 (was 1.4) |
+| N1 | 499 Wh | 2.146 kg | 2.254 kg (factor 0.750) | **2.26** / 2.9 / 3.2 (was 1.9) |
+
+The housing can now reach 0 kg in the most extreme draw, never below; a real pack has a case (the X1's is stainless
+steel), so this bound is a physical floor, not a likely mass. The X1's frame still falls below zero in about 0.8 % of
+its draws (a separate remainder, not changed here).
+
 ### E2.9 What the split into parts is for, and the materials it follows (Matthias, 2026-10-27)
 
 **His words:** "if the total material declartion is a good source, then the slipt into parts is just to get a deeper
