@@ -8,7 +8,802 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
-## E2. Robot type 1 taken apart: what makes up the Unitree G1, the sources, 2026-10-27
+## E4. A register of every known humanoid, each in one type: research, first pass (2026-10-28). Nothing entered
+
+Matthias: "I want that all know humanoid robots at the end can be assigned to types. It should be possible also to
+assign themeven they are out of limts. Nothing is left behind as the field is fluid and changes fast"; "If there is a
+given purpose usecase for a robot, then it should go to the respective type. Except it does not fit, due to on or no
+legs arms . We have to be a bit more open. We can not explude"; "There should be no double counting. A robot has to be
+in one but not two types. Boarder cases have to be decide manually"; then "Yes, research the list".
+
+**The list:** humanoid.guide's database (https://humanoid.guide/humanoid-robots-database/, "349 humanoids", read
+2026-10-28): every English product page of its category humanoids, 349, read with its attribute table (availability,
+nationality, the maker's website, joints, height, weight, payload, "Main market", manufacturer) and whether its page
+speaks of wheels. A catalogue, second-hand: makers may edit their entries ("Edit this robot (Only if you are this robot
+manufacturer)"), some say "Verified". 343 give a height, 328 a mass; 190 are prototypes, 122 "In production"; 2 are
+marked obsolete. Not in it: the Fourier N1, the Norinco Fuxi, the UBTECH Walker S. Possibly listed twice: Optimus and
+Optimus Gen2, CyberOne and CyberOne v2, Asimov and Asimov 1, YMBot D and D4 (same maker, height, mass and joints).
+
+**A first pass, by keywords** (Claude's scratch folder, `humanoid_register_first_pass_2026-10-28.xlsx`): each robot's
+"Main market" matched to the six types' purposes, research and education to type 1 or 2 by size, no stated use by the
+nearest size. Type 1: 35, type 2: 85, type 3: 125, type 4: 90, type 5: 12, type 6: 2; border cases 145 (94 speak of
+wheels, 51 with uses pointing to two types); 59 without a stated use; 214 outside their type's size (types 3 to 6's
+ranges are the workbook's comparators' spans, narrow).
+
+**Why it is not a proposal:** the catalogue's "Main market" lists many uses, often alphabetically, so keywords cannot
+weigh them; the first pass contradicts the workbook for its own anchors and comparators (the Atlas to 3, the workbook 5;
+the AgiBot A2 to 2, the workbook 4; Foundation's Phantom to 3 or 6, the workbook 6; the H2 to 3, the workbook 2; the
+T800 to 3, the workbook 5); and "speaks of wheels" catches walking robots too (the Apollo 2, the Digit).
+
+### E4.1 Batch 1 of 7: robots 1 to 50 (alphabetical), each read and a type proposed (2026-10-28). Not entered
+
+Matthias: "Yes: the robots the workbook names keep its type; every other robot read (its catalogue page and maker's
+description) and proposed a type with a one-line reason, in batches, border cases marked for me."
+
+**What was read:** every robot's humanoid.guide page (attribute table and description, second-hand: the catalogue's
+own text, not the maker's), and its whole text searched for wheels, legs and walking. The maker's own page where the
+catalogue left the form open: Hexagon AEON (https://robotics.hexagon.com/product/), AgiBot G1
+(https://www.agibot.com/products/G1), AgiBot A3 (https://www.agibot.com/products/A3), Astribot
+(https://www.astribot.com/en; its product pages answered 404). TeknTrash's page did not load.
+
+**How a type was proposed** (Claude's reading, for Matthias to accept or change):
+- R1. A robot the workbook's Taxonomy names keeps the workbook's type.
+- R2. Otherwise the use the robot is built for, from the catalogue's "Main market" and its description, decides: the
+  type whose definition (Taxonomy, column B) matches the main use.
+- R3. Uses spread over several types with none ahead: type 2, whose definition is "adaptable task execution across
+  research, commercial, and factory pilot environments".
+- R4. Research, education and developer platforms: type 1 when compact, type 2 when full-scale (the two research
+  types), by size.
+- R5. Size decides only where the use does not; a robot outside its type's height or mass is noted, not refused.
+
+**Form:** "legs" or "wheels" where the text read says so; "no wheels named" where the catalogue page never speaks of
+wheels and states no legs either. The workbook's types 1 and 3 are defined as bipedal ("portable bipedal form
+factor"; "wheeled variants (e.g., wheeled Apollo/KUAVO) are comparators, not primary bipedal humanoids").
+
+| # | Robot (maker) | Catalogue: status, height, mass | Type | Form | Size against the type | Reason | Border |
+|---|---|---|---|---|---|---|---|
+| 1 | NEO (1X Technologies, US) | prototype, 170 cm, 30 kg | 4 | no wheels named | mass below (62–71 kg) | home chores and conversation, soft body ("Consumer home use") | |
+| 2 | 4NE-1 (NEURA Robotics, DE) | prototype, 180 cm, 80 kg | 3 | no wheels named | height above (~1.70–1.75 m) | "from industrial to domestic settings", collaborative work | maybe the same robot as 3 |
+| 3 | 4NE1 (NEURA Robotics) | early production, ~180 cm, ~80 kg | 3 | legs or wheels ("Some models run on wheels for factory floors") | height above | everyday tasks, industrial automation, services | maybe the same robot as 2 |
+| 4 | 4NE1 Gen 3.5 (NEURA Robotics) | in production, 180 cm, 80 kg | 3 | no wheels named | height above | factories and warehouses (industrial manufacturing, logistics) | |
+| 5 | 4NE1 Gen 4 (NEURA Robotics) | in production, 180 cm, 65 kg | 3 | legs or wheels ("NEURA also offers wheeled versions") | height above | three of its four uses industrial (logistics, machine tending, manufacturing), the fourth home assistance | |
+| 6 | A2 (AgiBot, CN) | prototype, 170 cm, 60 kg | 4 | no wheels named | the workbook: 1.75 m, 69 kg | R1: type 4's anchor | |
+| 7 | A2 Max (AgiBot) | prototype, 178 cm, 85 kg | 3 | no wheels named | height above | "physical strength", logistics, healthcare, manufacturing | the heavy variant of type 4's anchor; healthcare also named |
+| 8 | A3 Ultra (AgiBot) | in production, 174 cm, 60 kg | 4 | no wheels named (the A3 walks, see 14) | mass below | commercial service, guided tours, reception, retail | |
+| 9 | Abi (Andromeda Robotics, AU) | in production, 120 cm, 50 kg | 4 | wheels ("Instead of legs, it uses a wheeled base") | both below | social companion in care facilities, retail, public venues | |
+| 10 | Adam Lite (PNDbotics, CN) | prototype, 160 cm, 60 kg | 2 | no wheels named | inside | R3: "platform for various industrial and service applications", open SDK, no single use | |
+| 11 | Adam SP (PNDbotics) | prototype, 167 cm, 62 kg | 2 | legs ("full-size biped") | inside | R3: "factory floors as well as dynamic research labs" (the catalogue's summary line describes another robot, "Steve") | |
+| 12 | AEON (Hexagon, SE) | prototype, 165 cm, 60 kg | 3 | unclear: the maker "Ready to roll", "go up the stairs" | both slightly below | the maker: "deployed in industries", manipulation, inspection, reality capture | form |
+| 13 | AGIBOT A2-W (AgiBot) | pilot, 163 cm, 230 kg | 3 | wheels | mass above (61–129 kg) | industrial automation, logistics, manufacturing | |
+| 14 | AGIBOT A3 (AgiBot) | in production, 173 cm, 55 kg | 4 | legs (the maker: "somersaults", "aerial walking"; the catalogue's "wheeled" is its carrying case) | mass below | stage performance, guided tours, retail | |
+| 15 | AGIBOT G1 (AgiBot) | pilot, 130–180 cm, 150 kg | 2 | wheels (the maker: "The chassis allows in-place turning") | mass above (50–80 kg) | the maker: "General purpose robot designed for data collection and model inference", "industrial, commercial, and domestic scenarios" | not the Unitree G1 |
+| 16 | AgiBot X1 (AgiBot) | prototype, 130 cm, 33 kg | 1 | legs | inside | R1: named in type 1 | |
+| 17 | AgiBot X2 (AgiBot) | in production, 130 cm, 35–37 kg | 4 | legs ("walks, runs, dances") | both below; type 1's size | four of its six uses face people (elderly care, entertainment, home service, public interaction) | |
+| 18 | Agile ONE (Agile Robots SE, DE) | prototype, 174 cm, 69 kg | 3 | legs ("a life-sized biped") | inside | "a shop-floor teammate", logistics, manufacturing | |
+| 19 | AI Sapiens K1 (ROBOTIS, KR) | in production, 135.5 cm, 35 kg | 1 | legs ("arms, legs, and waist") | inside | R4: open-source research platform | |
+| 20 | AI Worker (ROBOTIS) | in production, 162 cm, 90 kg | 3 | wheels ("swerve-drive base", "semi-humanoid") | height below | welding, wiring, inspection on the factory floor | |
+| 21 | AICO 2 (Flexiv Robotics) | in production, 160 cm, 281 kg | 3 | wheels; two arms on a base ("a mobile, dual-arm robot") | mass above | manufacturing, logistics | form: two arms on a cart |
+| 22 | AIDOL (AIDOL, RU) | prototype, 186 cm, 95 kg | 3 | legs ("walk on two legs") | height above | catalogue: industrial automation, logistics | its text stresses face and dialogue (type 4); the catalogue's summary line describes another robot |
+| 23 | AKINCI-5 (AKINROBOTICS, TR) | prototype, 129 cm, 42 kg | 3 | legs ("AI-supported walking") | both below; type 1's size | "Built for manufacturing, and logistics" | the catalogue's market "Robotics R&D and automation industry"; type 1's size |
+| 24 | Alex (IHMC, US) | prototype, 175 cm, 85 kg | 6 | legs ("biped") | inside | R1: named in type 6 | |
+| 25 | Alice (AeiROBOT) | prototype, 157 cm, 50 kg | 2 | no wheels named | between types 1 (≤1.45 m) and 2 (≥1.60 m) | R4: research platform | size between types 1 and 2; nationality China here, South Korea at 26 (same maker) |
+| 26 | Alice M1 (AeiROBOT, KR) | in production, 130–180 cm, 97 kg | 3 | wheels ("omnidirectional wheeled base") | inside by mass | construction, manufacturing, shipbuilding | |
+| 27 | ALLEX (WIRobotics, KR) | prototype, not given | 2 | upper body ("introduced initially as an upper-body system") | not given | R3: "general-purpose humanoid platform"; cleaning, home service, logistics | form: upper body |
+| 28 | ALPHA (TeknTrash, UK) | prototype, 200 cm, 90 kg | 3 | not stated ("a mobile, collaborative system") | height above | sorting in recycling plants, two 6-DoF arms, 5 kg lift | "dirty, repetitive, and dangerous": type 5? nothing hardened stated |
+| 29 | AlphaBot 2 (AI² Robotics, CN) | in production, 180 cm, 135 kg | 3 | wheels ("a six-wheeled base") | both slightly above | factories (HKC, Dongfeng Liuzhou), also airports | |
+| 30 | Ambidex (NAVER LABS, KR) | in production, 186 cm, not given | 4 | not stated; arms | height above | safe, delicate handling with force feedback; no use given | no stated use; form |
+| 31 | Anigon (Aimbo Robotics, CH) | prototype, 189 cm, 120 kg | 3 | wheels | height above | logistics, manufacturing, warehousing | |
+| 32 | Apollo (Apptronik, US) | prototype, 173 cm, 72 kg | 3 | no wheels named | inside | logistics and warehousing (crates, totes, boxes) | |
+| 33 | Apollo 2 (Apptronik) | prototype, 173 cm, 75 kg | 3 | legs or wheels ("switch it to a wheeled base") | inside | R1: qualifying in type 3 | the workbook also names it in type 2 (borderline) and type 5 (Apollo 'High-Perf', borderline) |
+| 34 | ARI (PAL Robotics, ES) | in production, 165 cm, 60 kg | 4 | wheels | mass below | talks with people and guides them in offices, shops, hospitals, museums | |
+| 35 | ARMAR-7 (KIT, DE) | prototype, 175 cm, 120 kg | 4 | wheels | mass above | household and nursing-care assistance | |
+| 36 | Asimov (MenloAI, SG) | in production, 120 cm, 35 kg | 1 | no wheels named | height slightly below | R4: DIY kit for developers and labs | maybe the same robot as 37 |
+| 37 | Asimov 1 (MenloAI) | in production, 120 cm, 35 kg | 1 | no wheels named | height slightly below | R4: DIY kit for engineers and researchers | maybe the same robot as 36 |
+| 38 | Asimov 2 (MenloAI) | prototype, 120 cm, 38 kg | 1 | no wheels named | height slightly below | R4: the next open platform (the catalogue's specs estimated from Asimov 1) | |
+| 39 | Astra (Apptronik) | prototype, 100–140 cm, 25–40 kg | 3 | upper body, "mounts onto various" bases | both below | "modular mobility for industrial tasks"; manufacturing, interactive service | form: upper body |
+| 40 | Astribot S1 (Astribot, CN) | in production, 170 cm, 80 kg | 2 | not stated | inside | R3: AI training, logistics, research, service | |
+| 41 | Astribot T1 (Astribot) | in production, 155 cm, 66 kg | 2 | wheels | height below | the maker: "All-in-One AI Robot", "validate your AI ideas"; catalogue: service, research, home, industrial | |
+| 42 | AstroDroid AD-01 (ELU.AI, CN) | prototype, 170 cm, 120 kg | 3 | wheels | inside | manufacturing, logistics, retail | |
+| 43 | Atlas (Boston Dynamics, US) | early production, 190 cm, 90 kg | 5 | legs | height above | R1: type 5's anchor | |
+| 44 | Atlas (old) (Boston Dynamics) | prototype, 150 cm, 89 kg | 5 | legs | height below | the same maker's earlier research Atlas; no use given | which robot: its size and page address ("atlas-2013") point to the older Atlas, its text to the electric one of 2024 |
+| 45 | Atom (DOBOT, CN) | prototype, 153 cm, 62 kg | 4 | legs ("straight-knee walking") | inside | R1: named in type 4 | |
+| 46 | ATOM (Vbot, CN) | prototype, 160 cm, 50 kg | 4 | legs ("quiet feet") | mass below | homes, offices, public service, retail | |
+| 47 | Atom Max (DOBOT) | prototype, 170 cm, 55 kg | 2 | legs ("straight-knee walking") | inside | R4: research labs, education, teleoperation development | |
+| 48 | Avatar (Avatar Robotics, US) | in production, 180 cm, not given | 3 | not stated | height above | teleoperated warehouse robot, light manufacturing | |
+| 49 | Avatar (Honda R&D, JP) | prototype, 155 cm, 101 kg | 2 | wheels | mass above | R3: remote work in medical support, equipment maintenance, disaster response, space | uses over types 3, 4 and 5 |
+| 50 | Axol (Almond AI, US) | in production, 61 cm, 19.5 kg | 1 | two arms on a table or cart, no legs, no head | both below | R4: physical-AI research, compact | form: "not a humanoid robot in the traditional sense" (the catalogue) |
+
+**Batch 1 by type, as first proposed:** type 1: 6; type 2: 9; type 3: 21; type 4: 11; type 5: 2; type 6: 1. Wheels:
+13 (three more, 4NE1, 4NE1 Gen 4 and Apollo 2, offered with legs or wheels); upper body or arms only: 5 (AICO 2 also
+on wheels); form not stated or unclear: 4.
+
+**Decided, 2026-10-28** (the form): "Wheels are also accepted. What is not, is just the upper body. We can refine the
+unclear once, after going through all the batches, as the rules might be improved." Read so: a robot on wheels goes to
+its use type as a robot on legs does; a robot that is only an upper body, with no legs and no wheels of its own, is not
+assigned. Applied to batch 1:
+- not assigned, an upper body only: 27 ALLEX ("introduced initially as an upper-body system"), 50 Axol (two arms "to
+  bolt onto a table or cart");
+- unclear, left for the end: 39 Astra ("mounts onto various" bases, mobile ones among them?), 30 Ambidex (arms; a
+  base not stated);
+- no longer a border case, legs and wheels both accepted: 12 AEON (type 3 either way), 21 AICO 2 (two arms on its
+  own wheeled base, type 3).
+
+Batch 1 by type after this: type 1: 5; type 2: 8; type 3: 20 and Astra unclear; type 4: 10 and Ambidex unclear;
+type 5: 2; type 6: 1; not assigned: 2.
+
+### E4.2 Batch 2 of 7: robots 51 to 100 (2026-10-28). Not entered
+
+Read and proposed as batch 1 (E4.1: rules R1 to R5; legs and wheels accepted, an upper body only not assigned,
+unclear forms left for the end). **What was read:** every robot's humanoid.guide page, its whole text searched for
+wheels, legs and walking; the maker's own page where the catalogue left the form open: Clone Robotics
+(https://www.clonerobotics.com: "Clone is a bipedal android companion"), Wandercraft (https://en.wandercraft.eu/),
+Svaya Robotics (https://svayarobotics.com/), Faraday Future (https://robotics.ff.com/us/); Sharpa's and CasiVision's
+pages gave no text.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Type | Form | Size against the type | Reason | Border |
+|---|---|---|---|---|---|---|---|
+| 51 | Billi (NEUBILITY, KR) | prototype, 149.7 cm, 110 kg | 3 | wheels ("uses wheels instead of legs") | height below | distribution, industrial logistics, manufacturing, material handling | |
+| 52 | Bimanual (Svaya Robotics, IN) | early production, 155 cm, 70 kg | 2 | unclear: two arms, a base not stated ("Instead of chasing extreme mobility") | height below | R4: "research-focused platform"; industrial R&D, research and education | form: an upper body only? left for the end |
+| 53 | Bolt (MirrorMe Technology, CN) | prototype, 175 cm, 75 kg | 2 | legs (sprints at "over 11 meters per second") | inside | R4: research, sparring partner for sprinters, technology demonstration | its speed and 50 kg load are type 5's marks (">2.5 m/s"), its use is not |
+| 54 | Booster T1 (Booster Robotics, CN) | prototype, 118 cm, 30 kg | 1 | no wheels named | height slightly below | R4: open-source platform for developers and researchers | |
+| 55 | Booster T2 (Booster Robotics) | in production, 140 cm, 43 kg | 1 | no wheels named | inside | R1: named in type 1 | |
+| 56 | Borg 01 (Borg Robotics, US) | prototype, 173 cm, 62 kg | 3 | legs or wheels ("switch between walking on two legs and a wheeled base") | inside | "designed for industrial and manufacturing environments" | |
+| 57 | Bumi (Noetix Robotics, CN) | in production, 98 cm, 17 kg | 4 | no wheels named | both far below | "companionship and learning at home", for children | maker education and programming also named (type 1) |
+| 58 | CALVIN-40 (Wandercraft, FR) | pilot, 170 cm, 80 kg | 3 | no wheels named; headless | inside | heavy logistics in factories (Renault Douai, tyres) | |
+| 59 | CASBOT 02 (CASBOT, CN) | early commercial, 163 cm, 50 kg | 4 | legs ("walks upright") | mass below | museums, shopping centres, reception; education, exhibitions, retail | |
+| 60 | CASBOT W1 (CASBOT) | in production, 112–210 cm, ~260 kg | 3 | wheels | mass above | "high-precision handling ... mobile manipulation in logistics" | |
+| 61 | CASIVIBOT (CasiVision, CN) | in production, 140 cm, 55 kg | 4 | not stated | height and mass below | "guide users, deliver items"; healthcare, hospitality, commercial service | |
+| 62 | Centaur-G1 (Elite Robots, CN) | in production, 150 cm, 260 kg | 3 | wheels ("omnidirectional wheeled base") | mass above | "for precision manufacturing" (±0.1 mm) | eldercare and home service also named (type 4) |
+| 63 | Cinnamon 1 (Donut Robotics, JP) | prototype, ~160–180 cm, ~60–90 kg | 2 | legs ("walks on two legs") | inside | R3: construction, industrial automation, security, service | security also named (type 6?) |
+| 64 | CLOiD (LG Electronics, KR) | pilots, ~120–130 cm, ~60–70 kg | 4 | wheels ("on a wheeled base rather than legs") | height below | hotels, retail, airports, offices | |
+| 65 | Clone Alpha (Clone Robotics, PL) | prototype, 170 cm, 60 kg | 4 | legs (the maker: "bipedal") | mass below | the maker: "android companion"; the catalogue: no use | |
+| 66 | Cruzr S2 (UBTECH, CN) | in production, 175 cm, 150 kg | 3 | wheels | mass above | "demanding industrial and commercial use", 15 kg payload | |
+| 67 | Cruzr Y1 (UBTECH) | in production, 170 cm, 90 kg | 3 | wheels (a wheeled base and two arms) | inside | transporting, loading, picking, sorting in factories and warehouses | |
+| 68 | CUE7 (Toyota, JP) | prototype, 218 cm, 74 kg | 2 | not stated | height above | R4: research robot, basketball shooting | |
+| 69 | CyberOne (Xiaomi, CN) | prototype, 177 cm, 52 kg | 2 | no wheels named | inside | R4: a demonstrator of Xiaomi's AI, emotion recognition | maybe the same robot as 70 |
+| 70 | CyberOne v2 (Xiaomi) | prototype, 177 cm, 52 kg | 2 | no wheels named | inside | R4: AI development, research, "future service robotics" | maybe the same robot as 69 |
+| 71 | CYBORG RO1 (Cyborg Robotics, CN) | in production, 180 cm, 75 kg | 5 | legs ("walks on two legs") | inside | the maker's aim: "high-risk industries such as power, gas, oil, chemicals"; hazardous-site inspection | no sealing stated; otherwise type 3 |
+| 72 | CYBORG WO1 (Cyborg Robotics) | in production, 160 cm, 170 kg | 5 | wheels | height below, mass above | as 71: hazardous-site inspection, power, gas, oil, chemicals, mining | as 71 |
+| 73 | D01 (Sharpa, SG) | early production, 162 cm, 40 kg | 2 | not stated | mass below | R3: food service, hospitality, manufacturing, research, retail | |
+| 74 | DEUX (XYZ, KR) | in production, 155 cm, 60 kg | 4 | wheels ("swerve-drive base") | mass below | "service robot" in stores, offices, hospitals, homes | |
+| 75 | Dex (Richtech Robotics, US) | prototype, 137 cm, 60 kg | 3 | wheels (the mobile version) | height below | factory floor: logistics, manufacturing, warehouse | its second, stationary version is an upper body only |
+| 76 | DexBot (BOSHIAC, CN) | prototype, 160–175 cm, 80 kg | 3 | legs or wheels ("operate on legs or wheels") | inside | industrial automation, logistics, manufacturing | |
+| 77 | Digit (Agility Robotics, US) | in production, 180 cm, 76 kg | 3 | legs | inside | "built for logistics and warehouse automation" (the text: 1.75 m, 65 kg) | |
+| 78 | Digit 5 (Agility Robotics) | production-ready, 180 cm, 129 kg | 3 | no wheels named | inside | R1: named in type 3 | |
+| 79 | Dora (Noetix Robotics) | prototype, 100 cm, 20 kg | 4 | legs ("walks stably over grass, snow or stairs") | both far below | household errands, education, elder care | |
+| 80 | DR01 (DEEP Robotics, CN) | prototype, 170 cm, 80 kg | 2 | no wheels named | inside | R4: "embodied intelligence explorer" for AI research | |
+| 81 | DR02 (DEEP Robotics) | in production, 175 cm, 65 kg | 5 | no wheels named | mass below | R1: named in type 5 (IP66) | |
+| 82 | Dual-Arm Lift (RealMan Robotics, CN) | in production, 178 cm, 157 kg | 2 | wheels | mass above | R4: data collection, embodied AI, research; also industrial automation | |
+| 83 | Duatic Alpha (Duatic, CH) | prototype, 175 cm, 90 kg | 3 | wheels ("wheeled half-humanoid") | inside | warehouses and factories, heavy loads | |
+| 84 | DUCO (SIASUN, CN) | prototype, ~150–160 cm, ~90–110 kg | 3 | wheels | height below | "industrial collaboration and logistics tasks" | |
+| 85 | E1 (Noetix Robotics) | in production, 136 cm, 40 kg | 1 | legs (running, long jump) | inside | R4: "for research and education" | entertainment and guided tours also named (type 4) |
+| 86 | Eggie (Tangible Robots, US) | prototype, 160 cm, 45 kg | 4 | wheels ("humanoid torso ... on a mobile wheeled base") | mass below | guides visitors, interaction and service; exhibitions, home assistance | |
+| 87 | Elf Xuan 2.0 (AheadForm, CN) | prototype, 165 cm, 50 kg | — | an upper body only ("lifelike upper-body humanoid") | — | not assigned (decided 2026-10-28); its use, reception and stage, would be type 4 | |
+| 88 | Elixis (Addverb, IN) | prototype, 175 cm, 75 kg | 3 | legs ("walks on two legs") | inside | logistics, warehousing, manufacturing; healthcare and retail also | |
+| 89 | Elixis-W (Addverb) | prototype, 183 cm, 75 kg | 3 | wheels | height above | factories and warehouses, intralogistics | |
+| 90 | Eno (Genesis AI, US) | prototype, 170 cm, 120 kg | 2 | wheels ("a wheeled platform rather than legs") | mass above | R3: "general-purpose robot" for factories, laboratories, hospitals, logistics | |
+| 91 | F-Series (Realbotix, US) | in production, 165 cm, 50 kg | 4 | wheels ("on a wheeled base") | mass below | "human connection rather than physical labor"; elder care, hospitality, entertainment | |
+| 92 | Feather (Feather Robotics, US) | in production, 180 cm, 105 kg | 2 | wheels ("omnidirectional base") | mass above | R3: warehouses, factories, restaurant kitchens, labs; physical-AI developers | |
+| 93 | Fengxing-001 (AVIC, CN) | prototype, 180 cm, 80 kg | 3 | legs ("give its legs extra load-bearing strength") | height above | aircraft support work, electro-hydraulic drive | aviation fits no type plainly (3, 5 or 6) |
+| 94 | FF Futurist (Faraday Future, US) | production-ready, 169 cm, 69 kg | 4 | not stated | inside | customer interaction, professional service, workplace assistance | |
+| 95 | FF Master (Faraday Future) | production-ready, 131 cm, 39 kg | 4 | not stated | both below; type 1's size | home assistant, interaction, education | |
+| 96 | FF Nova (Faraday Future) | in production, 49.7 cm, 2.8 kg | 1 | legs, and a detachable wheeled base | both far below | R4: developers, K–12 STEM, university research | |
+| 97 | Figure 02 (Figure AI, US) | prototype, 168 cm, 70 kg | 3 | no wheels named | height slightly below | industries, logistics, warehouse | |
+| 98 | Figure 03 (Figure AI) | prototype, 168 cm, 60 kg | 2 | no wheels named | inside | R1: qualifying in type 2 | the workbook also names it in type 3 (borderline) |
+| 99 | FlashBot Arm (Pudu Robotics, CN) | in production, 144 cm, 70 kg | 4 | wheels ("an independent chassis") | height below | "delivery and smart service tasks"; hospitality, household, retail restocking | |
+| 100 | Friday (Holiday Robotics, KR) | prototype, 173 cm, 115 kg | 3 | wheels ("fast wheeled mobility") | inside | the catalogue's market: manufacturing; its text: labs, factories, public spaces | |
+
+**Batch 2 by type:** type 1: 4; type 2: 11 and Bimanual unclear; type 3: 18; type 4: 12; type 5: 3; type 6: 0; not
+assigned: 1 (Elf Xuan 2.0, an upper body). Catalogue faults: the summary lines of Billi, Eno and Figure 02 describe
+other robots; Friday's nationality is blank.
+
+### E4.3 Batch 3 of 7: robots 101 to 150 (2026-10-28). Not entered
+
+Read and proposed as batches 1 and 2. **What was read:** every robot's humanoid.guide page, its whole text searched
+for wheels, legs and walking. The makers' pages tried for the form (Noetix, Galbot, JAKA, Futuring, Kinetix AI,
+Persona AI) gave no sentence on it. The type 2 robots decided on 2026-10-28 ("Those with model files": the H2, H2 Plus,
+H1-2, GR-2, GR-1) keep type 2, as the workbook's named robots keep theirs. **Not in the catalogue:** the Unitree H1,
+which the workbook names (type 2 excluded, type 5 borderline); the catalogue has only the H1-2.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Type | Form | Size against the type | Reason | Border |
+|---|---|---|---|---|---|---|---|
+| 101 | Futuring 2 (Futuring Robot, CN) | prototype, ~150–160 cm, 70 kg | 4 | not stated | height below | companion, healthcare and assisted living, public service and hospitality; also education and research | |
+| 102 | G1 (Unitree, CN) | in production, 127 cm, 35 kg | 1 | legs | inside | R1: type 1's anchor | |
+| 103 | G1+ (Unitree) | in production, 134 cm, 35 kg | 1 | no wheels named | inside | R4: the upgraded G1, "for research and education", "in labs and classrooms" | the catalogue's market: industrial manufacturing, logistics |
+| 104 | G1-D (Unitree) | in production, 160 cm, 90 kg | 2 | wheels in its Ultimate version; the other version a lifting column on a stand | mass above | R4: AI training data collection, developers, research | its version without the wheeled base is an upper body only |
+| 105 | G2 Genie (AgiBot) | prototype, 175 cm, 55 kg | 3 | wheels | inside | "built to industrial standards ... on factory floors and in public venues" | |
+| 106 | G2 Max (AgiBot) | in production, 179 cm, 185 kg | 3 | wheels | mass above | heavy-payload factory work, palletizing | |
+| 107 | Galbot (Galbot G1, CN) | prototype, 173 cm, 88 kg | 3 | wheels (the ET1 page: "the G1, which rolls rather than walks") | inside | "next-generation industrial robot", material handling | |
+| 108 | Galbot ET1 (Galbot) | prototype, 173 cm, 65 kg | 3 | legs ("first fully bipedal humanoid") | inside | automotive industry, industrial automation, manufacturing (specs estimated by the catalogue) | |
+| 109 | Galbot S1 (Galbot) | in production, 179 cm, 320 kg | 3 | not stated | mass far above | heavy loads in factories | |
+| 110 | Gen 1 (Persona AI, US) | prototype, 175 cm, 70 kg | 5 | not stated | mass below | heavy industry: welding in shipyards and steel plants, teleoperated | no sealing stated; otherwise type 3 |
+| 111 | GENE.01 (Generative Bionics, IT) | concept (production expected Q4 2026), ~170 cm, ~60–80 kg | 3 | not stated | inside | industrial automation, collaborative robotics | |
+| 112 | Gento Luna (Gento Robotics, CN) | prototype, 170 cm, 90 kg | 2 | wheels | mass above | R3: commercial services, home service, industrial inspection, research and education | |
+| 113 | Gino 1 (Geek+, CN) | in production, 168 cm, 63 kg | 3 | wheels | inside | "general-purpose humanoid built specifically for warehouses" | |
+| 114 | GoMate (GAC Group, CN) | prototype, 140 cm, 45 kg | 2 | wheels (a four-wheel mode and a second posture) | height below | R3: car production, education, elderly care, logistics, security patrol | factory deployment planned (type 3); security patrol (type 6?) |
+| 115 | GoMate Mini (GAC Group) | prototype, 170 cm, 60 kg | 2 | wheels ("legs that end in wheels") | inside | R3: car production lines, campus and subway security, guided tours | security is two of its five uses (type 6?) |
+| 116 | GR-1 (Fourier, CN) | prototype, 165 cm, 55 kg | 2 | legs ("walk at 5 km/h") | inside | decided 2026-10-28: a type 2 robot | |
+| 117 | GR-2 (Fourier) | prototype, 175 cm, 65 kg | 2 | no wheels named | inside | decided 2026-10-28: a type 2 robot | |
+| 118 | GR-3 (Fourier) | in production, 165 cm, 71 kg | 4 | no wheels named | inside | R1: named in type 4 | |
+| 119 | H1-2 (Unitree) | in production, 178 cm, 70 kg | 2 | no wheels named | inside | decided 2026-10-28: a type 2 robot | |
+| 120 | H2 (Unitree) | prototype, 180 cm, 70 kg | 2 | legs | inside | R1: type 2's anchor | |
+| 121 | H2 Plus (Unitree) | pilot, 180 cm, 68 kg | 2 | legs | inside | R1: named in type 2 | the same body as 140 |
+| 122 | H2-D (Unitree) | in production, 170 cm, 120 kg | 2 | wheels in its Flagship version; the other a column | mass above | R4: AI training data collection, developers, research | its version without the wheeled base is an upper body only |
+| 123 | H2-X (Unitree) | prototype, 182 cm, 70 kg | 2 | no wheels named | inside | the H2 body; R3: research, service, security ("serve and guard you") | security (type 6?) |
+| 124 | HELIOS (ORBIT Robotics, CH) | prototype, 160 cm, ~60–80 kg | — | unclear: four arms, no legs, for microgravity | — | space research | form: left for the end |
+| 125 | HIVA Haiwa (Haier, CN) | prototype, 165 cm, 70 kg | 4 | wheels ("a stable, wheeled mobile base") | inside | household chores, "Housework Terminator" | |
+| 126 | HMND 01 (Humanoid, UK) | prototype, 175 cm, 70 kg | 3 | legs ("walking speed of up to 1.5 m/s") | inside | "industrial, logistics, and service automation" | maybe the same robot as 127 |
+| 127 | HMND 01 Alpha (Humanoid) | prototype, 179 cm, 90 kg | 3 | legs ("Bipedal") | height above | industrial, logistics, retail restocking, warehouse | maybe the same robot as 126 |
+| 128 | Hobbs (Noetix Robotics) | in production, ~120–140 cm, ~40–50 kg | — | unclear: "smooth upper-body motion", "a mobile upper body", works "at table height" | — | research and education, service demonstration | form: an upper body only? left for the end |
+| 129 | Hobbs W1 (Noetix Robotics) | in production, 170 cm, 75 kg | 4 | wheels | mass above | "guide expert": reception, exhibition and hospital guidance | |
+| 130 | HONOR (HONOR, CN) | prototype, 160 cm, 80 kg | 4 | not stated | mass above | "service and natural human interaction": retail, workplaces, homes | |
+| 131 | HONOR A1 (HONOR) | prototype, 136.9 cm, 40 kg | 4 | legs (running) | both below; type 1's size | public spaces, retail, stage and events | |
+| 132 | HONOR D1 (HONOR) | prototype, 169 cm, 45 kg | 2 | legs (ran a half-marathon) | mass below | no use given; full-scale (R5) | no stated use |
+| 133 | HSR-ER-HR705 (Huashu Robot, CN) | prototype, 170 cm, 200 kg | 3 | wheels | mass above | "wheeled industrial humanoid" for factories | |
+| 134 | I-Series (Simplexity Robotics, CN) | prototype, 175 cm, 60 kg | 2 | legs ("balance during walking") | inside | R3: AI research, industrial automation, logistics, retail | |
+| 135 | IGRIS-C (ROBROS, KR) | production, 154 cm, 56 kg | 2 | not stated | height slightly below | R3: "AI research and industrial proof-of-concept deployments" | the catalogue's market: industrial manufacturing (type 3) |
+| 136 | IRON (XPeng, CN; the 2025 robot) | prototype, 173 cm, 70 kg | 4 | not stated | inside | the catalogue: "Early focus on commercial deployments", stores | factory work also named (type 3) |
+| 137 | IRON (XPeng; the earlier prototype) | prototype, 180 cm, 90 kg | 2 | not stated | height above, mass above | R3: retail, healthcare, logistics | an earlier robot of the same name as 136 |
+| 138 | Isaac 0 (Weave Robotics, US) | in production, 170 cm, not given | — | an upper body only ("it stays in one place") | — | not assigned (decided 2026-10-28); its use, laundry folding at home, would be type 4 | |
+| 139 | Isaac 1 (Weave Robotics) | pre-order, 160 cm, 40 kg | 4 | wheels | mass below | home chores: laundry, tidying | |
+| 140 | Isaac GR00T (NVIDIA, US) | pilot, 180 cm, 68 kg | 2 | legs | inside | the H2 Plus body with Sharpa hands and Jetson Thor ("pairs a Unitree H2 Plus humanoid body") | listed twice: the same robot as 121 |
+| 141 | JAKA K1 (JAKA Robotics, CN) | prototype, 165 cm, 40 kg | 2 | not stated | mass below | R3: "both industrial and service roles" | |
+| 142 | JAKA Kargo (JAKA Robotics) | in production, 156.5 cm, 180 kg | 3 | wheels | mass above | sorting, material handling, loading in factories and warehouses | |
+| 143 | JAKA π (JAKA Robotics) | in production, 122 cm, 42 kg | 4 | no wheels named | both below; type 1's size | retail, entertainment, companion and elderly care; also higher education | higher education and size (type 1) |
+| 144 | JingChu (JCBOT, CN) | in production, 170 cm, 65 kg | 2 | legs ("walks on two legs") | inside | R3: "mainly for education and service work" | education (type 2) or service (type 4) |
+| 145 | Jingchu Elf (JCBOT) | prototype, 165 cm, 70 kg | 4 | wheels ("a precise, two-wheel-drive base") | inside | guides and serves people: reception, exhibition halls | |
+| 146 | Jupiter (Zeroth, CN) | early production, 165 cm, 60 kg | 2 | not stated | inside | R3: front-of-house service, logistics, research, security patrol, training | security (type 6?) |
+| 147 | K0 (ROBOTIS, KR) | prototype, 130 cm, 34 kg | 1 | not stated | inside | R4: open research platform (CAD, source code) | |
+| 148 | K1 (Booster Robotics, CN) | in production, 95 cm, 19.5 kg | 1 | no wheels named | both far below | R4: education, research labs, competitions | |
+| 149 | K2 Bumblebee (Kepler, CN) | prototype, 175 cm, 75 kg | 2 | not stated | inside | R4: research, education, AI labs | |
+| 150 | KAI (Kinetix AI, CN) | prototype, 173 cm, 70 kg | 4 | not stated | inside | "closer to a household assistant than a factory-only system" | |
+
+**Batch 3 by type** (rows counted): type 1: 4; type 2: 20 rows, 19 robots (Isaac GR00T is the H2 Plus); type 3: 11;
+type 4: 11; type 5: 1; type 6: 0; unclear, left for the end: 2 (HELIOS, Hobbs); not assigned: 1 (Isaac 0, an
+upper body). **A question that recurs:** robots for civilian security patrol (campus, subway, "serve and guard"):
+GoMate, GoMate Mini, H2-X, Jupiter, and Cinnamon 1 in batch 2. The workbook's type 6 is "reconnaissance, riot control,
+EOD/hazmat, disaster response, and combat logistics", with ruggedisation; patrol robots are not described so. They are
+proposed to type 2 (several uses) until Matthias decides.
+
+**Decided, 2026-10-28** (security): "If it is clear security then 6 seems to me better, just the definition has to be
+changed. If there are other purpose then they stay in 2". So a robot built for security alone goes to type 6; one with
+security among other uses stays in type 2. Applied: GoMate, GoMate Mini, H2-X, Jupiter and Cinnamon 1 each name other
+uses besides security, so all five stay in type 2; none of batches 1 to 4 is a security robot alone. **Still open:**
+type 6's definition (the workbook's Taxonomy, row 7) is to be changed to take in civilian security; the workbook is
+Matthias's.
+
+### E4.4 Batch 4 of 7: robots 151 to 200 (2026-10-28). Not entered
+
+Read and proposed as batches 1 to 3. **What was read:** every robot's humanoid.guide page, its whole text searched
+for wheels, legs and walking; no maker's page was needed beyond them.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Type | Form | Size against the type | Reason | Border |
+|---|---|---|---|---|---|---|---|
+| 151 | KAIST Humanoid v0.9 (KAIST DRCD Lab, KR) | prototype, 165 cm, 75 kg | 2 | legs ("full-size bipedal") | inside | R4: a university research robot | |
+| 152 | Kaleido 9 (Kawasaki, JP) | prototype, 190 cm, 99 kg | 5 | legs ("waist and leg joints") | both above | disaster response, heavy industry | disaster response is also in type 6's definition |
+| 153 | Kangaroo (PAL Robotics, ES) | prototype, 160 cm, 40 kg | 2 | legs ("bipedal"); its text speaks of no arms | mass below | R4: research in dynamic legged locomotion | size between types 1 and 2; arms not stated |
+| 154 | KAPEX (LG and KIST, KR) | prototype, 175 cm, 65 kg | 2 | legs ("bipedal motion") | inside | R3: home, industrial automation, logistics, manufacturing, research | |
+| 155 | Keenon XMAN-R1 (KEENON, CN) | in production, 172 cm, 110 kg | 4 | not stated | mass above | "embodied service robot" for hospitality and logistics (the catalogue's market reads "China") | |
+| 156 | Kengo (Galaxea Dynamics, CN) | prototype, 170 cm, 65 kg | 2 | legs ("bipedal") | inside | R3: factories, commercial spaces, homes | |
+| 157 | Kepler (Kepler Forerunner K1, S1, D1, CN) | prototype, 170 cm, 88 kg | 2 | not stated | mass above | R3: "industrial, research, and safety applications" | one entry for three models |
+| 158 | Kepler K2 (Kepler Forerunner K2) | prototype, 178 cm, 85 kg | 3 | not stated | height above | "commercial and industrial applications", manufacturing, logistics | maybe the same robot as 149, K2 Bumblebee (batch 3, type 2) |
+| 159 | Kinisi 01 (Kinisi Robotics, US) | prototype, not given | 3 | wheels ("a low-profile omnidirectional base") | not given | warehouse pick and place, retail restocking | the same robot as 160 ("Kinisi 01 (KR1)") |
+| 160 | Kinisi KR1 (Kinisi Robotics) | prototype, 162 cm, 100 kg | 3 | wheels | height below | warehouse tasks, pick and place, sorting | the same robot as 159 |
+| 161 | Knowin-X1 (Knowin, CN) | prototype, 140 cm, 50 kg | 4 | wheels | height below | home: tidying, laundry, folding | |
+| 162 | KUAVO 5-W (Leju Robotics, CN) | in production, 200 cm, 156 kg | 4 | wheels | both above | R1: named in type 4 ("Borderline crossover") | its uses are mostly industrial (manufacturing, logistics, data collection) |
+| 163 | Kuavo-5 (Leju Robotics) | prototype, 168 cm, 55 kg | 2 | legs or wheels ("switch between walking and wheeled locomotion") | inside | R3: home, industrial automation, logistics, research | |
+| 164 | Kuavo-my (Leju Robotics) | prototype, 145 cm, 45 kg | 4 | not stated | both below | R1: named in type 4; a guide in exhibition halls and shopping centres | the workbook's KUAVO-MY is 1.73 m, 63.5 kg; the catalogue also lists an XTRON KUAVO-MY (166 cm, 55 kg) |
+| 165 | L1 (Moon Dynamics, CN) | in production, 165 cm, 60 kg | 3 | wheels ("a wheeled-bipedal base") | slightly below | heavy loads in warehouses and factories | |
+| 166 | Laborer C1 (Glroad, CN) | in production, 138 cm, 38 kg | 4 | legs ("bipedal") | both below; type 1's size | hotel reception, station guidance, tours, performance | |
+| 167 | Laborer M1 (Glroad) | in production, 187 cm, 86 kg | 3 | legs ("bipedal") | height above | industrial heavy-load handling, 50 kg with both arms | 430 N·m joints and a 50 kg load are type 5's marks |
+| 168 | LightBot-0 (Light Origins, CN) | prototype, 90 cm, 35 kg | 1 | legs (walks, climbs, jumps) | height far below | R4: research and education | |
+| 169 | LimX (CL-1, LimX Dynamics, CN) | prototype, 157 cm, 50 kg | 2 | legs (dynamic stair climbing) | height slightly below | no use given; a stair-climbing demonstrator (R5) | no stated use; maybe inside 170, the CL series |
+| 170 | LimX CL (LimX Dynamics) | prototype, 164 cm, 45 kg | 2 | legs (stair climbing) | mass below | R3: household services, industrial automation, R&D | one entry for a series (CL-1 to CL-3) |
+| 171 | LimX Oli (LimX Dynamics) | in production, 165 cm, 55 kg | 2 | not stated | inside | R4: "full-size humanoid for embodied AI R&D" (the catalogue's market reads "Global") | |
+| 172 | LinkerArm A7 (LinkerBot, CN) | in production, 140 cm, 40 kg | — | a robot arm ("a seven-axis robotic arm") | — | not assigned (decided 2026-10-28): arms only | |
+| 173 | Lumen H1 (HECbot, CN) | in production, 169 cm, 69 kg | 4 | not stated | inside | "interactive service work": reception, retail, eldercare | |
+| 174 | Lumen S1 (HECbot) | in production, 130 cm, 35 kg | 4 | not stated | both below; type 1's size | companionship, eldercare, entertainment, exhibitions | |
+| 175 | LUMO (DOBOT, CN) | in production, 130 cm, 35 kg | 4 | legs ("walks in a natural, humanlike way") | both below; type 1's size | "companion humanoid" for homes and schools | |
+| 176 | Luna (LimX Dynamics) | prototype, 165 cm, 55 kg | 4 | not stated | inside | home assistance, service; "approachable in social and service environments" | |
+| 177 | LUS2 (Lumos Robotics, CN) | early production, 160 cm, 65 kg | 2 | not stated | inside | R4: "a practical research platform" | |
+| 178 | MagicBot (MagicLab, CN) | prototype, 138 cm, 54 kg | 4 | not stated | height below | entertainment, events, public shows | |
+| 179 | MagicBot D1 (MagicLab) | in production, 180 cm, 150 kg | 3 | wheels | both above | "industrial wheeled humanoid" for factories and warehouses | |
+| 180 | MagicBot Gen1 (MagicLab) | in production, 174 cm, 70 kg | 2 | legs ("walks on two legs") | inside | R3: "general-purpose": research labs, flexible factory work, customer service | |
+| 181 | MagicBot X1 (MagicLab) | in production, 170 cm, 65 kg | 2 | not stated | inside | R3: commercial services, healthcare, home, manufacturing, logistics | |
+| 182 | MagicBot Z1 (MagicLab) | prototype, 140 cm, 40 kg | 4 | not stated | both below; type 1's size | education, home companionship | |
+| 183 | Maker H01 (GigaAI, CN) | prototype, 160 cm, 64 kg | 4 | wheels | inside | home service, hospitality, reception, workplace assistance | |
+| 184 | Mantis Standart (Blue Worm, CN) | in production, 140 cm, 50 kg | 2 | wheels | height below | R3: commercial service, data collection, manufacturing, home, warehousing | modular: some of its forms are an arm or an upper body only |
+| 185 | Martian (Unix Group, CN) | prototype, 160 cm, 50 kg | 4 | legs ("walks with stable balance") | mass below | the catalogue's markets: home service, office and mall, reception and guiding | its text: "industrial and research environments" (type 3 or 2) |
+| 186 | Matrix-1 (Matrix Robotics, CN) | prototype, 180 cm, 67 kg | 3 | legs (walks 7.6 km/h) | height above | "light-duty manufacturing and logistics work" | |
+| 187 | MATRIX-3 (Matrix Robotics) | prototype, ~160–180 cm, not given | 2 | legs ("Its body walks") | not given | R3: commercial robotics, logistics, service | |
+| 188 | MEMO (Sunday Robotics, US) | prototype, 170 cm, 77 kg | 4 | wheels ("wheeled, semi-humanoid") | mass above | household chores | |
+| 189 | MenteeBot (Mentee Robotics, IL) | prototype, 175 cm, 70 kg | 2 | not stated | inside | R3: "both domestic and industrial applications" | an earlier version of 190 |
+| 190 | MenteeBot V3 (Mentee Robotics) | prototype, 175 cm, 65 kg | 3 | not stated | inside | "warehouse automation", 25 kg payload | |
+| 191 | MH3 (Mirsee Robotics, CA) | in production, 180 cm, 125 kg | 5 | not stated | mass above | critical infrastructure, infrastructure maintenance; teleoperated | healthcare and defence also named (type 6?) |
+| 192 | MICO (Flexiv Robotics) | in production, 150 cm, 79 kg | — | unclear: "full-upper-body humanoid system", "does not walk or run" | — | industrial manufacturing, logistics, research | form: an upper body only? left for the end |
+| 193 | MIRO (Midea, CN) | prototype, not given | 3 | wheels | not given | "purpose-built for next-generation factory automation" | |
+| 194 | Mirokaï (Enchanted Tools, FR) | prototype, 123 cm, 29 kg | 4 | rolls on a ball ("a unique rolling globe system") | both below | social environments, interaction and light logistics | |
+| 195 | Moby (Noble Machines, US) | prototype, 170 cm, 45 kg | 3 | not stated | mass below | its text: "general-purpose industrial robot built for hazardous and physically demanding work" | the catalogue's markets: hospitality, research, service; hazardous (type 5?); maybe the same robot as 196 |
+| 196 | Moby (old) (Under Control Robotics, US) | prototype, 170 cm, 45 kg | 3 | not stated | mass below | the same name, size, joints and markets as 195 | maybe the same robot as 195 |
+| 197 | Modular (O-ID, JP) | early production, 172 cm, 70 kg | 3 | wheels | inside | warehouses, factories, commercial spaces | |
+| 198 | Mornine (AiMOGA, Chery, CN) | in production, 167 cm, 70 kg | 4 | legs ("bipedal") | inside | car dealerships, reception, retail, sales | |
+| 199 | Motion 2 (VinMotion, VN) | prototype, ~160–165 cm, ~60–75 kg | 2 | legs ("controlled walking") | inside | R3: factory automation, research and education | |
+| 200 | Moz1 (Spirit AI, CN) | prototype, 160 cm, 70 kg | 2 | not stated | inside | R3: AI research, education, service robotics | |
+
+**Batch 4 by type** (rows counted): type 1: 1; type 2: 17; type 3: 12 (Kinisi 01 and KR1 one robot, Moby and Moby
+(old) maybe one); type 4: 16; type 5: 2; type 6: 0; unclear, left for the end: 1 (MICO); not assigned: 1 (LinkerArm
+A7, an arm).
+
+**Decided, 2026-10-28** (robots listed twice): "No double counting use just 1". Each robot the catalogue lists twice
+is one entry. The pairs, read as the same robot (same maker, and the same size and joints or a text saying so), and
+the entry kept:
+- 2 4NE-1 and 3 4NE1: 3 kept (type 3);
+- 36 Asimov and 37 Asimov 1: 37 kept (type 1);
+- 69 CyberOne and 70 CyberOne v2: 69 kept (type 2);
+- 121 H2 Plus and 140 Isaac GR00T: 121 kept (type 2, the workbook's name);
+- 126 HMND 01 and 127 HMND 01 Alpha: 127 kept (type 3);
+- 149 K2 Bumblebee and 158 Kepler K2: 158 kept; proposed type 3 (its entry: "commercial and industrial
+  applications"; 149's entry: research and education, type 2), for Matthias to confirm;
+- 159 Kinisi 01 and 160 Kinisi KR1: 160 kept (type 3);
+- 169 LimX CL-1 and 170 LimX CL: 170 kept (type 2), the series that holds the CL-1;
+- 195 Moby and 196 Moby (old): 195 kept (type 3);
+- 220 Optimus and 222 Optimus Gen2 (batch 5): 222 kept (type 2).
+Generations of one line (NEO, NEO Beta, NEO Gamma; Atlas and Atlas (old); Phoenix and Phoenix Gen 8) are different
+robots and stay separate.
+
+**Decided, 2026-10-28** (two types; identical robots): "Double assignment possible, but no two identical. This chnges
+the statistics", then "Double assignment means 1 robot can be two types. Identical one means they are assigned to the
+same type but the rest is identical. For example sold by different companies under different names, but be the same.
+Identical". This replaces "A robot has to be in one but not two types": a robot may be in two types. Two entries that
+are the same robot (also sold by different companies under different names) are one entry. **Still open:** which
+robots get two types, and how a robot in two types is counted in the statistics.
+
+### E4.5 Batch 5 of 7: robots 201 to 250 (2026-10-28). Not entered
+
+Read and proposed as batches 1 to 4. **What was read:** every robot's humanoid.guide page, its whole text searched
+for wheels, legs and walking.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Type | Form | Size against the type | Reason | Border |
+|---|---|---|---|---|---|---|---|
+| 201 | N2 (Noetix Robotics, CN) | prototype, 118 cm, 30 kg | 4 | legs ("bipedal gait") | both far below; type 1's size | home, education, elder care | |
+| 202 | Nadia (IHMC, US) | prototype, 190 cm, 100 kg | 6 | legs ("biped") | both above | defence, disaster response; the forerunner of Alex (type 6) | research also named |
+| 203 | NAVAI-I3 (Zhejiang Humanoid Robot Innovation Center, CN) | prototype, 180 cm, 70 kg | 2 | legs ("walks with steady posture") | inside | R4: research institutions, labs, AI development | |
+| 204 | Navigator 2 (Zhejiang Humanoid Robot Innovation Center) | prototype, 165 cm, 60 kg | 3 | legs ("stable walking at speeds of up to 6 km/h") | slightly below | the catalogue's summary: "for industrial applications" | |
+| 205 | NE01 (GENISOM AI, CN) | prototype, 145 cm, 40 kg | 4 | not stated | both below; type 1's size | commercial performances, cultural tourism; research also | |
+| 206 | NEO Beta (1X Technologies, US) | prototype, 165 cm, 30 kg | 4 | not stated | mass below | the NEO line, for homes; "homes, workplaces, and industrial settings" | an earlier NEO (1) |
+| 207 | NEO Gamma (1X Technologies) | prototype, 165 cm, 35 kg | 4 | not stated | mass below | "home-focused humanoid" | an earlier NEO (1) |
+| 208 | Neo1 (Neodra Dynamics, CN) | prototype, 400 cm, 1,200 kg | 5 | not stated | both far above | construction, demolition, mining, nuclear, deep sea, rescue | a 4 m, 1.2 t hydraulic "mecha": a humanoid robot in this study's sense? |
+| 209 | NEXO (Galaxea Dynamics, CN) | prototype, 168 cm, 85 kg | 3 | wheels ("a slim, wheeled base") | inside | logistics, manufacturing, commercial services | |
+| 210 | Nezha P01 (Digit Robotics, CN) | prototype, 145 cm, 65 kg | 2 | legs ("dynamic legged locomotion") | height below | R4: research, education, AI labs; "full-size" | height of type 1, mass of type 2 |
+| 211 | NIX (Lumos Robotics, CN) | prototype, 80 cm, 20 kg | 4 | legs ("walks steadily on two legs") | both far below | public spaces, homes, learning; "service-oriented" | |
+| 212 | NORI L3 (Nori Robotics, CN) | in production, 145 cm, 40 kg | 1 | wheels ("a wheeled mobile base with two robotic arms") | inside | R4: research, education, AI development (the catalogue's summary line describes another robot) | |
+| 213 | North (Sharpa, SG) | prototype, 160 cm, 90 kg | 2 | wheels | mass above | R3: "service and industrial settings"; food service, hospitality, manufacturing, research | |
+| 214 | Northstar (UMA, FR) | prototype, 165 cm, 40 kg | 2 | not stated | mass below | R3: home, healthcare, logistics, manufacturing | |
+| 215 | Nova (ugo, JP) | prototype, 162 cm, 90 kg | 3 | wheels ("a four-wheel mecanum base") | mass above | industrial, manufacturing, warehousing | |
+| 216 | Omni (X-Humanoid, CN) | prototype, ~165 cm, ~55–75 kg | 2 | legs ("fluid walking") | inside | R3: interactive service, logistics, research | |
+| 217 | Onero H1 (SwitchBot, JP) | prototype, ~120–130 cm, ~35 kg | 4 | not stated | both below; type 1's size | home assistance, smart home | |
+| 218 | OpenArm 02 (Enactic, JP) | in production, not given, 30 kg | — | two arms ("OpenArm has no legs, wheels, or wings") | — | not assigned (decided 2026-10-28): arms only | |
+| 219 | Operator OP1 (Ultra Robotics, US) | in production, 180 cm, 140 kg | — | stationary ("does not walk anywhere", "a 5-by-5-foot fixed base") | — | not assigned (decided 2026-10-28): an upper body on a fixed base | |
+| 220 | Optimus (Tesla, US) | prototype, 173 cm, 56 kg | →222 | — | — | its text describes "Generation 2"; the same size and joints as 222 | listed twice: counted as 222 |
+| 221 | OPTIMUS GEN 3 (Tesla) | in production, 180 cm, 52 kg | 2 | no wheels named | inside | R1: qualifying in type 2 | |
+| 222 | Optimus Gen2 (Tesla) | prototype, 173 cm, 56 kg | 2 | no wheels named | inside | R1: the workbook's type 2 lists "Optimus Gen 2/Gen 3" | |
+| 223 | OPTIMUS V2.5 (Tesla) | prototype, 176.5 cm, 55 kg | 2 | legs ("walks, runs, climbs stairs") | inside | the step between Gen 2 and Gen 3, both in type 2 | |
+| 224 | Orca (Cyan Robotics, CN) | prototype, 160 cm, 50 kg | 2 | legs ("bipedal") | at the lower limits | R4: research labs, universities, education | |
+| 225 | Origin (HIRO Industries, US) | prototype, 160 cm, not given | — | an upper body ("It has no legs and does not walk"; "dual-arm workstation robot") | — | not assigned (decided 2026-10-28) | |
+| 226 | P0 (Pink Robotics, DE) | prototype, 175 cm, 82 kg | 3 | not stated | inside | logistics sorting | |
+| 227 | Panther (Unix Group, CN) | pilot, 160 cm, not given | 3 | wheels ("a mobile chassis") | height below | industrial logistics, manufacturing, warehouses | |
+| 228 | Phantom MK1 (Foundation, US) | prototype, 175 cm, 80 kg | 6 | not stated | inside | R1: named in type 6 | |
+| 229 | Phoenix (Sanctuary AI, CA) | prototype, 170 cm, 70 kg | 2 | not stated | inside | R3: "adapt to multiple industries" | an earlier Phoenix than 230 |
+| 230 | Phoenix Gen 8 (Sanctuary AI) | prototype, 170 cm, 70 kg | 2 | wheels ("rolls on a wheeled base") | inside | R4: "mainly to capture high-quality training data"; industrial, logistics | |
+| 231 | PHYBOT C1 (PHYBOT, CN) | prototype, 125 cm, 25 kg | 1 | not stated | mass below | R4: research, education, AI labs | |
+| 232 | PHYBOT M1 (PHYBOT) | early production, 172 cm, 60 kg | 2 | not stated | inside | R3: embodied AI testing, research labs, heavy object handling, logistics | |
+| 233 | pib.Pro (isento robotics, DE) | in production, 80 cm, not given | — | unclear: not stated, its forerunner pib a 3D-printed kit | — | education, research | form: an upper body only? left for the end |
+| 234 | PM01 (EngineAI, CN) | prototype, 138 cm, 40 kg | 1 | legs ("bipedal walking gait") | inside | R4: open-source testbed for AI research | |
+| 235 | PR-34D (Perceptyne, IN) | pilots, not given | — | unclear: "semi-humanoid", "dual-arm system" on assembly lines | — | car and electronics assembly | form: an upper body only? left for the end |
+| 236 | PrimeBOT Q1 (PrimeBOT, CN) | prototype, 88 cm, not given | 4 | not stated | height far below | "consumer-grade personal robot" | developers and robotics education also (type 1) |
+| 237 | PrimeBOT T1 (PrimeBOT) | prototype, 60 cm, 8.5 kg | 4 | wheels ("upright on wheeled legs"); changes into a four-legged form | both far below | consumer home use | form: half the time a quadruped |
+| 238 | ProWhite (PL-Universe, CN) | in production, ~155–165 cm, ~45–55 kg | 4 | legs ("basic walking") | mass below | reception, guidance in hotels, offices, exhibition halls | |
+| 239 | Psi V1 (PsiBot, CN) | in production, 175 cm, 150 kg | 3 | not stated | mass above | industrial automation, light industrial tasks | |
+| 240 | Pudu D7 (Pudu Robotics, CN) | prototype, 165 cm, 45 kg | 4 | wheels ("an omnidirectional chassis") | mass below | "service robot": elevators, item transport, sorting | |
+| 241 | Pudu D9 (Pudu Robotics) | prototype, 170 cm, 55 kg | 3 | legs ("bipedal") | mass below | the catalogue's summary: "versatile industrial applications"; two 20 kg arms | |
+| 242 | PX5 (XPeng, CN) | prototype, 150 cm, 109 kg | 2 | legs ("bipedal locomotion") | height below, mass above | R3: "industrial and domestic tasks", industry and retail | |
+| 243 | QDH (Apptronik, US) | prototype, ~165 cm, ~60–70 kg | — | unclear: 14 joints, its body not stated | — | logistics, manufacturing, research | form: an upper body only? left for the end |
+| 244 | Qinglong V3.0 (OpenLoong, CN) | early production, 165 cm, 75 kg | 2 | legs ("It can walk") | inside | R4: academic research, humanoid R&D | |
+| 245 | QUANTA X2 (X Square Robot, CN) | prototype, 172 cm, 95 kg | 2 | wheels | mass above | R3: "general-purpose service tasks" in homes, public venues, labs, logistics | |
+| 246 | QUESTER1 (Q1, AgiBot) | prototype, 79 cm, ~20–30 kg | 1 | not stated | both far below | R4: embodied AI research, education | |
+| 247 | R1 PRO (Galaxea Dynamics) | in production, 170 cm, 96 kg | 2 | wheels | mass above | R3: industrial automation and R&D, research labs, warehouse pick and place | |
+| 248 | R1-D (Unitree) | in production, 160 cm, 52 kg | 2 | wheels (the R1-A7-D version) | inside | R4: AI training data collection, developers, research | |
+| 249 | RAISE A1 (AgiBot) | prototype, 175 cm, 55 kg | 3 | legs ("stable bipedal walking") | inside | manufacturing, logistics; AgiBot's first generation | |
+| 250 | RayNex G3 (NineRay, CN) | in production, 173 cm, 60 kg | 3 | legs ("80 kg walking load") | inside | industrial, manufacturing; 100 kg deadlift | its loads are type 5's marks |
+
+**Batch 5 by type:** type 1: 4; type 2: 17; type 3: 9; type 4: 10; type 5: 1; type 6: 2; unclear, left for the end: 3
+(pib.Pro, PR-34D, QDH); not assigned: 3 (OpenArm 02, Operator OP1, Origin); listed twice: 1 (Optimus).
+
+**Received, 2026-10-28, its reading open** (industry): "If industry is listed industry. It could be just heavy duty in
+industry". Two readings, for Matthias to choose; nothing has been moved yet:
+- *Narrow:* where type 3 and type 5 compete, a robot whose use is industry is type 3, heavy duty or not; type 5 keeps
+  the hazardous environments. Moves Persona Gen 1, CYBORG RO1 and WO1, Kaleido 9 and Neo1 from 5 to 3 (each lists
+  industry); Laborer M1 and RayNex G3 stay 3. The robots with industry among other uses stay in type 2 (R3).
+- *Wide:* any robot that lists industry is type 3. Moves, besides those five, about 37 robots from type 2 (R3: Adam SP,
+  KAPEX, Kengo, MagicBot X1, North, PX5, R1 PRO and others) and NEO Beta from type 4.
+Settled by the rule for two types (E4.6).
+
+### E4.6 The rule for two types, applied to batches 1 to 5 (2026-10-28). Not entered
+
+**Decided, 2026-10-28:** "Rule holds", on this rule as Claude proposed it: (1) a robot that lists industry has type 3
+as one of its types; heavy duty in industry stays type 3; type 5 is for hazardous environments only; (2) a second type
+where another use is as strong: service, home or care type 4, research type 2 (type 1 if compact), hazardous type 5;
+(3) security alone type 6; (4) type 2 alone for research platforms and robots with no leading use; (5) at most two
+types. Shown with Kengo 3 and 4, A2 Max 3 and 4, CYBORG RO1 and WO1 3 and 5, Kaleido 9 3 and 5, AKINCI-5 3 and 1,
+Laborer M1 and RayNex G3 3, KAPEX 3 and 4 or 3 and 2 (for Matthias).
+
+**How Claude read it in the cases the rule leaves open** (for Matthias to check):
+- *Industry* is manufacturing, industrial work, factories, warehouses, machine tending and logistics; "light
+  logistics" and delivery inside buildings (FlashBot Arm, NIX, Mirokaï) are service.
+- *Research as a second type* where the robot is offered as a research or developer platform or research is about a
+  third of its uses; education for children is not research. A research institute's own mission robot (Alex, Nadia)
+  keeps its mission type.
+- *A robot the workbook names* keeps the workbook's type; if it lists industry, type 3 is its second.
+- *Three or more kinds of use:* the two that lead; where research and service tie beside industry, research (type 2),
+  marked.
+- Two border cases are resolved by the two types: Kepler K2 and K2 Bumblebee (one robot) is 3 and 2; KUAVO 5-W is 4 and
+  3.
+
+**What changes** (number, robot: before, after; the robots not listed keep their one type):
+
+| # | Robot | Before | After | Why | For Matthias |
+|---|---|---|---|---|---|
+| 3 | 4NE1 | 3 | 3, 4 | everyday tasks, services | |
+| 5 | 4NE1 Gen 4 | 3 | 3, 4 | home assistance | |
+| 7 | A2 Max | 3 | 3, 4 | healthcare | |
+| 10 | Adam Lite | 2 | 3, 4 | "industrial and service applications" | |
+| 11 | Adam SP | 2 | 3, 4 | industrial automation, service robotics | its text: research labs (3 and 2?) |
+| 13 | AGIBOT A2-W | 3 | 3, 2 | research labs | |
+| 15 | AGIBOT G1 | 2 | 2, 3 | data collection; industrial, manufacturing | |
+| 17 | AgiBot X2 | 4 | 4, 3 | light industrial assistance | |
+| 20 | AI Worker | 3 | 3, 2 | R&D | |
+| 21 | AICO 2 | 3 | 3, 2 | research | |
+| 22 | AIDOL | 3 | 3, 4 | its text: face and dialogue | |
+| 23 | AKINCI-5 | 3 | 3, 1 | R&D, compact | |
+| 29 | AlphaBot 2 | 3 | 3, 4 | public service, hospitality | |
+| 33 | Apollo 2 | 3 | 3, 4 | retail | the workbook also names it in 2 and 5 (borderline) |
+| 34 | ARI | 4 | 4, 2 | research | |
+| 35 | ARMAR-7 | 4 | 4, 2 | research | |
+| 40 | Astribot S1 | 2 | 2, 3 | logistics | service also |
+| 41 | Astribot T1 | 2 | 2, 3 | industrial | service and home also |
+| 42 | AstroDroid AD-01 | 3 | 3, 2 | research and education | |
+| 43 | Atlas | 5 | 5, 3 | industrial automation, logistics, manufacturing | type 5's anchor lists industry only |
+| 45 | Atom (DOBOT) | 4 | 4, 3 | "industrial automation to customer service" | |
+| 57 | Bumi | 4 | 4, 1 | maker education, programming | |
+| 60 | CASBOT W1 | 3 | 3, 2 | research | retail also |
+| 61 | CASIVIBOT | 4 | 4, 3 | industrial and commercial service | |
+| 62 | Centaur-G1 | 3 | 3, 4 | eldercare, home service | |
+| 63 | Cinnamon 1 | 2 | 3, 4 | construction, industrial automation; service | security among other uses |
+| 66 | Cruzr S2 | 3 | 3, 4 | healthcare | |
+| 71 | CYBORG RO1 | 5 | 3, 5 | industrial manufacturing; hazardous sites | |
+| 72 | CYBORG WO1 | 5 | 3, 5 | as 71 | |
+| 73 | D01 | 2 | 3, 4 | manufacturing; food service, hospitality, retail | |
+| 81 | DR02 | 5 | 5, 3 | industries, inspection, logistics | |
+| 82 | Dual-Arm Lift | 2 | 2, 3 | industrial automation | |
+| 84 | DUCO | 3 | 3, 4 | service robotics | |
+| 85 | E1 | 1 | 1, 4 | entertainment, guided tours | |
+| 86 | Eggie | 4 | 4, 2 | research and education | |
+| 88 | Elixis | 3 | 3, 4 | healthcare, retail | |
+| 90 | Eno | 2 | 3, 4 | manufacturing, logistics; healthcare, hospitality | |
+| 92 | Feather | 2 | 2, 3 | manufacturing; labs and developers | |
+| 98 | Figure 03 | 2 | 2, 3 | industries (the workbook: type 3 borderline) | |
+| 102 | G1 (Unitree) | 1 | 1, 3 | its text: "research, industrial, and development tasks" | type 1's anchor |
+| 103 | G1+ | 1 | 1, 3 | industrial manufacturing, logistics | |
+| 105 | G2 Genie | 3 | 3, 2 | research and education | |
+| 110 | Gen 1 (Persona AI) | 5 | 3 | heavy duty in industry | |
+| 112 | Gento Luna | 2 | 3, 4 | industrial inspection; commercial and home services | |
+| 114 | GoMate | 2 | 3, 4 | car production, logistics; elderly care | security among other uses |
+| 115 | GoMate Mini | 2 | 3, 4 | car production lines; tours, public venues | security among other uses |
+| 120 | H2 | 2 | 2, 3 | industries, logistics | |
+| 134 | I-Series | 2 | 2, 3 | industrial automation, logistics | |
+| 135 | IGRIS-C | 2 | 2, 3 | industrial manufacturing | |
+| 136 | IRON (2025) | 4 | 4, 3 | factory work | |
+| 137 | IRON (earlier) | 2 | 3, 4 | industrial tasks; retail, healthcare | |
+| 141 | JAKA K1 | 2 | 3, 4 | "both industrial and service roles" | |
+| 143 | JAKA π | 4 | 4, 1 | higher education | |
+| 144 | JingChu | 2 | 2, 4 | education and research; service | |
+| 146 | Jupiter | 2 | 3, 4 | logistics; front-of-house service | security and research among other uses |
+| 150 | KAI | 4 | 4, 3 | light industrial | |
+| 152 | Kaleido 9 | 5 | 3, 5 | heavy industry; disaster response | |
+| 154 | KAPEX | 2 | 3, 4 | industrial automation, logistics, manufacturing; home | or 3 and 2 (research) |
+| 155 | Keenon XMAN-R1 | 4 | 4, 3 | "industries like hospitality and logistics" | |
+| 156 | Kengo | 2 | 3, 4 | factories; commercial spaces, homes | |
+| 157 | Kepler (Forerunner series) | 2 | 2, 3 | industrial, research | rescue also |
+| 158 | Kepler K2 (and K2 Bumblebee) | 3 | 3, 2 | industrial; research and education (149's entry) | |
+| 162 | KUAVO 5-W | 4 | 4, 3 | industrial manufacturing, logistics | |
+| 163 | Kuavo-5 | 2 | 2, 3 | industrial automation, logistics | home also |
+| 170 | LimX CL | 2 | 2, 3 | industrial automation | household also |
+| 175 | LUMO | 4 | 4, 1 | education, research | |
+| 176 | Luna | 4 | 4, 2 | research | |
+| 179 | MagicBot D1 | 3 | 3, 2 | education, research | |
+| 180 | MagicBot Gen1 | 2 | 2, 3 | manufacturing | entertainment, hospitality also |
+| 181 | MagicBot X1 | 2 | 3, 4 | manufacturing, logistics; services, healthcare, home | |
+| 183 | Maker H01 | 4 | 4, 3 | its text: "factory floors or service environments" | |
+| 184 | Mantis Standart | 2 | 2, 3 | manufacturing, warehousing | commercial and home service also |
+| 185 | Martian | 4 | 4, 3 | its text: "industrial and research environments" | |
+| 187 | MATRIX-3 | 2 | 3, 4 | logistics; commercial, service | |
+| 189 | MenteeBot | 2 | 3, 4 | "both domestic and industrial applications" | |
+| 195 | Moby (Noble Machines) | 3 | 3, 5 | its text: "hazardous and physically demanding work" | the catalogue's markets: hospitality, research |
+| 199 | Motion 2 | 2 | 2, 3 | factory automation | |
+| 200 | Moz1 | 2 | 2, 4 | service robotics | |
+| 206 | NEO Beta | 4 | 4, 3 | "industrial settings" | |
+| 208 | Neo1 | 5 | 5, 3 | heavy manufacturing | |
+| 209 | NEXO | 3 | 3, 4 | commercial services | |
+| 213 | North | 2 | 3, 4 | manufacturing; food service, hospitality, retail | |
+| 214 | Northstar | 2 | 3, 4 | logistics, manufacturing; home, healthcare | |
+| 216 | Omni | 2 | 2, 3 | logistics | interactive service also |
+| 221 | OPTIMUS GEN 3 | 2 | 2, 3 | industrial automation, logistics, manufacturing | home also |
+| 223 | OPTIMUS V2.5 | 2 | 2, 3 | as 221 | home also |
+| 228 | Phantom MK1 | 6 | 6, 3 | industries | |
+| 229 | Phoenix | 2 | 2, 3 | "multiple industries" | |
+| 230 | Phoenix Gen 8 | 2 | 2, 3 | industrial, logistics | |
+| 232 | PHYBOT M1 | 2 | 2, 3 | industrial logistics, heavy object handling | |
+| 236 | PrimeBOT Q1 | 4 | 4, 1 | developers, robotics education | |
+| 240 | Pudu D7 | 4 | 4, 3 | "multi-industry automation" | |
+| 242 | PX5 | 2 | 3, 4 | "industrial and domestic tasks" | |
+| 245 | QUANTA X2 | 2 | 3, 4 | logistics; cleaning, home service | research also |
+| 247 | R1 PRO | 2 | 2, 3 | industrial automation, warehouse pick and place | |
+
+**Batches 1 to 5 after the rule** (computed from the tables and the changes above in Claude's scratch folder,
+`apply_two_types.py`): 223 robots with a type (250 entries, less 10 listed twice, 8 not assigned, 9 unclear), 94 of
+them with two types. In each type, a robot with two types counted in both: type 1: 22; type 2: 61; type 3: 129;
+type 4: 93; type 5: 9; type 6: 3. Unchanged and still for Matthias: ALPHA (3; hazardous, 5?), Fengxing-001 (3; 5 or
+6?), MH3 (5; defence, 6?).
+
+### E4.7 Batch 6 of 7: robots 251 to 300 (2026-10-28). Not entered
+
+Read as batches 1 to 5, with the rule for two types (E4.6) and one entry per identical robot. **What was read:**
+every robot's humanoid.guide page, its whole text searched for wheels, legs and walking. "Size" is against the first
+type.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Types | Form | Size | Reason | For Matthias |
+|---|---|---|---|---|---|---|---|
+| 251 | RB-Y1 (Rainbow Robotics, KR) | in production, 160 cm, 131 kg | 3, 2 | wheels ("mobile manipulator") | mass above | "real-world industrial tasks"; built for "the generative AI era" | |
+| 252 | Reachy 2 (Pollen Robotics, FR) | prototype, 166 cm, 50 kg | — | unclear: "a bimanual system", its base not stated | — | research and developers | form: an upper body only? left for the end |
+| 253 | RealBot-01 (RealMan Robotics, CN) | in production, 168 cm, 125 kg | 2, 3 | wheels | mass above | "for research, automation, and practical manipulation": embodied AI, data collection; industrial automation | home service also |
+| 254 | RealBot-L2 (RealMan Robotics) | in production, 170 cm, 120 kg | 4, 2 | wheels ("a two-wheel base") | mass above | home service, retail guidance; data collection | |
+| 255 | RealBot-S2 (RealMan Robotics) | in production, 170 cm, 125 kg | 3, 2 | wheels ("a four-wheel mobile base") | mass above | industrial automation; data collection, embodied AI | home service, retail also |
+| 256 | REEM-C (PAL Robotics, ES) | in production, 165 cm, 80 kg | 2 | legs ("full-size biped") | inside | R4: research and education in universities and labs | |
+| 257 | Reflex (Reflex Robotics, US) | prototype, not given | 3 | wheels ("a stable wheeled base") | not given | warehousing and logistics | |
+| 258 | REX G1 (RoboScience, CN) | prototype, 170 cm, 80 kg | 3, 4 | wheels | inside | factories, logistics, warehousing; homes, retail, supermarkets | |
+| 259 | RNoid (Robot.com, US) | production-ready, 160 cm, 50 kg | 4 | not stated | mass below | hospitality, reception, workplace assistance | |
+| 260 | Roban2 (Leju Robotics, CN) | prototype, 145 cm, 40 kg | 1 | not stated | inside | R4: research labs, education, demonstrations | |
+| 261 | Robbyant R1 (Ant Group, CN) | in production, 160 cm, 110 kg | 4 | wheels | mass above | kitchens, hospitality, museum tours, healthcare, public services | |
+| 262 | RoBee (Oversonic Robotics, IT) | in production, 190 cm, 180 kg | 3 | not stated | both above | industrial: "demanding, repetitive, or unsafe work" | |
+| 263 | Robin (Roboligent, US) | in production, 150 cm, 80 kg | 3 | wheels ("a mobile base") | height below | factory automation, logistics, manufacturing, warehouse | |
+| 264 | ROBO-T1 (Robo Robotics, US) | in production, 130 cm, 50 kg | 3 | not stated | height below | industrial automation, manufacturing | |
+| 265 | Robotera L7 (Robotera, CN) | prototype, 171 cm, 65 kg | 3, 2 | legs ("full-size biped") | inside | factory and industrial automation; research labs | |
+| 266 | Robotera M7 (Robotera) | in production, 119 cm, 43 kg | — | an upper body ("upper-body humanoid robot"; the L7's text: "a fixed-base upper-body") | — | not assigned (decided 2026-10-28) | |
+| 267 | ROBOTERA Q5 (Robotera) | in production, 165 cm, 70 kg | 4 | wheels | inside | hospitality, retail, healthcare, tourism | |
+| 268 | Roboto Origin (RoboParty, CN) | prototype, 125 cm, 34 kg | 1 | legs ("bipedal") | inside | R4: open source for makers, researchers, students | |
+| 269 | RP1 (RoboParty) | prototype, 130 cm, 34 kg | 1 | legs ("bipedal") | inside | R4: research, developers, education; the successor of 268 | |
+| 270 | SAO2 (EngineAI, CN) | in production, 125 cm, 25 kg | 4 | not stated | both below | a companion for teenagers in living rooms and dorms (its text: "SA02") | |
+| 271 | SE01 (EngineAI) | prototype, 180 cm, 80 kg | 2 | not stated | inside | no use given; full-scale (R5) | no stated use |
+| 272 | Sean (Zeroth Robotics, CN) | prototype, 155 cm, 45 kg | 2, 4 | not stated | both below | AI development, research; home assistance, retail | |
+| 273 | Sherpa Mecha (Ati Robotics, US) | prototype, 200 cm, 180 kg | 3 | wheels ("does not walk on legs") | both above | factory work: automotive, electronics, energy, food, pharma | |
+| 274 | Shimizu's Robot (Shimizu Corporation, JP) | prototype, 155 cm, not given | 3 | legs ("walks its site") | height below | construction site inspection | its maker builds, Sony is the partner: maybe another maker's robot, then identical to its entry |
+| 275 | SkyWalker 2 (EIR Technology, CN) | production-ready, 165 cm, 55 kg | 3, 4 | not stated | slightly below | manufacturing, inspection; elder care, intelligent services | |
+| 276 | Songxing (SIASUN, CN) | early production, 165 cm, 85 kg | 3, 2 | legs ("It can walk") | inside | industrial; industrial R&D, research and education | |
+| 277 | Spaceo M1 (Muks Robotics, IN) | in production, 167 cm, 65 kg | 4 | wheels ("rolling at a brisk 2 m/s") | inside | "service android": healthcare, hospitality, retail restocking | |
+| 278 | Spaceo Pro (Muks Robotics) | in production, 167 cm, 65 kg | 3 | wheels ("integrated wheels") | inside | heavy-duty factory work, 200 kg payload | |
+| 279 | Sprout (Fauna Robotics, US) | in production, 107 cm, 22.7 kg | 1, 4 | legs ("basic walking") | both below | R4: "ready for developers and researchers"; homes, schools, public places | |
+| 280 | Star1 (Robotera) | prototype, 171 cm, 63 kg | 3, 4 | legs (12 leg joints, runs 3.6 m/s) | inside | the catalogue's summary: "industrial and commercial" | |
+| 281 | StarBot Astra (StarBot, US) | pre-order, 152 cm, 34 kg | 1 | legs ("walks on two legs") | height above | R4: universities, research institutes, R&D teams | height between types 1 and 2 |
+| 282 | StarBot Flex (StarBot) | prototype, 175 cm, 50 kg | 4 | wheels | mass below | restaurants, hotels, retail | |
+| 283 | StarBot Nova (StarBot) | prototype, 152 cm, 32 kg | 4 | wheels | both below | restaurants, hospitality, retail | |
+| 284 | Steve (Sulu.be, BE) | in production, 210 cm, 140 kg | 4 | not stated | both above | a character at events: entertainment, hospitality | |
+| 285 | Superman (Unitree) | prototype, 170 cm, 45 kg | 2 | legs; "no hands and no grippers" | mass below | research, technology demonstration (jumps, sprints) | form: no hands |
+| 286 | Synthia (Syntheva Robotics, NO) | prototype, 165 cm, 30 kg | — | unclear: "start with just the head and add a torso, arms and legs later" | — | companionship, entertainment | form: left for the end |
+| 287 | Syntro (WorkFar, US) | in production, 170 cm, 108 kg | 3 | not stated | inside | industrial automation, logistics, manufacturing | |
+| 288 | T800 (EngineAI) | prototype, 173 cm, 60 kg | 5, 6 | no wheels named | mass below | R1: the workbook names the T800 Max in type 5 and the T800's security variants in type 6 | the catalogue's markets match AEON's; its nationality reads "US" |
+| 289 | Taku (DYNA Robotics, US) | in production, 170 cm, not given | 4, 3 | wheels ("four steerable wheels") | not given | hotels, laundry, restaurants, commercial services; warehouses | |
+| 290 | TALOS (PAL Robotics) | in production, 175 cm, 95 kg | 2 | legs ("full-size biped") | mass above | R4: research labs | |
+| 291 | TARA GEN1 (iHub Robotics, IN) | in production, 163 cm, 75 kg | 4, 3 | not stated (3 joints) | inside | reception, patient support, airport assistance; industries, logistics | form: 3 joints only |
+| 292 | TARS (TARS Robotics, CN) | prototype, 160–175 cm, 80 kg | 3 | not stated | inside | industrial automation, logistics, manufacturing | |
+| 293 | Tau Humanoid (Tau Robotics, US) | in production, 132 cm, 35 kg | 4 | not stated | both below | home and office cleaning, teleoperated | |
+| 294 | THEMIS V2 (Westwood Robotics, US) | in production, 160 cm, 32 kg | 2, 3 | legs ("walks and runs") | mass below | the catalogue's summary: "logistics, service, and research" | service also |
+| 295 | TIAGo Pro (PAL Robotics) | in production, 155 cm, 80 kg | 2, 3 | wheels | height below | "the next generation of its popular TIAGo research robot"; industry, logistics | healthcare, agrifood also |
+| 296 | Tian Yi 2.0 (X-Humanoid, CN) | in production, ~160–180 cm, not given | 3, 4 | not stated | not given | inspection in warehouses and industrial facilities; service | patrol among other uses |
+| 297 | TianGong Ultra (X-Humanoid) | prototype, 180 cm, 55 kg | 2 | legs ("shock-absorbing legs") | inside | research, technology demonstration (half-marathon) | |
+| 298 | Tianzhen Z1 (Tlibot, CN) | prototype, 167 cm, 45 kg | 4, 2 | not stated | mass below | commercial interaction, exhibition guidance; research | |
+| 299 | Tien Kung 2.0 (X-Humanoid) | in production, 170 cm, ~70–90 kg | 2 | legs ("bipedal motion") | inside | R4: AI development, robotics research | |
+| 300 | Tien Kung 3.0 (X-Humanoid) | prototype, 169 cm, 62 kg | 2 | legs ("walk up stairs") | inside | R4: industrial R&D, research, robotics labs | |
+
+**Batch 6** (counted from the table): 47 robots with a type, 18 of them with two; in each type, a robot with two types
+counted in both: type 1: 5; type 2: 17; type 3: 22; type 4: 19; type 5: 1; type 6: 1. Unclear, left for the end: 2
+(Reachy 2, Synthia); not assigned: 1 (Robotera M7, an upper body). To check in batch 7: UBTECH's "Walker Tienkung"
+against X-Humanoid's Tien Kung robots (299, 300), possibly one robot under two names.
+
+### E4.8 Batch 7 of 7: robots 301 to 349 (2026-10-28). Not entered
+
+Read as batch 6. **What was read:** every robot's humanoid.guide page, its whole text searched for wheels, legs and
+walking.
+
+| # | Robot (maker) | Catalogue: status, height, mass | Types | Form | Size | Reason | For Matthias |
+|---|---|---|---|---|---|---|---|
+| 301 | TITAN (RoboForce, US) | prototype, 210 cm, not given | 3, 5 | wheels ("a rugged, modular base with a humanoid upper body") | height above | "dull, dirty and dangerous jobs in harsh industrial environments": solar, mining, manufacturing, logistics, space | |
+| 302 | TLIBOT T1 (Tlibot, CN) | in production, 160 cm, 43 kg | 2 | legs ("walks on two legs") | mass below | R4: "general-purpose humanoid applications", R&D | |
+| 303 | TM Xplore 1 (Techman Robot, TW) | prototype, 160–175 cm, not given | 3 | wheels | inside | electronics and semiconductor factories, logistics, warehouses | |
+| 304 | Tobi (TwoLabs, US) | prototype, 150 cm, 60 kg | 4 | "semi-humanoid", a base not stated | height below | elder care in nursing homes: feeding, mobility support, companionship | |
+| 305 | Tora DoubleOne (PaXini, CN) | in production, 168 cm, 70 kg | 3, 4 | wheels | inside | factories, warehouses; public spaces, service | |
+| 306 | ToraOne (PaXini) | prototype, 186 cm, not given | 3, 4 | not stated | height above | "industries, healthcare, and service sectors" | the catalogue names "Tokyo Robotics" as maker, its text PaXini |
+| 307 | Torobo (Tokyo Robotics, JP) | prototype, 166 cm, 160 kg | 3, 2 | not stated | mass above | the catalogue's summary: "industrial, academic, and research" | |
+| 308 | Totan O1 (WL Robotics, CN) | limited production, 134 cm, 34 kg | 1 | not stated | inside | R4: AI research teams, universities, labs (its text: "Titan O1") | |
+| 309 | TRON 2 (LimX Dynamics) | in production, 132 cm, 35 kg | 1 | changes between two arms, two legs, two legs on wheels | inside | R4: embodied AI research, data collection, education, industrial prototyping | one of its forms is two arms only |
+| 310 | U1 Pro (UBTECH) | pre-order, 183 cm, 42 kg | 4 | not stated | height above, mass below | "a social companion rather than a labor robot" (the catalogue's markets are Martian's) | |
+| 311 | Unitree R1 (Unitree) | in production, 122 cm, 25 kg | 1 | legs (runs, cartwheels) | mass below | R4: hobbyists, developers, research labs | |
+| 312 | VB1-I (Lanxin Robotics, CN) | in production, ~165 cm, ~60–70 kg | 2, 3 | legs ("walks on two legs") | inside | embodied AI, research; industrial trials | maybe the same robot as 315 |
+| 313 | VB2 (Lanxin Robotics) | in production, ~170 cm, ~65–75 kg | 2, 3 | legs ("walks on two legs") | inside | embodied AI, industrial research; logistics | |
+| 314 | Vega (Dexmate, US) | in production, 171 cm, 135 kg | 3, 2 | wheels ("an omni-directional mobile base") | mass above | industrial automation; R&D labs | |
+| 315 | VersaBot VB-1 (Lanxin Robotics) | limited production, 165 cm, 75 kg | 2 | not stated | inside | R4: applied humanoid R&D, research and education | maybe the same robot as 312 |
+| 316 | Vesoma 1 (Vesoma, DE) | prototype, 170 cm, 75 kg | 3, 4 | not stated | inside | "factories, warehouses, and care work" | |
+| 317 | Voxel (Tuesday Labs, US) | prototype, 150 cm, 45 kg | 4 | legs ("Z-shaped legs") | mass below | home: tidying, fetching, watering plants | |
+| 318 | W-Bot (Yue Quan Bionics, CN) | in production, 178 cm, 60 kg | 2 | wheels (folding legs on a wheeled base) | inside | "manipulation in tight spaces"; no use beyond it (R5) | no stated use |
+| 319 | W1 Pro (DexForce, CN) | production, 163 cm, 110 kg | 3, 4 | wheels | mass above | industrial automation, logistics, inspection; service | |
+| 320 | Walden (Walden Robotics, US) | early production, 165 cm, 90 kg | 3 | wheels | inside | factories and warehouses | |
+| 321 | Walker C (UBTECH) | prototype, 163 cm, 43 kg | 4, 3 | not stated | mass below | its text: guiding and reception; the catalogue's markets: industries, logistics, manufacturing | the markets contradict the text |
+| 322 | Walker C1 (UBTECH) | prototype, 165 cm, 50 kg | 4 | not stated | mass below | commercial service, exhibitions, hospitality | |
+| 323 | Walker II (DroidUp, CN) | in production, 170 cm, 32 kg | 4, 2 | legs ("biped") | mass below | guided tours, stage and events; education and research | security patrol among other uses |
+| 324 | Walker S1 (UBTECH) | prototype, 172 cm, 76 kg | 4 | not stated | mass above | its text: "home and office environments" | UBTECH's Walker S line is its factory line (the S2 is type 3's anchor) |
+| 325 | Walker S2 (UBTECH) | prototype, 176 cm, "43, 73" kg | 3 | legs ("bipedal locomotion") | inside | R1: type 3's anchor | |
+| 326 | Walker Tienkung (UBTECH) | in production, 170 cm, 55 kg | 2 | legs (runs, climbs stairs) | inside | R4: universities, research institutes, developers; built with the Beijing Humanoid Robot Innovation Center | maybe the same robot as 299, Tien Kung 2.0 (X-Humanoid is that centre) |
+| 327 | Wanda 2.0 (Unix Group) | in production, 142–168 cm, not given | 3 | legs ("It walks") | not given | industrial automation, logistics, manufacturing | |
+| 328 | X-Bot (Yue Quan Bionics) | in production, 167 cm, 60 kg | 4, 3 | legs ("walks on two legs") | inside | delivery, guided tours, medical assistance, reception; industrial support | |
+| 329 | Xialan S0 (Digit Robotics) | prototype, 169 cm, not given | 2 | not stated | inside | R4: academic institutions, embodied AI, robotics research | |
+| 330 | Xiao Di (BYD, CN) | prototype, 161 cm, 58.5 kg | 4, 3 | legs ("walks") | inside | car dealership service, education; industrial uses | |
+| 331 | Xiao Liu (Tencent Robotics X, CN) | prototype, 165 cm, 70 kg | 4 | wheels | inside | eldercare, home assistance | |
+| 332 | Xiao Tuo (TOPSTAR, CN) | prototype, 120 cm, 40 kg | 1, 3 | not stated | inside | R4: research and education; "light industrial tasks" | |
+| 333 | XiaQi (Digit Robotics) | production platform, 169 cm, 69 kg | 4 | not stated | inside | exhibition guidance, reception, marketing | |
+| 334 | XTRON KUAVO-MY (Leju Robotics) | prototype, 166 cm, 55 kg | 4, 3 | legs (7 joints a leg, jumps) | inside | R1: the workbook's KUAVO-MY is type 4; "research and industrial use" | which entry is the workbook's (1.73 m, 63.5 kg): 164 or 334? |
+| 335 | Y1 (Tlibot) | in production, 195 cm, 150 kg | 3, 2 | wheels | both above | handling, warehousing; research | service also |
+| 336 | Y2-B (Tlibot) | in production, 160 cm, 85 kg | 2, 4 | wheels | mass above | research; service, light handling | |
+| 337 | Y2-P (Tlibot) | in production, 156.5 cm, 95 kg | 3, 2 | wheels | height below | handling, warehousing; research | service also |
+| 338 | Y4 (Tlibot) | in production, 144.5 cm, 95 kg | — | stationary ("a fixed-station, dual-arm robot", "does not drive around") | — | not assigned (decided 2026-10-28) | |
+| 339 | YMBot C (Yunmu, CN) | prototype, 174 cm, 75 kg | 4 | legs ("walks on two legs") | inside | cultural tourism, exhibitions, museums | |
+| 340 | YMBot D (Yunmu) | in production, 165 cm, 100 kg | 3, 2 | wheels | mass above | "industrial wheeled humanoid"; data collection | home and security also; maybe the same robot as 342 |
+| 341 | YMBot D2 (Yunmu) | prototype, 180 cm, 150 kg | 3, 2 | wheels | both above | heavy industry, precision assembly; data collection | |
+| 342 | YMBot D4 (Yunmu) | prototype, 165 cm, 100 kg | 3, 2 | wheels | mass above | industrial operations, logistics; data collection | security and service also; maybe the same robot as 340 |
+| 343 | YMBOT E3 (Yunmu) | prototype, 140 cm, 35 kg | 1 | legs ("bipedal") | inside | R4: universities, research, robotics education (the catalogue's summary line describes YMBot C) | |
+| 344 | YMBot H (Yunmu) | prototype, 170 cm, 75 kg | 4 | wheels | mass above | visitor reception in museums, showrooms, malls | |
+| 345 | Yogi (Cartwheel Robotics, US) | prototype, 150 cm, 47 kg | 4 | legs ("walks with steady coordination") | mass below | workplace assistance, light logistics, education | |
+| 346 | Zerith H1 (Zerith Robotics, CN) | in production, ~180 cm, 55 kg | 4, 3 | wheels | height above, mass below | its text: cleaning and restocking in hotels; the markets: industrial automation, logistics, inspection, service | the markets are W1 Pro's, word for word |
+| 347 | Zerith Z1 (Zerith Robotics) | in production, 145 cm, 33 kg | 4, 3 | legs ("stands upright on two legs") | both below | its text: lobbies and corridors; the same markets as 346 | as 346 |
+| 348 | Zeus 1 (PL-Universe, CN) | production-ready, 160–175 cm, ~300 kg | 3 | not stated | mass far above | heavy-duty factory work | |
+| 349 | ψ-SynRobot (PsiBot, CN) | prototype, 145 cm, 65 kg | 3, 2 | wheels | height below | light industrial tasks, logistics automation; research and education | |
+
+**Batch 7:** 48 robots with a type, 24 of them with two; not assigned: 1 (Y4, a fixed station).
+
+### E4.9 The register after all seven batches (2026-10-28). Not entered
+
+**Counted** (VERIFICATION.md V60): 349 catalogue entries; 10 listed twice and counted once; 10 not assigned (an upper
+body or arms only); 11 unclear, left for the end; **318 robots with a type, 136 of them with two.** In each type, a
+robot with two types counted in both: type 1: 32; type 2: 95; type 3: 178; type 4: 134; type 5: 11; type 6: 4. By the
+first type only: 27, 68, 125, 89, 6, 3.
+
+**Left for the end, as decided** ("We can refine the unclear once, after going through all the batches"):
+- *form unclear, an upper body only?* Ambidex, Astra, Bimanual, HELIOS (four arms, for space stations), Hobbs, MICO,
+  pib.Pro, PR-34D, QDH, Reachy 2, Synthia (sold from a head upward);
+- *maybe one robot under two entries:* VB1-I and VersaBot VB-1 (Lanxin); Walker Tienkung (UBTECH) and Tien Kung 2.0
+  (X-Humanoid, the centre UBTECH built it with); YMBot D and D4 (Yunmu);
+- *which entry is the workbook's KUAVO-MY* (1.73 m, 63.5 kg): Kuavo-my (145 cm) or XTRON KUAVO-MY (166 cm);
+- *robots the workbook names that the catalogue lacks:* Fourier N1 (type 1), Norinco Fuxi (type 6), Unitree H1 (type
+  2 excluded, type 5 borderline), UBTECH Walker S (the S1's forerunner);
+- *the catalogue's text against its own markets:* Walker C, Walker S1, Zerith H1 and Z1 (markets copied from another
+  entry), T800 (markets as AEON's), U1 Pro (markets as Martian's);
+- *the points marked "For Matthias"* in E4.6 to E4.8 (second types where research and service tie; MH3, ALPHA,
+  Fengxing-001; Superman without hands; Neo1 at 4 m and 1.2 t).
+
+**Still open, for later:** how a robot with two types counts in the statistics (in full in both, split, or one of its
+two drawn in each Monte Carlo draw); type 6's definition widened to civilian security (the workbook is Matthias's); the
+register file itself (`data/researched/humanoid_register.xlsx`, proposed, not built) and 01's check 20 turned from a
+fault into a flag.
+
+### E4.10 The refinement pass: the unclear forms and the pairs, from the makers (2026-10-28). Decided, not entered
+
+**Decided, 2026-10-28:** "Proposals hold", on the proposals below. Still open, asked and not answered: whether HELIOS
+in space is also type 5; whether PR-OMNI is added; whether Walker Tienkung and Tien Kung 2.0 are one robot (kept as two
+until a source says so).
+
+Matthias: "Start refinement" ("read the makers' pages for the 11 unclear forms and the 3 maybe-identical pairs, and
+propose each"). Read first-hand in the browser unless marked *second-hand* (a search summary or another site).
+
+**The eleven unclear forms:**
+
+| Robot | What the maker says | Proposal |
+|---|---|---|
+| Ambidex (NAVER LABS) | "양팔 로봇" (a two-arm robot), "양팔 로봇 플랫폼 연구" (research on a two-arm robot platform); no base named (https://www.naverlabs.com/ambidex) | not assigned: arms only |
+| Astra (Apptronik) | "one of Apptronik's most important upper-body humanoid platforms" (https://apptronik.com/company/our-work, read through WebFetch); apptronik.com/astra answers "Page Not Found" | not assigned: an upper body |
+| QDH (Apptronik) | "As an upper-body platform, QDH helped explore ..."; its "ability to be paired with different mobility bases" (same page). A search summary that QDH added legs is second-hand and contradicts the maker | not assigned: an upper body |
+| MICO (Flexiv) | "humanoid-style, modular, dual-arm robotic system", two Enlight arms under one control box; no base named (Flexiv's Automate 2026 news page, through WebFetch); the catalogue: "does not walk or run" | not assigned: two arms (Flexiv's mobile one is AICO 2, type 3) |
+| Bimanual (Svaya Robotics) | "Bimanual Humanoid Robot", "17 actuators", "arms with 7 degrees of freedom each"; no legs and no base named (https://svayarobotics.com/product/#bimanual) | not assigned: two arms and a torso |
+| PR-34D (Perceptyne) | not on the maker's site; its dual-arm robots there are PR-OMNI ("Mobility: Holonomic drive, Vertical Gantry") and PR-DUO (a work station, "at the same work-station"; 120 kg, 5'2") (https://www.perceptyne.com/, /product/duo) | not assigned as PR-34D (not found); PR-OMNI, wheeled, is missing from the catalogue: add as type 3? |
+| pib.Pro (isento) | the maker's page names no body (https://pib.rocks); its forerunner pib is described as a 3D-printed robot with a face, moving arms and a torso (*second-hand*, 3printr, Onshape) | not assigned, weakly: an upper body by its forerunner |
+| Hobbs (Noetix) | the maker's page did not load; the catalogue: "smooth upper-body motion", "a mobile upper body", works "at table height"; reports of the Hobbs W1 speak of a separate upper-body "dual arms" module (*second-hand*) | not assigned, weakly: an upper body |
+| HELIOS (ORBIT Robotics) | "In microgravity, legs serve little purpose ... HELIOS uses four arms to navigate station interiors, hold position, and handle tasks"; first work "cargo + inventory workflows", then "full orbital operations support" (https://www.orbitrobotics.ch/) | type 3 (cargo, inventory, maintenance); it moves by its arms, so it is more than an upper body. For Matthias: no legs; space, type 5? |
+| Reachy 2 (Pollen Robotics) | "The ideal bimanual mobile manipulator for AI & robotics labs"; "available on an omnidirectional mobile base", "Three omniwheels"; 136–166 cm, "Up to 50 kg" (https://pollen-robotics.com/reachy-2/) | type 2, wheels; without the optional base an upper body |
+| Synthia (Syntheva Robotics) | "lifelike, bipedal companions starting at just $6,490" (https://robotics.syntheva.no/) | type 4, legs; also sold from a head upward |
+
+**The three pairs:**
+- *VB1-I and VersaBot VB-1 (Lanxin):* two robots. The VB-1 is "a wheeled humanoid with a human-like upper body and no
+  legs", the VB1-I "a full-scale bipedal humanoid" (*second-hand*: aiwiki.ai, humanoid.guide; Lanxin's own pages not
+  found). Both stay; the VB-1's form becomes wheels.
+- *Walker Tienkung (UBTECH) and Tien Kung 2.0 (X-Humanoid):* not shown to be one robot. UBTECH and the Beijing Humanoid
+  Robot Innovation Center launched the "Tiangong Walker" research robot together, RMB 299,000 (*second-hand*: TechNode
+  2025-03-13, heise); X-Humanoid's page gives no details of a 2.0 (https://www.x-humanoid.com/detail/jstg.html). Same
+  centre, same height (170 cm), both research; the masses differ (55 kg against the catalogue's estimate of ~70–90
+  kg). Proposed: both stay until a source says they are the same; Matthias decides.
+- *YMBot D and D4 (Yunmu):* two products, on two product pages of the maker (*second-hand*: a search summary; the
+  pages, ymbot.com/detail/4 and /detail/7, open only after a login, not attempted). Both stay.
+
+**The register after these proposals** (recounted in Claude's scratch folder, as V60): 321 robots with a type, 136 of
+them with two; 18 not assigned (an upper body or arms only); none unclear. In each type, a robot with two types counted
+in both: type 1: 32; type 2: 96; type 3: 179; type 4: 135; type 5: 11; type 6: 4. Not yet counted: the four robots
+the workbook names that the catalogue lacks (Fourier N1, Norinco Fuxi, Unitree H1, UBTECH Walker S), and PR-OMNI if
+it is added.
+
+### E4.11 Five robots the catalogue lacks, added (2026-10-28). Decided, not entered
+
+**Decided, 2026-10-28:** "They hold", on the five proposals below.
+
+Matthias: "Yes, add them" ("add Fourier N1, Norinco Fuxi, Unitree H1, UBTECH Walker S and Perceptyne PR-OMNI, each
+read from its maker or source, with a proposed type"). Numbered on from the catalogue's 349. Read first-hand in the
+browser unless marked.
+
+| # | Robot (maker) | What the maker or source says | The workbook | Types | Form | Reason | For Matthias |
+|---|---|---|---|---|---|---|---|
+| 350 | N1 (Fourier, CN) | "1.3 m", "38 kg", 23 joints, open source (https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/Fouriern1/N1_Introduction/, through a search summary; its model file read for type 1, E2.8e) | qualifying in type 1 (1.25 m, 32 kg, 28 DoF, [S14]) | 1 | legs | R1, and R4: an open-source developer robot | |
+| 351 | Fuxi (NORINCO, CN) | "special-purpose humanoid robot, which can conduct reconnaissance, patrolling and operations in hazardous areas", "sentry duties", teleoperated by "external avatar", "around 90 kilograms" (DefenseMirror, 2026-08-19, the workbook's [S33]: https://defensemirror.com/news/41857/China___s_NORINCO_Unveils____Fuxi____Humanoid_Battlefield_Robot) | provisionally qualifying in type 6 (1.80 m, 90 kg) | 6 | not stated ("full-size humanoid") | R1; defence and security alone | |
+| 352 | H1 (Unitree, CN) | "Full-size universal humanoid robot", "Height about 180CM", "Weight about 47kg", "Moving speed of 3.3m/s"; "the first full-size general-purpose humanoid robot that can run in China" (https://www.unitree.com/h1) | excluded from type 2; borderline in type 5 ("specs not supplied") | 2, 5 | legs | its maker: general purpose (type 2); the workbook's type 5, its speed above type 5's ">2.5 m/s" | the workbook excluded it from type 2, by its 47 kg; type limits no longer exclude (decided 2026-10-28) |
+| 353 | Walker S (UBTECH, CN) | "our new industrial humanoid robot", "synchronized operations on the factory assembly line", "a height of 1.7 meters", "41 servo joints", "walk stably on mobile production lines" (https://www.ubtrobot.com/en/humanoid/products/walker-s) | only in a source's title ([S51], "UBTECH Walker S / S2") | 3 | legs | factory assembly lines | the maker also lists a "Walker S Lite", not in the catalogue |
+| 354 | PR-OMNI (Perceptyne, IN) | "The future of Industrial Robotics", "5'2"", "120 kg", "4 Wheel holonomic drive", "Dual arms, 7 DOF each", head 2 DOF (https://www.perceptyne.com/product/omni) | not named | 3 | wheels | industrial work | |
+
+**The register with these five** (recounted in Claude's scratch folder, VERIFICATION.md V60): 326 robots with a type,
+137 of them with two; 18 not assigned. In each type, a robot with two types counted in both: type 1: 33; type 2: 97;
+type 3: 181; type 4: 135; type 5: 12; type 6: 5.
+
+## E3. Robot type 2 taken apart: the robots and their sources, 2026-10-28. Nothing entered
+
+Matthias: "Yes, start robot type 2: find the robots inside its limits and their sources, and show me the sources table
+before anything is entered." **The workbook's type 2** (sheet Taxonomy, row 3): "Full-Scale General-Purpose / AI
+Research", "Height: 1.60–1.85 m (indicative 1.75–1.80 m)", "Mass: 50–80 kg" (not marked "defining", as type 1's
+are), anchor the Unitree H2 (1.82 m, 70.0 kg, 31 chassis DoF); "Qualifying: Unitree H2/H2 Plus, Tesla Optimus Gen 3,
+Figure 03. Borderline (industrial overlap): Apptronik Apollo 2. Excluded: Unitree H1, BD Atlas." Its parts list
+(rows 24 to 37) is labelled Estimate throughout.
+
+**The robots, and what each has** (read myself, 2026-10-28, unless said):
+
+| Robot | The maker's height and mass | Model file (the maker's) | Parts-level source | In the workbook |
+|---|---|---|---|---|
+| Unitree H2 | "1820 x 456 x 218mm", "About 70kg" with battery; 31 joints; legs "360N·m", arms "120N.m"; "15Ah(0.972KWh)", "Maximum Voltage: 75.6 V"; "Local air cooling"; "Aircraft-Grade Aluminum + Titanium Alloy + High-Strength Engineering Plastics"; Intel Core i5 and i7; binocular camera, microphone array, speaker (https://www.unitree.com/h2) | `H2.urdf` (https://github.com/unitreerobotics/unitree_ros, robots/h2_description): 31 joints, links 75.59 kg; hips and knees 360 N·m, ankles 19 and 66.88, waist 120 / 180 / 180, head 50, shoulders 130 / 60 / 60, elbow 60, wrist 60 / 10 / 10 N·m | none found (no teardown, no BOM; Chinese press only) | anchor, qualifying |
+| Unitree H2 Plus | as the H2, with dexterous hands | `H2_Plus.urdf`: 75 joints, links 77.24 kg | none | qualifying |
+| Unitree H1-2 | "Height about 178CM", "About 70kg"; 27 joints; knee "About 360N.m", hip and waist "About 220N.m"; "15Ah(0.864KWh)" (https://www.unitree.com/h1) | `h1_2.urdf`: links 67.37 kg | none | not named (the H1, 47 kg, excluded) |
+| Fourier GR-2 | "1750 mm × 552 mm × 275 mm", "≈63 kg", "铝合金+工程塑料"; 29 body joints (legs 6 + 6, waist 1, head 2, arms 7 + 7) and hands of 6 joints each (12 optional); torque limits hip pitch and knee 366.05, hip roll 95.47, hip yaw and ankle pitch 54.33, ankle roll 29.84, waist and shoulder pitch and roll 74.45, shoulder yaw and elbow 42.75, wrists and head 17.33 N·m, peak "436 N·m"; battery "≈950 Wh", "≤9 kg", 39.6 V; Intel Core i7 (14 cores) and an 8-core ARM perception board; binocular camera, 6-axis IMU, microphone, speaker; dual encoders (https://support-old.fftai.com/docs/GR-X-Humanoid-Robot/GR2/GR-2_Introduction/) | `GR2T2V2.urdf` (https://github.com/FFTAI/fourier_lab, models/gr2t2v2): links 62.73 kg; the same torque limits | none | not named |
+| Fourier GR-1 | "1650X524X325mm", "≈52kg", "铝合金+工程塑料"; "总执行器数量 44/34", 32 FSA, "最大关节扭矩 230N.m"; i7-13700H; RealSense depth camera, IMU; battery "483Wh", 40 V; in the torso a power management module, a switch board, the motion controller (https://support-old.fftai.com/docs/GR-X-Humanoid-Robot/GR1/GR-1_Introduction/) | `GR1T2.urdf` (fourier_lab, models/gr1t2): links 54.53 kg; only the legs' 12 joints actuated in the file | none | not named |
+| Figure 03 | "5'8"" (1.73 m), "61KG", payload "20KG" (https://www.figure.ai/figure) | none | none | qualifying |
+| Tesla Optimus Gen 3 | no maker's page found; the workbook 1.73 m, 57 kg [S18, S48]; AI Day 2022 (second-hand): 73 kg, actuators 20 / 110 / 180 N·m rotary and 500 / 3,900 / 8,000 N linear, no masses | none | none (broker BOMs of cost, not mass) | qualifying |
+| Apptronik Apollo 2 | the maker's page answered 404; the workbook 1.73 m, 73 kg | none | none | borderline |
+
+**Searched, not found:** a teardown or a parts list of any type-2 robot (English and Chinese); per-actuator masses of
+Optimus. The G1's weighed joint (type 1) is the only joint taken apart part by part.
+
+**What this means, for Matthias to decide:**
+1. *Which robots are type 2.* The workbook names the H2 (and H2 Plus), Optimus Gen 3 and Figure 03, Apollo 2
+   borderline. Inside its limits too, not named there: the H1-2, the GR-2 and the GR-1, each with the maker's model
+   file. The AgiBot A2 (type 4's anchor) may lie inside type 2's limits as well: the types overlap in size, and the
+   workbook separates them by use.
+2. *Which robots can be taken apart.* With a maker's model file (joints, torques, link masses), as the N1 was: the H2,
+   H2 Plus, H1-2, GR-2, GR-1. With specifications only, no joints and no parts: Optimus, Figure 03, Apollo 2.
+3. *The joints' masses.* The fit on AgiBot's actuators (E2.8e) reaches 200 N·m; type 2's hips and knees are 360 N·m,
+   beyond it.
+
+**Decided, 2026-10-28** (point 1 and 2): "Those with model files": type 2 is informed by the Unitree H2, H2 Plus,
+H1-2 and the Fourier GR-2 and GR-1; Optimus Gen 3, Figure 03 and Apollo 2 stay out, having specifications only (no
+joints, no parts), and this is said wherever type 2's results are shown.
 
 ### What was asked
 

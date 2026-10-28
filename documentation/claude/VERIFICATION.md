@@ -5,6 +5,27 @@ by Claude, newest first.
 
 ## 2026-10-28
 
+### V60. The register's counts by type, computed from the proposal tables (EVIDENCE.md E4.1 to E4.9)
+
+- **What:** the number of robots in each type, after robots listed twice were taken out, robots not assigned and
+  unclear ones left aside, and the rule for two types applied (E4.6).
+- **How:** a script in Claude's scratch folder (`apply_two_types.py`, then a combined count) reads the Types column of
+  every proposal table in EVIDENCE.md, applies the changes listed in E4.6 to robots 1 to 250, takes out the ten
+  entries listed twice and the rows without a type, and counts. The rows of batches 1 and 2 that still show a type for
+  five robots later not assigned or unclear (ALLEX, Axol, Ambidex, Astra, Bimanual) are taken out by number. Each
+  batch's own count was checked against its table the same way (50, 50, 50, 50, 50, 50 and 49 rows).
+- **Result:** 349 entries; 10 listed twice; 10 not assigned; 11 unclear; 318 robots with a type, 136 of them with two.
+  In each type, a robot with two types counted in both: 1: 32; 2: 95; 3: 178; 4: 134; 5: 11; 6: 4. By the first type
+  only: 1: 27; 2: 68; 3: 125; 4: 89; 5: 6; 6: 3.
+- **Not covered:** the types themselves are Claude's proposals from the catalogue's second-hand text, not checked
+  against the makers for most robots; three pairs may be one robot each (E4.9) and would lower the count to 315; four
+  robots the workbook names are not in the catalogue and not counted.
+- **Recount after the refinement proposals** (EVIDENCE.md E4.10; HELIOS, Reachy 2 and Synthia given a type, eight
+  more not assigned): 321 robots with a type, 321 different numbers (none counted twice), 136 with two types; 1: 32;
+  2: 96; 3: 179; 4: 135; 5: 11; 6: 4.
+- **Recount with the five robots added** (EVIDENCE.md E4.11; N1, Fuxi, H1, Walker S, PR-OMNI, numbered 350 to 354):
+  326 robots with a type, 326 different numbers, 137 with two types; 1: 33; 2: 97; 3: 181; 4: 135; 5: 12; 6: 5.
+
 ### V59. The magnets' grade by each joint's heat: in 01, the builder and 04
 
 - **What:** on Matthias's "Accept as proposed" (EVIDENCE.md E2.11): the sheet Joints' base grade class and scenarios
@@ -34,6 +55,11 @@ by Claude, newest first.
   4.3 g. Copper, Nd + Pr unchanged. The pages looked at; the new footnote fits.
 - **Not covered:** the grade probabilities are estimates (no maker states a joint's grade, E2.11); the real run is
   Matthias's.
+- **Matthias's runs, read back** (after the commit `5d2c6b2`): the builder at 12:53:19, 04 at 12:53:40 to 12:53:46
+  (code of 12:45 to 12:48), 200,000 draws (robots 0.334 / 0.333 / 0.333). **All 200 tests pass.** The classes drawn
+  at the accepted shares (knees SH 0.302 / UH 0.498 / EH 0.200, the others likewise); 30 remainders, none below zero in
+  any draw; dysprosium in one robot median 63 g, mean 67 g, 95 % 29 to 127 g; copper median 2.21 kg, Nd 287 g, Pr
+  54 g, gold 57 mg, as in the sandbox; the seven pages written.
 
 ### V58. The X1's and N1's joints weigh their stated mass: the joint's structure the remainder, in 04
 
