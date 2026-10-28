@@ -34,7 +34,7 @@ Before drawing, every check 02 makes (01's checks of the workbook, the shared li
 checks 18 to 20 of the data file, and its own (`check_parts`): every joint, part, board and sensor goes to a kind of
 the figures, and every part is of one material, of shares, or computed in a way this stage knows. Any fault stops it
 before anything is written. After drawing, it reports the share of draws where a remainder (a robot's frame, its
-battery housing) falls below zero; nothing is cut.
+battery housing, a joint's structure) falls below zero; nothing is cut.
 
 HOW IT DRAWS (N = `parts.draws` times; every triangle on the data file's min, mode and max; counts fixed)
 -------------------------------------------------------------------------------------------------------
@@ -47,10 +47,14 @@ HOW IT DRAWS (N = `parts.draws` times; every triangle on the data file's min, mo
   - The joints: each component of the G1's joint (sheet JointParts) drawn once in each draw for each joint size and
     shared by all the joints of that size (one design); the large joint's the small one's grams times its factor. The
     X1's and N1's joints: their module mass drawn for each joint kind, their inside the G1's of their size times the
-    module mass over the G1 joint's mass at its modes (a fixed number, not the draw's own sum: nothing normalised).
+    module mass over the G1 joint's mass at its modes (a fixed number, not the draw's own sum: nothing normalised),
+    and the joint's structure (housing, end caps, output flange, small bearings) the explicit remainder, so that the
+    joint weighs its drawn module mass (Matthias, 2026-10-28, "Yes, build it"; VERIFICATION.md V57).
   - A component or part of shares (sheet Shares): each share a triangle, the remainder 1 minus the others (02's
     `shares_drawn`). Elements: aluminium and plastics by type 1's recipes, the NMC cells by theirs with the energy per
-    kg drawn (02's `RecipeDraws`); copper is copper; the magnets by their joint's grade class (sheet Joints, base case);
+    kg drawn (02's `RecipeDraws`); copper is copper; the magnets by the grade class drawn for their joint's heat group
+    (sheet MagnetGrades: Matthias, 2026-10-28, "Heat has to matter", "Accept as proposed"), one draw of heat deciding
+    for every joint how hot the robot is built for (the classes tied within a draw);
     boards: copper their mass times the copper share, gold, silver, palladium, tin and nickel their area times the car
     board category's mg per cm2, tantalum their mass times the data centres' share; sensors: their car sensor elements
     times their units. Steel, titanium and the mixed parts have no recipe: their kilograms are drawn, not their
@@ -68,7 +72,8 @@ every file, each with its columns, one name per line, in the .txt of the same na
   parts.npy       every joint kind, part, board and sensor of every robot (0 in the draws of the other robots)
   materials.npy   every material in every kind of part
   elements.npy    every element in every kind of part
-  summary.csv     per element and per kind of part: mean, median, 2.5 % and 97.5 %; the remainders below zero
+  summary.csv     per element and per kind of part: mean, median, 2.5 % and 97.5 %; the remainders below zero;
+                  the grade classes drawn for each heat group, as shares of the draws
 
 And into `output.parts_figures_dir` (`figures/parts_taken_apart/`; not in git) the two figures Matthias approved, each
 on pages of a screen's shape (16 × 9 inches, text 14 points and up): `robot_type_1_elements_1.png` and `_2.png` (one
@@ -166,13 +171,17 @@ COMPUTED = FROM_JOINTS + (FROM_SENSORS, PACK, CELLS, HOUSING, CABLES, FRAME)
 
 # The JointParts component whose material is the joint's driver board.
 DRIVER_BOARD = 'Driver board'
+# The joint's structure: the JointParts components that are the explicit remainder of a joint whose module mass is
+# stated (the X1's, the N1's), split among them in the G1's weighed proportions at their modes. Aluminium and steel,
+# no copper or magnets; the housing alone was too small (below zero in 5.8 % of the large joints' draws, V57).
+STRUCTURE = ('Housing', 'Two end caps', 'Output flange', 'Two small bearings')
 # The recipes of type 1's aluminium and plastics: those its workbook rows of these families follow (sheet Rows of the
 # element recipes); and the recipe of the battery cells (the sheet Parts: "element_recipes.xlsx NMC cylindrical").
 RECIPE_FAMILY = {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering polymers'}
 CELL_RECIPE = 'NMC cylindrical'
 COPPER, MAGNETS, CELL_MATERIAL, ELECTRONICS = 'Copper', 'Magnets (NdFeB)', 'Battery materials', 'Electronics'
-# The NdFeB grade classes for 150 °C and above (RAWCLICVehicleTractionMotor's sheet PermanentMagnetNdFeB): the hot
-# joints, ringed red in the overview.
+# The NdFeB grade classes for 150 °C and above (RAWCLICVehicleTractionMotor's sheet PermanentMagnetNdFeB): a joint
+# whose heat group draws one of them in most draws is ringed red in the overview.
 HOT_CLASSES = {'SH', 'UH', 'EH', 'AH'}
 
 # The quantities of the sheet Constants this stage uses, as the sheet writes them.
@@ -293,8 +302,9 @@ def check_parts(inputs: Inputs) -> list:
         if p.computed and not p.computed.startswith(COMPUTED):
             faults.append(Fault(on + 'Parts', p.row, f"{p.robot}, {p.name}: 04 does not know how to compute "
                                                      f"'{p.computed}'."))
-    if DRIVER_BOARD not in {c.name for c in apart.joint_parts}:
-        faults.append(Fault(on + 'JointParts', 0, f"no component '{DRIVER_BOARD}'."))
+    for needed in (DRIVER_BOARD, *STRUCTURE):
+        if needed not in {c.name for c in apart.joint_parts}:
+            faults.append(Fault(on + 'JointParts', 0, f"no component '{needed}'."))
     rows = {(r.robot, r.family, r.shared): r.recipe for r in inputs.base.recipes.rows or []}
     for shared, family in RECIPE_FAMILY.items():
         if (TYPE, family, shared) not in rows:
@@ -315,8 +325,16 @@ def all_faults(inputs: Inputs, params: Params) -> list:
 
 
 def grade_classes(inputs: Inputs) -> list:
-    """The NdFeB grade classes of the joints' magnets, base case (answer C)."""
-    return sorted({j.magnet_class for j in inputs.apart.joints})
+    """The NdFeB grade classes a heat group can draw (sheet MagnetGrades), in the order of the heat they stand."""
+    drawn = {g.klass for g in inputs.apart.grades if (g.probability or 0) > 0}
+    return [k for k in schemas.MAGNET_CLASSES if k in drawn]
+
+
+def group_classes(apart, group: str) -> list:
+    """A heat group's grade classes and their probabilities, in the order of the heat they stand."""
+    order = list(schemas.MAGNET_CLASSES)
+    return sorted(((g.klass, g.probability) for g in apart.grades if g.group == group),
+                  key=lambda c: order.index(c[0]))
 
 
 def magnet_fractions(params: Params, classes: list, n: int) -> dict:
@@ -354,10 +372,13 @@ class Draws:
     varied: np.ndarray    # kg: its mass varied within type 1's limits
     parts: tuple          # (columns '<robot>: <part>', N × columns): kg of all units of each row of each robot
     remainders: list      # the columns of `parts` that are remainders (frames, battery housings)
+    structures: dict      # '<robot>: <joint> structure' -> kg of one joint's structure, a remainder (0 elsewhere)
     materials: tuple      # (columns (kind, material), N × columns): kg
     elements: dict        # (kind, element) -> kg in each draw
     estimated: dict       # (kind, element) -> the part of those kg resting on masses labelled E (TRACKED elements)
-    hot: dict             # kind of joint -> True where its magnets are graded for 150 °C or more
+    hot: dict             # kind of joint -> True where its magnets are for 150 °C or more in most draws
+    heat: np.ndarray      # the draw of heat, 0 to 1, that decides every heat group's grade class (tied)
+    grades: dict          # heat group -> the grade class drawn in each draw
 
 
 class Shared:
@@ -377,6 +398,12 @@ class Shared:
             self.at_mode['small'] += c.grams / 1000 * c.spread[1]
             self.at_mode['large'] += c.grams / 1000 * c.factor[1]
         self.material = {c.name: c.material for c in apart.joint_parts}
+        # The structure's components' shares of the structure, for each size: the G1's grams at their modes.
+        structure = [c for c in apart.joint_parts if c.name in STRUCTURE]
+        self.structure_share = {}
+        for size, multiplier in (('small', lambda c: c.spread[1]), ('large', lambda c: c.factor[1])):
+            total = sum(c.grams * multiplier(c) for c in structure)
+            self.structure_share[size] = {c.name: c.grams * multiplier(c) / total for c in structure}
         # The shares of every component or part that has them: name -> [(material, share in each draw)].
         groups: dict = {}
         for s in apart.shares:
@@ -403,6 +430,24 @@ class Shared:
                        for shared, family in RECIPE_FAMILY.items()}
         self.recipe[COPPER] = {'Cu': np.ones(n)}
         self.cells = recipes.elements(CELL_RECIPE, self.wh_per_kg / settings.nmc_wh_per_kg_mode)
+        # The magnets by heat (sheet MagnetGrades): one draw of heat, from 0 to 1, decides how hot the robot is built
+        # for; each heat group takes the grade class at that point of its cumulative probabilities (the classes tied
+        # within a draw, so that the hot cases do not average out), and its magnets the element fractions of that class
+        # in that draw (a discrete state, never blended).
+        self.heat = rng.random(n)
+        self.grade, self.magnet = {}, {}
+        for group in dict.fromkeys(g.group for g in apart.grades):
+            classes = group_classes(apart, group)
+            at = np.minimum(np.searchsorted(np.cumsum([p for _, p in classes]), self.heat, side='right'),
+                            len(classes) - 1)
+            self.grade[group] = np.array([k for k, _ in classes])[at]
+            names = magnets[classes[0][0]][0]
+            fractions = np.zeros((n, len(names)))
+            for k, (klass, _) in enumerate(classes):
+                if magnets[klass][0] != names:
+                    raise ValueError(f'the magnets of {klass} name other elements than those of {classes[0][0]}.')
+                fractions[at == k] = magnets[klass][1][at == k]
+            self.magnet[group] = (names, fractions)
         # The driver board of each joint size: its area (cm2) in the base robot (the G1): the small joint's from its
         # row of the sheet Boards, the large joint's the small one's times the same factor as its mass.
         base = base_robot(apart)
@@ -422,6 +467,7 @@ class Robot:
         self.materials: dict = {}   # (kind, material) -> kg
         self.elements: dict = {}    # (kind, element) -> kg
         self.estimated: dict = {}   # (kind, element) -> kg resting on masses labelled E
+        self.structures: dict = {}  # '<robot>: <joint> structure' -> kg of one joint's structure
 
     def of(self, values: np.ndarray) -> np.ndarray:
         """This robot's rows of draws shared by all robots."""
@@ -433,13 +479,14 @@ class Robot:
             self.estimated[(kind, element)] = self.estimated.get((kind, element), 0) + kg
 
     def material(self, part: str, kind: str, material: str, kg: np.ndarray, estimate: bool,
-                 magnet_class: str = '') -> None:
+                 heat_group: str = '') -> None:
         """kg of one material of a part in a kind, and the elements it holds: by its recipe, as copper, or as magnets
-        of `magnet_class`. Electronics are added by board() and sensor(); steel, titanium and mixed parts have none."""
+        of the grade class drawn for `heat_group`. Electronics are added by board() and sensor(); steel, titanium and
+        mixed parts have none."""
         self.parts[part] = self.parts.get(part, 0) + kg
         self.materials[(kind, material)] = self.materials.get((kind, material), 0) + kg
         if material == MAGNETS:
-            names, drawn = self.shared.magnets[magnet_class]
+            names, drawn = self.shared.magnet[heat_group]
             for k, element in enumerate(names):
                 self.element(kind, element, kg * self.of(drawn[:, k]), estimate)
         elif material in self.shared.recipe:
@@ -447,13 +494,13 @@ class Robot:
                 self.element(kind, element, kg * self.of(share), estimate)
 
     def piece(self, part: str, kind: str, item: str, material: str, kg: np.ndarray, estimate: bool,
-              magnet_class: str = '') -> None:
+              heat_group: str = '') -> None:
         """A part or component of one material, or of the shares of the sheet Shares."""
         if material:
-            self.material(part, kind, material, kg, estimate, magnet_class)
+            self.material(part, kind, material, kg, estimate, heat_group)
         else:
             for shared, share in self.shared.shares[item]:
-                self.material(part, kind, shared, kg * self.of(share), estimate, magnet_class)
+                self.material(part, kind, shared, kg * self.of(share), estimate, heat_group)
 
     def board(self, kind: str, category: str, kg: np.ndarray, area: np.ndarray, estimate: bool) -> None:
         """The elements of boards of `kg` and `area` (cm2): copper their mass times the copper share, the metals of
@@ -496,7 +543,7 @@ def draw(inputs: Inputs, params: Params, magnets: dict) -> Draws:
         r.piece(f'{name}: {frame.name}', KIND_OF[frame.kind], frame.name, frame.material, rest,
                 frame.label.startswith('E'))
         done.append(r)
-    return assemble(n, names, robot, own, varied, done, apart)
+    return assemble(n, names, robot, own, varied, done, apart, shared)
 
 
 def draw_robot(r: Robot, inputs: Inputs, constants: dict, rng: np.random.Generator) -> None:
@@ -507,25 +554,32 @@ def draw_robot(r: Robot, inputs: Inputs, constants: dict, rng: np.random.Generat
     in_robot = sum(j.count for j in joints)
 
     # The joints, joint kind by joint kind: the components of the G1's joint of their size, times the X1's or N1's
-    # module mass over the G1 joint's at its modes; times the joints of the kind and the mass factor (joints whole).
+    # module mass over the G1 joint's at its modes, the structure their remainder; times the joints of the kind and the
+    # mass factor (joints whole).
     drivers = {('small' if 'small' in b.name else 'large'): b for b in apart.boards
                if b.robot == name and b.kind in IN_THE_JOINTS}
     encoders = [p for p in apart.sensors if p.robot == name and p.kind in IN_THE_JOINTS]
     for j in joints:
         kind = JOINT_KIND[j.name.split()[0].lower()]
         estimate = label.get(f'Joint module, {j.module}', 'E').startswith('E')
-        scale = np.ones(n) if None in j.module_mass else triangle(rng, *j.module_mass, n) / s.at_mode[j.module]
-        times = j.count * scale * r.f
+        stated = None if None in j.module_mass else triangle(rng, *j.module_mass, n)
+        scale = np.ones(n) if stated is None else stated / s.at_mode[j.module]
+        one = {component: r.of(kg) * scale for component, kg in s.joint[j.module].items()}   # one joint, kg
+        if stated is not None:
+            rest = stated - sum(kg for component, kg in one.items() if component not in STRUCTURE)
+            one.update({component: rest * share for component, share in s.structure_share[j.module].items()})
+            r.structures[f'{name}: {j.name} structure'] = rest
+        times = j.count * r.f
         part = f'{name}: {j.name} ({j.count} joints)'
-        for component, kg in s.joint[j.module].items():
-            kg_here = r.of(kg) * times
+        for component, kg_one in one.items():
+            kg_here = kg_one * times
             material = s.material[component]
             if component == DRIVER_BOARD:
                 r.material(part, kind, ELECTRONICS, kg_here, estimate)
-                area = r.of(s.board_area[j.module]) * times
+                area = r.of(s.board_area[j.module]) * scale * times
                 r.board(kind, drivers[j.module].category, kg_here, area, estimate)
             else:
-                r.piece(part, kind, component, material, kg_here, estimate, j.magnet_class)
+                r.piece(part, kind, component, material, kg_here, estimate, j.heat_group)
         for e in encoders:   # their elements only: their mass is inside the joint's components
             units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
             r.sensor(kind, units, e.count / in_robot * j.count * r.f, e.label.startswith('E'))
@@ -585,7 +639,7 @@ def draw_robot(r: Robot, inputs: Inputs, constants: dict, rng: np.random.Generat
 
 
 def assemble(n: int, names: list, robot: np.ndarray, own: np.ndarray, varied: np.ndarray, done: list,
-             apart) -> Draws:
+             apart, shared: Shared) -> Draws:
     """The robots' draws put together into the N draws, in the order the data file names things."""
     def put(key, store, r):
         values = np.zeros(n)
@@ -595,6 +649,7 @@ def assemble(n: int, names: list, robot: np.ndarray, own: np.ndarray, varied: np
     part_columns = [c for r in done for c in r.parts]
     parts = np.column_stack([put(c, r.parts, r) for r in done for c in r.parts])
     remainders = [f'{p.robot}: {p.name}' for p in apart.parts if p.computed.startswith((FRAME, HOUSING))]
+    structures = {c: put(c, r.structures, r) for r in done for c in r.structures}
     material_keys = sorted({k for r in done for k in r.materials}, key=lambda k: (list(KINDS).index(k[0]), k[1]))
     materials = np.column_stack([sum((put(k, r.materials, r) for r in done if k in r.materials), np.zeros(n))
                                  for k in material_keys])
@@ -605,9 +660,10 @@ def assemble(n: int, names: list, robot: np.ndarray, own: np.ndarray, varied: np
     hot = {}
     for j in apart.joints:
         kind = JOINT_KIND[j.name.split()[0].lower()]
-        hot[kind] = hot.get(kind, False) or j.magnet_class in HOT_CLASSES
-    return Draws(n, names, robot, own, varied, (part_columns, parts), remainders, (material_keys, materials),
-                 elements, estimated, hot)
+        hot_share = sum(p for klass, p in group_classes(apart, j.heat_group) if klass in HOT_CLASSES)
+        hot[kind] = hot.get(kind, False) or hot_share > 0.5
+    return Draws(n, names, robot, own, varied, (part_columns, parts), remainders, structures,
+                 (material_keys, materials), elements, estimated, hot, shared.heat, shared.grade)
 
 
 def kind_kg(d: Draws, kind: str) -> np.ndarray:
@@ -617,12 +673,16 @@ def kind_kg(d: Draws, kind: str) -> np.ndarray:
 
 
 def below_zero(d: Draws) -> dict:
-    """The share of each robot's draws where one of its remainders falls below zero: '<robot>: <part>' -> share."""
+    """The share of each robot's draws where one of its remainders (a frame, a battery housing, a joint's structure)
+    falls below zero: '<robot>: <part>' -> share."""
     columns, draws = d.parts
     out = {}
     for column in d.remainders:
         k = d.robots.index(column.split(': ')[0])
         out[column] = float((draws[d.robot == k, columns.index(column)] < 0).mean())
+    for column, values in d.structures.items():
+        k = d.robots.index(column.split(': ')[0])
+        out[column] = float((values[d.robot == k] < 0).mean())
     return out
 
 
@@ -673,6 +733,10 @@ def write(d: Draws, folder: str) -> None:
         out.writerow([])
         out.writerow(['Remainder', 'Share of its robot\'s draws below zero'])
         out.writerows([[column, share] for column, share in below_zero(d).items()])
+        out.writerow([])
+        out.writerow(['Heat group', 'Grade class', 'Share of the draws'])
+        out.writerows([[group, klass, float((drawn == klass).mean())] for group, drawn in d.grades.items()
+                       for klass in dict.fromkeys(drawn)])
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -838,10 +902,10 @@ def element_page(d: Draws, page: list, number: int, limits: tuple):
         'lines: 2.5th and 97.5th percentile (the 95% interval); each panel on its own scale and unit; each bar split '
         'into the weight its draws hold in each kind of part, the smaller lower; a kind of part holding the element '
         'in fewer than 2.5% of the draws is not drawn.', robots_note(d, *limits),
-        'The joints with their driver boards and encoders; dysprosium with the magnets of the hot joints (legs and '
-        'waist) for 150\u00a0°C, of the arms for 120\u00a0°C; the NdFeB magnets shown by their neodymium and '
-        'praseodymium; the battery metals and silicon not shown.'), ha='center', va='bottom', fontsize=TEXT,
-        color=MUTED)
+        'The joints with their driver boards and encoders; the magnets\' grade class (with it their dysprosium) drawn '
+        'by each joint\'s heat, the knees hottest, the arms coolest, one draw deciding for every joint; the NdFeB '
+        'magnets shown by their neodymium and praseodymium; the battery metals and silicon not shown.'), ha='center',
+        va='bottom', fontsize=TEXT, color=MUTED)
     return figure
 
 
@@ -894,8 +958,8 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
 
 def draw_schema(axes, d: Draws) -> None:
     """The robot of the overview: 01's schematic body, each joint group numbered where it sits on both sides (a red
-    ring where its magnets are graded for 150 °C or more), the other kinds lettered, a short key below; the marks are
-    those of the panels' rows."""
+    ring where its magnets are for 150 °C or more in most draws), the other kinds lettered, a short key below; the
+    marks are those of the panels' rows."""
     schemas.body_shapes(axes, 0.0, 0.0, 1.0, facecolor=SHELL, edgecolor=OUTLINE, linewidth=1.0)
     for kind, spots in SPOTS.items():
         colour = KINDS[kind][1]
@@ -910,7 +974,7 @@ def draw_schema(axes, d: Draws) -> None:
             axes.text(*at, MARKS[kind], ha='center', va='center', fontsize=TEXT, fontweight='bold', zorder=4,
                       color='white' if kind in DARK else INK)
     axes.text(-0.31, 0.09, 'Numbers: joints; letters: the\nother parts, as in the rows.\nRed ring: magnets for '
-              '150 °C\n(hot joints, air-cooled).', ha='left', va='top', fontsize=TEXT, color=INK, linespacing=1.3)
+              '150 °C\nor more in most draws.', ha='left', va='top', fontsize=TEXT, color=INK, linespacing=1.3)
     axes.set_xlim(-0.32, 0.32)
     axes.set_ylim(0.36, -1.02)
     axes.set_aspect('equal')

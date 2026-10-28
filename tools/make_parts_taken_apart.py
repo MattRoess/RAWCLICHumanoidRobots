@@ -68,8 +68,10 @@ ABOUT = [
     'Every range is min / mode / max. A remainder takes what the other shares or parts '
     'leave; nothing is rescaled.',
     None,
-    'Sheet Joints: the 12 joint kinds of the basic G1 (23 joints), where they sit, torque, '
-    'cooling, magnet grade.',
+    'Sheet Joints: the joint kinds of each robot (G1 12 kinds, 23 joints; X1 12, 29; N1 12, '
+    '23), where they sit, torque, module mass (X1, N1), cooling, heat group.',
+    'Sheet MagnetGrades: each heat group a distribution over the magnets\' grade classes '
+    '(H, SH, UH, EH), drawn; estimates on the order of heat (EVIDENCE.md E2.11).',
     'Sheet JointParts: the joint module part by part: the small joint as weighed (T1, '
     'slide 43), the 13 not weighed at 0.5 / 1 / 1.5 times; the large joint as the small '
     'one times a factor from size and torque.',
@@ -108,143 +110,149 @@ ROBOTS_WIDTHS = [14, 10, 6, 10, 14, 60]
 # --- Joints ---------------------------------------------------------------------------------------------------------
 # Every joint kind of every robot: where it sits, its torque, which of the G1's two joint designs its inside
 # follows (Module), its module mass (the X1's from AgiBot, the N1's from the joint-mass fit, none for the G1,
-# whose JointParts give it), its magnet grade class. The G1: EVIDENCE.md E2.8 and E2.8c; the X1 and N1: E2.8e.
+# whose JointParts give it), its heat group (sheet MagnetGrades). The G1: EVIDENCE.md E2.8 and E2.8c; the X1 and N1:
+# E2.8e; the heat groups: E2.11.
 JOINTS_HEADINGS = ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
-                   'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Magnet grade class (base)',
-                   'Magnet grade scenarios', 'Body region', 'Sources', 'Basis']
+                   'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Heat group', 'Body region', 'Sources',
+                   'Basis']
 JOINTS_ROWS = [
-    ('Unitree G1', 1, 'Hip pitch', 2, 'large', 88, None, None, None, 'two centrifugal fans per hip', 'SH', 'UH; EH',
-     'Legs', 'U3; T1 slides 11, 18, 41; T3',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 2, 'Hip roll', 2, 'large', 88, None, None, None, 'two centrifugal fans per hip', 'SH', 'UH; EH',
-     'Legs', 'U3; T1 slides 11, 18; T3',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 3, 'Hip yaw', 2, 'large', 88, None, None, None, 'two centrifugal fans per hip', 'SH', 'UH; EH',
-     'Legs', 'U3; T1 slides 11, 18; T3',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 4, 'Knee', 2, 'large', 139, None, None, None, 'copper vapour chamber into the frame', 'SH',
-     'UH; EH', 'Legs', 'U3; U1 90 (basic) and 120 N·m (EDU); T1 slides 18, 40, 42; T3k',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 5, 'Ankle pitch', 2, 'small', 35, None, None, None, 'passive', 'SH', 'UH; EH', 'Legs',
+    ('Unitree G1', 1, 'Hip pitch', 2, 'large', 88, None, None, None,
+     'passive, with air from two centrifugal fans in the hip area', 'Hips', 'Legs', 'U3; T1 slides 11, 18, 41; T3',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 2, 'Hip roll', 2, 'large', 88, None, None, None,
+     'passive, with air from two centrifugal fans in the hip area', 'Hips', 'Legs', 'U3; T1 slides 11, 18; T3',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 3, 'Hip yaw', 2, 'large', 88, None, None, None,
+     'passive, with air from two centrifugal fans in the hip area', 'Hips', 'Legs', 'U3; T1 slides 11, 18; T3',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 4, 'Knee', 2, 'large', 139, None, None, None, 'copper vapour chamber into the frame', 'Knees',
+     'Legs', 'U3; U1 90 (basic) and 120 N·m (EDU); T1 slides 18, 40, 42; T3k',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 5, 'Ankle pitch', 2, 'small', 35, None, None, None, 'passive', 'Ankles', 'Legs',
      'U3; T1 slides 11, 18, 20',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 6, 'Ankle roll', 2, 'small', 35, None, None, None, 'passive', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 6, 'Ankle roll', 2, 'small', 35, None, None, None, 'passive', 'Ankles', 'Legs',
      'U3; T1 slides 11, 18, 20',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 7, 'Waist yaw', 1, 'large', 88, None, None, None, 'centrifugal fan', 'SH', 'UH; EH', 'Torso',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 7, 'Waist yaw', 1, 'large', 88, None, None, None, 'centrifugal fan', 'Waist', 'Torso',
      'U3; T1 slides 11, 41',
-     'Hot, air-cooled: magnets for 150 °C, 180 and 200 °C as scenarios. Matthias, '
-     '2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 8, 'Shoulder pitch', 2, 'small', 25, None, None, None, 'passive', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 8, 'Shoulder pitch', 2, 'small', 25, None, None, None, 'passive', 'Shoulders', 'Arms',
      'U3; T1 slides 11, 18',
-     'Arm joint, at most 2 kg payload: magnets for 120 °C. Matthias, 2026-10-27, step 1: '
-     '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 9, 'Shoulder roll', 2, 'small', 25, None, None, None, 'passive', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 9, 'Shoulder roll', 2, 'small', 25, None, None, None, 'passive', 'Shoulders', 'Arms',
      'U3; T1 slides 11, 18',
-     'Arm joint, at most 2 kg payload: magnets for 120 °C. Matthias, 2026-10-27, step 1: '
-     '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 10, 'Shoulder yaw', 2, 'small', 25, None, None, None, 'passive', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 10, 'Shoulder yaw', 2, 'small', 25, None, None, None, 'passive', 'Shoulders', 'Arms',
      'U3; T1 slides 11, 18',
-     'Arm joint, at most 2 kg payload: magnets for 120 °C. Matthias, 2026-10-27, step 1: '
-     '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 11, 'Elbow', 2, 'small', 25, None, None, None, 'passive', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 11, 'Elbow', 2, 'small', 25, None, None, None, 'passive', 'Elbows and wrists', 'Arms',
      'U3; T1 slides 11, 18',
-     'Arm joint, at most 2 kg payload: magnets for 120 °C. Matthias, 2026-10-27, step 1: '
-     '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Unitree G1', 12, 'Wrist roll', 2, 'small', 25, None, None, None, 'passive', 'H', None, 'Arms',
-     'U3; T1 slide 11',
-     'Arm joint, at most 2 kg payload: magnets for 120 °C. Matthias, 2026-10-27, step 1: '
-     '"Accept all" (EVIDENCE.md E2.8)'),
-    ('AgiBot X1', 1, 'Hip pitch', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Unitree G1', 12, 'Wrist roll', 2, 'small', 25, None, None, None, 'passive', 'Elbows and wrists', 'Arms',
+     'U3; T1 slide 11', 'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 1, 'Hip pitch', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'Hips', 'Legs',
      'X1b R86-3 1.28 kg; X1c (150 N·m)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 2, 'Hip roll', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 2, 'Hip roll', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'Hips', 'Legs',
      'X1b R86-3 1.28 kg; X1c (150 N·m)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 3, 'Hip yaw', 2, 'large', 50, 0.77, 0.81, 0.85, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 3, 'Hip yaw', 2, 'large', 50, 0.77, 0.81, 0.85, 'not stated', 'Hips', 'Legs',
      'X1b R86-2 0.81 kg; X1c (50 N·m)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 4, 'Knee', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 4, 'Knee', 2, 'large', 150, 1.22, 1.28, 1.34, 'not stated', 'Knees', 'Legs',
      'X1b R86-3 1.28 kg; X1c (150 N·m)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 5, 'Ankle pitch', 2, 'small', 80, 0.19, 0.2, 0.21, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 5, 'Ankle pitch', 2, 'small', 80, 0.19, 0.2, 0.21, 'not stated', 'Ankles', 'Legs',
      'X1b L28 push rod 0.20 kg; X1c (80 N·m at the ankle)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 6, 'Ankle roll', 2, 'small', 80, 0.19, 0.2, 0.21, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 6, 'Ankle roll', 2, 'small', 80, 0.19, 0.2, 0.21, 'not stated', 'Ankles', 'Legs',
      'X1b L28 push rod 0.20 kg; X1c (80 N·m at the ankle)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 7, 'Waist', 3, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'SH', 'UH; EH', 'Torso',
-     'X1b R86-2 0.81 kg, 80 N·m peak; X1a "腰部连杆组件"; 9 R86-2 less 2 hips and 4 shoulders '
-     '(E2.8e)',
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('AgiBot X1', 8, 'Shoulder pitch', 2, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'H', None, 'Arms',
-     'X1b R86-2 0.81 kg, 80 N·m peak (E2.8e)', 'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('AgiBot X1', 9, 'Shoulder roll', 2, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'H', None, 'Arms',
-     'X1b R86-2 0.81 kg, 80 N·m peak (E2.8e)', 'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('AgiBot X1', 10, 'Shoulder yaw', 2, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'H', None, 'Arms',
-     'X1b R52 0.45 kg, 19 N·m peak', 'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('AgiBot X1', 11, 'Elbow', 2, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'H', None, 'Arms',
-     'X1b R52 0.45 kg, 19 N·m peak', 'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('AgiBot X1', 12, 'Wrist (yaw, pitch, roll)', 6, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'H', None, 'Arms',
-     'X1b R52 0.45 kg, 19 N·m peak', 'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('Fourier N1', 1, 'Hip pitch', 2, 'large', 90, 0.44, 0.88, 1.32, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 7, 'Waist', 3, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'Waist', 'Torso',
+     'X1b R86-2 0.81 kg, 80 N·m peak; X1a "腰部连杆组件"; 9 R86-2 less 2 hips and 4 shoulders (E2.8e)',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 8, 'Shoulder pitch', 2, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'Shoulders', 'Arms',
+     'X1b R86-2 0.81 kg, 80 N·m peak (E2.8e)',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 9, 'Shoulder roll', 2, 'large', 80, 0.77, 0.81, 0.85, 'not stated', 'Shoulders', 'Arms',
+     'X1b R86-2 0.81 kg, 80 N·m peak (E2.8e)',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 10, 'Shoulder yaw', 2, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'Shoulders', 'Arms',
+     'X1b R52 0.45 kg, 19 N·m peak',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 11, 'Elbow', 2, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'Elbows and wrists', 'Arms',
+     'X1b R52 0.45 kg, 19 N·m peak',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('AgiBot X1', 12, 'Wrist (yaw, pitch, roll)', 6, 'small', 19, 0.43, 0.45, 0.47, 'not stated', 'Elbows and wrists',
+     'Arms', 'X1b R52 0.45 kg, 19 N·m peak',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 1, 'Hip pitch', 2, 'large', 90, 0.44, 0.88, 1.32, 'not stated', 'Hips', 'Legs',
      "N1a (90 N·m; N1b 95); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 2, 'Hip roll', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 2, 'Hip roll', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'Hips', 'Legs',
      "N1a (54 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 3, 'Hip yaw', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 3, 'Hip yaw', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'Hips', 'Legs',
      "N1a (54 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 4, 'Knee', 2, 'large', 90, 0.44, 0.88, 1.32, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 4, 'Knee', 2, 'large', 90, 0.44, 0.88, 1.32, 'not stated', 'Knees', 'Legs',
      "N1a (90 N·m; N1b 95); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 5, 'Ankle pitch', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 5, 'Ankle pitch', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Ankles', 'Legs',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 6, 'Ankle roll', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'SH', 'UH; EH', 'Legs',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 6, 'Ankle roll', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Ankles', 'Legs',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 7, 'Waist yaw', 1, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'SH', 'UH; EH', 'Torso',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 7, 'Waist yaw', 1, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'Waist', 'Torso',
      "N1a (54 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Hot, air-cooled (legs, waist): magnets for 150 °C, 180 and 200 °C as scenarios, as '
-     'the G1 (E2.8e).'),
-    ('Fourier N1', 8, 'Shoulder pitch', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 8, 'Shoulder pitch', 2, 'large', 54, 0.35, 0.7, 1.05, 'not stated', 'Shoulders', 'Arms',
      "N1a (54 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('Fourier N1', 9, 'Shoulder roll', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 9, 'Shoulder roll', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Shoulders', 'Arms',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('Fourier N1', 10, 'Shoulder yaw', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 10, 'Shoulder yaw', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Shoulders', 'Arms',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('Fourier N1', 11, 'Elbow', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 11, 'Elbow', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Elbows and wrists', 'Arms',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
-    ('Fourier N1', 12, 'Wrist yaw', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'H', None, 'Arms',
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
+    ('Fourier N1', 12, 'Wrist yaw', 2, 'small', 30, 0.27, 0.54, 0.81, 'not stated', 'Elbows and wrists', 'Arms',
      "N1a (30 N·m); the joint-mass fit on AgiBot's actuators, ± 50 % (E2.8e)",
-     'Arm joint: magnets for 120 °C, as the G1 (E2.8e).'),
+     'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'),
 ]
-JOINTS_WIDTHS = [12, 8, 22, 10, 9, 10, 10, 9, 9, 30, 12, 12, 11, 50, 90]
+JOINTS_WIDTHS = [12, 8, 22, 10, 9, 10, 10, 9, 9, 30, 18, 11, 50, 70]
+
+# --- MagnetGrades ---------------------------------------------------------------------------------------------------
+# The magnets' grade classes by heat group: each group a distribution over grade classes, drawn in each draw, tied
+# within a draw (Matthias, 2026-10-28: "Heat has to matter and so the distribution will be different depending on the
+# joint", "Accept as proposed"). Every joint judged as passively cooled ("Fans is not a sustainable solution"). No
+# maker states the grade of a joint motor: the probabilities are estimates on the order of heat the sources give
+# (EVIDENCE.md E2.11).
+MAGNETGRADES_HEADINGS = ['Heat group', 'Grade class', 'Probability', 'Label', 'Basis']
+MAGNETGRADES_ROWS = [
+    ('Knees', 'SH', 0.3, 'E',
+     'E2.11: the largest load, passive, derating to protect the magnets (OFweek; T1 slide 42; T3)'),
+    ('Knees', 'UH', 0.5, 'E',
+     'E2.11: the largest load, passive, derating to protect the magnets (OFweek; T1 slide 42; T3)'),
+    ('Knees', 'EH', 0.2, 'E',
+     'E2.11: the largest load, passive, derating to protect the magnets (OFweek; T1 slide 42; T3)'),
+    ('Hips', 'SH', 0.5, 'E', 'E2.11: carry the body; passive as judged (T3, OFweek)'),
+    ('Hips', 'UH', 0.4, 'E', 'E2.11: carry the body; passive as judged (T3, OFweek)'),
+    ('Hips', 'EH', 0.1, 'E', 'E2.11: carry the body; passive as judged (T3, OFweek)'),
+    ('Waist', 'SH', 0.6, 'E', 'E2.11: moves often (OFweek); passive as judged'),
+    ('Waist', 'UH', 0.4, 'E', 'E2.11: moves often (OFweek); passive as judged'),
+    ('Ankles', 'SH', 0.6, 'E', 'E2.11: carry the robot; small joints (T1)'),
+    ('Ankles', 'UH', 0.4, 'E', 'E2.11: carry the robot; small joints (T1)'),
+    ('Shoulders', 'H', 0.5, 'E', 'E2.11: hold the arm; low load'),
+    ('Shoulders', 'SH', 0.5, 'E', 'E2.11: hold the arm; low load'),
+    ('Elbows and wrists', 'H', 0.7, 'E', 'E2.11: the lowest load'),
+    ('Elbows and wrists', 'SH', 0.3, 'E', 'E2.11: the lowest load'),
+]
+MAGNETGRADES_WIDTHS = [18, 12, 12, 7, 90]
 
 # --- JointParts -----------------------------------------------------------------------------------------------------
 # The G1's small joint part by part as China Post Securities weighed it (slide 43), the small joints not
@@ -674,6 +682,7 @@ SOURCES_WIDTHS = [12, 70, 90, 50]
 SHEETS = [
     ('Robots', ROBOTS_HEADINGS, ROBOTS_ROWS, ROBOTS_WIDTHS),
     ('Joints', JOINTS_HEADINGS, JOINTS_ROWS, JOINTS_WIDTHS),
+    ('MagnetGrades', MAGNETGRADES_HEADINGS, MAGNETGRADES_ROWS, MAGNETGRADES_WIDTHS),
     ('JointParts', JOINTPARTS_HEADINGS, JOINTPARTS_ROWS, JOINTPARTS_WIDTHS),
     ('Parts', PARTS_HEADINGS, PARTS_ROWS, PARTS_WIDTHS),
     ('Shares', SHARES_HEADINGS, SHARES_ROWS, SHARES_WIDTHS),

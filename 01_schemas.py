@@ -184,12 +184,14 @@ CHECKS_DONE = [
     'group of shares with exactly one remainder that never falls below zero; every material and body region on the '
     'shared lists; every part or component of one material, of shares, or computed; for each robot its joints adding '
     'up to its joint modules, each number once, its module masses all three or none and in order, exactly one part '
-    "taking its remainder, and its own constants there; each magnet grade class known; every sensor element of a "
-    'listed sensor; every shared constant there; the layout of one robot only refused.',
+    "taking its remainder, and its own constants there; every joint in a heat group of the sheet MagnetGrades, each "
+    'group a distribution over known grade classes, each class once, its probabilities adding up to 1, and used by a '
+    'joint; every sensor element of a listed sensor; every shared constant there; the layout of one robot only and '
+    'the old grade columns refused.',
     "Robot type 1 taken apart, against the sibling projects' files it reads where they lie: every car board category "
     'with its gold, silver, palladium, tin and nickel (RAWCLICVehicleElectronics, 04_), every car sensor type (07_), '
-    "a tantalum row (RAWCLICDataCenters, 04_), every magnet grade class (RAWCLICVehicleTractionMotor's element "
-    'workbook).',
+    "a tantalum row (RAWCLICDataCenters, 04_), every magnet grade class a heat group can draw "
+    "(RAWCLICVehicleTractionMotor's element workbook).",
     "Robot type 1 taken apart, against the sheet Taxonomy: every robot's maker height and stated mass inside its "
     "type's defining limits (on this rule the Booster T1, 1.18 m, is out of type 1).",
 ]
@@ -1455,8 +1457,13 @@ def check_material_recipes(book: Workbook, lists: SharedLists, recipes: ElementR
 APART_SHEETS = {
     'Robots': ['Robot', 'Maker', 'Type', 'Height (m)', 'Stated mass (kg)', 'Sources'],
     'Joints': ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
-               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Magnet grade class (base)',
-               'Magnet grade scenarios', 'Body region', 'Sources', 'Basis'],
+               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Heat group', 'Body region', 'Sources',
+               'Basis'],
+    # The magnets' grade classes by heat group: each group a distribution over grade classes, drawn (Matthias,
+    # 2026-10-28: "Heat has to matter and so the distribution will be different depending on the joint"; "Accept as
+    # proposed", EVIDENCE.md E2.11). It replaces the sheet Joints' base class and scenarios, whose headings now stop
+    # the reading.
+    'MagnetGrades': ['Heat group', 'Grade class', 'Probability', 'Label', 'Basis'],
     'JointParts': ['Component', 'Small joint, weighed (g)', 'Small joints not weighed: times min', 'times mode',
                    'times max', 'Material (one material only)', 'Large joint: factor min', 'factor mode', 'factor max',
                    'Why the factor', 'Label', 'Sources'],
@@ -1483,8 +1490,11 @@ APART_ROBOT_SHEETS = ('Joints', 'Parts', 'Boards', 'Sensors')
 # more than one ('W, E': a weighed part, spread over the joints not weighed by an estimate).
 APART_LABELS = {'W': 'weighed', 'S': 'from a source', 'E': 'an estimate'}
 # The NdFeB grade classes of RAWCLICVehicleTractionMotor's element workbook
-# (data/raw/10_MaterialElementDefinitions.xlsx, sheet PermanentMagnetNdFeB), from 80 °C (N) to 230 °C (AH). Whether
-# that file holds them is checked with step 4.
+# (data/raw/10_MaterialElementDefinitions.xlsx, sheet PermanentMagnetNdFeB), from 80 °C (N) to 230 °C (AH), in the
+# order of the heat they stand (04 draws a heat group's class along it). Whether that file holds them is checked with
+# step 4.
+# A heat group's probabilities may miss 1 by this much (they are written to two decimals; their sum in floating point).
+PROBABILITY_TOLERANCE = 1e-9
 MAGNET_CLASSES = ('N', 'M', 'H', 'SH', 'UH', 'EH', 'AH')
 # The numbers the stage that draws the file needs from the sheet Constants: each robot's own, and those shared by all
 # robots, given once under the robot ALL_ROBOTS.
@@ -1534,8 +1544,7 @@ class Joint:
     module: str       # 'small' or 'large': which of the G1's two joint designs its inside follows
     torque: float     # N·m, the torque limit of the maker's model file, or its stated peak
     module_mass: tuple    # kg of one joint, min, mode, max; (None, None, None) where JointParts give it (the G1)
-    magnet_class: str     # the NdFeB grade class of its magnets, the base case
-    scenarios: list       # the other grade classes drawn as scenarios
+    heat_group: str       # the heat group of the sheet MagnetGrades its magnets' grade class is drawn from
     region: str
 
 
@@ -1587,11 +1596,23 @@ class ShareRow:
 
 
 @dataclass
+class MagnetGrade:
+    """One row of the sheet MagnetGrades: a grade class of a heat group and its probability."""
+
+    row: int
+    group: str
+    klass: str
+    probability: float | None
+    label: str
+
+
+@dataclass
 class PartsTakenApart:
     """Everything 01 reads from parts_taken_apart.xlsx."""
 
     robots: dict          # robot name -> ApartRobot
     joints: list          # Joint
+    grades: list          # MagnetGrade
     joint_parts: list     # JointPart
     parts: list           # ApartPart, sheet Parts
     shares: list          # ShareRow
@@ -1624,9 +1645,10 @@ def read_parts_taken_apart(path: str) -> PartsTakenApart:
                                      mass=number(v[4]), sources=text(v[5])) for r, v in rows['Robots']}
     joints = [Joint(row=r, robot=text(v[0]), number=int(number(v[1]) or 0), name=text(v[2]),
                     count=int(number(v[3]) or 0), module=text(v[4]), torque=number(v[5]),
-                    module_mass=triple_of(v[6:9]), magnet_class=text(v[10]),
-                    scenarios=[s.strip() for s in text(v[11]).split(';') if s.strip()], region=text(v[12]))
+                    module_mass=triple_of(v[6:9]), heat_group=text(v[10]), region=text(v[11]))
               for r, v in rows['Joints']]
+    grades = [MagnetGrade(row=r, group=text(v[0]), klass=text(v[1]), probability=number(v[2]), label=text(v[3]))
+              for r, v in rows['MagnetGrades']]
     joint_parts = [JointPart(row=r, name=text(v[0]), grams=number(v[1]), spread=triple_of(v[2:5]),
                              material=text(v[5]), factor=triple_of(v[6:9]), label=text(v[10]), sources=text(v[11]))
                    for r, v in rows['JointParts']]
@@ -1643,8 +1665,8 @@ def read_parts_taken_apart(path: str) -> PartsTakenApart:
     for r, v in rows['Constants']:
         constants.setdefault(text(v[0]), {})[text(v[1])] = (r, triple_of(v[2:5]), text(v[5]), text(v[6]))
     sources = {text(v[0]): (r, text(v[1]), text(v[2])) for r, v in rows['Sources']}
-    return PartsTakenApart(robots, joints, joint_parts, parts, shares, boards, sensors, elements, constants, sources,
-                           [])
+    return PartsTakenApart(robots, joints, grades, joint_parts, parts, shares, boards, sensors, elements, constants,
+                           sources, [])
 
 
 def label_faults(on: str, row: int, what: str, label: str) -> list[Fault]:
@@ -1689,8 +1711,9 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
     its own on every sheet that is per robot; ranges in order and estimates wide enough, labels known, shares with one
     remainder that never falls below zero, every material and body region on the shared lists, every part either of
     one material, of shares, or computed; for each robot its joints matching its joint modules, each joint number once,
-    its module masses all three given or none, one part taking its remainder, and its own constants there; magnet
-    grade classes known, every sensor element of a listed sensor, every shared constant there."""
+    its module masses all three given or none, one part taking its remainder, and its own constants there; every joint
+    in a heat group whose grade classes are known, each once, their probabilities adding up to 1, every group used;
+    every sensor element of a listed sensor, every shared constant there."""
     faults = list(apart.faults)
     where = os.path.basename(params.data.parts_taken_apart) + ': '
     materials = set(lists.names.get('Material', [])) - {NOT_ALLOCATED}
@@ -1732,10 +1755,9 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
             elif not 0 < j.module_mass[0] <= j.module_mass[1] <= j.module_mass[2]:
                 faults.append(Fault(on, j.row, f'{what}: the module mass min, mode and max must be in order from 0 up: '
                                                f'{j.module_mass}.'))
-        for klass in [j.magnet_class] + j.scenarios:
-            if klass not in MAGNET_CLASSES:
-                faults.append(Fault(on, j.row, f"{what}: the magnet grade class '{klass}' is not one of "
-                                               f"{', '.join(MAGNET_CLASSES)}."))
+        if j.heat_group not in {g.group for g in apart.grades}:
+            faults.append(Fault(on, j.row, f"{what}: its heat group '{j.heat_group}' is not in the sheet "
+                                           'MagnetGrades.'))
         faults += region_faults(on, j.row, what, j.region, lists)
     for robot in apart.robots:
         modules = {p.name: p for p in apart.parts if p.robot == robot and p.name.startswith('Joint module, ')}
@@ -1746,6 +1768,29 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
                 faults.append(Fault(on, 0, f'{robot}: {joints} {size} joints in the sheet Joints, but '
                                            f"{'no' if module is None else int(module.count)} {size} joint modules in "
                                            'the sheet Parts.'))
+
+    # The magnets' grade classes by heat group: known classes, each once in its group, probabilities from 0 to 1 adding
+    # up to 1, labels known, every group used by a joint.
+    on = where + 'MagnetGrades'
+    by_group: dict = {}
+    for g in apart.grades:
+        faults += label_faults(on, g.row, f'{g.group}, {g.klass}', g.label)
+        if g.klass not in MAGNET_CLASSES:
+            faults.append(Fault(on, g.row, f"{g.group}: the magnet grade class '{g.klass}' is not one of "
+                                           f"{', '.join(MAGNET_CLASSES)}."))
+        if g.klass in {x.klass for x in by_group.get(g.group, [])}:
+            faults.append(Fault(on, g.row, f"{g.group}: the grade class '{g.klass}' is given twice."))
+        if g.probability is None or not 0 <= g.probability <= 1:
+            faults.append(Fault(on, g.row, f'{g.group}, {g.klass}: the probability must be from 0 to 1, not '
+                                           f'{g.probability}.'))
+        by_group.setdefault(g.group, []).append(g)
+    used = {j.heat_group for j in apart.joints}
+    for group, members in by_group.items():
+        total = sum(g.probability for g in members if g.probability is not None)
+        if abs(total - 1) > PROBABILITY_TOLERANCE:
+            faults.append(Fault(on, members[0].row, f'{group}: its probabilities add up to {total:g}, not to 1.'))
+        if group not in used:
+            faults.append(Fault(on, members[0].row, f"the heat group '{group}' is the heat group of no joint."))
 
     # The joint module part by part.
     on = where + 'JointParts'
@@ -1902,7 +1947,8 @@ def sibling_rows(path: str, sheet: str) -> list[dict]:
 def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
     """Whether the sibling projects' files hold what the robots of type 1 taken apart name: every car board category
     with the metals of BOARD_METALS (RAWCLICVehicleElectronics, 04_), every car sensor type (07_), a tantalum row
-    (RAWCLICDataCenters, 04_), every magnet grade class (RAWCLICVehicleTractionMotor's element workbook)."""
+    (RAWCLICDataCenters, 04_), every magnet grade class a heat group can draw (RAWCLICVehicleTractionMotor's element
+    workbook)."""
     faults, rows = [], {}
     for key, sheet in SIBLING_SHEETS.items():
         path = getattr(params.data, key)
@@ -1941,18 +1987,17 @@ def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
             faults.append(Fault('data.data_center_element_composition', 0, 'no Ta row with min, mode and max in order '
                                                                             'in its sheet BoardsAndComponents.'))
     if 'traction_motor_magnets' in rows:
-        # One fault per grade class missing, naming every joint that uses it (a class is shared by many joints).
+        # One fault per grade class a heat group can draw that is missing, naming the groups (a class is shared).
         classes = {text(r.get('TempClass')) for r in rows['traction_motor_magnets']}
         missing: dict = {}
-        for j in apart.joints:
-            for klass in [j.magnet_class] + j.scenarios:
-                if klass not in classes:
-                    missing.setdefault(klass, []).append(j)
+        for g in apart.grades:
+            if g.klass not in classes and (g.probability or 0) > 0:
+                missing.setdefault(g.klass, []).append(g)
         where = os.path.basename(params.data.traction_motor_magnets)
-        for klass, joints in missing.items():
-            used_by = ', '.join(f'{j.robot} {j.number} {j.name}' for j in joints)
-            faults.append(Fault('Joints', joints[0].row, f"the magnet grade class '{klass}' is not in {where}; used by "
-                                                         f'{used_by}.'))
+        for klass, grades in missing.items():
+            used_by = ', '.join(g.group for g in grades)
+            faults.append(Fault('MagnetGrades', grades[0].row, f"the magnet grade class '{klass}' is not in {where}; "
+                                                               f'drawn by {used_by}.'))
     return faults
 
 

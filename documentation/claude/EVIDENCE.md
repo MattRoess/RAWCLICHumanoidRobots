@@ -870,6 +870,65 @@ plus electrical steel:
 - **What the share does to the robot's copper:** the 23 stators weigh about 2.83 kg at the E2.8 modes; their copper
   is 0.65 kg at 23 %, 1.02 kg at 36 %, 1.27 kg at 45 %.
 
+### E2.11 The magnets' grade by each joint's heat: research in progress (2026-10-28)
+
+Matthias: "2. Has to be done properly. Heat has to matter and so the distribution will be different depending on the
+joint"; "Joints have no fans, just passive cooling"; "I have seen the Munrow movies. Fans is not a sustainable
+solution"; "2 fans ok" (the G1's two hip-area fans and waist fan stay as parts; for the magnets every joint is judged as
+passively cooled); "3. grad by heat". Now: one grade class per joint (sheet Joints, base case SH for legs and waist, H
+for arms; UH and EH named as scenarios but not drawn). To come: a distribution over grade classes for each kind of
+joint, from sources, shown before any number.
+
+**Read so far** (first-hand unless said):
+
+| Source | What it is | What it says | Fits? |
+|---|---|---|---|
+| Humanoid.guide, "Rare-Earth Magnets in Humanoid Joints", Humanoid Actuation Report, August 2026, https://humanoid.guide/rare-earth-magnets-humanoid-robot-joints/ | an industry report's article, no author | sintered NdFeB; "Higher temperature classes such as SH, UH and EH carry more" heavy rare earths; better heat paths let a designer "drop a temperature class – from UH to SH"; analysts: 35–79 g dysprosium per humanoid; no grade named for any robot, no joint temperatures | general; no robot of type 1 |
+| Mainrich International, "Magnet Requirements for Humanoid Robot Actuators", 2026-01-05, updated 2026-09-12, https://www.mainrichinternational.com/resources/articles/magnets-for-humanoid-robot-actuators-complete-guide | a magnet seller's guide (vendor marketing) | "No single industry-standard grade is established here"; no grade by joint, no temperatures | no |
+| Aibang Robotics, 2026-05-08, https://www.aibangbots.com/a/8521 | a Chinese industry article | no grade class for joints; high-temperature NdFeB with Tb or Dy for "150~200°C" in the future; Optimus about 3.5 kg NdFeB | no |
+| Munro (T3, through Humanoid.guide, second-hand), read again 2026-10-28 | teardown summary | the G1's actuators cooled through their aluminium housings into the structure; the knees a copper heat pipe on the stator, "high duty cycle joints"; two centrifugal fans in the hip area | the G1 |
+| T1 slide 42 (China Post Securities, read 2026-10-27) | teardown | "高负载关节（如承受90N·m扭矩的膝关节）" derate when hot | the G1 |
+| Search summaries, not read first-hand: Unitree's G1 SDK reports a surface and a winding temperature per motor, no limit published; Honor's marathon robot: the knee about 150 W of heat, the main thermal limit (press); NimbRo (RoboCup, arXiv 1909.02385): knee fans lowered the knee by about 20 °C | — | — | to be read |
+
+**Read since** (2026-10-28, later):
+
+| Source | What it is | What it says | Fits? |
+|---|---|---|---|
+| OFweek Robot, "拆解宇树 G1 人形机器人：线束集成、热管理以及轻量化设计", 2026-04-07, https://robot.ofweek.com/2026-04/ART-898890-8420-30684472.html (read in the browser) | a trade article on the G1's teardown | "作为主要承重件，膝关节承受的功率负载最大", the knee, the main load-bearing part, carries the largest power load; cooled passively, copper strip into the structure; the waist a small centrifugal fan "快速排除驱动电路产生的热量" (for the drive circuit); the knee's thermal derating "为了保护电机磁钢不因高温退磁", to keep its magnets from demagnetising | the G1; heat by joint, first-hand |
+| Mainrich, "Radial Multi-pole Ring Magnets for Robot Joint Motors", 2026-09-02 | a magnet seller (vendor marketing) | no grade by joint, no robot named; "A suffix is a nominal material class, not a guaranteed motor temperature limit" | no |
+| Search summaries only: a Mainrich page calls N48SH "the most popular robotics grade" and N45UH for hotter duty; vendor sizing guides (winding limit 130–150 °C, magnet 100–120 °C, case above 80 °C without active cooling); NimbRo knee heat; Honor's marathon robot knee about 150 W | vendor, press | — | not first-hand; context only |
+
+**Searched, not found** (English and Chinese): any maker's magnet grade for a humanoid or robot joint motor (Unitree,
+AgiBot, Fourier, CubeMars, T-Motor, MyActuator, Kollmorgen, TQ); any measured magnet or winding temperature by joint;
+Unitree publishes a surface and a winding temperature per motor in its SDK, but no limit. The grade classes' rated
+temperatures agree across the sources: H 120 °C, SH 150 °C, UH 180 °C, EH 200 °C (RAWCLICVehicleTractionMotor's sheet
+PermanentMagnetNdFeB, its own sources).
+
+**What the sources settle, and what they do not:** the order of heat between joints, for the G1 (passively cooled, as
+Matthias judges every joint): the knees first (the largest power load, derating to protect the magnets; Munro's
+"high duty cycle joints"), then the hips (carrying the body; air from fans in the G1, not counted), the waist (moving
+often), the ankles (carrying the robot, small joints in the G1), the arms last. Which grade class a maker puts in which
+joint: no source. So the probabilities below are estimates (E).
+
+**Accepted, 2026-10-28** ("Accept as proposed": "Accept the grade distributions by joint as proposed, the classes tied
+within a draw. Build it into the builder and 04, tests first"; built, VERIFICATION.md V59): each kind of joint a
+discrete distribution over grade classes, drawn in each draw (never blended):
+
+| Joints | H (120 °C) | SH (150 °C) | UH (180 °C) | EH (200 °C) | Basis |
+|---|---|---|---|---|---|
+| Knees | | 0.3 | 0.5 | 0.2 | the largest load, passive, derating to protect the magnets (OFweek, T1 slide 42, T3) |
+| Hips | | 0.5 | 0.4 | 0.1 | carry the body; passive as judged |
+| Waist | | 0.6 | 0.4 | | moves often (OFweek); passive as judged |
+| Ankles | | 0.6 | 0.4 | | carry the robot; small joints |
+| Shoulders | 0.5 | 0.5 | | | hold the arm, low load |
+| Elbows, wrists | 0.7 | 0.3 | | | the lowest load |
+
+Within one draw the classes are tied (proposed): one draw decides how hot a maker designs for, and every joint takes the
+class at that point of its own distribution, so that a robot built for heat is built for it throughout; drawn
+independently by joint, the hot cases would average out and the dysprosium's band would come out too narrow. The
+dysprosium of each class from RAWCLICVehicleTractionMotor's own code, as now (H 0.02–0.05, SH 0.04–0.07, UH 0.06–0.09,
+EH 0.08–0.10 of the magnet). Replaces the sheet Joints' base class and scenarios (the old goes entirely).
+
 ## E1. The element recipes of the 13 shared materials: the sources, 2026-10-26
 
 ### What was asked, and how it was done

@@ -216,15 +216,17 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     falls below zero; every material and body region on the shared lists; every part or component of one material, of
     shares, or computed; for each robot its joints adding up to its joint modules, each number once, its module masses
     all three or none and in order, exactly one part taking its remainder (the frame), and its own constants (mass,
-    battery, cable length) there; each magnet grade class known; every sensor element of a listed sensor; every shared
-    constant there. A file of one robot only, without the column Robot, stops the reading: the old layout goes
+    battery, cable length) there; every joint in a heat group of the sheet MagnetGrades, each group a distribution
+    over known grade classes, each class once, its probabilities adding up to 1, every group the heat group of a joint;
+    every sensor element of a listed sensor; every shared constant there. A file of one robot only, without the column
+    Robot, and the sheet Joints with its former base grade class and scenarios, stop the reading: the old layout goes
     entirely.
 19. Robot type 1 taken apart, against the sibling projects' files it reads where they lie (for every robot) (absolute paths in
     `data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`, `data.data_center_element_composition`,
     `data.traction_motor_magnets`; never copied, never written): every car board category with its gold, silver,
     palladium, tin and nickel (RAWCLICVehicleElectronics, `04_VehiclePCBComposition.xlsx`); every car sensor type
     (`07_VehicleSensorComposition.xlsx`); a tantalum row (RAWCLICDataCenters, `04_DataCenterElementComposition.xlsx`,
-    sheet BoardsAndComponents); every magnet grade class (RAWCLICVehicleTractionMotor,
+    sheet BoardsAndComponents); every magnet grade class a heat group can draw (RAWCLICVehicleTractionMotor,
     `10_MaterialElementDefinitions.xlsx`, sheet PermanentMagnetNdFeB). A file that is not there is a fault.
 20. Robot type 1 taken apart, against the workbook's sheet Taxonomy: every robot's maker height and stated mass (sheet
     Robots) inside its type's defining limits, read from the sheet (type 1: "Height: 1.20–1.45 m (defining)", "Mass:
@@ -368,8 +370,11 @@ counts of joints, boards and screws fixed):
    times its spread, the large one's the small one's grams times its factor. All small joints take the spread, the
    weighed one too (an approximation that widens the band slightly). The X1's and N1's joints follow the G1's of their
    size, times their module mass, drawn for each joint kind, over the G1 joint's mass at its modes (525 g small,
-   1,011.717 g large). This divides by a fixed number, not by the draw's own sum, so nothing is normalised; the module's
-   total varies around its drawn mass as the components do (an approximation that widens the band).
+   1,011.717 g large). This divides by a fixed number, not by the draw's own sum, so nothing is normalised. The
+   joint's structure (housing, two end caps, output flange, two small bearings) is the explicit remainder, so that the
+   joint weighs its drawn module mass; the structure is split among its components in the G1's weighed proportions at
+   their modes (Matthias, 2026-10-28, "Yes, build it"; VERIFICATION.md V57, V58). Without it, the X1's joints came
+   out at 0.92 to 1.11 times AgiBot's stated masses and its frame fell below zero in 0.8 % of its draws.
 5. A component or part of shares (sheet Shares): each share a triangle, the remainder 1 minus the others (02's
    `shares_drawn`), drawn once in each draw.
 6. The battery: the pack's mass; its cells the pack's voltage times its capacity (both times the mass factor) over the
@@ -377,13 +382,21 @@ counts of joints, boards and screws fixed):
    board, a remainder. The cables: their length times two power and two signal conductors' cross-sections times
    copper's density, and their insulation as a share of that copper. The frame: the varied mass less every other part,
    a remainder.
-7. A remainder below zero is reported (share of its robot's draws), never cut.
+7. A remainder below zero (a frame, a battery housing, a joint's structure) is reported (share of its robot's draws),
+   never cut.
 
 **The elements:**
 - Aluminium and plastics by the recipes type 1's workbook rows follow ('Aluminium, robot type 1, Aluminum alloys';
   'Plastics, robot type 1, Engineering polymers'), the battery cells by 'NMC cylindrical' with its energy per kg drawn
   (02's `RecipeDraws`, each recipe drawn once in each draw); copper is copper.
-- The magnets by their joint's grade class, base case (sheet Joints: SH for the legs and waist, H for the arms), from
+- The magnets by heat (Matthias, 2026-10-28: "Heat has to matter and so the distribution will be different depending
+  on the joint", "Accept as proposed"; EVIDENCE.md E2.11): every joint in a heat group (sheet Joints), each group a
+  distribution over grade classes (sheet MagnetGrades: knees SH 0.3 / UH 0.5 / EH 0.2, hips SH 0.5 / UH 0.4 / EH 0.1,
+  waist and ankles SH 0.6 / UH 0.4, shoulders H 0.5 / SH 0.5, elbows and wrists H 0.7 / SH 0.3; estimates on the
+  order of heat the sources give, every joint judged as passively cooled). In each draw one draw of heat, from 0 to
+  1, decides how hot the robot is built for, and every group takes the class at that point of its cumulative
+  probabilities (classes in the order of the heat they stand): the classes are tied within a draw, so that the hot
+  cases do not average out. The class is a discrete state, never blended. Its element fractions from
   RAWCLICVehicleTractionMotor's own `magnet_element_draws`, run in that project's own environment where it lies
   (answer C). It does not normalise: Nd, Pr, Dy, Tb and the trace elements are drawn uniform between the class's
   bounds, iron is their remainder. Its seed is its own.

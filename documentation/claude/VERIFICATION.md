@@ -5,6 +5,79 @@ by Claude, newest first.
 
 ## 2026-10-28
 
+### V59. The magnets' grade by each joint's heat: in 01, the builder and 04
+
+- **What:** on Matthias's "Accept as proposed" (EVIDENCE.md E2.11): the sheet Joints' base grade class and scenarios
+  replaced by a heat group (Hips, Knees, Ankles, Waist, Shoulders, Elbows and wrists, by the joint's name); a new sheet
+  MagnetGrades, each group a distribution over grade classes (the accepted table); 01 reads it and checks it (check
+  18: every joint's group there, known classes, each once, probabilities adding up to 1, every group used; the old
+  grade columns stop the reading; check 19: every class a group can draw in RAWCLICVehicleTractionMotor's workbook); 04
+  draws one draw of heat in each draw and every group's class at that point (tied), the magnets' elements of that class;
+  the overview's red ring where a joint's group draws 150 °C or more in most draws; `summary.csv` the classes' shares.
+  The data file's About sheet updated for the Joints and MagnetGrades sheets (its stale line on the Joints, reported on
+  2026-10-28, is gone with it).
+- **How, tests first:** 01: six tests on a small file (an unknown class, a joint's group not in MagnetGrades,
+  probabilities not adding up to 1, a class twice in a group, a group no joint has, the old grade columns refused);
+  the builder: the accepted table and every joint's group by its name; 04: every group's classes at their
+  probabilities (4,000 draws, within four standard errors) and each the class at the draw's heat on its cumulative
+  probabilities (tied); at the modes, the G1's knees' dysprosium equals their magnets times the drawn class's
+  dysprosium (classes given different dysprosium) plus their encoders' 2 mg. All failed before the change. A
+  deliberate fault in a scratch copy (each group drawn on its own, not tied) failed the tie test in all six groups.
+- **Against the new data file**, built into Claude's scratch folder (not into `data/`): all 200 tests pass. In the
+  project, until Matthias runs the builder, 18 of the 200 wait on it: the builder's comparison with the file on disk
+  fails, and 3 tests of 01 and 14 of 04 that read the file on disk stop at its old Joints headings, by design (the old
+  layout is refused).
+- **Sandbox draw** (50,000 draws, the real magnets from RAWCLICVehicleTractionMotor's code, outputs in Claude's scratch
+  folder): the classes drawn at their probabilities (knees SH 0.299 / UH 0.500 / EH 0.201, the others likewise);
+  dysprosium in one robot median 63 g, mean 67 g, 95 % 29 to 126 g (before, with SH in the legs and waist and H in
+  the arms: 52 / 55 g, 26 to 100 g); by kind, medians: hips 23.6 g, arms 17.2 g, knees 9.4 g, ankles 6.7 g, waist
+  4.3 g. Copper, Nd + Pr unchanged. The pages looked at; the new footnote fits.
+- **Not covered:** the grade probabilities are estimates (no maker states a joint's grade, E2.11); the real run is
+  Matthias's.
+
+### V58. The X1's and N1's joints weigh their stated mass: the joint's structure the remainder, in 04
+
+- **What:** on Matthias's "Yes, build it" (variant 2 of V57): in `04_parts_taken_apart.py` each joint whose module
+  mass is stated (the X1's, the N1's) has its structure (housing, two end caps, output flange, two small bearings) as
+  the explicit remainder of its drawn module mass, split in the G1's weighed proportions at their modes; the
+  structures reported with the other remainders (`below_zero`, `summary.csv`); 04 checks that the four components
+  exist in JointParts. The G1's joints unchanged (they have no stated module mass).
+- **How, tests first:** two tests in `tests/test_parts_taken_apart.py`: the X1's and N1's joints, at the robot's own
+  mass, lie between the sums of their stated minima and maxima in every draw (before: the X1's 16.9 to 23.7 kg against
+  19.3 to 21.2 kg; failed); the joint structures are among the reported remainders (failed). After the change both
+  pass, and the hand calculations of the G1 still do.
+- **Result:** 191 tests pass. A sandbox draw (50,000 draws, the project's data and settings, outputs in Claude's scratch
+  folder): 30 remainders (3 frames, 3 battery housings, 24 joint structures), none below zero in any draw. The elements
+  as in V56 (copper median 2.2 kg, Nd + Pr 341 g, Dy 52 g, gold 57 mg); aluminium 95 % 6.6 to 21 kg.
+- **Not covered:** the real run is Matthias's (the data file is unchanged; 04 only).
+- **Then, on "Yes do it":** the G1's three hip rows of the sheet Joints, column Cooling, "two centrifugal fans per hip"
+  corrected to "passive, with air from two centrifugal fans in the hip area" (Munro, T3, read again 2026-10-28: "The hip
+  area uses two centrifugal fans"; Matthias: "Joints have no fans, just passive cooling"). Test first (failed, then
+  passed); against the file on disk the builder now differs in exactly these three cells. 04 does not read the column,
+  so no result changes. The builder's comparison with the file on disk fails until Matthias runs the builder.
+
+### V57. Why the X1's frame falls below zero, and two remainders tested in a scratch copy (nothing changed)
+
+- **Asked,** Matthias: "would mean that the correlations are not taken correctly, or is the uper weight limit the
+  problem", then "Yes do as proposed" (test the housing as the joint's remainder in a scratch copy).
+- **Measured on his run** (66,599 X1 draws): the frame below zero in 0.81 %, falling with the varied mass (1.35 % at
+  30 to 35 kg, 0.67 %, 0.48 %, 0.24 % at 45 to 50 kg): not the upper limit. At its own mass the X1 leaves a median of
+  about 3 kg for its frame (joints 20.6 kg, other scaled parts 7.7, fixed 1.9). Its joints come out 0.92 to 1.11 times
+  AgiBot's stated module masses at their modes (95 %), against about ± 5 % stated; in the draws below zero 1.12 times
+  (median). Cause: each joint's inside follows the G1's components, drawn with their own spread and scaled by a fixed
+  number, so it does not add up to the drawn module mass; and those draws are shared by all 29 joints.
+- **Tested** (scratch copy of 04, the project's data and settings read only, 50,000 draws, the same seed and magnets):
+  1. *The housing as the explicit remainder* of each X1 and N1 joint: the joints at 0.988 to 1.012 times the stated
+     masses, no frame below zero; but the housing below zero in 5.8 % of the X1's large joints' draws (5.5 % N1), 0.43 %
+     of the small ones'. Rejected: the housing (about 11 % of a large joint) is too small to take the large joint's
+     other components, drawn with the G1's factors of up to 3.56.
+  2. *The joint's structure as the explicit remainder* (housing, two end caps, output flange, two small bearings),
+     split among them in the G1's weighed proportions at their modes (fixed numbers, not the draw's own sum): no
+     remainder below zero anywhere (the lightest structure 19 g, the N1's shoulder pitch); the X1's joints at 0.988 to
+     1.012 times the stated masses; copper, Nd + Pr, Dy and Au unchanged to five figures; aluminium mean 13.27 kg
+     (13.22 before), as the steel of the flange and bearings is now part of the remainder.
+- **Not covered:** nothing changed in the project; variant 2 waits for Matthias's word.
+
 ### V56. The X1's and N1's battery packs cut at the model's own cells
 
 - **What:** on Matthias's "Cut at the cells" (EVIDENCE.md E2.8e, "The battery packs' lower cut"): in

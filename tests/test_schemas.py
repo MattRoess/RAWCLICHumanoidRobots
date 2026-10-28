@@ -23,7 +23,7 @@ import sys
 import tempfile
 import unittest
 
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -1047,8 +1047,9 @@ class TestTheWorkbook(unittest.TestCase):
 APART = {
     'Robots': ['Robot', 'Maker', 'Type', 'Height (m)', 'Stated mass (kg)', 'Sources'],
     'Joints': ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
-               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Magnet grade class (base)',
-               'Magnet grade scenarios', 'Body region', 'Sources', 'Basis'],
+               'Module mass, min (kg)', 'mode (kg)', 'max (kg)', 'Cooling', 'Heat group', 'Body region', 'Sources',
+               'Basis'],
+    'MagnetGrades': ['Heat group', 'Grade class', 'Probability', 'Label', 'Basis'],
     'JointParts': ['Component', 'Small joint, weighed (g)', 'Small joints not weighed: times min', 'times mode',
                    'times max', 'Material (one material only)', 'Large joint: factor min', 'factor mode', 'factor max',
                    'Why the factor', 'Label', 'Sources'],
@@ -1073,14 +1074,18 @@ APART = {
 # constant 01 needs, the shared ones once for all.
 SMALL_APART = {
     'Robots': [('Robot A', 'Maker A', 1, 1.32, 35, 'U1'), ('Robot B', 'Maker B', 1, 1.30, 33, 'X1b')],
-    'Joints': [('Robot A', 1, 'Hip', 2, 'large', 88, None, None, None, 'fans', 'SH', 'UH; EH', 'Legs', 'U3',
+    'Joints': [('Robot A', 1, 'Hip', 2, 'large', 88, None, None, None, 'passive', 'Hips', 'Legs', 'U3',
                 'For the tests.'),
-               ('Robot A', 2, 'Ankle', 2, 'small', 35, None, None, None, 'passive', 'H', '', 'Legs', 'U3',
+               ('Robot A', 2, 'Ankle', 2, 'small', 35, None, None, None, 'passive', 'Ankles', 'Legs', 'U3',
                 'For the tests.'),
-               ('Robot B', 1, 'Hip', 2, 'large', 150, 1.22, 1.28, 1.34, '', 'SH', 'UH; EH', 'Legs', 'X1b',
+               ('Robot B', 1, 'Hip', 2, 'large', 150, 1.22, 1.28, 1.34, '', 'Hips', 'Legs', 'X1b',
                 'For the tests.'),
-               ('Robot B', 2, 'Elbow', 2, 'small', 19, 0.43, 0.45, 0.47, '', 'H', '', 'Arms', 'X1b',
+               ('Robot B', 2, 'Elbow', 2, 'small', 19, 0.43, 0.45, 0.47, '', 'Elbows and wrists', 'Arms', 'X1b',
                 'For the tests.')],
+    # The magnets' grade classes by heat group (Matthias, 2026-10-28, "Accept as proposed"; EVIDENCE.md E2.11).
+    'MagnetGrades': [('Hips', 'SH', 0.5, 'E', ''), ('Hips', 'UH', 0.4, 'E', ''), ('Hips', 'EH', 0.1, 'E', ''),
+                     ('Ankles', 'SH', 0.6, 'E', ''), ('Ankles', 'UH', 0.4, 'E', ''),
+                     ('Elbows and wrists', 'H', 0.7, 'E', ''), ('Elbows and wrists', 'SH', 0.3, 'E', '')],
     'JointParts': [('Motor stator', 100, 0.5, 1, 1.5, '', 1.0, 1.78, 2.67, 'the area', 'W; E', 'T1'),
                    ('Housing', 80, 0.5, 1, 1.5, 'Aluminium', 1.0, 1.39, 2.09, 'the surface', 'W; E', 'T1')],
     'Parts': [('Robot A', 'Joint module, small', 2, 'Ankles', 'Legs', None, None, None, '', 'the sum of JointParts',
@@ -1241,7 +1246,31 @@ class TestPartsTakenApart(unittest.TestCase):
         self.assertFaultSays(self.faults({('Joints', 2, 6): 1.5}), 'in order')
 
     def test_a_magnet_grade_that_is_not_a_class(self):
-        self.assertFaultSays(self.faults({('Joints', 0, 10): 'XX'}), "'XX'")
+        self.assertFaultSays(self.faults({('MagnetGrades', 0, 1): 'XX'}), "'XX'")
+
+    def test_a_joint_whose_heat_group_has_no_grades(self):
+        self.assertFaultSays(self.faults({('Joints', 0, 10): 'Feet'}), "'Feet'")
+
+    def test_a_heat_groups_probabilities_that_do_not_add_up_to_one(self):
+        self.assertFaultSays(self.faults({('MagnetGrades', 0, 2): 0.6}), 'add up to 1')
+
+    def test_a_grade_class_given_twice_in_one_heat_group(self):
+        self.assertFaultSays(self.faults({('MagnetGrades', 2, 1): 'SH', ('MagnetGrades', 1, 2): 0.4}), 'twice')
+
+    def test_a_heat_group_that_no_joint_has(self):
+        self.assertFaultSays(self.faults({('MagnetGrades', 7): ('Neck', 'H', 1.0, 'E', '')}), "'Neck'")
+
+    def test_the_old_grade_columns_are_refused(self):
+        # The sheet Joints with its base grade class and its scenarios, as it was before 2026-10-28: the old goes
+        # entirely, and its headings stop the reading.
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'apart.xlsx')
+            build_apart(path)
+            book = load_workbook(path)
+            book['Joints'].cell(1, 11).value = 'Magnet grade class (base)'
+            book.save(path)
+            with self.assertRaises(schemas.WorkbookError):
+                schemas.read_parts_taken_apart(path)
 
     def test_a_sensor_element_of_a_sensor_not_listed(self):
         self.assertFaultSays(self.faults({('SensorElements', 0, 0): 'Camera'}), "'Camera'")

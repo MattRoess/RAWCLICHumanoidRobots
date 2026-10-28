@@ -2,7 +2,36 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-28, evening: the battery packs cut at the cells (start here)
+## 2026-10-28, night: the magnets graded by each joint's heat (start here)
+
+- On "Accept as proposed" (EVIDENCE.md E2.11): heat groups in the sheet Joints, a new sheet MagnetGrades, 01's checks,
+  04 drawing the classes by one draw of heat (tied), tests first (VERIFICATION.md V59). Dysprosium in one robot now
+  median 63 g, 95 % 29 to 126 g (before 52 g, 26 to 100 g).
+- **His runs, in this order** (in RAWCLICHumanoidRobots, press Run):
+  1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`
+  2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`
+  Until the first, the tests that read the data file on disk fail (its old Joints headings are refused, by design).
+- **Not committed** since `97797d3`: 01, 04, the builder, their tests, METHODOLOGY, EVIDENCE (E2.11), VERIFICATION
+  (V57 to V59), this handover.
+
+## 2026-10-28, late evening: the joints weigh their stated mass; the magnets by heat begun
+
+- **The X1's frame below zero (0.81 %):** Matthias asked whether the correlations or the upper weight limit were the
+  cause; measured: the correlation inside the X1's joints, not the limit (V57). Tested in a scratch copy: the housing
+  alone as remainder failed (5.8 % below zero), the joint's structure as remainder worked. On "Yes, build it", built
+  into 04, tests first (V58): no remainder below zero in 50,000 draws; 191 tests pass.
+- **His runs** (the builder for the corrected wording below, then 04):
+  `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`,
+  then `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/04_parts_taken_apart.py`
+- **The fans:** "2 fans ok": the G1's two hip-area fans and its waist fan stay as parts; for the magnets every joint is
+  judged as passively cooled ("Fans is not a sustainable solution"). On "Yes do it" the sheet Joints' wording "two
+  centrifugal fans per hip" corrected in the builder to "passive, with air from two centrifugal fans in the hip area"
+  (V58).
+- **The magnets by heat ("3. grad by heat"):** research begun, EVIDENCE.md E2.11; no maker's grade by joint found yet;
+  sources to be shown before any number.
+- **Not committed** since `97797d3`: 04, its tests, METHODOLOGY, EVIDENCE (E2.11), VERIFICATION (V57, V58), this handover.
+
+## 2026-10-28, evening: the battery packs cut at the cells
 
 - Matthias's run of 04 (12:02, 200,000 draws) read back and checked (VERIFICATION.md V55). Then, on the finding of the
   battery cut: "Cut at the cells". The X1's pack 1.75 / 2.2 / 3.3 kg, the N1's 2.26 / 2.9 / 3.2 kg, in the builder,

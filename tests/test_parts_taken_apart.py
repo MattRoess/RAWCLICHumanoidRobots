@@ -115,14 +115,36 @@ class TestDraws(unittest.TestCase):
         np.testing.assert_allclose(draws.sum(axis=1), d.varied, rtol=1e-9)
 
     def test_nothing_is_cut_where_a_remainder_falls_below_zero(self):
-        # The frame and the battery housing are remainders: below zero they are reported, never cut (point 2).
+        # The frame, the battery housing and the joints' structure (where a joint's mass is stated) are remainders:
+        # below zero they are reported, never cut (point 2).
         inputs = inputs_or_skip(self, self.params)
         d = apart.draw(inputs, self.params, fixed_magnets(inputs, self.params.parts.draws))
         below = apart.below_zero(d)
-        self.assertEqual(set(below), {f'{r}: {p}' for r in d.robots
-                                      for p in ('Frame', 'Battery housing, busbars and wires')})
+        expected = {f'{r}: {p}' for r in d.robots for p in ('Frame', 'Battery housing, busbars and wires')}
+        expected |= {f'{j.robot}: {j.name} structure' for j in inputs.apart.joints if None not in j.module_mass}
+        self.assertEqual(set(below), expected)
         for share in below.values():
             self.assertTrue(0 <= share <= 1)
+
+    def test_a_joint_whose_mass_is_stated_weighs_that_mass(self):
+        # Matthias, 2026-10-28: "Yes, build it" (VERIFICATION.md V57): each X1 and N1 joint adds up to its drawn module
+        # mass, its structure the explicit remainder. So, at the robot's own mass, its joints lie between the sums of
+        # their stated minima and maxima in every draw (before, the X1's reached 1.11 times its stated modes).
+        inputs = inputs_or_skip(self, self.params)
+        d = apart.draw(inputs, self.params, fixed_magnets(inputs, self.params.parts.draws))
+        columns, draws = d.parts
+        for k, robot in enumerate(d.robots):
+            stated = [j for j in inputs.apart.joints if j.robot == robot]
+            if any(None in j.module_mass for j in stated):
+                continue
+            rows = d.robot == k
+            joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot) and c.endswith('joints)'))
+            at_own = joints / (d.varied[rows] / d.own[rows])
+            low = sum(j.count * j.module_mass[0] for j in stated)
+            high = sum(j.count * j.module_mass[2] for j in stated)
+            with self.subTest(robot=robot):
+                self.assertTrue(np.all((at_own >= low - 1e-9) & (at_own <= high + 1e-9)),
+                                msg=f'{at_own.min():.3f} to {at_own.max():.3f} kg against {low:.3f} to {high:.3f}')
 
 
 class TestHandCalculations(unittest.TestCase):
@@ -176,6 +198,56 @@ class TestHandCalculations(unittest.TestCase):
         light_head = apart.kind_kg(light, 'head')[light.robot == g1]
         heavy_head = apart.kind_kg(heavy, 'head')[heavy.robot == g1]
         np.testing.assert_allclose(heavy_head, light_head, rtol=1e-9)
+
+
+class TestGradesByHeat(unittest.TestCase):
+    """Matthias, 2026-10-28: "Heat has to matter and so the distribution will be different depending on the joint",
+    then "Accept as proposed" (EVIDENCE.md E2.11): each heat group's grade class drawn by its probabilities, the classes
+    tied within a draw (one draw decides how hot the robot is built for, every joint takes its class at that point)."""
+
+    # Dysprosium by class, different for each, so that a joint's dysprosium tells which class it drew.
+    DY = {'H': 0.03, 'SH': 0.05, 'UH': 0.07, 'EH': 0.09}
+
+    def graded_magnets(self, inputs, n):
+        names = ['Nd', 'Pr', 'Dy', 'B', 'Fe']
+        return {k: (names, np.tile([0.24, 0.06, self.DY[k], 0.01, 0.69 - self.DY[k]], (n, 1)))
+                for k in apart.grade_classes(inputs)}
+
+    def test_each_heat_group_draws_its_classes_by_their_probabilities_tied_within_a_draw(self):
+        params = Params()
+        params.parts.draws = 4000
+        inputs = inputs_or_skip(self, params)
+        d = apart.draw(inputs, params, self.graded_magnets(inputs, params.parts.draws))
+        order = list(apart.schemas.MAGNET_CLASSES)
+        groups: dict = {}
+        for g in inputs.apart.grades:
+            groups.setdefault(g.group, []).append((order.index(g.klass), g.klass, g.probability))
+        for group, classes in groups.items():
+            classes.sort()
+            drawn = d.grades[group]
+            with self.subTest(group=group):
+                for _, klass, p in classes:
+                    share = (drawn == klass).mean()
+                    self.assertAlmostEqual(share, p, delta=4 * np.sqrt(p * (1 - p) / d.n) + 1e-12, msg=klass)
+                # Tied: the class is the one at the draw's heat on the group's cumulative probabilities.
+                edges = np.cumsum([p for _, _, p in classes])
+                at = np.minimum(np.searchsorted(edges, d.heat, side='right'), len(classes) - 1)
+                self.assertTrue(np.array_equal(drawn, np.array([k for _, k, _ in classes])[at]))
+
+    def test_a_joints_dysprosium_follows_the_class_it_drew(self):
+        # Every triangle at its mode: the G1's two knees' magnets, times the dysprosium of the class each draw gave
+        # the knees, plus their four encoders' 0.5 mg (car angle sensor).
+        params = Params()
+        params.parts.draws = 2000
+        inputs = inputs_or_skip(self, params)
+        with mock.patch.object(composition, 'triangle', at_mode):
+            d = apart.draw(inputs, params, self.graded_magnets(inputs, params.parts.draws))
+        g1 = d.robot == d.robots.index('Unitree G1')
+        columns, materials = d.materials
+        magnets = materials[g1, columns.index(('knees', 'Magnets (NdFeB)'))]
+        expected = magnets * np.array([self.DY[k] for k in d.grades['Knees'][g1]]) + 4 * 0.5e-6
+        np.testing.assert_allclose(d.elements[('knees', 'Dy')][g1], expected, rtol=1e-9)
+        self.assertGreater(len(set(d.grades['Knees'][g1])), 1)
 
 
 class TestMagnets(unittest.TestCase):

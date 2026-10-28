@@ -97,6 +97,41 @@ class TestMakePartsTakenApart(unittest.TestCase):
         packs = {p.robot: p.bounds for p in apart.parts if p.name == 'Battery pack'}
         self.assertEqual((packs['AgiBot X1'], packs['Fourier N1']), ((1.75, 2.2, 3.3), (2.26, 2.9, 3.2)))
 
+    def test_the_g1s_hips_are_cooled_passively_with_air_from_the_hip_area(self):
+        """Matthias, 2026-10-28: "Joints have no fans, just passive cooling"; Munro (T3): "The hip area uses two
+        centrifugal fans" for the whole robot, blowing air around the actuators, not two per hip."""
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'parts_taken_apart.xlsx')
+            builder.build(path)
+            book = load_workbook(path)
+        rows = [r for r in book['Joints'].iter_rows(min_row=2, values_only=True) if r[0] == 'Unitree G1'
+                and str(r[2]).startswith('Hip')]
+        self.assertEqual(len(rows), 3)
+        for row in rows:
+            self.assertEqual(row[9], 'passive, with air from two centrifugal fans in the hip area', msg=row[2])
+
+    def test_the_magnets_grade_by_each_joints_heat(self):
+        """Matthias, 2026-10-28: "Heat has to matter and so the distribution will be different depending on the joint",
+        then "Accept as proposed" (EVIDENCE.md E2.11): every joint in a heat group by its name, each group a
+        distribution over grade classes."""
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'parts_taken_apart.xlsx')
+            builder.build(path)
+            apart = schemas.read_parts_taken_apart(path)
+        grades = {}
+        for g in apart.grades:
+            grades.setdefault(g.group, {})[g.klass] = g.probability
+        self.assertEqual(grades, {'Knees': {'SH': 0.3, 'UH': 0.5, 'EH': 0.2},
+                                  'Hips': {'SH': 0.5, 'UH': 0.4, 'EH': 0.1},
+                                  'Waist': {'SH': 0.6, 'UH': 0.4},
+                                  'Ankles': {'SH': 0.6, 'UH': 0.4},
+                                  'Shoulders': {'H': 0.5, 'SH': 0.5},
+                                  'Elbows and wrists': {'H': 0.7, 'SH': 0.3}})
+        group_of = {'hip': 'Hips', 'knee': 'Knees', 'ankle': 'Ankles', 'waist': 'Waist', 'shoulder': 'Shoulders',
+                    'elbow': 'Elbows and wrists', 'wrist': 'Elbows and wrists'}
+        for j in apart.joints:
+            self.assertEqual(j.heat_group, group_of[j.name.split()[0].lower()], msg=f'{j.robot}, {j.name}')
+
     def test_it_takes_no_arguments_and_writes_where_00_says(self):
         self.assertEqual(builder.output_path(), absolute(Params().data.parts_taken_apart))
 
