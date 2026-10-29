@@ -223,10 +223,12 @@ def read_inputs(params: Params) -> Inputs:
 
 
 def check_composition(inputs: Inputs, params: Params) -> list:
-    """The check 02 adds to 01's. An item that follows the energy (E1.7i) is its mode times a cell's energy per kg over
-    the mode of the NMC cells, so it can sit only in the recipe of NMC cells, used as the recipe of cells: by NMC cells
-    of the sheet Cells, or named by a kept battery row; never named in the sheet Rows, nor held within another recipe,
-    where there is no cell to take the energy from."""
+    """The checks 02 adds to 01's. An item that follows the energy (E1.7i) is its mode times a cell's energy per kg
+    over the mode of the NMC cells, so it can sit only in the recipe of NMC cells, used as the recipe of cells: by NMC
+    cells of the sheet Cells, or named by a kept battery row; never named in the sheet Rows, nor held within another
+    recipe, where there is no cell to take the energy from. And every element left off the pages
+    (`composition.elements_not_shown`) is an element of 01's atomic masses, so that a slip of the pen cannot leave one
+    on the pages unnoticed."""
     recipes = inputs.recipes
     where = os.path.basename(params.data.element_recipes) + ': '
     follows = {i.recipe for i in recipes.items if i.follows_energy}
@@ -246,6 +248,10 @@ def check_composition(inputs: Inputs, params: Params) -> list:
             faults.append(Fault(where + schemas.RECIPE_SHEET, i.row,
                                 f"{i.recipe}, {i.item}: the recipe '{i.compound}' follows the energy of a cell; it can "
                                 'only be the recipe of cells, not held within another recipe.'))
+    for symbol in params.composition.elements_not_shown:
+        if symbol not in schemas.ATOMIC_MASS:
+            faults.append(Fault('src/params_schema.py: composition.elements_not_shown', 0,
+                                f"'{symbol}' is not an element of 01's atomic masses."))
     return faults
 
 
@@ -1354,7 +1360,30 @@ def interval_chart(figure, page, page_height: float, x: float, y: float, title: 
     return y + height + 0.55
 
 
-def page_notes(c: Composition) -> list:
+def shown_elements(names: list, params: Params) -> list:
+    """The elements a page shows: `names` less those of `composition.elements_not_shown` (Matthias, 2026-10-29:
+    "Hydrogene and Oxygen have to go you should know this. Same for F, and N"). The draws keep them all."""
+    return [name for name in names if name not in params.composition.elements_not_shown]
+
+
+def not_shown_note(params: Params) -> str:
+    """The note that says, in plain words, which elements the pages leave out: 'Hydrogen, nitrogen, oxygen and
+    fluorine are not shown; they are in the draws.'"""
+    words = [ELEMENT_NAMES.get(e, e).lower() for e in params.composition.elements_not_shown]
+    if not words:
+        return ''
+    listed = words[0] if len(words) == 1 else ', '.join(words[:-1]) + ' and ' + words[-1]
+    return f"{listed[0].upper()}{listed[1:]} {'is' if len(words) == 1 else 'are'} not shown; " \
+           f"{'it is' if len(words) == 1 else 'they are'} in the draws."
+
+
+def page_elements(c: Composition, params: Params) -> list:
+    """The rows of a page's 'By element': (the element in plain words, its draws), those not shown left out."""
+    return [(element_label(name), c.column('elements', name))
+            for name in shown_elements(c.tables['elements'][0], params)]
+
+
+def page_notes(c: Composition, params: Params) -> list:
     """What a reader needs to read the page of one robot type, in plain words."""
     rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
     below = rows[NOT_ALLOCATED]['Draws below zero (%)']
@@ -1372,7 +1401,8 @@ def page_notes(c: Composition) -> list:
     missing = [n for n, r in rows.items() if r['In the elements'] == 'No' and n != NOT_ALLOCATED]
     notes.append(f'By element: the materials that have a recipe so far, {", ".join(covered) or "none"}'
                  f'{"; in part: " + ", ".join(partly) if partly else ""}. Not yet in the elements: '
-                 f'{", ".join(missing) or "none"}; their kilograms are in the materials only.')
+                 f'{", ".join(missing) or "none"}; their kilograms are in the materials only. '
+                 + not_shown_note(params))
     notes.append('–: none in this robot type.')
     return notes
 
@@ -1380,8 +1410,8 @@ def page_notes(c: Composition) -> list:
 def draw_page(c: Composition, draws: int, path: str, params: Params) -> None:
     """Point 14: the page of one robot type, its kg by material and its kg by element, each with its 95 % interval."""
     materials = [(name, c.column('materials', name)) for name in c.tables['materials'][0]]
-    elements = [(element_label(name), c.column('elements', name)) for name in c.tables['elements'][0]]
-    notes = [line for note in page_notes(c) for line in schemas.wrap('• ' + note, 200)]
+    elements = page_elements(c, params)
+    notes = [line for note in page_notes(c, params) for line in schemas.wrap('• ' + note, 200)]
     total = c.column('total', 'Total')
     materials_kg = (total - c.column('materials', NOT_ALLOCATED)).mean()
     followed = c.in_elements.sum(axis=1).mean()
@@ -1479,8 +1509,9 @@ def element_panel(axes, kg: np.ndarray, symbol: str, first_in_row: bool) -> None
         axes.spines[side].set_visible(False)
 
 
-def type_one_notes(c: Composition, d: Draws, left_out: list) -> list:
-    """The notes page's paragraphs: how to read the element pages, what is drawn, what is not yet."""
+def type_one_notes(c: Composition, d: Draws, left_out: list, params: Params) -> list:
+    """The notes page's paragraphs: how to read the element pages, what is drawn, what is not yet, what is not
+    shown."""
     rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
     missing = [f"{name} (median {panel_number(rows[name]['Median (kg)'])} kg, mean "
                f"{panel_number(rows[name]['Mean (kg)'])} kg)" for name in rows
@@ -1503,13 +1534,15 @@ def type_one_notes(c: Composition, d: Draws, left_out: list) -> list:
         'other elements of those materials are missing from the pages.' +
         (f" In part: {', '.join(partly)} (only the metals of the boards and the elements of the sensors)."
          if partly else ''),
+        not_shown_note(params),
     ]
-    return notes
+    return [note for note in notes if note]
 
 
-def type_one_pages(c: Composition, d: Draws, left_out: list) -> list:
-    """Robot type 1's pages, as (file name, figure): the notes page, then the elements nine a page."""
-    names = c.tables['elements'][0]
+def type_one_pages(c: Composition, d: Draws, left_out: list, params: Params) -> list:
+    """Robot type 1's pages, as (file name, figure): the notes page, then the elements nine a page, each element it
+    holds but those not shown (`composition.elements_not_shown`)."""
+    names = shown_elements(c.tables['elements'][0], params)
     held = [e for e in names if c.column('elements', e).any()]
     per_page = TYPE_ONE_ACROSS * TYPE_ONE_DOWN
     pages = [held[k:k + per_page] for k in range(0, len(held), per_page)]
@@ -1517,7 +1550,7 @@ def type_one_pages(c: Composition, d: Draws, left_out: list) -> list:
     figure = plt.figure(figsize=TYPE_ONE_PAGE)
     figure.text(0.04, 0.93, f'Robot type 1, {c.title}: how to read its element pages', fontsize=TYPE_ONE_HEADING,
                 va='top')
-    text = '\n\n'.join(textwrap.fill(p, TYPE_ONE_NOTE_WIDTH) for p in type_one_notes(c, d, left_out))
+    text = '\n\n'.join(textwrap.fill(p, TYPE_ONE_NOTE_WIDTH) for p in type_one_notes(c, d, left_out, params))
     figure.text(0.04, 0.83, text, fontsize=TYPE_ONE_TEXT, va='top', color=TYPE_ONE_INK, linespacing=1.3)
     out.append((f'{c.name}_notes.png', figure))
     for p, page in enumerate(pages, 1):
@@ -1538,7 +1571,7 @@ def draw_type_one_pages(c: Composition, d: Draws, left_out: list, folder: str, p
     """Robot type 1's pages into `folder`; returns their file names."""
     os.makedirs(folder, exist_ok=True)
     written = []
-    for name, figure in type_one_pages(c, d, left_out):
+    for name, figure in type_one_pages(c, d, left_out, params):
         figure.savefig(os.path.join(folder, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
         written.append(name)

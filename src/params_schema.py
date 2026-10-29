@@ -252,6 +252,17 @@ class CompositionParams:
         default=15.0,
         metadata={'doc': "Robot type 1's lowest mass, kg (Matthias, 2026-10-28); lighter robots are not type 1."})
 
+    # The elements left off the element pages of 02 and 03, by their symbols (Matthias, 2026-10-29: "Hydrogene and
+    # Oxygen have to go you should know this. Same for F, and N"; as in RAWCLICStockAndFlow, whose figures leave out
+    # nitrogen, fluorine and oxygen, and RAWCLICDataCenters, whose leave out oxygen). The draws keep them, so that the
+    # elements still add up to the materials in every draw and stock-and-flow can read any of them. 02 stops when a
+    # symbol is not an element.
+    # SAFE TO CHANGE: only on Matthias's word.
+    elements_not_shown: tuple = field(
+        default=('H', 'N', 'O', 'F'),
+        metadata={'doc': 'The elements left off the element pages of 02 and 03 (Matthias, 2026-10-29); the draws '
+                         'keep them.'})
+
 
 @dataclass
 class PartsParams:
@@ -361,6 +372,12 @@ def validate(params: Params) -> None:
         raise ParameterError('composition.nmc_wh_per_kg_min, _mode and _max must be above 0 and in order, not '
                              f'{composition.nmc_wh_per_kg_min}, {composition.nmc_wh_per_kg_mode}, '
                              f'{composition.nmc_wh_per_kg_max}.')
+    # A tuple of element symbols, each once and none empty (whether each is an element, 02 checks against 01's list).
+    hidden = composition.elements_not_shown
+    if (not isinstance(hidden, tuple) or not all(isinstance(e, str) and e.strip() for e in hidden)
+            or len(set(hidden)) < len(hidden)):
+        raise ParameterError('composition.elements_not_shown must be a tuple of element symbols, each once, such as '
+                             f"('H', 'N', 'O', 'F'), not {hidden!r}.")
 
     # The sibling projects' files: absolute, .xlsx where a file is named.
     for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',

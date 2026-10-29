@@ -330,6 +330,25 @@ class TestRun(Drawn):
         self.assertFalse(os.path.exists(params.output.composition_dir))
         self.assertFalse(os.path.exists(params.output.composition_figures_dir))
 
+    def test_hydrogen_nitrogen_oxygen_and_fluorine_are_left_off_the_page_and_kept_in_the_draws(self):
+        # Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N"; the draws
+        # keep them (as RAWCLICStockAndFlow's do), so that the elements still add up to the materials in every draw.
+        params = self.write()
+        self.assertEqual(params.composition.elements_not_shown, ('H', 'N', 'O', 'F'))
+        drawn = self.compose()
+        held = drawn[1].tables['elements'][0]
+        self.assertIn('F', held)                       # the small recipes' LiPF6 holds fluorine
+        shown = [name for name, _ in composition.page_elements(drawn[1], params)]
+        self.assertNotIn('Fluorine (F)', shown)
+        self.assertEqual(len(shown), len([e for e in held if e not in ('H', 'N', 'O', 'F')]))
+        self.assertTrue(any('fluorine' in note for note in composition.page_notes(drawn[1], params)))
+
+    def test_an_element_not_shown_that_is_no_element_stops(self):
+        params = self.write()
+        params.composition.elements_not_shown = ('H', 'Ox')
+        faults = composition.all_faults(composition.read_inputs(params), params)
+        self.assertTrue(any("'Ox'" in f.text for f in faults), msg=[f.text for f in faults])
+
     def test_a_register_without_its_sheet_type_1_stops_before_anything_is_written(self):
         # 02 draws robot type 1 over the robots of the register's sheet Type 1 (Matthias, 2026-10-29); without it,
         # nothing is drawn.

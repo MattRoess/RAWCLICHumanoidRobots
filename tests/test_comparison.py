@@ -77,6 +77,16 @@ class TestComparison(Compared):
         for view in comparison.VIEWS:
             self.assertGreater(os.path.getsize(os.path.join(params.output.comparison_dir, f'{view}.png')), 0)
 
+    def test_hydrogen_nitrogen_oxygen_and_fluorine_are_left_off_the_page_by_element(self):
+        # Matthias, 2026-10-29: "Hydrogene and Oxygen have to go ... Same for F, and N"; the draws keep them.
+        params = self.drawn()
+        robots = comparison.read_draws(params)
+        self.assertIn('F', robots[0].tables['elements'][0])
+        shown = comparison.view_columns(robots, 'elements', params)
+        self.assertEqual(shown, [e for e in robots[0].tables['elements'][0] if e not in ('H', 'N', 'O', 'F')])
+        self.assertEqual(comparison.view_columns(robots, 'materials', params), robots[0].tables['materials'][0])
+        self.assertTrue(any('fluorine' in line for line in comparison.view_notes('elements', params)))
+
     def test_without_the_draws_of_02_it_stops(self):
         params = self.write()
         self.assertEqual(comparison.run(params), 1)

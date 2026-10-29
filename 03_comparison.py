@@ -163,15 +163,22 @@ def label(table: str, name: str) -> str:
     return composition.element_label(name) if table == 'elements' else name
 
 
+def view_columns(robots: list, table: str, params: Params) -> list:
+    """The columns a view shows: all of the table's, but for the elements those not shown left out
+    (`composition.elements_not_shown`, with 02's own function; the draws keep them)."""
+    names = robots[0].tables[table][0]
+    return composition.shown_elements(names, params) if table == 'elements' else names
+
+
 def draw_view(robots: list, table: str, path: str, params: Params) -> None:
     """The page of one view: one chart per column of the table, with one row per robot type."""
-    names = robots[0].tables[table][0]
+    names = view_columns(robots, table, params)
     draws = len(robots[0].tables['total'][1])
     rows_of_charts = -(-len(names) // COLUMNS)
     chart_height = PANEL_ROW * len(robots)
     block = 0.3 + chart_height + 0.55          # a chart's title, its rows and its kg scale
     key = schemas.wrap('; '.join(f'Robot type {r.number}: {r.title}' for r in robots) + '.', 210)
-    notes = view_notes(table)
+    notes = view_notes(table, params)
     top = 1.05 + len(key) * schemas.LINE + 0.25
     height = top + rows_of_charts * block + 0.2 + len(notes) * schemas.LINE + 0.4
     figure, page = schemas.new_page(PAGE_WIDTH, height)
@@ -201,7 +208,7 @@ def draw_view(robots: list, table: str, path: str, params: Params) -> None:
     schemas.save(figure, path, params.output.dpi)
 
 
-def view_notes(table: str) -> list:
+def view_notes(table: str, params: Params) -> list:
     """What a reader needs to read the page of one view, in plain words."""
     notes = ['–: none in this robot type.']
     if table == 'materials':
@@ -209,7 +216,7 @@ def view_notes(table: str) -> list:
                         'drawn materials weigh more than the drawn parts. Battery materials: the cells only.')
     elif table == 'elements':
         notes.insert(0, 'Only the materials that have a recipe so far are in the elements; which ones, for each robot '
-                        'type, is on its page in figures/composition/.')
+                        'type, is on its page in figures/composition/. ' + composition.not_shown_note(params))
     elif table == 'part_groups':
         notes.insert(0, 'Battery: the battery packs as the parts list gives them; their cells alone are Battery '
                         'materials on the page by material.')

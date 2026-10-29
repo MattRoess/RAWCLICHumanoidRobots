@@ -28,7 +28,7 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'data.parts_taken_apart',
         'data.vehicle_pcb_composition', 'data.vehicle_sensor_composition', 'data.data_center_element_composition',
         'data.traction_motor_magnets', 'data.traction_motor_dir', 'data.humanoid_guide', 'data.register',
-        'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg',
+        'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg', 'composition.elements_not_shown',
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
         'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'parts.draws', 'parts.seed',
@@ -64,6 +64,9 @@ class TestSettings(unittest.TestCase):
                                      ('composition', 'draws', 2_000_000),
                                      ('composition', 'seed', -1),
                                      ('composition', 'nmc_wh_per_kg_mode', 300.0),
+                                     ('composition', 'elements_not_shown', ('H', 'H')),
+                                     ('composition', 'elements_not_shown', ('H', '')),
+                                     ('composition', 'elements_not_shown', 'HNOF'),
                                      ('output', 'composition_dir', ' '),
                                      ('output', 'dpi', 10)):
             params = Params()

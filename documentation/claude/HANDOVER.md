@@ -2,7 +2,96 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-28, late night: the register, and robot type 1 over all its robots in 02 (start here)
+## 2026-10-29, morning: the sheet Type 1, H N O F off the pages, research batch 1 begun (start here)
+
+Matthias, leaving: "write a handover, so that we can continue in about 1.5 h". Checked on this Mac: the git folder
+was missing; attached on his "Yes, attach" (V63). Each line below names where it is recorded.
+
+### Done today, committed and pushed (GitHub `main` = 762a349)
+
+1. **The register's sheet Type 1** (39f51f1; V64): "There has to be an excel sheet where all the robots of the different
+   types are fully listed. For now it has to be just all for type 1." The builder writes it beside Robots: 32 robots,
+   every cell of their row, and "In the run" (3 own parts, 28 the parts of the G1, X1 or N1 scaled, PrimeBOT Q1 not
+   drawn: no mass). 01 checks it (check 22); 02 draws type 1 over it. Booster T1 kept in type 1 (his yes).
+2. **The 3 settings of 2026-10-28 in the test's `KEYS`** (762a349; V65, V66). The 2 failing tests had never waited on
+   his run of 00, as the handover of 2026-10-28 said: wrong, corrected in V64.
+3. **His runs today**, read back: 00 05:14:33, the register builder 05:15:02 (V65), 01 06:32:59 to 06:33:16, 02
+   06:35:05 to 06:35:18. 03 and 04 not run since.
+
+### Done today, NOT committed (commit and push on his word)
+
+4. **Hydrogen, nitrogen, oxygen and fluorine off the element pages of 02 and 03, kept in the draws** (V68): "02
+   Hydrogene and Oxygen have to go you should know this. Same for F, and N", "Yes do it". Setting
+   `composition.elements_not_shown` in `src/params_schema.py`; 02 (`shown_elements`, `not_shown_note`,
+   `page_elements`) and 03 (`view_columns`); a note on each page; 02 stops on a symbol that is no element. Tests
+   first: **246 tests, all pass**. Sandbox run (5,000 draws) looked at. METHODOLOGY ("Elements not shown"), README.
+   Files: 02, 03, `src/params_schema.py`, `tests/test_parameters.py`, `test_composition.py`, `test_comparison.py`,
+   `test_parts_taken_apart.py`, README, METHODOLOGY, VERIFICATION (V67, V68), this handover.
+   **His runs to see it:** in RAWCLICHumanoidRobots press Run on
+   `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` (writes the new setting into `params.xlsx`),
+   then `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`, then
+   `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`.
+5. **01's pages checked against his figure rules** (V67), on "I am not so happy about the figures generated in 01. You
+   know why!" and "I do NOT belive 01 figures show the ruslts of all the robots listed under type 1 it has to be 32":
+   type 1 shown as the G1 alone, not the robots of the sheet Type 1; pages not readable (19 in wide, text to 8.5 pt,
+   about 6 px on a 1920 × 1080 screen); notes on every page; project words (SHARED_LISTS points, EVIDENCE numbers,
+   file names); hand-picked colours, not Tol's; single bars at the mode. `3_industrial_logistics_warehousing_robot.png`
+   not rewritten by his run (still 2026-10-27). Nothing changed in 01.
+
+### Waiting for Matthias
+
+- **01's pages:** asked "Shall I write the specification for 01's pages by your rules?", no answer yet.
+- **The PrimeBOT Q1:** 32 listed, 31 drawn; showing 32 needs its mass (E) researched and agreed. Asked, no answer.
+- **Commit and push** of point 4.
+- The pages of types 2 to 6 in 02 show the mean alone and are not 16 × 9 (his rules): reported in V68, not changed.
+- Everything under "Waiting for Matthias" of 2026-10-28 below still stands.
+
+### Research of the 32 robots of type 1: batch 1 begun (his "Yes do it")
+
+**His words, the specification:** "Have you research for the missing data I also want a qualification of the numbers
+you have. Do they come from manufature. It is also not just the weight but at ;east the full composition Cu, etc.",
+"Essential is not only the mass, the composition. Mass is not enough.", "It is enough to have the total amount of Cu,
+Gold etc. we do not need to split it into different parts. If the information is available, then perfect. Use it",
+and "The type of motors and its enery allows to calculated its approximate composition in therms of Cu, rear earth
+mognet, electronic steell aluminum aloys etc." Agreed table: per robot the total in one robot of each element (at
+least Cu, Al, Fe, Cr, Ni, Nd, Pr, Dy, Li, Co, Au, Ag, Pd), min / mode / max; sources maker first, then teardowns;
+every source qualified (maker or not; weighed, design or claim; first- or second-hand; marketing named); a source table
+per robot before any number; what no source settles an estimate (E) agreed before entry; EVIDENCE.md in batches of 8;
+nothing into the data before his yes; a download asks him first; how 02 then draws the totals a later step, his yes.
+
+**Today's provenance** (shown to him): 31 of the 32 masses from the humanoid.guide catalogue (second-hand), the N1's
+from Fourier's page; own parts only for the G1 (China Post Securities' teardown, weighed), X1 (AgiBot's BOM), N1
+(Fourier's model file); the other 28 have no composition of their own.
+
+**Batch 1, the 8 robots chosen** (the most published hardware): 268 Roboto Origin, 37 Asimov 1, 269 RP1, 54 Booster
+T1, 148 Booster K1, 234 PM01, 311 Unitree R1, 19 AI Sapiens K1. **Read so far, web pages only, nothing downloaded and
+nothing written into EVIDENCE.md yet** (first-hand reading by web-fetch agents, 2026-10-29):
+- **Roboto Origin** (RoboParty's own BOM, github.com/Roboparty/roboto_origin/blob/main/assets/BOM_EN.md, dated
+  20260105, "ATOM 01 v1.0.1"): 14 × DM 4340P (48 V) and 9 × DM 10010L actuators (DAMIAO naming, no specs on the page);
+  48 V 15 Ah Li-ion pack (720 Wh, arithmetic); RDK X5 8G board; 25 CNC frame lines, black anodised, metal not named;
+  no masses in the BOM. 1.25 m, 34 kg only from a third-party article quoting RoboParty.
+- **Asimov 1** (Menlo's own docs, docs.menlo.ai/asimov/1/overview/system-tour/mechanical and /electrical): 25 joints,
+  5 actuator models (EC-A6416-P2-25 ×3, EC-A5013-H17-100 ×4, EC-A3814-H14-107 ×4, EC-A4315-P2-36 ×4,
+  EC-A4310-P2-36 ×10) with rated / peak torques; battery Li-ion INR18650 13S4P, 46.8 V, 10.5 Ah, 491.4 Wh, about 2 kg;
+  Radxa CM5 and Raspberry Pi 5; structure "7075 aluminum and MJF PA12 nylon"; about 1.2 m, 35 kg. The maker marks the
+  mechanical tables as possibly outdated. The full BOM is behind an e-mail form (tally.so/r/jaG0va): not opened.
+- **RP1** (RoboParty's own repositories RP1, RP1_hardware, ROMOMO): 24 joints (Pro 30); ROMOMO modules RMM10062-2E
+  (48 V, ratio 22, 44 / 160 N·m), RMM6562-2E (48 V, 19.5, 10 / 35 N·m), RMM8463-2E (drawing only); 14 boards named.
+  Mass 39 kg, 1.35 m, 48 V main + 30 V auxiliary battery, 10 Ah, materials AL6061, AL7075-T6, PC, resin, PU: from one
+  third-party article (cnx-software) only. The whole-robot BOMs (RP1.3.4, 5DOF and 7DOF), CNC / 3D-print / rubber BOMs
+  are XLSX files, the module test reports PDFs: downloads, his yes needed.
+- **Booster T1**: no maker source readable (Booster's Feishu wiki needs a login; booster.tech has no T1 page; T1
+  discontinued per RobotShop). Resellers only: 23 joints, peak 130 N·m, 10.5 Ah Li-ion (no voltage), Jetson AGX Orin
+  and Intel i7, about 30 kg, 1.18 m. Booster's docs.booster.tech not yet read.
+- **Not yet read:** Booster K1, PM01, Unitree R1, AI Sapiens K1.
+
+**Next, on his word:** read the four remaining; ask him for the downloads (RP1's BOM workbooks, ROMOMO's test
+reports, the Asimov BOM form, Booster's docs); write batch 1 into EVIDENCE.md (a new section E5) with the source table
+per robot; then propose how the element totals follow from the motors (number, kind, torque, the actuators' mass) and
+the battery (Wh, chemistry), sources first: the G1's weighed joint module (E2) is the same kind; whether
+RAWCLICVehicleTractionMotor's car motors represent robot joint motors is to be questioned (his rule 1, same kind).
+
+## 2026-10-28, late night: the register, and robot type 1 over all its robots in 02
 
 Matthias: "Write a good handover I will continue tomorrow on another mac", then "everything has to be comitted and
 pushed". Everything below is committed and pushed to `main` with this handover.

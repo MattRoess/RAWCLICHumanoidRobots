@@ -5,6 +5,49 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V68. Hydrogen, nitrogen, oxygen and fluorine off the element pages of 02 and 03, kept in the draws
+
+- **What:** on "Hydrogene and Oxygen have to go you should know this. Same for F, and N" and "Yes do it" (the four
+  points written back): the setting `composition.elements_not_shown` ('H', 'N', 'O', 'F'); 02's type 1 element pages
+  and the "By element" of types 2 to 6, and 03's `elements.png`, leave them out, with one function of 02
+  (`shown_elements`) and a note on each page; the draws keep them; 02 stops on a symbol that is not an element.
+- **Found before building:** the rule was set in RAWCLICStockAndFlow (`materials.battery_elements_not_of_interest`,
+  N and F, 2026-10-05; oxygen out of its figures) and RAWCLICDataCenters 05 (oxygen); hydrogen is written nowhere.
+- **How, tests first** (8 new tests; before the code: 5 failures and 3 errors): the setting listed and refused when a
+  symbol repeats, is empty, or is not in a tuple; on the small files, fluorine in the draws and off the page, the note
+  naming it, a symbol that is no element ('Ox') a fault of 02; on the real inputs, type 1 holding all four in its
+  draws, its pages' panels without them and with copper, its notes page naming them; 03's elements without them, its
+  materials as before.
+- **Sandbox run** (the real inputs, the register on disk, 02 and 03 with 5,000 draws, every output in the scratch
+  folder): exit 0 for both; type 1 as in V64 (31 robots, 34.0 kg at the mean); `elements.txt` still holds H, N, O, F;
+  type 1's first element page starts with lithium; type 2's page by element without the four, its note naming them.
+  The project's `figures/` unchanged.
+- **All tests: 246, all pass.**
+- **Not covered:** `params.xlsx` and PARAMETER_REFERENCE.md gain the setting at Matthias's next run of 00; the real run
+  of 02 and 03 is his. The pages of types 2 to 6 show the mean alone and are not 16 × 9 inches (his rules of
+  2026-10-28), as before: not changed.
+
+### V67. 01's pages of Matthias's run (06:32:59 to 06:33:16), against his figure rules
+
+- **What:** on "I am not so happy about the figures generated in 01. You know why!": the pages of `figures/schemas/`
+  opened (the overview, type 1's robot page, type 3's shared-lists page) and 01's drawing code read.
+- **Result, nothing changed:**
+  - They do not show what the model does: type 1's pages show the workbook's anchor robot alone (the G1, 13 parts,
+    35 kg, materials at the mode), the overview says one anchor robot "stands for the category"; 02 draws type 1 over
+    the 31 robots of the sheet Type 1 (34.0 kg at the mean, 95 %: 17.3 to 42.7 kg in V64's sandbox).
+  - Not readable by his rule of 2026-10-28 (16 × 9 inch pages, text 14 pt and up, 18 px at least on a 1920 × 1080
+    screen): pages 19 inches wide and 10 to 20 inches high, text down to 8.5 pt at 150 dpi (17.7 px); type 3's
+    shared-lists page (2850 × 3049 px) fit to the screen is 35 % of its size, its text about 6 px.
+  - Notes and explanations at the foot of every page, not once on a page of their own.
+  - Project words on the pages: "point 2 of SHARED_LISTS.md", "Point 5", "EVIDENCE.md E1.7j", "(E)", "sheet Splits",
+    report file names.
+  - Colours chosen by hand (`PART_COLOUR`, `MATERIAL_COLOUR`, `BAR` in 01), not Paul Tol's as published.
+  - Single bars at the mode with the bounds; no median, mean or 95 % interval (01 draws nothing at random).
+  - `figures/schemas/categories/3_industrial_logistics_warehousing_robot.png` still of 2026-10-27 09:41:11, the only
+    page not rewritten by the run: not written by it, or replaced by iCloud's older copy; not found out.
+- **Missed before:** V64 says faults.png was looked at with "nothing overflowing"; its readability by the rule above
+  was not checked.
+
 ### V66. The three settings of 2026-10-28 in the test's list of settings
 
 - **What:** on "Yes, add them": `data.humanoid_guide`, `data.register` and `composition.type_one_lowest_kg` added to

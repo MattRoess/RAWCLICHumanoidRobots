@@ -329,7 +329,7 @@ class TestReadable(unittest.TestCase):
             pages = apart.figure_pages(apart.read_taken(params))
             self.assertEqual([name for name, _ in pages], list(apart.FIGURES))
             # 02's pages of robot type 1: its notes, then its elements nine a page.
-            pages += composition.type_one_pages(c, d, [])
+            pages += composition.type_one_pages(c, d, [], params)
             for name, figure in pages:
                 figure.canvas.draw()
                 sizes = [t.get_fontsize() for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
@@ -341,6 +341,30 @@ class TestReadable(unittest.TestCase):
                 smallest = min(sizes) * params.output.dpi / 72 * scale
                 self.assertGreaterEqual(smallest, self.SMALLEST_PX,
                                         msg=f'{name}: {width} × {height} px, smallest text {smallest:.1f} px')
+
+
+class TestElementsNotShown(unittest.TestCase):
+    """Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N": type 1's
+    element pages leave them out, its draws keep them."""
+
+    def test_type_1s_pages_leave_out_hydrogen_nitrogen_oxygen_and_fluorine(self):
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        for symbol in ('H', 'N', 'O', 'F'):
+            self.assertTrue(c.column('elements', symbol).any(), msg=symbol)   # in the draws
+        pages = composition.type_one_pages(c, d, [], params)
+        titles = [axes.get_title(loc='left') for _, figure in pages[1:] for axes in figure.axes]
+        notes = ' '.join(t.get_text() for t in pages[0][1].texts)
+        for _, figure in pages:
+            apart.plt.close(figure)
+        for name in ('Hydrogen (H)', 'Nitrogen (N)', 'Oxygen (O)', 'Fluorine (F)'):
+            self.assertNotIn(name, titles)
+        self.assertIn('Copper (Cu)', titles)
+        self.assertIn('hydrogen, nitrogen, oxygen and fluorine are not shown', ' '.join(notes.split()).lower())
 
 
 class TestCentre(unittest.TestCase):

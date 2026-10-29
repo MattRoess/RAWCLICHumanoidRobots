@@ -356,6 +356,13 @@ included) and its kg by element (only the materials that have a recipe so far). 
 95 % of the draws. The numbers stand beside the bars, with three significant figures, so that a few grams of an
 element are not printed as 0.
 
+**Elements not shown.** The element pages of 02 and 03 leave out hydrogen, nitrogen, oxygen and fluorine
+(`composition.elements_not_shown`; Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same
+for F, and N", as RAWCLICStockAndFlow's figures leave out nitrogen, fluorine and oxygen, and RAWCLICDataCenters'
+oxygen). The draws keep them: `elements.npy` and the summary hold every element, so that the elements still add up to
+the materials in every draw and stock-and-flow can read any of them. Each page says in a note which elements it leaves
+out. 02 stops when the setting names a symbol that is not an element.
+
 ## Robot type 1 over its robots, in 02 (since 2026-10-28)
 
 Matthias, 2026-10-28: "Do it for all the robots which are in type 1. Do the code and the figure!!", "Why is it in 04",
@@ -384,7 +391,8 @@ drawing as it was built in 04, with these changes:
    waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body).
 5. **Its pages:** a notes page, then its elements nine a page, each the histogram of one robot's total over the draws,
    median solid and mean dotted with their numbers above the panel, 95 % dashed, own scale (Matthias: "Do not repeat
-   the comments on all slides have it on a separate one"; "can you better adust the hight").
+   the comments on all slides have it on a separate one"; "can you better adust the hight"); hydrogen, nitrogen,
+   oxygen and fluorine not shown (above, "Elements not shown"), their draws kept.
 
 ## What 04 draws (as built on 2026-10-28; its drawing now in 02, above)
 
@@ -488,4 +496,5 @@ It draws one page per view into `figures/comparison/`: `materials.png`, `element
 `body_regions.png`. Each holds one small chart per material (element, part group, body region) with one row per robot
 type: the mean as a bar, a line over 95 % of the draws, and the mean written beside it. Each chart has its own kg
 scale, so that a material of a few grams can be read as well as one of 25 kg. Matthias, 2026-10-26: "I want that it
-is possible to compare on a material level between the 6 types of roboy".
+is possible to compare on a material level between the 6 types of roboy". `elements.png` leaves out hydrogen, nitrogen,
+oxygen and fluorine, with 02's function and setting ("Elements not shown", above).
