@@ -23,11 +23,14 @@ The workbook (`data.workbook`), the shared lists (`data.shared_lists`) and the e
 of 01 show (one copy of the code). And the settings `composition.draws`, `composition.seed` and the energy per kg of
 the NMC cells (`composition.nmc_wh_per_kg_min`, `_mode`, `_max`).
 
-The register (`data.register`): every known humanoid robot with its robot types. A robot type whose robots in the
-register include one taken apart (today type 1: the Unitree G1, AgiBot X1 and Fourier N1) is drawn over its robots
-from the robots taken apart; for it 02 also reads the parts file (`data.parts_taken_apart`), the sibling projects'
-files where they lie (RAWCLICVehicleElectronics' board metals and sensor elements, RAWCLICDataCenters' tantalum) and
-runs RAWCLICVehicleTractionMotor's own code in its own environment for the elements of the magnets.
+The register (`data.register`): its sheet Robots, every known humanoid robot with its robot types, and its sheet
+Type 1, every robot of type 1 with what this run does with it (Matthias, 2026-10-29: "I want the all the know type 1
+robots are integrated and included in the run", "There has to be an excel sheet where all the robots of the different
+types are fully listed. For now it has to be just all for type 1."). Where the robots of the sheet Type 1 include one
+taken apart (the Unitree G1, AgiBot X1 and Fourier N1), type 1 is drawn over the robots of that sheet from the robots
+taken apart; for it 02 also reads the parts file (`data.parts_taken_apart`), the sibling projects' files where they
+lie (RAWCLICVehicleElectronics' board metals and sensor elements, RAWCLICDataCenters' tantalum) and runs
+RAWCLICVehicleTractionMotor's own code in its own environment for the elements of the magnets.
 
 WHAT IT CHECKS
 --------------
@@ -61,8 +64,9 @@ many robot types are drawn. Nothing is normalised.
 
 HOW IT DRAWS ROBOT TYPE 1 (Matthias, 2026-10-28: "Yes in 02 it is all type 1 in.!", "Yes, code it in 02")
 -----------------------------------------------------------------------------------------------------
-  - Each draw is one of the register's robots of type 1, all equally often; those without a stated mass are not drawn
-    (named on the notes page). Its mass: a triangle on its register mass (the stated mass +- 1 kg, or its range).
+  - Each draw is one of the robots of the register's sheet Type 1, all equally often; those without a stated mass
+    are not drawn (named on the notes page; the sheet says "not drawn"). Its mass: a triangle on its register mass
+    (the stated mass +- 1 kg, or its range).
   - Its parts: those of the robot taken apart that it is, else those of one of the three, each as often. The factor
     its mass over that robot's own scales the joints whole, with all inside them, and the parts of the kinds "Frame
     and shell" and "Battery pack" (the pack's energy too); not the boards outside the joints, the sensors, the cables
@@ -650,14 +654,14 @@ class ApartInputs:
     pcb: dict             # car board category -> element -> (min, mode, max), mg per cm2 of board
     sensor_types: dict    # car sensor type -> element -> (min, mode, max), mg per unit
     tantalum: tuple       # kg of tantalum per kg of board: min, mode, max
-    robots: list          # the register's robots of type 1 drawn (schemas.RegisterRobot), each with a mass
-    left_out: list        # the register's robots of type 1 not drawn: no mass stated
+    robots: list          # the robots of the register's sheet Type 1 drawn (schemas.RegisterRobot), each with a mass
+    left_out: list        # the robots of the sheet Type 1 not drawn: no mass stated
 
 
 def read_apart_inputs(params: Params, base: Inputs, register: list) -> ApartInputs:
     """The parts file and the sibling projects' files, read with 01's functions, beside 02's inputs (`base`) and the
-    register; the register's robots of type 1 with a stated mass are drawn. Raises schemas.WorkbookError when a file
-    cannot be read."""
+    robots of the register's sheet Type 1 (`register`); those with a stated mass are drawn. Raises
+    schemas.WorkbookError when a file cannot be read."""
     apart = schemas.read_parts_taken_apart(absolute(params.data.parts_taken_apart))
     triple = lambda row, keys: tuple(schemas.number(row.get(k)) for k in keys)  # noqa: E731
     pcb: dict = {}
@@ -1487,9 +1491,9 @@ def type_one_notes(c: Composition, d: Draws, left_out: list) -> list:
         'The bars: the draws of one element in one robot, the height the share of the draws. Solid line: the median; '
         'dotted line: the mean; both written above the panel, right. Dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit (kg, g, mg).',
-        f"The draws: {d.n:,}, each one robot of type 1 in the register, each of its {len(d.register)} robots equally "
-        'often; its mass a triangle on its stated mass ± 1 kg or its stated range; its parts those of the robot '
-        'taken apart that it is, else '
+        f"The draws: {d.n:,}, each one robot of the register's sheet Type 1, each of its {len(d.register)} robots "
+        'drawn equally often; its mass a triangle on its stated mass ± 1 kg or its stated range; its parts those of '
+        'the robot taken apart that it is, else '
         f'those of the {taken} (each as often), the joints, frame, shell and battery scaled to its mass, the '
         'electronics and sensors not.',
         'The robots drawn: ' + '; '.join(d.register) + '.',
@@ -1547,13 +1551,16 @@ def run(params: Params) -> int:
     try:
         inputs = read_inputs(params)
         register = schemas.read_register(absolute(params.data.register))
-        # The robot types drawn from robots taken apart: those whose robots in the register include one (type 1).
-        apart = read_apart_inputs(params, inputs, register) if any(r.taken_apart for r in register) else None
+        # Robot type 1's robots: those of the register's sheet Type 1, checked below against its sheet Robots. Type 1 is
+        # drawn from the robots taken apart where its robots include one.
+        type_one = schemas.read_type_sheet(absolute(params.data.register), TYPE_ONE)
+        apart = read_apart_inputs(params, inputs, type_one) if any(r.taken_apart for r in type_one) else None
     except schemas.WorkbookError as error:
         print(error, file=sys.stderr)
         return 1
-    faults = all_faults(inputs, params) + schemas.check_register(register, params,
-                                                                 list(apart.apart.robots) if apart else [])
+    faults = (all_faults(inputs, params)
+              + schemas.check_register(register, params, list(apart.apart.robots) if apart else [])
+              + schemas.check_type_one(register, type_one, params))
     if apart is not None:
         faults += apart_faults(apart, params)
     if faults:
@@ -1597,7 +1604,8 @@ def run(params: Params) -> int:
               f"{', '.join(missing) or 'none'}.")
     if taken is not None:
         write_taken_apart(taken, absolute(params.output.parts_dir))
-        print(f'  Robot type 1 drawn over {len(taken.register)} robots of the register; not drawn (no mass stated): '
+        print(f"  Robot type 1 drawn over {len(taken.register)} robots of the register's sheet Type 1; not drawn (no "
+              f'mass stated): '
               f"{', '.join(f'{r.number} {r.name}' for r in apart.left_out) or 'none'}.")
         for column, share in below_zero(taken).items():
             if share > 0:

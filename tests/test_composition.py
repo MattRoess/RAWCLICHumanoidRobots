@@ -330,6 +330,20 @@ class TestRun(Drawn):
         self.assertFalse(os.path.exists(params.output.composition_dir))
         self.assertFalse(os.path.exists(params.output.composition_figures_dir))
 
+    def test_a_register_without_its_sheet_type_1_stops_before_anything_is_written(self):
+        # 02 draws robot type 1 over the robots of the register's sheet Type 1 (Matthias, 2026-10-29); without it,
+        # nothing is drawn.
+        params = self.write()
+        small.build_register(params.data.register, rows=SMALL_REGISTER, without_type_one=True)
+        self.assertEqual(composition.run(params), 1)
+        self.assertFalse(os.path.exists(params.output.composition_dir))
+
+    def test_a_sheet_type_1_that_misses_a_robot_of_type_1_stops_before_anything_is_written(self):
+        params = self.write()
+        small.build_register(params.data.register, rows=SMALL_REGISTER, type_one=[])
+        self.assertEqual(composition.run(params), 1)
+        self.assertFalse(os.path.exists(params.output.composition_dir))
+
 
 if __name__ == '__main__':
     unittest.main()

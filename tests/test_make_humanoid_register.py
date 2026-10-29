@@ -84,6 +84,27 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(by_number[325].mass, (72, 73, 74))          # Walker S2: "43, 73", the larger
         self.assertEqual(by_number[236].mass, (None, None, None))    # PrimeBOT Q1: none stated
 
+    def test_the_sheet_type_1_lists_every_robot_of_type_1_as_in_the_sheet_robots(self):
+        # Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of the different types are fully
+        # listed. For now it has to be just all for type 1." Every robot whose types include 1, leading or second, in
+        # the order of the register, every cell as in the sheet Robots, and 01's check of it finds nothing.
+        listed = schemas.read_type_sheet(self.path, 1)
+        self.assertEqual([r.number for r in listed], [r.number for r in self.register if 1 in r.types])
+        self.assertEqual(len(listed), 32)
+        self.assertIn(54, [r.number for r in listed])    # the Booster T1, 1.18 m: kept in type 1 (2026-10-29)
+        self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, no mass stated: listed, not drawn
+        self.assertEqual([f.text for f in schemas.check_type_one(self.register, listed, Params())], [])
+
+    def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
+        listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}
+        own = {n for n, run in listed.items() if run == 'drawn: its own parts'}
+        scaled = {n for n, run in listed.items()
+                  if run == 'drawn: the parts of the Unitree G1, AgiBot X1 or Fourier N1, scaled to its mass'}
+        self.assertEqual(own, {102, 16, 350})
+        self.assertEqual(len(scaled), 28)
+        self.assertEqual({n for n in listed if n not in own | scaled}, {236})
+        self.assertEqual(listed[236], 'not drawn: no mass stated')
+
     def test_it_writes_where_00_says(self):
         self.assertEqual(builder.output_path(Params()), absolute(Params().data.register))
 

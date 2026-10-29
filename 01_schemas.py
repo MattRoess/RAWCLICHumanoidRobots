@@ -43,7 +43,10 @@ AgiBot X1 and the Fourier N1, part by part (EVIDENCE.md E2.8 to E2.8e, agreed by
 each lies inside its type's height and mass in the sheet Taxonomy, and checks the file against the sibling projects'
 files it
 names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`, `data.data_center_element_composition`,
-`data.traction_motor_magnets`), read where they lie. And it looks in `data.sources_dir`
+`data.traction_motor_magnets`), read where they lie. It reads the register `data.register`
+(`data/researched/humanoid_register.xlsx`, written by tools/make_humanoid_register.py): its sheet Robots, every known
+humanoid robot with its robot types, and its sheet Type 1, every robot of type 1 with what 02's run does with it,
+checked against the sheet Robots (`check_register`, `check_type_one`). And it looks in `data.sources_dir`
 (`documentation/sources/`) for the report of each category.
 
 WHAT IT CHECKS
@@ -193,11 +196,16 @@ CHECKS_DONE = [
     "a tantalum row (RAWCLICDataCenters, 04_), every magnet grade class a heat group can draw "
     "(RAWCLICVehicleTractionMotor's element workbook).",
     "Robot type 1 taken apart, against the sheet Taxonomy: every robot's maker height and stated mass inside its "
-    "type's defining limits (on this rule the Booster T1, 1.18 m, is out of type 1).",
+    "type's defining limits (on this rule the Booster T1, 1.18 m, is not taken apart; the register keeps it in type "
+    '1, 2026-10-29).',
     'The register of every known humanoid robot: every number once; a robot with types has one or two different '
     'robot types of the six, a robot without has an entry saying why (not assigned, or the same robot as an entry '
     'with types); every form known; every mass min, mode and max or none, in order; no robot of type 1 below its '
     'lowest mass (15 kg); the three robots taken apart in the parts file and of type 1.',
+    "The register's sheet Type 1: every robot of type 1 of the sheet Robots, leading or second type, listed once and "
+    'nothing else, every cell as in the sheet Robots; its "In the run" what 02 does with it: its own parts for a robot '
+    'taken apart, the parts of the robots taken apart scaled to its mass for a robot with a stated mass, not drawn for '
+    'a robot without.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -1903,7 +1911,8 @@ def type_limits(category: Category) -> tuple | None:
 def check_robot_types(apart: PartsTakenApart, categories: list) -> list[Fault]:
     """Whether every robot of the file lies inside its type: its maker's own height and stated mass inside the type's
     defining limits of the sheet Taxonomy (Matthias, 2026-10-27: "We have to see, that there is not a mixup between
-    the different types"; on this rule the Booster T1, 1.18 m, was taken out of type 1)."""
+    the different types"; on this rule the Booster T1, 1.18 m, is not taken apart; the register keeps it in type 1,
+    Matthias's yes of 2026-10-29)."""
     faults = []
     by_number = {c.number: c for c in categories}
     unreadable = set()
@@ -2025,12 +2034,25 @@ NOT_ASSIGNED = 'not assigned: '
 SAME_ROBOT = 'the same robot as '
 MOST_TYPES = 2   # "Double assignment means 1 robot can be two types" (Matthias, 2026-10-28)
 
+# The sheet of one robot type's robots (Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of
+# the different types are fully listed. For now it has to be just all for type 1."): 'Type 1' and so on, with every
+# heading of the sheet Robots and one more, what 02's run does with each robot.
+TYPE_SHEET = 'Type {}'
+IN_RUN = 'In the run'
+TYPE_SHEET_HEADINGS = REGISTER_HEADINGS + [IN_RUN]
+# What the sheet Type 1 says of a robot in 02's run (tools/make_humanoid_register.py writes the same): drawn with its
+# own parts (a robot taken apart); drawn with the parts of the robots taken apart, scaled to its mass (a robot with a
+# stated mass; the text goes on with their names); not drawn (no mass stated).
+IN_RUN_OWN = 'drawn: its own parts'
+IN_RUN_SCALED = 'drawn: the parts of '
+IN_RUN_NOT = 'not drawn: no mass stated'
+
 
 @dataclass
 class RegisterRobot:
     """One robot of the register."""
 
-    row: int                 # its row in the sheet Robots
+    row: int                 # its row in its sheet (Robots, or Type 1)
     number: int              # its number: the catalogue's order of reading, 350 on for the robots added
     name: str
     maker: str
@@ -2040,26 +2062,27 @@ class RegisterRobot:
     form: str
     entry: str
     taken_apart: str         # its name in parts_taken_apart.xlsx, for the three robots of type 1 taken apart
+    cells: tuple = ()        # every cell of its row under REGISTER_HEADINGS, as read (a type's sheet against Robots)
+    in_run: str = ''         # in a robot type's sheet: what 02's run does with it; '' in the sheet Robots
 
 
-def read_register(path: str) -> list[RegisterRobot]:
-    """Read the register; never writes to it. A missing file, sheet or heading stops the reading (WorkbookError), as
-    with the other files 01 reads."""
+def read_robots(path: str, name: str, headings: list) -> list[RegisterRobot]:
+    """The robots of one sheet of the register, `name`, whose first row must be `headings`; never writes to it. A
+    missing file, sheet or heading stops the reading (WorkbookError), as with the other files 01 reads."""
     if not os.path.exists(path):
         raise WorkbookError(f'{path}: the register is not there.')
     book = load_workbook(path, data_only=True)
-    if REGISTER_SHEET not in book.sheetnames:
-        raise WorkbookError(f"{path}: no sheet '{REGISTER_SHEET}'. Its sheets are: {', '.join(book.sheetnames)}.")
-    sheet = book[REGISTER_SHEET]
-    found = [text(cell.value) for cell in sheet[1]][:len(REGISTER_HEADINGS)]
-    if found != REGISTER_HEADINGS:
-        raise WorkbookError(f"{path}, sheet '{REGISTER_SHEET}': the first row must be {REGISTER_HEADINGS}, not "
-                            f'{found}.')
-    at = {name: k for k, name in enumerate(REGISTER_HEADINGS)}
+    if name not in book.sheetnames:
+        raise WorkbookError(f"{path}: no sheet '{name}'. Its sheets are: {', '.join(book.sheetnames)}.")
+    sheet = book[name]
+    found = [text(cell.value) for cell in sheet[1]][:len(headings)]
+    if found != headings:
+        raise WorkbookError(f"{path}, sheet '{name}': the first row must be {headings}, not {found}.")
+    at = {heading: k for k, heading in enumerate(headings)}
     robots = []
     for cells in sheet.iter_rows(min_row=2):
-        v = [cell.value for cell in cells] + [None] * len(REGISTER_HEADINGS)
-        if all(x is None for x in v[:len(REGISTER_HEADINGS)]):
+        v = [cell.value for cell in cells] + [None] * len(headings)
+        if all(x is None for x in v[:len(headings)]):
             continue
         written = text(v[at['Types']])
         types = tuple(int(t) if t.isdigit() else t for t in (piece.strip() for piece in written.split(',')) if t)
@@ -2067,8 +2090,20 @@ def read_register(path: str) -> list[RegisterRobot]:
         robots.append(RegisterRobot(row=cells[0].row, number=int(number(v[at['Number']]) or 0),
                                     name=text(v[at['Robot']]), maker=text(v[at['Maker']]), mass=mass, types=types,
                                     types_text=written, form=text(v[at['Form']]), entry=text(v[at['Entry']]),
-                                    taken_apart=text(v[at['Taken apart as']])))
+                                    taken_apart=text(v[at['Taken apart as']]),
+                                    cells=tuple(v[:len(REGISTER_HEADINGS)]),
+                                    in_run=text(v[at[IN_RUN]]) if IN_RUN in at else ''))
     return robots
+
+
+def read_register(path: str) -> list[RegisterRobot]:
+    """Read the register's sheet Robots: every known humanoid robot."""
+    return read_robots(path, REGISTER_SHEET, REGISTER_HEADINGS)
+
+
+def read_type_sheet(path: str, robot_type: int) -> list[RegisterRobot]:
+    """Read the register's sheet of one robot type ('Type 1'): its robots, each with what 02's run does with it."""
+    return read_robots(path, TYPE_SHEET.format(robot_type), TYPE_SHEET_HEADINGS)
 
 
 def check_register(register: list, params: Params, taken_apart: list) -> list[Fault]:
@@ -2129,6 +2164,45 @@ def check_register(register: list, params: Params, taken_apart: list) -> list[Fa
                                                   f'{os.path.basename(params.data.parts_taken_apart)}.'))
             if 1 not in r.types:
                 faults.append(Fault(where, r.row, f'{what}: a robot taken apart is a robot of type 1.'))
+    return faults
+
+
+def check_type_one(register: list, listed: list, params: Params) -> list[Fault]:
+    """Whether the sheet Type 1 (`listed`) lists every robot of type 1 of the sheet Robots (`register`), leading or
+    second type, each once and nothing else, every cell as in the sheet Robots; and whether its "In the run" says what
+    02 does with it: its own parts where it is taken apart, the parts of the robots taken apart scaled to its mass where
+    a mass is stated, else not drawn."""
+    where = os.path.basename(params.data.register) + ': ' + TYPE_SHEET.format(1)
+    of_type = {r.number: r for r in register if 1 in r.types}
+    numbers = [r.number for r in listed]
+    faults = []
+    for r in listed:
+        what = f'{r.number} {r.name}'
+        if numbers.count(r.number) > 1:
+            faults.append(Fault(where, r.row, f'{what}: listed twice.'))
+        if r.number not in of_type:
+            faults.append(Fault(where, r.row, f'{what}: not a robot of type 1 in the sheet {REGISTER_SHEET}.'))
+            continue
+        differ = [h for h, a, b in zip(REGISTER_HEADINGS, r.cells, of_type[r.number].cells) if a != b]
+        if differ:
+            faults.append(Fault(where, r.row, f"{what}: {', '.join(differ)} not as in its row "
+                                              f'{of_type[r.number].row} of the sheet {REGISTER_SHEET}.'))
+        if r.taken_apart:
+            if r.in_run != IN_RUN_OWN:
+                faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but a robot taken apart is "
+                                                  f"drawn with its own parts ('{IN_RUN_OWN}')."))
+        elif None not in r.mass:
+            if not r.in_run.startswith(IN_RUN_SCALED):
+                faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but a robot with a stated "
+                                                  'mass is drawn with the parts of the robots taken apart, scaled to '
+                                                  f"its mass ('{IN_RUN_SCALED}...')."))
+        elif r.in_run != IN_RUN_NOT:
+            faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but a robot without a stated "
+                                              f"mass is not drawn ('{IN_RUN_NOT}')."))
+    for number, r in of_type.items():
+        if number not in numbers:
+            faults.append(Fault(where, 0, f'{number} {r.name}: a robot of type 1 in row {r.row} of the sheet '
+                                          f'{REGISTER_SHEET}, missing here.'))
     return faults
 
 
@@ -3158,12 +3232,18 @@ def main() -> int:
                        + check_robot_types(apart, book.categories))
         except WorkbookError as error:
             print(f'{error} Robot type 1 taken apart is not checked.')
-    # The register of every known humanoid robot, against the robots taken apart.
+    # The register of every known humanoid robot, against the robots taken apart; then its sheet Type 1 against it.
+    register = None
     try:
         register = read_register(absolute(params.data.register))
         faults += check_register(register, params, list(apart.robots) if apart is not None else [])
     except WorkbookError as error:
         print(f'{error} The register is not checked.')
+    if register is not None:
+        try:
+            faults += check_type_one(register, read_type_sheet(absolute(params.data.register), 1), params)
+        except WorkbookError as error:
+            print(f'{error} Its sheet Type 1 is not checked.')
     sources = absolute(params.data.sources_dir)
     reports = {c.number: category_report(c.number, sources) for c in book.categories}
     out = absolute(params.output.schemas_dir)

@@ -15,8 +15,8 @@ Every setting is in `src/params_schema.py`.
 | Stage | Reads | Writes | Does |
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
-| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists; reads the element recipes and counts each robot type's battery cells. Checks that the workbook agrees with itself, that everything is placed, and that the recipes and the battery cells hold together. Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
-| `02_composition.py` | The same three files, through 01's functions; the register (`data/researched/humanoid_register.xlsx`); for robot type 1 the parts file, the sibling projects' board, sensor and tantalum data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/`, `figures/composition/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A robot type whose register robots include one taken apart (type 1) is drawn over its register robots from the robots taken apart; the others from the workbook. Writes the draws and a summary for each robot type separately, for stock-and-flow; type 1 taken apart for 04; the pages. |
+| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, `documentation/sources/` | `figures/schemas/` | Reads the six categories, their parts lists and their materials, and where each goes in the shared lists; reads the element recipes and counts each robot type's battery cells. Checks that the workbook agrees with itself, that everything is placed, that the recipes and the battery cells hold together, and that the register and its sheet Type 1 hold together (checks 21 and 22). Draws what the workbook defines, each robot type in the shared lists, and each robot type in one view. Nothing is drawn at random. |
+| `02_composition.py` | The same three files, through 01's functions; the register (`data/researched/humanoid_register.xlsx`: its sheet Robots, and its sheet Type 1 for robot type 1's robots); for robot type 1 the parts file, the sibling projects' board, sensor and tantalum data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/`, `figures/composition/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. Robot type 1 is drawn over the robots of the register's sheet Type 1 from the robots taken apart; the others from the workbook. Writes the draws and a summary for each robot type separately, for stock-and-flow; type 1 taken apart for 04; the pages. |
 | `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. |
 | `04_parts_taken_apart.py` | 02's draws of robot type 1 taken apart (`data/parts_taken_apart/`); the parts file through 01's functions (which joints run hot) | `figures/parts_taken_apart/` | Draws the two figures Matthias approved from 02's draws. Draws nothing at random itself. |
 
@@ -232,7 +232,18 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     Robots) inside its type's defining limits, read from the sheet (type 1: "Height: 1.20–1.45 m (defining)", "Mass:
     30–50 kg (defining)"); a type that the sheet does not have, or whose limits cannot be read, is a fault (Matthias,
     2026-10-27: "We have to see, that there is not a mixup between the different types"; on this rule the Booster T1,
-    1.18 m, is out of type 1).
+    1.18 m, is not taken apart; the register keeps it in type 1, on Matthias's yes of 2026-10-29).
+21. The register of every known humanoid robot (`data/researched/humanoid_register.xlsx`, sheet Robots; EVIDENCE.md E4
+    to E4.11): every number once; a robot with types has one or two different robot types of the six, a robot without
+    has an entry saying why (not assigned, or the same robot as an entry with types); every form known; every mass
+    min, mode and max or none, in order from 0; no robot of type 1 below its lowest mass (15 kg,
+    `composition.type_one_lowest_kg`); the three robots taken apart in the parts file and of type 1.
+22. The register's sheet Type 1 (Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of the
+    different types are fully listed. For now it has to be just all for type 1."): every robot of type 1 of the sheet
+    Robots, its leading or its second type, listed once and nothing else, every cell as in its row of the sheet Robots;
+    its column "In the run" what 02 does with it: "drawn: its own parts" for a robot taken apart, "drawn: the parts of
+    the Unitree G1, AgiBot X1 or Fourier N1, scaled to its mass" for a robot with a stated mass, "not drawn: no mass
+    stated" for a robot without. A register without the sheet stops 02.
 
 02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
 (the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row
@@ -352,9 +363,15 @@ Matthias, 2026-10-28: "Do it for all the robots which are in type 1. Do the code
 moved from 04 into 02 unchanged but for the choice of robot and mass; what follows ("What 04 draws") describes that
 drawing as it was built in 04, with these changes:
 
-1. **Each draw is one of the register's robots of type 1** (`data/researched/humanoid_register.xlsx`), all equally
-   often: 31 robots on 2026-10-28; the PrimeBOT Q1 is not drawn (no mass stated); robots lighter than 15 kg are not of
-   type 1 (`composition.type_one_lowest_kg`, Matthias: "Below 15 kg not part of the type 1"; 01 checks the register).
+1. **Each draw is one of the robots of the register's sheet Type 1** (`data/researched/humanoid_register.xlsx`), all
+   equally often. Matthias, 2026-10-29: "I want the all the know type 1 robots are integrated and included in the run"
+   and "There has to be an excel sheet where all the robots of the different types are fully listed. For now it has to
+   be just all for type 1." The sheet lists every robot of type 1 of the sheet Robots (its leading or its second type),
+   with every cell of its row there and what the run does with it ("In the run"; check 22): 32 robots on 2026-10-29,
+   31 drawn (3 with their own parts, 28 with the parts of the G1, X1 or N1 scaled to their mass), the PrimeBOT Q1 not
+   drawn (no mass stated). The Booster T1 (1.18 m, 30 kg) is in it, on Matthias's yes of 2026-10-29. Robots lighter
+   than 15 kg are not of type 1 (`composition.type_one_lowest_kg`, Matthias: "Below 15 kg not part of the type 1"; 01
+   checks the register).
 2. **Its mass:** a triangle on its register mass (the stated mass ± 1 kg, or its stated range). The G1, X1 and N1
    drawn as themselves take their own mass range from the parts file.
 3. **Its parts:** those of the robot taken apart that it is, else those of the G1, X1 or N1, each as often; the factor

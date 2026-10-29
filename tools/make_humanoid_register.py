@@ -12,6 +12,9 @@ wheels accepted, an upper body only not; one entry for one robot ("No double cou
 makers sell it under two names; a robot in at most two types ("Double assignment means 1 robot can be two types");
 industry listed gives type 3; security alone type 6; "Below 15 kg not part of the type 1".
 
+Then, 2026-10-29: "I want the all the know type 1 robots are integrated and included in the run" and "There has to be
+an excel sheet where all the robots of the different types are fully listed. For now it has to be just all for type 1."
+
 WHAT IT DOES
 ------------
 It writes the register: one row per robot of the humanoid.guide catalogue (349, as read on 2026-10-28) and the five
@@ -19,10 +22,17 @@ robots the catalogue lacks (numbered 350 to 354), each with its types, its form,
 maximum, and where in EVIDENCE.md it was decided. The decisions are held here, one line per robot (DECISIONS): a
 change is made in this file, not in the .xlsx, where it would be lost at the next run.
 
+Beside the sheet Robots (all robots), the sheet Type 1: every robot whose types include 1, as its leading or its
+second type, with every cell of its row in Robots and one more, "In the run": what 02_composition.py does with it
+(drawn with its own parts; drawn with the parts of the robots taken apart, scaled to its mass; or not drawn, as no
+mass is stated). 02 draws robot type 1 over the robots of this sheet; 01 checks that it lists exactly the robots of
+type 1 of the sheet Robots, as they are there.
+
 WHAT IT READS AND WRITES
 ------------------------
 It reads the catalogue (`data.humanoid_guide`, data/raw/humanoid_guide_2026-10-28.xlsx, sheet Catalogue) and writes one
-file, the path of `data.register` (data/researched/humanoid_register.xlsx, git-ignored), replacing the file there.
+file, the path of `data.register` (data/researched/humanoid_register.xlsx, git-ignored; sheets About, Robots and
+Type 1), replacing the file there.
 
 WHERE IT SITS
 -------------
@@ -63,13 +73,29 @@ ABOUT = [
     'mass is stated.',
     'Taken apart as: the robot of data/researched/parts_taken_apart.xlsx that is this robot, for the three robots of '
     'type 1 taken apart part by part.',
+    None,
+    'Sheet Type 1: every robot of the sheet Robots whose types include 1 (leading or second), with every cell of its '
+    'row there, and "In the run": what 02_composition.py does with it. "drawn: its own parts" for a robot taken apart; '
+    '"drawn: the parts of ..., scaled to its mass" for a robot with a stated mass, each draw taking the parts of one '
+    'of the robots taken apart, each as often; "not drawn: no mass stated" for a robot without. 02 draws robot type 1 '
+    'over the robots of this sheet, each as often.',
 ]
+
+# --- Type 1 ---------------------------------------------------------------------------------------------------------
+# The robot type whose robots are listed in a sheet of their own, and that sheet's name. Matthias, 2026-10-29: "For now
+# it has to be just all for type 1."
+TYPE_ONE = 1
+TYPE_ONE_SHEET = 'Type 1'
+# What the sheet Type 1 says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same three).
+IN_RUN_OWN = 'drawn: its own parts'
+IN_RUN_NOT = 'not drawn: no mass stated'
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
 HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
             'Mass mode (kg)', 'Mass max (kg)', 'Mass basis', 'Types', 'Form', 'Entry', 'Taken apart as',
             'Decided in', 'Source']
 WIDTHS = [8, 26, 28, 12, 22, 12, 14, 10, 10, 10, 34, 8, 16, 34, 14, 16, 50]
+IN_RUN_WIDTH = 80   # the width of the sheet Type 1's column "In the run", in characters
 
 # The robots the catalogue lacks, read from their makers or from the workbook's sources (EVIDENCE.md E4.11):
 # number -> (robot, maker, country, status, height in cm, mass in kg as stated, source).
@@ -495,8 +521,45 @@ def register_rows(catalogue: dict) -> list:
     return out
 
 
-def build(path: str, params: Params) -> None:
-    """Write the register to `path`: the sheets About and Robots."""
+def types_of(row: list) -> list:
+    """The robot types of one row of the register, as numbers ('3, 1' -> [3, 1]; empty for a robot without)."""
+    return [int(t) for t in (piece.strip() for piece in row[HEADINGS.index('Types')].split(',')) if t]
+
+
+def in_the_run(row: list) -> str:
+    """What 02_composition.py does with a robot of type 1 (its row of the register): drawn with its own parts, where it
+    is one of the robots taken apart; drawn with the parts of those robots scaled to its mass, where its mass is stated
+    (02 gives each of them as many draws); not drawn, where no mass is stated (EVIDENCE.md E4.11)."""
+    if row[HEADINGS.index('Taken apart as')]:
+        return IN_RUN_OWN
+    if row[HEADINGS.index('Mass mode (kg)')] is not None:
+        names = list(TAKEN_APART.values())
+        return f"drawn: the parts of the {', '.join(names[:-1])} or {names[-1]}, scaled to its mass"
+    return IN_RUN_NOT
+
+
+def type_one_rows(rows: list) -> list:
+    """The rows of the sheet Type 1: every robot of the register whose types include 1, in the register's order, each
+    its row of the sheet Robots and what the run does with it."""
+    return [row + [in_the_run(row)] for row in rows if TYPE_ONE in types_of(row)]
+
+
+def write_sheet(sheet, headings: list, rows: list, widths: list) -> None:
+    """One sheet of robots: its headings in bold on grey, its rows, its column widths, the first two columns frozen."""
+    sheet.append(headings)
+    for cell in sheet[1]:
+        cell.font = Font(bold=True)
+        cell.fill = HEADING_FILL
+    for row in rows:
+        sheet.append(row)
+    for k, width in enumerate(widths, 1):
+        sheet.column_dimensions[openpyxl.utils.get_column_letter(k)].width = width
+    sheet.freeze_panes = 'C2'
+
+
+def build(path: str, params: Params) -> int:
+    """Write the register to `path`: the sheets About, Robots (every robot) and Type 1 (every robot of type 1).
+    Returns the number of robots in the sheet Type 1."""
     book = openpyxl.Workbook()
     about = book.active
     about.title = 'About'
@@ -505,18 +568,14 @@ def build(path: str, params: Params) -> None:
         about.cell(about.max_row, 1).alignment = Alignment(wrap_text=True, vertical='top')
     about['A1'].font = Font(bold=True, size=13)
     about.column_dimensions['A'].width = ABOUT_WIDTH
-    sheet = book.create_sheet('Robots')
-    sheet.append(HEADINGS)
-    for cell in sheet[1]:
-        cell.font = Font(bold=True)
-        cell.fill = HEADING_FILL
-    for row in register_rows(read_catalogue(absolute(params.data.humanoid_guide))):
-        sheet.append(row)
-    for k, width in enumerate(WIDTHS, 1):
-        sheet.column_dimensions[openpyxl.utils.get_column_letter(k)].width = width
-    sheet.freeze_panes = 'C2'
+    rows = register_rows(read_catalogue(absolute(params.data.humanoid_guide)))
+    write_sheet(book.create_sheet('Robots'), HEADINGS, rows, WIDTHS)
+    # The same robots' rows again, those of type 1 only, with what the run does with each: one list of decisions.
+    listed = type_one_rows(rows)
+    write_sheet(book.create_sheet(TYPE_ONE_SHEET), HEADINGS + ['In the run'], listed, WIDTHS + [IN_RUN_WIDTH])
     os.makedirs(os.path.dirname(path), exist_ok=True)
     book.save(path)
+    return len(listed)
 
 
 def output_path(params: Params) -> str:
@@ -528,8 +587,9 @@ def main() -> int:
     """Press Run: build the register from 00's settings."""
     params = current()
     path = output_path(params)
-    build(path, params)
-    print(f'{len(DECISIONS)} robots written to {params.data.register}.')
+    listed = build(path, params)
+    print(f'{len(DECISIONS)} robots written to {params.data.register}, sheet Robots; {listed} of them of robot type '
+          f'{TYPE_ONE} also in the sheet {TYPE_ONE_SHEET}.')
     return 0
 
 

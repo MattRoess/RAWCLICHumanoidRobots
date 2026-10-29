@@ -3,6 +3,75 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-10-29
+
+### V64. The register's sheet Type 1: every robot of type 1 listed, and 02 drawing over it
+
+- **What:** on "I want the all the know type 1 robots are integrated and included in the run", "There has to be an
+  excel sheet where all the robots of the different types are fully listed. For now it has to be just all for type 1."
+  and "Yes, build it" (points 1 to 5 as written back, the Booster T1 kept in type 1, the PrimeBOT Q1 listed and not
+  drawn): the builder writes the sheet Type 1 into the register beside the sheet Robots, from the same decisions;
+  01 reads it and checks it against the sheet Robots (check 22, `read_type_sheet`, `check_type_one`); 02 reads type 1's
+  robots from it and stops without it.
+- **Found before building:** `data/researched/humanoid_register.xlsx` was never written to disk (the builder ran only
+  in the scratch folder of 2026-10-28), so 02 stops today with "the register is not there".
+- **How, tests first** (14 new tests; before the code: 12 errors and 2 failures, as expected):
+  - the builder on the real catalogue: the sheet lists exactly the robots of the sheet Robots whose types include 1,
+    32, in the register's order, the Booster T1 (54) and the PrimeBOT Q1 (236) among them; 01's check finds nothing;
+    "In the run": own parts for 102, 16 and 350, the parts of the G1, X1 or N1 scaled for 28, not drawn for 236 only;
+  - 01 on a small register: read robot by robot with "In the run"; refused without the sheet; one fault each for a
+    robot of type 1 missing, a robot not of type 1 listed, a robot listed twice, a cell not as in Robots (the mass
+    mode), a robot without a mass said to be drawn, a robot with a mass said not to be drawn, a robot taken apart said
+    to take other parts;
+  - 02 on the small files: stops, writing nothing, without the sheet Type 1, and when it misses a robot of type 1.
+- **Deliberate faults on the real register** (a copy in the scratch folder): the Booster T1's row removed, the G1's
+  mass mode set to 40, the PrimeBOT Q1 said to be drawn with its own parts: three faults, each naming the robot.
+- **Sandbox run** (the real inputs; the register built in the scratch folder; 01, then 02 with 5,000 draws, every
+  output in the scratch folder): the builder 32 robots in the sheet Type 1; 01 no fault; 02 exit 0, type 1 drawn over
+  31 robots of the sheet, not drawn 236 PrimeBOT Q1, 34.0 kg at the mean (95 %: 17.3 to 42.7), the X1's frame below
+  zero in 0.2 % of its draws (reported, not cut): the same as V62. The sheet opened: 18 columns, the last "In the run".
+  faults.png and type 1's notes page looked at: the new check and the sheet named, nothing overflowing. The project's
+  `data/researched/` and `figures/` unchanged (their dates as before).
+- **All tests: 242, 238 pass**; the 2 failing wait on Matthias's run of 00 (the three settings of 2026-10-28 not yet in
+  `params.xlsx` and PARAMETER_REFERENCE.md), the 2 skipped on the register on disk (his run of the builder).
+- **Also changed:** three texts that said the Booster T1 "is out of type 1" (01's check 20 and `check_robot_types`,
+  METHODOLOGY.md check 20) now say it is not taken apart and the register keeps it in type 1; METHODOLOGY.md's list of
+  checks had stopped at 20: checks 21 (the register) and 22 (the sheet Type 1) written.
+- **Not covered:** the real run (the builder, then 00 to 04) is Matthias's; the masses in the sheet are as the
+  catalogue states them (second-hand, not checked against the makers); the 28 robots without their own parts are
+  drawn with the parts of the G1, X1 or N1, scaled; the PrimeBOT Q1 waits on a mass estimate (E).
+
+### V63. The handover checked against the disk, and the git folder attached on this Mac
+
+- **What:** on the other Mac, on Matthias's "read them and follow them and als read the handover": the section
+  "2026-10-28, late night" of HANDOVER.md against what is on disk; then, on "Yes, attach", the git folder attached and
+  the working tree compared with GitHub.
+- **How:**
+  - the modification times (`stat`) of `params.xlsx`, PARAMETER_REFERENCE.md, the stages, `tools/`, `src/` and every
+    file in `data/` and `figures/`;
+  - the git folder: `git clone --bare` of https://github.com/MattRoess/RAWCLICHumanoidRobots.git into
+    `$HOME/gitdirs/RAWCLICHumanoidRobots.git`, the path the project's `.git` pointer names, set up as
+    RAWCLICDataCenters' (`core.bare` false, `core.worktree` the project folder, `origin` fetching every branch, `main`
+    following `origin/main`); the index filled from `origin/main` by a mixed `git reset`, which writes no file in the project
+    folder; then `git status` and `git log`.
+- **Result:**
+  - Before attaching, git refused: "Kein Git-Repository: /Users/rm/gitdirs/RAWCLICHumanoidRobots.git".
+  - After: on `main`, the same as `origin/main` (b271afd, 2026-10-28 15:50:02 +0100), nothing to commit. The working
+    tree equals GitHub, so it holds no uncommitted work; the handover's "committed and pushed to `main`" holds.
+  - None of Matthias's six runs has been made, as the handover says: `params.xlsx` and PARAMETER_REFERENCE.md are of
+    2026-10-27 09:41:06, while 01, 02 and `src/params_schema.py` changed on 2026-10-28 between 15:44 and 15:47;
+    `data/researched/humanoid_register.xlsx` does not exist; `figures/composition/` holds only the six pages of
+    2026-10-27 09:41, not type 1's notes and element pages.
+  - Still on disk: `data/parts_taken_apart/` and `figures/parts_taken_apart/` of 2026-10-28 12:53, from 04 before its
+    drawing moved into 02 (15:43 to 15:44); `data/consolidated/` of 2026-10-27 09:42, the run of 00 to 03, his to keep
+    or remove; the old page `figures/composition/1_compact_research_developer.png` (2026-10-27 09:41:23), the
+    handover's waiting point 1.
+  - On this Mac the project lies at `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots` (`pwd -P`); the handover's run
+    paths begin with `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/`.
+- **Not covered:** the test suite was not run (the handover: 228 tests, 226 pass before run 1); whether the handover's
+  `Mobile Documents` paths exist on this Mac (outside the GitHub folder, not looked at); whether iCloud evicted any
+  file (`stat -f %Sf` not run); the statements of the older sections of the handover.
+
 ## 2026-10-28
 
 ### V62. Robot type 1 drawn in 02 over all its robots of the register; 04 draws its figures from 02's draws
