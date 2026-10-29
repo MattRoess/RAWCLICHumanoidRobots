@@ -10,6 +10,48 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
 
 ## E5. Each robot of type 1 its own composition: research, batch 1 of 4 (2026-10-29). Entered 2026-10-29 (E5.20)
 
+### E5.21 The rest of a board beyond its metals: glass, epoxy and bromine (2026-10-29). Entered on his word
+
+Matthias, 2026-10-29: "Yes, build them", point 3b: the rest of the boards (laminate and components) by the recipes
+E-glass and Epoxy already in `element_recipes.xlsx`, "the glass share entered only after a source table of FR-4
+laminates, agreed by him". What it is: type 1's electronics are 0.82 kg at the mean (his run of 14:34), mostly boards;
+of a board's mass 20 % is copper (E2.8b) and about 2 % the other metals (gold to lead, point 3a); the rest, about
+0.6 kg in one robot, has no elements yet.
+
+**The sources** (each read myself; what each is; whether it represents a robot's boards):
+
+| Source | What it is | Read | What it says | Represents a robot's boards? |
+|---|---|---|---|---|
+| Isola Group, FR406 laminate and prepreg, product page with its core and prepreg tables, https://www.isola-group.com/pcb-laminates-prepreg/fr406/ (read 2026-10-29) | Manufacturer's data sheet; an FR-4 epoxy ("FR-4 process compatible", IPC-4101 /21 /24 /26, UL 94 V-0); first-hand | Yes (the page's tables; its PDF data sheet could not be decoded) | "Resin Content %" by glass style. Cores: 1x1080 58.0 %, 1x2116 45.0 %, 2x2116 45.0 and 52.0 %, 1x7628 41.0 %, 2x7628 41.0 %, 3x7628 to 5x7628 40.0 %, 2x106 65.0 %; prepregs: 106 75 %, 1080 65 %, 2116 56 %, 7628 42 to 50 % | Yes: the laminate of multilayer boards. Glass by weight is 100 % less the resin content: 35 to 60 %, 59 to 60 % in the 7628 cores of a 1.6 mm board, 42 to 55 % in the thin 1080 and 2116 plies of dense compute boards. One maker only |
+| IPC-TM-650 2.3.16.2, *Treated Weight of Prepreg*, 12/94 (IPC, the industry's standards body), https://www.electronics.org/sites/default/files/test_methods_docs/2.3.16.2.pdf | Industry test method; first-hand | Yes (decoded from its PDF) | "RC = resin content by weight", RC = (1 − BW / TW) × 100, for "woven fabric 'E'-glass reinforced epoxy FR-4 prepreg"; resin specific gravity 1.37, E-glass 2.59 | Yes: it says the makers' resin content is by weight, so their glass is the rest of the weight |
+| Lassen, Løkke, Andersen (1999). *Brominated Flame Retardants: Substance Flow Analysis and Assessment of Alternatives.* Danish EPA, Environmental Project 494, § 2.2.1, https://www2.mst.dk/udgiv/Publications/1999/87-7909-416-3/html/kap02_2_eng.htm | Government report; second-hand (from the literature); its words "can approximately be estimated" | Yes (§ 2.2.1) | "FR4 is by far the most used laminate. The laminate typically contains about 15% TPPBA [TBBPA]"; "0.42 kg per m2" of TBBPA in a 1.6 mm FR4 laminate (Legarth 1996); TBBPA "reactive" in FR4 epoxy | Yes in kind (FR-4); an estimate of 1999. Its two figures agree: 1.6 mm of laminate at 55 % glass (IPC's densities) weighs 2.96 kg/m2, and 0.42 kg of it is 14 %. TBBPA is 58.8 % bromine by its formula (C15H12Br4O2), so bromine about 8.8 % of the laminate |
+| Marques, Cabrera Marrero, de Fraga Malfatti (2013). A review of the recycling of non-metallic fractions of printed circuit boards. *SpringerPlus* 2: 521, doi:10.1186/2193-1801-2-521 (read through Europe PMC; the PMC page asked for a bot check) | Peer-reviewed review; second-hand for its numbers, no method given for any | Yes | The non-metal part "about 70 wt%" of waste boards (no source of its own); Iji and Yokoyoma 1997, boards "with mounted electronic parts": "glass fiber (65 wt%), cured epoxy resin (32 wt%), and impurities (copper: < 3 wt%...)"; Zheng et al. 2009 by particle size: glass 71.50 / 55.50 / 46.00 %, "resin, etc." 26.86 / 43.45 / 53.52 %; Braun et al. 2001: a board "reinforced with 59,5% of fiber glass sheets"; no bromine figure | In part: whole waste boards of the 1990s and 2000s, some with their components; the glass share of the non-metals, the components' bodies counted in it. Second-hand |
+
+Left out: Shengyi's S1000-2M data sheet (a distributor's copy; its tables are images, nothing could be read); search
+summaries and suppliers' blogs with resin contents and bromine (8 to 12 %), not read first-hand; Mou et al. 2007's
+table (a formulation of boards made from recycled non-metals, not a board).
+
+**What the sources say together:** glass is 35 to 60 % of the laminate's weight by the maker (59 to 60 % in a 1.6 mm
+board of 7628 cores), and 46 to 72 % of the non-metals of whole waste boards (65 % in boards with their parts); epoxy
+the rest; bromine about 9 % of an FR-4 laminate (one estimate, 1999; halogen-free laminates exist and no source gives
+their share in today's boards).
+
+**Entered as proposed** (Matthias, 2026-10-29: "Yes, enter them"; VERIFICATION.md V77), the shared constants "Board
+rest, glass fibre share" and "Board rest, bromine share" of the parts file, for the rest of a board beyond its metals,
+in every draw, with the recipes of `element_recipes.xlsx`:
+
+| Share of the rest | Min / mode / max | Label | Basis |
+|---|---|---|---|
+| Glass fibre (E-glass) | 40 / 55 / 70 % | S, E | the maker's laminates 35 to 60 % and the populated boards 46 to 72 %; the mode between a 1.6 mm board of 7628 (60 %) and a dense board of thin plies (42 to 55 %) |
+| Bromine (of the flame retardant) | 4.4 / 8.8 / 13.2 % | E | one source, about 15 % TBBPA in the laminate, 58.8 % of it bromine; half to 1.5 times, as every estimate |
+| Epoxy | the remainder (17 to 56 %) | E | its recipe in the file (amine-cured); FR-4 is cured with dicyandiamide, near enough for carbon, hydrogen, oxygen and nitrogen |
+
+**An approximation, said with its direction:** the components' bodies (moulding compound filled with silica, ceramic
+capacitors of barium titanate, silicon dies) are counted as glass and epoxy, as in the populated boards' analyses:
+silicon is about right, barium and titanium are missing (low), and the glass's calcium, boron and aluminium slightly
+high.
+
+
 ### E5.20 The entry: what each agreed outcome landed in (2026-10-29, on "Yes, build it")
 
 Matthias: "Yes, build it" (the entry, HANDOVER.md, points 1 to 10 with the recommendations for A to D); during the
@@ -58,6 +100,22 @@ entry, as listed."
 **Not entered, as not in E5.14's list:** fans and heat sinks of the 29 robots (their mass is in the frame); the RP1's
 30 V auxiliary battery (said so in E5.14), the bearings outside its actuators and its 80 small magnets in the covers;
 Sprout's four time-of-flight sensors; the PM01's navigation LiDAR and the K1 Professional's AGX Orin (other versions).
+
+**Since entered** (Matthias, 2026-10-29: "Can we go through the open items and decide pragmatic solutions", "Yes
+build a pragmatic solution list", "Yes, build them"; HANDOVER.md, point 4; VERIFICATION.md V76), each out of its
+robot's frame, the estimates agreed with the list:
+
+| Part | Robots | Entered as | Label |
+|---|---|---|---|
+| The computer's cooler, ARM board (a Jetson, Rockchip, Radxa, Qualcomm, RDK, or not named) | 25 and the T1's Jetson | a fan as the G1's main board fan, 5 / 10 / 20 g (its copper winding by the sheet Shares); the G1's aluminium heat sink, 50 / 100 / 200 g | E |
+| The computer's cooler, Intel or AMD laptop-class processor | AKINCI-5, JAKA π, YMBOT E3, the T1's Express-i7 | a fan as above; the X1's and N1's copper heat pipes and fins, 0.055 / 0.12 / 0.19 kg | E |
+| The RP1's fans | RP1 | its BOM (RP1a): a main-board fan and two waist fans, each as the G1's; its heat sink as an ARM board's | E |
+| The RP1's 30 V auxiliary battery | RP1 | its BOM: two "小电池" (small batteries), no data; RP1d "30V auxiliary battery" (third party): cells 0.12 / 0.25 / 0.5 kg (30 V × 1 / 2 / 4 Ah over the NMC cells' 241.5 Wh/kg), NMC as its main pack | E |
+| The RP1's bearings outside its actuators | RP1 | its BOM: 9 parts of bearing steel; each as the X1's on average (0.8 kg over 21), 0.019 / 0.0381 / 0.0572 kg; GCr15 | E |
+| The RP1's magnets in its covers | RP1 | its BOM: 80 × N52 NdFeB, 4 × 4 and 4 × 2 mm, how many of each not stated; each 0.188 / 0.283 / 0.377 g (all of the small size to all of the large, sintered NdFeB about 7.5 g/cm³); grade class N | S, E |
+| The Sprout's time-of-flight sensors | Sprout | SP1 "4 time-of-flight sensors"; no such type in the car sensor file: each the elements of the LiDAR's laser diode array and photodetector array; 5 / 10 / 20 g each | E |
+
+The PM01's navigation LiDAR and the K1 Professional's AGX Orin stay out: they are of other versions than those drawn.
 
 Matthias, 2026-10-29: "Have you research for the missing data I also want a qualification of the numbers you have. Do
 they come from manufature. It is also not just the weight but at ;east the full composition Cu, etc.", "Essential is

@@ -41,8 +41,8 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
    on a 1920 × 1080 screen); the median and the mean; the 95 % interval; Paul Tol's colours as published; no hydrogen,
    nitrogen, oxygen or fluorine (V68), for type 1 also no sodium, phosphorus or sulfur; the two figures of the critical
    elements by kind of part (04 until 2026-10-29, now 02); 01's pages showing what the model does; an element or
-   material 0 in some draws shown by the draws that hold it. Done for type 1 (V71 to V75). Open: project words on 02's
-   notes page and 01's faults pages; the pages of types 2 to 6 in 02 (mean alone, not 16 × 9).
+   material 0 in some draws shown by the draws that hold it; no project words on any page. Done for type 1 (V71 to
+   V77). Open: the pages of types 2 to 6 in 02 (mean alone, not 16 × 9).
 10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
     in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
 
@@ -50,33 +50,90 @@ Already known for type 2: its robots with model files chosen ("Those with model 
 EVIDENCE E3); open: whether the H2 Plus is the H2 with optional hands, and joint masses above 200 N·m; 97 robots of
 type 2 in the register.
 
-## 2026-10-29, late afternoon: where robot type 1 stands (start here)
+## 2026-10-29, evening: type 1's last open items (start here)
+
+His run of 16:01 read back (VERIFICATION.md V79): all 309 tests pass, every material of type 1 wholly in its elements,
+01 no fault. Matthias: "I want to finish open items first and once for all", then "Yes, 1 to 5":
+1. **The X1's newer parts list** (`智元灵犀X1_BOM清单_20250108.xlsx`, 17,678 bytes, github.com/AGIBOTTech/
+   AGIBOT_x1_hardware): download it (his yes), compare it with what was entered from the list of 2024-10-24, propose
+   what differs.
+2. **Parts found in the X1's and N1's lists on 2026-10-28, never decided** (EVIDENCE.md E2.8e): the N1's network
+   switch; the X1's XT60 and XT90 plugs and battery cables, 16 brass threaded inserts, a stainless sensor shield, 4
+   silicone dampers: a source table and values to him before anything is entered.
+3. **Whether a mated XT30 counts once or twice**: settled from Amass's data sheet, read first-hand.
+4. **The titanium panel** (a peak near 13 g, a long tail to 450 g): kept, the true distribution.
+5. **Commit and push** V76 to V79: done with this section.
+Then type 2, by the ten steps above.
+
+## 2026-10-29, late afternoon: where robot type 1 stands
 
 Committed and pushed on his words ("Looks good commit and push", "Commit and push"): GitHub `main` = `5adfd02`
 (V69 to V75). His question: "Is there any open item for the type 1 robots?"; the answer below was checked against his
 run of 14:33 to 14:34 (200,000 draws) and the code's times, not against this document.
 
-### Open for robot type 1
+### Open for robot type 1, and the pragmatic solution of each
 
-1. **His run of 02** (`/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`): his run of 14:34 holds
-   everything to V74; V75 (the overview's column "held in") came after it (02 changed 14:40:43). 00 and 01 have not
-   changed since his run.
-2. **Remainders below zero, reported, not cut** (`data/parts_taken_apart/summary.csv` of his run): 27 of them in some
-   draws; the largest the Booster K1 2 Ah's battery housing, busbars and wires in 1.6 % of its draws, then the Noetix
-   Bumi's frame 0.4 %, the PrimeBOT Q1's frame 0.23 %, the Bumi's battery housing 0.2 %, the rest 0.15 % or less. His
-   decision: accept, or have the K1 2 Ah looked at first.
-3. **Electronics only partly in the elements** (step 4 above): the boards' laminate and components beyond their
-   metals have no recipe yet. Research on his word.
-4. **Parts found in the research and not entered** (E5.14): the fans and heat sinks of 29 robots (in their frames'
-   remainder), the RP1's 30 V auxiliary battery, its bearings outside the actuators and the magnets in its covers, the
-   Sprout's time-of-flight sensors. Estimates to propose to him.
+His words: "Can we go through the open items and decide pragmatic solutions", then "2 accept, this is occuring in MC"
+and "Yes build a pragmatic solution list". Each solution was checked against the code, his run of 14:34 (200,000
+draws) and the sibling files before it was proposed. Point 2 decided ("2 accept"); then "Yes, build them": **built**
+7, 5 and 6, 3a, 4 and 3c (VERIFICATION.md V76; the sensors' share widened to 25 / 50 / 75 % by his rule for
+estimates); **3b entered** on "Yes, enter them" (EVIDENCE.md E5.21, VERIFICATION.md V77: glass 40 / 55 / 70 %,
+bromine 4.4 / 8.8 / 13.2 %, epoxy the remainder; the electronics now wholly in the elements). **His runs, in this order** (the builder
+first: until it runs, the parts file on disk lacks the new rows and a constant, and 01 and 02 stop on it):
+`/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_parts_taken_apart.py`, then `01_schemas.py`, then
+`02_composition.py`. Not committed.
+
+1. **His run of 02**: his run of 14:34 holds everything to V74; V75 (the overview's column "held in") came after it.
+   **Solution:** one run after the points below are built: point 4 changes the parts file, so the builder, 01 and 02
+   run again anyway (`tools/make_parts_taken_apart.py`, `01_schemas.py`, `02_composition.py`).
+2. **Remainders below zero:** 27 in some draws; the largest the Booster K1 2 Ah's battery housing, busbars and wires
+   in 1.6 % of its draws, then the Noetix Bumi's frame 0.4 %, the PrimeBOT Q1's frame 0.23 %, the Bumi's battery
+   housing 0.2 %, the rest 0.15 % or less; frames at most 1.4 kg below zero (medians 4 to 12 kg), battery housings at
+   most 40 g; type 1's means move by less than 1 g. **Decided: accepted** (Matthias, 2026-10-29: "2 accept, this is
+   occuring in MC"): they stay as drawn, neither cut nor rescaled, reported in `data/parts_taken_apart/summary.csv` and
+   in 02's printout as now.
+3. **Electronics only partly in the elements:** 0.82 kg at the mean, 0.18 kg of it in the elements (the boards' copper,
+   20 % of their mass after the measured boards, E2.8b; gold, silver, palladium, tin, nickel of the car board file;
+   tantalum; the sensors' elements). **Solution:**
+   - a. **The boards' aluminium, zinc, iron and lead** from the car board file as its other metals (`BOARD_METALS`
+     reads 5 of its 10; copper stays on the measured boards). At 0.56 g/cm2: Al 0.3 to 1.1 %, Fe 0.45 to 0.7 %, Zn
+     0.02 to 0.05 %, Pb 0.04 to 0.09 % of a board, plausible for lead-free boards (Bizzo's old PC boards: Fe 3.1 %,
+     Pb 2.5 %, not representative).
+   - b. **The rest of the boards** (about 0.6 kg: laminate and components) by the recipes E-glass and Epoxy already in
+     `element_recipes.xlsx`, glass fibre in epoxy as in every FR-4 board; the glass share entered only after a source
+     table of FR-4 laminates, agreed by him.
+   - c. **The sensors' housings** (about 0.04 kg; the car sensor file holds the sensor elements only, "not the
+     complete module housing"): aluminium 30 / 50 / 70 % (E), plastics the remainder, by type 1's recipes.
+4. **Parts found in the research and not entered** (EVIDENCE.md, the list after E5.20's table): **Solution:** enter
+   each, its mass out of the frame's remainder (today counted there as aluminium):
+   - **fans and heat sinks of the 29**, by computer: Intel or AMD (AKINCI-5, JAKA π, YMBOT E3, the Booster T1's
+     Express-i7) as the X1's and N1's (copper heat pipes and fins 0.055 / 0.12 / 0.19 kg, a fan 5 / 10 / 20 g); ARM or
+     not named (the other 25, the T1's Jetson) as the G1's (aluminium heat sink 50 / 100 / 200 g, a fan);
+   - **the RP1's 30 V auxiliary battery** (its BOM: two "small batteries"; the voltage from a news site): cells 0.12 /
+     0.25 / 0.5 kg (30 V × 1 / 2 / 4 Ah over the NMC cells' 241.5 Wh/kg), NMC as its main pack (E);
+   - **the RP1's bearings outside its actuators** (its BOM: 9 parts of bearing steel): each as the X1's average (0.8
+     kg over 21), 0.17 / 0.34 / 0.51 kg in all, GCr15 (E);
+   - **the RP1's 80 N52 magnets in its covers** (4 × 4 and 4 × 2 mm): 15 / 23 / 30 g (all of the small size to all of
+     the large), grade class N; needs a small change to 02, a magnet part naming its grade class (today a magnet's
+     class comes from its joint's heat group only);
+   - **the Sprout's 4 time-of-flight sensors** (no such type in the car sensor file): each the elements of the LiDAR's
+     laser diode array and photodetector array, 5 / 10 / 20 g each (E).
 5. **Type 1's part groups and body regions** placed by its ten kinds whole (`KIND_PART_GROUP`, `KIND_BODY_REGION` in
-   02): confirm, or place part by part. Asked 2026-10-28, no answer.
-6. **A robot of two types** in the statistics (in full, split, or one type drawn per draw); in type 1 the PrimeBOT Q1
-   (types 4 and 1). Asked 2026-10-28, no answer.
-7. **Project words on pages** (his rule: none): 02's notes page "EVIDENCE.md E2 and E5", "(E5.17 point 1)"; 01's faults
-   pages "(E)", "04_", "documentation/claude/EVIDENCE.md". The test of project words covers only 01's overview, notes
-   and type 1 pages. Mine to fix, on his word.
+   02). **Solution:** keep them; the notes page says where they are rough (the head's joints count as Sensors, the
+   battery management board as Battery). No repository reads them yet (searched 2026-10-29); stock-and-flow will read
+   the materials and elements, which are exact; revisit when it needs part groups.
+6. **A robot of two types** (10 of type 1's 31: AKINCI-5, Bumi, E1, G1, G1+, JAKA π, LUMO, PrimeBOT Q1, Sprout, Xiao
+   Tuo). **Solution:** in full in each of its types, as type 1 draws them now: 02 says what one robot of a type is made
+   of; how many robots there are comes from stock-and-flow, not the register, so nothing is counted twice. Nothing
+   changes for type 1; the rule for types 3 and 4.
+7. **Project words on pages:** 02's notes page "EVIDENCE.md E2 and E5", "(E5.17 point 1)"; 01's faults pages "(E)",
+   "04_", "documentation/claude/EVIDENCE.md". **Solution:** plain words on both; the faults pages keep sheet names
+   (they say where a fault is); the test of project words widened to every page of 01 and 02.
+
+**Order of the work:** 7, then 5 and 6 (notes and documents), then 3a, 4 and 3c, then 3b after its source table;
+then his runs (point 1). **All built** (V76, V77; 307 of 309 tests pass, the two reading the parts file on disk wait
+for his builder run). His run of 15:44 holds V76, not 3b (V78: it ran while 3b was built); **his runs once more** for
+3b and the matplotlib fix: the builder, 01, 02. Not committed.
 
 ### Settled since the sections below were written
 

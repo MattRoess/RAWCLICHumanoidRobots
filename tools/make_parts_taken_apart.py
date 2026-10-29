@@ -31,6 +31,7 @@ number. 01_schemas.py reads and checks the file (METHODOLOGY.md checks 18 and 19
 from it, each robot from its own rows. Press Run: no arguments. Importing this file writes nothing;
 tests/test_make_parts_taken_apart.py checks that what it writes passes 01's checks and equals the file on disk.
 """
+import math
 import os
 import sys
 
@@ -651,6 +652,17 @@ CONSTANTS_G1_X1_N1 = [
      "at least its cells at the NMC cells' lowest energy per kg (E5.14 point 3)"),
     ('all', 'Shell, share of the robot mass', 0.0575, 0.115, 0.1725, 'share', 'E',
      "the median of the G1's 12.9, the N1's 11.5 and the X1's 9.1 %; half to 1.5 times (E5.14 point 6)"),
+    ('all', 'Sensor housing, aluminium share', 0.25, 0.5, 0.75, 'share', 'E',
+     'a sensor module beyond its car sensor elements (the car file: "not the complete module housing"): its housing, '
+     "aluminium as the LiDAR's and the depth camera's, plastics the remainder; half to 1.5 times (2026-10-29, point "
+     '3c, its 30 / 50 / 70 % widened by the rule for estimates)'),
+    ('all', 'Board rest, glass fibre share', 0.4, 0.55, 0.7, 'share', 'S, E',
+     "the rest of a board beyond its metals: Isola's FR-4 laminates 35 to 60 % glass by weight, the populated boards' "
+     'non-metals 46 to 72 %; the mode between a 1.6 mm board of 7628 cores and a dense board of thin plies '
+     '(EVIDENCE.md E5.21; 2026-10-29, "Yes, enter them", point 3b)'),
+    ('all', 'Board rest, bromine share', 0.044, 0.088, 0.132, 'share', 'E',
+     'about 15 % TBBPA in an FR-4 laminate (Danish EPA 1999), 58.8 % of it bromine; half to 1.5 times (EVIDENCE.md '
+     'E5.21; point 3b)'),
     ('Unitree G1', 'Robot mass, with battery', 34, 35, 36, 'kg', 'S', 'U1 "About 35kg"; U3 adds up to 35.115 kg'),
     ('Unitree G1', 'Battery voltage', 46.8, 46.8, 46.8, 'V', 'S', 'T1 slide 25 (13 cells in series)'),
     ('Unitree G1', 'Battery capacity', 8.55, 9, 9.45, 'Ah', 'S',
@@ -828,6 +840,31 @@ MICROPHONES_G = (5, 10, 20)      # g: a microphone array (as the G1's)
 SPEAKER_G = (17.5, 35, 60)       # g: a speaker (as the G1's)
 D435_G = (72, 75, 80)            # g: an Intel RealSense D435 or D435i (Intel's datasheet, second-hand; as the G1's)
 CONNECTOR_KG = (0.0015, 0.003, 0.0045)   # kg: one XT30 (2+2) connector (as the G1's)
+# The computer's cooler of a robot whose sources do not weigh it (Matthias, 2026-10-29, "Yes, build them", point 4;
+# EVIDENCE.md E5.20, "Not entered": until then in its frame's remainder): a fan as the G1's main board fan (its copper
+# winding by the sheet Shares), and for an ARM board (a Jetson, Rockchip, Radxa, Qualcomm or RDK, or a board not named)
+# the G1's aluminium heat sink, for an Intel or AMD laptop-class processor the X1's and N1's copper heat pipes and fins
+# (E2.8e). Each an entry of a block's `cooler`, as one of its `parts`.
+FAN_KG = (0.005, 0.01, 0.02)
+COOLER_FAN = ('Main board fan', 1, 'Torso boards', 'Torso', FAN_KG, None, None, 'E',
+              "as the G1's main board fan (E2.8e; 2026-10-29, point 4)")
+ARM_SINK = ('Main board heat sink', 1, 'Torso boards', 'Torso', (0.05, 0.1, 0.2), 'Aluminium', None, 'E',
+            "an ARM board's: as the G1's (E2.8e; 2026-10-29, point 4)")
+X86_SINK = ('Main board heat sink: heat pipes and fins', 1, 'Torso boards', 'Torso', (0.055, 0.12, 0.19), 'Copper',
+            None, 'E', "an Intel or AMD laptop-class processor's: as the X1's and N1's (E2.8e; 2026-10-29, point 4)")
+ARM_COOLER = [COOLER_FAN, ARM_SINK]
+X86_COOLER = [COOLER_FAN, X86_SINK]
+NDFEB_G_PER_MM3 = 0.0075   # g per mm3: sintered NdFeB, about 7.5 g/cm3
+
+
+def disc_kg(diameter_mm: float, height_mm: float) -> float:
+    """The mass of one NdFeB disc magnet, kg: its volume times NDFEB_G_PER_MM3."""
+    return math.pi * (diameter_mm / 2) ** 2 * height_mm * NDFEB_G_PER_MM3 / 1000
+
+
+# The RP1's 80 N52 magnets in its covers (RP1a: 4 × 4 and 4 × 2 mm, how many of each not stated): one magnet from all
+# of the small size to all of the large, the mode between them (S, E).
+COVER_MAGNET = (round(disc_kg(4, 2), 6), round((disc_kg(4, 2) + disc_kg(4, 4)) / 2, 6), round(disc_kg(4, 4), 6))
 SCREWS_KG = (0.2, 0.5, 1)        # kg: a robot's screws (as the G1's; E5.14 point 7)
 CABLES_M = (5, 10, 15)           # m of four conductors where no length is listed (as the N1's; E5.14 point 5)
 # The car sensor elements of a sensor whose maker names its kind but not its model (E5.14 point 8, as type 1's).
@@ -915,8 +952,8 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
     for the sheet Constants (`mass`: (min, mode, max), label, source), its joints (joint() each, or AVERAGE), and in
     `more` what differs from the template (E5.14): voltage and capacity ((min, mode, max), label, source; none: the
     energy per kg of robot), pack ((min, mode, max), label, source; None: from its energy; PACK_CELLS_ONLY), housing,
-    boards, sensors, cables, screws, parts, shell, frame, and the labels and sources of its joints, connectors,
-    encoders and cells."""
+    boards, sensors, cables, screws, parts, cooler (ARM_COOLER unless its computer is an Intel or AMD processor's),
+    shell, frame, and the labels and sources of its joints, connectors, encoders and cells."""
     b = dict(name=name, maker=maker, height=height, stated=stated, sources=sources, mass=mass, joints=joints,
              joints_stated=None, joint_label={'small': 'E', 'large': 'E'}, joint_sources='', voltage=None,
              capacity=None, pack=None, pack_source='', housing=HOUSING_MIXED,
@@ -925,7 +962,7 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
              connectors=('E', 'two per joint, as type 1 (E5.14 point 5)'),
              encoders=('E', 'two per joint, as type 1 (E5.14)'),
              screws=[('Screws', 1, SCREWS_KG, '42CrMo4', 'E', 'as the G1 (E5.14 point 7); grade E5.18')],
-             parts=[], shell=('Shell: plastics', 'not stated; plastics as type 1 (E5.14 point 6)'),
+             parts=[], cooler=ARM_COOLER, shell=('Shell: plastics', 'not stated; plastics as type 1 (E5.14 point 6)'),
              frame=('Frame', 'Aluminium', 'not stated; aluminium as type 1 (E5.14 point 9)'))
     b.update(more)
     return b
@@ -1039,8 +1076,8 @@ RP1 = block(
                    'knees, hips; RMM8463 shoulders, waist; RMM6562 arms, wrists, ankles); RP1c: their masses (E5.12 '
                    'point 3)'),
     voltage=((48, 48, 48), 'S', 'RP1d "48V main lithium battery" (third party)'),
-    capacity=(spread(10), 'S', 'RP1d "10Ah" (third party), ± 5 %; its 30 V auxiliary battery not known, left out '
-                               '(E5.14 point 2)'),
+    capacity=(spread(10), 'S', 'RP1d "10Ah" (third party), ± 5 %; its 30 V auxiliary battery a part of its own since '
+                               '2026-10-29 (point 4)'),
     boards=[('Main board RBE-MAIN-RK3588S, with an Orange Pi CM5', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
              "RP1a; as the X1's and N1's computer boards (E5.14 point 4)"),
             ('Main control wiring board', 1, 'Torso boards', 'Torso', SMALL_BOARD, 'ITC', 'E', 'RP1a'),
@@ -1065,7 +1102,20 @@ RP1 = block(
             ('Pins and screws, 304 stainless (61)', 1, (0.0195, 0.039, 0.0585), 'Type 304', 'E',
              'RP1a "304"; E5.14 point 7, split by their number; grade E5.18')],
     parts=[('Brass parts (8)', 8, 'Frame and shell', 'Whole body', (0.005, 0.01, 0.02), 'Copper', 'Brass', 'E',
-            'RP1a (8 brass parts); 5 / 10 / 20 g each (E5.19 point 3)')],
+            'RP1a (8 brass parts); 5 / 10 / 20 g each (E5.19 point 3)'),
+           ('Auxiliary battery cells (30 V)', 1, 'Battery pack', 'Torso', (0.12, 0.25, 0.5), 'Battery materials', None,
+            'E', 'RP1a: two "小电池" (small batteries), no data; RP1d "30V auxiliary battery" (third party): 30 V × 1 '
+                 "/ 2 / 4 Ah over the NMC cells' 241.5 Wh/kg, NMC as its main pack (2026-10-29, point 4)"),
+           ('Bearings outside the actuators (9)', 9, 'Frame and shell', 'Whole body', estimate(round(0.8 / 21, 4)),
+            'Steel', 'GCr15', 'E', "RP1a: 9 parts of bearing steel; each as the X1's on average, 0.8 kg over 21 "
+                                   '(2026-10-29, point 4)'),
+           ('Magnets in the covers, N52 (80)', 80, 'Frame and shell', 'Whole body', COVER_MAGNET, 'Magnets (NdFeB)',
+            'N', 'S, E', 'RP1a: 80 × N52 NdFeB, 4 × 4 and 4 × 2 mm, how many of each not stated: each between the two, '
+                         'about 7.5 g/cm3; its grade class N (2026-10-29, point 4)')],
+    cooler=[(*COOLER_FAN[:8], 'RP1a (a main-board fan); as the G1\'s main board fan (E2.8e; 2026-10-29, point 4)'),
+            ('Waist fan', 2, 'Waist', 'Torso', FAN_KG, None, None, 'E',
+             "RP1a (two waist fans); as the G1's waist fan (E2.8e; 2026-10-29, point 4)"),
+            ARM_SINK],
     shell=('Shell: ABS, PLA, PC, resin; PU, TPU, EPDM, EPP and EVA', 'RP1a; 11.5 % of the robot (E5.14 point 6)'),
     frame=('Frame: aluminium, with steel 45 and P20 parts', None,
            'RP1a: AL6061-T6 (76 CNC parts), AL7075, AL5052; steel 45 or AISI 1045 (24), P20 (4); its shares in the '
@@ -1098,6 +1148,9 @@ BOOSTER_T1 = block(
             ('Motion control board, Express-i7', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
              'BT1; its size not found'),
             POWER_BOARD],
+    cooler=[('Main board fan', 2, 'Torso boards', 'Torso', FAN_KG, None, None, 'E',
+             "its two computers, a fan each: as the G1's main board fan (E2.8e; 2026-10-29, point 4)"),
+            ARM_SINK, X86_SINK],
     sensors=[('Depth camera (not named)', 1, 'Head', 'Head', None, 'S',
               "BT1; its elements as the Intel RealSense D435's, its mass not stated: its elements only", DEPTH_CAMERA),
              ('Microphone array (4 microphones)', 1, 'Head', 'Head', MICROPHONES_G, 'E',
@@ -1282,14 +1335,14 @@ NOETIX_BUMI = catalogue_block(
                                          'the robot (E5.14 point 6)'))
 AKINCI_5 = catalogue_block(
     'AKINROBOTICS AKINCI-5', 'AKINROBOTICS', 1.29, 42, ((41, 42, 43), 'S', 'HG "42 kg" ("Not Verified"); ± 1 kg'),
-    19, 'Computer board, AMD Ryzen 9 PRO 6950H',
+    19, 'Computer board, AMD Ryzen 9 PRO 6950H', cooler=X86_COOLER,
     shell=('Shell: composites',
            'HG "Aluminum alloy + composites", the composites\' kind not named: plastics as type 1; 11.5 % of the robot '
            '(E5.14 point 6)'),
     frame=('Frame', 'Aluminium', 'HG "Aluminum alloy"'))
 JAKA_PI = catalogue_block(
     'JAKA π', 'JAKA Robotics', 1.22, 42, ((41, 42, 43), 'S', 'HG "42 kg" ("Not Verified"); ± 1 kg'),
-    27, 'Computer board, Intel Core Ultra 7 255H',
+    27, 'Computer board, Intel Core Ultra 7 255H', cooler=X86_COOLER,
     voltage=((48, 48, 48), 'S', 'HG "48-volt pack"'),
     capacity=(estimate(10.5), 'E', '12 Wh per kg of robot at 42 kg, over 48 V (E5.17 point 2)'),
     shell=('Shell: soft-touch polymer covers', 'HG; 11.5 % of the robot (E5.14 point 6)'),
@@ -1383,7 +1436,11 @@ FAUNA_SPROUT = catalogue_block(
               'SP1; its mass not read: its elements only', [('CMOS image sensor', 2)]),
              ('Motion sensor (IMU), not named', 1, 'Torso boards', 'Torso', IMU_G, 'E', 'SP1', [('IMU', 1)]),
              ('Microphone array (4 microphones)', 1, 'Head', 'Head', MICROPHONES_G, 'E', 'SP1 "microphones"; as the '
-                                                                                        "G1's", MICROPHONES)],
+                                                                                        "G1's", MICROPHONES),
+             ('Time-of-flight sensor', 4, 'Head', 'Head', (5, 10, 20), 'E',
+              'SP1 "4 time-of-flight sensors"; no such type in the car sensor file: the elements of the LiDAR\'s laser '
+              'diode array and photodetector array; 5 / 10 / 20 g each (2026-10-29, point 4)',
+              [('laser diode array', 1), ('photodetector array', 1)])],
     shell=('Shell: soft exterior', 'SP1 "soft exterior"; plastics as type 1; 11.5 % of the robot (E5.14 point 6)'),
     frame=('Frame', 'Aluminium', 'HG (aluminium, third party)'))
 STARBOT_ASTRA = catalogue_block(
@@ -1411,7 +1468,7 @@ XIAO_TUO = catalogue_block(
     frame=('Frame', 'Aluminium', 'HG "Aluminum"'))
 YMBOT_E3 = catalogue_block(
     'YMBOT E3', 'Yunmu', 1.4, 35, ((34, 35, 36), 'S', 'HG "35 kg" ("Not Verified"); ± 1 kg'),
-    24, 'Computer board, Intel 12th-generation Core i9 class',
+    24, 'Computer board, Intel 12th-generation Core i9 class', cooler=X86_COOLER,
     joint_sources=("no joint count in its sources: 24 for the encoders and connectors (E, the median of type 1's "
                    "stated counts); no joint torques: its joint modules 24.5 / 49 / 73.5 % of its mass, split as batch "
                    "1's on average (E5.17 point 1)"))
@@ -1530,7 +1587,7 @@ def robot_rows(b: dict) -> dict:
     for part, count, kg, grade, label, source in b['screws']:
         out['Parts'].append((name, part, count, 'Frame and shell', 'Whole body', *kg, 'Steel', grade, None, label,
                              source))
-    for part, count, kind, region, kg, material, grade, label, source in b['parts']:
+    for part, count, kind, region, kg, material, grade, label, source in b['cooler'] + b['parts']:
         out['Parts'].append((name, part, count, kind, region, *kg, material, grade, None, label, source))
     shell, source = b['shell']
     out['Parts'].append((name, shell, 1, 'Frame and shell', 'Whole body', None, None, None, 'Plastics', None, SHELL,

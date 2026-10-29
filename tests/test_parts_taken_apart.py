@@ -254,6 +254,68 @@ class TestHandCalculations(unittest.TestCase):
         # 9.78288 mg; two encoders each, 12 × 0.06 mg (car angle sensor) = 0.72 mg.
         np.testing.assert_allclose(self.element(d, 'Unitree G1', 'hips', 'Au'), 10.50288e-6, rtol=1e-9)
 
+    def test_the_g1s_lead_in_its_hips_from_its_driver_boards(self):
+        # 2026-10-29, "Yes, build them", point 3a: the boards' aluminium, zinc, iron and lead from the car board file,
+        # as its other metals. Six hip joints, large: a driver board of 22.9 cm2 × 3.56 = 81.524 cm2 each, 489.144 cm2
+        # × 0.5 mg/cm2 (car PE_HVS, the mode) = 244.572 mg. The die-cast alloy, A380 or ADC12, is drawn: in the draws
+        # of ADC12 (its lead 0 at the mode) the boards' lead is all the hips hold.
+        d = self.at()
+        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'hips', 'Pb').min(), 244.572e-6, rtol=1e-9)
+
+    def material(self, d, robot: str, kind: str, material: str) -> np.ndarray:
+        columns, draws = d.materials
+        return draws[d.robot == d.robots.index(robot), columns.index((kind, material))]
+
+    def test_the_rp1s_magnets_in_its_covers_of_their_stated_class(self):
+        # 2026-10-29, "Yes, build them", point 4: 80 magnets of 0.283 g at the mode, NdFeB of the class N they name
+        # (N52), neodymium 24 % (FIXED_MAGNET): 5.4336 g in its frame and shell, which holds no other magnet.
+        d = self.at()
+        np.testing.assert_allclose(self.element(d, 'RoboParty RP1', 'frame', 'Nd'), 80 * 0.000283 * 0.24, rtol=1e-9)
+        rows = d.robot == d.robots.index('RoboParty RP1')
+        np.testing.assert_allclose(d.details[('frame', composition.MAGNETS, 'N')][rows], 80 * 0.000283, rtol=1e-9)
+
+    def test_the_rp1s_auxiliary_battery_is_cells_as_its_main_pack(self):
+        # Point 4: its main cells 48 V × 10 Ah = 480 Wh over 241.5 Wh/kg, and its auxiliary cells 0.25 kg at the mode,
+        # both battery cells by the NMC recipe.
+        d = self.at()
+        cells = 480 / 241.5 + 0.25
+        np.testing.assert_allclose(self.material(d, 'RoboParty RP1', 'battery', composition.CELL_MATERIAL), cells,
+                                   rtol=1e-9)
+        rows = d.robot == d.robots.index('RoboParty RP1')
+        key = ('battery', composition.CELL_MATERIAL, composition.CELL_RECIPE)
+        np.testing.assert_allclose(d.details[key][rows], cells, rtol=1e-9)
+
+    def test_the_g1s_head_sensors_are_their_elements_and_their_housings(self):
+        # Point 3c: the head holds the head control board (15 cm2 × 0.56 g/cm2 = 8.4 g) and four sensors with masses
+        # (265 + 75 + 10 + 35 = 385 g). Each sensor its car elements (electronics) and its housing, the rest of its
+        # mass: aluminium 50 % of it at the mode, plastics the remainder.
+        d = self.at()
+        aluminium, plastics, electronics = (self.material(d, 'Unitree G1', 'head', m)
+                                            for m in ('Aluminium', 'Plastics', composition.ELECTRONICS))
+        np.testing.assert_allclose(aluminium, plastics, rtol=1e-9)
+        np.testing.assert_allclose(aluminium + plastics + electronics, 0.385 + 0.0084, rtol=1e-9)
+        self.assertTrue((electronics > 0.0084).all() and (aluminium < 0.385 / 2).all())   # the elements in electronics
+
+    def test_the_g1s_head_board_holds_its_bromine_in_the_rest_beyond_its_metals(self):
+        # 2026-10-29, "Yes, enter them" (point 3b, EVIDENCE.md E5.21): the rest of a board beyond its metals 55 % glass
+        # fibre, 8.8 % bromine, epoxy the remainder, at the modes. The G1's head control board: 15 cm2 × 0.56 g/cm2 =
+        # 8.4 g, less its copper (20 %), its tantalum (the data centres' share) and its car metals (VCC, mg per cm2).
+        inputs = inputs_or_skip(self, self.params)
+        d = self.at()
+        metals = 15 * sum(inputs.pcb['VCC'][m][1] for m in schemas.BOARD_METALS) / 1e6
+        rest = 0.0084 * (1 - 0.2 - inputs.tantalum[1]) - metals
+        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'head', 'Br'), 0.088 * rest, rtol=1e-9)
+
+    def test_type_1s_electronics_wholly_in_its_elements(self):
+        # Point 3b: the boards' rest in the elements, the sensors' housings their own materials (point 3c), a joint's
+        # encoders inside its driver board: every robot's electronics are in the elements, to the compounds' rounding.
+        inputs = inputs_or_skip(self, self.params)
+        d = self.at()
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        rows = {r['Name']: r for r in composition.summary(c) if r['Kind'] == 'Material'}
+        self.assertEqual(rows[composition.ELECTRONICS]['In the elements'], 'Yes')
+
     def test_the_g1s_neodymium_in_its_hips(self):
         d = self.at()
         # Six rotors of 42.9 g × 1.78 (the large joint), 90 % NdFeB, 24 % Nd: 98.965152 g; twelve encoders × 20 mg.
@@ -296,7 +358,7 @@ class TestGradesByHeat(unittest.TestCase):
     tied within a draw (one draw decides how hot the robot is built for, every joint takes its class at that point)."""
 
     # Dysprosium by class, different for each, so that a joint's dysprosium tells which class it drew.
-    DY = {'H': 0.03, 'SH': 0.05, 'UH': 0.07, 'EH': 0.09}
+    DY = {'N': 0.0, 'H': 0.03, 'SH': 0.05, 'UH': 0.07, 'EH': 0.09}   # N: the RP1's cover magnets (point 4), no Dy
 
     def graded_magnets(self, inputs, n):
         names = ['Nd', 'Pr', 'Dy', 'B', 'Fe']
@@ -425,6 +487,65 @@ class TestElementsNotShown(unittest.TestCase):
                       ' '.join(notes.split()).lower())
 
 
+class TestProjectWords(unittest.TestCase):
+    """Matthias's figure rule: no code names and no project jargon on a page; 2026-10-29, "Yes, build them", point 7:
+    every page of 02 in plain words (01's PROJECT_WORDS)."""
+
+    def test_no_project_words_on_any_page_of_02(self):
+        from matplotlib.text import Text
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        pages = (composition.type_one_pages(c, d, [], params) + composition.parts_figure_pages(d)
+                 + composition.sources_pages(d))
+        for name, figure in pages:
+            words = ' '.join(' '.join(t.get_text() for t in figure.findobj(Text)).split())
+            composition.plt.close(figure)
+            for word in schemas.PROJECT_WORDS:
+                self.assertNotIn(word, words, msg=name)
+
+
+class TestNoDeprecatedCalls(unittest.TestCase):
+    """Matthias, 2026-10-29, from his run of 02: "MatplotlibDeprecationWarning: vert: bool was deprecated in Matplotlib
+    3.11 and will be removed in 3.13". Every page of 02 drawn with the pinned matplotlib without a deprecated call, so
+    that a later matplotlib draws them the same."""
+
+    def test_the_pages_of_02_call_nothing_deprecated(self):
+        import warnings
+        from matplotlib import MatplotlibDeprecationWarning
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', MatplotlibDeprecationWarning)
+            pages = (composition.type_one_pages(c, d, [], params) + composition.parts_figure_pages(d)
+                     + composition.sources_pages(d))
+        for _, figure in pages:
+            composition.plt.close(figure)
+
+
+class TestElementTitles(unittest.TestCase):
+    """Matthias's figure rule, plain words on every figure: every element of robot type 1's element pages by its name
+    and its symbol, "Bromine (Br)", never the symbol alone (2026-10-29: the boards' bromine, point 3b, came without)."""
+
+    def test_every_element_on_the_pages_has_its_name(self):
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        for symbol in composition.shown_elements(c.tables['elements'][0], params):
+            self.assertIn(symbol, composition.ELEMENT_NAMES, msg=symbol)
+            self.assertEqual(composition.element_label(symbol), f'{composition.ELEMENT_NAMES[symbol]} ({symbol})')
+
+
 class TestPartsNotes(unittest.TestCase):
     """Matthias, 2026-10-29: "parts taken apart show each a long legend, you know, what I think about this": his rule,
     the notes once, on a page of their own. The two figures of where the critical elements sit carry no footnote; their
@@ -490,8 +611,8 @@ class TestElementPages(unittest.TestCase):
             per, unit = composition.panel_unit(kg[held])
             self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
             self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
-        self.assertIn('Pb', partly)
         self.assertIn('V', partly)
+        self.assertNotIn('Pb', partly)   # since point 3a in every robot's boards, so in every draw
 
     def test_a_critical_element_held_in_some_draws_shows_the_draws_that_hold_it(self):
         # The same on the pages of where the critical elements sit: indium, in the head of some robots only.
@@ -553,7 +674,7 @@ class TestElementPages(unittest.TestCase):
                 self.assertEqual(at[(median_x, y)], composition.panel_number(np.median(kinds[kind][held]) / per))
                 if not held.all():
                     partly.append((symbol, kind))
-        self.assertIn(('Al', 'boards'), partly)
+        self.assertIn(('In', 'head'), partly)   # the torso boards' aluminium in every draw since point 3a
 
 
 class TestCentre(unittest.TestCase):

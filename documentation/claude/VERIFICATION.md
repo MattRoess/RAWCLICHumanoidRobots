@@ -5,6 +5,106 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V79. His run of 16:01 read back: type 1 wholly in its elements
+
+- **Times, against the code's:** the builder 16:01:38 (its code 15:48:43), 01 16:01:50 (15:48:43), 02 16:02:11 to
+  16:02:35 (15:57:42); 00 not run, its settings unchanged since 12:06:56 (`params.xlsx` 15:44:40). Every stage after
+  its code: the run holds V76, V77 and V78.
+- **Tests:** all 309 pass, the two reading his files included (the parts file now holds the boards' rest constants).
+- **His results (200,000 draws):** every material of type 1 "Yes" in its elements, electronics 0.777 kg included;
+  bromine 51.16 g, calcium 46.86 g, copper (element) 2.071 kg, lead 2.53 g, neodymium 260.7 g, dysprosium 59.8 g; 01
+  found no fault. Looked at: his elements page 3 ("Bromine (Br)", median 49 g, mean 51 g).
+- **Remainders below zero, accepted ("2 accept"):** 30 of 416 in some draws (27 before), the largest the Booster K1
+  2 Ah's battery housing 1.59 %, the Noetix Bumi's frame 0.50 % (0.40 before: the coolers and parts now out of the
+  frames), the PrimeBOT Q1's frame 0.31 %, the Sprout's frame 0.23 %. A first count of 44 was mine and wrong: it read the
+  table of magnet classes that follows in the same file.
+- **Not covered:** the open items of his "Yes, 1 to 5" (HANDOVER.md, 2026-10-29, evening).
+
+### V78. His run of 15:44 read back; matplotlib's deprecated `vert` replaced
+
+- **His run, read against the code's times:** the builder 15:44:31, 00 15:44:40, 01 15:44:45, 02 15:45:06 to
+  15:45:32, 200,000 draws. It ran while 3b was being built: the builder's change for 3b came at 15:48:43, after it; before
+  that only test files had changed. So it holds V76 and not 3b: the coolers, the RP1's auxiliary cells and cover
+  magnets, the Sprout's sensors in `parts.txt`; lead 2.53 g; electronics 0.777 kg, "Partly"; no bromine.
+- **Copper, measured:** 1.6077 kg before (his run of 14:34), 1.6248 kg now: +17.1 g. The new coolers by hand: the
+  heat pipes of four robots (AKINCI-5, JAKA π, YMBOT E3, the T1), 4 of 31 × 0.1217 kg = 15.7 g, and the new fans'
+  windings, about 1.3 g: 17 g. **My V76 said "about 25 g": wrong**, it counted the X1's and N1's heat pipes, which were
+  there before.
+- **The warning he saw:** "MatplotlibDeprecationWarning: vert: bool was deprecated in Matplotlib 3.11 and will be
+  removed in 3.13" (the violins of the figures of where a material sits). `vert=False` replaced by
+  `orientation='horizontal'`, the only use. Test (new): every page of 02 drawn with deprecation warnings as errors;
+  failed first on this warning, then passed. The same violin drawn both ways: the same picture, pixel for pixel. 307
+  of 309 tests pass; the two reading the parts file on disk wait for his builder run (3b's two constants).
+- **Not covered:** his run of 3b.
+
+### V77. Point 3b entered: the rest of the boards in glass fibre, bromine and epoxy; electronics wholly in the elements
+
+- **What, on his words:** "Yes, enter them" (EVIDENCE.md E5.21): the rest of a board beyond its metals glass fibre 40 /
+  55 / 70 % (E-glass), bromine 4.4 / 8.8 / 13.2 %, epoxy the remainder (Epoxy).
+- **Built:** the builder's two shared constants; 01 requires them, checks that glass and bromine at their maxima leave
+  the epoxy above zero, and that the recipes E-glass and Epoxy are in the element recipes; 02's `board()` gives a
+  board's rest its glass, bromine and epoxy. **Two accounting faults found by the new test** (electronics wholly in the
+  elements) and closed: a joint's encoders sit on its driver board, so their elements are in its mass (its rest is
+  now its mass less them); a sensor whose mass no source states had its elements drawn and no mass booked (now its
+  elements at least, its housing in the frame's remainder). After both, every robot's electronics equal their elements
+  to the compounds' rounding (0.1 %); before, four robots were 0.13 to 0.17 % over.
+- **Fault on a page caught by looking:** the bromine panel was titled "Br" (no name in 02's list); a test (new) that
+  every element of the pages has its name, failed first, then "Bromine (Br)".
+- **Tests (new):** by hand at the modes, the G1's head board's bromine = 8.8 % of (8.4 g less 20 % copper, its tantalum
+  and its car metals over 15 cm2); type 1's electronics "Yes" in its elements; 01: maxima that leave no epoxy a
+  fault; a missing recipe of the boards' rest a fault; every element named. 306 of 308 pass; the two that read the
+  parts file on disk wait for his builder run.
+- **Sandbox** (the builder's file in Claude's scratch folder, 3,000 draws): no fault; electronics 0.776 kg, in the
+  elements "Yes" (0.776 kg); the boards' rest about 0.58 kg: bromine 51 g (none before), calcium 47 g (none), silicon
+  +83 g, boron +7 g, carbon +158 g, each as the shares give it by hand; copper and gold unchanged within chance.
+  Looked at: elements pages 1, 3 and 4. **Seen, not changed:** titanium is now in every draw (the glass's TiO2, 0 to
+  0.8 %), a few grams, while the titanium parts of a few robots reach hundreds of grams: its panel is a peak near
+  13 g with a long tail to 450 g.
+- **Not covered:** his runs.
+
+### V76. The pragmatic solutions built: plain words on the pages, the boards' other metals, the parts not entered, the sensors' housings
+
+- **What, on his words:** "Can we go through the open items and decide pragmatic solutions", "2 accept, this is
+  occuring in MC", "Yes build a pragmatic solution list", "Yes, build them" (HANDOVER.md, the list of 2026-10-29, late
+  afternoon). Built in its order: 7, 5 and 6, 3a, 4, 3c; 3b waits on its source table.
+- **7, plain words:** every page of 01 and 02 searched for the project words: found on 02's notes pages ("EVIDENCE.md
+  E2 and E5", "(E5.17 point 1)", "(E5.12 point 4, E2.8e)", "(E)", "the register's sheet Type 1") and 01's faults
+  pages ("(E)", "04_", "07_", "documentation/claude/EVIDENCE.md"); each put in plain words; the faults pages keep sheet
+  names. One list of the words in 01 (`PROJECT_WORDS`), read by both tests: every page of 02 (new) and 01's faults
+  pages (new; sheet names allowed). The overview's "02_composition.py" stays: the file he presses Run on.
+- **5 and 6:** the notes page says where the part groups and body regions are rough, and that a robot of two types is
+  drawn in full in each; METHODOLOGY and 02's comments the same.
+- **3a:** `BOARD_METALS` adds aluminium, zinc, iron and lead from the car board file. Test by hand (new): the G1's hips'
+  lead in the draws of ADC12 (its lead 0 at the mode) is its six large driver boards' 489.144 cm2 × 0.5 mg/cm2 =
+  244.572 mg (failed first at 0). Lead is now in every draw (2.5 g at the mean, 1.4 g before); the tests that had lead
+  and the torso boards' aluminium as held in some draws moved to vanadium and the head's indium.
+- **4:** in the builder, a block's `cooler` (the G1's by default, the X1's for the AKINCI-5, JAKA π and YMBOT E3, both
+  for the T1, the RP1's three fans from its BOM); the RP1's auxiliary battery cells, bearings and cover magnets; the
+  Sprout's time-of-flight sensors (EVIDENCE.md E5.20, "Since entered"). Code: a part of battery cells follows the
+  cells' recipe; a part of magnets names its grade class (01 checks the class and the sibling's sheet). Tests: three
+  of the builder (every robot its cooler by its computer; the RP1's four parts; the Sprout's sensors), three of 01 (a
+  magnet part's class passes; a wrong one, one in a joint, one missing from the traction motors' file each a fault),
+  two by hand in 02 (the RP1's cover magnets 80 × 0.283 g × 24 % Nd = 5.4336 g in its frame, class N; its cells 480 /
+  241.5 + 0.25 kg, all NMC).
+- **3c:** a sensor with a mass is its elements (electronics) and its housing, aluminium a share of the rest, plastics
+  the remainder. **Fault of mine caught by 01's check:** the share I proposed, 30 / 50 / 70 %, is narrower than his
+  rule for estimates (at least half to 1.5 times the mode); entered as 25 / 50 / 75 %. Test by hand (new): the G1's
+  head (its head board 8.4 g, four sensors 385 g at the modes): aluminium equals plastics, the three add up to
+  0.3934 kg.
+- **Sandbox** (the builder's new file in Claude's scratch folder, 3,000 draws): no fault; electronics 0.775 kg (0.815
+  in his run), of it in the elements 0.196 kg (0.183); lead 2.5 g (1.4); aluminium +0.026 kg. **Checked, not assumed:**
+  copper seemed unchanged (1.608 kg against his 1.608), where the coolers add about 25 g. Their parts are drawn and
+  carry it (JAKA π: heat pipes 0.119 kg, its torso boards' copper 0.121 kg); the committed code (`20c2023`) on his
+  file at the same 3,000 draws gives 1.590 kg, the new code 1.608 kg: +18 g, the 3,000 draws' chance (± 10 g), not a
+  fault. Looked at: type 1's notes page 1, materials page 1 (the class N, in 3.1 % of the draws, median 22 g).
+- **Tests:** 303; 301 pass. The two that fail read the parts file on disk (his builder run of 11:53): it lacks the new
+  rows and the constant "Sensor housing, aluminium share", so 01 and 02 stop on it until he runs the builder first.
+- **3b, the sources checked against each other** (EVIDENCE.md E5.21): the Danish EPA's "about 15%" TBBPA in an FR-4
+  laminate against its own 0.42 kg/m2 in 1.6 mm: at 55 % glass and IPC-TM-650 2.3.16.2's densities (resin 1.37, E-glass
+  2.59 g/cm3) the laminate weighs 2.96 kg/m2, so 0.42 kg is 14 %: the two agree. TBBPA's bromine by its formula
+  C15H12Br4O2: 58.8 %. Not entered: his word first.
+- **Not covered:** his runs; 3b's entry.
+
 ### V75. The overview's rows: the draws in which a kind of part holds the element, and in what share of the draws
 
 - **What, on his words:** "Yes, do it", to the overview's rows of a kind of part that holds an element in only some

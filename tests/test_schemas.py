@@ -397,7 +397,8 @@ class TestScreenPages(unittest.TestCase):
 
     SCREEN, SMALLEST_PX = (1920, 1080), 18
     # Words of the project that a page must not show (his rule: no code names, no project jargon).
-    PROJECT_WORDS = ('.md', '.xlsx', 'EVIDENCE', 'SHARED_LISTS', 'point ', '(E)', 'E5.', 'E2.', 'sheet ')
+    PROJECT_WORDS = schemas.PROJECT_WORDS
+    FAULT_PAGE_WORDS = tuple(w for w in PROJECT_WORDS if w != 'sheet ')   # the faults pages say where a fault is
 
     @classmethod
     def setUpClass(cls):
@@ -439,6 +440,14 @@ class TestScreenPages(unittest.TestCase):
             words = ' '.join(t.get_text() for t in figure.findobj(Text))
             schemas.plt.close(figure)
             for word in self.PROJECT_WORDS:
+                self.assertNotIn(word, words)
+
+    def test_no_project_words_on_the_faults_pages_but_sheet_names(self):
+        from matplotlib.text import Text
+        for figure in schemas.fault_pages([]):
+            words = ' '.join(' '.join(t.get_text() for t in figure.findobj(Text)).split())
+            schemas.plt.close(figure)
+            for word in self.FAULT_PAGE_WORDS:
                 self.assertNotIn(word, words)
 
     def test_the_table_of_robot_type_1_lists_every_robot_of_the_parts_file(self):
@@ -1263,7 +1272,11 @@ SMALL_APART = {
                   ('Robot B', 'Robot mass, with battery', 32, 33, 34, 'kg', 'S', 'X1b'),
                   ('Robot B', 'Battery voltage', 43.2, 44.4, 48, 'V', 'S', 'X1a'),
                   ('Robot B', 'Battery capacity', 8, 8, 8, 'Ah', 'S', 'X1a'),
-                  ('Robot B', 'Cable length (four conductors)', 10, 11, 12, 'm', 'S', 'X1a')],
+                  ('Robot B', 'Cable length (four conductors)', 10, 11, 12, 'm', 'S', 'X1a'),
+                  # Last, so that the rows the tests change by their number stay where they were (points 3c, 3b).
+                  ('all', 'Sensor housing, aluminium share', 0.25, 0.5, 0.75, 'share', 'E', 'point 3c'),
+                  ('all', 'Board rest, glass fibre share', 0.4, 0.55, 0.7, 'share', 'S, E', 'E5.21'),
+                  ('all', 'Board rest, bromine share', 0.044, 0.088, 0.132, 'share', 'E', 'E5.21')],
     'Sources': [('T1', 'China Post Securities, teardown', 'https://example.org', 'A teardown')],
 }
 APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),
@@ -1449,6 +1462,12 @@ class TestPartsTakenApart(unittest.TestCase):
         without = {key: value for key, value in self.SHARES.items() if key[0] != 'Constants'}
         self.assertFaultSays(self.faults(without), "'Joint modules, share of the robot mass'")
 
+    def test_board_rest_shares_that_could_leave_no_epoxy(self):
+        # 2026-10-29, "Yes, enter them" (point 3b): epoxy is the remainder of a board's rest, 1 less its glass and its
+        # bromine; their maxima must leave it above zero (rows 15 and 16 of the small file).
+        self.assertEqual([f.text for f in self.faults()], [])
+        self.assertFaultSays(self.faults({('Constants', 15, 4): 0.9}), 'the epoxy, their remainder')
+
     def test_a_battery_voltage_without_its_capacity(self):
         faults = self.faults({('Constants', 12): None})
         self.assertFaultSays(faults, 'not only its battery voltage')
@@ -1528,7 +1547,9 @@ class TestPartsTakenApart(unittest.TestCase):
 
 
 # The sibling projects' files robot type 1 taken apart reads where they lie (step 4): small copies of their sheets.
-SIBLING_PCB = [(c, e, 1, 2, 3) for c in ('PE_HVS', 'ITC') for e in ('Cu', 'Ag', 'Au', 'Sn', 'Ni', 'Pd')]
+# The car board file's ten metals, as RAWCLICVehicleElectronics' 04_ holds them for every category.
+SIBLING_PCB = [(c, e, 1, 2, 3) for c in ('PE_HVS', 'ITC')
+               for e in ('Cu', 'Ag', 'Au', 'Sn', 'Pb', 'Ni', 'Pd', 'Al', 'Zn', 'Fe')]
 SIBLING_SENSORS = [('IMU', '6-axis MEMS'), ('angle sensor', 'Hall IC')]
 SIBLING_TANTALUM = [('Cu', 0.1, 0.18, 0.28), ('Ta', 0, 0.0001, 0.00045)]
 SIBLING_MAGNETS = [('N35H', 'max', 'H'), ('N42SH', 'max', 'SH'), ('N40UH', 'max', 'UH'), ('N38EH', 'max', 'EH')]
@@ -1601,6 +1622,11 @@ class TestSiblingData(unittest.TestCase):
     def test_everything_named_is_there(self):
         self.assertEqual([f.text for f in self.faults()], [])
 
+    def test_a_magnet_grade_class_a_part_names_that_the_traction_motors_do_not_have(self):
+        # Point 4: a part of magnets naming its class; the small traction-motor file has H, SH, UH and EH only.
+        faults = self.faults({('Parts', 2, 8): 'Magnets (NdFeB)', ('Parts', 2, 9): 'N'})
+        self.assertFaultSays(faults, "the magnet grade class 'N' is not in")
+
     def test_a_board_category_the_car_file_does_not_have(self):
         self.assertFaultSays(self.faults({('Boards', 0, 9): 'XYZ'}), "'XYZ'")
 
@@ -1651,16 +1677,16 @@ class TestGrades(unittest.TestCase):
     each): every steel or titanium part has a grade, a copper part may, no other; every grade is a recipe or a steel of
     the sibling's workbook, and that steel's limits are in order."""
 
-    RECIPES = ('42CrMo4', 'GCr15', 'Brass')
+    RECIPES = ('42CrMo4', 'GCr15', 'Brass', 'E-glass', 'Epoxy')   # E-glass and Epoxy: the boards' rest (point 3b)
 
-    def faults(self, changes=None, steels=None):
+    def faults(self, changes=None, steels=None, recipes=None):
         with tempfile.TemporaryDirectory() as folder:
             build_apart(os.path.join(folder, 'apart.xlsx'), changes)
             apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
             params = Params()
             params.data.traction_motor_steels = os.path.join(folder, 'steels.xlsx')
             build_steels(params.data.traction_motor_steels, steels)
-            recipes = types.SimpleNamespace(items=[types.SimpleNamespace(recipe=r) for r in self.RECIPES])
+            recipes = types.SimpleNamespace(items=[types.SimpleNamespace(recipe=r) for r in recipes or self.RECIPES])
             return schemas.check_grades(apart, recipes, params)
 
     def assertFaultSays(self, faults, words):
@@ -1685,6 +1711,21 @@ class TestGrades(unittest.TestCase):
 
     def test_a_copper_part_may_name_its_recipe(self):
         self.assertEqual([f.text for f in self.faults({('Shares', 0, 2): 'Brass'})], [])
+
+    def test_the_recipes_of_the_boards_rest_must_be_there(self):
+        # 2026-10-29, "Yes, enter them", point 3b: the boards' glass fibre and epoxy by the recipes E-glass and Epoxy.
+        without = tuple(r for r in self.RECIPES if r != 'Epoxy')
+        self.assertFaultSays(self.faults(recipes=without), "the recipe 'Epoxy' of the boards' rest")
+
+    def test_a_part_of_magnets_may_name_its_grade_class(self):
+        # 2026-10-29, "Yes, build them", point 4: the RP1's N52 magnets in its covers, grade class N.
+        magnets = {('Parts', 2, 8): 'Magnets (NdFeB)'}
+        self.assertEqual([f.text for f in self.faults({**magnets, ('Parts', 2, 9): 'N'})], [])
+        self.assertFaultSays(self.faults({**magnets, ('Parts', 2, 9): 'N52'}), 'a grade of magnets is a grade class')
+
+    def test_a_joints_magnets_take_their_heat_groups_class(self):
+        self.assertFaultSays(self.faults({('JointParts', 1, 5): 'Magnets (NdFeB)', ('JointParts', 1, 6): 'N'}),
+                             "in a joint its heat group's")
 
     def test_a_sibling_steel_whose_maximum_is_below_its_minimum(self):
         # The fault found on 2026-10-29 in RAWCLICVehicleTractionMotor's sheet CastFeSteel, rows 16 and 17: Type 304's

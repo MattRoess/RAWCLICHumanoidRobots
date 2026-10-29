@@ -242,3 +242,62 @@ class TestMakePartsTakenApart(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestPartsNotEntered(unittest.TestCase):
+    """Matthias, 2026-10-29, "Yes, build them", point 4: the parts the research found and the entry left out
+    (EVIDENCE.md E5.20, "Not entered") entered, each out of its robot's frame: the computer's cooler of every robot
+    without one, by its computer; the RP1's 30 V auxiliary battery, its bearings outside the actuators and its 80
+    magnets in the covers; the Sprout's four time-of-flight sensors."""
+
+    # The robots whose computer has an Intel or AMD laptop-class processor: cooled as the X1's and N1's mini PCs.
+    X86 = {'AKINROBOTICS AKINCI-5', 'JAKA π', 'YMBOT E3'}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, _ = written()
+
+    def parts(self, robot: str) -> dict:
+        return {p.name: p for p in self.apart.parts if p.robot == robot}
+
+    def test_every_robot_has_its_computers_cooler(self):
+        pipes, sink = 'Main board heat sink: heat pipes and fins', 'Main board heat sink'
+        for robot in self.apart.robots:
+            parts = self.parts(robot)
+            factor = 38 / 35 if robot == 'Menlo Asimov 2' else 1   # the Asimov 1's masses times 38 / 35
+            with self.subTest(robot=robot):
+                self.assertIn('Main board fan', parts)
+                self.assertEqual(parts['Main board fan'].bounds, tuple(round(kg * factor, 4) for kg in
+                                                                       (0.005, 0.01, 0.02)))
+                if robot in self.X86 | {'AgiBot X1', 'Fourier N1'}:
+                    self.assertEqual((parts[pipes].bounds, parts[pipes].material), ((0.055, 0.12, 0.19), 'Copper'))
+                    self.assertNotIn(sink, parts)
+                elif robot == 'Booster T1':   # a Jetson AGX Orin and an Express-i7: both coolers, two fans
+                    self.assertEqual(parts['Main board fan'].count, 2)
+                    self.assertEqual(parts[sink].material, 'Aluminium')
+                    self.assertEqual(parts[pipes].material, 'Copper')
+                else:
+                    self.assertEqual((parts[sink].bounds, parts[sink].material),
+                                     (tuple(round(kg * factor, 4) for kg in (0.05, 0.1, 0.2)), 'Aluminium'))
+                    self.assertNotIn(pipes, parts)
+
+    def test_the_rp1s_fans_its_auxiliary_battery_bearings_and_cover_magnets(self):
+        parts = self.parts('RoboParty RP1')
+        self.assertEqual(parts['Waist fan'].count, 2)            # its BOM: two waist fans and a main-board fan
+        battery = parts['Auxiliary battery cells (30 V)']
+        self.assertEqual((battery.bounds, battery.material, battery.kind), ((0.12, 0.25, 0.5), 'Battery materials',
+                                                                            'Battery pack'))
+        bearings = parts['Bearings outside the actuators (9)']
+        self.assertEqual((bearings.count, bearings.material, bearings.grade), (9, 'Steel', 'GCr15'))
+        self.assertAlmostEqual(9 * bearings.bounds[1], 0.8 / 21 * 9, places=3)   # each as the X1's average
+        magnets = parts['Magnets in the covers, N52 (80)']
+        self.assertEqual((magnets.count, magnets.material, magnets.grade), (80, 'Magnets (NdFeB)', 'N'))
+        # 4 × 2 mm and 4 × 4 mm discs of NdFeB, 7.5 g/cm3: 0.188 g and 0.377 g each.
+        self.assertEqual(magnets.bounds, (0.000188, 0.000283, 0.000377))
+
+    def test_the_sprouts_time_of_flight_sensors(self):
+        sensors = {e.name: e for e in self.apart.sensors if e.robot == 'Fauna Sprout'}
+        tof = sensors['Time-of-flight sensor']
+        self.assertEqual((tof.count, tof.bounds), (4, (5, 10, 20)))
+        units = {(t, u) for _, sensor, t, u in self.apart.elements if sensor == 'Time-of-flight sensor'}
+        self.assertEqual(units, {('laser diode array', 1), ('photodetector array', 1)})

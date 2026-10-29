@@ -441,7 +441,13 @@ robot is drawn part by part, with these changes:
    it holds; every robot type now has the same element columns, 0 where none is drawn), its part groups and body
    regions (its ten kinds placed whole: the joints in Joint drives, the battery in Battery, the torso boards in
    Computer, the head in Sensors, the cables in Cables, the frame and shell in Frame; hips, knees, ankles in Legs,
-   waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body).
+   waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body). Kept so
+   (Matthias, 2026-10-29, "Yes, build them", point 5): no repository reads these two tables yet, and stock-and-flow
+   will read the materials and the elements, which are exact; rough where a kind holds parts of another group (the
+   head's joints counted as Sensors, the battery management board as Battery), as the notes page says.
+   **A robot of two types** (10 of type 1's 31, the G1 among them, types 1 and 3) is drawn in full in each of its
+   types (point 6): 02 says what one robot of a type is made of; how many robots there are is stock-and-flow's, not
+   the register's, so nothing is counted twice.
 5. **Its pages:** its notes (`1_<name>_notes_<k>.png`, on as many pages as they need, a paragraph never split), then
    its elements nine a page, each the histogram of one robot's total over the draws, median solid and mean dotted with
    their numbers above the panel, 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it
@@ -498,11 +504,28 @@ and the factor over its own) were replaced on 2026-10-29 by the section above; t
   (answer C). It does not normalise: Nd, Pr, Dy, Tb and the trace elements are drawn uniform between the class's
   bounds, iron is their remainder. Its seed is its own.
 - Boards: copper their mass times the copper share of a board (Bizzo et al. 2014, sheet Constants); gold, silver,
-  palladium, tin and nickel their area times the car board category's mg per cm2 (RAWCLICVehicleElectronics `04_`);
-  tantalum their mass times the data centres' share (RAWCLICDataCenters `04_`). A board's mass is its area times the
-  board mass per cm2, except the joints' driver boards, whose mass is their JointParts component.
+  palladium, tin, nickel, and since 2026-10-29 aluminium, zinc, iron and lead ("Yes, build them", point 3a; 01's
+  `BOARD_METALS`: every metal of the car file but its copper, which did not fit the weighed board, EVIDENCE.md E2.8b),
+  their area times the car board category's mg per cm2 (RAWCLICVehicleElectronics `04_`); tantalum their mass times
+  the data centres' share (RAWCLICDataCenters `04_`). A board's mass is its area times the board mass per cm2, except
+  the joints' driver boards, whose mass is their JointParts component. The rest of a board beyond these metals
+  (laminate and components; point 3b, "Yes, enter them", EVIDENCE.md E5.21): glass fibre 40 / 55 / 70 % of it by the
+  recipe E-glass, bromine 4.4 / 8.8 / 13.2 %, epoxy their remainder by the recipe Epoxy (01 checks that their maxima
+  leave the epoxy above zero and that both recipes are there); a joint's driver board less its encoders' elements,
+  which sit on it. The electronics are so wholly in the elements.
 - Sensors: their car sensor elements (RAWCLICVehicleElectronics `07_`) times their units; the encoders, two per joint,
-  by their elements only (their mass is inside the joint's components).
+  by their elements only (their mass is inside the joint's components). A sensor with a mass of its own is its elements
+  (electronics) and its housing, the rest of its mass: aluminium 25 / 50 / 75 % of it (E, the shared constant "Sensor
+  housing, aluminium share"), plastics the remainder, by type 1's recipes (point 3c: the car file holds the elements,
+  "not the complete module housing"). A sensor whose mass no source states is its elements at least, its housing in
+  the frame's remainder.
+- A part of battery cells outside the main pack (the RP1's auxiliary battery) follows the cells' recipe as the main
+  pack; a part of magnets outside the joints names its grade class in its column Grade where its source states it (the
+  RP1's N52 cover magnets, class N; 01 checks the class and that the traction motors' file holds it), a joint's magnets
+  the class their heat group draws (point 4).
+- The computer's cooler of every robot whose sources do not weigh it (point 4; EVIDENCE.md E5.20, "Since entered"): a
+  fan as the G1's and, by its computer, the G1's aluminium heat sink (an ARM board, or one not named) or the X1's and
+  N1's copper heat pipes and fins (an Intel or AMD laptop-class processor); each out of the frame's remainder.
 - Steel and titanium by their grades (since 2026-10-29; EVIDENCE.md E5.18): each part of its use's grade (the gears
   20CrMnTi; the bearings GCr15; the flanges, links, shafts and class 12.9 screws 42CrMo4; the X1's 17-4PH and pins
   C45; the RP1's steel 45, P20 and 304; the X1's TC4 links Ti-6Al-4V; the motors' laminations M19 or M27, each as

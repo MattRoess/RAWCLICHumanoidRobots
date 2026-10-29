@@ -175,7 +175,7 @@ CHECKS_DONE = [
     'fibre composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of '
     'the sheet Recipe, and every row names a piece that exists.',
     "Robot type 1 part by part (its 31 robots, the K1 in two versions): every robot named in the sheet Robots and "
-    'with rows of its own on every sheet that is per robot; every min, mode and max in order, and every estimate (E) '
+    'with rows of its own on every sheet that is per robot; every min, mode and max in order, and every estimate '
     "at least half to 1.5 times its mode, cut only at 100 % for a share and at 1 for a large joint's factor; every "
     "label W, S or E; every "
     'group of shares with exactly one remainder that never falls below zero; every material and body region on the '
@@ -193,9 +193,9 @@ CHECKS_DONE = [
     "one; every grade ('A or B': each) is a recipe of the element recipes or a steel of RAWCLICVehicleTractionMotor's "
     'element workbook, read where it lies, with every minimum at most its maximum and a remainder.',
     "Robot type 1 part by part, against the sibling projects' files it reads where they lie: every car board category "
-    'with its gold, silver, palladium, tin and nickel (RAWCLICVehicleElectronics, 04_), every car sensor type (07_), '
-    "a tantalum row (RAWCLICDataCenters, 04_), every magnet grade class a heat group can draw "
-    "(RAWCLICVehicleTractionMotor's element workbook), its sheets of steels.",
+    "with its gold, silver, palladium, tin, nickel, aluminium, zinc, iron and lead (RAWCLICVehicleElectronics' car "
+    "boards), every car sensor type (its car sensors), a tantalum row (RAWCLICDataCenters' element composition), every "
+    "magnet grade class a heat group can draw (RAWCLICVehicleTractionMotor's element workbook), its sheets of steels.",
     'The register of every known humanoid robot: every number once; a robot with types has one or two different '
     'robot types of the six, a robot without has an entry saying why (not assigned, or the same robot as an entry '
     'with types); every form known; every mass min, mode and max or none, in order; no robot of type 1 below its '
@@ -209,8 +209,8 @@ CHECKS_DONE = [
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
 NOT_CHECKED = ('The checks test whether the workbook agrees with itself, whether every part and material is '
                'placed on the shared lists, and whether the battery cells and the element recipes hold together. '
-               'They do not test whether the numbers are right, which needs the sources, report by report '
-               '(documentation/claude/EVIDENCE.md), nor whether a placement is right, which is Matthias\'s check of '
+               'They do not test whether the numbers are right, which needs the sources, report by report (the '
+               'research report), nor whether a placement is right, which is Matthias\'s check of '
                'the shared-lists pages.')
 
 # ------------------------------------------------------------------------------------------------------
@@ -1526,7 +1526,12 @@ SHELL_SHARE = 'Shell, share of the robot mass'
 APART_SHARED_CONSTANTS = ('Board mass per cm2 (boards not weighed)', "Copper share of a board's mass",
                           'Power conductor cross-section (2 conductors)',
                           'Signal conductor cross-section (2 conductors)', 'Copper density',
-                          'Insulation and jackets, per mass of copper')
+                          'Insulation and jackets, per mass of copper', 'Sensor housing, aluminium share',
+                          'Board rest, glass fibre share', 'Board rest, bromine share')
+# The rest of a board beyond its metals (2026-10-29, "Yes, enter them", point 3b; EVIDENCE.md E5.21): glass fibre and
+# bromine each a share of it, epoxy their remainder, the glass and the epoxy by these recipes of the element recipes.
+BOARD_GLASS, BOARD_BROMINE = 'Board rest, glass fibre share', 'Board rest, bromine share'
+BOARD_REST_RECIPES = ('E-glass', 'Epoxy')
 ALL_ROBOTS = 'all'
 # The words that mark the one part of each robot that takes its remainder (the frame), and a body region that follows
 # the joints a part sits in (the encoders).
@@ -1931,6 +1936,12 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         if quantity not in shared:
             faults.append(Fault(on, 0, f"'{quantity}' is missing (for {ALL_ROBOTS}); the stage that draws the file "
                                        'needs it.'))
+    if BOARD_GLASS in shared and BOARD_BROMINE in shared:   # the epoxy, their remainder, above zero in every draw
+        highest = (shared[BOARD_GLASS][1][2] or 0) + (shared[BOARD_BROMINE][1][2] or 0)
+        if highest >= 1:
+            faults.append(Fault(on, shared[BOARD_GLASS][0], f"'{BOARD_GLASS}' and '{BOARD_BROMINE}' reach "
+                                                            f'{highest:g} at their maxima: nothing is left for the '
+                                                            'epoxy, their remainder.'))
     for robot in apart.robots:
         own = apart.constants.get(robot, {})
         for quantity in APART_ROBOT_CONSTANTS:
@@ -1961,11 +1972,15 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
 
 
 # The sheets of the sibling projects' files and the columns read from them (step 4 of the plan): each read where it
-# lies, never written. The metals a car board category must hold for the G1's boards.
+# lies, never written. The metals a car board category must hold for type 1's boards, each its mg per cm2 of board:
+# all those of the car board file but copper, whose share of a board's mass is that of the measured boards (EVIDENCE.md
+# E2.8b: the car copper did not fit the G1's weighed board). Aluminium, zinc, iron and lead since 2026-10-29 ("Yes,
+# build them", point 3a): at 0.56 g/cm2 Al 0.3 to 1.1 %, Fe 0.45 to 0.7 %, Zn 0.02 to 0.05 %, Pb 0.04 to 0.09 % of a
+# board, as lead-free boards.
 SIBLING_SHEETS = {'vehicle_pcb_composition': 'PCPComposition', 'vehicle_sensor_composition': 'Sensor Details',
                   'data_center_element_composition': 'BoardsAndComponents',
                   'traction_motor_magnets': 'PermanentMagnetNdFeB'}
-BOARD_METALS = ('Au', 'Ag', 'Pd', 'Sn', 'Ni')
+BOARD_METALS = ('Au', 'Ag', 'Pd', 'Sn', 'Ni', 'Al', 'Zn', 'Fe', 'Pb')
 
 
 def sibling_rows(path: str, sheet: str) -> list[dict]:
@@ -2042,6 +2057,10 @@ def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
             used_by = ', '.join(g.group for g in grades)
             faults.append(Fault('MagnetGrades', grades[0].row, f"the magnet grade class '{klass}' is not in {where}; "
                                                                f'drawn by {used_by}.'))
+        for p in apart.parts:   # the classes parts of magnets name (point 4)
+            if p.material == MAGNET_MATERIAL and p.grade and p.grade not in classes:
+                faults.append(Fault('Parts', p.row, f"{p.robot}, {p.name}: the magnet grade class '{p.grade}' is not "
+                                                    f'in {where}.'))
     return faults
 
 
@@ -2054,6 +2073,15 @@ BALANCE = 'balance'
 # nickel strip counted with the copper); every other material has none (EVIDENCE.md E5.18, E5.19).
 GRADED = ('Steel', 'Titanium')
 MAY_HAVE_GRADE = ('Copper',)
+# A part of magnets on the sheet Parts (outside the joints) may name its grade class (MAGNET_CLASSES) where its source
+# states its grade, as the RP1's N52 magnets in its covers (Matthias, 2026-10-29, "Yes, build them", point 4); a joint's
+# magnets take the class their heat group draws (sheet MagnetGrades).
+MAGNET_MATERIAL = 'Magnets (NdFeB)'
+
+
+def stated_magnet_classes(apart: PartsTakenApart) -> set:
+    """The grade classes the parts of magnets of the sheet Parts name in their column Grade."""
+    return {p.grade for p in apart.parts if p.material == MAGNET_MATERIAL and p.grade}
 
 
 def sibling_steels(path: str) -> dict:
@@ -2077,9 +2105,9 @@ def sibling_steels(path: str) -> dict:
 
 def check_grades(apart: PartsTakenApart, recipes: ElementRecipes, params: Params) -> list[Fault]:
     """Whether every grade the parts file names can be drawn: a part or component of steel or titanium has a grade,
-    a copper part may, no other has one; every grade ('A or B': each) is a recipe of the element recipes or a steel of
-    the sibling's element workbook, and such a steel has its minimum at most its maximum for every element and a
-    remainder."""
+    a copper part may, a part of magnets on the sheet Parts may name its grade class, no other has one; every grade
+    ('A or B': each) is a recipe of the element recipes or a steel of the sibling's element workbook, and such a steel
+    has its minimum at most its maximum for every element and a remainder."""
     faults = []
     known = {i.recipe for i in recipes.items}
     path = params.data.traction_motor_steels
@@ -2095,6 +2123,12 @@ def check_grades(apart: PartsTakenApart, recipes: ElementRecipes, params: Params
     used = set()
     for sheet, row, what, material, grade in rows:
         materials = alternatives(material)
+        if material == MAGNET_MATERIAL and grade:
+            if sheet != 'Parts' or grade not in MAGNET_CLASSES:
+                classes = ', '.join(MAGNET_CLASSES)
+                faults.append(Fault(sheet, row, f"{what}: a grade of magnets is a grade class ({classes}), on the "
+                                                f"sheet Parts only; in a joint its heat group's, not '{grade}'."))
+            continue
         if any(m in GRADED for m in materials) and not grade:
             faults.append(Fault(sheet, row, f"{what}: give its grade, whose element recipe its {material.lower()} "
                                             'follows (EVIDENCE.md E5.18).'))
@@ -2107,6 +2141,10 @@ def check_grades(apart: PartsTakenApart, recipes: ElementRecipes, params: Params
                 faults.append(Fault(sheet, row, f"{what}: the grade '{g}' is neither a recipe of "
                                                 f'{os.path.basename(params.data.element_recipes)} nor a steel of '
                                                 f'{os.path.basename(path)}.'))
+    for recipe in BOARD_REST_RECIPES:   # the rest of the boards (point 3b)
+        if recipe not in known:
+            faults.append(Fault('data.element_recipes', 0, f"the recipe '{recipe}' of the boards' rest is not in "
+                                                           f'{os.path.basename(params.data.element_recipes)}.'))
     for g in sorted(used & set(steels) - known):
         elements, remainder = steels[g]
         bad = [e for e, (low, high) in elements.items() if low is None or high is None or not 0 <= low <= high]
@@ -3326,6 +3364,11 @@ SCREEN_CHARS = 9.0                 # characters of 14-point text in an inch, for
 # they write, what is not yet worked on.
 TOL_LIGHT = {'his': '#EEDD88', 'sibling': '#99DDFF', 'stage': '#77AADD', 'output': '#44BB99', 'later': '#DDDDDD'}
 SCREEN_INK, SCREEN_MUTED = '#222222', '#555555'
+# Words of the project no page of 01 or 02 may show (his figure rule: no code names, no project jargon): file names,
+# sections of EVIDENCE.md, the label of an estimate, the sibling files' numbers. The faults pages may name a sheet of
+# his files, as they say where a fault is (2026-10-29, "Yes, build them", point 7). The tests check every page.
+PROJECT_WORDS = ('.md', '.xlsx', 'EVIDENCE', 'SHARED_LISTS', 'point ', '(E)', 'E5.', 'E2.', 'E1.', 'sheet ', '04_',
+                 '07_', 'documentation/')
 
 
 def screen_page():

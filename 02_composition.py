@@ -92,7 +92,8 @@ HOW IT DRAWS ROBOT TYPE 1 (Matthias, 2026-10-28: "Yes in 02 it is all type 1 in.
     cells, the Asimov's: no housing). The shell, where no source weighs it: a share of the robot's mass. The cables:
     their length times the four conductors' cross-sections times copper's density, and their insulation. The frame:
     the robot's mass less every other part; where it falls below zero it is reported, not cut.
-  - Its part groups and body regions: its ten kinds of part placed whole (KIND_PART_GROUP, KIND_BODY_REGION).
+  - Its part groups and body regions: its ten kinds of part placed whole (KIND_PART_GROUP, KIND_BODY_REGION), kept so
+    on his word (2026-10-29, "Yes, build them", point 5). A robot of two types is drawn in full in each (point 6).
 
 WHAT IT WRITES
 --------------
@@ -652,6 +653,9 @@ PACK_WH_PER_KG, SHELL_SHARE = schemas.PACK_WH_PER_KG, schemas.SHELL_SHARE
 BOARD_G_PER_CM2, BOARD_COPPER = 'Board mass per cm2 (boards not weighed)', "Copper share of a board's mass"
 POWER_CS, SIGNAL_CS = 'Power conductor cross-section (2 conductors)', 'Signal conductor cross-section (2 conductors)'
 DENSITY, INSULATION = 'Copper density', 'Insulation and jackets, per mass of copper'
+SENSOR_ALUMINIUM = 'Sensor housing, aluminium share'   # of a sensor module beyond its elements (point 3c)
+BOARD_GLASS, BOARD_BROMINE = schemas.BOARD_GLASS, schemas.BOARD_BROMINE   # of a board's rest (point 3b)
+GLASS_RECIPE, EPOXY_RECIPE = schemas.BOARD_REST_RECIPES
 
 # The critical elements whose kilograms resting on estimates (E) are followed, for the overview figure (its hatching).
 TRACKED = {'Cu', 'Al', 'Ag', 'Au', 'Pd', 'Ta', 'Nd', 'Pr', 'Dy', 'Ga', 'In'}
@@ -783,8 +787,10 @@ def apart_faults(inputs: ApartInputs, params: Params) -> list:
 
 
 def grade_classes(inputs: ApartInputs) -> list:
-    """The NdFeB grade classes a heat group can draw (sheet MagnetGrades), in the order of the heat they stand."""
-    drawn = {g.klass for g in inputs.apart.grades if (g.probability or 0) > 0}
+    """The NdFeB grade classes a heat group can draw (sheet MagnetGrades) or a part of magnets names (sheet Parts,
+    since 2026-10-29, point 4), in the order of the heat they stand."""
+    drawn = {g.klass for g in inputs.apart.grades if (g.probability or 0) > 0} | schemas.stated_magnet_classes(
+        inputs.apart)
     return [k for k in schemas.MAGNET_CLASSES if k in drawn]
 
 
@@ -984,7 +990,9 @@ class Robot:
                  grade: str = '') -> None:
         """kg of one material of a part in a kind, and the elements it holds: by its grade's recipe where it names one,
         else by type 1's recipe, as copper, or as magnets of the grade class drawn for `heat_group`. A material or grade
-        written 'A or B' is either, drawn (Shared.state). Electronics are added by board() and sensor()."""
+        written 'A or B' is either, drawn (Shared.state). A part of magnets outside the joints may name its grade
+        class, a part of battery cells follows the cells' recipe as the main pack (2026-10-29, "Yes, build them",
+        point 4). Electronics are added by board() and sensor()."""
         for written, call in ((material, lambda m, k: self.material(part, kind, m, k, estimate, heat_group, grade)),
                               (grade, lambda g, k: self.material(part, kind, material, k, estimate, heat_group, g))):
             if schemas.OR in written:
@@ -996,9 +1004,12 @@ class Robot:
         self.materials[(kind, material)] = self.materials.get((kind, material), 0) + kg
         self.detail(kind, material, kg, heat_group, grade)
         if material == MAGNETS:
-            names, drawn = self.shared.magnet[heat_group]
+            names, drawn = self.shared.magnets[grade] if grade else self.shared.magnet[heat_group]
             for k, element in enumerate(names):
                 self.element(kind, element, kg * self.of(drawn[:, k]), estimate, material)
+        elif material == CELL_MATERIAL:
+            for element, share in self.shared.cells.items():
+                self.element(kind, element, kg * self.of(share), estimate, material)
         elif grade:
             for element, share in self.shared.grade_elements(grade).items():
                 self.element(kind, element, kg * self.of(share), estimate, material)
@@ -1012,9 +1023,13 @@ class Robot:
         for their joint's heat; a material with a grade by the recipes the grade holds (the gear stage 2's steel as
         20CrMnTi and GCr15); type 1's aluminium by its alloys; every other material whole ('')."""
         s = self.shared
-        if material == MAGNETS:
+        if material == MAGNETS and grade:
+            split = {grade: 1.0}
+        elif material == MAGNETS:
             classes = self.of(s.heat_grade[heat_group])
             split = {klass: (classes == klass).astype(float) for klass in np.unique(classes)}
+        elif material == CELL_MATERIAL:
+            split = {CELL_RECIPE: 1.0}
         elif grade:
             split = {leaf: self.of(share) for leaf, share in s.grade_leaves(grade).items()}
         elif material in ALLOYS:
@@ -1034,14 +1049,32 @@ class Robot:
             for (shared, its_grade), share in self.shared.shares[item]:
                 self.material(part, kind, shared, kg * self.of(share), estimate, heat_group, its_grade)
 
-    def board(self, kind: str, category: str, kg: np.ndarray, area: np.ndarray, estimate: bool) -> None:
+    def board(self, kind: str, category: str, kg: np.ndarray, area: np.ndarray, estimate: bool,
+              inside: np.ndarray | float = 0.0) -> None:
         """The elements of boards of `kg` and `area` (cm2): copper their mass times the copper share, the metals of
-        BOARD_METALS their area times the car category's mg per cm2, tantalum their mass times its share."""
+        BOARD_METALS their area times the car category's mg per cm2, tantalum their mass times its share; their rest,
+        less the elements `inside` them that are drawn as another's (a joint's encoders on its driver board), glass
+        fibre and bromine each a share of it and epoxy the remainder, the glass and the epoxy by their recipes
+        (2026-10-29, "Yes, enter them", point 3b; EVIDENCE.md E5.21)."""
         s = self.shared
-        self.element(kind, 'Cu', kg * self.of(s.constant[BOARD_COPPER]), estimate, ELECTRONICS)
-        for metal in schemas.BOARD_METALS:
-            self.element(kind, metal, area * self.of(s.pcb[(category, metal)]) / 1e6, estimate, ELECTRONICS)
-        self.element(kind, 'Ta', kg * self.of(s.tantalum), estimate, ELECTRONICS)
+        copper, tantalum = kg * self.of(s.constant[BOARD_COPPER]), kg * self.of(s.tantalum)
+        metals = {metal: area * self.of(s.pcb[(category, metal)]) / 1e6 for metal in schemas.BOARD_METALS}
+        self.element(kind, 'Cu', copper, estimate, ELECTRONICS)
+        for metal, kg_metal in metals.items():
+            self.element(kind, metal, kg_metal, estimate, ELECTRONICS)
+        self.element(kind, 'Ta', tantalum, estimate, ELECTRONICS)
+        rest = kg - copper - tantalum - sum(metals.values()) - inside
+        glass, bromine = rest * self.of(s.constant[BOARD_GLASS]), rest * self.of(s.constant[BOARD_BROMINE])
+        self.element(kind, 'Br', bromine, estimate, ELECTRONICS)
+        for recipe, kg_of in ((GLASS_RECIPE, glass), (EPOXY_RECIPE, rest - glass - bromine)):
+            for element, share in s.grade_elements(recipe).items():
+                self.element(kind, element, kg_of * self.of(share), estimate, ELECTRONICS)
+
+    def sensor_kg(self, units: list, count: np.ndarray | float) -> np.ndarray:
+        """kg of the car sensor elements of `count` sensors, each made of `units` (car sensor type, units in one
+        sensor): what sensor() adds as their elements."""
+        return sum((count * per_sensor * self.of(mg) / 1e6 for car_type, per_sensor in units
+                    for (t, _), mg in self.shared.sensor.items() if t == car_type), np.zeros(self.n))
 
     def sensor(self, kind: str, units: list, count: np.ndarray | float, estimate: bool) -> None:
         """The elements of `count` sensors, each made of `units` (car sensor type, units in one sensor)."""
@@ -1102,11 +1135,12 @@ def on_estimates(apart, drawn: list) -> dict:
     """What of the robots drawn rests most on estimates (E), for the notes page (the entry, point 8), by 01's
     estimate_kinds: their joint modules a share of their mass, their joints' masses from their torques, their battery's
     energy a share of their mass, their mass itself."""
-    words = {'joint shares': "the joint modules a share of the robot's mass, split as batch 1's on average (E5.17 "
-                             'point 1)',
-             'joint torques': "the joints' masses from their torques (E5.12 point 4, E2.8e)",
-             'battery per kg': "the battery's energy a share of the robot's mass (E5.17 point 2)",
-             'mass': 'the mass itself (E5.17 point 6)'}
+    # In plain words, without the sections of EVIDENCE.md (E5.17 points 1, 2 and 6; E5.12 point 4, E2.8e), which are
+    # project words on a page (Matthias's figure rule; 2026-10-29, "Yes, build them", point 7).
+    words = {'joint shares': "the joint modules a share of the robot's mass, split as batch 1's on average",
+             'joint torques': "the joints' masses from their torques",
+             'battery per kg': "the battery's energy a share of the robot's mass",
+             'mass': 'the mass itself'}
     out = {what: [r for r in drawn if key in schemas.estimate_kinds(apart, r)] for key, what in words.items()}
     return {what: robots for what, robots in out.items() if robots}
 
@@ -1146,7 +1180,10 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             if component == DRIVER_BOARD:
                 r.material(part, kind, ELECTRONICS, kg_here, estimate)
                 area = r.of(s.board_area[j.module]) * scale * j.count
-                r.board(kind, drivers[j.module].category, kg_here, area, estimate)
+                # The joint's encoders sit on its driver board: their elements are in its mass (point 3b).
+                inside = sum((r.sensor_kg([(t, u) for _, sensor, t, u in apart.elements if sensor == e.name],
+                                          e.count / in_robot * j.count) for e in encoders), np.zeros(n))
+                r.board(kind, drivers[j.module].category, kg_here, area, estimate, inside)
             else:
                 r.piece(part, kind, component, s.material[component], kg_here, estimate, j.heat_group,
                         s.grade[component])
@@ -1182,15 +1219,24 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
         r.material(f'{name}: {b.name}', KIND_OF[b.kind], ELECTRONICS, kg, b.label.startswith('E'))
         r.board(KIND_OF[b.kind], b.category, kg, area, b.label.startswith('E'))
 
-    # The sensors outside the joints: their mass (g) where a source gives it, their car sensor elements.
+    # The sensors outside the joints: their mass (g) where a source gives it, their car sensor elements. A module is
+    # its elements (electronics) and its housing, the rest of its mass: aluminium a share of it, plastics the remainder
+    # (2026-10-29, "Yes, build them", point 3c; the car file holds the elements, "not the complete module housing").
+    # A sensor whose mass no source states is its elements at least (point 3b: the electronics wholly in the elements);
+    # its housing, not known, stays in the frame's remainder.
     for e in apart.sensors:
         if e.robot != name or e.kind in IN_THE_JOINTS:
             continue
+        units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
+        estimate, column, kind = e.label.startswith('E'), f'{name}: {e.name}', KIND_OF[e.kind]
+        inside = r.sensor_kg(units, e.count)
+        r.material(column, kind, ELECTRONICS, inside, estimate)
         if None not in e.bounds:
             kg = e.count * triangle(rng, *e.bounds, n) / 1000
-            r.material(f'{name}: {e.name}', KIND_OF[e.kind], ELECTRONICS, kg, e.label.startswith('E'))
-        units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
-        r.sensor(KIND_OF[e.kind], units, e.count, e.label.startswith('E'))
+            aluminium = (kg - inside) * r.of(s.constant[SENSOR_ALUMINIUM])
+            r.material(column, kind, 'Aluminium', aluminium, estimate)
+            r.material(column, kind, 'Plastics', kg - inside - aluminium, estimate)
+        r.sensor(kind, units, e.count, estimate)
 
     # The battery: its energy (its voltage times its capacity, or its energy per kg of robot times its mass), its cells
     # from it, its housing the pack less its cells and its management board (the boards of the kind Battery pack); the
@@ -1340,7 +1386,9 @@ def write_taken_apart(d: Draws, folder: str) -> None:
 # ------------------------------------------------------------------------------------------------------
 
 # The kinds of part of robot type 1 placed in the shared lists' part groups and body regions, so that its tables have
-# the columns of every other robot type (03 compares them): whole kinds, not part by part.
+# the columns of every other robot type (03 compares them): whole kinds, not part by part. Kept so (2026-10-29, "Yes,
+# build them", point 5): no repository reads these tables yet; rough where a kind holds parts of another group (the
+# head's joints in Sensors, the battery management board in Battery), as the notes page says.
 KIND_PART_GROUP = {'hips': 'Joint drives', 'knees': 'Joint drives', 'ankles': 'Joint drives', 'waist': 'Joint drives',
                    'arms': 'Joint drives', 'battery': 'Battery', 'boards': 'Computer', 'head': 'Sensors',
                    'cables': 'Cables', 'frame': 'Frame'}
@@ -1592,9 +1640,9 @@ TYPE_ONE_NOTE_WIDTH = 140                       # characters in a line of a note
 # tests/test_parts_taken_apart.py fails where a text runs off its page.
 NOTES_LINES = 26
 # The elements of robot type 1's other materials (boards, sensors, magnets) in plain words, beside those of the recipes.
-ELEMENT_NAMES.update({'Ag': 'Silver', 'As': 'Arsenic', 'Au': 'Gold', 'Dy': 'Dysprosium', 'Ga': 'Gallium',
-                      'In': 'Indium', 'Nb': 'Niobium', 'Nd': 'Neodymium', 'Pd': 'Palladium', 'Pr': 'Praseodymium',
-                      'Ta': 'Tantalum', 'Tb': 'Terbium', 'W': 'Tungsten'})
+ELEMENT_NAMES.update({'Ag': 'Silver', 'As': 'Arsenic', 'Au': 'Gold', 'Br': 'Bromine', 'Dy': 'Dysprosium',
+                      'Ga': 'Gallium', 'In': 'Indium', 'Nb': 'Niobium', 'Nd': 'Neodymium', 'Pd': 'Palladium',
+                      'Pr': 'Praseodymium', 'Ta': 'Tantalum', 'Tb': 'Terbium', 'W': 'Tungsten'})
 
 
 def panel_unit(values_kg: np.ndarray) -> tuple:
@@ -1676,18 +1724,20 @@ def type_one_notes(c: Composition, d: Draws, left_out: list, params: Params) -> 
         '(95 % of the draws between them). Each panel on its own scale and unit (kg, g, mg). An element or material '
         '0 in some draws: its panel shows the draws that hold it and says in what share of all the draws it is held; '
         'one held in fewer than 2.5 % of the draws has no panel.',
-        f"The draws: {d.n:,}, each one robot of the register's sheet Type 1, each of its {len(d.register)} robots "
+        f"The draws: {d.n:,}, each one robot of type 1 in the register, each of its {len(d.register)} robots "
         'drawn equally often (a robot in two versions, each as often); its mass a triangle on its own mass, its '
-        'parts its own, part by part (the parts file, from its sources; EVIDENCE.md E2 and E5).',
-        'The robots drawn: ' + '; '.join(d.register) + '.',
-        ('Resting most on estimates (E): ' + '; '.join(estimates) + '.') if estimates else '',
+        'parts its own, part by part (the parts file, from its sources).',
+        'The robots drawn: ' + '; '.join(d.register) + '. A robot of two robot types is drawn in full in each of them.',
+        ('Resting most on estimates: ' + '; '.join(estimates) + '.') if estimates else '',
         'Not drawn: ' + ('; '.join(f'{r.number} {r.name} (no mass stated)' for r in left_out) or 'none') +
         '. A robot lighter than 15 kg is not of robot type 1.',
         'Not yet in the elements: ' + (', '.join(missing) + '; their elements are missing from the pages.'
                                        if missing else 'none.') +
-        (f" In part: {', '.join(partly)} (only the metals of the boards and the elements of the sensors)."
-         if partly else ''),
+        (f" In part: {', '.join(partly)} (its elements less than its mass)." if partly else ''),
         not_shown_note(params),
+        "The tables by part group and by body region (for stock-and-flow): type 1's ten kinds of part, each placed "
+        "whole; rough where a kind holds parts of another group: the head's joints are counted as sensors, the battery "
+        'management board as battery.',
         'The material pages: each material in one robot, drawn as the elements; the steels by their grade, the '
         "aluminium by its alloys (type 1's recipe: die-cast 0 to 40 %, of the wrought rest 7075 0 to 64 % and 6061), "
         "the permanent magnets in all and by the grade class each joint's heat draws. Copper is the metal of windings, "
@@ -2126,7 +2176,8 @@ def sources_figure(title: str, kinds: dict, d: Draws):
         values = kinds[kind]
         logs = np.log10(values[values > 0])
         if logs.max() > logs.min():
-            body = axes.violinplot([logs], positions=[row], vert=False, widths=0.8, showextrema=False)['bodies'][0]
+            body = axes.violinplot([logs], positions=[row], orientation='horizontal', widths=0.8,
+                                  showextrema=False)['bodies'][0]
             body.set_facecolor(VIOLIN)
             body.set_edgecolor('none')
             body.set_alpha(0.6)
