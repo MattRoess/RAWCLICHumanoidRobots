@@ -27,12 +27,13 @@ from src.params_schema import ParameterError, Params, current, flatten, validate
 KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.materials_sheet',
         'data.sources_dir', 'data.shared_lists', 'data.element_recipes', 'data.parts_taken_apart',
         'data.vehicle_pcb_composition', 'data.vehicle_sensor_composition', 'data.data_center_element_composition',
-        'data.traction_motor_magnets', 'data.traction_motor_dir', 'data.humanoid_guide', 'data.register',
+        'data.traction_motor_magnets', 'data.traction_motor_steels', 'data.traction_motor_dir', 'data.humanoid_guide',
+        'data.register',
         'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg', 'composition.elements_not_shown',
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
-        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'parts.draws', 'parts.seed',
-        'output.parts_dir', 'output.parts_figures_dir'}
+        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'output.parts_dir',
+        'output.parts_figures_dir', 'output.robot_types_with_pages'}
 
 
 class TestSettings(unittest.TestCase):
@@ -53,8 +54,7 @@ class TestSettings(unittest.TestCase):
                                      ('data', 'parts_taken_apart', 'apart.csv'),
                                      ('data', 'vehicle_pcb_composition', 'relative/04_.xlsx'),
                                      ('data', 'traction_motor_dir', 'relative/folder'),
-                                     ('parts', 'draws', 50),
-                                     ('parts', 'seed', -1),
+                                     ('data', 'traction_motor_steels', 'relative/10_.xlsx'),
                                      ('output', 'parts_dir', ' '),
                                      ('data', 'components_sheet', ' '),
                                      ('data', 'materials_sheet', ''),
@@ -68,7 +68,11 @@ class TestSettings(unittest.TestCase):
                                      ('composition', 'elements_not_shown', ('H', '')),
                                      ('composition', 'elements_not_shown', 'HNOF'),
                                      ('output', 'composition_dir', ' '),
-                                     ('output', 'dpi', 10)):
+                                     ('output', 'dpi', 10),
+                                     ('output', 'robot_types_with_pages', ()),
+                                     ('output', 'robot_types_with_pages', (1, 1)),
+                                     ('output', 'robot_types_with_pages', (7,)),
+                                     ('output', 'robot_types_with_pages', 1)):
             params = Params()
             setattr(getattr(params, section), name, value)
             with self.assertRaises(ParameterError, msg=f'{section}.{name} = {value!r}'):

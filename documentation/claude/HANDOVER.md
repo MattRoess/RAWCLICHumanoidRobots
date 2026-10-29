@@ -2,10 +2,134 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
-## 2026-10-29, morning: the sheet Type 1, H N O F off the pages, research batch 1 begun (start here)
+## What a robot type needs: the steps robot type 1 went through (for types 2 to 6)
+
+Matthias, 2026-10-29: "Also notice, what all had to be done for type 1 robots, so you remeber, what has to be done for
+all the other one." Each step was taken for type 1 on his word, and each will be for the others; where it is recorded
+stands after it. Type 1 is not finished either: what is still open for it is said at each step.
+
+1. **The workbook's category, checked and drawn by 01:** its parts and materials, their sums, its anchor robot
+   (METHODOLOGY checks 1 to 11). Open for type 1: 01's pages show the anchor robot alone, not the type's robots, and
+   break his figure rules (V67).
+2. **Its parts and materials on the shared lists** (`data/researched/shared_lists.xlsx`): each part in a part group and
+   a body region, each material in a shared material, a row holding several split by the sheet Splits (SHARED_LISTS.md).
+3. **The battery as cells only:** the cells counted from the pack's voltage and capacity with a cell sheet that fits the
+   pack's mass, the chemistry and grade decided (EVIDENCE E1.7c to E1.7k).
+4. **An element recipe for every material it holds**, sources first, ranked: the standard, then commercial analyses,
+   university analyses only combined and with wide ranges (E1.1 to E1.9). Done: battery cells, plastics, fibre
+   composites, aluminium, magnesium; for type 1 also its steels and titanium by grade, copper, brass and the nickel
+   strip (E5.18, E5.19). Open: electronics beyond the boards' metals, ceramics; for the other types all but the five.
+5. **All its robots listed:** every known robot of the type in the register by his rules (E4: use first, size second,
+   wheels accepted, at most two types ...), in a sheet of its own, "Type n", with "In the run" (V64: "For now it has to
+   be just all for type 1"). Missing masses researched and estimated (E): the PrimeBOT Q1's (E5.17 point 6).
+6. **Robots of the type taken apart part by part**, from sources of the same kind (a teardown, the maker's BOM, a model
+   file): its joints and what each holds (stator copper, NdFeB rotor, the magnets graded by each joint's heat,
+   bearings, housing), boards (area times the car board metals), sensors (car sensor elements), cables (length times
+   cross-section), the battery pack cut at its cells, the frame the remainder; every estimate at least half to 1.5 times
+   its mode; in `data/researched/parts_taken_apart.xlsx` through `tools/make_parts_taken_apart.py`; 01 checks it
+   (E2.1 to E2.11, V45 to V59; the check against the Taxonomy's limits removed on 2026-10-29, his word).
+7. **Each robot's own composition** ("Essential is not only the mass, the composition. Mass is not enough."): the total
+   of every element in one robot (at least Cu, Al, Fe, Cr, Ni, Nd, Pr, Dy, Li, Co, Au, Ag, Pd) from its maker's data:
+   its motors (number, kind, torque, power: "The type of motors and its enery allows to calculated its approximate
+   composition"), its battery (Wh, chemistry), its boards; every source qualified; estimates agreed; then entered,
+   every robot its own rows (one block each in the builder). Done for type 1 (E5, E5.20, V69).
+8. **02 draws the type over all its robots**, each as often (a robot in versions, each as often), each from its own
+   rows, with its own mass; the draws kept at every level; nothing normalised; remainders reported, not cut
+   (METHODOLOGY "Robot type 1 over its robots, in 02").
+9. **Its pages by his figure rules:** a notes page once; element pages 16 × 9 inches, text 14 pt and up (18 px at least
+   on a 1920 × 1080 screen); the median and the mean; the 95 % interval; Paul Tol's colours as published; no hydrogen,
+   nitrogen, oxygen or fluorine (V68); 04's two figures of the critical elements by kind of part; 01's pages showing
+   what the model does. Open: 01's pages (V67); the pages of types 2 to 6 in 02 (mean alone, not 16 × 9).
+10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
+    in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
+
+Already known for type 2: its robots with model files chosen ("Those with model files": H2, H2 Plus, H1-2, GR-2, GR-1,
+EVIDENCE E3); open: whether the H2 Plus is the H2 with optional hands, and joint masses above 200 N·m; 97 robots of
+type 2 in the register.
+
+## 2026-10-29, evening: 01's pages and overview, type 1's material pages, 04 in 02, pages of type 1 only (start here)
+
+His words: "Yes, into 02"; "Type 1 only"; "Yes, build it" (01's pages and the overview); "S and P can go also Na";
+"Yes, 1 to 5" (the material pages, as RAWCLICDataCenters). Built, tested (281 pass), tried in a sandbox, every new page
+looked at (VERIFICATION.md V71). Then the material pages (V72: a material held in some draws shows those draws, the
+cells by their chemistry) and 01's robots table redone on "Yes, build it" (V73: range bars, groups by what the joints
+rest on, five cells of where the numbers come from; 287 tests pass). Then V74: elements 0 in some draws (lead,
+vanadium, indium …) show the draws that hold them; the parts figures' footnotes once on their notes page; type 1's
+notes, which ran off their page, on two pages (290 tests pass). **Committed and pushed** on his word ("Looks good
+commit and push"), 2026-10-29.
+
+1. **02** draws robot type 1's pages: notes, elements, and now materials (the steels by grade, the aluminium by alloy,
+   the magnets in all and by grade class), its two figures of where its critical elements sit (until today 04), and
+   `figures/parts_taken_apart/sources/`: where copper, the magnets, each steel and alloy sit; `grades.npy` written.
+2. **04 removed**; the stages are 00 to 03. 03 waits until robot type 6 ("I am currently not interested in 03").
+3. **01**: overview two pages (how the model works; the six robot types), a notes page, faults pages, type 1's robots
+   (2 pages since V73) and robot page; all 16 × 9 inches, 14 pt and up, Paul Tol's colours.
+4. **Pages only of type 1** (`output.robot_types_with_pages`); the draws of all six still written.
+5. **Leftovers on disk, his outputs, for his word to remove** (no code reads a page): `figures/schemas/overview.png`,
+   `figures/schemas/faults.png`, `figures/schemas/categories/1_compact_research_developer.png` and
+   `..._shared_lists.png` (type 1's former anchor pages), the 15 pages of types 2 to 6 in `figures/schemas/categories/`
+   and the 5 in `figures/composition/` (`2_...png` to `6_...png`); after his next run of 01, the table's former third
+   page `figures/schemas/categories/1_compact_research_developer_robots_3.png` (V73); after his next run of 02,
+   `figures/composition/1_compact_research_developer_notes.png` (now `_notes_1.png` and `_notes_2.png`, V74).
+6. **His runs**, in RAWCLICHumanoidRobots: `01_schemas.py`, then `02_composition.py` (00 for the new setting in
+   `params.xlsx`: `00_parameters.py` first).
+
+## 2026-10-29, afternoon: the entry of type 1's research built
+
+Matthias: "I want to complete all work with type 1 and see the results!", then "Yes, build it" (the specification
+below, points 1 to 10, the recommendations for A to D). Built, tested, tried in a sandbox (VERIFICATION.md V69; what
+landed where: EVIDENCE.md E5.20). Committed and pushed with the evening's work, on his word.
+
+### Done
+
+1. **Register:** the TRON 2 not assigned ("no form with legs and arms"); type 1 31 robots; "Taken apart as" names the
+   parts file's robots, the K1 as "Booster K1 5 Ah; Booster K1 2 Ah"; the sheet Type 1 says "drawn: its own parts" for
+   all 31.
+2. **Parts file** (`tools/make_parts_taken_apart.py`): all 32 robots, one block each beyond the G1, X1 and N1; the
+   columns Grade and "Share of the joint modules"; the X1's grippers two small joints; the battery housing by its
+   shares; four shared constants (joint modules, battery energy per kg of robot, pack energy per kg, shell share).
+3. **Recipes** (`data/researched/element_recipes.xlsx`, copied first): the grades of E5.18 and E5.19, and two steel
+   mixtures (the gear stage 2's, the RP1 frame's); backups in Claude's scratch folder.
+4. **01:** the new columns read; checks of the joint shares, battery constants, 'A or B', the grades (`check_grades`)
+   and the sibling's steel sheets; check 20 (the Taxonomy's limits) removed on his word; the setting
+   `data.traction_motor_steels` (the sibling's steels, read where they lie).
+5. **02:** each robot of the register drawn from its own rows, its versions each as often, its grades and alternatives
+   drawn, its joint modules, shell and battery energy as shares of its mass where its sources stop; the scaled drawing
+   removed (decision C); the notes page names what rests on estimates (point 8). 04's footnote follows.
+6. **Removed** (decision D, nothing read them): `parts.draws`, `parts.seed` (`PartsParams`), check 20 and its tests,
+   the old page `figures/composition/1_compact_research_developer.png`.
+7. **Tests:** 273; in the sandbox all pass but the six reading the files on disk (they pass against files the builders
+   write). Sandbox run of 02, 03, 04 with 500 draws: type 1 33.6 kg at the mean (95 %: 16.9 to 42.6), steel, titanium
+   and copper in the elements. At 20,000 draws (V70): eight remainders below zero, each in 0.2 to 0.6 % of its
+   robot's draws (reported, not cut); 14 s, 1.0 GB of memory (his 200,000: about 2 to 3 minutes, 8 to 10 GB).
+
+### Waiting for Matthias
+
+1. **Done: the fault in his data corrected on his word** ("Yes, correct it"): RAWCLICVehicleTractionMotor
+   `data/raw/10_MaterialElementDefinitions.xlsx`, sheet CastFeSteel, H17 (Type 304's chromium maximum) 0.02 to 0.20,
+   a backup first, the one cell changed (V70).
+2. **The estimates made while building: agreed** ("I agree with the estimates made while building the entry, as
+   listed", 2026-10-29; EVIDENCE.md E5.20): the
+   AI Sapiens K1's and K0's actuator placement; the X1's 17-4PH shafts against its C45 pins (half each, E); the RP1's
+   P20 share of its frame steel (4 of 28 parts) and its screws split 753 : 61 by number; the K1 5 Ah with the Orin NX
+   (Education); 26, 28 and 24 joints for the E1, the QUESTER1 and the three robots without a count (encoders and
+   connectors only); "composite" shells as plastics; the X1's encoders and connectors 62 with its grippers; the head
+   joints in the kind Head (in 02's standard tables in the part group Sensors); a sensor without a mass by its
+   elements only.
+3. **Not in E5.14, not entered:** fans and heat sinks of the 29 (in their frames), the RP1's 30 V battery, bearings
+   outside its actuators and the magnets in its covers, Sprout's time-of-flight sensors.
+4. **His runs**, in RAWCLICHumanoidRobots, after point 1: `tools/make_humanoid_register.py`,
+   `tools/make_parts_taken_apart.py`, `00_parameters.py`, `01_schemas.py`, `02_composition.py`, `03_comparison.py`,
+   `04_parts_taken_apart.py` (full paths in the report of the day); then the read-back.
+5. **Next on the list:** step 7 (01's pages and 04's notes on their own page, a specification of their own); commit and
+   push on his word.
+
+## 2026-10-29, morning: the sheet Type 1, H N O F off the pages, research batch 1 begun
 
 Matthias, leaving: "write a handover, so that we can continue in about 1.5 h". Checked on this Mac: the git folder
-was missing; attached on his "Yes, attach" (V63). Each line below names where it is recorded.
+was missing; attached on his "Yes, attach" (V63). Each line below names where it is recorded. **Since written:** on his
+"Yes, commit and push", points 4 and 5 below and this handover were committed and pushed as dc9d423; GitHub `main` =
+dc9d423. His runs of 00, 02 and 03 to see point 4 are not made yet (`params.xlsx` 05:14:33, the pages 06:35).
 
 ### Done today, committed and pushed (GitHub `main` = 762a349)
 
@@ -67,9 +191,9 @@ from Fourier's page; own parts only for the G1 (China Post Securities' teardown,
 T1, 148 Booster K1, 234 PM01, 311 Unitree R1, 19 AI Sapiens K1. **Read so far, web pages only, nothing downloaded and
 nothing written into EVIDENCE.md yet** (first-hand reading by web-fetch agents, 2026-10-29):
 - **Roboto Origin** (RoboParty's own BOM, github.com/Roboparty/roboto_origin/blob/main/assets/BOM_EN.md, dated
-  20260105, "ATOM 01 v1.0.1"): 14 × DM 4340P (48 V) and 9 × DM 10010L actuators (DAMIAO naming, no specs on the page);
-  48 V 15 Ah Li-ion pack (720 Wh, arithmetic); RDK X5 8G board; 25 CNC frame lines, black anodised, metal not named;
-  no masses in the BOM. 1.25 m, 34 kg only from a third-party article quoting RoboParty.
+  20260105, "ATOM 01 v1.0.1"): 14 × DM 4340P (48 V) and 9 × DM 10010L actuators (maker not named, no specs on the
+  page); 48 V 15 Ah Li-ion pack (720 Wh, arithmetic); RDK X5 8G board; 25 CNC frame lines, black anodised, metal not
+  named; no masses in the BOM. 1.25 m, 34 kg only from a third-party article quoting RoboParty.
 - **Asimov 1** (Menlo's own docs, docs.menlo.ai/asimov/1/overview/system-tour/mechanical and /electrical): 25 joints,
   5 actuator models (EC-A6416-P2-25 ×3, EC-A5013-H17-100 ×4, EC-A3814-H14-107 ×4, EC-A4315-P2-36 ×4,
   EC-A4310-P2-36 ×10) with rated / peak torques; battery Li-ion INR18650 13S4P, 46.8 V, 10.5 Ah, 491.4 Wh, about 2 kg;
@@ -84,6 +208,91 @@ nothing written into EVIDENCE.md yet** (first-hand reading by web-fetch agents, 
   discontinued per RobotShop). Resellers only: 23 joints, peak 130 N·m, 10.5 Ah Li-ion (no voltage), Jetson AGX Orin
   and Intel i7, about 30 kg, 1.18 m. Booster's docs.booster.tech not yet read.
 - **Not yet read:** Booster K1, PM01, Unitree R1, AI Sapiens K1.
+- **Since, after his "Read the handover and then continue":** all 8 read and written into EVIDENCE.md **E5** (E5.1 to
+  E5.8 a source table per robot, E5.9 batch 1 together, the downloads that would close the gaps). Most complete from
+  the maker: the PM01 (21 of 24 motor masses, battery 468 Wh NMC 2.95 kg, aviation aluminium) and the AI Sapiens K1
+  (all 23 DYNAMIXEL-Q masses, LG M50LT 21700 cells). No maker states the copper, magnet or electrical steel in a
+  motor: the motors' datasheets and the G1's weighed joint (E2) are the next sources. No min / mode / max proposed.
+- **Then, on "Yes, download":** the six files downloaded into Claude's scratch folder and read, and the makers' URDF
+  models of seven robots (E5.10). RP1's BOMs give every part's material but no weights (column empty); ROMOMO's sheet
+  the RMM8463-2E (20 / 87 N·m); the PM01 manual aluminium alloy and rubber; the K1 datasheet 48 V 5 Ah; the models' link
+  sums 19.7 to 40.9 kg, within 0.5 to 1.7 kg of the stated masses. The PM01 manual needed EngineAI's support page as
+  referrer. PDFs read as text only (`pdftoppm` missing; nothing installed). **Next:** the actuators' datasheets
+  (EngineAI Q series, DYNAMIXEL-Q, DM 4340P / 10010L, ROMOMO drawings) for the copper, magnet and steel in a motor; then
+  the proposal of the element totals for his yes; then batch 2.
+- **Then, on "Yes, read them":** the actuators' datasheets (EVIDENCE E5.11): EngineAI Q90H 1.1 kg and Q25H 0.5 kg;
+  DYNAMIXEL-Q QC060 435 / 455 g and QC080 845 / 865 g; DAMIAO DM-J4340P 375 g and DM-J10010L 1375 g (DAMIAO's 2025
+  handbook); RoboParty RMM6562-2E 533.1 g and RMM10062-2E 1197 g measured in its test reports, RMM8463-2E < 800 g. The
+  motors are 33 to 52 % of these robots' mass. None states copper, magnet or steel inside. **Next, for his yes:** the
+  proposal of how an actuator's mass becomes its elements, from the G1's weighed joint (E2), questioned for size and
+  gear type.
+- **Then, on "Yes, propose it":** the proposal is EVIDENCE E5.12, shown to him, not entered: each actuator the G1's
+  weighed joint of its class (small below 55 N·m, large from 55) scaled to its mass, as for the X1 and N1; masses not
+  stated estimated from torque ÷ the nine actuators' torque density (65.7 / 87.3 / 133.7 N·m/kg); at the modes 9 to 19
+  kg of actuators, 0.7 to 1.5 kg copper and 0.65 to 1.34 kg NdFeB per robot. **Agreed** ("I agree with the actuator
+  proposal of E5.12, points 1 to 6, including its estimates."); not entered.
+- **Then, on "Yes, go on":** the rest of each batch 1 robot. Sources E5.13 (batteries, compute modules, the Roboto
+  Origin's 10.0 m of cables, frame and shell materials); proposal E5.14, shown to him, not agreed yet: the type 1
+  template (G1, X1, N1) filled from each robot's sources; packs at 164 Wh/kg where no mass is stated; the Asimov 1's
+  "about 2 kg" pack lighter than its 52 cells (reported); the T1 at 48 V as the K1 (E). **Agreed** ("I agree with the
+  proposal of E5.14 for the rest of the batch 1 robots, points 1 to 9, including its estimates."); not entered.
+- **Then, on "I want to complete all work with type 1 and see the results!":** batch 2's sources (EVIDENCE E5.15: T2,
+  G1+, Asimov 2, K0, E1, Bumi, Roban2, TRON 2) and four register questions for him (TRON 2 not sold with legs and arms;
+  K0 and AI Sapiens K1 one line; Asimov 2 no maker data; G1+ the G1 upgraded). The list of everything still open for
+  type 1 shown to him for his yes on the order. Batches 3 and 4 (13 robots) not started.
+- **Then, on "Yes, this order"** (the 10-point list: research, proposals, register questions, steel, titanium and
+  Mixed, entry, pages, runs): batches 3 and 4 read (E5.16; only Fauna's Sprout and StarBot's Astra with maker values;
+  the PrimeBOT Q1 has no mass anywhere); the proposal for batches 2 to 4 (E5.17: actuators 49 % of the robot, battery
+  12 Wh per kg of robot where nothing is stated, the G1+ as the G1, the PrimeBOT Q1 9.75 / 19.5 / 29.25 kg, the Asimov
+  2 as the Asimov 1) and the four register questions with recommendations, shown to him. **Agreed** ("I agree with the
+  proposal of E5.17 for batches 2 to 4, points 1 to 7, and with the four recommendations on the register questions."):
+  the TRON 2 not assigned (the builder's change with the entry step). Next in the list: the steel recipe.
+- **Then:** the steels and titanium proposed part by part (EVIDENCE E5.18: each steel part the grade of its use, M19 or
+  M27, 20CrMnTi, GCr15, 42CrMo4, C45, P20, 304, 17-4PH, Ti-6Al-4V; limits from datasheets quoting the standards, the
+  electrical steel and 304 from RAWCLICVehicleTractionMotor where they lie); shown to him. Mixed (the battery packs'
+  housing, busbars and wires; the X1's grippers) next, sources first. **Agreed** ("I agree with the steel and titanium
+  proposal of E5.18, including its estimates and the C45 reading of Ni and Mo."); not entered.
+- **Then:** Mixed proposed (EVIDENCE E5.19): no weighed source of a small pack exists on the web (teardowns give
+  materials, not masses), so all estimates (E): the pack less cells and BMS as nickel strip, copper, plastics and a
+  housing (aluminium for the PM01, else aluminium or plastics); the X1's grippers as a small G1 joint; RP1's brass.
+  **Agreed** ("I agree with the Mixed proposal of E5.19, points 1 to 3, including its estimates."); not entered. Every
+  material of type 1 now has an agreed recipe. Next in the list: the entry's specification.
+
+### The entry of type 1's research: the specification (agreed, "Yes, build it"; built in the afternoon)
+
+His words: "I want to complete all work with type 1 and see the results!", "Yes, this order" (step 6: the entry, a
+specification for his yes). What it enters: the agreed E5.12, E5.14, E5.17, E5.18, E5.19.
+
+1. **Register** (`tools/make_humanoid_register.py`): the TRON 2 "not assigned: no form with legs and arms" (E5.17);
+   type 1 then 31 robots; the builder's test counts follow. 01's checks unchanged.
+2. **Parts file** (`tools/make_parts_taken_apart.py` writes `data/researched/parts_taken_apart.xlsx`): every robot of
+   the sheet Type 1 gets its own rows, as the G1, X1 and N1 have (sheets Robots, Joints, Parts, Boards, Sensors,
+   Constants): its joints with module masses (stated, or by E5.12 point 4, or E5.17 point 1), battery, boards, cables,
+   shell, screws, sensors, frame. **Decision A:** the per-robot inputs held in the builder, one block per robot, as
+   now for the G1, X1 and N1 (recommended: one place, "a change is made in this file"), or in a new input workbook.
+3. **A robot in several versions** (the K1's 2 Ah and 5 Ah, E5.14 point 2): the register's "Taken apart as" may name
+   several robots of the parts file, each drawn as often (a discrete state). **Decision B:** this general way
+   (recommended), or the K1 at one version only.
+4. **Grades:** a column "Grade" for every steel part (sheets JointParts, Parts, Shares), by E5.18; the element recipes
+   of 20CrMnTi, GCr15, 42CrMo4, C45, P20, 17-4PH, Ti-6Al-4V, brass and nickel added to
+   `data/researched/element_recipes.xlsx` (copied first, as the earlier entries); M19, M27 and 304 read where they lie
+   in RAWCLICVehicleTractionMotor (a new setting naming the file, as the magnets'; 01 checks the sheets are there).
+5. **Mixed** (E5.19): the pack's rest split by the sheet Shares (nickel, copper, plastics, housing the remainder, the
+   housing aluminium or plastics drawn as a discrete state through its recipe's alternatives); the X1's grippers as two
+   small joints in the sheet Joints, heat group cool; RP1's brass parts as parts.
+6. **02 draws each robot of type 1 from its own rows** (all 31: "drawn: its own parts"). **Decision C:** the drawing of
+   a robot with the parts of the G1, X1 or N1 scaled to its mass then reads nothing: removed, with its notes and
+   tests (recommended, "no dead code"), or kept.
+7. **01** checks the new rows with its existing checks, and the grades (every grade has its recipe; every sibling
+   sheet named is there); tests first, a planted fault for each.
+8. **Pages:** 02's type 1 pages and 04's figures as now, over 31 robots; the notes page names which robots rest on
+   estimates. 01's pages and 04's notes: step 7 of the list, a specification of their own.
+9. **Checks and documents:** tests first; a sandbox run with few draws, its pages looked at; VERIFICATION,
+   METHODOLOGY, README, the parts file's About sheet; the leftovers of the move and of point 6 listed for removal.
+   **Decision D:** remove the earlier leftovers (`parts.draws`, `parts.seed`, the old page) in the same step
+   (recommended) or later.
+10. **His runs** afterwards, in RAWCLICHumanoidRobots: the register builder, the parts builder, 00, 01, 02, 03, 04;
+    then the read-back and the results shown to him.
 
 **Next, on his word:** read the four remaining; ask him for the downloads (RP1's BOM workbooks, ROMOMO's test
 reports, the Asimov BOM form, Booster's docs); write batch 1 into EVIDENCE.md (a new section E5) with the source table

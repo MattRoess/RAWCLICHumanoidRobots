@@ -34,6 +34,9 @@ def load(name: str, path: str):
 
 schemas = load('schemas', '01_schemas.py')
 builder = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
+parts_builder = load('make_parts_taken_apart', os.path.join('tools', 'make_parts_taken_apart.py'))
+# The robots of the parts file, as its builder writes them: the names the register's "Taken apart as" must use.
+APART = [row[0] for row in parts_builder.ROBOTS_ROWS]
 from src.params_schema import Params, absolute  # noqa: E402
 
 
@@ -55,34 +58,44 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         cls.folder.cleanup()
 
     def test_what_it_writes_passes_every_check_of_01(self):
-        apart = ['Unitree G1', 'AgiBot X1', 'Fourier N1']
-        self.assertEqual([f.text for f in schemas.check_register(self.register, Params(), apart)], [])
+        self.assertEqual([f.text for f in schemas.check_register(self.register, Params(), APART)], [])
 
     def test_every_robot_once_as_decided(self):
         # EVIDENCE.md E4.9 to E4.11 and V60: 349 entries of the catalogue and 5 added; 10 second entries of one robot;
-        # 18 not assigned, and the FF Nova below 15 kg (decided 2026-10-28); 325 robots with a type, 137 with two.
+        # 18 not assigned, the FF Nova below 15 kg (decided 2026-10-28) and the TRON 2, sold in no form with legs and
+        # arms (E5.17, agreed 2026-10-29); 324 robots with a type, 137 with two.
         self.assertEqual([r.number for r in self.register], list(range(1, 355)))
         typed = [r for r in self.register if r.types]
-        self.assertEqual(len(typed), 325)
+        self.assertEqual(len(typed), 324)
         self.assertEqual(sum(len(r.types) == 2 for r in typed), 137)
         self.assertEqual(sum(r.entry.startswith(schemas.SAME_ROBOT) for r in self.register), 10)
-        self.assertEqual(sum(r.entry.startswith(schemas.NOT_ASSIGNED) for r in self.register), 19)
+        self.assertEqual(sum(r.entry.startswith(schemas.NOT_ASSIGNED) for r in self.register), 20)
+        tron = next(r for r in self.register if r.number == 309)
+        self.assertEqual(tron.entry, 'not assigned: no form with legs and arms')
 
     def test_the_robots_in_each_type(self):
-        # V60's recount with the five added (1: 33 ...), less the FF Nova, which leaves type 1.
+        # V60's recount with the five added (1: 33 ...), less the FF Nova and the TRON 2, which leave type 1.
         counts = {t: sum(t in r.types for r in self.register) for t in range(1, 7)}
-        self.assertEqual(counts, {1: 32, 2: 97, 3: 181, 4: 135, 5: 12, 6: 5})
+        self.assertEqual(counts, {1: 31, 2: 97, 3: 181, 4: 135, 5: 12, 6: 5})
 
-    def test_the_three_robots_taken_apart(self):
-        apart = {r.taken_apart: r.number for r in self.register if r.taken_apart}
-        self.assertEqual(apart, {'Unitree G1': 102, 'AgiBot X1': 16, 'Fourier N1': 350})
+    def test_every_robot_of_type_1_has_its_own_rows_in_the_parts_file(self):
+        # Matthias, 2026-10-29: "Yes, build it" (the entry, point 2): every robot of type 1 its own rows; the K1 in its
+        # two versions, each drawn as often (point 3).
+        apart = {r.number: r.taken_apart for r in self.register if r.taken_apart}
+        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types})
+        self.assertEqual(apart[102], 'Unitree G1')
+        self.assertEqual(apart[148], 'Booster K1 5 Ah; Booster K1 2 Ah')
+        names = [n for v in apart.values() for n in v.split('; ')]
+        self.assertEqual(len(names), len(set(names)))
+        for name in names:
+            self.assertFalse(set('(),') & set(name), msg=name)   # 04 reads the names between brackets, by commas
 
     def test_masses_as_stated(self):
         by_number = {r.number: r for r in self.register}
         self.assertEqual(by_number[102].mass, (34, 35, 36))          # G1: "35", +- 1 kg
         self.assertEqual(by_number[246].mass, (20, 25, 30))          # QUESTER1: "~20–30", the range
         self.assertEqual(by_number[325].mass, (72, 73, 74))          # Walker S2: "43, 73", the larger
-        self.assertEqual(by_number[236].mass, (None, None, None))    # PrimeBOT Q1: none stated
+        self.assertEqual(by_number[236].mass, (9.75, 19.5, 29.25))   # PrimeBOT Q1: none stated, E5.17 point 6
 
     def test_the_sheet_type_1_lists_every_robot_of_type_1_as_in_the_sheet_robots(self):
         # Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of the different types are fully
@@ -90,20 +103,14 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # the order of the register, every cell as in the sheet Robots, and 01's check of it finds nothing.
         listed = schemas.read_type_sheet(self.path, 1)
         self.assertEqual([r.number for r in listed], [r.number for r in self.register if 1 in r.types])
-        self.assertEqual(len(listed), 32)
+        self.assertEqual(len(listed), 31)
         self.assertIn(54, [r.number for r in listed])    # the Booster T1, 1.18 m: kept in type 1 (2026-10-29)
-        self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, no mass stated: listed, not drawn
+        self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, its mass an estimate (E5.17)
         self.assertEqual([f.text for f in schemas.check_type_one(self.register, listed, Params())], [])
 
     def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
         listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}
-        own = {n for n, run in listed.items() if run == 'drawn: its own parts'}
-        scaled = {n for n, run in listed.items()
-                  if run == 'drawn: the parts of the Unitree G1, AgiBot X1 or Fourier N1, scaled to its mass'}
-        self.assertEqual(own, {102, 16, 350})
-        self.assertEqual(len(scaled), 28)
-        self.assertEqual({n for n in listed if n not in own | scaled}, {236})
-        self.assertEqual(listed[236], 'not drawn: no mass stated')
+        self.assertEqual(set(listed.values()), {'drawn: its own parts'})
 
     def test_it_writes_where_00_says(self):
         self.assertEqual(builder.output_path(Params()), absolute(Params().data.register))

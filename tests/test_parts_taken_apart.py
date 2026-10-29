@@ -1,6 +1,7 @@
 """
-Tests of robot type 1 taken apart: its drawing over its robots in 02_composition.py, and the two figures of
-04_parts_taken_apart.py drawn from what 02 writes.
+Tests of 02_composition.py's robot type 1 part by part: its drawing over its robots, its element and material pages,
+its two figures of where its critical elements sit and its figures of where each material sits (04_parts_taken_apart.py
+until 2026-10-29: "Yes, into 02").
 
 **Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
 **Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
@@ -9,14 +10,15 @@ at the root of the repository.
 Matthias, 2026-10-28: "Yes, build steps 5 and 6: stage 04 and its two approved figures, tests first, tried in a
 sandbox with few draws", with his answers A to E (documentation/claude/HANDOVER.md, 2026-10-28); then, the same day,
 "Yes in 02 it is all type 1 in.!" and "Yes, code it in 02": the drawing moved to 02, over all the register's robots of
-type 1. The tests draw the real parts file and the sibling projects' files where they lie, a few hundred times, over a
-register of the three robots taken apart (and, where a test needs it, one robot of 50 kg), into temporary folders:
-press Run, nothing in the project is changed. Where a file is not on disk, the test that needs it is skipped and says
-so.
+type 1; 2026-10-29, "Yes, build it": every robot of type 1 drawn from its own rows. The tests draw what the parts
+file's builder writes (tools/make_parts_taken_apart.py, into a temporary folder) and the sibling projects' files where
+they lie, a few hundred times, over the register's robots of type 1 and their versions (the register's builder,
+tools/make_humanoid_register.py), into temporary folders: press Run, nothing in the project is changed. Where a file is
+not on disk, the test that needs it is skipped and says so; where the inputs have a fault, it fails and names it.
 
 The hand calculations draw every triangle at its mode (the test replaces 02's `triangle` by one that returns the mode)
 and give the magnets fixed element fractions, so that one robot can be added up by hand from the data file's modes
-(EVIDENCE.md E2.8 and E2.8b).
+(EVIDENCE.md E2.8, E2.8b, E5).
 """
 
 import importlib.util
@@ -46,36 +48,44 @@ def load(name: str, file: str):
     return module
 
 
-apart = load('parts_taken_apart', '04_parts_taken_apart.py')
-composition = sys.modules['composition']
+composition = load('composition', '02_composition.py')
 schemas = composition.schemas
 
-# A robot of the register of type 1 that is not taken apart, of 50 kg (49 to 51): drawn with the parts of one of the
-# three robots taken apart, scaled to its mass.
-HEAVY = schemas.RegisterRobot(row=0, number=900, name='Heavy robot', maker='Tests', mass=(49.0, 50.0, 51.0), types=(1,),
-                              types_text='1', form='legs', entry='', taken_apart='')
+# The parts file as its builder writes it, built once into a temporary folder for all the tests here; and the register's
+# robots of type 1, every version of each, as the register's builder names them ("Taken apart as").
+PARTS_BUILDER = load('make_parts_taken_apart', os.path.join('tools', 'make_parts_taken_apart.py'))
+REGISTER_BUILDER = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
+FOLDER = tempfile.TemporaryDirectory()
+PARTS_FILE = os.path.join(FOLDER.name, 'parts_taken_apart.xlsx')
+PARTS_BUILDER.build(PARTS_FILE)
 
 # The magnets' element fractions the hand calculations use, the same for every grade class: neodymium 0.24,
 # praseodymium 0.06, dysprosium 0.05, boron 0.01, iron the remainder.
 FIXED_MAGNET = {'Nd': 0.24, 'Pr': 0.06, 'Dy': 0.05, 'B': 0.01, 'Fe': 0.64}
 
 
-def inputs_or_skip(test: unittest.TestCase, params: Params, extra: tuple = ()):
-    """02's inputs of robot type 1 taken apart, over a register of the three robots taken apart (each its own mass
-    range) and `extra`; or the test skipped where a file is not on disk."""
+def inputs_or_skip(test: unittest.TestCase, params: Params):
+    """02's inputs of robot type 1, from the parts file as its builder writes it, over the register's robots of type 1
+    (each with its versions, its mass the parts file's, as its own); or the test skipped where a file is not on disk,
+    failed where the inputs have a fault (01's checks and 02's)."""
+    params.data.parts_taken_apart = PARTS_FILE
     files = [absolute(params.data.workbook), absolute(params.data.shared_lists), absolute(params.data.element_recipes),
-             absolute(params.data.parts_taken_apart), params.data.vehicle_pcb_composition,
-             params.data.vehicle_sensor_composition, params.data.data_center_element_composition]
+             params.data.vehicle_pcb_composition, params.data.vehicle_sensor_composition,
+             params.data.data_center_element_composition, params.data.traction_motor_steels]
     missing = [f for f in files if not os.path.exists(f)]
     if missing:
         test.skipTest(f'not on disk: {", ".join(missing)}')
     base = composition.read_inputs(params)
-    parts = schemas.read_parts_taken_apart(absolute(params.data.parts_taken_apart))
-    register = [schemas.RegisterRobot(row=0, number=k + 1, name=name, maker=robot.maker,
-                                      mass=parts.constants[name][composition.ROBOT_MASS][1], types=(1,),
-                                      types_text='1', form='legs', entry='', taken_apart=name)
-                for k, (name, robot) in enumerate(parts.robots.items())]
-    return composition.read_apart_inputs(params, base, register + list(extra))
+    parts = schemas.read_parts_taken_apart(PARTS_FILE)
+    register = [schemas.RegisterRobot(row=0, number=number, name=names, maker='', types=(1,), types_text='1',
+                                      mass=parts.constants[schemas.versions(names)[0]][composition.ROBOT_MASS][1],
+                                      form='legs', entry='', taken_apart=names)
+                for number, names in sorted(REGISTER_BUILDER.TAKEN_APART.items())]
+    inputs = composition.read_apart_inputs(params, base, register)
+    faults = composition.apart_faults(inputs, params)
+    if faults:
+        test.fail('faults in the inputs: ' + '; '.join(f'{f.sheet} {f.row}: {f.text}' for f in faults))
+    return inputs
 
 
 def draw(inputs, params: Params, magnets: dict):
@@ -109,100 +119,128 @@ class TestDraws(unittest.TestCase):
         cls.params = Params()
         cls.params.composition.draws = 3000
 
-    def drawn(self, extra=()):
-        inputs = inputs_or_skip(self, self.params, extra)
+    def drawn(self):
+        inputs = inputs_or_skip(self, self.params)
         return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
-    def test_each_robot_is_drawn_about_a_third_of_the_time(self):
-        _, d = self.drawn()
-        self.assertEqual(d.robots, ['Unitree G1', 'AgiBot X1', 'Fourier N1'])
-        self.assertEqual(d.register, ['1 Unitree G1', '2 AgiBot X1', '3 Fourier N1'])
-        shares = np.bincount(d.robot, minlength=3) / d.n
-        # Four standard errors of a share of 1/3 in 3,000 draws: 0.034.
-        for share in shares:
-            self.assertAlmostEqual(share, 1 / 3, delta=4 * np.sqrt(1 / 3 * 2 / 3 / d.n))
-        np.testing.assert_array_equal(d.register_robot, d.robot)   # each robot taken apart takes its own parts
+    def test_each_robot_of_the_register_is_drawn_equally_often(self):
+        inputs, d = self.drawn()
+        self.assertEqual(len(d.register), 31)
+        self.assertEqual(len(d.robots), 32)
+        p = 1 / len(d.register)
+        for share in np.bincount(d.register_robot, minlength=len(d.register)) / d.n:
+            self.assertAlmostEqual(share, p, delta=4 * np.sqrt(p * (1 - p) / d.n))
+        # Every draw takes the rows of a version of its robot of the register.
+        for k, r in enumerate(inputs.robots):
+            versions = {d.robots.index(v) for v in schemas.versions(r.taken_apart)}
+            self.assertTrue(set(d.robot[d.register_robot == k]) <= versions, msg=r.name)
 
-    def test_a_robot_taken_apart_weighs_its_own_mass_within_its_range(self):
-        _, d = self.drawn()
-        np.testing.assert_array_equal(d.varied, d.own)
-        ranges = {'Unitree G1': (34, 36), 'AgiBot X1': (32, 35.3), 'Fourier N1': (38, 40)}
+    def test_a_robot_in_two_versions_draws_each_as_often(self):
+        # The entry, decision B: the K1's 5 Ah and 2 Ah, each as often (a discrete state, never blended).
+        inputs, d = self.drawn()
+        k1 = next(k for k, r in enumerate(inputs.robots) if 'Booster K1 5 Ah' in r.taken_apart)
+        rows = d.register_robot == k1
+        five = (d.robot[rows] == d.robots.index('Booster K1 5 Ah')).mean()
+        self.assertAlmostEqual(five, 0.5, delta=4 * np.sqrt(0.25 / rows.sum()))
+
+    def test_each_robot_weighs_its_own_mass_within_its_range(self):
+        inputs, d = self.drawn()
         for k, name in enumerate(d.robots):
-            own = d.own[d.robot == k]
-            self.assertTrue(np.all((own >= ranges[name][0]) & (own <= ranges[name][1])), msg=name)
+            low, _, high = inputs.apart.constants[name][composition.ROBOT_MASS][1]
+            mass = d.mass[d.robot == k]
+            self.assertTrue(np.all((mass >= low) & (mass <= high)), msg=name)
 
-    def test_a_robot_of_the_register_takes_the_parts_of_each_robot_taken_apart_and_its_own_mass(self):
-        _, d = self.drawn((HEAVY,))
-        heavy = d.register_robot == 3
-        self.assertAlmostEqual(heavy.mean(), 1 / 4, delta=4 * np.sqrt(1 / 4 * 3 / 4 / d.n))
-        self.assertTrue(np.all((d.varied[heavy] >= 49) & (d.varied[heavy] <= 51)))
-        shares = np.bincount(d.robot[heavy], minlength=3) / heavy.sum()
-        for share in shares:
-            self.assertAlmostEqual(share, 1 / 3, delta=4 * np.sqrt(1 / 3 * 2 / 3 / heavy.sum()))
-
-    def test_the_materials_of_every_draw_add_up_to_its_mass(self):
-        _, d = self.drawn((HEAVY,))
-        columns, draws = d.materials
-        np.testing.assert_allclose(draws.sum(axis=1), d.varied, rtol=1e-9)
-        columns, draws = d.parts
-        np.testing.assert_allclose(draws.sum(axis=1), d.varied, rtol=1e-9)
+    def test_the_materials_and_the_parts_of_every_draw_add_up_to_its_mass(self):
+        _, d = self.drawn()
+        for columns, draws in (d.materials, d.parts):
+            np.testing.assert_allclose(draws.sum(axis=1), d.mass, rtol=1e-9)
 
     def test_nothing_is_cut_where_a_remainder_falls_below_zero(self):
-        # The frame, the battery housing and the joints' structure (where a joint's mass is stated) are remainders:
-        # below zero they are reported, never cut (point 2).
+        # The frame, the battery housing and the joints' structure (where a joint's mass is stated, or its share of the
+        # robot) are remainders: below zero they are reported, never cut (point 2).
         inputs, d = self.drawn()
         below = composition.below_zero(d)
-        expected = {f'{r}: {p}' for r in d.robots for p in ('Frame', 'Battery housing, busbars and wires')}
-        expected |= {f'{j.robot}: {j.name} structure' for j in inputs.apart.joints if None not in j.module_mass}
+        expected = {f'{p.robot}: {p.name}' for p in inputs.apart.parts
+                    if p.computed.startswith((composition.FRAME, composition.HOUSING))}
+        expected |= {f'{j.robot}: {j.name} structure' for j in inputs.apart.joints
+                     if None not in j.module_mass or j.share is not None}
         self.assertEqual(set(below), expected)
         for share in below.values():
             self.assertTrue(0 <= share <= 1)
 
     def test_a_joint_whose_mass_is_stated_weighs_that_mass(self):
-        # Matthias, 2026-10-28: "Yes, build it" (VERIFICATION.md V57): each X1 and N1 joint adds up to its drawn module
-        # mass, its structure the explicit remainder. So, at the robot's own mass, its joints lie between the sums of
-        # their stated minima and maxima in every draw (before, the X1's reached 1.11 times its stated modes).
-        inputs, d = self.drawn((HEAVY,))
+        # Matthias, 2026-10-28: "Yes, build it" (VERIFICATION.md V57): each joint whose module mass is given adds up to
+        # its drawn module mass, its structure the explicit remainder; so its robot's joints lie between the sums of
+        # their stated minima and maxima in every draw.
+        inputs, d = self.drawn()
         columns, draws = d.parts
         for k, robot in enumerate(d.robots):
             stated = [j for j in inputs.apart.joints if j.robot == robot]
             if any(None in j.module_mass for j in stated):
                 continue
             rows = d.robot == k
-            joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot) and c.endswith('joints)'))
-            at_own = joints / (d.varied[rows] / d.own[rows])
+            joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':')
+                         and c.endswith('joints)'))
             low = sum(j.count * j.module_mass[0] for j in stated)
             high = sum(j.count * j.module_mass[2] for j in stated)
             with self.subTest(robot=robot):
-                self.assertTrue(np.all((at_own >= low - 1e-9) & (at_own <= high + 1e-9)),
-                                msg=f'{at_own.min():.3f} to {at_own.max():.3f} kg against {low:.3f} to {high:.3f}')
+                self.assertTrue(np.all((joints >= low - 1e-9) & (joints <= high + 1e-9)),
+                                msg=f'{joints.min():.3f} to {joints.max():.3f} kg against {low:.3f} to {high:.3f}')
+
+    def test_joints_that_are_a_share_of_the_robot_weigh_that_share(self):
+        # E5.17 point 1: the joint modules 24.5 / 49 / 73.5 % of the robot's mass, split by fixed shares.
+        inputs, d = self.drawn()
+        columns, draws = d.parts
+        low, _, high = inputs.apart.constants[schemas.ALL_ROBOTS][composition.JOINT_SHARE][1]
+        shared = [r for r in d.robots if any(j.share is not None for j in inputs.apart.joints if j.robot == r)]
+        self.assertEqual(len(shared), 17)
+        for robot in shared:
+            rows = d.robot == d.robots.index(robot)
+            joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':')
+                         and c.endswith(')') and 'joints)' in c)
+            with self.subTest(robot=robot):
+                share = joints / d.mass[rows]
+                self.assertTrue(np.all((share >= low - 1e-9) & (share <= high + 1e-9)))
 
     def test_robot_type_1_as_02_writes_every_robot_type_adds_up(self):
         # Its materials (Not allocated 0), part groups and body regions add up to its mass, its elements to the
         # kilograms of the materials they come from, nothing below zero but where 02 allows it (draw_faults).
-        inputs, d = self.drawn((HEAVY,))
+        inputs, d = self.drawn()
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_type_one(category, d, inputs.base.lists)
         self.assertEqual(composition.draw_faults(c), [])
         self.assertFalse(c.column('materials', schemas.NOT_ALLOCATED).any())
-        np.testing.assert_allclose(c.column('total', 'Total'), d.varied)
+        np.testing.assert_allclose(c.column('total', 'Total'), d.mass)
+
+    def test_either_of_two_grades_or_materials_each_as_often(self):
+        # E5.18, E5.19: the electrical steel M19 or M27, the battery housing aluminium or plastics, each as often.
+        inputs, d = self.drawn()
+        shared = composition.Shared(inputs, self.params, fixed_magnets(inputs, d.n), np.random.default_rng(5), d.n)
+        for written in ('M19 or M27', 'Aluminium or Plastics'):
+            first = (shared.state(written) == 0).mean()
+            self.assertAlmostEqual(first, 0.5, delta=4 * np.sqrt(0.25 / d.n), msg=written)
 
 
 class TestHandCalculations(unittest.TestCase):
-    """Point 6: one robot at its modes, added up by hand from the data file (EVIDENCE.md E2.8, E2.8b)."""
+    """Point 6: one robot at its modes, added up by hand from the data file (EVIDENCE.md E2.8, E2.8b, E5)."""
 
     @classmethod
     def setUpClass(cls):
         cls.params = Params()
         cls.params.composition.draws = 300
 
-    def at(self, extra=()):
-        inputs = inputs_or_skip(self, self.params, extra)
+    def at(self):
+        inputs = inputs_or_skip(self, self.params)
         with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
             return draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
     def element(self, d, robot: str, kind: str, element: str) -> np.ndarray:
         return d.elements.get((kind, element), np.zeros(d.n))[d.robot == d.robots.index(robot)]
+
+    def part(self, d, column: str) -> np.ndarray:
+        columns, draws = d.parts
+        robot = column.split(': ')[0]
+        return draws[d.robot == d.robots.index(robot), columns.index(column)]
 
     def test_the_g1s_copper_in_its_cables(self):
         d = self.at()
@@ -221,23 +259,35 @@ class TestHandCalculations(unittest.TestCase):
         # Six rotors of 42.9 g × 1.78 (the large joint), 90 % NdFeB, 24 % Nd: 98.965152 g; twelve encoders × 20 mg.
         np.testing.assert_allclose(self.element(d, 'Unitree G1', 'hips', 'Nd'), 0.099205152, rtol=1e-9)
 
-    def test_a_robot_at_its_modes_weighs_its_own_mass(self):
+    def test_the_g1s_molybdenum_in_its_hips_from_the_grades(self):
+        # E5.18, every share at its mode. One large joint: the output flange 50.8 g × 1.78 = 90.424 g of 42CrMo4,
+        # Mo 0.225 %: 0.203454 g; the "Other" 38.1 g × 1.78 = 67.818 g, 40 % 42CrMo4: 0.0610362 g; the small bearings
+        # 11 g × 1.78 = 19.58 g of GCr15, Mo 0.05 %: 0.00979 g; the gear stage 2 74 g × 2.33 = 172.42 g, 75 % steel,
+        # half of it GCr15: 64.6575 g, 0.0323288 g. Six hip joints: 1.8396537 g. No other material of the hips holds
+        # Mo.
         d = self.at()
-        for k, mass in enumerate((35, 33, 39)):
-            np.testing.assert_allclose(d.varied[d.robot == k], mass, rtol=1e-12)
+        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'hips', 'Mo'), 1.8396537e-3, rtol=1e-6)
 
-    def test_what_follows_mass_is_scaled_and_the_rest_is_not(self):
-        # Answer B, "Joints whole, as listed": a robot of the register of 50 kg drawn with the G1's parts has the G1's
-        # hip joints (whole) 50 / 35 times as heavy, its two hip fans (2 × 0.01 kg, not scaled) the same; its head
-        # (sensors and a board) the same.
-        d = self.at((HEAVY,))
-        g1 = d.robots.index('Unitree G1')
-        itself, heavy = (d.robot == g1) & (d.register_robot == g1), (d.robot == g1) & (d.register_robot == 3)
-        self.assertTrue(itself.any() and heavy.any())
-        fans = 2 * 0.01
-        hips, head = composition.kind_kg(d, 'hips'), composition.kind_kg(d, 'head')
-        np.testing.assert_allclose(hips[heavy], (hips[itself][0] - fans) * 50 / 35 + fans, rtol=1e-9)
-        np.testing.assert_allclose(head[heavy], head[itself][0], rtol=1e-9)
+    def test_each_robot_at_its_modes_weighs_its_own_mass(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = self.at()
+        for k, robot in enumerate(d.robots):
+            mass = inputs.apart.constants[robot][composition.ROBOT_MASS][1][1]
+            np.testing.assert_allclose(d.mass[d.robot == k], mass, rtol=1e-12, err_msg=robot)
+
+    def test_a_robot_without_joint_torques_and_battery_data_at_its_modes(self):
+        # The Noetix E1, 40 kg (E5.17): its joint modules 49 % of it, 19.6 kg; its shell 11.5 %, 4.6 kg; its battery
+        # 12 Wh per kg of robot, 480 Wh: cells 480 / 241.5 = 1.987578 kg, the pack 480 / 164 = 2.926829 kg, its housing
+        # the pack less the cells and its management board (60 cm2 × 0.56 g/cm2 = 33.6 g): 0.905651 kg.
+        d = self.at()
+        columns, draws = d.parts
+        rows = d.robot == d.robots.index('Noetix E1')
+        joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith('Noetix E1:') and 'joints)' in c)
+        np.testing.assert_allclose(joints, 19.6, rtol=1e-9)
+        np.testing.assert_allclose(self.part(d, 'Noetix E1: Shell: plastics'), 4.6, rtol=1e-9)
+        np.testing.assert_allclose(self.part(d, 'Noetix E1: Battery cells'), 480 / 241.5, rtol=1e-9)
+        np.testing.assert_allclose(self.part(d, 'Noetix E1: Battery housing, busbars and wires'),
+                                   480 / 164 - 480 / 241.5 - 0.0336, rtol=1e-9)
 
 
 class TestGradesByHeat(unittest.TestCase):
@@ -319,33 +369,39 @@ class TestReadable(unittest.TestCase):
         from matplotlib.text import Text
         params = Params()
         params.composition.draws = 300
-        inputs = inputs_or_skip(self, params, (HEAVY,))
+        inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_type_one(category, d, inputs.base.lists)
         with tempfile.TemporaryDirectory() as folder:
             params.output.parts_dir = os.path.join(folder, 'data')
-            composition.write_taken_apart(d, params.output.parts_dir)
-            pages = apart.figure_pages(apart.read_taken(params))
-            self.assertEqual([name for name, _ in pages], list(apart.FIGURES))
-            # 02's pages of robot type 1: its notes, then its elements nine a page.
-            pages += composition.type_one_pages(c, d, [], params)
+            pages = composition.parts_figure_pages(d)
+            self.assertEqual([name for name, _ in pages if '_notes_' not in name], list(composition.PARTS_FIGURES))
+            # 02's pages of robot type 1: its notes, its elements and its materials nine a page; where each material
+            # sits.
+            pages += composition.type_one_pages(c, d, [], params) + composition.sources_pages(d)
             for name, figure in pages:
                 figure.canvas.draw()
                 sizes = [t.get_fontsize() for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
+                # No text of the page itself (its title, a notes page's notes, which grow with them) runs off it.
+                page = figure.bbox
+                within = lambda t: all(page.contains(*corner) for corner in t.get_window_extent().get_points())  # noqa
+                outside = [t.get_text()[:60] for t in figure.texts if t.get_text().strip() and not within(t)]
                 path = os.path.join(folder, name)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
                 figure.savefig(path, dpi=params.output.dpi, facecolor='white')
-                apart.plt.close(figure)
+                composition.plt.close(figure)
                 height, width = matplotlib.image.imread(path).shape[:2]
                 scale = min(self.SCREEN[0] / width, self.SCREEN[1] / height)
                 smallest = min(sizes) * params.output.dpi / 72 * scale
+                self.assertEqual(outside, [], msg=name)
                 self.assertGreaterEqual(smallest, self.SMALLEST_PX,
                                         msg=f'{name}: {width} × {height} px, smallest text {smallest:.1f} px')
 
 
 class TestElementsNotShown(unittest.TestCase):
-    """Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N": type 1's
-    element pages leave them out, its draws keep them."""
+    """Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N", then "S and P
+    can go also Na": type 1's element pages leave them out, its draws keep them."""
 
     def test_type_1s_pages_leave_out_hydrogen_nitrogen_oxygen_and_fluorine(self):
         params = Params()
@@ -354,17 +410,112 @@ class TestElementsNotShown(unittest.TestCase):
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_type_one(category, d, inputs.base.lists)
-        for symbol in ('H', 'N', 'O', 'F'):
+        for symbol in ('H', 'N', 'O', 'F', 'Na', 'P', 'S'):
             self.assertTrue(c.column('elements', symbol).any(), msg=symbol)   # in the draws
         pages = composition.type_one_pages(c, d, [], params)
-        titles = [axes.get_title(loc='left') for _, figure in pages[1:] for axes in figure.axes]
-        notes = ' '.join(t.get_text() for t in pages[0][1].texts)
+        titles = [axes.get_title(loc='left') for _, figure in pages for axes in figure.axes]
+        notes = ' '.join(t.get_text() for name, figure in pages if '_notes_' in name for t in figure.texts)
         for _, figure in pages:
-            apart.plt.close(figure)
-        for name in ('Hydrogen (H)', 'Nitrogen (N)', 'Oxygen (O)', 'Fluorine (F)'):
+            composition.plt.close(figure)
+        for name in ('Hydrogen (H)', 'Nitrogen (N)', 'Oxygen (O)', 'Fluorine (F)', 'Sodium (Na)', 'Phosphorus (P)',
+                     'Sulfur (S)'):
             self.assertNotIn(name, titles)
         self.assertIn('Copper (Cu)', titles)
-        self.assertIn('hydrogen, nitrogen, oxygen and fluorine are not shown', ' '.join(notes.split()).lower())
+        self.assertIn('hydrogen, nitrogen, oxygen, fluorine, sodium, phosphorus and sulfur are not shown',
+                      ' '.join(notes.split()).lower())
+
+
+class TestPartsNotes(unittest.TestCase):
+    """Matthias, 2026-10-29: "parts taken apart show each a long legend, you know, what I think about this": his rule,
+    the notes once, on a page of their own. The two figures of where the critical elements sit carry no footnote; their
+    notes are on one page, the first of the folder."""
+
+    def test_the_notes_once_on_their_own_page_and_no_footnote_on_a_figure(self):
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        pages = composition.parts_figure_pages(d)
+        notes = [figure for name, figure in pages if '_notes_' in name]
+        figures = [(name, figure) for name, figure in pages if '_notes_' not in name]
+        self.assertEqual([name for name, _ in pages][:len(notes)],
+                         [f'robot_type_1_notes_{k}.png' for k in range(1, len(notes) + 1)])   # first in the folder
+        for name, figure in figures:
+            footnotes = [t.get_text() for t in figure.texts if t.get_text() != figure.get_suptitle()]   # its title
+            self.assertEqual(footnotes, [], msg=name)
+            composition.plt.close(figure)
+        text = ' '.join(' '.join(t.get_text() for figure in notes for t in figure.texts).split())
+        for figure in notes:
+            composition.plt.close(figure)
+        for words in ('the element pages', 'the overview pages', 'hatched', 'fewer than 2.5 % of the draws',
+                      f'{d.n:,} draws', "the magnets' grade class"):
+            self.assertIn(words, text.lower())
+
+
+class TestElementPages(unittest.TestCase):
+    """Matthias, 2026-10-29: "I told you I want to see the distribution not just the 0 value for vanadium and lead": an
+    element that is 0 in some draws (a robot or a version without it) shows the draws that hold it and in what share of
+    the draws it is held, as the material pages do ("If there is nothing then show nothing. If it is just a bit and a
+    large 0 then show me the distribution")."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def test_an_element_held_in_some_draws_shows_the_draws_that_hold_it(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_type_one(category, d, inputs.base.lists)
+        pages = composition.type_one_pages(c, d, [], self.params)
+        panels = {axes.get_title(loc='left'): axes.get_title(loc='right')
+                  for name, figure in pages if '_elements_' in name for axes in figure.axes}
+        for _, figure in pages:
+            composition.plt.close(figure)
+        partly = []
+        for symbol in composition.shown_elements(c.tables['elements'][0], self.params):
+            kg = c.column('elements', symbol)
+            held = kg > 0
+            label = composition.element_label(symbol)
+            if held.mean() < composition.HELD_SHARE:   # nothing, or nearly: no panel
+                self.assertNotIn(label, panels)
+                continue
+            numbers = panels[label]
+            self.assertNotIn('median 0 ', numbers, msg=symbol)
+            if held.all():
+                self.assertNotIn('of the draws', numbers, msg=symbol)
+                continue
+            partly.append(symbol)
+            per, unit = composition.panel_unit(kg[held])
+            self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
+            self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
+        self.assertIn('Pb', partly)
+        self.assertIn('V', partly)
+
+    def test_a_critical_element_held_in_some_draws_shows_the_draws_that_hold_it(self):
+        # The same on the pages of where the critical elements sit: indium, in the head of some robots only.
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        partly = []
+        for symbol, name in composition.FIGURE_ELEMENTS:
+            kinds = composition.by_kind(d, symbol)
+            total = sum(kinds.values())
+            figure, axes = composition.plt.subplots()
+            composition.stacked_panel(axes, kinds, name, True)
+            texts = ' '.join(t.get_text() for t in axes.texts)
+            share = axes.get_title(loc='right')
+            composition.plt.close(figure)
+            self.assertNotIn(' median 0 ', texts, msg=symbol)
+            held = total > 0
+            if held.all():
+                self.assertEqual(share, '', msg=symbol)
+                continue
+            partly.append(symbol)
+            self.assertEqual(share, f'in {composition.panel_number(100 * held.mean())} % of the draws')
+            per, unit = composition.panel_unit(total[held])
+            self.assertIn(f' median {composition.panel_number(np.median(total[held]) / per)} {unit}', texts)
+        self.assertIn('In', partly)
 
 
 class TestCentre(unittest.TestCase):
@@ -379,7 +530,7 @@ class TestCentre(unittest.TestCase):
     def test_the_element_panel_marks_the_median_solid_and_the_mean_dotted(self):
         import matplotlib.pyplot as plt
         figure, axes = plt.subplots()
-        apart.stacked_panel(axes, {'hips': self.VALUES}, 'Copper (Cu)', True)
+        composition.stacked_panel(axes, {'hips': self.VALUES}, 'Copper (Cu)', True)
         solid, dotted = self.lines(axes, '-'), self.lines(axes, ':')
         self.assertEqual(len(solid), 1)
         self.assertEqual(len(dotted), 1)
@@ -392,7 +543,7 @@ class TestCentre(unittest.TestCase):
     def test_the_overview_row_marks_the_median_solid_and_the_mean_dotted(self):
         import matplotlib.pyplot as plt
         figure, axes = plt.subplots()
-        apart.ridge_panel(axes, {'hips': self.VALUES}, {'hips': np.zeros(self.VALUES.size)}, 'Copper (Cu)')
+        composition.ridge_panel(axes, {'hips': self.VALUES}, {'hips': np.zeros(self.VALUES.size)}, 'Copper (Cu)')
         solid, dotted = self.lines(axes, '-'), self.lines(axes, ':')
         self.assertEqual(len(solid), 1)
         self.assertEqual(len(dotted), 1)
@@ -401,20 +552,97 @@ class TestCentre(unittest.TestCase):
         plt.close(figure)
 
 
-class TestRun(unittest.TestCase):
-    """02 writes robot type 1 taken apart at every level, and 04 draws its two figures from it, all into temporary
-    folders."""
+class TestMaterialPages(unittest.TestCase):
+    """Matthias, 2026-10-29: "There are only figures on the element level I want to see, how much Copper and especially
+    permanent magnets. The different steels and aluminum alyoys. We had this differently in datacenters", then "Yes, 1
+    to 5": the materials of one robot, the steels by grade, the aluminium by its alloys, the magnets in all and by grade
+    class, where each sits, the draws behind them kept."""
 
-    def test_02_writes_the_draws_and_04_draws_both_figures(self):
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def drawn(self):
+        inputs = inputs_or_skip(self, self.params)
+        return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def test_the_grades_alloys_and_magnet_classes_add_up_to_their_material_in_every_draw(self):
+        _, d = self.drawn()
+        columns, draws = d.materials
+        for k, (kind, material) in enumerate(columns):
+            parts = sum(kg for (x, m, _), kg in d.details.items() if x == kind and m == material)
+            np.testing.assert_allclose(parts, draws[:, k], rtol=1e-9, atol=1e-15, err_msg=f'{kind}, {material}')
+
+    def test_the_pages_show_copper_the_magnets_each_steel_and_each_aluminium_alloy(self):
+        _, d = self.drawn()
+        titles = [title for title, *_ in composition.material_panels(d)]
+        for wanted in ('Copper', 'Permanent magnets', 'Magnets, grade class SH',
+                       'Gear steel 20CrMnTi', 'Bearing steel GCr15', 'Alloy steel 42CrMo4', 'Electrical steel M19',
+                       'Electrical steel M27', 'Aluminium 6061', 'Aluminium 7075', 'Plastics',
+                       'Battery cells, NMC (cylindrical)', 'Nickel strips, battery'):
+            self.assertIn(wanted, titles)
+        self.assertNotIn('Steel', titles)        # steel only by its grades
+        self.assertNotIn('Aluminium', titles)    # aluminium only by its alloys
+        sources = [name for name, _ in composition.sources_pages(d)]
+        for name in ('Copper', 'Permanent_magnets', 'Gear_steel_20CrMnTi', 'Aluminium_7075'):
+            self.assertIn(os.path.join(composition.SOURCES_FOLDER, f'{name}.png'), sources)
+        self.assertFalse(any('grade_class' in name for name in sources))   # the classes on the pages only
+
+    def test_a_material_held_in_some_draws_shows_the_draws_that_hold_it(self):
+        # Matthias, 2026-10-29: "If there is nothing then show nothing. If it is just a bit and a large 0 then show me
+        # the distribution": the brass of the RP1 alone, held in about 1 of 31 draws.
+        import matplotlib.pyplot as plt
+        _, d = self.drawn()
+        title, _, _, kinds = next(p for p in composition.material_panels(d) if p[0] == 'Brass')
+        kg = sum(kinds.values())
+        figure, axes = plt.subplots()
+        composition.material_panel(axes, kg, title, True)
+        numbers = axes.get_title(loc='right')
+        share = 100 * (kg > 0).mean()
+        self.assertIn(f'in {composition.panel_number(share)} % of the draws', numbers)
+        median = np.median(kg[kg > 0]) * 1000
+        self.assertIn(f'median {composition.panel_number(median)}', numbers)   # of the draws that hold it, in g
+        plt.close(figure)
+
+    def test_the_aluminium_alloys_at_the_modes_of_type_1s_recipe(self):
+        # Every triangle at its mode: die-cast 20 % of the aluminium, of the wrought rest 7075 32 % (25.6 %) and 6061
+        # the remainder (54.4 %), in every kind of part.
+        inputs = inputs_or_skip(self, self.params)
+        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+            d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        aluminium = sum(kg for (_, m, _), kg in d.details.items() if m == 'Aluminium')
+        alloy = lambda name: sum(kg for (_, m, x), kg in d.details.items() if m == 'Aluminium' and x == name)  # noqa
+        np.testing.assert_allclose(alloy('Aluminium 7075'), 0.256 * aluminium, rtol=1e-9)
+        np.testing.assert_allclose(alloy('Aluminium 6061'), 0.544 * aluminium, rtol=1e-9)
+
+    def test_the_draws_behind_the_pages_are_written(self):
+        _, d = self.drawn()
+        with tempfile.TemporaryDirectory() as folder:
+            composition.write_taken_apart(d, folder)
+            with open(os.path.join(folder, 'grades.txt'), encoding='utf-8') as file:
+                columns = file.read().splitlines()
+            draws = np.load(os.path.join(folder, 'grades.npy'))
+        self.assertEqual(draws.shape, (d.n, len(columns)))
+        self.assertIn('Hip joints: Steel: 20CrMnTi', columns)
+        self.assertIn('Frame and shell: Aluminium: Aluminium 6061', columns)
+        self.assertIn('Knee joints: Magnets (NdFeB): UH', columns)
+
+
+class TestRun(unittest.TestCase):
+    """02 writes robot type 1 part by part at every level, and draws its two figures and where each material sits, all
+    into temporary folders."""
+
+    def test_02_writes_the_draws_and_draws_both_figures_and_where_each_material_sits(self):
         params = Params()
         params.composition.draws = 300
-        inputs = inputs_or_skip(self, params, (HEAVY,))
+        inputs = inputs_or_skip(self, params)
         with tempfile.TemporaryDirectory() as folder:
             params.output.parts_dir = os.path.join(folder, 'data')
             params.output.parts_figures_dir = os.path.join(folder, 'figures')
             d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
             composition.write_taken_apart(d, params.output.parts_dir)
-            self.assertEqual(apart.run(params), 0)
+            composition.draw_parts_figures(d, params)
             with open(os.path.join(params.output.parts_dir, 'register.txt'), encoding='utf-8') as file:
                 self.assertEqual(file.read().splitlines(), d.register)
             for table in composition.APART_TABLES:
@@ -423,7 +651,7 @@ class TestRun(unittest.TestCase):
                     columns = file.read().splitlines()
                 self.assertEqual(draws.shape, (300, len(columns)), msg=table)
             self.assertTrue(os.path.exists(os.path.join(params.output.parts_dir, 'summary.csv')))
-            for name in apart.FIGURES:
+            for name in list(composition.PARTS_FIGURES) + [n for n, _ in composition.sources_pages(d)]:
                 self.assertGreater(os.path.getsize(os.path.join(params.output.parts_figures_dir, name)), 10_000,
                                    msg=name)
 

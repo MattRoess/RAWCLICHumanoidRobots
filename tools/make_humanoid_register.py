@@ -24,9 +24,9 @@ change is made in this file, not in the .xlsx, where it would be lost at the nex
 
 Beside the sheet Robots (all robots), the sheet Type 1: every robot whose types include 1, as its leading or its
 second type, with every cell of its row in Robots and one more, "In the run": what 02_composition.py does with it
-(drawn with its own parts; drawn with the parts of the robots taken apart, scaled to its mass; or not drawn, as no
-mass is stated). 02 draws robot type 1 over the robots of this sheet; 01 checks that it lists exactly the robots of
-type 1 of the sheet Robots, as they are there.
+(drawn with its own rows of the parts file, which every robot of type 1 has since 2026-10-29). 02 draws robot type 1
+over the robots of this sheet; 01 checks that it lists exactly the robots of type 1 of the sheet Robots, as they
+are there.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -71,13 +71,12 @@ ABOUT = [
     'Mass: as the catalogue (or the source of an added robot) states it, second-hand; minimum, mode and maximum the '
     'stated mass +- 1 kg (as the X1\'s and N1\'s own masses, EVIDENCE.md E2.8e) or the stated range; empty where no '
     'mass is stated.',
-    'Taken apart as: the robot of data/researched/parts_taken_apart.xlsx that is this robot, for the three robots of '
-    'type 1 taken apart part by part.',
+    'Mass of the PrimeBOT Q1: no source states one; the estimate (E) agreed on 2026-10-29 (EVIDENCE.md E5.17).',
+    'Taken apart as: the rows of data/researched/parts_taken_apart.xlsx that are this robot, for every robot of type 1; '
+    'a robot in several versions names each, separated by "; ", each drawn as often (the Booster K1\'s two batteries).',
     None,
     'Sheet Type 1: every robot of the sheet Robots whose types include 1 (leading or second), with every cell of its '
-    'row there, and "In the run": what 02_composition.py does with it. "drawn: its own parts" for a robot taken apart; '
-    '"drawn: the parts of ..., scaled to its mass" for a robot with a stated mass, each draw taking the parts of one '
-    'of the robots taken apart, each as often; "not drawn: no mass stated" for a robot without. 02 draws robot type 1 '
+    'row there, and "In the run": what 02_composition.py does with it, "drawn: its own parts". 02 draws robot type 1 '
     'over the robots of this sheet, each as often.',
 ]
 
@@ -88,7 +87,7 @@ TYPE_ONE = 1
 TYPE_ONE_SHEET = 'Type 1'
 # What the sheet Type 1 says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same three).
 IN_RUN_OWN = 'drawn: its own parts'
-IN_RUN_NOT = 'not drawn: no mass stated'
+IN_RUN_NOT = 'not drawn: no mass stated'   # no robot of type 1 since 2026-10-29: each has a mass and its own rows
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
 HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
@@ -110,8 +109,24 @@ ADDED = {
     354: ('PR-OMNI', 'Perceptyne', 'India', 'Pre-order', '157', '120', 'https://www.perceptyne.com/product/omni'),
 }
 
-# The three robots of type 1 taken apart part by part: number -> their name in data/researched/parts_taken_apart.xlsx.
-TAKEN_APART = {102: 'Unitree G1', 16: 'AgiBot X1', 350: 'Fourier N1'}
+# Every robot of type 1 and its rows in data/researched/parts_taken_apart.xlsx: number -> the name of its own rows
+# there (Matthias, 2026-10-29, "Yes, build it": every robot of type 1 its own rows, EVIDENCE.md E5.12 to E5.19). A robot
+# in several versions names each, separated by '; ', each drawn as often: the Booster K1 with its 5 Ah and its 2 Ah
+# battery (E5.14, point 2). No brackets or commas in a name: 04 reads the names from between brackets, by commas.
+TAKEN_APART = {
+    16: 'AgiBot X1', 19: 'ROBOTIS AI Sapiens K1', 23: 'AKINROBOTICS AKINCI-5', 37: 'Menlo Asimov 1',
+    38: 'Menlo Asimov 2', 54: 'Booster T1', 55: 'Booster T2', 57: 'Noetix Bumi', 85: 'Noetix E1', 102: 'Unitree G1',
+    103: 'Unitree G1+', 143: 'JAKA π', 147: 'ROBOTIS K0', 148: 'Booster K1 5 Ah; Booster K1 2 Ah',
+    168: 'Light Origins LightBot-0', 175: 'DOBOT LUMO', 212: 'Nori L3', 231: 'PHYBOT C1', 234: 'EngineAI PM01',
+    236: 'PrimeBOT Q1', 246: 'AgiBot QUESTER1', 260: 'Leju Roban2', 268: 'RoboParty Roboto Origin',
+    269: 'RoboParty RP1', 279: 'Fauna Sprout', 281: 'StarBot Astra', 308: 'WL Robotics Totan O1', 311: 'Unitree R1',
+    332: 'TOPSTAR Xiao Tuo', 343: 'YMBOT E3', 350: 'Fourier N1',
+}
+
+# A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:
+# the Booster K1's 19.5 kg, the robot nearest in height (0.95 against 0.88 m) with a mass from its maker, half to 1.5
+# times (Matthias, 2026-10-29: "I agree with the proposal of E5.17 ...", point 6).
+MASS_ESTIMATES = {236: (9.75, 19.5, 29.25, "E: the Booster K1's 19.5 kg, half to 1.5 times (EVIDENCE.md E5.17)")}
 
 # The decisions, one per robot: (number, types, form, entry, decided in). Types: "4" or "3, 4", the leading one first,
 # empty where the entry says why there are none. Form: how the robot moves, as read (EVIDENCE.md E4.1 to E4.10).
@@ -424,7 +439,7 @@ DECISIONS = [
     (306, '3, 4', 'not stated', '', 'E4.8'),
     (307, '3, 2', 'not stated', '', 'E4.8'),
     (308, '1', 'not stated', '', 'E4.8'),
-    (309, '1', 'legs or wheels', '', 'E4.8'),
+    (309, '', 'legs or wheels', 'not assigned: no form with legs and arms', 'E4.8, E5.15, E5.17'),
     (310, '4', 'not stated', '', 'E4.8'),
     (311, '1', 'legs', '', 'E4.8'),
     (312, '2, 3', 'legs', '', 'E4.8'),
@@ -516,6 +531,8 @@ def register_rows(catalogue: dict) -> list:
     for number, types, form, entry, decided in DECISIONS:
         robot, maker, country, status, height, mass, source = robots[number]
         low, mode, high, basis = mass_bounds(mass)
+        if number in MASS_ESTIMATES:      # no mass stated anywhere: the agreed estimate (E)
+            low, mode, high, basis = MASS_ESTIMATES[number]
         out.append([number, robot, maker, country, status, height, mass, low, mode, high, basis, types, form, entry,
                     TAKEN_APART.get(number, ''), decided, source])
     return out
@@ -527,15 +544,10 @@ def types_of(row: list) -> list:
 
 
 def in_the_run(row: list) -> str:
-    """What 02_composition.py does with a robot of type 1 (its row of the register): drawn with its own parts, where it
-    is one of the robots taken apart; drawn with the parts of those robots scaled to its mass, where its mass is stated
-    (02 gives each of them as many draws); not drawn, where no mass is stated (EVIDENCE.md E4.11)."""
-    if row[HEADINGS.index('Taken apart as')]:
-        return IN_RUN_OWN
-    if row[HEADINGS.index('Mass mode (kg)')] is not None:
-        names = list(TAKEN_APART.values())
-        return f"drawn: the parts of the {', '.join(names[:-1])} or {names[-1]}, scaled to its mass"
-    return IN_RUN_NOT
+    """What 02_composition.py does with a robot of type 1 (its row of the register): drawn with its own rows of the
+    parts file, where it has them (every robot of type 1 since 2026-10-29); not drawn, where it has none (01 then
+    reports it)."""
+    return IN_RUN_OWN if row[HEADINGS.index('Taken apart as')] else IN_RUN_NOT
 
 
 def type_one_rows(rows: list) -> list:

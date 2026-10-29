@@ -8,6 +8,543 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E5. Each robot of type 1 its own composition: research, batch 1 of 4 (2026-10-29). Entered 2026-10-29 (E5.20)
+
+### E5.20 The entry: what each agreed outcome landed in (2026-10-29, on "Yes, build it")
+
+Matthias: "Yes, build it" (the entry, HANDOVER.md, points 1 to 10 with the recommendations for A to D); during the
+build "only if it is exclude due to a limit given in the code" (check 20 removed) and "With Copper" (the nickel strip).
+Checked in VERIFICATION.md V69.
+
+| Outcome | Where it lands |
+|---|---|
+| E5.17: the TRON 2 not assigned; type 1 31 robots | `tools/make_humanoid_register.py`, row 309 and `TAKEN_APART` (31 numbers, the K1 "Booster K1 5 Ah; Booster K1 2 Ah") |
+| Every robot its own rows (point 2, decision A) | `tools/make_parts_taken_apart.py`: the G1, X1, N1 as before; one block each for the 29 others (`ROBOTO_ORIGIN` to `YMBOT_E3`), `robot_rows()`; `g1_plus_rows()`, `asimov_two_rows()` |
+| E5.12 points 1 to 4: the actuators | the sheet Joints, module masses per joint (the stated masses, `DM_J10010L` to `QM060`; `from_torque()` over 87.3 N·m/kg); class by `LARGE_FROM_NM` 55 N·m; inside as JointParts (02 `draw_robot`) |
+| The placement of each actuator | the Asimov 1's from Menlo's mechanical page (AS1, read 2026-10-29: the actuator at each joint); the RP1's from RoboParty's ROMOMO introduction; the Roboto Origin's, T1's, K1's, PM01's and R1's from their models' torque limits; **the AI Sapiens K1's and the K0's not stated by ROBOTIS: an estimate (E)**, the larger actuators at the hips, knees, waist and (the K1's eleven) the ankle pitch, written in their rows |
+| E5.12's table, the RP1 | at the agreed modes (point 3, the RMM8463-2E 0.7 kg) its actuators are 18.8 kg; the table gave 19.2 kg with the RMM8463-2E at its bound, 0.8 kg |
+| E5.14 point 1: the masses | the sheet Constants, 'Robot mass, with battery' of each robot |
+| E5.14 points 2 and 3: battery | Constants voltage and capacity (± 5 %), or the shared 'Battery energy per kg of robot' (6 / 12 / 18); the pack's stated mass or the shared 'Battery pack, Wh per kg (packs not weighed)' (109.3 / 164 / 232.5); the Asimov's pack without housing |
+| E5.14 point 4: boards | the sheet Boards, one row per board named (the template's `COMPUTER`, `POWER`, `BATTERY_BOARD`, `SMALL_BOARD`, the modules `AGX_ORIN`, `ORIN_NX`, `RADXA_CM5`); the RP1's 13 boards in the robot (its e-stop transmitter and charger board are accessories) |
+| E5.14 points 5 to 9 | cables (Constants), XT30 connectors two per joint, screws, shell (the shared 'Shell, share of the robot mass'), sensors (by their car sensor types; a sensor without a mass its elements only), frame (the remainder) |
+| E5.17 point 1: robots without torques | the sheet Joints, 'Share of the joint modules' (one row per joint group, the shares of batch 1 on average, `average_joints()`), the shared 'Joint modules, share of the robot mass' (24.5 / 49 / 73.5 %) |
+| E5.17 points 5 to 7 | the G1+ (the G1's rows and two head joints), the PrimeBOT Q1's mass (9.75 / 19.5 / 29.25 kg), the Asimov 2 (the Asimov 1 times 38 / 35) |
+| E5.18: the grades | the column Grade (JointParts, Parts, Shares); the recipes in `data/researched/element_recipes.xlsx` (20CrMnTi, GCr15, 42CrMo4, C45, P20, 17-4PH, Ti-6Al-4V, and the mixtures 'Gear stage 2 steel: 20CrMnTi and GCr15', 'RP1 frame steel: C45 and P20'); M19, M27 and Type 304 read where they lie (`data.traction_motor_steels`); 01 `check_grades`, 02 `Shared.grade_elements` |
+| E5.19: Mixed, brass | the sheet Shares: the battery housing (nickel strip with the copper, copper, plastics, housing 'Aluminium or Plastics' or the PM01's aluminium); the X1's grippers two small joints; the RP1's brass parts |
+| Decisions C and D | the scaled drawing removed from 02 (and its notes and tests); check 20, `parts.draws`, `parts.seed` and the old page removed |
+
+**Found while entering, Matthias's data:** RAWCLICVehicleTractionMotor's element workbook, sheet CastFeSteel, rows 16
+and 17: Type 304's chromium 0.18 at its minimum (cell H16) and 0.02 at its maximum (H17). E5.18 wrote "the sibling's
+limits (Cr 18 to 20 ...)": the standard's range, which the sheet's maximum row did not hold. 01's `check_grades`
+reported it. **Corrected** on his word ("Yes, correct it", 2026-10-29): H17 0.20, the one cell changed (V70).
+
+**Estimates made while entering** (each E, in its row of the builder):
+
+| Point | Entered |
+|---|---|
+| AI Sapiens K1, K0 | ROBOTIS states only how many of each actuator: the larger at the hips, knees and waist (the K1's eleven also at the ankle pitch) |
+| X1 shafts and pins | 17-4PH 25 / 50 / 75 % of the part, C45 the remainder |
+| RP1 frame steel, screws | P20 4 of its 28 steel parts by count (7.14 / 14.29 / 21.43 % of the steel), C45 the remainder; its screws split 753 : 61 by number (12.9 against 304) |
+| K1 5 Ah | the Education version's Jetson Orin NX; the Professional's AGX Orin not drawn |
+| Joint counts (encoders, connectors only) | E1 26, QUESTER1 28, LightBot-0, LUMO and YMBOT E3 24 |
+| "Composite" shells | the Bumi's, AKINCI-5's and Totan O1's drawn as plastics |
+| X1 | 62 encoders and 62 connectors, two per joint with its grippers |
+| Head joints | in the figures' kind Head (02's standard tables: the part group Sensors) |
+| Sensors without a mass | drawn by their elements only, their mass in the frame |
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the estimates made while building the
+entry, as listed."
+
+**Not entered, as not in E5.14's list:** fans and heat sinks of the 29 robots (their mass is in the frame); the RP1's
+30 V auxiliary battery (said so in E5.14), the bearings outside its actuators and its 80 small magnets in the covers;
+Sprout's four time-of-flight sensors; the PM01's navigation LiDAR and the K1 Professional's AGX Orin (other versions).
+
+Matthias, 2026-10-29: "Have you research for the missing data I also want a qualification of the numbers you have. Do
+they come from manufature. It is also not just the weight but at ;east the full composition Cu, etc.", "Essential is
+not only the mass, the composition. Mass is not enough.", "It is enough to have the total amount of Cu, Gold etc. we do
+not need to split it into different parts. If the information is available, then perfect. Use it", "The type of
+motors and its enery allows to calculated its approximate composition in therms of Cu, rear earth mognet, electronic
+steell aluminum aloys etc.", then "Yes do it". The agreed specification is in HANDOVER.md (2026-10-29, "Research of
+the 32 robots of type 1"). Here: for each robot of batch 1 what its sources give for its composition (motors, battery,
+boards, structure), each source qualified. **No min / mode / max is proposed:** that follows once Matthias has seen
+these tables.
+
+**How read:** every page through the web-fetch tool on 2026-10-29, HTML only, quoted as the page gives it; no PDF,
+workbook, CAD or model file downloaded (those are listed at the end, for his yes). **Batch 1:** the 8 robots of type 1
+with the most published hardware (268, 37, 269, 54, 148, 234, 311, 19). The G1, X1 and N1 have their own parts (E2) and
+are not in it. **Tags:** *maker* = the maker's own page, documentation or repository; *third* = a reseller, a news
+site or a catalogue; *spec* = a stated specification; *model* = a simulation model's value (URDF); *claim* = a
+marketing statement; *arith.* = Claude's arithmetic, stated nowhere. No source of batch 1 gives a measured value.
+
+### E5.1 Roboto Origin (268, RoboParty, Shanghai)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 14 × "DM 4340P (48V)", 9 × "DM 10010L" (23 joints); no torque, mass or type on the page | BOM, github.com/Roboparty/roboto_origin/blob/main/assets/BOM_EN.md ("Internal Roboto D-BOM", 20260105, "ATOM 01 v1.0.1") | maker, parts list (names, quantities, CNY prices) |
+| Battery | "48V 15Ah Li-ion pack", 140 × 140 × 115 mm; 720 Wh | the same BOM, line 27 | maker, spec in the name; Wh arith. |
+| Boards | "RDK X5 8G" compute board; USB hub, 4 USB-to-CAN, DC-DC 48 V to 5 V, power distribution board, 4 CAN adapter boards; sensor "Chaohe HI13 M0-USB" | the same BOM | maker, parts list |
+| Structure | 25 CNC parts "120-grit sandblasting / black anodizing" (metal not named; anodising points to aluminium, not stated); 3D-printed rubber soles; steel screws by GB/T standards (material not stated); bearings (one 130 × 165 × 18 mm) | the same BOM | maker, parts list |
+| Mass, height | 34 kg, 1.25 m | humanoidroboticstechnology.com, "Source: Roboparty" | third, repeating the maker |
+
+Gives: the motors by name and number, the battery's energy and chemistry, the boards by name. Missing: the motors' mass
+and make-up (the maker of the "DM" motors is not named in the BOM; its datasheets are not read yet), the structure's
+metal, every part's mass. Not read: RoboParty's documentation site (roboparty.com/roboto_origin/doc), the repositories
+rpo_hardware (CAD, PCB) and rpo_description (URDF with link masses).
+
+### E5.2 Asimov 1 (37, Menlo, open-source)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 25 joints: EC-A6416-P2-25 × 3 (40 / 120 N·m rated / peak), EC-A5013-H17-100 × 4 (30 / 90), EC-A3814-H14-107 × 4 (20 / 60), EC-A4315-P2-36 × 4 (25 / 75), EC-A4310-P2-36 × 10 (12 / 36; at the ankles 40 / 145.4 and 17 / 57.6, unexplained); motor type, gearbox, mass, magnet not stated | docs.menlo.ai/asimov/1/overview/system-tour/mechanical; counts docs.menlo.ai/asimov/1/build/assembly-preparations/part-organisation | maker, spec; the page marks its mechanical tables as possibly out of date |
+| Battery | Li-ion "INR18650", 13S4P (52 cells), 46.8 V, 10.5 Ah, 491.4 Wh, "Approximately 2 kg" | docs.menlo.ai/asimov/1/overview/system-tour/electrical | maker, spec ("Current specification") |
+| Boards | Radxa CM5 on a carrier board (motion control), Raspberry Pi 5 with Media HAT, head board, power distribution board; 6-axis IMU, 2 MP camera, microphones, 10 W speaker | the same page | maker, spec |
+| Structure | "7075 aluminum and MJF PA12 nylon" | the mechanical page | maker, spec (possibly out of date) |
+| Mass, height | "Approximately 35 kg", "Approximately 1.2 m" | docs.menlo.ai/asimov/1/bom (served the overview) | maker, spec |
+
+Gives: every motor by model and torque, the battery completely (cells, energy, mass), the structure's two materials.
+Missing: the motors' mass and make-up (the maker of the "EC-A" actuators is not named by Menlo), part masses. The full
+parts list sits behind an e-mail form (tally.so/r/jaG0va); the CAD files are on github.com/asimovinc/asimov-1, the URDF
+with link masses on github.com/menloresearch/asimov-1: not opened.
+
+### E5.3 RP1 (269, RoboParty)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 24 joints (Pro 30); ROMOMO modules RMM10062-2E (48 V, ratio 22, 44 / 160 N·m rated / peak), RMM6562-2E (48 V, 19.5, 10 / 35 N·m), RMM8463-2E (drawing only); which module at which joint not stated; "inner-rotor motors", "two-stage planetary" | github.com/Roboparty/ROMOMO (values "transcribed from the published specification and test-report PDFs"); motor type and gearbox only cnx-software.com/?p=178402 | maker, spec; third |
+| Battery | "48V main lithium battery", "30V auxiliary battery", "10Ah dual-battery system" | cnx-software.com/?p=178402 | third only |
+| Boards | 14 boards named with part numbers (main board RBE-MAIN-RK3588S, IMU board, power boards ...); Rockchip RK3588, 8 GB, 32 GB eMMC; Pro also a Jetson Orin NX 16 GB | github.com/Roboparty/RP1_hardware/blob/main/02_PCB/README.md; processors cnx-software | maker (boards); third (processors) |
+| Structure | "AL6061" limbs, "AL7075-T6" foot plates, polycarbonate chest, resin covers, polyurethane bumpers | cnx-software.com/?p=178402 | third only; the maker's CMF tables (XLSX) not opened |
+| Mass, height | about 39 kg (Pro 41 kg) "including battery and end effectors", 1.35 m | cnx-software.com/?p=178402 | third only |
+
+Gives: the joints' torque classes, the boards by name. Missing at the maker's HTML pages: mass, battery, materials,
+which module where. The maker publishes them in files: the whole-robot BOMs RP1.3.4 (5 DOF and 7 DOF arms, sheet
+"总BOM" with material information), the CNC, 3D-print and rubber BOMs and their CMF tables (XLSX), the ROMOMO test
+reports and drawings (PDF), the CAD (ZIP), the URDF (github.com/Roboparty/RP1_description): **downloads, his yes**.
+
+### E5.4 Booster T1 (54, Booster Robotics)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 23 joints (head 2, arms 4 each, waist 1, legs 6 each); "Max Joint Torque: 130 N·m", dual encoders; model, type, mass not stated | docs.booster.tech/docs/product-manual/t1/getting-started/specifications/ (counts); torque uk.robotshop.com | maker (counts); third (torque) |
+| Battery | 10.5 Ah Li-ion; voltage not stated; "Battery Life 2h" | chipsilicon.pages.dev (capacity); generationrobots.com lists a "10.5 Ah Battery for Booster T1"; life docs.booster.tech | third (capacity); maker (life) |
+| Boards | Jetson AGX Orin 32 GB, motion board "Express-i7" (Standard); depth camera, microphone array | docs.booster.tech T1 specifications | maker, spec |
+| Structure | not stated | – | – |
+| Mass, height | "About 30kg", 1.18 m | docs.booster.tech T1 specifications | maker, spec |
+
+Gives: the joint count and the boards from the maker. Missing: the motors' make-up, the battery voltage (so no Wh), the
+structure. The URDF files T1_23dof.urdf (link masses) are in github.com/BoosterRobotics/booster_assets: not opened.
+
+### E5.5 Booster K1 (148, Booster Robotics)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 22 joints (head 2, arms 4 each, legs 6 each, no waist); "Max Peak Torque: 60 N·m" (joint not named); dual encoders | docs.booster.tech/docs/product-manual/k1/getting-started/specifications/, booster.tech/booster-k1 | maker, spec |
+| Motors, per joint | peak torques 60, 50, 36, 14 and 7 N·m | a search result's summary of a RoboCup team sheet (RFC Tsudanuma, hsl.robocup.org); the PDF not opened, so not read first-hand | third, not read |
+| Battery | Geek 2 Ah, Education and Professional 5 Ah, "magnetic battery"; voltage not stated by Booster (48 V only in a search result's summary of RoboCup team sheets, not read) | docs.booster.tech K1 specifications | maker (Ah); third, not read (V) |
+| Boards | Geek ARM processor (Qualcomm QCS8550 per a reseller); Education Jetson Orin NX 8 GB; Professional Jetson AGX Orin 32 GB; binocular depth camera, 9-axis IMU, microphones, speaker | docs.booster.tech, booster.tech/booster-k1; QCS8550 generationrobots.com | maker; third |
+| Structure | not stated | – | – |
+| Mass, height | "About 19.5kg", 0.95 m | docs.booster.tech K1 specifications | maker, spec |
+
+Gives: joints, battery capacity by version, boards by version. Missing: the motors' make-up, the voltage from the maker,
+the structure. Not opened: the K1 datasheet PDF (static.generation-robots.com/media/datasheet-booster-k1.pdf), the URDF
+K1_22dof.urdf (booster_assets).
+
+### E5.6 PM01 (234, EngineAI, Shenzhen)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 24 joints: Q90H × 6 (hip pitch, hip roll, knee; 145 N·m, ratio 25, **1.1 kg**, 48 V), Q25H × 15 (ankles, arms, head; 50 N·m, ratio 25, **0.5 kg**, 48 V), Q25H-L × 3 (hip yaw, waist; no data); "Full Planetary"; "Ultra-High-Speed Internal Rotor Permanent Magnet Synchronous Motor"; crossed roller bearings | en.engineai.com.cn/open/docs/pm01/01/joint-system; motor type en.engineai.com.cn/product-pm01.html | maker, spec |
+| Battery | "Cylindrical Lithium-ion Battery (Ternary Lithium System)", nominal 10 Ah, 46.8 V (13S, two in parallel by arith.), 468 Wh arith., "Total System Mass ≈2.95kg", housing "Aluminum Alloy" | en.engineai.com.cn/open/docs/pm01/01/peripheral-devices | maker, spec |
+| Boards | NVIDIA Jetson Orin NX 16 GB; motion unit "Nezha" 4 cores, 8 GB; D435i depth camera and a waist camera; IMU YIS320 (7.7 g); Navigation edition a 3D LiDAR (Livox Mid-360 per EngineAI's navigation README) | en.engineai.com.cn/open/docs/pm01/01/hardware-information, /sensor-system; github.com/engineai-robotics/engineai_navigation | maker, spec |
+| Structure | "Structural Material Aviation Aluminum" | en.engineai.com.cn/product-pm01.html | maker, spec |
+| Mass, height | 43 to 44.5 kg with battery (three of EngineAI's own pages differ); 1400 mm by the dimension table, 138 cm by its home page; 40 kg third-party | en.engineai.com.cn/product-pm01.html, the development guide, engineai.com.cn | maker, spec (disagreeing); third |
+
+Gives: the most complete set of batch 1 from the maker: every joint's motor with its mass (21 of 24), the battery with
+its chemistry, energy and mass, the boards, the structure's material. Missing: the Q25H-L's data, the motors' make-up
+(copper, magnet, steel), the shell. Not opened: the user manual PDF (product-support-pm01.html), the URDF
+(github.com/engineai-robotics/engineai_robotics_description, folder pm01_edu).
+
+### E5.7 Unitree R1 (311, Unitree Robotics)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | R1: 26 joints (legs 6 each, arms 5 each, waist 2, head 2; R1 Air 20); "Low inertia high-speed internal rotor PMSM"; crossed roller bearings; "Maximum Torque of Arm Joint: About 2kg" (a load); model, mass not stated | unitree.com/R1 | maker, spec |
+| Motors, limits | joint effort limits 60 (hip, knee, waist, shoulder pitch and roll), 50 (ankles), 33 (shoulder yaw, elbow, wrist), N·m by the model's convention | github.com/unitreerobotics/unitree_ros, robots/r1_description/R1.urdf | maker, model |
+| Battery | "Lithium battery", "About 1h"; voltage, Ah, Wh not stated | unitree.com/R1 | maker, spec |
+| Boards | "8-Core High-Performance Processor"; EDU an optional module "such as Orin(40-100TOPS)"; binocular camera (Air monocular), 4 microphones, speaker | unitree.com/R1 | maker, spec |
+| Structure | not stated | – | – |
+| Mass, height | "About 29kg" with battery (R1, EDU), Air "About 27kg"; 1230 mm; "about 25kg" third-party | unitree.com/R1; cnx-software.com | maker, spec; third |
+
+Gives: joints by region, the motor type, the boards; the URDF's link masses (R1 Air 26.68 kg in all, arith.; leg
+5.81 kg each) as a model. Missing: the motors' make-up and mass, the battery's energy, the structure.
+
+### E5.8 AI Sapiens K1 (19, ROBOTIS, Korea)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Motors | 23 joints (arms 5 each, legs 6 each, waist 1): DYNAMIXEL-Q QC060-200-R020-RE × 12 (**435 g**, peak 30.0 N·m, 20:1) and QC080-240-R020-RE × 11 (**845 g**, 72.6 N·m, 20:1); "Low-inertia inner rotor PMSM", 48 V; continuous torque 10.6 / 24.2 N·m, power 200 / 240 W and masses 455 / 865 g on the product page | docs.robotis.com/docs/systems/aisapiens/specifications/hardware; robotis.com/en/product/dynamixel-q.php (marked "Preliminary") | maker, spec |
+| Battery | "Li-ion 21700, 13S2P", cell "LG Energy Solution M50LT", 48 V, 10 Ah, "460.8 Wh" (48 × 10 = 480: does not add up; 46.8 V × 9.6 Ah would) | docs.robotis.com/docs/systems/aisapiens/specifications/electrical_system | maker, spec |
+| Boards | NVIDIA Jetson Orin NX 16 GB, 256 GB SSD; HAT board (two STM32 MCUs), IMU board (ICM-42688-P or BNO085) | the same page | maker, spec |
+| Structure | "Aluminium alloy frame with polymer covers"; covers 3D-printable | humanoid.guide (frame); docs.robotis.com (covers) | third (frame); maker (covers) |
+| Mass, height | "Weight 35 kg", "Height 1355 mm" (K1); the K0 34 kg, 1300 mm, QM-060 × 14 and QM-080 × 9, 46.8 V 9 Ah | docs.robotis.com (K1); ai.robotis.com/ai_sapiens/introduction_ai_sapiens.html (K0) | maker, spec, "may change as the product approaches launch" |
+
+Gives: every motor by model and mass (14.5 kg of motors in all, arith.), the battery's cell by maker and model. Missing:
+the motors' make-up, the structure from the maker. Not opened: the K1 hardware drawing PDF (docs.robotis.com); the
+parts list, STEP files "Coming soon".
+
+### E5.9 Batch 1 together: what the sources give, and what is still missing
+
+With the downloads and model files of E5.10 (read after Matthias's "Yes, download").
+
+| Robot | Motors: count and kind | Motor masses | Battery: Wh, chemistry | Boards | Structure | Mass from the maker |
+|---|---|---|---|---|---|---|
+| 268 Roboto Origin | yes (BOM) | no | 720 Wh, Li-ion | yes (BOM) | anodised CNC parts, metal not named | 33.76 kg (its model) |
+| 37 Asimov 1 | yes, torques | no | 491.4 Wh, 18650 cells, 2 kg | yes | 7075 Al, PA12 | 35 kg; model 35.55 kg |
+| 269 RP1 | 24 modules of 3 sizes (BOM), torques | no | not stated by the maker | 15 boards (BOM) | every part's material (BOM) | 39.11 kg (its model) |
+| 54 Booster T1 | count only | no | 10.5 Ah, no voltage | yes | no | 30 kg; model 31.74 kg |
+| 148 Booster K1 | count, 60 N·m | no | 48 V 5 Ah, 240 Wh (reseller's datasheet) | yes | no | 19.5 kg; model 19.67 kg |
+| 234 PM01 | yes, torques | 21 of 24 | 468 Wh, NMC cylindrical, 2.95 kg | yes | aviation aluminium alloy, rubber | 40 to 44.5 kg; model 40.92 kg |
+| 311 Unitree R1 | count, PMSM | no | no | yes | no | 27 / 29 kg; model 29.14 kg |
+| 19 AI Sapiens K1 | yes, torques | all 23 | 460.8 Wh, LG M50LT 21700 | yes | third only | 35 kg |
+
+**What no maker of batch 1 states:** the copper, magnet and electrical steel inside a motor. For that the motors' own
+datasheets are the next sources (the makers of the Roboto Origin's "DM" and the Asimov 1's "EC-A" motors, neither named
+by the robot's maker; EngineAI's Q series; ROBOTIS's DYNAMIXEL-Q), and the one weighed robot joint motor of this
+project, the G1's from China Post Securities' teardown (E2), the same kind. Whether car traction motors
+(RAWCLICVehicleTractionMotor) represent a 0.5 kg robot joint motor is to be questioned before any use (his rule 1, same
+kind).
+
+**Downloads that would close most gaps, each his yes** (done on his "Yes, download", E5.10, but the Asimov 1 form,
+which needs his e-mail address): RP1's whole-robot BOMs and CMF tables (XLSX,
+github.com/Roboparty/RP1_hardware); the ROMOMO test reports (PDF); the Asimov 1 parts list (an e-mail form,
+tally.so/r/jaG0va); the PM01 user manual (PDF, EngineAI's support page); the K1 datasheet (PDF, Generation Robots); the
+AI Sapiens K1 hardware drawing (PDF, docs.robotis.com); the URDF files of the R1, T1, K1, PM01, Asimov 1, Roboto Origin
+and RP1 (link masses, from the makers' GitHub repositories).
+
+### E5.10 The downloads and the makers' model files (2026-10-29, on "Yes, download")
+
+Downloaded into Claude's scratch folder (`downloads/`, one folder each; not into the project), read with openpyxl and
+macOS's PDFKit (text only: the PDF page images could not be rendered, `pdftoppm` is not installed).
+
+| File (size) | From | Kind | What it gives |
+|---|---|---|---|
+| RP1.3.4 BOM, 5-DOF arms (8.1 MB) and 7-DOF arms (8.4 MB) | github.com/Roboparty/RP1_hardware, 04_BOM | maker, parts list, "首发" 2026.9.10 | 422 and 460 rows (sheet 总BOM): every part's number, type, name, quantity and material ("材料要求"); the column "单件重量(Kg)" (unit weight) is **empty in every row**. Actuators: 5-DOF 12 × RMM6562-2E, 8 × RMM10062-2, 4 × RMM8463-2E (24); the 7-DOF adds 4 × RZW5552-2C (28). Materials named: AL6061-T6 (76 CNC parts), AL6061, AL7075, AL5052, steel 45 / AISI 1045 (24), P20 tool steel (4), PC, PU, TPU, ABS (28 printed), PLA (12), UFS9002 resin, EVA and EPP foam, EPDM rubber (8), screws of grade 12.9 steel (753), 304 stainless (61), N52 NdFeB magnets (80, 4 × 4 and 4 × 2 mm, in the covers), PA (18), bearing steel (9), brass (8). 15 boards (main board RBE-MAIN-RK3588S with an Orange Pi CM5, IMU board, power and capacitor boards, ...). Battery: "明美锂离子电池组" (a Mingmei lithium-ion pack) and 2 "小电池" (small batteries), no data. Fans: 2 waist fans, a main-board fan |
+| ROMOMO hardware introduction V261013 (0.5 MB, 6 pages) | github.com/Roboparty/ROMOMO | maker, specification, 2026.10 | the three modules' rated / peak torque: RMM6562-2E 10 / 35 N·m (arms, wrists, ankles), **RMM8463-2E 20 / 87 N·m (shoulders, waist)**, RMM10062-2E 44 / 160 N·m (thighs, knees, hips); 48 V (24 to 60 V); driver boards with GaN (6562) or Si MOSFETs, a HPM5E3Y RISC-V controller, dual magnetic encoders, inside each module. No mass, no motor make-up |
+| PM01 user manual V1.0 (0.8 MB, 9 pages) | EngineAI's support page (product-support-pm01.html; the server serves it only with that page as referrer) | maker, manual | "航空铝合金和橡胶等轻质材料" (aviation aluminium alloy and rubber), "整机重量约 40kg" in its text and "重量（含电池） 约43kg" in its table; 1388 mm; 23 DOF in its table; joint maximum 145 N·m, "全行星" (full planetary), peak torque density 130 N·m/kg; 10000 mAh battery, 54.6 V 4.5 A charger; local air cooling of the joints |
+| Booster K1 datasheet (12.6 MB, 3 pages) | static.generation-robots.com | reseller's datasheet (Booster's figures, not Booster's document) | **battery 5 Ah, voltage 48 V** (240 Wh, arith.), 40 min walking; knee maximum 60 N·m; 22 DOF; 19.5 kg |
+| AI Sapiens K1 hardware drawing (8.3 MB, 1 page) | docs.robotis.com | maker, drawing "FOR REFERENCE ONLY", 07/29/2026 | dimensions only (height 1355 mm, ...); its material field is empty in the text |
+
+**The makers' model files** (URDF, raw text from each maker's GitHub repository; Claude's arithmetic: the sum of the
+links' `<mass>`, a design model's values, not weighed):
+
+| Robot | File | Links / moving joints | Sum of the links | Heaviest links |
+|---|---|---|---|---|
+| 268 Roboto Origin | Roboparty/rpo_description, urdf/rpo.urdf | 24 / 23 | 33.757 kg | torso 7.58, base 5.51, each thigh 2.35 kg |
+| 37 Asimov 1 | menloresearch/asimov-1, sim-model/asimov_1_25dof/urdf/asimov_1_25dof.urdf | 26 / 25 | 35.552 kg | waist 8.67, pelvis 3.66, each knee 2.48 kg |
+| 269 RP1 | Roboparty/RP1_description, urdf/rp1_24dof.urdf | 25 / 24 | 39.109 kg | waist 8.34, base 3.30, each knee 2.56 kg |
+| 54 Booster T1 | BoosterRobotics/booster_assets, robots/T1/T1_23dof.urdf | 25 / 23 | 31.738 kg | |
+| 148 Booster K1 | BoosterRobotics/booster_assets, robots/K1/K1_22dof.urdf | 25 / 22 | 19.666 kg | |
+| 234 PM01 | engineai-robotics/engineai_robotics_description, pm01_edu/urdf/serial_pm01_edu.urdf | 31 / 24 | 40.921 kg | torso 9.01, each knee 4.29, base 4.09 kg |
+| 311 Unitree R1 | unitreerobotics/unitree_ros, robots/r1_description/R1.urdf | 41 / 26 | 29.138 kg | |
+
+Each model's sum lies within 0.5 to 1.7 kg of the maker's stated mass; for the Roboto Origin and the RP1 it is the only
+mass from the maker. A link's mass holds its motor, structure and wiring together: the models give where the mass sits,
+not what it is made of. The AI Sapiens K1's model is shown in ROBOTIS's viewer; no file was found.
+
+**Still no maker states the copper, magnet or electrical steel inside a motor.** Next sources (not yet read): the
+actuators' own datasheets (EngineAI's Q90H and Q25H, ROBOTIS's DYNAMIXEL-Q QC060 and QC080, the Roboto Origin's DM 4340P
+and DM 10010L, RoboParty's ROMOMO drawings), and the G1's weighed joint (E2), the same kind of motor.
+
+### E5.11 The actuators' own datasheets (2026-10-29, on "Yes, read them")
+
+Matthias: "Yes, read them" (the actuators' datasheets of batch 1, the ROMOMO drawings included). EngineAI's and
+ROBOTIS's pages read through the web-fetch tool; RoboParty's drawings and test reports and DAMIAO's handbook downloaded
+into Claude's scratch folder (0.39 to 1.8 MB each) and read with PDFKit (the RMM8463-2E drawing, an image only,
+rendered and read as a picture).
+
+| Actuator (robot, count) | Mass | Rated / peak torque, ratio | Motor | Source | Kind |
+|---|---|---|---|---|---|
+| EngineAI Q90H (PM01, 6) | 1.1 kg | – / 145 N·m, 25, "Full Planetary" | internal rotor PMSM (robot page); Ø86 × 62 mm, 48 V | en.engineai.com.cn/open/docs/pm01/01/joint-system (same in Chinese) | maker, spec |
+| EngineAI Q25H (PM01, 15) | 0.5 kg | – / 50 N·m, 25, planetary | Ø62 × 60 mm, 48 V | the same | maker, spec |
+| EngineAI Q25H-L (PM01, 3) | not stated | not stated | – | the same (name only) | maker |
+| ROBOTIS DYNAMIXEL-Q QC060-200-R020-RE (AI Sapiens K1, 12) | 455 g (product page), 435 g (K1 page) | 10.6 / 30.0 N·m, 20 | "Frameless BLDC" / "Low-inertia inner rotor PMSM"; 200 W; Ø58 × 60 mm | robotis.com/en/product/dynamixel-q.php ("Preliminary"); docs.robotis.com K1 hardware | maker, spec, preliminary |
+| ROBOTIS DYNAMIXEL-Q QC080-240-R020-RE (AI Sapiens K1, 11) | 865 g / 845 g | 24.2 / 72.6 N·m, 20 | 240 W; Ø78 × 65 mm | the same | maker, spec, preliminary |
+| DAMIAO DM-J4340P-2EC 48 V (Roboto Origin, 14) | 375 g | 9 / 27 N·m, 40 | 14 pole pairs, 33 W, 0.88 Ω; Ø57 × 56.5 mm | DAMIAO's 2025 product selection handbook (达妙科技 2025年产品选型手册, worldrobotconference.com), p. 13 | maker, spec |
+| DAMIAO DM-J10010L-2EC (Roboto Origin, 9) | 1375 g | 40 / 120 N·m, 10 | 21 pole pairs, 418 W, 0.11 Ω; Ø120 × 53 mm | the same handbook, p. 20 | maker, spec |
+| RoboParty RMM6562-2E (RP1, 12) | **533.1 g measured**; ≤ 530 g on the drawing | 10 / 35 N·m, 19.5 | 10 pole pairs, 62.8 W, 0.81 Ω; Ø65 mm; insulation class F (155 °C) | test report RMM6562-2E-关节模组测试报告-1013 ("数据来源于实验室测试": RoboParty's laboratory); drawing RMM6562-2EV1.0 (2026-09-02); github.com/Roboparty/ROMOMO | maker, measured (test report) and spec (drawing) |
+| RoboParty RMM10062-2E (RP1, 8) | **1197 g measured**; < 1260 g on the drawing | 44 / 160 N·m (140 in the report's table), 22 | 14 pole pairs, 370 W, 0.179 Ω; Ø100 mm; class F | test report RMM10062-2E-…-1013; drawing RMM10062-2EV1.0 (2026-09-04) | maker, measured and spec |
+| RoboParty RMM8463-2E (RP1, 4) | < 800 g | 20 / 87 N·m, 20 | 10 pole pairs, 87.9 W, 0.163 Ω; Ø84 × 63 mm; class F | drawing RMM8463-2EV1.0 (2026-09-04, image) | maker, spec |
+
+**From the test reports, the heat of a joint:** the RMM6562-2E at its rated load (60 rpm, 10 N·m, 60 minutes, 25 °C
+room) reached a motor temperature of 71.2 °C, a winding rise of 43.8 K; its heat sink 52.4 °C. Measured, one module.
+
+**The motors' mass in each robot** (Claude's arithmetic from the masses above; the maker's model sum of E5.10 for the
+share):
+
+| Robot | Motors | Their mass | Share of the robot |
+|---|---|---|---|
+| 268 Roboto Origin | 14 × 375 g + 9 × 1375 g | 17.6 kg | 52 % of 33.8 kg |
+| 269 RP1 (5-DOF arms) | 12 × 533.1 g + 8 × 1197 g + 4 × < 800 g | < 19.2 kg | < 49 % of 39.1 kg |
+| 234 PM01 | 6 × 1.1 kg + 15 × 0.5 kg + 3 × Q25H-L (not stated) | 14.1 kg and the three | 33 % of 43 kg and the three |
+| 19 AI Sapiens K1 | 12 × 435 g + 11 × 845 g (K1 page) | 14.5 kg (15.0 by the product page) | 41 % of 35 kg |
+
+**What none of them states:** the copper of the winding, the magnet's mass and grade, the electrical steel, the
+housing's alloy, the gears' steel, inside an actuator. The datasheets give the size, the pole pairs, the power and the
+winding's resistance, not what the actuator is made of. The one robot joint actuator of this project taken apart and
+weighed part by part is the G1's (E2, China Post Securities), the same kind (a planetary joint module with an inner-rotor
+PMSM and its driver board). Next, for Matthias's yes: a proposal of how each actuator's mass above becomes its elements
+(the G1's weighed shares, questioned for size and gear type), sources first.
+
+### E5.12 Proposal: each actuator of batch 1 from its mass to its elements (2026-10-29). Agreed, entered 2026-10-29 (E5.20)
+
+Matthias: "Yes, propose it" (how each actuator's mass becomes its elements, from the G1's weighed joint, questioned for
+size and gear type, sources first). The method is the one already agreed for the X1 and N1 (E2.8e, "Accept all" of
+2026-10-27); new are only the actuators' masses (E5.11) and the estimates where no mass is stated. The numbers below are
+at the modes, Claude's arithmetic, to show the order of magnitude; the run draws every share and mass from its min /
+mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **Inside each actuator** | The G1's weighed small or large joint (E2.2; builder's sheet JointParts), scaled to the actuator's own mass, the joint's structure (housing, end caps, output flange, small bearings) the remainder, as for the X1 and N1. The class: small below 55 N·m peak torque, large from 55 N·m (E: the geometric middle of the G1's small, 35 N·m, and large, 88 N·m). At the modes the shares are small / large: copper 8.3 / 7.6 %, NdFeB 7.4 / 6.8 %, electrical steel 10.6 / 9.8 %, other steel 41.5 / 45.8 %, aluminium 25.9 / 21.9 %, plastics 3.9 / 3.6 %, driver board 2.4 / 4.5 %; the class moves a share by at most 4.3 percentage points |
+| 2 | **Materials to elements**, all as agreed for type 1 | Stator copper 23 / 36 / 45 % of the stator, its coating 2 / 5 / 10 %, electrical steel the remainder; rotor NdFeB 45 / 90 / 100 %, steel the remainder; the NdFeB's grade drawn for the joint's heat group (sheet MagnetGrades: hips, knees, waist and ankles hot), its elements from RAWCLICVehicleTractionMotor's own code; aluminium by type 1's recipe; the driver board's area scaled with it, its metals the car board category's mg per cm²; steel and electrical steel without a recipe yet (their Fe, Si, Cr, Ni, Mn wait on E1.4) |
+| 3 | **Masses stated by the maker** (E5.11) | The maker's figure the mode; where the maker gives two, the other figure the bound (QC060 435 / 455 g, QC080 845 / 865 g, RMM6562-2E 530 / 533.1 g, RMM10062-2E 1197 / 1260 g); a single figure ± 5 % (E, the spread between units: Q90H, Q25H, DM-J4340P, DM-J10010L); the RMM8463-2E "< 800 g" 0.35 / 0.7 / 0.8 kg (E, at least half its mode, cut at the stated bound) |
+| 4 | **Masses not stated** (E) | Each joint's peak torque (the datasheet's; where none, the maker's model's effort limit, E5.10) divided by the peak torque density of the nine actuators read: 65.7 / 87.3 / 133.7 N·m/kg (min / median / max: RMM6562-2E, DM-J10010L, RMM10062-2E), widened to at least half to 1.5 times its mode (his rule for estimates). Gives the actuators of the **Asimov 1** 9.3 / 18.6 / 27.8 kg, **Booster T1** 7.5 / 14.9 / 22.3 kg, **Booster K1** 4.6 / 9.2 / 13.8 kg, **Unitree R1** 7.3 / 14.6 / 21.9 kg (47 to 53 % of each robot at the mode). The PM01's **Q25H-L** as the Q25H instead (the same family, the same 61 N·m in EngineAI's model): 0.25 / 0.5 / 0.75 kg each |
+| 5 | **Questioned: the same kind as the G1's joint** (inner-rotor PMSM, two-stage planetary, driver board inside) | EngineAI Q series: inner-rotor PMSM, "Full Planetary" (maker): the same kind. RoboParty ROMOMO: driver board inside (maker), inner rotor and two-stage planetary (third party): the same kind. ROBOTIS DYNAMIXEL-Q: inner-rotor PMSM (maker), gear type not stated, single-stage by a catalogue (third): with one stage, the G1's two-stage shares overstate the steel and understate the copper and magnet. DAMIAO: motor and gear type not stated. Asimov 1's EC-A models: "P2" and "H14 / H17" read as planetary and harmonic gears from the names only, not stated by Menlo; a harmonic gear is steel as well, its share against the motor not known. Each is written next to its robot; none is corrected without a source |
+| 6 | **Not in this proposal** | The rest of each robot (the battery's cells from its Wh and chemistry, the boards, cables, frame and shell), the steel recipe, and how 02 draws each robot from its own totals: the next steps, each for his yes |
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the actuator proposal of E5.12, points 1 to
+6, including its estimates." Not entered: where and how it enters the data and 02 is a step of its own, for his yes.
+
+**What it gives at the modes, the actuators only:**
+
+| Robot | Actuators (kg) | Copper (kg) | NdFeB (kg) | Mass basis |
+|---|---|---|---|---|
+| 268 Roboto Origin | 17.6 | 1.38 | 1.23 | DAMIAO's handbook |
+| 269 RP1 | 19.2 | 1.51 | 1.34 | RoboParty's test reports and drawings |
+| 234 PM01 | 15.6 | 1.25 | 1.11 | EngineAI's guide; Q25H-L as the Q25H (E) |
+| 19 AI Sapiens K1 | 14.5 | 1.14 | 1.02 | ROBOTIS (preliminary) |
+| 37 Asimov 1 | 18.6 (E) | 1.44 | 1.29 | estimate from its torques |
+| 54 Booster T1 | 14.9 (E) | 1.16 | 1.04 | estimate from its model's torques |
+| 148 Booster K1 | 9.2 (E) | 0.73 | 0.65 | estimate from its model's torques |
+| 311 Unitree R1 | 14.6 (E) | 1.14 | 1.02 | estimate from its model's torques |
+| *for comparison: Unitree G1* | *17.25 (weighed: 9 × 1100 + 14 × 525 g)* | *1.36* | *1.22* | *E2.2* |
+
+### E5.13 The rest of each robot of batch 1: the sources (2026-10-29, on "Yes, go on")
+
+Matthias: "Yes, go on" (the rest of the batch 1 robots: battery cells, boards, cables, frame and shell, sources first,
+then propose). Searched on the web (search results only where marked), and the sources of E5.1 to E5.11.
+
+**Batteries**
+
+| Robot | Energy, chemistry, cells | Pack mass | Source | Kind |
+|---|---|---|---|---|
+| 268 Roboto Origin | "48V 15Ah Li-ion pack", 720 Wh (arith.); 140 × 140 × 115 mm, 2.25 l: 320 Wh/l, an NMC pack's density, not an LFP's (Claude's reading, E); cells not named | not stated | its BOM (E5.1); the pack's maker "孚小二" not found on the web | maker, parts list |
+| 37 Asimov 1 | Li-ion INR18650, 13S4P (52 cells), 46.8 V, 10.5 Ah, 491.4 Wh; cell maker not named | "Approximately 2 kg" | docs.menlo.ai, electrical (E5.2) | maker, spec. **Does not add up:** 52 cells of 2.6 Ah weigh about 45 g each, 2.3 kg, more than the pack; 491.4 Wh in 2 kg is 246 Wh/kg, a cell's density with no housing |
+| 269 RP1 | "明美锂离子电池组" (Mingmei Li-ion pack) and 2 "小电池" (small batteries); 48 V, 10 Ah (480 Wh) and a 30 V auxiliary pack only from a news site | not stated | its BOM (E5.10); cnx-software (E5.3) | maker (names); third (values) |
+| 54 Booster T1 | 10.5 Ah, Li-ion; voltage not stated anywhere | not stated | chipsilicon, Generation Robots (E5.4) | third |
+| 148 Booster K1 | 48 V, 5 Ah (Education, Professional; 240 Wh), 2 Ah (Geek; 96 Wh) | not stated | Booster's docs (Ah); Generation Robots' K1 datasheet (48 V) | maker (Ah); reseller (V) |
+| 234 PM01 | "Cylindrical Lithium-ion Battery (Ternary Lithium System)", 13S2P, 46.8 V, 10 Ah, 468 Wh (arith.) | "≈2.95kg" | EngineAI's guide, peripherals (E5.6) | maker, spec |
+| 311 Unitree R1 | 6000 mAh at 33.12 V (199 Wh) or 32.4 V (194.4 Wh), 9 cells in series (arith.) | not stated | resellers' battery listings (maverickdrone, globaldronehq, search results; one says the 199 Wh are "according to Unitree") | third, not read first-hand |
+| 19 AI Sapiens K1 | Li-ion 21700 13S2P, LG Energy Solution M50LT, 48 V, 10 Ah, "460.8 Wh" (26 × 18.2 Wh = 473 Wh, arith.); the M50LT NCM / graphite, about 68 g and 18.2 Wh | not stated | docs.robotis.com electrical (E5.8); the M50LT from LG-branded specifications on third-party sites (dnkpower, nkon; LG's own page not found) | maker (pack); third (cell) |
+| *template: G1, X1, N1* | *421, 355, 475 Wh* | *2.5, 2.2, 2.9 kg: 168, 161, 164 Wh per kg of pack* | *E2.8e, accepted* | |
+
+**Compute modules** (search results; NVIDIA's, Raspberry Pi's and D-Robotics' own datasheets not read): Jetson AGX
+Orin 100 × 87 mm (87 cm²); Jetson Orin NX 69.6 × 45 mm (31.3 cm², about 26 g by one retailer); Radxa CM5 55 × 40 mm
+(22 cm²); Raspberry Pi CM5 55 × 40 mm, 14 to 16 g; the RDK X5's and the Raspberry Pi 5's sizes not found. No carrier
+board, power board or battery management board of batch 1 has a size from its maker.
+
+**Cables:** the Roboto Origin's BOM lists its motor cables by length: 4 × 40, 4 × 20, 2 × 10 cm (wire01), 2 × 40, 8 ×
+20, 2 × 10 cm (wire02), 10 × 40, 4 × 20 cm (wire03): **10.0 m** (arith.). RP1's harness BOM is a file in
+github.com/Roboparty/RP1_hardware, 03_Harness, not downloaded. The Asimov 1 and the AI Sapiens K1 use XT30 (2+2)
+connectors at every actuator (maker). No other robot of batch 1 gives a cable length.
+
+**Frame and shell:** materials as their makers name them (E5.2, E5.6, E5.10): Asimov 1 "7075 aluminum and MJF PA12
+nylon"; PM01 "aviation aluminium alloy and rubber"; RP1 every part (AL6061-T6 in 76 CNC parts, steel 45 / AISI 1045 in
+24, P20 in 4, AL7075, AL5052; shells of ABS, PLA, PC, resin; PU, TPU, EPDM, EPP and EVA foam; about 850 screws of grade
+12.9 steel and 304 stainless); Roboto Origin 25 CNC parts "black anodizing" (anodising is aluminium's treatment; the
+metal itself not named), 3D-printed soles. No part mass from any maker; the robots' masses from their makers' models
+(E5.10).
+
+### E5.14 Proposal: the rest of each robot of batch 1 (2026-10-29). Agreed, entered 2026-10-29 (E5.20)
+
+The template already agreed for the G1, X1 and N1 (E2.8 to E2.8e), filled from each robot's own sources (E5.13). Only
+the inputs are new; the drawing and the element recipes are those of type 1.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **The robot's mass** (for the frame's remainder) | The maker's stated mass the mode (its model's sum where it states none); the bounds the lowest and highest of its stated masses, its model's sum and the mode ± 1 kg (E, as the G1's): Roboto Origin 32.8 / 33.8 / 34.8 kg (model), Asimov 1 34 / 35 / 36, RP1 38.1 / 39.1 / 40.1 (model), Booster T1 29 / 30 / 31.7, Booster K1 18.5 / 19.5 / 20.5, PM01 40 / 43 / 44.5 (its manual's 40 kg, its editions' 44.5 kg), Unitree R1 28 / 29 / 30, AI Sapiens K1 34 / 35 / 36 (the K0's 34 kg) |
+| 2 | **Battery cells** | Energy = voltage × capacity as the maker states them, ± 5 % (the N1's accepted production tolerance); the cells NMC cylindrical (stated "ternary" or NCM for the PM01 and AI Sapiens K1; for the others Li-ion without chemistry, E, as type 1's robots); their mass the energy ÷ the NMC cells' 232.5 / 241.5 / 256 Wh/kg (E1.7d), their elements by the NMC recipe (E1.7i). Where no voltage is stated: the Booster T1 at 48 V as its sibling K1 (E: 504 Wh); the RP1 at the news site's 48 V 10 Ah (E: 480 Wh, its 30 V auxiliary pack not known, left out and said so); the R1 at the resellers' 194.4 / 199 Wh. The K1 drawn as one of its versions, 5 Ah (Education, Professional) or 2 Ah (Geek), each as often (a discrete state, never blended) |
+| 3 | **Battery pack** | The maker's pack mass where stated (PM01 2.95 kg; Asimov 1 "about 2 kg" is less than its cells: the cells kept, the pack's housing 0, and said so); else the energy ÷ 164 Wh/kg (E: the median of the G1's, X1's, N1's and PM01's packs, 159 to 168), its minimum cut at the cells (as the X1's and N1's, "Cut at the cells"), its maximum 1.5 times its mode. Housing the pack less its cells, as type 1 |
+| 4 | **Boards** | Inside the actuators: E5.12. The rest by the template's kinds and area ranges (G1, X1, N1; E2.8, E2.8e), one row per board the maker names: compute modules at their stated size (AGX Orin 87 cm², Orin NX 31.3 cm², Radxa CM5 22 cm², ± 5 %), their carrier or base board 60 / 120 / 180 cm² (E, as the X1's and N1's computer boards); power distribution 30 / 60 / 100 cm², battery management 30 / 60 / 96 cm², head, IMU and other small boards 5 / 15 / 30 cm² (E, as the G1's); RP1's 15 boards each by its kind; the boards' metals the car board category of their kind, as type 1 |
+| 5 | **Cables and connectors** | The Roboto Origin's listed 10.0 m, 10 / 10.5 / 12 m (E for cables not in its BOM); every other robot 5 / 10 / 15 m (E, as the N1), the K1 3 / 6 / 10 m (E, as the G1, a smaller robot); four conductors, copper and insulation as type 1; XT30 (2+2) connectors two per joint (stated for the Asimov 1 and AI Sapiens K1; E for the others, as type 1) |
+| 6 | **Shell** | 11.5 % of the robot's mass at the mode (E: the median of the G1's 12.9, the N1's 11.5 and the X1's 9.1 %), half to 1.5 times; plastics, with the makers' named materials where they exist (RP1, Asimov 1 PA12, PM01 rubber) |
+| 7 | **Screws, bearings outside the actuators** | RP1 about 850 screws: 0.26 / 0.52 / 0.78 kg (E, scaled from the X1's 0.6 kg for 980); the others 0.2 / 0.5 / 1 kg (E, as the G1's); steel |
+| 8 | **Sensors** | Each camera, LiDAR and IMU the maker names (E5.1 to E5.8) by its car sensor type's elements, as type 1 |
+| 9 | **Frame** | The remainder: the robot's mass less every part above and the actuators (E5.12); aluminium (the Asimov 1's 7075 and the PM01's aviation aluminium stated; the Roboto Origin's anodised parts and the others E, as type 1); RP1's frame 10 / 20 / 30 % steel (E: 28 of its 112 CNC parts are steel, by count only), the rest aluminium. A remainder below zero is reported, not cut |
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the proposal of E5.14 for the rest of the
+batch 1 robots, points 1 to 9, including its estimates." Not entered.
+
+**Not settled by this proposal:** the steel recipe (E1.4), so iron, chromium, nickel and manganese stay missing; the
+RP1's auxiliary battery; the boards' sizes from their makers (only the compute modules have one). Then: how 02 draws
+each robot from its own composition, a step of its own for his yes.
+
+### E5.15 Batch 2 of 4: eight more robots of type 1, the sources (2026-10-29). Nothing entered
+
+Matthias: "I want to complete all work with type 1 and see the results!" Batch 2: the eight of the 21 remaining with
+the most maker data expected. Read through the web-fetch tool, HTML only, nothing downloaded.
+
+| Robot | What its sources give | Source | Kind |
+|---|---|---|---|
+| 55 Booster T2 | ~42 kg (Education, Pro), ~43 kg (gripper and hand versions), ~1.4 m; 31 joints (head 2, arms 7 each, waist 3, legs 6 each); "High-speed inner-rotor PMSM", crossed roller bearings, peak 140 N·m (no actuator model or mass); **48 V, 10 Ah** (480 Wh, arith.), chemistry not stated; Education an ARM board, Pro a Jetson Thor T5000; RGB-D cameras in head and waist, wrist cameras, optional Hesai JT128 LiDAR; materials not stated; URDF files in github.com/BoosterRobotics/booster_assets (robots/T2/...) | docs.booster.tech T2 specifications and overview; booster.tech/booster-t2 | maker, spec |
+| 103 Unitree G1+ | the G1 with six upgrades: 2 head joints (25 in all), "stronger motors" (shoulder and waist peak torque + 110 %, arms + 43 %, against the G1), binocular and wide-angle cameras, head touch sensing, 6 microphones, external power; "Approx. 35kg" with battery, 1.34 m; "13 string lithium battery", 9000 mAh (the G1's), charger 54 V 5 A; inner-rotor PMSM, crossed roller bearings; 3D LiDAR; URDF g1_pl.urdf in github.com/unitreerobotics/unitree_ros | unitree.com/G1pl, unitree.com/g1 | maker, spec |
+| 38 Asimov 2 | **no maker data**: Menlo lists it "In progress", its GitHub "coming soon"; 38 kg, 1.2 m, 27 joints only as the catalogue's "educated estimate" | humanoid.guide (it says so); menlo.ai, github.com/asimovinc | third, estimate |
+| 147 K0 (ROBOTIS) | 34 kg, 1.3 m; 23 joints (arms 5, legs 6 each, waist 1); DYNAMIXEL-Q QM-060 × 14 (450 g) and QM-080 × 9 (850 g), 48 V, ratio 12, 16 or 20:1 (13.95 kg of actuators, arith.); 46.8 V 9 Ah (421 Wh, arith.), chemistry not stated; Jetson Orin NX 16 GB; covers 3D-printable; BOM and STEP "Coming Soon". ROBOTIS calls it "the first humanoid in that line: the baseline hardware and software others extend" | ai.robotis.com/ai_sapiens/introduction_ai_sapiens.html ("K0 - AI Sapiens") | maker, spec, "subject to change" |
+| 85 E1 (Noetix) | the maker's pages show no text (rendered by script); 40 kg, 1.36 m, 23 to 28 joints, knee 150 N·m peak, crossed roller and deep groove bearings, Jetson Orin Nano Super (development), 2 h | humanoid.guide ("Not Verified"); noetixrobotics.com (title only) | third |
+| 57 Bumi (Noetix) | the maker's pages show no text; 17 kg, 98 cm, 21 joints, in-house joints up to 70 N·m, Rockchip RK3576, shell "Composite materials", 3 h | humanoid.guide ("Not Verified") | third |
+| 260 Roban2 (Leju) | the maker's pages give no values (its product page only pictures, its manual page empty); 40 kg, 1.45 m, 40 joints (hands 10), "Harmonic/planetary mixed reducers", "Aluminum alloy + ABS composite shells", 2 h | humanoid.guide ("Not verified"); lejurobot.com/en/products/roban2 | third |
+| 309 TRON 2 (LimX) | **sold in four set-ups, none with legs and arms together**: dual arms on a stand, a biped "Sole" (987 mm, no arms), wheeled legs (1015 mm), dual arms on a mobile base; a legs-and-arms humanoid exists only as a simulation model (DASF, 26 joints); 46.8 V 9 Ah "ternary lithium" (421 Wh, arith.); "Aluminum alloy, plastic"; Intel Core Ultra (EDU); URDF and MJCF in github.com/limxdynamics/tron2-robot-description; user manual and brochure PDFs not opened | limxdynamics.com/en/products/tron2 and /spec, its manual page | maker, spec; maker, model |
+
+**For Matthias's decision, found in batch 2 (the register's rules, E4; nothing changed):**
+- **TRON 2:** LimX sells no form with legs and arms; the one with legs (987 mm) has no arms. By his rule "an upper body
+  only not", and its height below type 1's 1.20 m, it may not be a humanoid of type 1.
+- **K0 and AI Sapiens K1:** ROBOTIS's own pages make the K0 the baseline of the AI Sapiens line and the K1 its documented
+  version (QM against QC actuators, 34 against 35 kg). "No double counting use just 1": one robot or two?
+- **Asimov 1 and Asimov 2:** no maker data on the Asimov 2 at all.
+- **G1 and G1+:** the G1+ is the G1 with named upgrades; drawn now with the parts of the G1, X1 or N1 scaled, it could
+  take the G1's own parts (taken apart) with its two head joints and stronger motors.
+
+**Not readable for the next step:** the Noetix and Leju sites give no text to a reader; their robots' composition can
+come only from the third-party catalogue and estimates (E). URDF files of the T2, G1+ and TRON 2 (link masses) are
+downloads, not opened.
+
+### E5.16 Batches 3 and 4: the last 13 robots of type 1, the sources (2026-10-29). Nothing entered
+
+Matthias: "Yes, this order" (the list of everything open for type 1, step 1 first). Read through the web-fetch tool,
+HTML only, nothing downloaded. **Only two makers give values** (Fauna Robotics, StarBot); for the other eleven the
+makers' pages show no text, a "coming soon", or no specifications, and only humanoid.guide's catalogue remains (most
+entries marked "Not Verified"; some fields marked there as "assumed" or "Likely", left out here).
+
+| Robot | What its sources give | Kind |
+|---|---|---|
+| 23 AKINCI-5 (AKINROBOTICS, Turkey) | 42 kg, 1.29 m, 19 joints; in-house inner-rotor BLDC motors; AMD Ryzen 9 PRO 6950H; "Aluminum alloy + composites"; 1 h; maker site refused (HTTP 403) | third |
+| 143 JAKA π (JAKA) | 42 kg, 1.22 m, 27 joints (legs 6, arms 6 each: by its prose), up to 120 N·m, BLDC with planetary reducers; "48-volt pack", 2 h; Intel Core Ultra 7 255H; "Aluminum frame with soft-touch polymer covers"; maker pages empty | third |
+| 168 LightBot-0 (Light Origins) | 35 kg, 0.9 m; depth camera; 3 h; the maker: "The bipedal humanoid is coming." | third; maker (no values) |
+| 175 LUMO (DOBOT) | 35 kg, 1.3 m, hands 5 fingers each; "Aluminum alloy and plastic"; 2 h; DOBOT's page marketing only | third |
+| 212 NORI L3 (Nori Robotics) | 40 kg, 1.45 m, 20 joints (16 in the hands), harmonic and planetary reducers, four 720p cameras; "Aluminum alloy with engineering plastics"; 6 h; the maker's site shows another robot (NORI A3) | third |
+| 231 PHYBOT C1 (PHYBOT) | 25 kg, 1.25 m, 28 joints (12 in the hands), harmonic or planetary gears, RGB and depth camera; "Composite polymer + aluminum frame"; 3 h | third |
+| 236 PrimeBOT Q1 (PrimeBOT) | 0.88 m, 22 joints; **no mass anywhere** ("has not publicly confirmed ... its weight"); maker pages empty | third |
+| 246 QUESTER1 (AgiBot) | ~20 to 30 kg, 0.79 m, ~24 to 32 joints, harmonic gearboxes; "Aluminum + plastic composites"; 3 h; not on AgiBot's site | third |
+| 279 Sprout (Fauna Robotics) | **22.7 kg, 1.07 m, 29 joints** (neck 2, arms 6, grippers 1, legs 5 each); **Jetson AGX Orin 64 GB**, 1 TB SSD; ZED 2i stereo camera, 4 time-of-flight sensors, IMU, microphones; swappable battery, 3 to 3.5 h, no voltage; "soft exterior" (aluminium only in the catalogue); a "Full specs" PDF on its site, not opened | maker, spec |
+| 281 StarBot Astra (StarBot USA) | **"75 lb" (34 kg), "5 ft", 23 joints; battery "48 V", 2 to 5 h** (maker); planetary reducers, a Jetson Orin-class computer (third) | maker; third |
+| 308 Totan O1 (WL Robotics) | 34 kg, 1.34 m, 30 joints; "Aluminum alloy frame with composite panels"; 1.5 to 2.5 h; the maker's site title says Westlake Robotics, no values | third |
+| 332 Xiao Tuo (TOPSTAR) | 40 kg, 1.2 m, 30 joints; RGB camera and 3D LiDAR; "Aluminum + plastic composites"; 3 h; TOPSTAR's news item gives no values | third; maker (no values) |
+| 343 YMBOT E3 (Yunmu) | 35 kg, 1.4 m; Intel 12th-generation Core i9-class CPU; 2 h; maker pages a loading screen | third |
+
+### E5.17 Proposal: batches 2 to 4, by the agreed method (2026-10-29). Agreed, entered 2026-10-29 (E5.20)
+
+The method of E5.12 (actuators) and E5.14 (the rest), agreed; what is new is how each input is filled where the maker
+gives nothing, from batch 1's makers' data (the same kind of robot):
+
+| # | Input missing | Proposal (E unless the maker states it) |
+|---|---|---|
+| 1 | Actuators' masses, no joint torques | 49 % of the robot's mass at the mode (batch 1 and the G1: 36 to 53 %, median 49 %), half to 1.5 times (24.5 / 49 / 73.5 %), split into small and large joints as batch 1's are on average; the K0 by its stated QM-060 and QM-080 masses (13.95 kg) |
+| 2 | Battery energy, no voltage or capacity | 12 Wh per kg of robot (batch 1 and the G1, X1, N1: 6.8 to 21, median 12), half to 1.5 times; stated where given: T2 48 V 10 Ah (480 Wh), G1+ the G1's 13 cells 9 Ah, K0 and TRON 2 46.8 V 9 Ah (421 Wh), JAKA π and Astra 48 V (their capacity by the 12 Wh/kg); NMC cells (stated "ternary" for the TRON 2) |
+| 3 | Boards | Each computer the catalogue or maker names by the template's computer board (60 / 120 / 180 cm²) or its module size (AGX Orin, Orin NX); the rest of the boards as the template (E5.14, point 4) |
+| 4 | Cables, shell, screws, sensors, frame | As E5.14, points 5 to 9; materials as the maker or the catalogue names them ("Aluminum alloy + ..."), else aluminium and plastics as type 1 |
+| 5 | **The G1+** | The G1's own parts as taken apart (E2), its mass 35 kg, and its two head joints as two small joints (E); its "stronger motors" (+110 % peak torque at shoulders and waist) not in the G1's parts and said so |
+| 6 | **The PrimeBOT Q1's mass** (no source) | 9.75 / 19.5 / 29.25 kg (E: the Booster K1's 19.5 kg, the robot nearest in height, 0.95 against 0.88 m, with a mass from its maker; half to 1.5 times). Its mode lies above type 1's 15 kg, so it is drawn |
+| 7 | **The Asimov 2** (no maker data) | The Asimov 1's composition (E5.2, E5.12, E5.14) scaled to the catalogue's 38 kg (E) |
+
+**Four register questions** (found in batch 2, E5.15), each with a recommendation:
+
+| Question | Recommendation |
+|---|---|
+| TRON 2: no form sold with both legs and arms | Not assigned: "not assigned: no form with legs and arms" (as "an upper body only not"); 31 robots of type 1 |
+| K0 and AI Sapiens K1: one line | Both kept, two versions with their own actuators and batteries (as the G1 and G1+) |
+| Asimov 2: no maker data | Kept, as point 7 |
+| G1+: the G1 upgraded | As point 5 |
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the proposal of E5.17 for batches 2 to 4,
+points 1 to 7, and with the four recommendations on the register questions." Not entered: the TRON 2's entry in the
+register's builder (not assigned) is made with the entry step, tests first.
+
+### E5.18 Proposal: the steels and the titanium of type 1, part by part (2026-10-29). Agreed, entered 2026-10-29 (E5.20)
+
+Matthias, "Yes, this order", step 4 (the steel recipe) and step 5 (titanium; Mixed follows, E5.19). Type 1 is now
+taken apart part by part (E2, E5), so the open question of E1.4, each steel family's share in a robot, is answered by
+the parts themselves: **each steel part takes the grade of its use**. The sources rank as Matthias set on 2026-10-27:
+the standard (here through datasheets that quote it, read first-hand), commercial analyses, university analyses only
+as context. Each grade's mode: a commercial typical value read first-hand where one exists, else the middle of the
+standard's range (E), from 0 to the maximum where only a maximum is given (his rule). Iron the explicit remainder.
+
+**The grades and their limits** (wt%; read 2026-10-29 unless named in E1.4):
+
+| Grade | Limits | Source | Kind |
+|---|---|---|---|
+| Electrical steel M19, M27 | M19 Si 2.5 to 3.5, M27 Si 2.4 to 3.1, with C, Mn, Al, P, S up to their maxima | RAWCLICVehicleTractionMotor, `10_MaterialElementDefinitions.xlsx`, sheet ElectricalSteel, read where it lies (as the magnets); ASTM A677's scope (E1.4) | sibling's data, from the standard |
+| 20CrMnTi (gears) | C 0.17 to 0.23, Si 0.17 to 0.37, Mn 0.80 to 1.10, Cr 1.00 to 1.30, Ti 0.04 to 0.10, P and S ≤ 0.030, Cu ≤ 0.30 | steelestores.com and otaisteel.com, quoting GB/T 3077; Cu Total Materia (E1.4) | datasheets quoting the standard |
+| GCr15 (bearings) | C 0.95 to 1.05, Si 0.15 to 0.35, Mn 0.25 to 0.45, Cr 1.40 to 1.65, Ni ≤ 0.30, Mo ≤ 0.10, Cu ≤ 0.25, P and S ≤ 0.025 | steelestores.com, quoting GB/T 18254 | datasheet quoting the standard |
+| 42CrMo4 (flanges, shafts, links; the 12.9 screws) | C 0.38 to 0.45, Si 0.15 to 0.40, Mn 0.60 to 0.90, Cr 0.90 to 1.20, Mo 0.15 to 0.30, P ≤ 0.025, S ≤ 0.035 | Astrup's datasheet, EN 10083-3 (E1.4); for screws of class 12.9 ISO 898-1 asks C 0.30 to 0.50 and Cr, Ni, Mo or V (Optimas, E1.4b), which 42CrMo4 meets | datasheet quoting the standard |
+| C45 (RP1's "45" and AISI 1045 parts) | C 0.42 to 0.50, Si ≤ 0.40, Mn 0.50 to 0.80, Cr ≤ 0.40, P and S ≤ 0.045; **Ni and Mo: the page gives Ni ≤ 0.10 and Mo ≤ 0.40, another source the reverse** (Cr + Mo + Ni ≤ 0.63 by Saarstahl): proposed Ni ≤ 0.40 and Mo ≤ 0.10, the reading that keeps Cr + Mo + Ni ≤ 0.63 at the modes | steelestores.com, quoting EN 10083-2 | datasheet quoting the standard; conflict reported |
+| P20 (RP1, 4 parts) | C 0.28 to 0.40, Si 0.20 to 0.80, Mn 0.60 to 1.00, Cr 1.40 to 2.00, Mo 0.30 to 0.55, P and S ≤ 0.030 | otaisteel.com, quoting ASTM A681 and GB 1299 | supplier quoting the standards |
+| 304 (RP1's pins and screws) | the sibling's limits (Cr 18 to 20, Ni 8 to 10.5, C ≤ 0.08, Mn ≤ 2, Si ≤ 0.75); modes Outokumpu's typical C 0.04, Cr 18.1, Ni 8.1 | RAWCLICVehicleTractionMotor, sheet CastFeSteel; Outokumpu (E1.4b) | sibling's data; producer's typical (commercial) |
+| 17-4PH (the X1's shafts) | modes Outokumpu's typical C 0.02, Cr 15.5, Ni 4.8, Cu 3.4, Nb; limits not found (ASTM A564 not read): ± 50 % of each mode (E, his rule for estimates) | Outokumpu (E1.4b) | producer's typical |
+| Ti-6Al-4V (the X1's TC4 links) | Al 5.50 to 6.75, V 3.50 to 4.50, Fe ≤ 0.40, O ≤ 0.20, C ≤ 0.08, N ≤ 0.05, H ≤ 0.015, Ti the remainder | voestalpine's datasheet, ASTM B348 (E1.3) | producer's datasheet quoting the standard |
+
+**Each steel part of type 1 and its grade:**
+
+| Part (sheets JointParts, Parts; the template of E5.14) | Grade | Why |
+|---|---|---|
+| Motor stator's electrical steel; motor rotor's steel | M19 or M27, each as often (a discrete state) | non-oriented silicon steel of motors; the two grades of the sibling's traction motors (E for a robot's laminations) |
+| Gears: stage 1 sun, planets, ring; stage 2 ring | 20CrMnTi | KOFON's humanoid joints (E1.4b, search result only) and the workbook's types 2 and 6 name it for gears |
+| Stage 2 planets, carrier and crossed roller bearing (its steel) | 20CrMnTi 30 / 50 / 70 %, GCr15 the remainder (E: gears and the bearing in one weighed group) | |
+| Small bearings; bearings outside the actuators; RP1's bearing steel | GCr15 | China's standard bearing steel; the G1's crossed roller bearing is Chinese-made (E2.2) |
+| Output flange; lower-leg links; links and shafts not named | 42CrMo4 (E) | the workbook's shaft and high-strength steel |
+| Screws (all robots), the joints' "Other" steel | 42CrMo4 as class 12.9 (RP1 states "12.9级") (E) | ISO 898-1 |
+| RP1's "45" / AISI 1045 parts; the X1's steel pins | C45 | named by RP1's BOM; pins E |
+| RP1's P20 parts; RP1's 304 parts; the X1's 17-4PH shafts | P20; 304; 17-4PH | named by their makers |
+| Titanium: the X1's TC4 links | Ti-6Al-4V | named by AgiBot (E2.8e) |
+
+**What it adds** (type 1's steel 9.9 kg at the median in one robot, V64): iron as each grade's remainder, and
+chromium (1.15 % in the gears, 1.5 % in the bearings, 1.05 % in the screws and shafts at the modes; 18.1 % in RP1's
+304), manganese, silicon (about 3 % in the electrical steel), molybdenum, nickel (304, 17-4PH), titanium (20CrMnTi,
+Ti-6Al-4V), vanadium (Ti-6Al-4V). The robot's totals follow from the run, not computed here. Brass (RP1, 8 parts)
+and the battery's Mixed parts are not in this proposal.
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the steel and titanium proposal of E5.18,
+including its estimates and the C45 reading of Ni and Mo." Not entered.
+
+### E5.19 Proposal: Mixed, brass (2026-10-29). Agreed, entered 2026-10-29 (E5.20)
+
+Matthias, "Yes, this order", step 5 (titanium and Mixed). Type 1's Mixed is: each robot's **battery pack less its cells
+and its management board** (housing, cell holders, nickel strips or busbars, wires; in the parts file "Battery housing,
+busbars and wires"), and the X1's two **OmniPicker grippers** (0.43 kg each, AgiBot's manual, E2.8e). RP1's 8 brass
+parts are named by its BOM.
+
+**Sources, read 2026-10-29 (web-fetch tool, HTML only):**
+
+| Source | What it gives | Kind |
+|---|---|---|
+| sevarg.net, iZip Ultra 2011 pack, parts 1 to 3 (36 V, 10 Ah, 50 Samsung 18650 cells, 10S5P) | "black plastic retainers" holding the cells, nickel strip "0.2mm thick" (measured with a micrometer), 10 mm and 8 mm wide, sense wires, a BMS, padding tape, heat shrink; **nothing weighed** | first-hand teardown, not weighed |
+| sevarg.net, Schwinn Tailwind pack (24 V, Toshiba prismatic cells) | plastic shell, a metal plate, thick busbars, ribbon cable, potted BMS; nothing weighed | first-hand teardown; prismatic cells, not the same kind |
+| teswaybike.com, "We Tear Down an eBike Battery" | "The casing is typically made from tough materials like aluminum or high-impact plastics"; no pack opened | seller's article, a claim |
+| EngineAI, PM01 pack (E5.6) | housing "Aluminum Alloy", the pack 2.95 kg | maker, spec |
+| Searched, not found | a weighed split of a small cylindrical-cell pack; the composition shares of e-bike packs (a VTT report on crushed e-bike batteries is a PDF, not opened) | – |
+
+**Not weighed anywhere: every share below is an estimate (E).** Claude's arithmetic for scale: the G1's pack, 2.5 kg,
+less its cells (421 Wh ÷ 241.5 Wh/kg = 1.74 kg) leaves 0.76 kg; the PM01's 2.95 kg less 26 cells of about 68 g
+(1.77 kg) leaves 1.18 kg; one nickel piece of 0.2 × 8 × 20 mm weighs 0.28 g, two to six per cell.
+
+| # | Part | Proposal |
+|---|---|---|
+| 1 | Battery pack less cells and management board | nickel strip (nickel) 1 / 3 / 6 %; copper wires and busbars 5 / 10 / 15 %; cell holders, insulation and tape (plastics) 5 / 10 / 20 %; the housing the remainder (E). The housing aluminium where the maker says so (PM01); elsewhere aluminium or plastics, each as often (a discrete state, E: the seller's "aluminum or high-impact plastics"). Every share at least half to 1.5 times its mode |
+| 2 | The X1's OmniPicker grippers | as a small joint of the G1 (E5.12's shares at the mode: copper 8.3 %, NdFeB 7.4 %, electrical steel 10.6 %, steel 41.5 %, aluminium 25.9 %, plastics 3.9 %, driver board 2.4 %), drawn as the small joint (E: a gripper is a motor, gears and a frame) |
+| 3 | RP1's brass parts | brass, Cu 58 / 62 / 65 %, zinc the remainder (E: the common free-cutting and H62 brasses; their standards not read); their mass 5 / 10 / 20 g each (E) |
+
+**Agreed:** Matthias, 2026-10-29, choosing the answer offered: "I agree with the Mixed proposal of E5.19, points 1 to 3,
+including its estimates." Not entered.
+
 ## E4. A register of every known humanoid, each in one type: research, first pass (2026-10-28). Nothing entered
 
 Matthias: "I want that all know humanoid robots at the end can be assigned to types. It should be possible also to

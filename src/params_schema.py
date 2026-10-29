@@ -188,6 +188,15 @@ class DataParams:
         default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
                  'RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx'),
         metadata={'doc': "RAWCLICVehicleTractionMotor's NdFeB grades by temperature class; read where it lies."})
+    # RAWCLICVehicleTractionMotor's steels (sheets ElectricalSteel and CastFeSteel of the same element workbook): the
+    # electrical steels M19 and M27 of type 1's motors and the stainless steel Type 304 of the RP1's pins and screws,
+    # each a row of minima and of maxima, iron the balance (EVIDENCE.md E5.18; Matthias, 2026-10-29: "Yes, build it",
+    # point 4: "M19, M27 and 304 read where they lie").
+    traction_motor_steels: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx'),
+        metadata={'doc': "RAWCLICVehicleTractionMotor's electrical steels and stainless steel 304; read where they "
+                         'lie.'})
     traction_motor_dir: str = field(
         default='/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICVehicleTractionMotor',
         metadata={'doc': "RAWCLICVehicleTractionMotor, whose own code draws the NdFeB elements of a grade class."})
@@ -254,32 +263,14 @@ class CompositionParams:
 
     # The elements left off the element pages of 02 and 03, by their symbols (Matthias, 2026-10-29: "Hydrogene and
     # Oxygen have to go you should know this. Same for F, and N"; as in RAWCLICStockAndFlow, whose figures leave out
-    # nitrogen, fluorine and oxygen, and RAWCLICDataCenters, whose leave out oxygen). The draws keep them, so that the
-    # elements still add up to the materials in every draw and stock-and-flow can read any of them. 02 stops when a
-    # symbol is not an element.
+    # nitrogen, fluorine and oxygen, and RAWCLICDataCenters, whose leave out oxygen; then "S and P can go also Na").
+    # The draws keep them, so that the elements still add up to the materials in every draw and stock-and-flow can read
+    # any of them. 02 stops when a symbol is not an element.
     # SAFE TO CHANGE: only on Matthias's word.
     elements_not_shown: tuple = field(
-        default=('H', 'N', 'O', 'F'),
+        default=('H', 'N', 'O', 'F', 'Na', 'P', 'S'),
         metadata={'doc': 'The elements left off the element pages of 02 and 03 (Matthias, 2026-10-29); the draws '
                          'keep them.'})
-
-
-@dataclass
-class PartsParams:
-    """How the stage that draws robot type 1 taken apart draws it (Monte Carlo); step 5 of its plan."""
-
-    # How many times robot type 1 taken apart is drawn: 200,000, as 02. The real run is Matthias's; the tests and the
-    # sandbox runs use few draws.
-    # SAFE TO CHANGE: yes, between 100 and 1,000,000 (`current()` enforces it).
-    draws: int = field(
-        default=200_000,
-        metadata={'doc': 'How many Monte Carlo draws are made of robot type 1 taken apart.'})
-
-    # The start of its random numbers, fixed so that a rerun gives the same draws.
-    # SAFE TO CHANGE: yes; another seed gives other draws of the same distributions.
-    seed: int = field(
-        default=1,
-        metadata={'doc': 'The seed of the random numbers of robot type 1 taken apart.'})
 
 
 @dataclass
@@ -322,6 +313,14 @@ class OutputParams:
         default=os.path.join('figures', 'parts_taken_apart'),
         metadata={'doc': 'Where the figure of robot type 1 taken apart is drawn.'})
 
+    # The robot types whose pages 01 and 02 draw (Matthias, 2026-10-29: "Why the hell are ther all thes figure for robot
+    # types 2 to 6?", then "Type 1 only"; "I will only focus on 1", 2026-10-28). The same code draws every robot type's
+    # pages; a type comes back here when its steps begin. 02 writes the draws of all six types whatever is set here.
+    # SAFE TO CHANGE: yes, any of the robot types 1 to 6, each once.
+    robot_types_with_pages: tuple = field(
+        default=(1,),
+        metadata={'doc': 'The robot types whose pages 01 and 02 draw; 02 writes the draws of all six.'})
+
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
     # and a page small enough to open quickly.
     dpi: int = field(
@@ -336,7 +335,6 @@ class Params:
     data: DataParams = field(default_factory=DataParams)
     checks: CheckParams = field(default_factory=CheckParams)
     composition: CompositionParams = field(default_factory=CompositionParams)
-    parts: PartsParams = field(default_factory=PartsParams)
     output: OutputParams = field(default_factory=OutputParams)
 
 
@@ -381,21 +379,22 @@ def validate(params: Params) -> None:
 
     # The sibling projects' files: absolute, .xlsx where a file is named.
     for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',
-                 'traction_motor_magnets', 'traction_motor_dir'):
+                 'traction_motor_magnets', 'traction_motor_steels', 'traction_motor_dir'):
         value = getattr(data, name)
         if not os.path.isabs(value) or (name != 'traction_motor_dir' and not value.lower().endswith('.xlsx')):
             raise ParameterError(f'data.{name} must be an absolute path' + ('' if name == 'traction_motor_dir' else
                                  ' to an .xlsx workbook') + f', not {value!r}.')
-    parts = params.parts
-    if not 100 <= parts.draws <= 1_000_000:
-        raise ParameterError(f'parts.draws must be between 100 and 1,000,000, not {parts.draws}.')
-    if not isinstance(parts.seed, int) or parts.seed < 0:
-        raise ParameterError(f'parts.seed must be a whole number from 0 up, not {parts.seed!r}.')
 
     for name in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir', 'parts_dir',
                  'parts_figures_dir'):
         if not str(getattr(params.output, name)).strip():
             raise ParameterError(f'output.{name} is empty.')
+    # The robot types whose pages are drawn: whole numbers from 1 to 6, each once, at least one.
+    types = params.output.robot_types_with_pages
+    if (not isinstance(types, tuple) or not types or len(set(types)) < len(types)
+            or not all(isinstance(t, int) and 1 <= t <= 6 for t in types)):
+        raise ParameterError('output.robot_types_with_pages must be a tuple of robot types from 1 to 6, each once, '
+                             f'such as (1,), not {types!r}.')
     # Below 50 dpi the small print of a page cannot be read; above 600 a page takes megabytes and
     # seconds to open, for nothing a screen can show.
     if not 50 <= params.output.dpi <= 600:

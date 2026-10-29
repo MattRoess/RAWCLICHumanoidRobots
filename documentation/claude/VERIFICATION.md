@@ -5,6 +5,205 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V74. Elements 0 in some draws show the draws that hold them; the parts figures' footnotes once on a notes page
+
+- **What, on his words:** "I told you I want to see the distribution not just the 0 value for vanadium and lead" (the
+  rule of V72 had been applied to the material pages only, not the element pages: my fault), then, mid-turn, "parts
+  taken apart show each a long legend, you know, what I think about this" (his rule: the notes once, on a page of
+  their own).
+- **Element panels** (02, `element_panel`, one copy for the element and the material pages): an element that is 0 in
+  some draws shows the draws that hold it, their median, mean and 95 % interval, and above them in what share of all
+  the draws it is held; one held in fewer than 2.5 % of the draws has no panel, as a material (`held`). On the real
+  inputs, 3,000 draws: lead in 50 % of the draws (median 2.4 g), vanadium 3.5 % (16 g), arsenic 33 %, indium 33 %,
+  tungsten 49 %; every other shown element in every draw; none below 2.5 %, so no panel is lost. The same on the
+  element figure of `figures/parts_taken_apart/` (`stacked_panel`): indium in 33 % of the draws, median 14 mg (before:
+  "median 0 mg"), the share right of its title.
+- **Footnotes:** the grey footnote under each of the 7 pages of the two figures (2 element pages, 5 overview pages)
+  removed, the panels given its space; its paragraphs once on `robot_type_1_notes_<k>.png`, the first pages of the
+  folder (nothing cut, the repeated sentences once). The footnote's code (`figure_note`, `FIGURE_NOTE_WIDTH`,
+  `FOOTNOTE`) went with it; nothing else read it.
+- **A fault of mine found by the new test:** type 1's notes page in `figures/composition/` has run off its foot since
+  V71/V72: its last paragraph (the material pages) was cut off the page, and I missed it when I looked. The notes now
+  go on as many pages as they need (`notes_pages`: at most 26 lines a page, a paragraph never split, "(k of n)" in
+  the title), wrapped at 140 characters instead of 120: two pages, `1_compact_research_developer_notes_1.png` and
+  `_2.png`.
+- **Tests:** three new (an element held in some draws on the element pages; the same on the element figure, indium;
+  no footnote under a figure and the notes on their own pages) and one widened (every page's own texts within the
+  page, on every page of 02, which caught the notes). 290 tests pass.
+- **Looked at** (real inputs, 3,000 draws, Claude's scratch folder): elements 2 (lead and vanadium), the element
+  figure's two pages, overview 1, both notes pages of type 1, the notes page of the figures.
+- **Not covered:** his run. After it, his former `figures/composition/1_compact_research_developer_notes.png` is left
+  behind (now `_notes_1.png` and `_notes_2.png`): for his word to remove. **Seen and not changed (not asked):** on the
+  overview pages a row of a kind of part that holds an element in only some draws still shows the median of all the
+  draws, 0 where it holds it in fewer than half (aluminium in the torso boards: median 0, mean 0.0077 kg).
+
+### V73. 01's table of robot type 1's robots redone: range bars and where each robot's numbers come from
+
+- **What, on his words:** "These table in 01 can be made better", "you are so cheap", then "Yes, build it" to the table
+  proposed. Two pages (`categories/1_<name>_robots_<k>.png`): the robots grouped by what their joints rest on (weighed,
+  from a robot taken apart: 2; masses stated: 6; from their torques: 7; a share of the robot's mass: 17), the lightest
+  first within each group; the mass a bar from its min to its max with its mode a dot, on one kg axis for all (0 to 50
+  kg), the mode written beside it; the joints (two encoders a joint), marked † where they are a share of the mass; the
+  battery's energy at the modes a bar on one Wh axis (0 to 800 Wh), written beside it; five cells (mass, joints,
+  battery, boards, frame and shell), each coloured by where the numbers of its rows in the parts file come from:
+  weighed (label W), from the maker (S, its first source's "What it is" the manufacturer's or the actuators' maker's),
+  from a third party (S, any other source), estimated (E). A heading band, every other row shaded, a heading for each
+  group, the key once at the foot of each page, Paul Tol's "medium contrast" colours as published.
+- **Decided where the specification was silent (to be told to him):** a cell whose rows rest on different bases shows
+  each as a stripe, not only the weakest or the strongest; a stated number counts as its first named source's; a
+  stated number naming no source would count as a third party's, never the maker's (the test finds none).
+- **Reader:** 01 now keeps the column Source of the sheet Constants and the column "What it is" of the sheet Sources;
+  the two places that unpack a constant (01's label check, 02's shared constants) take the new field. Nothing else
+  reads the sheet Sources. The old table's words for the estimates (`ESTIMATE_KINDS` as a dict) and its page bottom
+  (`ROBOTS_BOTTOM`) went with the old table; 02's notes page keeps its own words.
+- **Tests (six, replacing one):** the rows (the G1: 1.32 m, 34 / 35 / 36 kg, 23 joints, 421 Wh; the E1's 480 Wh; the
+  PrimeBOT Q1's 9.75 / 19.5 / 29.25 kg); the groups, their order and their order by mass, the mark on the shares group
+  only; the cells of the G1, X1, T1, E1 and Q1; the label and source rule ('BT1b' read as itself, not as the maker's
+  'BT1'; the actuators' maker counted as the maker); every stated number behind the cells names a source of the sheet
+  Sources; the pages show every robot once and no text runs into another or off the page. **All 287 tests pass.**
+- **Looked at** both pages (drawn into Claude's scratch folder, not into `figures/`). Fixed after looking: "720 Wh"
+  nearly touched the first cell (the mass axis made wider, the battery axis narrower); the heading "Joints of the
+  masses stated for them" reworded to "Joints whose masses are stated".
+- **What the cells show, as the parts file stands:** the masses 17 from the maker, 14 from a third party (all 14 the
+  catalogue humanoid.guide, "Not Verified" there), 1 estimated (the PrimeBOT Q1); the frame and shell estimated for
+  all 32; the boards estimated for all but 10 robots (partly the maker's, the G1 and G1+ partly weighed); the G1's
+  battery a third party's, because the teardown T1 is named before the maker's U1 in its capacity's sources.
+- **Not covered:** his run of 01. The table now has two pages, so after his run his former third page
+  `figures/schemas/categories/1_compact_research_developer_robots_3.png` (written 12:58 today) is left behind: for his
+  word to remove.
+
+### V72. The material pages: the draws that hold a material, the battery by its cells' chemistry
+
+- **What:** Matthias: "If there is nothing then show nothing. If it is just a bit and a large 0 then show me the
+  distribution. Give me NMC etc. for the batteries as materiel not nickel". A material held in fewer than 2.5 % of the
+  draws still gets no panel; one that is 0 in some draws shows the draws that hold it (their median, mean and 95 %
+  interval) and says in what share of the draws it is held; the battery cells by their recipe, "Battery cells, NMC
+  (cylindrical)" (one panel per chemistry); the nickel strips named "Nickel strips, battery".
+- **Tests:** a new one, the RP1's brass: the panel names its share of the draws and the median of the draws that hold
+  it; the titles of the cells and the strips. 02's 54 tests pass.
+- **Sandbox** (3,000 draws, the real inputs, outputs in the scratch folder): looked at materials 1 and 3: brass in 3 %
+  of the draws (median 87 g), stainless 17-4PH in 4 % (149 g), titanium in 4 % (390 g), the magnet classes H 70 %, UH
+  71 %, EH 21 %, the die-cast alloys A380 and ADC12 each in 50 % (one of them in a draw), the cells NMC 1.8 kg at the
+  median. Fixed after looking: the strips' title ran into its numbers.
+- **Not covered:** his runs; the element pages keep the draws at 0 in their panels (not asked).
+
+### V71. 01's pages and overview by his rules, type 1's material pages, 04 into 02, pages of type 1 only
+
+- **What, on his words:** "Yes, into 02" (04's two figures drawn by 02, 04 removed); "Type 1 only" (a setting,
+  `output.robot_types_with_pages`, the robot types whose pages 01 and 02 draw; 02 still writes all six types' draws);
+  "Yes, build it" (01's pages and the overview, the specification in HANDOVER.md); "S and P can go also Na" (added to
+  `composition.elements_not_shown`); "Yes, 1 to 5" (type 1's material pages as RAWCLICDataCenters draws its materials:
+  each material in one robot, the steels by grade, the aluminium by alloy, the magnets in all and by grade class, where
+  each sits, the draws kept).
+- **Read first:** RAWCLICDataCenters' "materials of one data center" (one distribution panel per material) and "where
+  the copper comes from" (a violin per item on a logarithmic axis), figures and code (its 04).
+- **How, tests first:** 02 keeps each material by its grade, alloy or magnet class (`Robot.detail`, the shares by
+  `RecipeDraws.leaves`, the same draws its elements are drawn with); 04's code moved into 02 verbatim, its names given
+  02's forms; the robot schema, the kinds of part, the hot joints and the estimate kinds moved into 01 (one copy, used
+  by 01's robot page and 02's figure). New tests: the grades, alloys and magnet classes add up to their material in
+  every draw (all 10 kinds); the material pages show copper, the magnets and their classes, each steel grade and each
+  aluminium alloy, steel and aluminium never whole; by hand at the modes, 7075 25.6 % and 6061 54.4 % of the
+  aluminium; grades.npy written with its columns; 02's figures and the sources figures written; every page of 01 and
+  02 readable fit to 1920 × 1080 (18 px at least) and 01's 16 × 9 inches; no project words on 01's overview, notes and
+  type 1 pages; type 1's table lists every robot of the parts file (the G1 34 / 35 / 36 kg, 23 joints, 421 Wh); the
+  faults continue over pages; the setting refused when empty, repeated or outside 1 to 6; 02 draws no page for a type
+  the setting does not name and still writes its draws.
+- **Sandbox run** (the real inputs on disk, 01 and 02 with 3,000 draws, every output in the scratch folder): exit 0 for
+  both; 01: overview_1 and _2, notes, faults_1 to _3, type 1's robots_1 to _3 and robot page; 02: type 1's notes,
+  elements 1 to 4, materials 1 to 3, its two figures (7 pages), 17 "where it sits" figures; no page of types 2 to 6.
+  Looked at: overview_1 (fixed: the sibling box over the legend; "a robot in two versions twice"), overview_2 (fixed:
+  type 1's card, the last line), the robots table (fixed: it ran off its page; now as many rows a page as fit, 3
+  pages), the robot page (fixed: each kind's name twice), materials_1 (fixed: two-line titles over the numbers),
+  sources/Copper (the hip joints 428 g at the median, the arms 371 g, the cables 227 g), faults_1. Type 1: 33.8 kg at
+  the mean (95 %: 17.2 to 42.7); copper 1.6 kg as metal, 2.1 kg as the element with the boards'; the magnets 972 g at
+  the median.
+- **Tests:** 281, all pass.
+- **Not covered:** his runs of 01 and 02; the pages of types 2 to 6 keep their former drawing until their steps begin;
+  the faults pages list the checks with the names of the sheets they check (to find a fault), the one page not held to
+  the project-words test.
+
+### V70. Type 304's chromium maximum corrected in RAWCLICVehicleTractionMotor's element workbook, on his word
+
+- **What:** Matthias, 2026-10-29: "What the hell is with 304. Why did you not tell me and resolve it", then, choosing
+  the answer offered: "Yes, correct it" (set Type 304's chromium maximum, sheet CastFeSteel, cell H17, from 0.02 to
+  0.20, a backup first). The fault: V69.
+- **How:** the workbook `RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx` (not evicted by iCloud,
+  no lock file, no charts or drawings, git-ignored there) copied first into Claude's scratch folder
+  (`backups/10_MaterialElementDefinitions_before_304_Cr_2026-10-29.xlsx`); then written anew part by part, every part
+  byte for byte as it was, the sheet's XML (`xl/worksheets/sheet6.xml`) with the one cell's value `0.02` as `0.2`.
+- **Checked:** every part of the file but that sheet byte-identical to the backup, the sheet differing in that cell
+  only; every cell of every sheet read against the backup: one differs, CastFeSteel H17, 0.02 to 0.2. Type 304 now
+  0.18 to 0.20 (the standard's 18 to 20 %). RAWCLICVehicleTractionMotor's own code reads only the magnets' sheet for
+  elements (its `src/params_schema.py`: "THE MAGNET ONLY, AND THAT IS A DECISION"), so none of its results change.
+- **Tests on the real files:** 273; all pass but the six that compare with the register and the parts file on disk,
+  which his builder runs write (they pass against files the builders write, V69). The 21 failures naming Type 304
+  are gone.
+- **A second sandbox run, 20,000 draws, the real files** (the register and the parts file built into the scratch folder,
+  every output there): 02, 03 and 04 exit 0; 14 s, 1.0 GB at most in memory; `data/parts_taken_apart/` 106 MB (its
+  parts 795 columns), `data/consolidated/` 32 MB. For his run of 200,000 draws, by the same measure: about 2 to 3
+  minutes, 8 to 10 GB of memory (this Mac: 17 GB), about 1 GB into `data/parts_taken_apart/`. Type 1: 33.8 kg at the
+  mean (95 %: 17.1 to 42.8). Remainders below zero (reported, not cut): the frames of the Noetix Bumi 0.6 %, Fauna
+  Sprout 0.3 %, PrimeBOT Q1 0.2 %, TOPSTAR Xiao Tuo 0.2 % of their draws; the battery housings of the Booster K1 2 Ah
+  0.6 %, Noetix Bumi, AgiBot QUESTER1 and Fauna Sprout 0.2 %. **Corrects V69:** the K1 2 Ah's "8.3 %" there came from
+  about eight of its draws in 500.
+- **Not covered:** his runs.
+
+### V69. The entry of type 1's research: every robot of type 1 from its own rows
+
+- **What:** on "Yes, build it" (the entry, HANDOVER.md, points 1 to 10 with the recommendations for A to D), and his
+  two answers during the build ("only if it is exclude due to a limit given in the code": check 20 removed; the nickel
+  strip "With Copper"): the register's TRON 2 not assigned (31 robots of type 1); the parts file's builder writes all
+  32 (the K1 in its versions 5 Ah and 2 Ah), one block per robot (EVIDENCE.md E5.12 to E5.19); the columns Grade
+  (JointParts, Parts) and "Share of the joint modules" (Joints); 01's new checks (joint shares, battery constants,
+  alternatives 'A or B', `check_grades`, the sibling's steel sheets, the setting `data.traction_motor_steels`); 02
+  draws each robot from its own rows, its versions each as often, its grades, its shares of its mass; the scaled
+  drawing, check 20, `parts.draws`, `parts.seed` and the old page `figures/composition/1_compact_research_developer.png`
+  removed (decisions C and D; nothing read them, grep of the code, tests and documents).
+- **Read first-hand for the placements** (web-fetch tool): Menlo's mechanical system tour gives the Asimov 1's actuator
+  at every joint (its "Full Actuator Specifications"; the page marks these tables as possibly outdated), entered as it
+  gives them; ROBOTIS's pages give only the count of each actuator model for the AI Sapiens K1 and the K0, not where
+  each sits: the placement is an estimate (E), written in its row (the larger actuators at the hips, knees, waist and,
+  for the K1's eleven, the ankle pitch). The makers' model files on disk (E5.10) give the joints' torque limits of the
+  Roboto Origin, RP1, T1, K1, PM01 and R1; the RP1's actuators by joint from RoboParty's ROMOMO introduction.
+- **How, tests first:** the builder's 14 tests (every robot of the sheet Type 1 with rows, the K1's versions differing
+  only in battery and computer, the G1+ the G1 with two head joints, the Asimov 2 the Asimov 1 times 38 / 35, the
+  actuators of batch 1 at their modes as E5.12: Roboto Origin 17.6, Asimov 1 18.6, T1 14.9, K1 9.2, PM01 15.6, R1 14.6,
+  AI Sapiens K1 14.5 kg, RP1 18.8 kg; the 17 robots without joint torques with shares adding up to 1; every steel and
+  titanium part with its grade); 01's 19 new tests, each a planted fault (shares not adding up to 1, shares for some
+  joints only, a module mass beside a share, the shared share missing; a voltage without its capacity; neither and no
+  energy per kg; a pack with no mass without the pack energy per kg; a share of the robot without the shell share; a
+  material 'Steel or Brass'; a steel part without a grade; a grade neither recipe nor steel; 'M19 or M99'; a grade on
+  aluminium; a sibling steel whose maximum is below its minimum; the steels' sheet missing; the six tests of check
+  20 removed with it); 02's 23 type 1 tests over
+  the register's 31 robots (each drawn as often within 4 standard errors, the K1's versions each half of its draws,
+  each robot within its mass range, materials and parts adding up to its mass, every remainder reported and none cut,
+  each joint of a stated mass within its stated range, the joints of a robot without torques 24.5 to 73.5 % of it,
+  'M19 or M27' and 'Aluminium or Plastics' each as often, and by hand at the modes: the G1's copper in its cables, gold
+  and neodymium in its hips as before, its molybdenum in its hips from the grades 1.8396537 g, the E1's joints 19.6 kg,
+  shell 4.6 kg, cells 1.987578 kg, housing 0.905651 kg).
+- **Found by the new check, Matthias's data, not corrected here** (corrected on his word, V70): RAWCLICVehicleTractionMotor
+  `data/raw/10_MaterialElementDefinitions.xlsx`, sheet CastFeSteel, rows 16 and 17 (Type 304): chromium 0.18 at its
+  minimum (H16) and 0.02 at its maximum (H17); the standard's range is 18 to 20 % (E5.18). Until it is settled, 01 and
+  02 report the fault and 02 draws nothing; the RP1's 304 pins and screws (39 g at the mode) are the only part that
+  uses it.
+- **Sandbox run** (the register and the parts file built by their builders into the scratch folder; the sibling's steels
+  a scratch copy with H17 0.2, only to try the drawing; 02, 03 and 04 with 500 draws, every output in the scratch
+  folder): exit 0 for all three. Type 1: 33.6 kg at the mean (95 %: 16.9 to 42.6), 31 robots drawn, none left out;
+  steel, titanium and copper now in the elements, only the electronics in part. One remainder below zero: the Booster K1
+  2 Ah's battery housing in 8.3 % of its draws (its 96 Wh pack against the template's battery management board of 30 /
+  60 / 96 cm2; reported, not cut); no frame below zero. Pages looked at: the notes page (fixed after looking: it listed
+  the G1 and G1+ under "joints' masses from their torques", and said iron was missing when nothing was), element pages
+  1 and 2 (iron 10 kg, chromium 133 g, carbon 4.5 kg at the median), 04's element figure 1. The project's `data/` and
+  `figures/` unchanged but the old page removed.
+- **Tests:** 273. In the sandbox (the steels' copy) all pass but the six that read the register and the parts file on
+  disk (written before the change); those six pass against files built by the builders (sandbox). As the project
+  stands, 21 more fail, each naming the one fault above ("the steel 'Type 304': min and max not in order for Cr").
+- **Not covered:** the real run (his); the files on disk until his builder runs; the joints' kinds of the 17 robots
+  without torques (an average layout, one row per joint group); the head joints counted in the kind "Head", which 02's
+  standard tables place in the part group Sensors (KIND_PART_GROUP, unchanged); fans, heat sinks, the RP1's 30 V
+  battery, bearings outside its actuators and its magnets in the covers, and Sprout's four time-of-flight sensors (not
+  in E5.14); a sensor whose mass no source gives is drawn by its elements only, its mass in the frame.
+
 ### V68. Hydrogen, nitrogen, oxygen and fluorine off the element pages of 02 and 03, kept in the draws
 
 - **What:** on "Hydrogene and Oxygen have to go you should know this. Same for F, and N" and "Yes do it" (the four

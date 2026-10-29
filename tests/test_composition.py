@@ -305,12 +305,19 @@ class TestRun(Drawn):
             self.assertEqual({r['Kind'] for r in rows}, {'Material', 'Element'})
             self.assertTrue(os.path.exists(os.path.join(path, 'summary.xlsx')))
 
-    def test_a_page_is_drawn_for_each_robot_type(self):
-        # Point 14: kg by material and kg by element, each with its 95 % interval.
+    def test_a_page_is_drawn_for_each_robot_type_the_setting_names(self):
+        # Point 14: kg by material and kg by element, each with its 95 % interval; since 2026-10-29 only for the robot
+        # types of `output.robot_types_with_pages` (Matthias: "Type 1 only"), the draws of all of them written.
         params = self.write()
         self.assertEqual(composition.run(params), 0)
+        figures = params.output.composition_figures_dir
+        self.assertGreater(os.path.getsize(os.path.join(figures, '1_small.png')), 0)
+        self.assertFalse(os.path.exists(os.path.join(figures, '2_large.png')))
+        self.assertTrue(os.path.exists(os.path.join(params.output.composition_dir, '2_large', 'materials.npy')))
+        params.output.robot_types_with_pages = (1, 2)
+        self.assertEqual(composition.run(params), 0)
         for name in ('1_small.png', '2_large.png'):
-            self.assertGreater(os.path.getsize(os.path.join(params.output.composition_figures_dir, name)), 0)
+            self.assertGreater(os.path.getsize(os.path.join(figures, name)), 0)
 
     def test_small_masses_keep_three_significant_figures(self):
         # An element of a few grams or less must not be printed as 0 kg.
@@ -331,16 +338,17 @@ class TestRun(Drawn):
         self.assertFalse(os.path.exists(params.output.composition_figures_dir))
 
     def test_hydrogen_nitrogen_oxygen_and_fluorine_are_left_off_the_page_and_kept_in_the_draws(self):
-        # Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N"; the draws
-        # keep them (as RAWCLICStockAndFlow's do), so that the elements still add up to the materials in every draw.
+        # Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N", then "S and
+        # P can go also Na"; the draws keep them (as RAWCLICStockAndFlow's do), so that the elements still add up to the
+        # materials in every draw.
         params = self.write()
-        self.assertEqual(params.composition.elements_not_shown, ('H', 'N', 'O', 'F'))
+        self.assertEqual(params.composition.elements_not_shown, ('H', 'N', 'O', 'F', 'Na', 'P', 'S'))
         drawn = self.compose()
         held = drawn[1].tables['elements'][0]
         self.assertIn('F', held)                       # the small recipes' LiPF6 holds fluorine
         shown = [name for name, _ in composition.page_elements(drawn[1], params)]
         self.assertNotIn('Fluorine (F)', shown)
-        self.assertEqual(len(shown), len([e for e in held if e not in ('H', 'N', 'O', 'F')]))
+        self.assertEqual(len(shown), len([e for e in held if e not in ('H', 'N', 'O', 'F', 'Na', 'P', 'S')]))
         self.assertTrue(any('fluorine' in note for note in composition.page_notes(drawn[1], params)))
 
     def test_an_element_not_shown_that_is_no_element_stops(self):
