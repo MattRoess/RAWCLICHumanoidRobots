@@ -2238,7 +2238,7 @@ def run(params: Params) -> int:
         return 1
     faults = (all_faults(inputs, params)
               + schemas.check_register(register, params, list(apart.apart.robots) if apart else [])
-              + schemas.check_type_one(register, type_one, params))
+              + schemas.check_type_sheet(register, type_one, TYPE_ONE, params))
     if apart is not None:
         faults += apart_faults(apart, params)
     if faults:

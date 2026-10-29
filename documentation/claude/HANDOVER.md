@@ -46,11 +46,66 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
 10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
     in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
 
-Already known for type 2: its robots with model files chosen ("Those with model files": H2, H2 Plus, H1-2, GR-2, GR-1,
-EVIDENCE E3); open: whether the H2 Plus is the H2 with optional hands, and joint masses above 200 N·m; 97 robots of
-type 2 in the register.
+Where type 2 stands (2026-10-29, night): step 5 built (the sheet Type 2, 97 robots; V81), step 7 begun (batch 1's
+source table, EVIDENCE E6); the rest not begun. See the next section.
 
-## 2026-10-29, evening: type 1's last open items (start here)
+## 2026-10-29, night: type 2 begun (start here tomorrow morning)
+
+**His words:** "commit and push and then to typ 2", then "Yes, as proposed" to:
+- **A:** all register robots of type 2, each its own rows, in batches. Batch 1 is the five with the makers' model
+  files: H2, H2 Plus, H1-2, GR-2, GR-1 ("Those with model files", E3). A source table goes to him first.
+- **B:** the 37 wheeled robots of type 2 get their own kinds of part, researched in their batch, with a source table
+  first.
+- **C:** a parts file and a builder per type; 02 draws each type the same way.
+- The first step: the register's sheet Type 2, then batch 1's source table.
+
+**Committed and pushed:** type 1's last items, GitHub `main` = `bfdfdfc` (V80).
+
+**Done since, NOT committed** (commit and push on his word only):
+- `tools/make_humanoid_register.py` writes the sheet Type 2 (97 robots, each "not drawn: its type drawn from the
+  workbook, none of its robots taken apart yet").
+- `01_schemas.py` checks every sheet "Type n" with one check; `02_composition.py` calls it for type 1.
+- The tests of both. README and METHODOLOGY (check 22) describe the new sheet.
+- VERIFICATION V81 records his run of 16:38 read back (it holds V80) and the sheet Type 2.
+- EVIDENCE E6 holds batch 1's source table.
+- Tests: 315 of 316 pass. The one failure, `test_what_it_writes_equals_the_register_on_disk`, waits for his run of
+  the register builder.
+
+**His runs, in this order** (in RAWCLICHumanoidRobots, press Run):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (writes the sheet Type 2);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`.
+02's only change is the call of the one check for every sheet; it reads the sheet Type 1 as before. I have not run 02
+against his data.
+
+**Waiting for Matthias:**
+1. **Batch 1's source table, EVIDENCE E6** (E6.1 to E6.6), to be looked at. Its three questions, each with a
+   recommendation (E6.6):
+   - the H1-2 with or without its optional hands;
+   - the GR-1's legs from which of Fourier's two model files (225 or 135 N·m);
+   - the H2 Plus's mass, which no maker states (the register's 68 kg is lighter than the H2 with hands added).
+2. **Commit and push** of the work listed above.
+
+**What batch 1's research found** (E6):
+- Every robot's joints and torques, from the makers' model files and pages.
+- Batteries: H2 and H2 Plus 972 Wh (18 cells in series by arithmetic), H1-2 864 Wh (16 in series), GR-2 950 Wh and
+  ≤ 9 kg, GR-1 483 Wh.
+- Boards: the makers name them (Intel i5 and i7 in the Unitree robots; the H2 Plus also carries the Jetson Thor; the
+  GR-2 an i7 and an ARM board; the GR-1 an i7-13700H, a power board, a switch board).
+- Sensors: named (H1-2: Livox MID-360 and RealSense D435; H2: a binocular camera, no LiDAR).
+- Structure: aluminium, titanium and plastics in the H2, aluminium and plastics in the Fourier robots, no shares.
+- **The one large joint with a stated mass:** Unitree's M107, 1.9 kg at 360 N·m, used in the H1-2 (which joints not
+  stated).
+- **Not found:** any mass of Fourier's FSA actuators (seven models named in Fourier's programming reference, no masses
+  anywhere in Fourier's site, GitHub or searches); the H2's motors; any teardown; battery pack masses but the GR-2's;
+  board sizes; cables.
+
+**Next, after his answers and his yes:**
+- The proposal for batch 1 by the method agreed for type 1 (E5.12 for the actuators, E5.14 for the rest, E5.17).
+  Where no maker states an actuator's mass, it comes from the joint's torque, with the M107 in the basis, since type
+  1's fit stops at 200 N·m (it gives 1.62 kg at 360 N·m, 15 % below the M107).
+- Then the entry for C (a parts file and builder per type, by his yes), 02's pages for type 2, and B.
+
+## 2026-10-29, evening: type 1's last open items
 
 His run of 16:01 read back (VERIFICATION.md V79): all 309 tests pass, every material of type 1 wholly in its elements,
 01 no fault. Matthias: "I want to finish open items first and once for all", then "Yes, 1 to 5":

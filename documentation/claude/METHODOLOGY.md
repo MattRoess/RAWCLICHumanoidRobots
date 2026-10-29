@@ -258,7 +258,9 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     its column "In the run" what 02 does with it: "drawn: its own parts" for a robot with rows in the parts file, "not
     drawn: no mass stated" for a robot without a mass; a robot with a mass and no rows of its own is a fault wherever
     a robot of type 1 has rows (since 2026-10-29 every robot of type 1 has its own). A register without the sheet stops
-    02.
+    02. Since 2026-10-29, evening (on "Yes, as proposed", point A), the register has one sheet per type listed, Type 1
+    and Type 2, and the check is the same for each sheet "Type n"; a type none of whose robots is taken apart yet says
+    "not drawn: its type drawn from the workbook, none of its robots taken apart yet" (type 2: 97 robots).
 
 02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
 (the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row

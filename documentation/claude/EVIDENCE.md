@@ -8,6 +8,109 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E6. Each robot of type 2 its own composition: research, batch 1 (2026-10-29). Nothing entered
+
+Matthias, 2026-10-29: "commit and push and then to typ 2", then "Yes, as proposed" to: A, all register robots of type
+2, each its own rows, in batches, batch 1 the five with the makers' model files, with a source table to him first; B,
+the wheeled robots their own kinds of part, in their batch; C, a parts file and builder per type. This section is
+batch 1's source table. Read myself on 2026-10-29 in the built-in browser and through GitHub's interface, unless it
+says E3 (read myself on 2026-10-28). Nothing is entered.
+
+The sources: **H2p**, unitree.com/h2 (the H2's parameter table); **H2d**, Unitree's H2 developer guide, "About H2",
+support.unitree.com/home/en/H2_developer/About_H2 (updated 2026-09-03); **H1p**, unitree.com/h1 (the H1 and H1-2
+parameter tables and the M107 table); **H1d**, "About_H1-2", support.unitree.com/home/en/H1_developer/About_H1-2
+(updated 2026-03-12); the makers' model files: `H2.urdf`, `h2_plus/H2_Plus.urdf`, `h1_2_description/h1_2.urdf`
+(github.com/unitreerobotics/unitree_ros), `GR1T2.urdf`, `GR2T2V2.urdf` (github.com/FFTAI/fourier_lab),
+`gr1t2/basic_urdf/gr1t2.urdf`, `gr2v3_8_7/basic_urdf/gr2v3_8_7.urdf` (github.com/FFTAI/Wiki-GRx-Models); **FSA**,
+Fourier's actuator programming reference, fftai.github.io/fsa/fsa/.
+
+### E6.1 Unitree H2 (120)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Joints | "31 DoF, driven by 31 joint motors"; "Low inertia high-speed internal rotor PMSM"; "Industrial grade crossed roller bearings"; arm "120N.m", leg "360N.m" at most. The model's limits: hips (3) and knee 360 N·m (8 joints), ankle pitch 66.88 (2), ankle roll 19 (2), waist yaw 120, waist roll and pitch 180 (2), head 50 (2), shoulder pitch 130 (2), shoulder roll and yaw, elbow, wrist roll 60 (8), wrist pitch and yaw 10 (4). The motors' model, mass and gearbox: not stated | H2p, H2d, `H2.urdf` | maker, spec; maker's model |
+| Battery | "15Ah(0.972KWh)", "Maximum Voltage: 75.6 V", "54–75.6V" at the back port; quick release; "Premium Lithium Battery with Low Internal Resistance". 18 cells in series by arithmetic (75.6 / 4.2 V; 972 Wh / 15 Ah = 64.8 V = 18 × 3.6 V). Mass, chemistry, cell format: not stated | H2p, H2d | maker, spec; arith. |
+| Boards | PC1 "Intel Core i5" (motion control, 10 cores, 8 GB), PC2 "Intel Core i7" (development, 10 cores, 16 or 32 GB), each "500 GB or above"; optional PC3 "Jetson Thor (T5000)", "40W ~ 130W", and PC4 "Jetson Orin NX (16GB)". Board sizes: not stated | H2d | maker, spec |
+| Sensors | binocular camera, "2 RGB sensor", 2064 × 1552, "Baseline 60mm", on PC1 (MIPI); "Array Microphone and High-Power Speaker"; the model: an IMU in the torso and one in the pelvis. No LiDAR named | H2p, H2d, `H2.urdf` | maker |
+| Connectors | on the back: GXT30(2) sockets × 4 (battery and RS-485; 24 V and CAN × 2; 12 V and RS-485), Type-C × 6, RJ45 × 2, two hand connectors. The cables inside: not given | H2d | maker |
+| Structure, cooling | "Aircraft-Grade Aluminum + Titanium Alloy + High-Strength Engineering Plastics" (no shares); "Local air cooling" | H2p | maker, spec |
+| Mass, height | "About 70kg" with battery; "1820 x 456 x 218mm"; the model's links 75.59 kg | H2p; `H2.urdf` | maker; the register 70 kg, 180 cm |
+
+### E6.2 Unitree H2 Plus (121)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Joints | the H2's 31, with the same limits, and 44 hand joints (22 per hand: 3.3 N·m × 4, 1.864 × 20, 0.638 × 10, 0.5285 × 2, 0.189 × 8); which hand joints have their own motor: not stated | `H2_Plus.urdf` | maker's model |
+| Sensors, boards | its binocular camera: 2560 × 1984, on "PC3/GMSL2"; PC3 is the H2's optional Jetson Thor, so the H2 Plus carries it (my reading of the table, not said in words) | H2d | maker |
+| Hands | the hand's model: not named | — | — |
+| Mass, height | not on Unitree's page (H2p lists the H2 and the H2 EDU only); the model's links 77.24 kg; the register 68 kg (humanoid.guide), lighter than the H2 with hands added | `H2_Plus.urdf`; the register | maker's model; catalogue |
+
+The rest as the H2 (H2p, H2d).
+
+### E6.3 Unitree H1-2 (119)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Joints | "27 joint motors"; "The H1-2 robot uses the self-developed M107 joint motor" (which joints: not stated); "Knee Torque About 360N.m, Hip Joint Torque About 220N.m, Waist Joint About 220N.m, Ankle Joint About 75x2N.m"; shoulder and elbow "About 120N.m", wrist "About 30N.m". The model's limits, all lower: hips 200 N·m (6), knee 300 (2), ankle pitch 60 (2), ankle roll 40 (2), waist 200 (1), shoulder pitch and roll 40 (4), shoulder yaw and elbow 18 (4), wrists 19 (6) | H1p, H1d, `h1_2.urdf` | maker, spec; maker's model |
+| **M107** | "Maximum torque" 360 N·m, **"Weight 1.9kg"**, 107 × 74 mm, hollow shaft, dual encoder; low-inertia internal-rotor PMSM | H1p (the M107 table), H1d | maker, spec |
+| Battery | "15Ah(0.864KWh)", "Max Voltage 67.2V"; "quickly replaceable"; 16 cells in series by arithmetic (67.2 / 4.2 V; 864 / 15 = 57.6 V = 16 × 3.6 V). Mass, chemistry: not stated | H1p | maker, spec; arith. |
+| Boards | PC1 "i5-1235U" (motion control), PC4 "i7-1255U / i7-1265U" (development), 10 cores each, "500GB or more"; optional "Orin NX (Maximum up to 3 devices)" | H1d, H1p | maker, spec |
+| Sensors | "MID-360 Lidar" in the head (Livox; 265 g, L1 of E2.1); "D435 depth camera" in the head (75 g, E2.8); the model: an IMU | H1d, `h1_2.urdf` | maker |
+| Hands | "Optional Dex5-1 or other ambidextrous hands"; the model `h1_2.urdf` carries two hands of 12 joints at 1 N·m each, `h1_2_handless.urdf` none | H1p; the two models | maker |
+| Structure | not stated | — | — |
+| Mass, height | "About 70kg", "(1503+285)mm" (1.79 m); the model's links 67.37 kg with two hands | H1p; `h1_2.urdf` | maker; the register 70 kg, 178 cm |
+
+### E6.4 Fourier GR-2 (117)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Joints | 29 body joints (E3). The model's limits: hip pitch and knee 366.05 N·m (4), hip roll 95.47 (2), hip yaw and ankle pitch 54.33 (4), ankle roll 29.84 (2), waist 74.45 (1), shoulder pitch and roll 74.45 (4), shoulder yaw and elbow 42.75 (4), wrists 17.33 (6), head 17.33 (2): seven levels of torque. Hands of 6 joints each, 12 optional (E3) | `gr2v3_8_7.urdf` (29 joints, 62.98 kg); `GR2T2V2.urdf` (21 joints driven, 62.73 kg); E3 | maker's models |
+| Actuators | Fourier's own: FSA (motor, driver, gearbox, encoder in one; dual encoders, E3). Fourier's programming reference names seven models, FSA130_20V0, FSA100_15V0, FSA80_10V0, FSA60_08V0, FSA36_10V0, FSA36_08V0, FSA25_08V0, and gearbox ratios of 7 to 120; **no mass**, and which model sits in which joint is not stated. "Seven distinct FSA" in the GR-2 (press release, second-hand), as many as its torque levels | FSA; roboticstomorrow.com, 2024-09-30 | maker, programming reference; press |
+| Battery | "≈950 Wh", "≤9 kg", 39.6 V (11 cells in series at 3.6 V, arith.) | E3 | maker, spec |
+| Boards | Intel Core i7 (14 cores) and an 8-core ARM perception board | E3 | maker, spec |
+| Sensors | binocular camera, 6-axis IMU, microphone, speaker | E3 | maker, spec |
+| Structure | "铝合金+工程塑料" (aluminium alloy and engineering plastics; no shares) | E3 | maker, spec |
+| Mass, height | "≈63 kg", 1750 mm | E3 | maker; the register 65 kg (humanoid.guide), 175 cm |
+
+### E6.5 Fourier GR-1 (116)
+
+| What | Value as given | Source | Kind |
+|---|---|---|---|
+| Joints | 32 FSA, "总执行器数量 44/34" (44 or 34 actuators with the hands), "最大关节扭矩 230N.m" (E3). **The two model files disagree on the legs:** `GR1T2.urdf` (fourier_lab, legs only driven) hip pitch and knee 225 N·m, hip yaw 66, hip roll 48, ankle roll 30, ankle pitch 15; `gr1t2.urdf` (Wiki-GRx-Models, all 32 driven) hip pitch and knee 135, hip roll 84.18, hip yaw 65, ankles 41.67 (4), waist 65 (3), shoulder pitch and roll 38.46 (4), shoulder yaw and elbow 30.3 (4), wrist yaw 13.17 (2), wrist roll and pitch 5.25 (4), head 5.25 (3). The maker's 230 N·m fits the first | E3; the two models (both 54.53 kg) | maker, spec; maker's models |
+| Actuators | FSA, as the GR-2 (no mass stated) | FSA | maker |
+| Battery | "483Wh", 40 V | E3 | maker, spec |
+| Boards | i7-13700H; in the torso a power management module, a switch board, the motion controller | E3 | maker, spec |
+| Sensors | RealSense depth camera, IMU | E3 | maker, spec |
+| Structure | "铝合金+工程塑料" | E3 | maker, spec |
+| Mass, height | "≈52kg", 1650 mm | E3 | maker; the register 55 kg (humanoid.guide), 165 cm |
+
+### E6.6 Batch 1 together: what the sources give, and what is missing
+
+| Robot | Joints: count and torques | Actuator masses | Battery | Boards | Sensors | Structure | Mass from the maker |
+|---|---|---|---|---|---|---|---|
+| 120 H2 | 31, model and page | no | 972 Wh, 18 in series | named | named | Al, Ti, plastics | about 70 kg; model 75.59 |
+| 121 H2 Plus | 31 + 44 hand joints, model | no | as the H2 | as the H2, with PC3 | named | as the H2 | not stated; model 77.24 |
+| 119 H1-2 | 27, model and page (they differ) | the M107, 1.9 kg, at which joints not stated | 864 Wh, 16 in series | named | MID-360, D435 | not stated | about 70 kg; model 67.37 |
+| 117 GR-2 | 29, model | no | 950 Wh, ≤ 9 kg | named | named | Al, plastics | ≈63 kg; models 62.73, 62.98 |
+| 116 GR-1 | 32, two models that differ | no | 483 Wh | named | named | Al, plastics | ≈52 kg; models 54.53 |
+
+**Searched, not found:** the mass of any Fourier FSA (Fourier's site, its download centre, which lists only the newer
+robots' brochures, its GitHub repositories, its programming reference, searches in English and Chinese); the motors of
+the H2; a teardown or parts list of any of the five (E3); any battery pack's mass but the GR-2's; board sizes; the
+cables inside.
+
+**The one large joint with a stated mass:** the M107, 1.9 kg at 360 N·m (Unitree, the same kind: an internal-rotor
+PMSM joint of a full-size humanoid). Type 1's fit (E2.8e, 0.121 kg × torque^0.441, from AgiBot's three actuators up
+to 200 N·m) gives 1.62 kg at 360 N·m, 15 % below it: a check only, not used.
+
+**For Matthias, before the proposal** (the method agreed for type 1, E5.12, E5.14, E5.17, then applies):
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | The H1-2: with hands or without? Unitree sells them as an option | without, as sold; its hands as their own rows only if he wants them |
+| 2 | The GR-1's legs: which of Fourier's two model files? | `GR1T2.urdf` (225 N·m): it fits the maker's "230N.m"; the arms from `gr1t2.urdf`, the only file with them |
+| 3 | The H2 Plus's mass: the maker gives none; the register has 68 kg (humanoid.guide) | the H2's "About 70kg" and its two hands, their mass the models' difference, 77.24 − 75.59 = 1.65 kg (E); the register's 68 kg reported, not changed |
+
 ## E5. Each robot of type 1 its own composition: research, batch 1 of 4 (2026-10-29). Entered 2026-10-29 (E5.20)
 
 ### E5.22 Type 1's last open parts: the X1's newer parts list, its found parts, the N1's switch, the XT connectors (2026-10-29). Entered on his word

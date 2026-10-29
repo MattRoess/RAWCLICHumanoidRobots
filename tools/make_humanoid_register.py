@@ -26,13 +26,14 @@ Beside the sheet Robots (all robots), the sheet Type 1: every robot whose types 
 second type, with every cell of its row in Robots and one more, "In the run": what 02_composition.py does with it
 (drawn with its own rows of the parts file, which every robot of type 1 has since 2026-10-29). 02 draws robot type 1
 over the robots of this sheet; 01 checks that it lists exactly the robots of type 1 of the sheet Robots, as they
-are there.
+are there. The sheet Type 2 the same for robot type 2 (2026-10-29), none of its robots taken apart yet: 02 draws type
+2 from the workbook, and the sheet says so of each.
 
 WHAT IT READS AND WRITES
 ------------------------
 It reads the catalogue (`data.humanoid_guide`, data/raw/humanoid_guide_2026-10-28.xlsx, sheet Catalogue) and writes one
-file, the path of `data.register` (data/researched/humanoid_register.xlsx, git-ignored; sheets About, Robots and
-Type 1), replacing the file there.
+file, the path of `data.register` (data/researched/humanoid_register.xlsx, git-ignored; sheets About, Robots, Type 1
+and Type 2), replacing the file there.
 
 WHERE IT SITS
 -------------
@@ -78,16 +79,19 @@ ABOUT = [
     'Sheet Type 1: every robot of the sheet Robots whose types include 1 (leading or second), with every cell of its '
     'row there, and "In the run": what 02_composition.py does with it, "drawn: its own parts". 02 draws robot type 1 '
     'over the robots of this sheet, each as often.',
+    'Sheet Type 2: every robot whose types include 2, as the sheet Type 1; none of them taken apart yet, so 02 draws '
+    'robot type 2 from the workbook, "In the run" says so of each (2026-10-29).',
 ]
 
-# --- Type 1 ---------------------------------------------------------------------------------------------------------
-# The robot type whose robots are listed in a sheet of their own, and that sheet's name. Matthias, 2026-10-29: "For now
-# it has to be just all for type 1."
-TYPE_ONE = 1
-TYPE_ONE_SHEET = 'Type 1'
-# What the sheet Type 1 says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same three).
+# --- The sheets of robot types --------------------------------------------------------------------------------------
+# The robot types whose robots are listed in a sheet of their own, "Type n". Matthias, 2026-10-29: "For now it has to
+# be just all for type 1"; then for type 2, "Yes, as proposed" (type 2 as type 1, step 5).
+TYPES_LISTED = (1, 2)
+TYPE_SHEET = 'Type {}'
+# What a sheet Type n says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same three).
 IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'   # no robot of type 1 since 2026-10-29: each has a mass and its own rows
+IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'   # type 2 for now
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
 HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
@@ -543,17 +547,22 @@ def types_of(row: list) -> list:
     return [int(t) for t in (piece.strip() for piece in row[HEADINGS.index('Types')].split(',')) if t]
 
 
-def in_the_run(row: list) -> str:
-    """What 02_composition.py does with a robot of type 1 (its row of the register): drawn with its own rows of the
-    parts file, where it has them (every robot of type 1 since 2026-10-29); not drawn, where it has none (01 then
-    reports it)."""
-    return IN_RUN_OWN if row[HEADINGS.index('Taken apart as')] else IN_RUN_NOT
+def in_the_run(row: list, any_apart: bool) -> str:
+    """What 02_composition.py does with a robot of a type (its row of the register), `any_apart` whether any robot of
+    the type is taken apart: drawn with its own rows of the parts file, where it has them (every robot of type 1 since
+    2026-10-29); where it has none, not drawn (01 then reports it), or, while none of its type is taken apart, its type
+    drawn from the workbook (type 2 for now)."""
+    if row[HEADINGS.index('Taken apart as')]:
+        return IN_RUN_OWN
+    return IN_RUN_NOT if any_apart else IN_RUN_WORKBOOK
 
 
-def type_one_rows(rows: list) -> list:
-    """The rows of the sheet Type 1: every robot of the register whose types include 1, in the register's order, each
-    its row of the sheet Robots and what the run does with it."""
-    return [row + [in_the_run(row)] for row in rows if TYPE_ONE in types_of(row)]
+def type_rows(rows: list, robot_type: int) -> list:
+    """The rows of the sheet of `robot_type`: every robot of the register whose types include it, in the register's
+    order, each its row of the sheet Robots and what the run does with it."""
+    of_type = [row for row in rows if robot_type in types_of(row)]
+    any_apart = any(row[HEADINGS.index('Taken apart as')] for row in of_type)
+    return [row + [in_the_run(row, any_apart)] for row in of_type]
 
 
 def write_sheet(sheet, headings: list, rows: list, widths: list) -> None:
@@ -569,9 +578,9 @@ def write_sheet(sheet, headings: list, rows: list, widths: list) -> None:
     sheet.freeze_panes = 'C2'
 
 
-def build(path: str, params: Params) -> int:
-    """Write the register to `path`: the sheets About, Robots (every robot) and Type 1 (every robot of type 1).
-    Returns the number of robots in the sheet Type 1."""
+def build(path: str, params: Params) -> dict:
+    """Write the register to `path`: the sheets About, Robots (every robot) and a sheet Type n for each type of
+    TYPES_LISTED (every robot of that type). Returns the number of robots of each listed type."""
     book = openpyxl.Workbook()
     about = book.active
     about.title = 'About'
@@ -582,12 +591,16 @@ def build(path: str, params: Params) -> int:
     about.column_dimensions['A'].width = ABOUT_WIDTH
     rows = register_rows(read_catalogue(absolute(params.data.humanoid_guide)))
     write_sheet(book.create_sheet('Robots'), HEADINGS, rows, WIDTHS)
-    # The same robots' rows again, those of type 1 only, with what the run does with each: one list of decisions.
-    listed = type_one_rows(rows)
-    write_sheet(book.create_sheet(TYPE_ONE_SHEET), HEADINGS + ['In the run'], listed, WIDTHS + [IN_RUN_WIDTH])
+    # The same robots' rows again, those of each listed type, with what the run does with each: one list of decisions.
+    counts = {}
+    for robot_type in TYPES_LISTED:
+        listed = type_rows(rows, robot_type)
+        write_sheet(book.create_sheet(TYPE_SHEET.format(robot_type)), HEADINGS + ['In the run'], listed,
+                    WIDTHS + [IN_RUN_WIDTH])
+        counts[robot_type] = len(listed)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     book.save(path)
-    return len(listed)
+    return counts
 
 
 def output_path(params: Params) -> str:
@@ -599,9 +612,9 @@ def main() -> int:
     """Press Run: build the register from 00's settings."""
     params = current()
     path = output_path(params)
-    listed = build(path, params)
-    print(f'{len(DECISIONS)} robots written to {params.data.register}, sheet Robots; {listed} of them of robot type '
-          f'{TYPE_ONE} also in the sheet {TYPE_ONE_SHEET}.')
+    counts = build(path, params)
+    listed = '; '.join(f'{n} of robot type {t} also in the sheet {TYPE_SHEET.format(t)}' for t, n in counts.items())
+    print(f'{len(DECISIONS)} robots written to {params.data.register}, sheet Robots; {listed}.')
     return 0
 
 

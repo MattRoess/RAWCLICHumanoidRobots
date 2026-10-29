@@ -5,6 +5,26 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V81. His run of 16:38 read back; the register's sheet Type 2 and the check of every type's sheet
+
+- **Times, against the code's:** the builder 16:38:57, 01 16:39:07 to 16:39:08, 02 16:39:30 to 16:39:52; the code of
+  all three committed at 16:36:53 (`bfdfdfc`). Every stage after its code: the run holds V80. My first edit after it
+  (the register's sheet Type 2) is of 16:40:35, after his run had ended.
+- **His results (200,000 draws):** copper (element) 2.042 kg at the mean (2.071 in V79: −29 g, the connectors'
+  contacts now brass), zinc 0.245 kg (+15 g, the brass), bromine 51.2 g, neodymium 260.7 g; as V80's sandbox said
+  (copper −45 g there at 3,000 draws, the rest chance).
+- **The sheet Type 2** (on "commit and push and then to typ 2", then "Yes, as proposed", point A: "first the
+  register's sheet Type 2"): `tools/make_humanoid_register.py` writes one sheet per type listed (1 and 2), each robot
+  with its In the run; a type none of whose robots is taken apart yet says "not drawn: its type drawn from the
+  workbook, none of its robots taken apart yet". 01's check of the sheet is now one check for every sheet "Type n"
+  (it was for type 1 only).
+- **Tests first** (failed, then passed): the builder writes 97 robots into Type 2, each "not drawn: its type drawn from
+  the workbook"; 01 finds a robot missing from a type's sheet, one too many, and a wrong In the run, in type 2 as in
+  type 1.
+- **Tests:** 316; all pass but `test_what_it_writes_equals_the_register_on_disk`, which waits for his run of the
+  register builder.
+- **Not covered:** his run of the register builder and of 01 with the new sheet.
+
 ### V80. Type 1's last open parts entered: the X1 by its newer lists, the N1's switch, the XT30 a mated pair of brass
 
 - **What, on his words:** "Yes, 1 to 5", then "Yes, enter all" (EVIDENCE.md E5.22). Downloaded on his yes, each into

@@ -1768,17 +1768,21 @@ def register_cells(n, robot, low, mode, high, types, form, entry, apart):
             'the stated mass +- 1 kg', types, form, entry, apart, 'E4.1', 'https://example.org']
 
 
-def in_the_run(row) -> str:
-    """What the sheet Type 1 says of a robot in 02's run: drawn with its own parts (taken apart), or not drawn (no
-    mass stated)."""
+def in_the_run(row, any_apart: bool = True) -> str:
+    """What a sheet Type n says of a robot in 02's run, as the register's builder writes it: drawn with its own parts
+    (taken apart); not drawn (no mass stated); or, where none of its type is taken apart (`any_apart` false), its type
+    drawn from the workbook."""
     n, robot, low, mode, high, types, form, entry, apart = row
-    return 'drawn: its own parts' if apart else 'not drawn: no mass stated'
+    if apart:
+        return 'drawn: its own parts'
+    return 'not drawn: no mass stated' if any_apart else schemas.IN_RUN_WORKBOOK
 
 
-def build_register(path, rows=None, headings=None, type_one=None, without_type_one=False):
+def build_register(path, rows=None, headings=None, type_one=None, without_type_one=False, type_two=None):
     """A small register in the layout of data/researched/humanoid_register.xlsx: the sheet Robots, and the sheet Type 1
     with every robot of type 1 and what the run does with it. `type_one` replaces the rows of the sheet Type 1 (each a
-    row of REGISTER_ROWS and its 'In the run'); `without_type_one` leaves the sheet out."""
+    row of REGISTER_ROWS and its 'In the run'); `without_type_one` leaves the sheet out; `type_two`, where given, the
+    rows of a sheet Type 2 (as `type_one`)."""
     rows = REGISTER_ROWS if rows is None else rows
     book = Workbook()
     book.active.title = 'About'
@@ -1789,8 +1793,14 @@ def build_register(path, rows=None, headings=None, type_one=None, without_type_o
     if not without_type_one:
         listed = book.create_sheet('Type 1')
         listed.append(REGISTER_HEADINGS + ['In the run'])
-        of_type = [(r, in_the_run(r)) for r in rows if '1' in [t.strip() for t in r[5].split(',')]]
+        typed = [r for r in rows if '1' in [t.strip() for t in r[5].split(',')]]
+        of_type = [(r, in_the_run(r, any(t[8] for t in typed))) for r in typed]
         for row, run in (of_type if type_one is None else type_one):
+            listed.append(register_cells(*row) + [run])
+    if type_two is not None:
+        listed = book.create_sheet('Type 2')
+        listed.append(REGISTER_HEADINGS + ['In the run'])
+        for row, run in type_two:
             listed.append(register_cells(*row) + [run])
     book.save(path)
 
@@ -1897,7 +1907,7 @@ class TestRegister(unittest.TestCase):
         register = schemas.read_register(path)
         self.assertEqual([f.text for f in schemas.check_register(register, params, list(apart.robots))], [])
         type_one = schemas.read_type_sheet(path, 1)
-        self.assertEqual([f.text for f in schemas.check_type_one(register, type_one, params)], [])
+        self.assertEqual([f.text for f in schemas.check_type_sheet(register, type_one, 1, params)], [])
 
 
 class TestGradeRecipes(unittest.TestCase):
@@ -1957,7 +1967,7 @@ class TestTypeOneSheet(unittest.TestCase):
             path = os.path.join(folder, 'register.xlsx')
             build_register(path, rows, type_one=type_one)
             register, listed = schemas.read_register(path), schemas.read_type_sheet(path, 1)
-        return schemas.check_type_one(register, listed, Params())
+        return schemas.check_type_sheet(register, listed, 1, Params())
 
     def assertFaultSays(self, faults, words):
         self.assertTrue(any(words in f.text for f in faults), msg=[f.text for f in faults])
@@ -1974,6 +1984,30 @@ class TestTypeOneSheet(unittest.TestCase):
 
     def test_a_sheet_that_lists_every_robot_of_type_1(self):
         self.assertEqual([f.text for f in self.faults(self.ROWS)], [])
+
+    # Two robots of type 2, none taken apart (2026-10-29, "Yes, as proposed": a sheet for type 2 as for type 1).
+    TYPE_TWO = [(8, 'Robot G', 64, 65, 66, '2', 'legs', '', ''), (9, 'Robot H', 69, 70, 71, '2, 3', 'wheels', '', '')]
+
+    def type_two_faults(self, runs):
+        """01's check of the whole register (every sheet Type n it holds), its sheet Type 2 the two robots with
+        `runs`."""
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS + self.TYPE_TWO, type_two=list(zip(self.TYPE_TWO, runs)))
+            self.assertEqual(schemas.type_sheet_numbers(path), [1, 2])
+            return schemas.check_type_sheets(path, schemas.read_register(path), Params())
+
+    def test_a_type_none_of_whose_robots_is_taken_apart_is_drawn_from_the_workbook(self):
+        self.assertEqual([f.text for f in self.type_two_faults([schemas.IN_RUN_WORKBOOK] * 2)], [])
+        self.assertFaultSays(self.type_two_faults([schemas.IN_RUN_WORKBOOK, schemas.IN_RUN_OWN]),
+                             "9 Robot H: 'In the run' is 'drawn: its own parts'")
+
+    def test_a_robot_of_type_2_missing_from_its_sheet(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS + self.TYPE_TWO, type_two=[(self.TYPE_TWO[0], schemas.IN_RUN_WORKBOOK)])
+            faults = schemas.check_type_sheets(path, schemas.read_register(path), Params())
+        self.assertFaultSays(faults, '9 Robot H: a robot of type 2')
 
     def test_it_is_read_robot_by_robot_with_what_the_run_does(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -106,7 +106,17 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(len(listed), 31)
         self.assertIn(54, [r.number for r in listed])    # the Booster T1, 1.18 m: kept in type 1 (2026-10-29)
         self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, its mass an estimate (E5.17)
-        self.assertEqual([f.text for f in schemas.check_type_one(self.register, listed, Params())], [])
+        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 1, Params())], [])
+
+    def test_the_sheet_type_2_lists_every_robot_of_type_2_drawn_from_the_workbook_for_now(self):
+        # Matthias, 2026-10-29, "Yes, as proposed" (type 2 as type 1, step 5: its robots all listed): every robot whose
+        # types include 2, leading or second; none of them taken apart yet, so 02 draws type 2 from the workbook, and
+        # the sheet says so of each.
+        listed = schemas.read_type_sheet(self.path, 2)
+        self.assertEqual([r.number for r in listed], [r.number for r in self.register if 2 in r.types])
+        self.assertEqual(len(listed), 97)
+        self.assertEqual({r.in_run for r in listed}, {schemas.IN_RUN_WORKBOOK})
+        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params())], [])
 
     def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
         listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}

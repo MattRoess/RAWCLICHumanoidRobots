@@ -45,9 +45,9 @@ projects' files it names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_c
 `data.data_center_element_composition`, `data.traction_motor_magnets`, `data.traction_motor_steels`), read where they
 lie, and its grades against the element recipes. It reads the register `data.register`
 (`data/researched/humanoid_register.xlsx`, written by tools/make_humanoid_register.py): its sheet Robots, every known
-humanoid robot with its robot types, and its sheet Type 1, every robot of type 1 with what 02's run does with it,
-checked against the sheet Robots (`check_register`, `check_type_one`). And it looks in `data.sources_dir`
-(`documentation/sources/`) for the report of each category.
+humanoid robot with its robot types, and its sheets Type 1 and Type 2, every robot of that type with what 02's run
+does with it, checked against the sheet Robots (`check_register`, `check_type_sheets`). And it looks in
+`data.sources_dir` (`documentation/sources/`) for the report of each category.
 
 WHAT IT CHECKS
 --------------
@@ -200,10 +200,11 @@ CHECKS_DONE = [
     'robot types of the six, a robot without has an entry saying why (not assigned, or the same robot as an entry '
     'with types); every form known; every mass min, mode and max or none, in order; no robot of type 1 below its '
     'lowest mass (15 kg); every robot it names taken apart (each version) in the parts file and of type 1.',
-    "The register's sheet Type 1: every robot of type 1 of the sheet Robots, leading or second type, listed once and "
-    'nothing else, every cell as in the sheet Robots; its "In the run" what 02 does with it: its own parts for a robot '
-    'with rows in the parts file, not drawn for a robot without a mass; a robot with a mass and no rows of its own is '
-    'a fault where any robot of type 1 has rows.',
+    "The register's sheets Type 1 and Type 2: every robot of the type of the sheet Robots, leading or second type, "
+    'listed once and nothing else, every cell as in the sheet Robots; its "In the run" what 02 does with it: its own '
+    'parts for a robot with rows in the parts file, not drawn for a robot without a mass, or drawn from the workbook '
+    'while none of its type is taken apart; a robot with a mass and no rows of its own is a fault where any robot of '
+    'its type has rows.',
 ]
 
 # What the checks cannot tell, said on faults.png so that "No fault found" is not read as more than it is.
@@ -2181,10 +2182,12 @@ MOST_TYPES = 2   # "Double assignment means 1 robot can be two types" (Matthias,
 TYPE_SHEET = 'Type {}'
 IN_RUN = 'In the run'
 TYPE_SHEET_HEADINGS = REGISTER_HEADINGS + [IN_RUN]
-# What the sheet Type 1 says of a robot in 02's run (tools/make_humanoid_register.py writes the same): drawn with its
-# own rows of the parts file, or not drawn (no mass stated).
+# What a sheet Type n says of a robot in 02's run (tools/make_humanoid_register.py writes the same): drawn with its own
+# rows of the parts file, or not drawn (no mass stated), or not drawn as its type is drawn from the workbook, none of
+# its robots taken apart yet (type 2 since 2026-10-29).
 IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'
+IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
 
 
 @dataclass
@@ -2314,22 +2317,25 @@ def check_register(register: list, params: Params, taken_apart: list) -> list[Fa
     return faults
 
 
-def check_type_one(register: list, listed: list, params: Params) -> list[Fault]:
-    """Whether the sheet Type 1 (`listed`) lists every robot of type 1 of the sheet Robots (`register`), leading or
-    second type, each once and nothing else, every cell as in the sheet Robots; and whether its "In the run" says what
-    02 does with it: its own parts where it has rows of its own in the parts file, else not drawn. Where any robot of
-    type 1 has its own rows, every one with a mass must (since 2026-10-29 02 draws a robot of type 1 from its own rows
-    only); where none has, type 1 is drawn from the workbook."""
-    where = os.path.basename(params.data.register) + ': ' + TYPE_SHEET.format(1)
-    of_type = {r.number: r for r in register if 1 in r.types}
+def check_type_sheet(register: list, listed: list, robot_type: int, params: Params) -> list[Fault]:
+    """Whether the sheet Type n of `robot_type` (`listed`) lists every robot of that type of the sheet Robots
+    (`register`), leading or second type, each once and nothing else, every cell as in the sheet Robots; and whether its
+    "In the run" says what 02 does with it: its own parts where it has rows of its own in the parts file. Where any
+    robot of the type has its own rows, every one with a mass must (since 2026-10-29 02 draws a type from its robots'
+    own rows only), and one without a mass is not drawn; where none has, the type is drawn from the workbook and each of
+    its robots says so (IN_RUN_WORKBOOK; type 2 until its robots are taken apart, 2026-10-29, "Yes, as proposed")."""
+    where = os.path.basename(params.data.register) + ': ' + TYPE_SHEET.format(robot_type)
+    of_type = {r.number: r for r in register if robot_type in r.types}
     numbers = [r.number for r in listed]
+    any_apart = any(o.taken_apart for o in listed)
     faults = []
     for r in listed:
         what = f'{r.number} {r.name}'
         if numbers.count(r.number) > 1:
             faults.append(Fault(where, r.row, f'{what}: listed twice.'))
         if r.number not in of_type:
-            faults.append(Fault(where, r.row, f'{what}: not a robot of type 1 in the sheet {REGISTER_SHEET}.'))
+            faults.append(Fault(where, r.row, f'{what}: not a robot of type {robot_type} in the sheet '
+                                              f'{REGISTER_SHEET}.'))
             continue
         differ = [h for h, a, b in zip(REGISTER_HEADINGS, r.cells, of_type[r.number].cells) if a != b]
         if differ:
@@ -2339,18 +2345,38 @@ def check_type_one(register: list, listed: list, params: Params) -> list[Fault]:
             if r.in_run != IN_RUN_OWN:
                 faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but a robot taken apart is "
                                                   f"drawn with its own parts ('{IN_RUN_OWN}')."))
+        elif not any_apart:
+            if r.in_run != IN_RUN_WORKBOOK:
+                faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but none of the type's "
+                                                  f"robots is taken apart, so it is drawn from the workbook "
+                                                  f"('{IN_RUN_WORKBOOK}')."))
         elif None not in r.mass:
-            if any(o.taken_apart for o in listed):
-                faults.append(Fault(where, r.row, f'{what}: a robot of type 1 with a mass and no rows of its own in '
-                                                  f'{os.path.basename(params.data.parts_taken_apart)}; 02 draws a '
-                                                  'robot of type 1 from its own rows only.'))
+            faults.append(Fault(where, r.row, f'{what}: a robot of type {robot_type} with a mass and no rows of its '
+                                              f'own in {os.path.basename(params.data.parts_taken_apart)}; 02 draws a '
+                                              'type from its robots\' own rows only.'))
         elif r.in_run != IN_RUN_NOT:
             faults.append(Fault(where, r.row, f"{what}: '{IN_RUN}' is '{r.in_run}', but a robot without a stated "
                                               f"mass is not drawn ('{IN_RUN_NOT}')."))
     for number, r in of_type.items():
         if number not in numbers:
-            faults.append(Fault(where, 0, f'{number} {r.name}: a robot of type 1 in row {r.row} of the sheet '
-                                          f'{REGISTER_SHEET}, missing here.'))
+            faults.append(Fault(where, 0, f'{number} {r.name}: a robot of type {robot_type} in row {r.row} of the '
+                                          f'sheet {REGISTER_SHEET}, missing here.'))
+    return faults
+
+
+def type_sheet_numbers(path: str) -> list:
+    """The robot types whose sheet "Type n" the register at `path` holds, in order."""
+    book = load_workbook(path, read_only=True)
+    names = book.sheetnames
+    book.close()
+    return sorted(int(m.group(1)) for m in (re.fullmatch(r'Type (\d+)', n) for n in names) if m)
+
+
+def check_type_sheets(path: str, register: list, params: Params) -> list[Fault]:
+    """check_type_sheet for every sheet "Type n" of the register at `path` (types 1 and 2 since 2026-10-29)."""
+    faults = []
+    for robot_type in type_sheet_numbers(path):
+        faults += check_type_sheet(register, read_type_sheet(path, robot_type), robot_type, params)
     return faults
 
 
@@ -3854,9 +3880,9 @@ def main() -> int:
         print(f'{error} The register is not checked.')
     if register is not None:
         try:
-            faults += check_type_one(register, read_type_sheet(absolute(params.data.register), 1), params)
+            faults += check_type_sheets(absolute(params.data.register), register, params)
         except WorkbookError as error:
-            print(f'{error} Its sheet Type 1 is not checked.')
+            print(f'{error} Its sheets of robot types are not checked.')
     sources = absolute(params.data.sources_dir)
     reports = {c.number: category_report(c.number, sources) for c in book.categories}
     out = absolute(params.output.schemas_dir)
