@@ -537,9 +537,12 @@ page the centre of a distribution is its median, a solid line, and its mean, a d
   robots (answer E, "Groups, histograms"), two elements a page in the same order: left the robot (01's body shapes)
   with its joint groups numbered on both sides (a red ring where their magnets are for 150 °C) and its other kinds
   lettered, a short key below; right the two elements one above the other, one row per kind of part holding it,
-  labelled with its mark on the robot ("1  Hip joints", "A  Battery pack"), each row a histogram of its kg scaled to
-  the row, the median and the mean in two columns of numbers at the right, hatched where more than half the mean rests
-  on parts whose mass is an estimate (label E).
+  labelled with its mark on the robot ("1  Hip joints", "A  Battery pack"), each row a histogram of its kg over the
+  draws in which that kind of part holds the element, scaled to the row, at the right three columns: the median and
+  the mean of those draws and "held in", in what share of all the draws it holds it (the waist 96 %, the head 76 to
+  83 %, the torso boards' aluminium 41 %, the cables' silver, gold, palladium and tantalum 10 %, the head's indium
+  33 %; Matthias, 2026-10-29, "Yes, do it"); hatched where more than half the mean rests on parts whose mass is an
+  estimate (label E).
 
 In both, a kind of part holding an element in fewer than 2.5 % of the draws is not drawn. On the element figure, an
 element that is 0 in some draws (indium: in the head of some robots only) shows the draws that hold it and, right of

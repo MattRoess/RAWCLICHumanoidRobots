@@ -5,6 +5,25 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V75. The overview's rows: the draws in which a kind of part holds the element, and in what share of the draws
+
+- **What, on his words:** "Yes, do it", to the overview's rows of a kind of part that holds an element in only some
+  draws (seen in V74: the torso boards' aluminium, median 0).
+- **Built** (02, `ridge_panel`): each row the histogram of the draws in which the kind of part holds the element, its
+  median, mean and 95 % lines of those draws; a third column "held in", in what share of all the draws (100 % where in
+  every draw). The panels 0.38 of the page wide (0.42 before) and their columns at 1.01, 1.18 and 1.35 of the panel's
+  width (`OVERVIEW_COLUMNS`), so that three columns fit; the figures of where a material sits keep their two
+  (`NUMBER_COLUMNS`). The notes page of the figures says it, once.
+- **Rows held in some draws** (real inputs, 3,000 draws): the waist 96 % (a robot without waist joints), the head 76
+  to 83 %, the torso boards' aluminium 41 % (median 0.000022 kg, mean 0.019 kg: a trace in the board metals in some
+  robots, a heat sink of aluminium in others), the cables' silver, gold, palladium and tantalum 10 %, the head's indium
+  33 %.
+- **Test (new):** on the five overview pages as 02 draws them, every row's median is that of the draws that hold it,
+  its share is written, every number is within the page and clear of every other. The last check caught, after the
+  first try, the torso boards' "0.000022" running into its mean; fixed by the wider columns. 291 tests pass.
+- **Looked at:** overview pages 1, 2 and 5 (scratch folder).
+- **Not covered:** his run. Committed and pushed on his word ("Commit and push"), after `946c0a5` (V69 to V74).
+
 ### V74. Elements 0 in some draws show the draws that hold them; the parts figures' footnotes once on a notes page
 
 - **What, on his words:** "I told you I want to see the distribution not just the 0 value for vanadium and lead" (the

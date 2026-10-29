@@ -1777,9 +1777,13 @@ HELD_SHARE = 0.025    # a kind of part holding an element in fewer draws than th
 # requires 18 at least). No footnote under a page: the notes are once, on a page of their own, the first of the folder
 # (Matthias, 2026-10-29: "parts taken apart show each a long legend, you know, what I think about this").
 FIGURE_TITLE_WIDTH = 30   # characters in a line of an element page's panel title; a longer one takes two lines
-# The overview's panels: their width (share of the page), and where their two columns of numbers start, the median's
-# and the mean's (share of the panel's width beyond its right edge), so that both stay within the page.
-PANEL_WIDTH = 0.42
+# The overview's panels: their width (share of the page), and where their three columns of numbers start, the
+# median's, the mean's and in what share of the draws the kind of part holds the element (share of the panel's width
+# beyond its right edge), so that all three stay within the page and a number of eight characters (0.000022) clears
+# the next (2026-10-29, "Yes, do it": the third column, the panels 0.42 of the page before). The figures of where a
+# material sits keep their two columns, NUMBER_COLUMNS.
+PANEL_WIDTH = 0.38
+OVERVIEW_COLUMNS = (1.01, 1.18, 1.35)
 NUMBER_COLUMNS = (1.02, 1.20)
 ELEMENT_PAGES = [FIGURE_ELEMENTS[:6], FIGURE_ELEMENTS[6:]]                                # three panels across
 OVERVIEW_PAGES = [FIGURE_ELEMENTS[k:k + 2] for k in range(0, len(FIGURE_ELEMENTS), 2)]    # two elements a page
@@ -1896,9 +1900,12 @@ def element_page(d: Draws, page: list, number: int):
 
 def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     """One panel of the overview: one row per kind of part holding the element, labelled with its mark on the robot,
-    each the histogram of its kg over the draws scaled to the row, hatched where more than half its mean rests on
-    masses labelled E; the median a solid line and the mean a dotted one, their numbers in two columns at the right
-    (answer "Both, median first"); the 2.5th and 97.5th percentile dashed; one scale and unit for the panel."""
+    each the histogram of its kg over the draws that hold it scaled to the row, hatched where more than half its mean
+    rests on masses labelled E; the median a solid line and the mean a dotted one (answer "Both, median first"), the
+    2.5th and 97.5th percentile dashed, all of the draws that hold it; at the right three columns: the median, the mean
+    and in what share of the draws the kind of part holds the element (Matthias, 2026-10-29, "Yes, do it", to the
+    overview's rows as the element panels: a kind of part holding it in only some draws showed a median of 0); one
+    scale and unit for the panel."""
     shown = [k for k in KINDS if k in kinds and held(kinds[k])]
     axes.set_title(title, fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
     if not shown:
@@ -1907,11 +1914,12 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         axes.axis('off')
         return
     per, unit = panel_unit(sum(kinds[k] for k in shown))
-    top = max(np.percentile(kinds[k], 99.9) for k in shown) / per
+    holding = {k: kinds[k][kinds[k] > 0] for k in shown}   # the draws in which the kind of part holds the element
+    top = max(np.percentile(holding[k], 99.9) for k in shown) / per
     edges = np.linspace(0, top if top > 0 else 1, 51)
     right = blended_transform_factory(axes.transAxes, axes.transData)
     for row, kind in enumerate(reversed(shown)):
-        values = kinds[kind] / per
+        values = holding[kind] / per
         counts, _ = np.histogram(np.clip(values, 0, edges[-1]), bins=edges)
         heights = 0.8 * counts / max(counts.max(), 1)
         hatched = float(estimated[kind].mean()) > 0.5 * float(kinds[kind].mean())
@@ -1922,10 +1930,12 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         axes.plot([mean, mean], [row + 0.05, row + 0.9], color=TYPE_ONE_INK, linewidth=1.8, linestyle=':')
         for bound in np.percentile(values, [2.5, 97.5]):
             axes.plot([bound, bound], [row + 0.05, row + 0.9], color=TYPE_ONE_INK, linewidth=1.2, linestyle='--')
-        for column, x in zip(NUMBER_COLUMNS, (median, mean)):
-            axes.text(column, row + 0.45, panel_number(x), transform=right, ha='left', va='center',
-                      fontsize=TYPE_ONE_TEXT, color=TYPE_ONE_INK)
-    for column, what in zip(NUMBER_COLUMNS, ('median', 'mean')):
+        share = holding[kind].size / kinds[kind].size
+        for column, number in zip(OVERVIEW_COLUMNS, (panel_number(median), panel_number(mean),
+                                                     f'{panel_number(100 * share)} %')):
+            axes.text(column, row + 0.45, number, transform=right, ha='left', va='center', fontsize=TYPE_ONE_TEXT,
+                      color=TYPE_ONE_INK)
+    for column, what in zip(OVERVIEW_COLUMNS, ('median', 'mean', 'held in')):
         axes.text(column, len(shown) + 0.1, what, transform=right, ha='left', va='bottom', fontsize=TYPE_ONE_TEXT,
                   color=TYPE_ONE_INK)
     axes.set_title(f'{title}, in {unit}', fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
@@ -1980,9 +1990,10 @@ def parts_notes(d: Draws) -> list:
         'smaller lower. Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit. An element that is 0 in some draws: '
         'its panel shows the draws that hold it and says in what share of all the draws it is held.',
-        "The overview pages: each row the element's weight in one kind of part over the draws, the height the share "
-        'of the draws scaled to the row, the lines as on the element pages, the median and the mean written at the '
-        'right. Hatched: more than half of the mean rests on parts whose mass is an estimate.',
+        "The overview pages: each row the element's weight in one kind of part over the draws that hold it, the "
+        'height the share of those draws scaled to the row, the lines as on the element pages, of those draws; at the '
+        "right their median and mean, and 'held in': in what share of all the draws the kind of part holds the "
+        'element. Hatched: more than half of the mean rests on parts whose mass is an estimate.',
         'On both: a kind of part holding the element in fewer than 2.5 % of the draws is not drawn.',
         robots_note(d),
         "The joints with their driver boards and encoders; the magnets' grade class (with it their dysprosium) drawn "

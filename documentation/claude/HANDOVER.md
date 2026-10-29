@@ -56,7 +56,8 @@ cells by their chemistry) and 01's robots table redone on "Yes, build it" (V73: 
 rest on, five cells of where the numbers come from; 287 tests pass). Then V74: elements 0 in some draws (lead,
 vanadium, indium …) show the draws that hold them; the parts figures' footnotes once on their notes page; type 1's
 notes, which ran off their page, on two pages (290 tests pass). **Committed and pushed** on his word ("Looks good
-commit and push"), 2026-10-29.
+commit and push"), 2026-10-29: `946c0a5`. After it, V75 on "Yes, do it": the overview's rows of the draws that hold
+the element, a column "held in" (291 tests pass); committed and pushed on his word ("Commit and push").
 
 1. **02** draws robot type 1's pages: notes, elements, and now materials (the steels by grade, the aluminium by alloy,
    the magnets in all and by grade class), its two figures of where its critical elements sit (until today 04), and

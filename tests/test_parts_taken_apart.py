@@ -517,6 +517,44 @@ class TestElementPages(unittest.TestCase):
             self.assertIn(f' median {composition.panel_number(np.median(total[held]) / per)} {unit}', texts)
         self.assertIn('In', partly)
 
+    def test_an_overview_row_held_in_some_draws_shows_the_draws_that_hold_it(self):
+        # Matthias, 2026-10-29, "Yes, do it": the same for the overview's rows, a kind of part holding the element in
+        # only some draws (aluminium in the torso boards: median 0 before). Its median and mean those of the draws that
+        # hold it; in what share of the draws, a third column; every number within the page.
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        partly, panels = [], []
+        for number, elements in enumerate(composition.OVERVIEW_PAGES, 1):   # the pages as 02 draws them
+            figure = composition.overview_page(d, elements, number)
+            figure.canvas.draw()
+            page = figure.bbox
+            for (symbol, _), axes in zip(elements, figure.axes[1:]):       # the robot first, then the panels
+                boxes = []
+                for t in axes.texts:   # every number within the page and clear of every other
+                    box = t.get_window_extent()
+                    self.assertTrue(all(page.contains(*c) for c in box.get_points()), msg=f'{symbol}: {t.get_text()}')
+                    for other, seen in boxes:
+                        self.assertFalse(box.overlaps(seen), msg=f'{symbol}: {t.get_text()} on {other}')
+                    boxes.append((t.get_text(), box))
+                panels.append((symbol, {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text()
+                                        for t in axes.texts}))
+            composition.plt.close(figure)
+        for symbol, at in panels:
+            kinds = composition.by_kind(d, symbol)
+            shown = [k for k in composition.KINDS if k in kinds and composition.held(kinds[k])]
+            if not shown:
+                continue
+            per, _ = composition.panel_unit(sum(kinds[k] for k in shown))
+            median_x, mean_x, share_x = (round(x, 3) for x in composition.OVERVIEW_COLUMNS)
+            for row, kind in enumerate(reversed(shown)):
+                held = kinds[kind] > 0
+                y = round(row + 0.45, 2)
+                self.assertEqual(at[(share_x, y)], f'{composition.panel_number(100 * held.mean())} %')
+                self.assertEqual(at[(median_x, y)], composition.panel_number(np.median(kinds[kind][held]) / per))
+                if not held.all():
+                    partly.append((symbol, kind))
+        self.assertIn(('Al', 'boards'), partly)
+
 
 class TestCentre(unittest.TestCase):
     """Matthias, 2026-10-28: "Showing the mean is wrong. It is not a good measure. Use the median or show boths", and
