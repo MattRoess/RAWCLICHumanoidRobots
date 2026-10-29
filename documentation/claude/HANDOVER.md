@@ -9,8 +9,8 @@ all the other one." Each step was taken for type 1 on his word, and each will be
 stands after it. Type 1 is not finished either: what is still open for it is said at each step.
 
 1. **The workbook's category, checked and drawn by 01:** its parts and materials, their sums, its anchor robot
-   (METHODOLOGY checks 1 to 11). Open for type 1: 01's pages show the anchor robot alone, not the type's robots, and
-   break his figure rules (V67).
+   (METHODOLOGY checks 1 to 11). Done for type 1: 01's pages redone by his rules, its robots in a table of their own
+   (V71, V73; the anchor robot alone and the broken rules found in V67).
 2. **Its parts and materials on the shared lists** (`data/researched/shared_lists.xlsx`): each part in a part group and
    a body region, each material in a shared material, a row holding several split by the sheet Splits (SHARED_LISTS.md).
 3. **The battery as cells only:** the cells counted from the pack's voltage and capacity with a cell sheet that fits the
@@ -18,7 +18,8 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
 4. **An element recipe for every material it holds**, sources first, ranked: the standard, then commercial analyses,
    university analyses only combined and with wide ranges (E1.1 to E1.9). Done: battery cells, plastics, fibre
    composites, aluminium, magnesium; for type 1 also its steels and titanium by grade, copper, brass and the nickel
-   strip (E5.18, E5.19). Open: electronics beyond the boards' metals, ceramics; for the other types all but the five.
+   strip (E5.18, E5.19). Open for type 1: its electronics beyond the boards' metals and the sensors' elements (0.82 kg
+   at the mean, "Partly" in its summary); it holds no ceramics. For the other types: ceramics and all but the five.
 5. **All its robots listed:** every known robot of the type in the register by his rules (E4: use first, size second,
    wheels accepted, at most two types ...), in a sheet of its own, "Type n", with "In the run" (V64: "For now it has to
    be just all for type 1"). Missing masses researched and estimated (E): the PrimeBOT Q1's (E5.17 point 6).
@@ -38,8 +39,10 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
    (METHODOLOGY "Robot type 1 over its robots, in 02").
 9. **Its pages by his figure rules:** a notes page once; element pages 16 × 9 inches, text 14 pt and up (18 px at least
    on a 1920 × 1080 screen); the median and the mean; the 95 % interval; Paul Tol's colours as published; no hydrogen,
-   nitrogen, oxygen or fluorine (V68); 04's two figures of the critical elements by kind of part; 01's pages showing
-   what the model does. Open: 01's pages (V67); the pages of types 2 to 6 in 02 (mean alone, not 16 × 9).
+   nitrogen, oxygen or fluorine (V68), for type 1 also no sodium, phosphorus or sulfur; the two figures of the critical
+   elements by kind of part (04 until 2026-10-29, now 02); 01's pages showing what the model does; an element or
+   material 0 in some draws shown by the draws that hold it. Done for type 1 (V71 to V75). Open: project words on 02's
+   notes page and 01's faults pages; the pages of types 2 to 6 in 02 (mean alone, not 16 × 9).
 10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
     in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
 
@@ -47,7 +50,45 @@ Already known for type 2: its robots with model files chosen ("Those with model 
 EVIDENCE E3); open: whether the H2 Plus is the H2 with optional hands, and joint masses above 200 N·m; 97 robots of
 type 2 in the register.
 
-## 2026-10-29, evening: 01's pages and overview, type 1's material pages, 04 in 02, pages of type 1 only (start here)
+## 2026-10-29, late afternoon: where robot type 1 stands (start here)
+
+Committed and pushed on his words ("Looks good commit and push", "Commit and push"): GitHub `main` = `5adfd02`
+(V69 to V75). His question: "Is there any open item for the type 1 robots?"; the answer below was checked against his
+run of 14:33 to 14:34 (200,000 draws) and the code's times, not against this document.
+
+### Open for robot type 1
+
+1. **His run of 02** (`/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`): his run of 14:34 holds
+   everything to V74; V75 (the overview's column "held in") came after it (02 changed 14:40:43). 00 and 01 have not
+   changed since his run.
+2. **Remainders below zero, reported, not cut** (`data/parts_taken_apart/summary.csv` of his run): 27 of them in some
+   draws; the largest the Booster K1 2 Ah's battery housing, busbars and wires in 1.6 % of its draws, then the Noetix
+   Bumi's frame 0.4 %, the PrimeBOT Q1's frame 0.23 %, the Bumi's battery housing 0.2 %, the rest 0.15 % or less. His
+   decision: accept, or have the K1 2 Ah looked at first.
+3. **Electronics only partly in the elements** (step 4 above): the boards' laminate and components beyond their
+   metals have no recipe yet. Research on his word.
+4. **Parts found in the research and not entered** (E5.14): the fans and heat sinks of 29 robots (in their frames'
+   remainder), the RP1's 30 V auxiliary battery, its bearings outside the actuators and the magnets in its covers, the
+   Sprout's time-of-flight sensors. Estimates to propose to him.
+5. **Type 1's part groups and body regions** placed by its ten kinds whole (`KIND_PART_GROUP`, `KIND_BODY_REGION` in
+   02): confirm, or place part by part. Asked 2026-10-28, no answer.
+6. **A robot of two types** in the statistics (in full, split, or one type drawn per draw); in type 1 the PrimeBOT Q1
+   (types 4 and 1). Asked 2026-10-28, no answer.
+7. **Project words on pages** (his rule: none): 02's notes page "EVIDENCE.md E2 and E5", "(E5.17 point 1)"; 01's faults
+   pages "(E)", "04_", "documentation/claude/EVIDENCE.md". The test of project words covers only 01's overview, notes
+   and type 1 pages. Mine to fix, on his word.
+
+### Settled since the sections below were written
+
+- **The leftovers on disk** listed in the evening's point 5 (the old overview and faults pages, type 1's former anchor
+  pages, the table's third page, the old notes page, the pages of types 2 to 6): none of them is on disk any more.
+- **His runs:** 00 (`params.xlsx` 14:33:41), 01 (14:33:48 to 14:33:49, "No fault found in the inputs"), 02 (14:34:09
+  to 14:34:37, 200,000 draws). The parts file (11:53:54) and the register (11:53:41) are newer than their builders'
+  last changes (11:17:04, 10:40:07): no builder to rerun. The afternoon's list of runs (with 04, now removed) is done.
+- **Of 2026-10-28's open points:** 1 (the leftovers of the move, removed), 2 (the PrimeBOT Q1's mass, E5.17 point 6),
+  3 (the steel and titanium recipes, E5.18, E5.19), 5 (the footnotes, V74) and check 20 (removed on his word).
+
+## 2026-10-29, evening: 01's pages and overview, type 1's material pages, 04 in 02, pages of type 1 only
 
 His words: "Yes, into 02"; "Type 1 only"; "Yes, build it" (01's pages and the overview); "S and P can go also Na";
 "Yes, 1 to 5" (the material pages, as RAWCLICDataCenters). Built, tested (281 pass), tried in a sandbox, every new page
@@ -767,7 +808,7 @@ graded by a home-made score ("You always try to trick me"). Discuss a form in on
   - 02 needed 1.88 GB of memory, not the estimated 1 GB.
 - **Next, his:** verifying the pages.
 
-## 2026-10-26, end of the day: where everything stands (start here)
+## 2026-10-26, end of the day: where everything stood
 
 Matthias, leaving: "Handover. I will need to go I let you work". Nothing was started after it: every next step
 below waits for his word.
