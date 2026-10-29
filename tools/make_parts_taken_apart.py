@@ -359,8 +359,8 @@ PARTS_G1_X1_N1 = [
      'Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
     ('Unitree G1', 'Cable conductors and insulation', 1, 'Cables', 'Whole body', None, None, None, None,
      'from Constants: length, cross-sections, insulation', 'E', 'T1 slides 3, 35, 36; T3k'),
-    ('Unitree G1', 'XT30 (2+2) connectors (two per joint)', 46, 'Cables', 'Whole body', 0.0015, 0.003, 0.0045, None,
-     None, 'E', 'T3k ("XT30 2+2"); T1 slide 12'),
+    ('Unitree G1', 'XT30 (2+2) connectors (two per joint)', 46, 'Cables', 'Whole body', 0.0019, 0.00212, 0.0023, None,
+     None, 'S, E', 'T3k ("XT30 2+2"); T1 slide 12; the mass of a mated pair, Amass through LCSC (E5.22)'),
     ('Unitree G1', 'Fixed plastic hands', 2, 'Arms', 'Arms', 0.12, 0.17, 0.22, 'Plastics', None, 'S',
      'T1 slide 18; U3 (0.170 kg each, a design value)'),
     ('Unitree G1', 'Screws', 1, 'Frame and shell', 'Whole body', 0.2, 0.5, 1, 'Steel', None, 'E', 'no source'),
@@ -397,16 +397,36 @@ PARTS_G1_X1_N1 = [
      'the battery pack, less its cells and its management board', 'E', 'X1a (stainless-steel case); as the G1'),
     ('AgiBot X1', 'Cable conductors and insulation', 1, 'Cables', 'Whole body', None, None, None, None,
      'from Constants: length, cross-sections, insulation', 'S', 'X1a: the lengths listed (11.0 m)'),
-    ('AgiBot X1', 'XT30 (2+2) connectors (two per joint)', 62, 'Cables', 'Whole body', 0.0015, 0.003, 0.0045, None,
+    ('AgiBot X1', 'XT30 (2+2) connectors (two per joint)', 62, 'Cables', 'Whole body', 0.0019, 0.00212, 0.0023, None,
      None, 'S, E',
-     "X1a: 58 cable plugs (19 cables with two, 12 with one, 6 terminating resistors, 2 to the L28); mass as the "
-     "G1's (E); 4 more, two per joint, for the two grippers (E5.19 point 2)"),
+     "X1a: 58 cable plugs (19 cables with two, 12 with one, 6 terminating resistors, 2 to the L28); 4 more, two per "
+     "joint, for the two grippers (E5.19 point 2); the mass of a mated pair, Amass through LCSC (E5.22)"),
     ('AgiBot X1', 'Titanium (TC4) links: waist (2), ankles (4)', 1, 'Frame and shell', 'Legs, Torso', 0.2, 0.4, 0.6,
      'Titanium', None, 'E', 'X1a "钛合金TC4"; masses not given'),
-    ('AgiBot X1', 'Stainless 17-4PH shafts and crosses; steel pins (about 115)', 1, 'Frame and shell', 'Whole body',
-     0.1, 0.3, 0.5, None, None, 'E', 'X1a "0Cr17Ni4Cu4Nb", "40Cr"; its two steels in the sheet Shares'),
-    ('AgiBot X1', 'Screws (about 980)', 1, 'Frame and shell', 'Whole body', 0.3, 0.6, 0.9, 'Steel', None, 'E',
-     'X1a (M2 to M5)'),
+    # The X1's screws, pins and shafts by its newer parts list (2025-01-08; Matthias, 2026-10-29, "Yes, enter all";
+    # EVIDENCE.md E5.22): 827 screws, not about 980 (the old list's "Screws and pins: 980" counted its pins, then in
+    # the shafts' row too); its 90 pins of SUS440C on their own; its brass inserts, sensor shield, silicone dampers and
+    # XT60 from its lists.
+    ('AgiBot X1', 'Stainless 17-4PH shafts and crosses', 1, 'Frame and shell', 'Whole body', 0.075, 0.15, 0.225,
+     'Steel', None, 'E', 'X1a "0Cr17Ni4Cu4Nb"; the former row of shafts and pins less its pins (E5.22)'),
+    ('AgiBot X1', 'Pins, SUS440C (90)', 1, 'Frame and shell', 'Whole body', 0.105, 0.1086, 0.112, 'Steel', None, 'S',
+     'X1a 2025-01-08: 90 pins GB/T 119.2 "材质SUS440C", their sizes stated: 108.6 g at 7.7 g/cm3, ± 3 % (E5.22)'),
+    ('AgiBot X1', 'Screws, class 12.9 and 10.9 (677)', 1, 'Frame and shell', 'Whole body', 0.207, 0.4145, 0.622,
+     'Steel', None, 'E', 'X1a 2025-01-08: 618 of class 12.9 and 59 of 10.9, "材质碳钢 镀亮镍"; 0.6 kg for 980, by '
+                         'number (E5.22)'),
+    ('AgiBot X1', 'Screws, stainless 304 (150)', 1, 'Frame and shell', 'Whole body', 0.0459, 0.0918, 0.1377, 'Steel',
+     None, 'E', 'X1a 2025-01-08: 142 "材质为不锈钢304" and 8 shoulder screws of 304; 0.6 kg for 980, by number '
+                '(E5.22)'),
+    ('AgiBot X1', 'Brass threaded inserts, M3 (12) and M4 (4)', 1, 'Frame and shell', 'Whole body', 0.0065, 0.013,
+     0.0195, 'Copper', None, 'E', 'X1a "IUT铜螺母" M3 × 12, M4 × 4, "材质为C3604黄铜"; the sizes of typical heat-set '
+                                  'inserts (E5.22)'),
+    ('AgiBot X1', 'Sensor shield, stainless 304', 1, 'Frame and shell', 'Torso', 0.01, 0.02, 0.03, 'Steel', None, 'E',
+     'X1a overall BOM "传感器屏蔽罩", "0Crl8Ni9(GB)"; its size not given (E5.22)'),
+    ('AgiBot X1', 'Silicone dampers (4)', 4, 'Frame and shell', 'Whole body', 0.001, 0.002, 0.003, 'Plastics', None,
+     'E', 'X1a "硅胶减震块" × 4, "硅胶"; their size not given (E5.22)'),
+    ('AgiBot X1', 'XT60 connector, mated pair', 1, 'Cables', 'Whole body', 0.0059, 0.0065, 0.0072, None, None, 'S, E',
+     'X1a overall BOM "XT60E-M" × 1, with its cable female: Amass XT60-M 3.29 g and XT60-F 3.21 g (LCSC, gross), '
+     '± 10 %; its contacts brass (E5.22)'),
     ('AgiBot X1', 'Bearings outside the actuators', 1, 'Frame and shell', 'Whole body', 0.4, 0.8, 1.2, 'Steel', None,
      'E', 'X1a: crossed roller × 10, four-point × 9, ball × 20, rod ends × 8, spherical × 12'),
     ('AgiBot X1', 'Shell: 3D-printed resin or ABS', 1, 'Frame and shell', 'Whole body', 1.5, 3, 4.5, 'Plastics', None,
@@ -442,8 +462,10 @@ PARTS_G1_X1_N1 = [
      'the battery pack, less its cells and its management board', 'E', 'as the G1'),
     ('Fourier N1', 'Cable conductors and insulation', 1, 'Cables', 'Whole body', None, None, None, None,
      'from Constants: length, cross-sections, insulation', 'E', 'E2.8e'),
-    ('Fourier N1', 'XT30 (2+2) connectors (two per joint)', 46, 'Cables', 'Whole body', 0.0015, 0.003, 0.0045,
-     None, None, 'E', "two per joint and their mass, as the G1's (T3k); N1a names no connector (E2.8e)"),
+    ('Fourier N1', 'XT30 (2+2) connectors (two per joint)', 46, 'Cables', 'Whole body', 0.0019, 0.00212, 0.0023,
+     None, None, 'S, E',
+     "two per joint, as the G1's (T3k); N1a names no connector (E2.8e); the mass of a mated pair, Amass through LCSC "
+     '(E5.22)'),
     ('Fourier N1', 'Screws', 1, 'Frame and shell', 'Whole body', 0.2, 0.5, 1, 'Steel', None, 'E',
      'as the G1 (E2.8e)'),
     ('Fourier N1', 'Shell (engineering plastics)', 1, 'Frame and shell', 'Whole body', 2.25, 4.5, 6.75, 'Plastics',
@@ -492,8 +514,12 @@ SHARES_ROWS = [
     ('Waist fan', 'Plastics', None, None, None, None, 'Yes', 'E', 'E2.8'),
     ('Main board fan', 'Copper', None, 0.05, 0.1, 0.2, None, 'E', 'The motor winding: E2.8'),
     ('Main board fan', 'Plastics', None, None, None, None, 'Yes', 'E', 'E2.8'),
-    ('XT30 (2+2) connectors (two per joint)', 'Copper', None, 0.175, 0.35, 0.525, None, 'E', 'The contacts: E2.8'),
+    ('XT30 (2+2) connectors (two per joint)', 'Copper', 'Brass', 0.175, 0.35, 0.525, None, 'E',
+     'The contacts: E2.8; brass, gold-plated (Amass, through LCSC; E5.22)'),
     ('XT30 (2+2) connectors (two per joint)', 'Plastics', None, None, None, None, 'Yes', 'E', 'The housing: E2.8'),
+    ('XT60 connector, mated pair', 'Copper', 'Brass', 0.175, 0.35, 0.525, None, 'E',
+     "The contacts, brass, as the XT30's (E5.22)"),
+    ('XT60 connector, mated pair', 'Plastics', None, None, None, None, 'Yes', 'E', "The housing, as the XT30's"),
     ('Battery housing, busbars and wires', 'Copper', 'Nickel strip', 0.01, 0.03, 0.06, None, 'E',
      'The nickel strips between the cells, 0.2 mm thick (sevarg.net, measured), counted with the copper (Matthias, '
      '2026-10-29: "With Copper"); E5.19 point 1'),
@@ -512,10 +538,6 @@ SHARES_ROWS = [
      'The cell holders, insulation and tape: E5.19 point 1'),
     ('Battery housing (aluminium), busbars and wires', 'Aluminium', None, None, None, None, 'Yes', 'E',
      'The housing: "Aluminum Alloy" (EngineAI, the PM01; E5.6, E5.19 point 1)'),
-    ('Stainless 17-4PH shafts and crosses; steel pins (about 115)', 'Steel', '17-4PH', 0.25, 0.5, 0.75, None, 'E',
-     'The shafts and crosses: X1a "0Cr17Ni4Cu4Nb"; their share of the part not given (E: half, half to 1.5 times)'),
-    ('Stainless 17-4PH shafts and crosses; steel pins (about 115)', 'Steel', 'C45', None, None, None, 'Yes', 'E',
-     'The pins (E5.18: "the X1\'s steel pins C45")'),
     ('Frame: aluminium, with steel 45 and P20 parts', 'Steel', 'RP1 frame steel: C45 and P20', 0.1, 0.2, 0.3, None,
      'E', 'The steel parts: 28 of its 112 CNC parts are steel, 24 of steel 45 or AISI 1045 and 4 of P20 (RP1a), by '
      'count only (E5.14 point 9, E5.18)'),
@@ -573,6 +595,9 @@ BOARDS_G1_X1_N1 = [
      'PE_HVS', 'E', 'as the G1 (E2.8e)'),
     ('Fourier N1', 'Computer board, Intel Core i7-13700H', 1, 'Torso boards', 'Torso', 60, 120, 180,
      'area times Constants board mass per cm2', 'ITC', 'E', 'N1a'),
+    ('Fourier N1', 'Network switch board', 1, 'Torso boards', 'Torso', 30, 60, 90,
+     'area times Constants board mass per cm2', 'ITC', 'E',
+     'N1a "交换机" in its chest; as the X1\'s router board (2026-10-29, "Yes, enter all"; EVIDENCE.md E5.22)'),
     ('Fourier N1', 'Power distribution unit and DC-DC converter', 1, 'Torso boards', 'Torso', 30, 60, 100,
      'area times Constants board mass per cm2', 'PE_HVS', 'E', 'as the G1 (E2.8e)'),
     ('Fourier N1', 'Battery management board', 1, 'Battery pack', 'Torso', 30, 60, 96,
@@ -839,7 +864,9 @@ IMU_G = (1, 2, 5)                # g: a motion sensor (as the G1's)
 MICROPHONES_G = (5, 10, 20)      # g: a microphone array (as the G1's)
 SPEAKER_G = (17.5, 35, 60)       # g: a speaker (as the G1's)
 D435_G = (72, 75, 80)            # g: an Intel RealSense D435 or D435i (Intel's datasheet, second-hand; as the G1's)
-CONNECTOR_KG = (0.0015, 0.003, 0.0045)   # kg: one XT30 (2+2) connector (as the G1's)
+# kg: one XT30 (2+2) connector, a mated pair: Amass's cable female XT30(2+2)-F.G.B 1.1224 g and board male
+# XT30PB(2+2)-M 1 g (LCSC, gross), ± 10 % (2026-10-29, "Yes, enter all"; EVIDENCE.md E5.22; 3 g before).
+CONNECTOR_KG = (0.0019, 0.00212, 0.0023)
 # The computer's cooler of a robot whose sources do not weigh it (Matthias, 2026-10-29, "Yes, build them", point 4;
 # EVIDENCE.md E5.20, "Not entered": until then in its frame's remainder): a fan as the G1's main board fan (its copper
 # winding by the sheet Shares), and for an ARM board (a Jetson, Rockchip, Radxa, Qualcomm or RDK, or a board not named)
@@ -959,7 +986,8 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
              capacity=None, pack=None, pack_source='', housing=HOUSING_MIXED,
              cells=('E', 'NMC cylindrical, E (E5.14 point 2)'),
              boards=[], sensors=[], cables=(CABLES_M, 'E', 'as the N1 (E5.14 point 5)'),
-             connectors=('E', 'two per joint, as type 1 (E5.14 point 5)'),
+             connectors=('S, E', 'two per joint, as type 1 (E5.14 point 5); the mass of a mated pair, Amass '
+                                 'through LCSC (E5.22)'),
              encoders=('E', 'two per joint, as type 1 (E5.14)'),
              screws=[('Screws', 1, SCREWS_KG, '42CrMo4', 'E', 'as the G1 (E5.14 point 7); grade E5.18')],
              parts=[], cooler=ARM_COOLER, shell=('Shell: plastics', 'not stated; plastics as type 1 (E5.14 point 6)'),
@@ -1054,7 +1082,8 @@ ASIMOV_ONE = block(
              ('Microphone array (4 microphones)', 1, 'Head', 'Head', MICROPHONES_G, 'E',
               "AS2 \"microphones\", their number not stated: as the G1's four", MICROPHONES),
              ('Speaker, 10 W', 1, 'Head', 'Head', SPEAKER_G, 'E', "AS2; as the G1's 5 W speaker", [])],
-    connectors=('S, E', 'AS1: XT30 (2+2) at every actuator (E5.13); their mass as the G1\'s (E)'),
+    connectors=('S, E', 'AS1: XT30 (2+2) at every actuator (E5.13); the mass of a mated pair, Amass through LCSC '
+                        '(E5.22)'),
     shell=('Shell: MJF PA12 nylon', 'AS1 "7075 aluminum and MJF PA12 nylon"; 11.5 % of the robot (E5.14 point 6)'),
     frame=('Frame', 'Aluminium', 'AS1 "7075 aluminum"'))
 
@@ -1302,7 +1331,8 @@ AI_SAPIENS_K1 = block(
             POWER_BOARD],
     sensors=[('Motion sensor (IMU), ICM-42688-P or BNO085', 1, 'Torso boards', 'Torso', IMU_G, 'E', 'AK1',
               [('IMU', 1)])],
-    connectors=('S, E', 'ROBOTIS: XT30 (2+2) at every actuator (E5.13); their mass as the G1\'s (E)'),
+    connectors=('S, E', 'ROBOTIS: XT30 (2+2) at every actuator (E5.13); the mass of a mated pair, Amass through '
+                        'LCSC (E5.22)'),
     shell=('Shell: polymer covers', 'AK1 (covers 3D-printable); 11.5 % of the robot (E5.14 point 6)'),
     frame=('Frame', 'Aluminium', 'HG "Aluminium alloy frame" (third party)'))
 
@@ -1612,7 +1642,13 @@ def robot_rows(b: dict) -> dict:
 # The grades of the G1's, X1's and N1's parts of steel and titanium, each by its use (E5.18).
 PART_GRADES = {('Unitree G1', 'Screws'): '42CrMo4', ('Unitree G1', 'Lower-leg links'): '42CrMo4',
                ('AgiBot X1', 'Titanium (TC4) links: waist (2), ankles (4)'): 'Ti-6Al-4V',
-               ('AgiBot X1', 'Screws (about 980)'): '42CrMo4', ('AgiBot X1', 'Bearings outside the actuators'): 'GCr15',
+               ('AgiBot X1', 'Screws, class 12.9 and 10.9 (677)'): '42CrMo4',
+               ('AgiBot X1', 'Screws, stainless 304 (150)'): 'Type 304',
+               ('AgiBot X1', 'Pins, SUS440C (90)'): '440C',
+               ('AgiBot X1', 'Stainless 17-4PH shafts and crosses'): '17-4PH',
+               ('AgiBot X1', 'Brass threaded inserts, M3 (12) and M4 (4)'): 'Brass',
+               ('AgiBot X1', 'Sensor shield, stainless 304'): 'Type 304',
+               ('AgiBot X1', 'Bearings outside the actuators'): 'GCr15',
                ('Fourier N1', 'Screws'): '42CrMo4'}
 # The G1's, X1's and N1's rows with the columns added on 2026-10-29: the share of the joint modules (empty), the grade.
 JOINTS_THREE = [r[:9] + (None,) + r[9:] for r in JOINTS_G1_X1_N1]

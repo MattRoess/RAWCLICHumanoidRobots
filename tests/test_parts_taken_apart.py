@@ -244,9 +244,10 @@ class TestHandCalculations(unittest.TestCase):
 
     def test_the_g1s_copper_in_its_cables(self):
         d = self.at()
-        # Cables: 6 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 g/cm3 = 102.144 g; 46 XT30 × 3 g × 0.35 = 48.3 g;
-        # 4 capacitor buffer boards × 5 cm2 × 0.56 g/cm2 × 0.20 = 2.24 g.
-        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'cables', 'Cu'), 0.152684, rtol=1e-9)
+        # Cables: 6 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 g/cm3 = 102.144 g; 46 mated XT30 (2+2) × 2.12 g × 0.35 of
+        # contacts × 0.62 copper of their brass = 21.16184 g (2026-10-29, "Yes, enter all", EVIDENCE.md E5.22: the pair
+        # 1.1224 g + 1 g, its contacts brass); 4 capacitor buffer boards × 5 cm2 × 0.56 g/cm2 × 0.20 = 2.24 g.
+        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'cables', 'Cu'), 0.12554584, rtol=1e-9)
 
     def test_the_g1s_gold_in_its_hips(self):
         d = self.at()
@@ -750,10 +751,11 @@ class TestMaterialPages(unittest.TestCase):
 
     def test_a_material_held_in_some_draws_shows_the_draws_that_hold_it(self):
         # Matthias, 2026-10-29: "If there is nothing then show nothing. If it is just a bit and a large 0 then show me
-        # the distribution": the brass of the RP1 alone, held in about 1 of 31 draws.
+        # the distribution": the 440C of the X1's pins alone, held in about 1 of 31 draws (since 2026-10-29, "Yes,
+        # enter all", every robot holds brass, the contacts of its connectors).
         import matplotlib.pyplot as plt
         _, d = self.drawn()
-        title, _, _, kinds = next(p for p in composition.material_panels(d) if p[0] == 'Brass')
+        title, _, _, kinds = next(p for p in composition.material_panels(d) if p[0] == 'Stainless steel 440C')
         kg = sum(kinds.values())
         figure, axes = plt.subplots()
         composition.material_panel(axes, kg, title, True)

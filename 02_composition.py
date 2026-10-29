@@ -2088,7 +2088,8 @@ MATERIAL_TITLES = {COPPER: 'Copper', MAGNETS: 'Permanent magnets', CELL_MATERIAL
                    ELECTRONICS: 'Electronics'}
 GRADE_TITLES = {'20CrMnTi': 'Gear steel 20CrMnTi', 'GCr15': 'Bearing steel GCr15', '42CrMo4': 'Alloy steel 42CrMo4',
                 'C45': 'Carbon steel C45', 'P20': 'Tool steel P20', '17-4PH': 'Stainless steel 17-4PH',
-                'Type 304': 'Stainless steel 304', 'M19': 'Electrical steel M19', 'M27': 'Electrical steel M27',
+                'Type 304': 'Stainless steel 304', '440C': 'Stainless steel 440C', 'M19': 'Electrical steel M19',
+                'M27': 'Electrical steel M27',
                 'Ti-6Al-4V': 'Titanium Ti-6Al-4V', 'Brass': 'Brass', 'Nickel strip': 'Nickel strips, battery',
                 'NMC cylindrical': 'Battery cells, NMC (cylindrical)', 'LFP cylindrical': 'Battery cells, LFP '
                                                                                            '(cylindrical)'}

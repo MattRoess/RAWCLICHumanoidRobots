@@ -436,7 +436,10 @@ robot is drawn part by part, with these changes:
    of pack (E5.14 point 3; the Asimov 1's and 2's packs, lighter than their cells, have no housing); its shell 5.75 /
    11.5 / 17.25 % of its mass (E5.14 point 6); its boards, cables, connectors, screws and sensors as E5.14 points 4 to
    8; its frame the remainder. The steels and the titanium by their grades (E5.18), the battery's rest by its shares
-   (E5.19).
+   (E5.19). Its XT30 (2+2) connectors two per joint, each a mated pair of 1.9 / 2.12 / 2.3 g (Amass's cable
+   female and board male, through LCSC), their contacts brass (2026-10-29, "Yes, enter all"; EVIDENCE.md E5.22); the X1's
+   parts by its newer parts lists (E5.22: its screws split 677 : 150 into 42CrMo4 and 304, its 90 pins 440C, its brass
+   inserts, sensor shield, silicone dampers and an XT60), the N1's network switch a board.
 4. **As 02 writes every robot type:** its materials (Not allocated 0, as the frame takes the rest), its elements (all
    it holds; every robot type now has the same element columns, 0 where none is drawn), its part groups and body
    regions (its ten kinds placed whole: the joints in Joint drives, the battery in Battery, the torso boards in

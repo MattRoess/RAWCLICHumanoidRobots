@@ -5,6 +5,33 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V80. Type 1's last open parts entered: the X1 by its newer lists, the N1's switch, the XT30 a mated pair of brass
+
+- **What, on his words:** "Yes, 1 to 5", then "Yes, enter all" (EVIDENCE.md E5.22). Downloaded on his yes, each into
+  its own new folder of Claude's scratch area: `智元灵犀X1_BOM清单_20250108.xlsx` (17,678 bytes) and
+  `智元灵犀X1总BOM.xlsx` (folder 20250307, 18,808 bytes), sizes checked. The connectors' masses read in LCSC's
+  listings in the built-in browser (LCSC refuses automated reading); 440C from Carpenter's alloy page.
+- **Tests first** (failed, then passed): the builder (the X1's screws split and its pins on their own, no row counting
+  the pins twice; its inserts, shield, dampers and XT60; the N1's switch; every connector's contacts brass; every
+  XT30 a pair of 1.9 / 2.12 / 2.3 g, the Asimov 2's × 38 / 35); 02 by hand at the modes: the G1's cables' copper
+  102.144 g + 46 × 2.12 g × 0.35 × 0.62 = 21.16184 g + 2.24 g = 125.54584 g (152.684 g before). 01's check caught my
+  own slip: the XT30 rows still labelled E, narrower than an estimate may be; labelled S, E as the table said (the
+  count estimated, the mass stated).
+- **The recipes file** `data/researched/element_recipes.xlsx`: a backup first (Claude's scratch folder,
+  `backups/element_recipes_before_440C_2026-10-29.xlsx`), then the 8 rows of 440C (rows 290 to 297); nothing else
+  changed.
+- **Moved with it:** the test of a material held in some draws used the RP1's brass, now in every robot (the
+  connectors' contacts); it uses the X1's 440C (in 3.5 % of the draws).
+- **Sandbox** (the builder's file in Claude's scratch folder, 3,000 draws): no fault; the X1's new parts at their
+  means as entered (pins 108.6 g, screws 420 g and 92 g, shafts 153 g, inserts 12.7 g, shield 20 g, dampers 8 g, XT60
+  6.5 g), the N1's switch drawn; copper (element) 2.026 kg (his run 2.071), zinc +16 g, plastics −39 g; by hand the
+  connectors' copper falls by about 30 g (from 1.05 g to 0.46 g a pair, about 50 pairs a robot), the rest the 3,000
+  draws' chance. Looked at: materials page 2 ("Stainless steel 440C", "Stainless steel 17-4PH").
+- **Tests:** 313; all pass but `test_what_it_writes_equals_the_data_file_on_disk`, which waits for his builder run.
+- **Found, left out on his word** ("Leave it out"): the X1's docking terminal "对接端子2进8出" (2 in, 8 out) in its
+  overall BOM.
+- **Not covered:** his runs.
+
 ### V79. His run of 16:01 read back: type 1 wholly in its elements
 
 - **Times, against the code's:** the builder 16:01:38 (its code 15:48:43), 01 16:01:50 (15:48:43), 02 16:02:11 to

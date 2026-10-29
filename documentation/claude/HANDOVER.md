@@ -62,8 +62,11 @@ His run of 16:01 read back (VERIFICATION.md V79): all 309 tests pass, every mate
    silicone dampers: a source table and values to him before anything is entered.
 3. **Whether a mated XT30 counts once or twice**: settled from Amass's data sheet, read first-hand.
 4. **The titanium panel** (a peak near 13 g, a long tail to 450 g): kept, the true distribution.
-5. **Commit and push** V76 to V79: done with this section.
-Then type 2, by the ten steps above.
+5. **Commit and push** V76 to V79: done with this section (`5bb29c7`).
+**Built** on "Yes, enter all" (VERIFICATION.md V80, EVIDENCE.md E5.22): points 1 to 3 entered; point 4 kept. **His
+runs**, the builder first: `tools/make_parts_taken_apart.py`, `01_schemas.py`, `02_composition.py` (the recipes file
+has 440C since; 01 reads it). Not committed. The X1's docking terminal "对接端子2进8出" in its overall BOM: **left out**
+(Matthias, 2026-10-29: "Leave it out"). Then type 2, by the ten steps above.
 
 ## 2026-10-29, late afternoon: where robot type 1 stands
 

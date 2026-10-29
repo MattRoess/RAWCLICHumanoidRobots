@@ -10,6 +10,65 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
 
 ## E5. Each robot of type 1 its own composition: research, batch 1 of 4 (2026-10-29). Entered 2026-10-29 (E5.20)
 
+### E5.22 Type 1's last open parts: the X1's newer parts list, its found parts, the N1's switch, the XT connectors (2026-10-29). Entered on his word
+
+Matthias, 2026-10-29: "I want to finish open items first and once for all", then "Yes, 1 to 5" (HANDOVER.md,
+2026-10-29, evening).
+
+**1. The X1's newer parts list,** `智元灵犀X1_20250108/智元灵犀X1_BOM清单_20250108.xlsx` (17,678 bytes,
+github.com/AGIBOTTech/AGIBOT_x1_hardware, downloaded on his yes into Claude's scratch folder; the maker's own list,
+first-hand). One sheet, "结构件包" (the structural package), 167 items: no electrical parts. Against the X1's rows as
+entered from the list of 2024-10-24 and the overall BOM of 2025-03-07:
+- **The same:** the bearings outside the actuators (10 crossed roller, 9 four-point, 20 deep-groove ball: 12 ×
+  61900-2Z and 8 × SB685ZZ, 8 rod ends); the battery case of sheet metal (电池包钣金 1 and 2); the shells (外观件).
+- **Screws: 827, not about 980.** 618 socket-head of class 12.9 and 59 countersunk of class 10.9 ("材质碳钢 镀亮镍"),
+  142 of stainless 304 ("材质为不锈钢304") and 8 shoulder screws of 304 (塞打螺钉): 677 carbon steel, 150 stainless
+  304. The old list said "Screws and pins: 980" (E5.1), screws and pins together; the X1's rows count the pins twice
+  (in "Screws (about 980)" and in "steel pins (about 115)").
+- **Pins: 90 of SUS440C** (GB/T 119.2, "材质SUS440C"), not 40Cr or C45 steel: 5 × 3×25, 2 × 3×35, 9 × 4×10, 4 × 4×12,
+  10 × 4×14, 2 × 4×20, 38 × 4×8, 18 × 5×10, 2 × 5×35 mm; at 7.7 g/cm3 108.6 g in all (arithmetic from the stated
+  sizes).
+- **Found again, with their numbers and material:** brass threaded inserts "IUT铜螺母" M3 × 12 and M4 × 4, "材质为
+  C3604黄铜" (16, as on 2026-10-28); 4 silicone dampers (硅胶减震块); 1 sensor shield (传感器屏蔽罩, its material not
+  in this list; stainless in the old one).
+
+**2. The XT connectors' masses** (LCSC, the distributor, product pages of Amass parts, read in the built-in browser;
+"商品毛重", the gross weight per piece; Amass's own data sheets give current and wire size, no mass):
+
+| Part (Amass) | LCSC | Gross weight |
+|---|---|---|
+| XT30(2+2)-F.G.B, cable female, 3 pieces | C19268028 | 1.1224 g |
+| XT30PB(2+2)-M, board male | C3040128 | 1 g |
+| XT30U-F, cable female ("金属部分采用黄铜材质并经过镀金处理": brass, gold-plated; housing PA) | C99102 | 0.976 g |
+| XT60-M / XT60-F | C98733 / C98734 | 3.29 g / 3.21 g |
+| XT60H-M | C5334533 | 3.96 g |
+| XT90H-F (its male: no weight on its page) | C3040685 | 8.8 g |
+
+**What this settles for the XT30 (point 3):** a mated XT30 (2+2), a cable female and a board male, weighs 2.12 g; the
+3 g entered for "one connector" is a mated pair and some, not one piece. Two per joint is two mated pairs (the
+daisy chain: each joint's in and out), so the count stands and the mass of one pair falls to the parts' 2.12 g. Its
+contacts are brass, gold-plated (Amass, through LCSC), not copper.
+
+**The steel 440C** (Carpenter Technology, a producer, https://www.carpentertechnology.com/alloy-finder/440c, read
+first-hand, "Type Analysis", UNS S44004): carbon 0.95 to 1.20, manganese ≤ 1, silicon ≤ 1, chromium 16.00 to 18.00,
+molybdenum ≤ 0.75, phosphorus ≤ 0.04, sulfur ≤ 0.03 %, iron the balance. Outokumpu's grade table (read) does not hold it.
+
+**The X1's overall BOM** (`智元灵犀X1_20250307/智元灵犀X1总BOM.xlsx`, 18,808 bytes, downloaded again on his yes; the
+maker's newest overall list, 197 rows): of plugs only "XT60E-M" × 1 (a panel male, with its cable female one mated
+pair); no XT90 (the older list of 2024-10-24 named XT90 plugs: not entered, the newest list holding none); the sensor
+shield "0Crl8Ni9(GB)" (stainless 304); the dampers "硅胶" (silicone); the inserts "黄铜". **Found, left out**
+(Matthias, 2026-10-29: "Leave it out"): "对接端子2进8出" × 1, a docking terminal of 2 inputs and 8 outputs,
+electrical; no mass or material given.
+
+**Entered** (Matthias, 2026-10-29: "Yes, enter all"; VERIFICATION.md V80): the X1's screws as 677 of 42CrMo4 (0.207 /
+0.4145 / 0.622 kg, E) and 150 of stainless 304 (0.0459 / 0.0918 / 0.1377 kg, E), by number from the entered 0.6 kg for
+980; its pins 90 of 440C, 0.105 / 0.1086 / 0.112 kg (S, the stated sizes); its shafts and crosses 17-4PH 0.075 / 0.15 /
+0.225 kg (E, the former row less its pins); its brass inserts 6.5 / 13 / 19.5 g (E); its sensor shield, 304, 10 / 20 /
+30 g (E); its silicone dampers 4 × 1 / 2 / 3 g, plastics (E); its XT60, one mated pair 5.9 / 6.5 / 7.2 g (S, E); the
+N1's network switch, a board of 30 / 60 / 90 cm2 as the X1's router board (E); every robot's XT30 one mated pair 1.9 /
+2.12 / 2.3 g (S, E; 3 g before), its contacts (35 % of it, as before) brass; the recipe 440C in
+`element_recipes.xlsx` from Carpenter's analysis, the mode the middle of each range (S).
+
 ### E5.21 The rest of a board beyond its metals: glass, epoxy and bromine (2026-10-29). Entered on his word
 
 Matthias, 2026-10-29: "Yes, build them", point 3b: the rest of the boards (laminate and components) by the recipes

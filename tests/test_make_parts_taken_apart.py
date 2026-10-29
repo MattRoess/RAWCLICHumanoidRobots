@@ -230,7 +230,8 @@ class TestMakePartsTakenApart(unittest.TestCase):
                 self.assertEqual(xt30.count, 2 * joints)
                 # Each of the G1's mass; the Asimov 2's, as all of its composition, the Asimov 1's times 38 / 35.
                 factor = 38 / 35 if robot == 'Menlo Asimov 2' else 1
-                self.assertEqual(xt30.bounds, tuple(round(kg * factor, 4) for kg in (0.0015, 0.003, 0.0045)))
+                pair = (0.0019, 0.00212, 0.0023)   # one mated pair (EVIDENCE.md E5.22); the Asimov 2's to four decimals
+                self.assertEqual(xt30.bounds, pair if factor == 1 else tuple(round(kg * factor, 4) for kg in pair))
         for robot in ('Unitree G1', 'AgiBot X1', 'Fourier N1'):
             parts = {p.name: p for p in self.apart.parts if p.robot == robot}
             self.assertEqual(parts['Main board fan'].bounds, (0.005, 0.01, 0.02))
@@ -301,3 +302,54 @@ class TestPartsNotEntered(unittest.TestCase):
         self.assertEqual((tof.count, tof.bounds), (4, (5, 10, 20)))
         units = {(t, u) for _, sensor, t, u in self.apart.elements if sensor == 'Time-of-flight sensor'}
         self.assertEqual(units, {('laser diode array', 1), ('photodetector array', 1)})
+
+
+class TestTheLastOpenParts(unittest.TestCase):
+    """Matthias, 2026-10-29, "Yes, enter all" (EVIDENCE.md E5.22): the X1's parts by its newer parts list (its screws
+    split, its 90 pins of 440C on their own, no longer counted twice), the parts found in its lists (brass inserts,
+    sensor shield, silicone dampers, an XT60), the N1's network switch, and every robot's XT30 a mated pair of 2.12 g
+    with brass contacts."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, _ = written()
+
+    def parts(self, robot: str) -> dict:
+        return {p.name: p for p in self.apart.parts if p.robot == robot}
+
+    def test_the_x1s_screws_and_pins_by_its_newer_list(self):
+        parts = self.parts('AgiBot X1')
+        self.assertNotIn('Screws (about 980)', parts)
+        self.assertNotIn('Stainless 17-4PH shafts and crosses; steel pins (about 115)', parts)
+        carbon, stainless = parts['Screws, class 12.9 and 10.9 (677)'], parts['Screws, stainless 304 (150)']
+        self.assertEqual((carbon.bounds, carbon.grade), ((0.207, 0.4145, 0.622), '42CrMo4'))
+        self.assertEqual((stainless.bounds, stainless.grade), ((0.0459, 0.0918, 0.1377), 'Type 304'))
+        self.assertAlmostEqual(carbon.bounds[1] + stainless.bounds[1], 0.6 * 827 / 980, places=3)   # by number
+        pins = parts['Pins, SUS440C (90)']
+        self.assertEqual((pins.bounds, pins.material, pins.grade, pins.label), ((0.105, 0.1086, 0.112), 'Steel', '440C',
+                                                                               'S'))
+        shafts = parts['Stainless 17-4PH shafts and crosses']
+        self.assertEqual((shafts.bounds, shafts.material, shafts.grade), ((0.075, 0.15, 0.225), 'Steel', '17-4PH'))
+        self.assertFalse([s for s in self.apart.shares if s.item.startswith('Stainless 17-4PH shafts and crosses;')])
+
+    def test_the_x1s_parts_found_in_its_lists(self):
+        parts = self.parts('AgiBot X1')
+        inserts = parts['Brass threaded inserts, M3 (12) and M4 (4)']
+        self.assertEqual((inserts.bounds, inserts.material, inserts.grade),
+                         ((0.0065, 0.013, 0.0195), 'Copper', 'Brass'))
+        shield = parts['Sensor shield, stainless 304']
+        self.assertEqual((shield.bounds, shield.grade), ((0.01, 0.02, 0.03), 'Type 304'))
+        dampers = parts['Silicone dampers (4)']
+        self.assertEqual((dampers.count, dampers.bounds, dampers.material), (4, (0.001, 0.002, 0.003), 'Plastics'))
+        xt60 = parts['XT60 connector, mated pair']
+        self.assertEqual((xt60.count, xt60.bounds), (1, (0.0059, 0.0065, 0.0072)))
+
+    def test_the_n1s_network_switch(self):
+        boards = {b.name: b for b in self.apart.boards if b.robot == 'Fourier N1'}
+        switch = boards['Network switch board']
+        self.assertEqual((switch.bounds, switch.category, switch.label), ((30, 60, 90), 'ITC', 'E'))
+
+    def test_every_connectors_contacts_are_brass(self):
+        for item in ('XT30 (2+2) connectors (two per joint)', 'XT60 connector, mated pair'):
+            contacts = [s for s in self.apart.shares if s.item == item and s.material == 'Copper']
+            self.assertEqual([(s.grade, s.share) for s in contacts], [('Brass', (0.175, 0.35, 0.525))], msg=item)
