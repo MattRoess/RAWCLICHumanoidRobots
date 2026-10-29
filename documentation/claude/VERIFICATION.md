@@ -5,6 +5,35 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V66. The three settings of 2026-10-28 in the test's list of settings
+
+- **What:** on "Yes, add them": `data.humanoid_guide`, `data.register` and `composition.type_one_lowest_kg` added to
+  `KEYS` in `tests/test_parameters.py`, the list every setting of the project must be in (V65's two failures).
+- **How:** all tests, with `params.xlsx` and PARAMETER_REFERENCE.md as Matthias's run of 00 wrote them (05:14:33).
+- **Result:** 242 tests, all pass.
+- **Not covered:** `parts.draws` and `parts.seed`, which nothing reads since 02 draws type 1 (HANDOVER.md, waiting
+  point 1), stay in `KEYS` while they stay in the settings.
+
+### V65. Matthias's runs of 00 and of the register builder, read back
+
+- **What:** on "I have run the two programs": what `00_parameters.py` and `tools/make_humanoid_register.py` wrote,
+  against the commit they ran (39f51f1, 2026-10-29 05:14:28 +0100).
+- **How:** the files' modification times; `params.xlsx`, PARAMETER_REFERENCE.md and the register opened; all tests.
+- **Result:**
+  - 00 at 05:14:33: `params.xlsx` (7,190 bytes) and PARAMETER_REFERENCE.md (5,409 bytes) hold the three settings of
+    2026-10-28, `data.humanoid_guide`, `data.register` and `composition.type_one_lowest_kg`.
+  - The builder at 05:15:02: `data/researched/humanoid_register.xlsx` (45,703 bytes), sheets About, Robots (354
+    robots, 17 columns) and Type 1 (32 robots, 18 columns, the last "In the run"): 3 drawn with their own parts, 28 with
+    the parts of the G1, X1 or N1 scaled to their mass, the PrimeBOT Q1 not drawn (no mass stated); the Booster T1 in.
+  - The two tests that waited on the register on disk now run and pass: what the builder writes equals the file on
+    disk sheet by sheet, cell by cell; the real register and its sheet Type 1 pass 01's checks 21 and 22.
+  - **242 tests, 240 pass, 2 fail.** The 2 failing (`test_parameters`:
+    `test_every_setting_is_listed_with_a_description`, `test_the_register_holds_every_setting`) do not wait on the
+    run of 00, as HANDOVER.md (2026-10-28) and V64 said: they compare the settings with the test's own list `KEYS`,
+    which was not given the three settings of 2026-10-28. They fail with or without 00's run. Not changed: adding
+    the three to `KEYS` waits on Matthias's word.
+- **Not covered:** 01 to 04 not run since (his runs).
+
 ### V64. The register's sheet Type 1: every robot of type 1 listed, and 02 drawing over it
 
 - **What:** on "I want the all the know type 1 robots are integrated and included in the run", "There has to be an
@@ -32,8 +61,8 @@ by Claude, newest first.
   zero in 0.2 % of its draws (reported, not cut): the same as V62. The sheet opened: 18 columns, the last "In the run".
   faults.png and type 1's notes page looked at: the new check and the sheet named, nothing overflowing. The project's
   `data/researched/` and `figures/` unchanged (their dates as before).
-- **All tests: 242, 238 pass**; the 2 failing wait on Matthias's run of 00 (the three settings of 2026-10-28 not yet in
-  `params.xlsx` and PARAMETER_REFERENCE.md), the 2 skipped on the register on disk (his run of the builder).
+- **All tests: 242, 238 pass**; the 2 skipped on the register on disk (his run of the builder). The 2 failing were said
+  here to wait on Matthias's run of 00, taken from HANDOVER.md without checking; that is wrong (V65).
 - **Also changed:** three texts that said the Booster T1 "is out of type 1" (01's check 20 and `check_robot_types`,
   METHODOLOGY.md check 20) now say it is not taken apart and the register keeps it in type 1; METHODOLOGY.md's list of
   checks had stopped at 20: checks 21 (the register) and 22 (the sheet Type 1) written.
@@ -52,8 +81,8 @@ by Claude, newest first.
   - the git folder: `git clone --bare` of https://github.com/MattRoess/RAWCLICHumanoidRobots.git into
     `$HOME/gitdirs/RAWCLICHumanoidRobots.git`, the path the project's `.git` pointer names, set up as
     RAWCLICDataCenters' (`core.bare` false, `core.worktree` the project folder, `origin` fetching every branch, `main`
-    following `origin/main`); the index filled from `origin/main` by a mixed `git reset`, which writes no file in the project
-    folder; then `git status` and `git log`.
+    following `origin/main`); the index filled from `origin/main` by a mixed `git reset`, which writes no file in the
+    project folder; then `git status` and `git log`.
 - **Result:**
   - Before attaching, git refused: "Kein Git-Repository: /Users/rm/gitdirs/RAWCLICHumanoidRobots.git".
   - After: on `main`, the same as `origin/main` (b271afd, 2026-10-28 15:50:02 +0100), nothing to commit. The working
