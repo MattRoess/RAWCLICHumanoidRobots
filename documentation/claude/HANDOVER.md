@@ -46,10 +46,84 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
 10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
     in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
 
-Where type 2 stands (2026-10-29, night): step 5 built (the sheet Type 2, 97 robots; V81), step 7 begun (batch 1's
-source table, EVIDENCE E6); the rest not begun. See the next section.
+Where type 2 stands (2026-10-30, late morning): step 5 built (the sheet Type 2, 97 robots; V81); steps 6 to 8 for 53 of
+its robots (batch 1, E6; batch 2, E7; batch 2b, E8), the other 43 with a mass all on wheels (B), the Xialan S0 without a
+mass; step 9 its pages as type 1's (V85, V89, V93); step 4 open beyond type 1's recipes. See the next section.
 
-## 2026-10-30, C built: a parts file and builder per type, type 2's batch 1 drawn (start here)
+## 2026-10-30, late morning: batch 2b of type 2 entered (start here)
+
+**Done since the section below** (EVIDENCE E8, VERIFICATION V90 to V93): his runs of 08:39 read back (V92: 01 no
+fault; type 2 over 29 robots, nothing below zero; the files on disk equal to the builders'). "Yes, start batch 2b": the
+sources of the 27 robots not on wheels (E8.1). "Yes, all six" (E8.2): Torobo, VB1-I, VB2 on wheels; the maker's mass;
+the Walker Tienkung in two versions; the robots found nowhere kept; TALOS's torques from LAAS's model, second-hand. Of
+the Omni (135 cm, 39.5 kg by its maker): "If 2 stay, it has to be included, as it is just slightly smaler and has
+slightly less weight": kept in type 2. "Propose batch 2b" (E8.3), "Yes, agree E8.3"; "Spec batch 2b's entry", "Yes,
+build it" (open points A: the template unchanged; B: joints named by their place and axis; C: the Walker Tienkung's
+names).
+
+**Built on "Yes, build it"** (E8.4, V93). NOT committed (commit and push on his word only):
+- `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`: the 24 robots of batch 2b; 23 source
+  codes added to its sheet Sources; batch 2's two Orin NX rows now name their robots' codes.
+- `tools/make_humanoid_register.py`: the 24 taken apart; 307, 312, 313 on wheels.
+- `01_schemas.py`: the battery's axis of the robots' table leaves room for the longest bar's label (`WH_ROOM`).
+- Tests (two new for type 2's pages: every stated number names a source code; no battery label over the cells),
+  README, METHODOLOGY, EVIDENCE E8, VERIFICATION V90 to V93.
+- **Found and fixed at the entry:** the makers' numbers of batch 2b first showed as a third party's (the codes not in
+  the sheet Sources); "1584 Wh" ran into its cells; the Tien Kung 3.0's estimated voltage now 24 / 48 / 72 V.
+
+**His runs, in this order** (in RAWCLICHumanoidRobots, press Run; 00 and type 1's builder need no run):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`;
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`;
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run).
+
+**Next, by his words ("All 97 first"; B, the wheeled robots their own kinds of part):** the 43 robots of type 2 on
+wheels: their sources first, then a spec of the wheeled robots' kinds of part (wheels, drive motors, base) for his
+yes. Type 2's draws for stock-and-flow switch to its parts once they are in (Q2). The leftovers of C wait for his word;
+commit and push on his word.
+
+## 2026-10-30, early morning: batch 2 of type 2 entered
+
+**Decided, in this order** (EVIDENCE E7): "Yes, start batch 2" (the first 27 of the 55 not on wheels, sources only),
+the source table E7.1 to E7.3; "Yes, all six" (E7.3: Astribot S1, Moz1 and CUE7 on wheels, to the wheeled batch; the
+maker's mass in the parts file; Alice the ALICE 4, "Kepler" the K1, the Atom Max DOBOT's Atom; the Kuavo-5 by
+`biped_s56`; the Luna's two battery modules; LimX CL and Nezha P01 kept); on question 6, "for 6 test, if you can develop
+a method just using 2 data and see if it is different than 1 model", then "Yes, build the test": E7.4, type 2's joint
+modules 40.4 % of the robot against type 1's 49 % (different, p = 0.008), its battery 14.7 Wh/kg against 12 (not
+different), "Yes, agree E7.4"; "Propose batch 2", E7.5, "Yes, agree E7.5"; "Spec the entry", "Yes, build it".
+
+**Built on "Yes, build it"** (E7.6, V89). NOT committed (commit and push on his word only):
+- `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`: the 24 robots of batch 2 (the H2-X in two
+  versions), type 2's own template (its two shared numbers, its split over its seven robots without their hands).
+- `tools/parts_taken_apart.py`: `template_block()` (one copy; type 1's `catalogue_block` binds type 1's texts to it,
+  its file unchanged cell for cell), `average_joints()` naming what it averages, a template robot's stated joints and
+  hands (`template_joints()`).
+- `tools/1_compact_research_developer/make_parts_taken_apart.py`: its `catalogue_block` the shared function.
+- `tools/make_humanoid_register.py`: the 24 taken apart; 40, 68, 200 on wheels.
+- `01_schemas.py`: check 18 lets a template robot have its hands and stated joints beside its shares (point A).
+- `02_composition.py`: the notes page names each type's own template.
+- Tests (355; the two comparing with the files on disk fail until his runs), README, METHODOLOGY, EVIDENCE E7.6,
+  VERIFICATION V86 to V89.
+- **Made at the entry, not spelled out in E7.5** (E7.6, for his look): the joints counted for encoders and connectors
+  (the Bolt 29, E); the estimated compute modules widened to half to 1.5 times (01 asks it); the Kangaroo at its stated
+  976 Wh; the H2-X's two names shortened to fit 01's table.
+
+**His runs, in this order** (in RAWCLICHumanoidRobots, press Run; 00 and type 1's builder need no run):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`;
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`;
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run).
+
+**Not yet read back:** his run of 02 of 2026-10-30, 05:03 to 05:04 (batch 1 only); after his runs above, the new one.
+
+**Seen, not changed:** 02 opens more than 20 figures at once (matplotlib warns; type 1 did before, type 2 now too).
+
+**Next, by his words ("All 97 first"):** batch 2b, the other 27 robots of type 2 not on wheels with a mass (216 Omni to
+352 H1); B, the 40 on wheels (the 37 and Astribot S1, Moz1, CUE7); the Xialan S0, not on wheels, has no mass (27 + 40 =
+the 67 "not yet taken apart"). The leftovers of C (below) wait for his word. His runs of the register, type 2's builder
+and 01 were done at 08:39; 02 started at about 08:39:36.
+
+## 2026-10-30, C built: a parts file and builder per type, type 2's batch 1 drawn
 
 **Built on "Yes, build C"** (the specification below, points 1 to 8, Q1 to Q4; VERIFICATION.md V84, EVIDENCE.md E6.9).
 NOT committed (commit and push on his word only):

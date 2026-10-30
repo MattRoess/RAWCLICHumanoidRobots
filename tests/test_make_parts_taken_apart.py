@@ -48,6 +48,9 @@ from src.params_schema import Params, absolute  # noqa: E402
 REGISTER = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
 TYPE_ONE = [name for names in REGISTER.TAKEN_APART[1].values() for name in schemas.versions(names)]
 TYPE_TWO = [name for names in REGISTER.TAKEN_APART[2].values() for name in schemas.versions(names)]
+# Type 2's batch 1 (EVIDENCE.md E6.8), the GR-1 in two versions; batch 2 since 2026-10-30 (E7.5), TestTypeTwoBatchTwo.
+BATCH_ONE_TWO = ['Fourier GR-1 one camera', 'Fourier GR-1 two cameras', 'Fourier GR-2', 'Unitree H1-2', 'Unitree H2',
+                 'Unitree H2 Plus']
 
 
 def written(which=None):
@@ -395,7 +398,10 @@ class TestTypeTwo(unittest.TestCase):
     def test_its_robots_are_those_the_register_names(self):
         self.assertEqual(sorted(self.apart.robots), sorted(TYPE_TWO))
         self.assertEqual({r.type for r in self.apart.robots.values()}, {2})
-        self.assertEqual(len(TYPE_TWO), 6)   # five robots, the GR-1 in two versions
+        # Batch 1, five robots (the GR-1 in two versions), batch 2, 24 (the H2-X in two versions; E7.5), and batch 2b,
+        # 24 (the Walker Tienkung in two versions; E8.3).
+        self.assertEqual(len(TYPE_TWO), 56)
+        self.assertTrue(set(BATCH_ONE_TWO) <= set(TYPE_TWO))
 
     def test_the_joints_masses_by_the_refit_and_the_m107(self):
         # E6.8 point 1: 0.0689 kg × torque^0.566, half to 1.5 times; the H1-2's knees the M107, 1.9 kg ± 5 %.
@@ -413,13 +419,13 @@ class TestTypeTwo(unittest.TestCase):
         self.assertEqual(joints[('Unitree H1-2', 'Hip pitch')].torque, 220)           # its page's peak (point 2)
         self.assertEqual(joints[('Fourier GR-1 one camera', 'Knee')].torque, 225)     # GR1T2.urdf (decided)
         self.assertEqual(joints[('Fourier GR-1 one camera', 'Shoulder pitch')].torque, 38.46)   # gr1t2.urdf
-        counts = {r: sum(j.count for j in self.apart.joints if j.robot == r) for r in self.apart.robots}
+        counts = {r: sum(j.count for j in self.apart.joints if j.robot == r) for r in BATCH_ONE_TWO}
         self.assertEqual(counts, {'Fourier GR-1 one camera': 34, 'Fourier GR-1 two cameras': 34, 'Fourier GR-2': 31,
                                   'Unitree H1-2': 27, 'Unitree H2': 31, 'Unitree H2 Plus': 33})
 
     def test_the_hands(self):
         # E6.8 point 4: the H2 Plus's two hands 1.65 kg for both (decided), the Fourier hands their model's 0.443 kg.
-        hands = {j.robot: j for j in self.apart.joints if j.name.startswith('Hand')}
+        hands = {j.robot: j for j in self.apart.joints if j.name.startswith('Hand') and j.robot in BATCH_ONE_TWO}
         self.assertEqual(set(hands), {'Unitree H2 Plus', 'Fourier GR-2', 'Fourier GR-1 one camera',
                                       'Fourier GR-1 two cameras'})
         self.assertEqual(hands['Unitree H2 Plus'].module_mass, (0.4125, 0.825, 1.2375))
@@ -429,7 +435,7 @@ class TestTypeTwo(unittest.TestCase):
     def test_the_batteries_by_voltage_and_capacity(self):
         # E6.8 point 6: 972, 864, 950 and 483 Wh at the modes; the GR-2's pack cut at its stated 9 kg.
         wh = {r: self.constant(r, 'Battery voltage')[1] * self.constant(r, 'Battery capacity')[1]
-              for r in self.apart.robots}
+              for r in BATCH_ONE_TWO}
         for robot, energy in (('Unitree H2', 972), ('Unitree H2 Plus', 972), ('Unitree H1-2', 864),
                               ('Fourier GR-2', 950), ('Fourier GR-1 one camera', 483)):
             self.assertAlmostEqual(wh[robot], energy, places=1, msg=robot)
@@ -438,7 +444,7 @@ class TestTypeTwo(unittest.TestCase):
     def test_the_cables_by_height_and_the_fourier_robots_ethernet_line(self):
         # E6.8 point 9: 7 / 14 / 21 m (the GR-1 6.5 / 13 / 19.5 m); the Fourier robots two power conductors and an
         # Ethernet line of eight.
-        for robot in self.apart.robots:
+        for robot in BATCH_ONE_TWO:
             own = self.apart.constants[robot]
             cable = schemas.CABLE_ETHERNET if robot.startswith('Fourier') else schemas.CABLE_FOUR
             self.assertIn(cable, own, msg=robot)
@@ -480,3 +486,322 @@ class TestTypeTwo(unittest.TestCase):
         for name in self.book.sheetnames:
             rows = [list(r) for r in self.book[name].iter_rows(values_only=True)]
             self.assertEqual(rows, [list(r) for r in present[name].iter_rows(values_only=True)], msg=name)
+
+
+def fitted(torque: float) -> tuple:
+    """Type 2's fit at a torque, half to 1.5 times, to four decimals (EVIDENCE.md E6.8 point 1)."""
+    mode = 0.0689 * torque ** 0.566
+    return tuple(round(f * mode, 4) for f in (0.5, 1, 1.5))
+
+
+def half_to_one_and_a_half(mode: float) -> tuple:
+    return tuple(round(f * mode, 4) for f in (0.5, 1, 1.5))
+
+
+class TestTypeTwoBatchTwo(unittest.TestCase):
+    """Type 2's batch 2 entered (Matthias, 2026-10-30: "Yes, all six" (E7.3), "Yes, agree E7.4", "Yes, agree E7.5",
+    "Spec the entry", "Yes, build it"): its 24 robots as E7.5 agreed them, the H2-X in two versions; type 2's own
+    template where a maker gives no joint torques (E7.4); the JingChu's stated knees beside the template's other
+    joints (open point A); every joint named by its body part (D)."""
+
+    # The seven robots whose joints give type 2's template (E7.4: every joint's torque; each robot once, the GR-1's
+    # first version; their hands left out).
+    SEVEN = ['Unitree H2', 'Unitree H1-2', 'Fourier GR-2', 'Fourier GR-1 one camera', 'Leju Kuavo 5', 'LimX Luna',
+             'MagicLab MagicBot Gen1']
+    # The robots whose joint modules are a share of their mass (E7.5 point 2), the H2-X in both versions.
+    TEMPLATE = ['AeiROBOT ALICE 4', 'MirrorMe Bolt', 'Xiaomi CyberOne', 'Deep Robotics DR01', 'Figure AI Figure 03',
+                'Unitree H2-X Core i7', 'Unitree H2-X Orin NX', 'HONOR D1', 'Simplexity I-Series',
+                'ROBROS IGRIS-C', 'JCBOT JingChu', 'KAIST Humanoid', 'PAL Kangaroo', 'Kepler K1', 'Kepler K2',
+                'LimX CL', 'LimX Oli', 'Lumos LUS2', 'VinMotion Motion 2', 'Zhejiang NAVAI-I3', 'Digit Nezha P01']
+    GROUP = {'hip': 'Hip joints', 'knee': 'Knee joints', 'ankle': 'Ankle joints', 'waist': 'Waist joints',
+             'shoulder': 'Shoulder joints', 'elbow': 'Elbow and wrist joints', 'wrist': 'Elbow and wrist joints',
+             'head': 'Head joints'}
+    LABEL = "as type 2's seven robots with every joint's torque on average"
+    # Batch 2's robots (since batch 2b, 2026-10-30, the file holds more).
+    BATCH_TWO = set(TEMPLATE) | {'DOBOT Atom', 'Leju Kuavo 5', 'LimX Luna', 'MagicLab MagicBot Gen1'}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, cls.book = written(builder_two)
+
+    def joints(self, robot: str) -> list:
+        return [j for j in self.apart.joints if j.robot == robot]
+
+    def constant(self, robot: str, quantity: str) -> tuple:
+        return self.apart.constants[robot][quantity][1]
+
+    def test_type_2s_template_numbers(self):
+        # E7.4: the joint modules 20.2 / 40.4 / 60.6 % of the robot's mass; the battery 14.67 Wh per kg (type 2's
+        # median), half to 1.5 times.
+        shared = self.apart.constants['all']
+        self.assertEqual(shared[schemas.JOINT_SHARE][1], (0.202, 0.404, 0.606))
+        self.assertEqual(shared[schemas.ENERGY_PER_KG][1], (7.335, 14.67, 22.005))
+
+    def test_the_template_split_is_the_seven_robots_without_their_hands(self):
+        # Recomputed here from the seven robots' own rows: each group and class its share of the body's joint modules
+        # at the modes, averaged over the seven; the rows named for it (open point B).
+        expected: dict = {}
+        for robot in self.SEVEN:
+            body = [j for j in self.joints(robot) if not j.name.startswith('Hand')]
+            total = sum(j.count * j.module_mass[1] for j in body)
+            for j in body:
+                key = (self.GROUP[j.name.split()[0].lower()], j.module)
+                expected[key] = expected.get(key, 0) + j.count * j.module_mass[1] / total / len(self.SEVEN)
+        rows = [j for j in self.joints('LimX CL')]
+        got = {(j.name.split(',')[0], j.module): j.share for j in rows}
+        self.assertEqual(set(got), set(expected))
+        for key, share in expected.items():
+            self.assertAlmostEqual(got[key], share, places=6, msg=key)
+        self.assertAlmostEqual(sum(got.values()), 1, places=9)
+        for j in rows:
+            self.assertTrue(j.name.endswith(f'({self.LABEL})'), j.name)
+
+    def test_which_robots_rest_on_the_template(self):
+        shared = {j.robot for j in self.apart.joints if j.share is not None and j.robot in self.BATCH_TWO}
+        self.assertEqual(shared, set(self.TEMPLATE))
+        for robot in self.TEMPLATE:
+            self.assertIn('joint shares', schemas.estimate_kinds(self.apart, robot), msg=robot)
+
+    def test_the_jingchus_knees_stated_its_other_joints_the_template(self):
+        # E7.5 point 2: "关节重量：2kg" each, ± 5 % (S); the template's knee rows left out, its others as for every robot
+        # of the template; nothing rescaled.
+        template = {(j.name, j.module): j.share for j in self.joints('LimX CL')}
+        mine = self.joints('JCBOT JingChu')
+        knees = [j for j in mine if j.name.split()[0] == 'Knee']
+        self.assertEqual([(j.count, j.module, j.module_mass, j.share) for j in knees],
+                         [(2, 'large', (1.9, 2.0, 2.1), None)])
+        shares = {(j.name, j.module): j.share for j in mine if j.share is not None}
+        knee_rows = {k: v for k, v in template.items() if k[0].startswith('Knee joints')}
+        self.assertTrue(knee_rows)
+        self.assertEqual(shares, {k: v for k, v in template.items() if k not in knee_rows})
+        self.assertAlmostEqual(sum(shares.values()), 1 - sum(knee_rows.values()), places=9)
+        hands = [j for j in mine if j.name.startswith('Hand')]
+        self.assertEqual([(j.count, j.module_mass) for j in hands], [(2, (0.2215, 0.443, 0.6645))])
+
+    def test_the_four_robots_with_every_joints_torque(self):
+        # E7.5 point 1: type 2's fit at each joint's torque of the maker's model; the joints named by their axes (D).
+        kuavo = {'Hip roll': 127, 'Hip yaw': 71, 'Hip pitch': 132, 'Knee': 280, 'Ankle pitch': 91.6,
+                 'Ankle roll': 68.4, 'Waist yaw': 102, 'Shoulder pitch': 66, 'Shoulder roll': 75, 'Shoulder yaw': 57,
+                 'Elbow': 75, 'Wrist yaw': 14.1, 'Wrist roll': 14.1, 'Wrist pitch': 14.1, 'Head yaw': 1.5,
+                 'Head pitch': 12}
+        atom = {'Hip pitch': 207.76, 'Hip roll': 241.42, 'Hip yaw': 104.16, 'Knee': 213.8, 'Ankle pitch': 89.896,
+                'Ankle roll': 89.896, 'Waist yaw': 104.16, 'Shoulder pitch': 56, 'Shoulder roll': 36,
+                'Shoulder yaw': 36, 'Elbow pitch': 36, 'Elbow roll': 18.6, 'Wrist pitch': 18.6, 'Wrist yaw': 18.6,
+                'Head yaw': 12, 'Head pitch': 12}
+        for robot, torques, body, modules in (('Leju Kuavo 5', kuavo, 29, 21.66), ('DOBOT Atom', atom, 29, 22.37),
+                                              ('LimX Luna', None, 27, 23.24), ('MagicLab MagicBot Gen1', None, 30,
+                                                                               32.59)):
+            rows = [j for j in self.joints(robot) if not j.name.startswith('Hand')]
+            with self.subTest(robot=robot):
+                self.assertEqual(sum(j.count for j in rows), body)
+                for j in rows:
+                    self.assertEqual(j.module_mass, fitted(j.torque), msg=j.name)
+                    if torques:
+                        self.assertEqual(j.torque, torques[j.name], msg=j.name)
+                self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in rows), modules, places=1)
+        # The Atom's waist (DOBOT's file a placeholder of 1000 N·m) its own hip yaw's, E (E7.5 point 1).
+        self.assertNotIn(1000, [j.torque for j in self.joints('DOBOT Atom')])
+
+    def test_every_joint_named_by_its_body_part(self):
+        for j in self.apart.joints:
+            self.assertIn(j.name.split()[0].lower(), schemas.JOINT_KIND, msg=f'{j.robot}, {j.name}')
+
+    def test_the_masses_as_agreed(self):
+        # E7.5 point 5 and its table: the maker's where stated (E7.3, 2), else the register's.
+        masses = {'AeiROBOT ALICE 4': (44, 45, 46), 'DOBOT Atom': (57.91, 58.91, 61.81), 'MirrorMe Bolt': (74, 75, 76),
+                  'Xiaomi CyberOne': (51, 52, 53), 'Deep Robotics DR01': (79, 80, 81),
+                  'Figure AI Figure 03': (60, 61, 62), 'Unitree H2-X Core i7': (65, 66, 70),
+                  'Unitree H2-X Orin NX': (65, 66, 70), 'HONOR D1': (44, 45, 46),
+                  'Simplexity I-Series': (59, 60, 61), 'ROBROS IGRIS-C': (55, 56, 57), 'JCBOT JingChu': (64, 65, 66),
+                  'KAIST Humanoid': (74, 75, 76), 'PAL Kangaroo': (50, 57.5, 65), 'Kepler K1': (84, 85, 86),
+                  'Kepler K2': (74, 75, 76), 'Leju Kuavo 5': (62.5, 63.5, 69.44), 'LimX CL': (44, 45, 46),
+                  'LimX Oli': (54, 55, 55), 'LimX Luna': (55, 56, 57), 'Lumos LUS2': (56, 57, 58),
+                  'MagicLab MagicBot Gen1': (66.4, 70, 71), 'VinMotion Motion 2': (60, 67.5, 75),
+                  'Zhejiang NAVAI-I3': (69, 70, 71), 'Digit Nezha P01': (64, 65, 66)}
+        for robot, mass in masses.items():
+            self.assertEqual(self.constant(robot, 'Robot mass, with battery'), mass, msg=robot)
+
+    def test_the_batteries(self):
+        # E7.5 point 6: the maker's energy where stated (voltage × capacity at the modes); else no voltage, the energy
+        # per kg of the template.
+        stated = {'Unitree H2-X Core i7': 1152, 'Unitree H2-X Orin NX': 1152, 'ROBROS IGRIS-C': 816,
+                  'JCBOT JingChu': 960, 'PAL Kangaroo': 976, 'LimX Oli': 478.8, 'LimX Luna': 1008, 'Lumos LUS2': 540,
+                  'MagicLab MagicBot Gen1': 1350}
+        for robot in set(self.TEMPLATE) | {'DOBOT Atom', 'Leju Kuavo 5', 'LimX Luna', 'MagicLab MagicBot Gen1'}:
+            own = self.apart.constants[robot]
+            with self.subTest(robot=robot):
+                if robot in stated:
+                    wh = own['Battery voltage'][1][1] * own['Battery capacity'][1][1]
+                    self.assertAlmostEqual(wh, stated[robot], places=1)
+                else:
+                    self.assertNotIn('Battery voltage', own)
+        cells = {p.robot: p.label for p in self.apart.parts if p.name == 'Battery cells'}
+        self.assertEqual(cells['Lumos LUS2'], 'S')   # "Ternary lithium battery"
+
+    def test_the_h2x_two_versions_differ_in_pc2_only(self):
+        intel, orin = 'Unitree H2-X Core i7', 'Unitree H2-X Orin NX'
+
+        def rows(robot, items, leave=()):
+            return sorted((p.name, p.count, p.bounds) for p in items if p.robot == robot and p.name not in leave)
+
+        coolers = ('Main board heat sink', 'Main board heat sink: heat pipes and fins')
+        self.assertEqual(rows(intel, self.apart.parts, coolers), rows(orin, self.apart.parts, coolers))
+        self.assertEqual(rows(intel, self.apart.sensors), rows(orin, self.apart.sensors))
+        boards = {r: {b.name: b.bounds for b in self.apart.boards if b.robot == r} for r in (intel, orin)}
+        self.assertEqual(boards[intel]['Computer board PC2, Intel Core i7'], (60, 120, 180))
+        self.assertEqual(boards[orin]['Compute module PC2, NVIDIA Jetson Orin NX'], (29.74, 31.3, 32.87))
+        self.assertEqual(boards[orin]['Carrier board of the Orin NX'], (60, 120, 180))
+        self.assertEqual({k: v for k, v in boards[intel].items() if 'PC2' not in k},
+                         {k: v for k, v in boards[orin].items() if 'PC2' not in k and 'Carrier' not in k})
+
+    def test_the_cables_by_height_and_the_kangaroos_ethernet_line(self):
+        # E7.5 point 9: 8 m per metre of height, to the half metre, half to 1.5 times; the Kangaroo's EtherCAT.
+        modes = {'AeiROBOT ALICE 4': 13, 'DOBOT Atom': 13.5, 'MirrorMe Bolt': 14, 'Xiaomi CyberOne': 14,
+                 'Deep Robotics DR01': 13.5, 'Figure AI Figure 03': 14, 'Unitree H2-X Core i7': 14,
+                 'Unitree H2-X Orin NX': 14, 'HONOR D1': 13.5, 'Simplexity I-Series': 14, 'ROBROS IGRIS-C': 12.5,
+                 'JCBOT JingChu': 13.5, 'KAIST Humanoid': 13, 'PAL Kangaroo': 13, 'Kepler K1': 14, 'Kepler K2': 14,
+                 'Leju Kuavo 5': 14, 'LimX CL': 13, 'LimX Oli': 13, 'LimX Luna': 13, 'Lumos LUS2': 13,
+                 'MagicLab MagicBot Gen1': 14, 'VinMotion Motion 2': 13, 'Zhejiang NAVAI-I3': 14.5,
+                 'Digit Nezha P01': 11.5}
+        for robot, mode in modes.items():
+            own = self.apart.constants[robot]
+            cable = schemas.CABLE_ETHERNET if robot == 'PAL Kangaroo' else schemas.CABLE_FOUR
+            self.assertEqual(own[cable][1], half_to_one_and_a_half(mode), msg=robot)
+
+    def test_the_hands_and_grippers_of_batch_2(self):
+        # E7.5 point 4.
+        six = half_to_one_and_a_half(0.443)
+        eleven = half_to_one_and_a_half(0.443 * 11 / 6)
+        expected = {'Leju Kuavo 5': six, 'ROBROS IGRIS-C': six, 'JCBOT JingChu': six, 'Kepler K1': eleven,
+                    'Kepler K2': eleven, 'MagicLab MagicBot Gen1': half_to_one_and_a_half(1.178 / 2),
+                    'Figure AI Figure 03': (0.4125, 0.825, 1.2375), 'LimX Oli': (0.41, 0.43, 0.45)}
+        got = {}
+        for j in self.apart.joints:
+            if j.robot in self.BATCH_TWO and j.name.split()[0] in ('Hand', 'Gripper'):
+                got[j.robot] = (j.count, j.module, j.module_mass)
+        self.assertEqual(got, {r: (2, 'small', m) for r, m in expected.items()})
+
+    def test_one_motion_sensor_where_the_maker_names_no_sensor(self):
+        # E7.5 point 8.
+        for robot in ('DOBOT Atom', 'MirrorMe Bolt', 'Deep Robotics DR01', 'HONOR D1', 'Simplexity I-Series',
+                      'KAIST Humanoid', 'LimX CL', 'VinMotion Motion 2', 'Zhejiang NAVAI-I3', 'Digit Nezha P01'):
+            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
+            self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
+
+    def test_a_compute_module_where_the_maker_names_only_its_power(self):
+        # E7.5 point 7: an Orin NX-sized module and its carrier, estimates, so half to 1.5 times the Orin NX's 31.3 cm2.
+        for robot in ('JCBOT JingChu', 'Kepler K1', 'Kepler K2', 'Leju Kuavo 5', 'MagicLab MagicBot Gen1'):
+            boards = [b for b in self.apart.boards if b.robot == robot and b.kind == 'Torso boards']
+            modules = [b for b in boards if b.name.startswith('Compute module')]
+            carriers = [b for b in boards if b.name.startswith('Carrier board')]
+            self.assertEqual([b.bounds for b in modules], [(15.65, 31.3, 46.95)], msg=robot)
+            self.assertEqual([b.bounds for b in carriers], [(60, 120, 180)], msg=robot)
+
+
+class TestTypeTwoBatchTwoB(unittest.TestCase):
+    """Type 2's batch 2b entered (Matthias, 2026-10-30: "Yes, all six" (E8.2), the Omni "has to be included", "Yes, agree
+    E8.3", "Yes, build it" with the spec's open points A to C): its 24 robots as E8.3 agreed them, the Walker Tienkung in
+    two versions; the template of E7.4 unchanged (A); Qinglong's and TALOS's joints named by their place and axis (B)."""
+
+    TORQUES = {'Unitree H1': (19, 21.67), 'OpenLoong Qinglong': (31, 30.11), 'X-Humanoid Tien Kung 2.0': (30, 24.79),
+               'Walker Tienkung Vision': (21, 21.00), 'Walker Tienkung Embodied': (30, 24.06), 'PAL TALOS': (30, 26.09)}
+    TEMPLATE = ['X-Humanoid Omni', 'Tesla Optimus Gen 3', 'Tesla Optimus Gen 2', 'Tesla Optimus V2.5',
+                'Cyan Robotics Orca', 'Sanctuary Phoenix', 'PHYBOT M1', 'PAL REEM-C', 'Robotera L7', 'EngineAI SE01',
+                'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman', 'Westwood THEMIS', 'X-Humanoid TianGong Ultra',
+                'Tlibot Tianzhen Z1', 'X-Humanoid Tien Kung 3.0', 'Tlibot T1', 'DroidUp Walker II']
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, _ = written(builder_two)
+
+    def joints(self, robot: str) -> list:
+        return [j for j in self.apart.joints if j.robot == robot]
+
+    def test_the_template_unchanged(self):
+        # Open point A: E7.4's numbers and its seven robots; batch 2b's robots of the template take its rows as they are.
+        shared = self.apart.constants['all']
+        self.assertEqual(shared[schemas.JOINT_SHARE][1], (0.202, 0.404, 0.606))
+        rows = {(j.name, j.share) for j in self.joints('LimX CL')}
+        for robot in self.TEMPLATE:
+            self.assertEqual({(j.name, j.share) for j in self.joints(robot) if j.share is not None}, rows, msg=robot)
+
+    def test_the_robots_with_every_joints_torque(self):
+        for robot, (count, modules) in self.TORQUES.items():
+            body = [j for j in self.joints(robot) if j.name.split()[0] not in ('Hand', 'Gripper')]
+            with self.subTest(robot=robot):
+                self.assertEqual(sum(j.count for j in body), count)
+                self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in body), modules, places=1)
+                self.assertTrue(all(j.share is None for j in self.joints(robot)))
+        knees = [j for j in self.joints('Unitree H1') if j.name.startswith('Knee')]
+        self.assertEqual([(j.count, j.module_mass) for j in knees], [(2, (1.805, 1.9, 1.995))])   # the M107 (E8.3, 1)
+        self.assertEqual(max(j.torque for j in self.joints('PAL TALOS') if j.torque), 300)          # LAAS's model
+        waist = [j for j in self.joints('Walker Tienkung Vision') if j.name.startswith('Waist')]
+        self.assertEqual([(j.torque, j.module_mass) for j in waist], [(180, fitted(180))])       # E: its hip roll's
+
+    def test_every_joint_named_by_its_body_part(self):
+        for j in self.apart.joints:
+            self.assertIn(j.name.split()[0].lower(), schemas.JOINT_KIND, msg=f'{j.robot}, {j.name}')
+
+    def test_the_masses_as_agreed(self):
+        masses = {'X-Humanoid Omni': (38.5, 39.5, 40.5), 'Tesla Optimus Gen 3': (51, 52, 53),
+                  'Tesla Optimus Gen 2': (55, 56, 57), 'Tesla Optimus V2.5': (54, 55, 56), 'Cyan Robotics Orca': (49, 50, 51),
+                  'Sanctuary Phoenix': (69, 70, 71), 'PHYBOT M1': (59, 60, 61), 'OpenLoong Qinglong': (85.14, 86.14, 87.14),
+                  'PAL REEM-C': (79, 80, 81), 'Robotera L7': (66.2, 67.2, 68.2), 'EngineAI SE01': (79, 80, 81),
+                  'Zeroth Sean': (44, 45, 46), 'Siasun Songxing': (84, 85, 86), 'Unitree Superman': (44, 45, 46),
+                  'PAL TALOS': (93.34, 95, 96), 'Westwood THEMIS': (36.92, 37.92, 38.92),
+                  'X-Humanoid TianGong Ultra': (54, 55, 56), 'Tlibot Tianzhen Z1': (44, 45, 46),
+                  'X-Humanoid Tien Kung 2.0': (66.96, 67.96, 68.96), 'X-Humanoid Tien Kung 3.0': (63.5, 64.5, 65.5),
+                  'Tlibot T1': (42, 43, 44), 'DroidUp Walker II': (31, 32, 33), 'Walker Tienkung Vision': (60, 61, 62),
+                  'Walker Tienkung Embodied': (72, 73, 74), 'Unitree H1': (46, 47, 59.34)}
+        for robot, mass in masses.items():
+            self.assertEqual(self.apart.constants[robot]['Robot mass, with battery'][1], mass, msg=robot)
+
+    def test_the_batteries(self):
+        stated = {'Unitree H1': 864, 'Robotera L7': 900, 'Walker Tienkung Vision': 1584, 'Walker Tienkung Embodied': 1584,
+                  'Tlibot T1': 1110, 'X-Humanoid Tien Kung 3.0': 864}
+        for robot in self.TEMPLATE + list(self.TORQUES):
+            own = self.apart.constants[robot]
+            with self.subTest(robot=robot):
+                if robot in stated:
+                    self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], stated[robot],
+                                           places=1)
+                else:
+                    self.assertNotIn('Battery voltage', own)
+
+    def test_hands_and_grippers(self):
+        expected = {'Robotera L7': (1.045, 1.1, 1.155), 'EngineAI SE01': half_to_one_and_a_half(0.443),
+                    'Walker Tienkung Embodied': half_to_one_and_a_half(0.443),
+                    'Westwood THEMIS': half_to_one_and_a_half(0.463), 'PAL TALOS': half_to_one_and_a_half(1.094)}
+        got = {j.robot: j.module_mass for j in self.apart.joints if j.robot in self.TEMPLATE + list(self.TORQUES)
+               and j.name.split()[0] in ('Hand', 'Gripper')}
+        self.assertEqual(got, expected)
+
+    def test_the_cables_by_height_and_talos_ethernet_line(self):
+        modes = {'X-Humanoid Omni': 11, 'Unitree H1': 14.5, 'PAL TALOS': 14, 'Walker Tienkung Vision': 14,
+                 'Robotera L7': 13.5, 'Zeroth Sean': 12.5}
+        for robot, mode in modes.items():
+            cable = schemas.CABLE_ETHERNET if robot == 'PAL TALOS' else schemas.CABLE_FOUR
+            self.assertEqual(self.apart.constants[robot][cable][1], half_to_one_and_a_half(mode), msg=robot)
+
+    def test_the_walker_tienkungs_two_versions(self):
+        vision, embodied = 'Walker Tienkung Vision', 'Walker Tienkung Embodied'
+        boards = {r: {b.name: b.count for b in self.apart.boards if b.robot == r and b.kind == 'Torso boards'}
+                  for r in (vision, embodied)}
+        self.assertEqual(boards[vision]['Compute module, NVIDIA Jetson AGX Orin'], 1)
+        self.assertEqual(boards[embodied]['Compute module, NVIDIA Jetson AGX Orin'], 2)
+        extra = {j.name for j in self.joints(embodied)} - {j.name for j in self.joints(vision)}
+        self.assertEqual({n.split()[0] for n in extra}, {'Head', 'Wrist', 'Hand'})
+
+    def test_the_compute_modules_read_from_their_power(self):
+        # E8.3 point 7: a "2070" controller as the H2 Plus's Thor, the L7's "275 TOPS" Orin as an AGX Orin (E).
+        for robot in ('X-Humanoid Omni', 'X-Humanoid Tien Kung 3.0', 'Robotera L7'):
+            modules = [b.bounds for b in self.apart.boards if b.robot == robot and b.name.startswith('Compute module')]
+            self.assertEqual(modules, [(43.5, 87, 130.5)], msg=robot)
+
+    def test_one_motion_sensor_where_the_maker_names_none(self):
+        for robot in ('Tesla Optimus Gen 3', 'Cyan Robotics Orca', 'Sanctuary Phoenix', 'PHYBOT M1', 'PAL REEM-C',
+                      'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman', 'Westwood THEMIS',
+                      'X-Humanoid TianGong Ultra', 'Tlibot Tianzhen Z1', 'Tlibot T1', 'OpenLoong Qinglong',
+                      'X-Humanoid Tien Kung 2.0'):
+            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
+            self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)

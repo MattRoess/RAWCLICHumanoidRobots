@@ -37,6 +37,7 @@ tests/test_make_parts_taken_apart.py checks that what it writes passes 01's chec
 import math
 import os
 import sys
+from functools import partial
 
 # The tools/ folder, so that the shared machinery (tools/parts_taken_apart.py) can be imported when this file is run.
 TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -648,20 +649,16 @@ QM080 = spread(0.85)              # ROBOTIS QM-080, 850 g (K0a); no torque state
 QM060 = spread(0.45)              # ROBOTIS QM-060, 450 g (K0a); no torque stated
 
 
-def catalogue_block(name: str, maker: str, height: float, stated: float | None, mass: tuple, joints_stated: int,
-                    computer: str, **more) -> dict:
-    """A robot of batches 2 to 4 that gives no joint torques (E5.17): its joints a share of its mass, split as batch
-    1's are on average (point 1); its battery 12 Wh per kg of robot unless a voltage or capacity is given (point 2); a
-    computer board as the template's (point 3), named as its sources name it; the rest as E5.14 (point 4)."""
-    defaults = dict(joints_stated=joints_stated,
-                    boards=[(computer, 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
-                             'HG; as the X1\'s and N1\'s computer boards (E5.17 point 3)'),
-                            ('Power distribution board', 1, 'Torso boards', 'Torso', POWER, 'PE_HVS', 'E',
-                             'as the G1 (E5.14 point 4)')],
-                    joint_sources=("no joint torques in its sources: its joint modules 24.5 / 49 / 73.5 % of its mass, "
-                                   "split as batch 1's on average (E5.17 point 1)"))
-    defaults.update(more)
-    return block(name, maker, height, stated, defaults.pop('sources', 'HG (E5.15, E5.16)'), mass, AVERAGE, **defaults)
+# A robot of batches 2 to 4 that gives no joint torques (E5.17): its joints a share of its mass, split as batch 1's
+# are on average (point 1); its battery 12 Wh per kg of robot unless a voltage or capacity is given (point 2); a
+# computer board as the template's (point 3), named as its sources name it; the rest as E5.14 (point 4). The function
+# is the shared one (tools/parts_taken_apart.py, template_block(), one copy for every type since 2026-10-30, "Yes,
+# build it", open point C), with type 1's texts.
+catalogue_block = partial(
+    template_block, computer_source="HG; as the X1's and N1's computer boards (E5.17 point 3)",
+    joint_sources=("no joint torques in its sources: its joint modules 24.5 / 49 / 73.5 % of its mass, split as batch "
+                   "1's on average (E5.17 point 1)"),
+    default_sources='HG (E5.15, E5.16)')
 
 
 # --- Batch 1: the eight robots with the most published hardware (E5.1 to E5.14) ---------------------------------------

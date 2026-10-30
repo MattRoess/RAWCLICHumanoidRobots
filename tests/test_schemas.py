@@ -545,13 +545,27 @@ class TestTypeTwoPages(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # The files as their builders write them now, in a temporary folder (2026-10-30, the entry of batch 2): the
+        # pages are checked before they are drawn from the files on disk.
+        def load(name, path):
+            spec = importlib.util.spec_from_file_location(name, os.path.join(ROOT, path))
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[name] = module
+            spec.loader.exec_module(module)
+            return module
+
         params = Params()
-        paths = [real_parts_file(2), absolute(params.data.register)]
-        if not all(os.path.exists(p) for p in paths):
-            raise unittest.SkipTest("type 2's parts file or the register is not on disk")
+        parts = load('make_parts_taken_apart_2', os.path.join('tools', '2_full_scale_general_purpose_ai_research',
+                                                               'make_parts_taken_apart.py'))
+        register = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
+        if not os.path.exists(absolute(params.data.humanoid_guide)):
+            raise unittest.SkipTest('the humanoid.guide catalogue, which the register is built from, is not on disk')
+        with tempfile.TemporaryDirectory() as folder:
+            parts.build(os.path.join(folder, 'parts.xlsx'))
+            register.build(os.path.join(folder, 'register.xlsx'), params)
+            cls.apart = schemas.read_parts_taken_apart(os.path.join(folder, 'parts.xlsx'))
+            cls.register = schemas.read_register(os.path.join(folder, 'register.xlsx'))
         cls.params = params
-        cls.apart = schemas.read_parts_taken_apart(paths[0])
-        cls.register = schemas.read_register(paths[1])
 
     def pages(self) -> list:
         return schemas.taken_apart_type_pages('categories/2_type', self.apart, 2, self.register)
@@ -562,10 +576,13 @@ class TestTypeTwoPages(unittest.TestCase):
 
     def test_its_pages_are_type_1s_with_its_own_title(self):
         pages = self.pages()
-        self.assertEqual([name for name, _ in pages], ['categories/2_type_robots_1.png', 'categories/2_type_robot.png'])
-        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 5 of its 97 robots taken apart so far, each drawn '
-                                                  'from its own parts (1 of 1)')
-        self.assertEqual(self.title(pages[1][1]), 'Robot type 2: where its kinds of part sit')
+        # Batches 1, 2 and 2b: 53 robots, 56 rows (the GR-1, the H2-X and the Walker Tienkung in two versions each), on
+        # four pages of 18 lines.
+        self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in (1, 2, 3, 4)]
+                         + ['categories/2_type_robot.png'])
+        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 53 of its 97 robots taken apart so far, each drawn '
+                                                  'from its own parts (1 of 4)')
+        self.assertEqual(self.title(pages[4][1]), 'Robot type 2: where its kinds of part sit')
         for _, figure in pages:
             schemas.plt.close(figure)
 
@@ -589,6 +606,33 @@ class TestTypeTwoPages(unittest.TestCase):
             words = ' '.join(t.get_text() for t in texts)
             for word in self.PROJECT_WORDS:
                 self.assertNotIn(word, words, msg=name)
+            schemas.plt.close(figure)
+
+    def test_every_stated_number_behind_the_cells_names_a_source_of_the_sheet_sources(self):
+        # As type 1's (2026-10-30, batch 2b's entry: its source codes were first missing from the sheet Sources, so its
+        # makers' numbers showed as a third party's): a stated number names a code of the sheet Sources first.
+        for robot in self.apart.robots:
+            for cell, rows in schemas.cell_rows(self.apart, robot).items():
+                for label, sources in rows:
+                    if label.startswith('S'):
+                        self.assertIsNotNone(schemas.first_source(self.apart, sources), (robot, cell, sources))
+
+    def test_no_battery_label_runs_into_the_cells_beside_it(self):
+        # 2026-10-30, batch 2b's entry: the Walker Tienkung's "1584 Wh" ran into its first cell; the battery's axis now
+        # leaves room for the label of the longest bar.
+        from matplotlib.patches import Rectangle
+        from matplotlib.text import Text
+        for name, figure in enumerate(schemas.robots_table_pages(self.apart, 2), start=1):
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            labels = [t for t in figure.findobj(Text) if t.get_text().endswith(' Wh') and t.get_visible()]
+            cells = [p for p in figure.findobj(Rectangle) if p.get_x() >= schemas.T_CELLS[0] - schemas.T_CELL[0]
+                     and p.get_width() <= schemas.T_CELL[0] + 1e-9]
+            self.assertTrue(labels and cells, name)
+            boxes = [c.get_window_extent(renderer) for c in cells]
+            for t in labels:
+                box = t.get_window_extent(renderer)
+                self.assertFalse(any(box.overlaps(b) for b in boxes), (name, t.get_text()))
             schemas.plt.close(figure)
 
     def test_the_former_pages_only_for_a_type_with_no_parts_file(self):
@@ -1520,9 +1564,45 @@ class TestPartsTakenApart(unittest.TestCase):
         self.assertFaultSays(self.faults({**self.SHARES, ('Joints', 3, 9): 0.2}), 'add up to 0.95')
 
     def test_a_robot_with_shares_for_some_of_its_joints_only(self):
+        # Robot B the only robot with shares, and not for all its joints: no template in the file to take them from.
         changes = {**self.SHARES, ('Joints', 3, 6): 0.43, ('Joints', 3, 7): 0.45, ('Joints', 3, 8): 0.47,
                    ('Joints', 3, 9): None, ('Joints', 2, 9): 1.0}
-        self.assertFaultSays(self.faults(changes), 'all or none')
+        self.assertFaultSays(self.faults(changes), 'no robot of the file has all its joints as shares')
+
+    # Matthias, 2026-10-30, "Yes, build it" (the entry of type 2's batch 2, open point A): a robot whose joints are
+    # shares may have stated joints beside them: its hands or grippers, outside the template (EVIDENCE.md E7.4 counts
+    # body joints only), and joints that replace a group of the template (the JingChu's knees, E7.5 point 2). Its
+    # shares must then be the template's (a robot of the file with all its joints as shares) less the groups its
+    # stated body joints replace, exactly; nothing is rescaled. Robot B is the template (SHARES); Robot A its hips
+    # stated, its other joints the template's elbow share.
+    MIXED_JOINTS = {**SHARES, ('Joints', 0, 6): 1.0, ('Joints', 0, 7): 1.1, ('Joints', 0, 8): 1.2,
+                    ('Joints', 1, 2): 'Elbow', ('Joints', 1, 4): 'small', ('Joints', 1, 5): 19, ('Joints', 1, 9): 0.25,
+                    ('Joints', 1, 11): 'Elbows and wrists', ('Joints', 1, 12): 'Arms'}
+    # No joint is an ankle any more: the ankles' grade classes go with it (01 faults a heat group no joint has).
+    NO_ANKLES = {('MagnetGrades', 3): None, ('MagnetGrades', 4): None}
+    MIXED = {**MIXED_JOINTS, **NO_ANKLES}
+
+    def test_stated_joints_beside_the_templates_other_shares(self):
+        self.assertEqual([f.text for f in self.faults(self.MIXED)], [])
+
+    def test_a_hand_beside_the_whole_template(self):
+        # Robot A: the template's two shares, and a hand with its mass: the hand is outside the template.
+        changes = {**self.SHARES, ('Joints', 0, 9): 0.75, ('Joints', 0, 5): None,
+                   ('Joints', 1, 2): 'Hand (six joints)', ('Joints', 1, 4): 'small', ('Joints', 1, 5): None,
+                   ('Joints', 1, 6): 0.2, ('Joints', 1, 7): 0.4, ('Joints', 1, 8): 0.6,
+                   ('Joints', 1, 11): 'Elbows and wrists', ('Joints', 1, 12): 'Arms',
+                   ('Joints', 9): ('Robot A', 3, 'Elbow', 2, 'small', None, None, None, None, 0.25, 'passive',
+                                   'Elbows and wrists', 'Arms', 'U3', 'grades'),
+                   ('Parts', 0, 2): 4, **self.NO_ANKLES}
+        self.assertEqual([f.text for f in self.faults(changes)], [])
+
+    def test_a_mixed_robots_shares_unlike_the_templates(self):
+        self.assertFaultSays(self.faults({**self.MIXED, ('Joints', 1, 9): 0.2}), "not the template's")
+
+    def test_a_mixed_robots_stated_joints_not_the_groups_it_leaves_out(self):
+        # It leaves out the template's hips, but the joint it states is an ankle.
+        changes = {**self.MIXED_JOINTS, ('Joints', 0, 2): 'Ankle', ('Joints', 0, 11): 'Ankles'}
+        self.assertFaultSays(self.faults(changes), 'leaves out')
 
     def test_a_joint_with_a_module_mass_and_a_share(self):
         faults = self.faults({**self.SHARES, ('Joints', 3, 6): 0.43, ('Joints', 3, 7): 0.45, ('Joints', 3, 8): 0.47})

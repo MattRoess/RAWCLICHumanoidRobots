@@ -3,6 +3,208 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-10-30
+
+### V93. Batch 2b of type 2 entered (EVIDENCE E8.4): tests first, a sandbox run, the pages looked at
+
+- **His words:** "Spec batch 2b's entry", "Yes, build it" (points 1 to 6, open points A to C).
+- **Tests first** (each failing before its code): `tests/test_make_parts_taken_apart.py` TestTypeTwoBatchTwoB (10: the
+  template unchanged and taken as it is; the five robots' joints by their torques, the H1's knees the M107, TALOS's
+  limits, the Walker Tienkung's waist; every joint named by its body part; the masses; the batteries; hands and
+  grippers; cables, TALOS's Ethernet line; the Walker Tienkung's versions; the compute modules; one motion sensor where
+  none is named); the register's test (53 taken apart, the 43 left all on wheels, 307, 312, 313 on wheels); 02's test
+  (53 robots each as often, the three two-version robots half as often); 01's page test (53 of 97, four pages). Two
+  of batch 2's tests that collected over every robot now look at batch 2's only.
+- **Faults the tests and the pages found, and their fixes:** (1) 01 refused the Tien Kung 3.0's and T1's voltage of 48 V
+  labelled E at one value (an estimate spans half to 1.5 times): the Tien Kung 3.0 24 / 48 / 72 V (E) as type 1's
+  Booster T1, the T1's labelled "S, E" (its stated energy only split). (2) **On the sandbox's pages**: the Walker
+  Tienkung's "1584 Wh" ran into its first cell, and the makers' numbers of several robots showed as a third party's.
+  The second cause: batch 2b's source codes cited but not in the sheet Sources, and batch 2's two Orin NX rows naming
+  no code. **Two new tests for type 2's pages, failing first**: every stated number behind the cells names a code of
+  the sheet Sources (type 1 had it, type 2 not); no battery label overlaps the cells. Fixed: the codes added, the rows
+  naming their codes first, 01's battery axis with room for the label (`WH_ROOM`; type 1's ticks 0, 400, 800 as before,
+  computed). Both tests pass; the pages looked at again.
+- **After:** the whole suite, 368 tests; 366 pass. The two that fail compare the builders' output with the files on
+  disk (the register, type 2's parts file) and pass once he reruns the two builders.
+- **Sandbox:** both builders and the register into Claude's scratch folder, 01's pages of type 2 and 02 whole at 2,000
+  draws; type 2 over 53 robots, 43 not yet taken apart, its stock-and-flow draws from the workbook; no frame of type 2
+  below zero. Per robot of type 2, the medians: copper 3.4 kg, aluminium 25 kg, Nd and Pr 447 g.
+- **Looked at:** 01's four table pages of type 2 (after the fixes: labels clear, the makers' cells blue).
+- **Not covered:** his runs; the other pages of 02 one by one.
+
+### V92. His runs of 08:39 read back: the register, type 2's builder, 01 and 02 with batch 2
+
+- **His words:** "Read back 02 first".
+- **Times:** the register 08:39:08, type 2's parts file 08:39:16, 01's pages 08:39:25 to 08:39:26, 02's outputs
+  08:39:59 to 08:40:48 (`data/consolidated/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`,
+  `figures/parts_taken_apart/<n>_<name>/`): every file of the per-type folders is of this run. Older: only C's
+  leftovers at the former paths (`data/parts_taken_apart/*.npy`, `.txt`, `summary.csv`; `figures/parts_taken_apart/
+  robot_type_1_*.png` and `sources/`), of 2026-10-29 16:39, waiting for his word.
+- **The files on disk equal the builders':** the register, type 1's and type 2's parts files, cell for cell (the
+  three tests that failed until his runs now pass).
+- **01:** "No fault found in the inputs"; type 2 "29 of its 97 robots of the register taken apart so far …; their
+  masses 44 to 86 kg. Its draws for stock-and-flow from the workbook until all are."
+- **02, type 2:** 200,000 draws over its 29 robots (`register.txt`), each drawn 6,789 to 7,048 times (200,000 / 29 =
+  6,897); the GR-1's versions 3,351 and 3,458 times, the H2-X's 3,593 and 3,455. No remainder below zero in any draw
+  (495 remainders). Per robot, the medians: mass 64.2 kg (95 %: 44.7 to 84.7), copper 3.47 kg, aluminium 26.4 kg, iron
+  16.1 kg, nickel 0.84 kg, Nd 0.39 kg, Pr 0.073 kg, Dy 86 g, lithium 0.10 kg, cobalt 0.15 kg: as the sandbox of V89
+  at 2,000 draws (copper 3.5 kg, Nd and Pr 465 g, Dy 85 g). Its draws for stock-and-flow from the workbook
+  (`data/consolidated/2_…/summary.csv`: titanium, steel not yet in the elements, as before).
+- **02, type 1:** remainders below zero in a few draws, as before (at most the Booster K1 2 Ah's housing, 1.6 %; the
+  PrimeBOT Q1's frame 0.37 %): reported, not cut.
+- **Looked at:** 01's overview pages; type 2's first element page (the medians as above, its kinds of part stacked).
+- **Seen, not changed:** 01's overview box of the register says "31 of robot type 1" and not type 2's 97.
+- **Not covered:** the other pages of this run one by one; type 1's draws against the run of 05:04 (its outputs
+  overwritten, no copy kept).
+
+### V91. Batch 2b's proposal (EVIDENCE E8.3): its numbers at the modes
+
+- **His words:** "Propose batch 2b" (and, before it, "Yes, all six" and, of the Omni, "If 2 stay, it has to be
+  included"). Only `documentation/claude/EVIDENCE.md` and this report were written; his run of 02 not touched.
+- **From the models** (`batch2b_inputs.py`, Claude's scratch folder, reading the model files of V90): the joint
+  modules by type 2's fit: H1 21.67 kg (its page's peaks per group, the knees the M107's 1.9 kg, its model's torso),
+  Qinglong 30.11 kg (31 joints), Tien Kung 2.0 24.79 kg (30), Walker Tienkung 21.00 kg (its model's 20 and its waist
+  at 180 N·m) and 24.06 kg (with its neck at 15.8 and wrists at 17.3 N·m), TALOS 26.09 kg (its 30 body joints).
+  TALOS's grippers 1.094 kg each and THEMIS's hands 0.463 kg each by their models' links. A first count of THEMIS's
+  right hand (0.926 kg) also caught the left, "WRIST_YAW" starting "WRIST_YAW_L": counted again, 0.463 kg each. TALOS's
+  file holds `<joint>` entries inside its transmissions: only the robot's own joints read.
+- **At the modes** (`batch2b_modes.py`): no frame below zero; the least the H1's, 30 % of its mass; the template's
+  robots without hands or stated battery 38 %. Two sentences of the proposal corrected before showing it (14 such
+  robots, not 16; the T1 states its hips', knees' and ankles' torques, not a maximum only).
+- **The medians the Walker Tienkung's neck and wrists take** (17.3 and 15.8 N·m): from the seven robots' joints as
+  entered (V89): wrists 19 values, median 17.3; head 13 values, median 15.8; by hand.
+- **Not covered:** nothing is entered or drawn; the module sizes "2070" and "275 TOPS" read as Thor and AGX Orin are my
+  reading; the scratch scripts may be emptied again (their results stand here).
+
+### V90. Batch 2b's source table (EVIDENCE E8); the scratch scripts of V87 to V89 gone
+
+- **His words:** "Yes, start batch 2b" (the sources of the 27 robots not on wheels, nothing changed while 02 runs).
+  Only `documentation/claude/EVIDENCE.md` and this report were written, with the handover's line on the next batch
+  corrected earlier (27 with a mass and the Xialan S0, not 28).
+- **His run checked by its files' times only (not read back):** the register 08:39:08, type 2's parts file 08:39:16,
+  01's pages of type 2 08:39:25 to 08:39:26; 02 started at about 08:39:36. So this run of 02 draws batch 2.
+- **The 27 against the register:** read from `data/researched/humanoid_register.xlsx` (sheet Type 2): its robots of
+  form not "wheels" and "not drawn: not yet taken apart", 27, from 216 Omni to 352 H1 (the Xialan S0 "not drawn: no
+  mass stated").
+- **How read:** six web-fetch reads of the makers' sites (HTML text, no PDF opened); the built-in browser where they
+  got no text (Robotera's script-rendered pages, Zeroth's rate limit, Tesla's refusal, PHYBOT's splash page; Westwood's
+  site down, Cloudflare 522, in both); two spec pictures read myself (Tien Kung 3.0, Walker Tienkung); nine model
+  files through GitHub's interface, their links' masses summed and their moving joints' limits listed by script.
+- **Checked against each other:** the Walker Tienkung's model (61.76 kg, 20 joints, peak 300 N·m) fits its "Voice &
+  Vision" version (about 61 kg, 21 DoF, peak 300 N·m); the L7's 65 kg without hands plus two XHAND 1 of 1.1 kg; the
+  H1's "Peak Torque Density: 189N.m/Kg" is the M107's 360 N·m over 1.9 kg (E6.3).
+- **Found against the register** (E8.2's questions): three robots on wheels (Torobo, VB1-I, VB2), the Omni at 135 cm,
+  five robots on no list of their makers or without a site, masses that differ.
+- **Claude's scratch folder emptied again** between turns (as noted on 2026-10-30, morning): the scripts behind V87 to
+  V89 (`type2_template_test.py`, `type2_template_check.py`, `knee_check.py`, `batch2_modes.py`, `sandbox_batch2.py`)
+  are gone; their results stand as recorded, and the entry's checks that matter are tests in `tests/` (V89).
+- **Not covered:** REEM-C's model (xacro, not expanded); the PDFs linked (TALOS's datasheet); TALOS's model is a
+  user's, not PAL's.
+
+### V89. Batch 2 of type 2 entered (EVIDENCE E7.6): tests first, a sandbox run of 01 and 02, the pages looked at
+
+- **His words:** "Spec the entry", "Yes, build it" (points 1 to 7, open points A to D with the recommendations).
+- **Before:** the whole suite, 335 tests, all passing (type 1's file on disk equal to its builder's, cell for cell).
+- **Tests first** (each failing before its code): `tests/test_make_parts_taken_apart.py` TestTypeTwoBatchTwo (13: the
+  template's numbers; its split recomputed from the seven robots' own rows without their hands; which robots rest on
+  it; the JingChu's stated knees and the template's other rows, their shares adding up to 1 less the knees'; the four
+  robots' joints by the fit at their models' torques; every joint named by its body part; masses; batteries; the H2-X's
+  versions differing in PC2 only; cables; hands and grippers; one motion sensor where none is named; the compute
+  modules); `tests/test_schemas.py` (01's check 18: a stated joint beside the template's other shares, a hand beside the
+  whole template, shares unlike the template's, stated joints of the wrong group, shares for some joints with no
+  template in the file; the pages of type 2 from the builders' output, 29 of 97 robots on two pages);
+  `tests/test_make_humanoid_register.py` (29 taken apart, 67 later, the three on wheels);
+  `tests/test_parts_taken_apart.py` (02: 29 robots each as often, the H2-X's and GR-1's versions half as often; the
+  JingChu's knees within 2 × 1.9 to 2 × 2.1 kg, its other joints 20.2 to 60.6 % of its mass over the template's shares
+  it keeps; the notes in type 2's own words).
+- **After:** 355 tests; 353 pass. The two that fail compare the builders' output with the files on disk (the register,
+  type 2's parts file) and pass once he reruns the two builders. Type 1's file is still equal to its builder's, cell for
+  cell (point C proved).
+- **Deliberate faults:** the H2-X's long name put back: the page test failed on "1.725 m" over "Unitree H2-X PC2 Intel
+  Core i7", then passed again with the short name. 01's new check against four planted faults (the tests above).
+- **What 01 found in the new file and was corrected:** the compute modules whose size is an estimate had ± 5 %; 01 asks
+  half to 1.5 times of every estimate: widened (E7.6). Then no fault.
+- **Sandbox:** both builders and the register written into Claude's scratch folder, 01's pages of type 2 drawn, and 02
+  run whole at 2,000 draws with every output folder redirected there; nothing of `data/` or `figures/` touched. Type 2
+  drawn over 29 robots, 67 not yet taken apart, its stock-and-flow draws from the workbook; no frame of type 2 below
+  zero (type 1's PrimeBOT Q1 in 1.8 %, as before). Per robot of type 2, the medians: copper 3.5 kg, aluminium 26 kg,
+  Nd and Pr 465 g, dysprosium 85 g (batch 1 alone: copper 3.9 kg, Nd and Pr 0.51 kg, V84).
+- **Looked at:** 01's two table pages and the robot page of type 2; 02's notes, overview 1 and notes pages of type 2.
+  Found: the H2-X's long name over its height (shortened); 02's notes saying "split as batch 1's on average" for type 2
+  (now from the rows' own words; type 1's notes read "split as batch 1 on average", one word fewer than before).
+- **Seen, not changed:** 02 opens more than 20 figures at once (matplotlib's warning): type 1's 26 pages did before
+  this entry; type 2 now opens 21.
+- **Not covered:** his runs of the register's and type 2's builders, then 01 and 02 at 200,000 draws; the other
+  element and material pages of type 2 not looked at one by one.
+
+### V88. Batch 2's proposal (EVIDENCE E7.5): its numbers at the modes, and three checks
+
+- **His words:** "Propose batch 2". Only `documentation/claude/EVIDENCE.md` and this report were written.
+- **The numbers at the modes:** `batch2_modes.py` in Claude's scratch folder, reading only the makers' model files
+  (`atom_wholebody.urdf`, `biped_s56.urdf`, `HU_L04_01.urdf`, `MAGICBOT.urdf`): each joint's module by type 2's fit,
+  the template's 40.4 % and 14.67 Wh/kg (E7.4), the pack at 164 Wh/kg, shell 11.5 %, screws 0.5 kg × mass / 35 kg, the
+  frame the remainder. No remainder below zero; the least the MagicBot's, 27 % of its mass. The JingChu's row by hand:
+  26.26 − 3.70 + 4.0 = 26.56 kg of modules, the frame 23.3 kg.
+- **The JingChu's stated knees against the template** (`knee_check.py`): the knees' share of the modules over E7.4's
+  seven robots, 11.8 to 17.5 %, mean 14.1 %; the template gives its knees 1.85 kg each against the stated 2 kg (0.92).
+  A first pass read the Kuavo-5's knees as none: its model names them `leg_l4_joint`, `leg_r4_joint` (280 N·m);
+  counted by name, rerun. **For the entry:** the Kuavo-5's and the Atom's joints must be named by their place in the
+  chain, or `average_joints()` will not find their groups.
+- **The MagicBot's hands:** `MAGICBOT_with_hand.urdf` against `MAGICBOT.urdf`: 24 links only in the first, 1.178 kg;
+  the first sums to 66.19 kg, the second to 66.40 kg (the second holds fixed hand links the first replaces).
+- **Cables, boards and sensors, from his run of 02** (`data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`,
+  written 05:03 to 05:04; the first 20,000 draws, each robot's draws where it was drawn): the medians of the three
+  added, H2 1.23, H1-2 1.42, GR-2 1.57, GR-1 1.31 kg. A sentence of E7.5 first said "about 2 kg", unchecked; corrected
+  to these.
+- **Not covered:** nothing is entered or drawn; the Orin-sized modules where a maker names only TOPS are my reading;
+  the run of 02 itself is not yet read back (its figures and summary).
+
+### V87. The test of a template from type 2's own robots against type 1's (EVIDENCE E7.4)
+
+- **His words:** "for 6 test, if you can develop a method just using 2 data and see if it is different than 1 model",
+  then "Yes, build the test". Only `documentation/claude/EVIDENCE.md` and this report were written.
+- **How:** a script in Claude's scratch folder (`type2_template_test.py`, and `type2_template_check.py` for the check
+  below), run with the project's `.venv` (scipy 1.18.1). It reads, never writes, both parts files (type 1's of 04:41,
+  type 2's of 05:03) and five of the makers' model files fetched through GitHub (`biped_s56.urdf`, `HU_L04_01.urdf`,
+  `MAGICBOT.urdf`, `atom_wholebody.urdf`, `atom_p3.urdf`). A two-sided Mann–Whitney test (no distribution assumed),
+  different if p < 0.05.
+- **Against the agreed numbers:** the script reproduces E5.17's type 1 inputs, 49.3 % (36.3 to 53.0 %) and 12.3 Wh/kg
+  (6.85 to 21.3), and E5.12's joint masses for eight of its nine robots; the ninth, the RP1, 18.77 kg against the
+  table's 19.2, is the difference E5.20 already gives (the RMM8463-2E at its mode 0.7 kg, not its bound 0.8). Type 2's
+  batch 1 against E6.8's table: H1-2 28.3, GR-2 22.2, GR-1 18.3 kg the same; the H2 31.3 kg against "31.1" (E6.8's
+  rounding of 8 × 1.93; summed by hand joint by joint, 31.31 kg).
+- **Result:** the joint modules' share differs (type 2 40.4 %, type 1 49.3 %, p = 0.008); the large joints' share of
+  the modules (90.0 against 65.9 %, p = 0.055) and the battery's Wh per kg (14.7 against 12.3, p = 0.25) do not.
+- **Checked, a deliberate change of method:** type 1's four robots estimated at 87.3 N·m/kg recomputed by type 2's fit:
+  type 1 still 49.3 %, p = 0.008; so the difference is not the method. Type 1's five robots with stated or weighed
+  joints alone: 48.0 % against 40.4 %, p = 0.11, too few robots for the test to settle.
+- **Not covered:** type 2's joint masses are the fit's, none stated but the M107 (the makers' modules of E7.2 lie at
+  0.60 to 1.38 times the fit); seven type 2 robots for (a), so a difference of a few points would not be found; the
+  Atom Max left out (a placeholder torque at its waist). Nothing entered: E7.4's proposal waits for Matthias.
+
+### V86. Batch 2's source table (EVIDENCE E7): its robots, its arithmetic, the joint modules against the fit
+
+- **His words:** "Yes, start batch 2": the first 27 of type 2's 55 robots not on wheels, sources only, nothing changed
+  while his run of 02 goes. Only `documentation/claude/EVIDENCE.md` and this report were written; no code, data or
+  figure.
+- **The robots against the register:** the 27 numbers, names, heights and masses of E7.1 read from
+  `data/researched/humanoid_register.xlsx` (sheet Type 2, read only) and the catalogue's rows from
+  `data/raw/humanoid_guide_2026-10-28.xlsx`. By script: the sheet holds 97 robots, 37 of form "wheels" and 5 drawn
+  from their own parts; of the other 55, in the sheet's order, the first 27 are E7.1's, number for number (the 28th is
+  216 Omni). Where a maker's figure differs, E7.1 marks it bold and question 2 or 3 of E7.3 lists it.
+- **Arithmetic** (by hand, then by script): the batteries' energies, voltage × capacity: IGRIS-C 48 × 17 = 816 Wh,
+  JingChu 48 × 20 = 960 Wh, LUS2 54 × 10 = 540 Wh, Oli 14 × 3.6 × 9.5 = 479 Wh (58.8 V / 4.2 V = 14 cells), Luna 14 ×
+  3.6 × 20 = 1,008 Wh, H2-X 1,152 Wh / 20 Ah = 57.6 V = 16 × 3.6 V (67.2 V / 4.2 V = 16 cells), as stated.
+- **The joint modules against type 2's fit** (E7.2): 0.0689 × torque^0.566 computed for each of the eight rotary
+  modules; mass / fit 0.60 to 1.38, all inside the band of half to 1.5 times. A check of the fit agreed in E6.8, not
+  a change to it.
+- **Leju's model files** (E7.1, Kuavo-5): every `biped_s50` to `biped_s56` file (and s200053, s300053) read through
+  GitHub; the links' masses summed and the moving joints' effort limits listed by script; version 5.x by Leju's
+  numbering rule (`docs/robot_version版本号说明.md`: "45" is version 4.5).
+- **Not covered:** the second-hand figures (context only, none proposed as a value); Leju's parameters, read by eye
+  from a picture (no text on the page); PAL's model files of the Kangaroo, not read; the datasheet PDF of the
+  Astribot S1, not opened (a download). Nothing is entered; E7.3's six questions wait for Matthias.
+
 ## 2026-10-29
 
 ### V85. 01's pages of type 2 as type 1's; the H1-2's joint modules labelled E

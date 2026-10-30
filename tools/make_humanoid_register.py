@@ -122,10 +122,14 @@ ADDED = {
 
 # The robots taken apart, robot type by robot type: number -> the name of its own rows in its type's parts file
 # (data/researched/<n>_<name>/parts_taken_apart.xlsx). Type 1: every robot (Matthias, 2026-10-29, "Yes, build it",
-# EVIDENCE.md E5.12 to E5.19); type 2: batch 1 (2026-10-30, "Yes, agree E6.8", "Yes, build C"). A robot in several
-# versions names each, separated by '; ', each drawn as often: the Booster K1 with its 5 Ah and its 2 Ah battery
-# (E5.14, point 2), the GR-1 with one or two depth cameras (E6.8 point 8). No brackets or commas in a name: 04 reads the
-# names from between brackets, by commas.
+# EVIDENCE.md E5.12 to E5.19); type 2: batch 1 (2026-10-30, "Yes, agree E6.8", "Yes, build C") and batch 2
+# (2026-10-30, "Yes, agree E7.5", "Yes, build it"; the Alice as the ALICE 4, the Atom Max as DOBOT's Atom, the
+# "Kepler" as the K1, E7.3 question 3) and batch 2b (2026-10-30, "Yes, agree E8.3", "Yes, build it"; the Omni kept in
+# type 2, E8.2). A robot in several versions names each, separated by '; ', each drawn as often: the Booster K1 with
+# its 5 Ah and its 2 Ah battery (E5.14, point 2), the GR-1 with one or two depth cameras (E6.8 point 8), the H2-X with
+# an Intel Core i7 or an Orin NX as its second computer (E7.5 point 12), the Walker Tienkung "Voice & Vision" or
+# "Embodied intelligence" (E8.2 question 4). No brackets or commas in a name: 04 reads the names from between brackets,
+# by commas.
 TAKEN_APART = {1: {
     16: 'AgiBot X1', 19: 'ROBOTIS AI Sapiens K1', 23: 'AKINROBOTICS AKINCI-5', 37: 'Menlo Asimov 1',
     38: 'Menlo Asimov 2', 54: 'Booster T1', 55: 'Booster T2', 57: 'Noetix Bumi', 85: 'Noetix E1', 102: 'Unitree G1',
@@ -135,8 +139,19 @@ TAKEN_APART = {1: {
     269: 'RoboParty RP1', 279: 'Fauna Sprout', 281: 'StarBot Astra', 308: 'WL Robotics Totan O1', 311: 'Unitree R1',
     332: 'TOPSTAR Xiao Tuo', 343: 'YMBOT E3', 350: 'Fourier N1',
 }, 2: {
-    116: 'Fourier GR-1 one camera; Fourier GR-1 two cameras', 117: 'Fourier GR-2', 119: 'Unitree H1-2',
-    120: 'Unitree H2', 121: 'Unitree H2 Plus',
+    25: 'AeiROBOT ALICE 4', 47: 'DOBOT Atom', 53: 'MirrorMe Bolt', 69: 'Xiaomi CyberOne', 80: 'Deep Robotics DR01',
+    98: 'Figure AI Figure 03', 116: 'Fourier GR-1 one camera; Fourier GR-1 two cameras', 117: 'Fourier GR-2',
+    119: 'Unitree H1-2', 120: 'Unitree H2', 121: 'Unitree H2 Plus',
+    123: 'Unitree H2-X Core i7; Unitree H2-X Orin NX', 132: 'HONOR D1', 134: 'Simplexity I-Series',
+    135: 'ROBROS IGRIS-C', 144: 'JCBOT JingChu', 151: 'KAIST Humanoid', 153: 'PAL Kangaroo', 157: 'Kepler K1',
+    158: 'Kepler K2', 163: 'Leju Kuavo 5', 170: 'LimX CL', 171: 'LimX Oli', 176: 'LimX Luna', 177: 'Lumos LUS2',
+    180: 'MagicLab MagicBot Gen1', 199: 'VinMotion Motion 2', 203: 'Zhejiang NAVAI-I3', 210: 'Digit Nezha P01',
+    216: 'X-Humanoid Omni', 221: 'Tesla Optimus Gen 3', 222: 'Tesla Optimus Gen 2', 223: 'Tesla Optimus V2.5',
+    224: 'Cyan Robotics Orca', 229: 'Sanctuary Phoenix', 232: 'PHYBOT M1', 244: 'OpenLoong Qinglong', 256: 'PAL REEM-C',
+    265: 'Robotera L7', 271: 'EngineAI SE01', 272: 'Zeroth Sean', 276: 'Siasun Songxing', 285: 'Unitree Superman',
+    290: 'PAL TALOS', 294: 'Westwood THEMIS', 297: 'X-Humanoid TianGong Ultra', 298: 'Tlibot Tianzhen Z1',
+    299: 'X-Humanoid Tien Kung 2.0', 300: 'X-Humanoid Tien Kung 3.0', 302: 'Tlibot T1', 323: 'DroidUp Walker II',
+    326: 'Walker Tienkung Vision; Walker Tienkung Embodied', 352: 'Unitree H1',
 }}
 
 # A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:
@@ -186,7 +201,7 @@ DECISIONS = [
     (37, '1', 'no wheels named', '', 'E4.1'),
     (38, '1', 'no wheels named', '', 'E4.1'),
     (39, '', 'an upper body', 'not assigned: an upper body only', 'E4.1, E4.10'),
-    (40, '2, 3', 'not stated', '', 'E4.1, E4.6'),
+    (40, '2, 3', 'wheels', '', 'E4.1, E4.6, E7.3'),      # its maker's pictures: a wheeled base
     (41, '2, 3', 'wheels', '', 'E4.1, E4.6'),
     (42, '3, 2', 'wheels', '', 'E4.1, E4.6'),
     (43, '5, 3', 'legs', '', 'E4.1, E4.6'),
@@ -214,7 +229,7 @@ DECISIONS = [
     (65, '4', 'legs', '', 'E4.2'),
     (66, '3, 4', 'wheels', '', 'E4.2, E4.6'),
     (67, '3', 'wheels', '', 'E4.2'),
-    (68, '2', 'not stated', '', 'E4.2'),
+    (68, '2', 'wheels', '', 'E4.2, E7.3'),               # the press: "a wheeled base instead of legs"
     (69, '2', 'no wheels named', '', 'E4.2'),
     (70, '', 'no wheels named', 'the same robot as 69', 'E4.2'),
     (71, '3, 5', 'legs', '', 'E4.2, E4.6'),
@@ -346,7 +361,7 @@ DECISIONS = [
     (197, '3', 'wheels', '', 'E4.4'),
     (198, '4', 'legs', '', 'E4.4'),
     (199, '2, 3', 'legs', '', 'E4.4, E4.6'),
-    (200, '2, 4', 'not stated', '', 'E4.4, E4.6'),
+    (200, '2, 4', 'wheels', '', 'E4.4, E4.6, E7.3'),     # its maker: "全向轮式底盘", an omnidirectional wheeled chassis
     (201, '4', 'legs', '', 'E4.5'),
     (202, '6', 'legs', '', 'E4.5'),
     (203, '2', 'legs', '', 'E4.5'),
@@ -453,13 +468,13 @@ DECISIONS = [
     (304, '4', 'not stated', '', 'E4.8'),
     (305, '3, 4', 'wheels', '', 'E4.8'),
     (306, '3, 4', 'not stated', '', 'E4.8'),
-    (307, '3, 2', 'not stated', '', 'E4.8'),
+    (307, '3, 2', 'wheels', '', 'E4.8, E8.2'),           # its maker: "omni-directional mobile base"
     (308, '1', 'not stated', '', 'E4.8'),
     (309, '', 'legs or wheels', 'not assigned: no form with legs and arms', 'E4.8, E5.15, E5.17'),
     (310, '4', 'not stated', '', 'E4.8'),
     (311, '1', 'legs', '', 'E4.8'),
-    (312, '2, 3', 'legs', '', 'E4.8'),
-    (313, '2, 3', 'legs', '', 'E4.8'),
+    (312, '2, 3', 'wheels', '', 'E4.8, E8.2'),           # its maker: "Dual-wheel differential motor"
+    (313, '2, 3', 'wheels', '', 'E4.8, E8.2'),           # its maker: "Four-wheel omnidirectional wheel"
     (314, '3, 2', 'wheels', '', 'E4.8'),
     (315, '2', 'wheels', '', 'E4.8, E4.10'),
     (316, '3, 4', 'not stated', '', 'E4.8'),

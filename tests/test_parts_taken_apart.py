@@ -853,9 +853,13 @@ def type_two_inputs_or_skip(test: unittest.TestCase, params: Params):
 
 
 class TestTypeTwo(unittest.TestCase):
-    """Robot type 2 drawn by 02 part by part (Matthias, 2026-10-30, "Yes, build C"): over its five robots taken apart,
-    the GR-1 in two versions, by type 2's own recipes, the Fourier robots' Ethernet line by hand; the robots not yet
-    taken apart counted, so that its draws for stock-and-flow come from the workbook until all are (Q2, Q4)."""
+    """Robot type 2 drawn by 02 part by part (Matthias, 2026-10-30, "Yes, build C"): over its robots taken apart (batch
+    1's five, the GR-1 in two versions; since "Yes, build it" batch 2's 24, the H2-X in two versions), by type 2's own
+    recipes, the Fourier robots' Ethernet line by hand; the robots not yet taken apart counted, so that its draws for
+    stock-and-flow come from the workbook until all are (Q2, Q4)."""
+    BATCHES = [25, 47, 53, 69, 80, 98, 116, 117, 119, 120, 121, 123, 132, 134, 135, 144, 151, 153, 157, 158, 163, 170,
+               171, 176, 177, 180, 199, 203, 210, 216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290,
+               294, 297, 298, 299, 300, 302, 323, 326, 352]
 
     @classmethod
     def setUpClass(cls):
@@ -864,19 +868,50 @@ class TestTypeTwo(unittest.TestCase):
 
     def test_its_robots_and_those_not_yet_taken_apart(self):
         inputs = type_two_inputs_or_skip(self, self.params)
-        self.assertEqual([r.number for r in inputs.robots], [116, 117, 119, 120, 121])
+        self.assertEqual([r.number for r in inputs.robots], self.BATCHES)
         self.assertEqual([r.number for r in inputs.left_out], [329])       # the Xialan S0, no mass stated
-        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (91, 97, 2))
+        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (43, 97, 2))
 
-    def test_drawn_over_its_five_robots_each_as_often(self):
+    def test_drawn_over_its_robots_each_as_often(self):
         inputs = type_two_inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
-        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 5 of its 97 robots'))
-        n, tolerance = d.n, 4 * np.sqrt(0.2 * 0.8 / d.n)
-        for k in range(5):
-            self.assertAlmostEqual((d.register_robot == k).mean(), 0.2, delta=tolerance, msg=d.register[k])
-        for version in ('Fourier GR-1 one camera', 'Fourier GR-1 two cameras'):
-            self.assertAlmostEqual((d.robot == d.robots.index(version)).mean(), 0.1, delta=4 * np.sqrt(0.09 / n))
+        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 53 of its 97 robots'))
+        n, p = d.n, 1 / 53
+        tolerance = 4 * np.sqrt(p * (1 - p) / n)
+        for k in range(53):
+            self.assertAlmostEqual((d.register_robot == k).mean(), p, delta=tolerance, msg=d.register[k])
+        for version in ('Fourier GR-1 one camera', 'Fourier GR-1 two cameras', 'Unitree H2-X Core i7',
+                        'Unitree H2-X Orin NX', 'Walker Tienkung Vision', 'Walker Tienkung Embodied'):
+            self.assertAlmostEqual((d.robot == d.robots.index(version)).mean(), p / 2,
+                                   delta=4 * np.sqrt(p / 2 * (1 - p / 2) / n))
+
+    def test_its_notes_name_its_own_template(self):
+        # Open point B: the template's rows name what they average, and the notes page says it in their words, type
+        # 2's seven robots for type 2, batch 1 for type 1; never the other type's.
+        inputs = type_two_inputs_or_skip(self, self.params)
+        words = list(composition.on_estimates(inputs.apart, ['LimX CL']))
+        self.assertEqual(words, ["the joint modules a share of the robot's mass, split as type 2's seven robots with "
+                                 "every joint's torque on average", "the battery's energy a share of the robot's mass"])
+        one = schemas.read_parts_taken_apart(PARTS_FILE)
+        self.assertIn("the joint modules a share of the robot's mass, split as batch 1 on average",
+                      composition.on_estimates(one, ['JAKA π']))
+
+    def test_the_jingchus_knees_drawn_from_their_stated_mass_its_other_joints_a_share(self):
+        # E7.5 point 2 (open point A): its two knees each 1.9 / 2 / 2.1 kg; its other joints the template's shares of
+        # one drawn total, 20.2 / 40.4 / 60.6 % of its mass, the knees' share left out: nothing rescaled.
+        inputs = type_two_inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        columns, draws = d.parts
+        robot = 'JCBOT JingChu'
+        rows = d.robot == d.robots.index(robot)
+        knees = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ': Knee ('))
+        others = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':')
+                     and c.endswith('joints)') and not c.startswith(robot + ': Knee (') and ': Hand' not in c)
+        self.assertTrue(np.all((knees >= 2 * 1.9 - 1e-9) & (knees <= 2 * 2.1 + 1e-9)))
+        left = sum(j.share for j in inputs.apart.joints if j.robot == robot and j.share is not None)
+        share = others / d.mass[rows] / left
+        self.assertTrue(np.all((share >= 0.202 - 1e-9) & (share <= 0.606 + 1e-9)))
+        self.assertLess(left, 1)
 
     def test_its_own_recipes_of_aluminium_and_plastics(self):
         # Q3: type 2's own rows of the element recipes.

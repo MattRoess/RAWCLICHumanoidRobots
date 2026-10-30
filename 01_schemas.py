@@ -41,7 +41,7 @@ compounds and the recipe of each cell down to its elements (documentation/claude
 reads `data.parts_taken_apart` (`data/researched/<n>_<name>/parts_taken_apart.xlsx`, one file for each robot type
 whose robots are taken apart): every robot of type 1, part by part, the Unitree G1, the AgiBot X1 and the Fourier N1
 as taken apart (EVIDENCE.md E2.8 to E2.8e, agreed by Matthias on 2026-10-27) and the others from their own sources
-(E5, agreed 2026-10-29), and the robots of type 2 taken apart so far (E6, agreed 2026-10-30), and checks each file
+(E5, agreed 2026-10-29), and the robots of type 2 taken apart so far (E6 and E7, agreed 2026-10-30), and checks each file
 against the sibling
 projects' files it names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`,
 `data.data_center_element_composition`, `data.traction_motor_magnets`, `data.traction_motor_steels`), read where they
@@ -1535,6 +1535,9 @@ BATTERY_CONSTANTS = ('Battery voltage', 'Battery capacity')
 # of robot (no voltage and capacity), a pack's energy per kg (a pack with a housing and no mass of its own), the shell
 # a share of the robot's mass (a part computed so).
 JOINT_SHARE = 'Joint modules, share of the robot mass'
+# The joints a template leaves out (it counts body joints only, EVIDENCE.md E7.4): a robot of the template has them
+# with their own masses beside its shares (by the first word of the joint's name).
+TEMPLATE_OUTSIDE = {'hand', 'gripper'}
 ENERGY_PER_KG = 'Battery energy per kg of robot'
 PACK_WH_PER_KG = 'Battery pack, Wh per kg (packs not weighed)'
 SHELL_SHARE = 'Shell, share of the robot mass'
@@ -1816,11 +1819,25 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
             faults.append(Fault(on, j.row, f"{what}: its heat group '{j.heat_group}' is not in the sheet "
                                            'MagnetGrades.'))
         faults += region_faults(on, j.row, what, j.region, lists)
-    # A robot whose joint modules are a share of its mass: every joint its share, from 0 to 1, no module mass beside
-    # it, the shares adding up to 1 (they split one drawn total, nothing is rescaled), and the shared share given.
+    # A robot whose joint modules are a share of its mass: every such joint its share, from 0 to 1, no module mass
+    # beside it, and the shared share given. Its other joints may have their masses: its hands or grippers, outside
+    # the template (which counts body joints only, EVIDENCE.md E7.4), and stated body joints in place of the template's
+    # rows of their groups (the JingChu's knees, E7.5 point 2; Matthias, 2026-10-30, "Yes, build it", open point A).
+    # The template is the share rows of the robots with no stated body joint, alike in all of them and adding up to 1
+    # (they split one drawn total, nothing is rescaled); a robot with stated body joints has the template's rows less
+    # those of exactly the groups it states.
+    def outside(j) -> bool:
+        return j.name.split()[0].lower() in TEMPLATE_OUTSIDE
+
+    def key(j) -> tuple:
+        return j.name, j.module
+
+    shares_of = {}
     for robot in apart.robots:
         mine = [j for j in apart.joints if j.robot == robot]
         shared = [j for j in mine if j.share is not None]
+        if not shared:
+            continue
         for j in shared:
             if not 0 < j.share <= 1:
                 faults.append(Fault(on, j.row, f'{robot}, {j.number} {j.name}: its share of the joint modules must be '
@@ -1828,15 +1845,46 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
             if any(m is not None for m in j.module_mass):
                 faults.append(Fault(on, j.row, f'{robot}, {j.number} {j.name}: give its module mass or its share of '
                                                'the joint modules, not both.'))
-        if shared and len(shared) != len(mine):
-            faults.append(Fault(on, 0, f'{robot}: {len(shared)} of its {len(mine)} joints have a share of the joint '
-                                       'modules; all or none.'))
-        if shared and abs(sum(j.share for j in shared) - 1) > PROBABILITY_TOLERANCE:
-            faults.append(Fault(on, 0, f'{robot}: its shares of the joint modules add up to '
-                                       f'{sum(j.share for j in shared):g}, not to 1.'))
-        if shared and JOINT_SHARE not in apart.constants.get(ALL_ROBOTS, {}):
+        stated = [j for j in mine if j.share is None and not outside(j)]
+        shares_of[robot] = (shared, stated)
+        if JOINT_SHARE not in apart.constants.get(ALL_ROBOTS, {}):
             faults.append(Fault(where + 'Constants', 0, f"'{JOINT_SHARE}' is missing (for {ALL_ROBOTS}); {robot}'s "
                                                         'joints are shares of it.'))
+    templates = {robot: shared for robot, (shared, stated) in shares_of.items() if not stated}
+    for robot, shared in templates.items():
+        if abs(sum(j.share for j in shared) - 1) > PROBABILITY_TOLERANCE:
+            faults.append(Fault(on, 0, f'{robot}: its shares of the joint modules add up to '
+                                       f'{sum(j.share for j in shared):g}, not to 1.'))
+    first = next(iter(templates), None)
+    template = {key(j): j for j in templates.get(first, [])}
+    for robot, shared in templates.items():
+        rows = {key(j): j.share for j in shared}
+        if robot != first and (set(rows) != set(template)
+                               or any(abs(rows[k] - template[k].share) > PROBABILITY_TOLERANCE for k in rows)):
+            faults.append(Fault(on, 0, f'{robot}: its shares of the joint modules are not those of {first}; the robots '
+                                       'whose joints are all shares split them alike (the template).'))
+    for robot, (shared, stated) in shares_of.items():
+        if not stated:
+            continue
+        mine = [j for j in apart.joints if j.robot == robot]
+        if first is None:
+            faults.append(Fault(on, 0, f'{robot}: {len(shared)} of its {len(mine)} joints have a share of the joint '
+                                       'modules, but no robot of the file has all its joints as shares (the template '
+                                       'its shares come from).'))
+            continue
+        rows = {key(j): j.share for j in shared}
+        if any(k not in template or abs(share - template[k].share) > PROBABILITY_TOLERANCE
+               for k, share in rows.items()):
+            faults.append(Fault(on, 0, f"{robot}: its shares of the joint modules are not the template's ({first}) "
+                                       'for the groups it keeps.'))
+            continue
+        left = {(j.heat_group, j.region) for k, j in template.items() if k not in rows}
+        given = {(j.heat_group, j.region) for j in stated}
+        if left != given:
+            faults.append(Fault(on, 0, f"{robot}: it leaves out the template's joints of "
+                                       f"{', '.join(' in '.join(g) for g in sorted(left)) or 'no group'}, but states "
+                                       f"joints of {', '.join(' in '.join(g) for g in sorted(given))}: they must be the same groups, "
+                                       'or its shares and stated joints do not make up its joints.'))
     for robot in apart.robots:
         modules = {p.name: p for p in apart.parts if p.robot == robot and p.name.startswith('Joint module, ')}
         for size in ('small', 'large'):
@@ -3693,6 +3741,8 @@ T_CELLS, T_CELL = (11.45, 0.95), (0.72, 0.22)
 T_BAND = (0.95, 2.05)
 T_TOP, T_ROW = 2.12, 0.32
 T_LINES = 18
+# The longest battery bar at most this share of its column, to leave room for its label (robots_table_pages).
+WH_ROOM = 0.9
 # Light grey of every other row, the heading band, the axes' lines, the bars (Paul Tol's grey, as published).
 TABLE_SHADE, TABLE_BAND, TABLE_GRID, TABLE_BAR = '#F2F2F2', '#DDDDDD', '#C8C8C8', '#BBBBBB'
 
@@ -3811,7 +3861,10 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
     register (`listed`) are taken apart (`taken`) where not all are (type 2's, since 2026-10-30)."""
     rows = robots_table_rows(apart)
     mass_ticks = axis_ticks(max(r.mass[2] for r in rows), 5)
-    wh_ticks = axis_ticks(max(r.battery_wh for r in rows), 2)
+    # The battery's axis leaves room for the label of the longest bar: that bar ends at 90 % of the column at most, its
+    # label beside it then clear of the cells (2026-10-30, batch 2b's entry: "1584 Wh" ran into them; type 1's axis the
+    # same as before, 0 to 800 Wh).
+    wh_ticks = axis_ticks(max(r.battery_wh for r in rows) / WH_ROOM, 2)
     mass_x = lambda kg_: T_MASS[0] + kg_ / mass_ticks[-1] * (T_MASS[1] - T_MASS[0])        # noqa: E731
     wh_x = lambda wh: T_BATTERY[0] + wh / wh_ticks[-1] * (T_BATTERY[1] - T_BATTERY[0])     # noqa: E731
     cells = {cell: T_CELLS[0] + k * T_CELLS[1] for k, cell in enumerate(TABLE_CELLS)}

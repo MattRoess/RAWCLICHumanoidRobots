@@ -31,7 +31,8 @@ proposed, with its test and documents"; rewritten on 2026-10-28, "Yes, rewrite";
 2026-10-29, "Yes, build it"; a file and builder per type, each in its type's folder, on 2026-10-30, "Yes, build C").
 Neither is a stage: each writes an input, not a result. Type 1's holds the values agreed in EVIDENCE.md E2.8 to E2.8e
 (the G1, X1 and N1) and E5.12 to E5.19 (every other robot of type 1, one block each), type 2's those of E6.8 (the five
-robots of its batch 1); a change to them is made there, not in the `.xlsx`. Pressing Run on one replaces its file.
+robots of its batch 1) and E7.4 and E7.5 (the 24 of its batch 2, and type 2's own template); a change to them is made
+there, not in the `.xlsx`. Pressing Run on one replaces its file.
 Splitting the builder changed nothing of type 1's file: it equals the file before, cell for cell (VERIFICATION.md V84).
 `tests/test_make_parts_taken_apart.py` checks that what it writes passes 01's checks 18 to 20, holds every robot of the
 register's sheet Type 1 as agreed (the K1 in two versions, the G1+ the G1 with two head joints, the Asimov 2 the Asimov
@@ -212,8 +213,9 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     fibre composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the
     sheet Recipe, and every row names a piece that exists.
 18. Each robot type part by part (`data/researched/<n>_<name>/parts_taken_apart.xlsx`; type 1's EVIDENCE.md E2.8 to
-    E2.8e and E5, type 2's E6.8; since 2026-10-30 the same checks for every type's file): the robots of the file, type
-    1's 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), type 2's 6, each named in the sheet Robots
+    E2.8e and E5, type 2's E6.8 and E7.5; since 2026-10-30 the same checks for every type's file): the robots of the file,
+    type 1's 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), type 2's 56 (its 53, the GR-1,
+    the H2-X and the Walker Tienkung in two versions each), each named in the sheet Robots
     and with rows of its own on the sheets Joints, Parts, Boards, Sensors and Constants; JointParts, Shares and SensorElements are one set for all ("We can assume, they are similar within
     given ranges"), a joint with a module mass following the joint parts of its size scaled to that mass. Checked:
     every min, mode and max in order, and every estimate (E) at least half to 1.5 times its mode, cut only at 100 % for
@@ -229,6 +231,10 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     entirely. Since 2026-10-29: a robot whose sources give no joint torques has its joints as shares of its joint
     modules (sheet Joints, "Share of the joint modules"; E5.17 point 1): every joint its share, above 0 and at most 1,
     no module mass beside it, the shares adding up to 1, and the shared 'Joint modules, share of the robot mass' there;
+    since 2026-10-30 (open point A of batch 2's entry) such a robot may also have joints with their masses: its hands
+    or grippers, outside the template, and joints in place of the template's rows of their groups; the template is
+    the share rows of the robots with no such stated body joint, alike in all of them, and a robot with stated body
+    joints has the template's rows less those of exactly the groups it states;
     every robot its battery voltage and capacity both, or neither and the shared 'Battery energy per kg of robot'; a
     pack with no mass and a housing, the shared 'Battery pack, Wh per kg (packs not weighed)'; a part that is a share of
     the robot's mass (the shell), the shared 'Shell, share of the robot mass'; a material written 'A or B' (the battery
@@ -428,8 +434,13 @@ the other 92 robots, "All 97 first" and "but also look at the parts where you ca
 by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"), its type a parameter:
 
 1. **Its robots:** batch 1, the five robots whose makers publish a model file (the Unitree H2, H2 Plus and H1-2, the
-   Fourier GR-2 and GR-1, the GR-1 in two versions, one or two depth cameras, each as often), each from its own rows of
-   `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`, written by its builder from E6.8.
+   Fourier GR-2 and GR-1, the GR-1 in two versions, one or two depth cameras, each as often), and since 2026-10-30
+   ("Yes, agree E7.5", "Yes, build it") batch 2, 24 robots not on wheels (the H2-X in two versions, its second computer
+   an Intel Core i7 or an Orin NX), and batch 2b ("Yes, agree E8.3", "Yes, build it"), 24 more (the Walker Tienkung in
+   two versions; the Omni kept in type 2), each from its own rows of
+   `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`, written by its builder from E6.8,
+   E7.5 and E8.3. The Astribot S1, Moz1, CUE7, Torobo, VB1-I and VB2 stand on wheels (E7.3, E8.2): with the 37 before,
+   the 43 robots of type 2 not yet taken apart are all on wheels, for the wheeled batch.
 2. **What E6.8 changed against type 1:** each joint's mass from its peak torque by type 1's fit of mass on torque,
    refit on the 12 makers' actuators with a stated mass, 0.0689 kg × torque^0.566, half to 1.5 times (the M107's
    stated 1.9 kg at the H1-2's knees); the hands of the H2 Plus, GR-2 and GR-1 as small joints; the cables scaled by
@@ -437,12 +448,23 @@ by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"),
    robot's mass; the H2's titanium a share of its mass. The rest as type 1: the inside of every joint the G1's weighed
    small or large joint scaled to its mass, the battery from its voltage and capacity, the boards and sensors by the
    template, the shell a share of the mass, the frame the remainder.
+2b. **Type 2's own template (E7.4, "Yes, agree E7.4"), where a maker gives no joint torques:** the joint modules
+   20.2 / 40.4 / 60.6 % of the robot's mass (type 2's median over its seven robots with every joint's torque, against
+   type 1's 49 %: different by a Mann–Whitney test, p = 0.008), split by joint group and class as those seven robots
+   are on average, their hands left out (the template's rows say so in their names); the battery 7.3 / 14.7 / 22.0 Wh
+   per kg of robot where a maker gives no energy (type 2's median over twelve robots). A robot of the template may have
+   its hands or grippers with their own masses beside its shares (the template counts body joints only), and joints
+   its maker states in place of a group of the template: the JingChu's knees, 2 kg each by its maker, its other joints
+   the template's shares, nothing rescaled (01's check 18 sees to it: such a robot's shares are the template's less
+   exactly the groups it states). The four robots of batch 2 with every joint's torque in their makers' models (the
+   Atom Max as DOBOT's Atom, the Kuavo-5, Luna, MagicBot Gen1) take E6.8's fit at each joint, their joints named by
+   the model's axes.
 3. **Its recipes:** type 2's own aluminium and plastics ("Aluminium, robot type 2, Aluminum alloys", "Plastics, robot
    type 2, Engineering plastics"; Q3); the steels, titanium, copper, magnets and cells by the shared recipes.
-4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass is taken apart (Q2: five
-   robots, three of them Unitree's, do not represent 97); its five robots drawn part by part on their own, into
-   `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 5 of its 97
-   robots"). The register's sheet Type 2 says "not drawn: not yet taken apart" of the 91 others with a mass (Q4).
+4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass is taken apart (Q2: a
+   part of its robots does not represent 97); its 53 robots drawn part by part on their own, into
+   `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 53 of its 97
+   robots"). The register's sheet Type 2 says "not drawn: not yet taken apart" of the 43 others with a mass (Q4).
 5. **Its random numbers:** its own, from the seed and its number (type 1's as before: its draws did not change, V84).
 
 ## Robot type 1 over its robots, in 02 (since 2026-10-28; each from its own rows since 2026-10-29)

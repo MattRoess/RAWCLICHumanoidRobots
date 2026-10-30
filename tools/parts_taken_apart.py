@@ -364,6 +364,11 @@ POWER_BOARD = ('Power distribution board', 1, 'Torso boards', 'Torso', POWER, 'P
 JOINT_MASSES = "the Joints' module masses; inside as JointParts' joint of its size, scaled to its mass"
 JOINT_SHARES = ("the Joints' shares of the joint modules, a share of the robot's mass (Constants); inside as "
                 "JointParts' joint of its size, scaled to its mass")
+# A size of joint whose rows are partly shares, partly stated masses: a template robot's hands or grippers (outside the
+# template, which counts body joints only: EVIDENCE.md E7.4), or its stated joints in place of a group of the template
+# (the JingChu's knees, E7.5 point 2).
+JOINT_MIXED = ("the Joints' module masses where given, else their shares of the joint modules, a share of the robot's "
+               "mass (Constants); inside as JointParts' joint of its size, scaled to its mass")
 DRIVER_FROM = "JointParts' driver board of its size, scaled to its joint's module mass; area likewise"
 PACK_STATED = 'its cells, its management board (Boards) and its housing (the rows below)'
 PACK_FROM_ENERGY = ('its cells, its management board (Boards) and its housing (the rows below); its mass the energy '
@@ -381,7 +386,8 @@ MAGNETS_BASIS = 'Its magnets: the grade classes of its heat group, sheet MagnetG
 # aluminium where the maker says so (the PM01).
 HOUSING_MIXED = 'Battery housing, busbars and wires'
 HOUSING_ALUMINIUM = 'Battery housing (aluminium), busbars and wires'
-# The joints of a robot whose sources give no joint torques (E5.17 point 1): AVERAGE in its block.
+# The joints of a robot whose sources give no joint torques (E5.17 point 1): AVERAGE in its block. The text is also
+# type 1's name of what its template's rows average; another type names its own (average_joints()).
 AVERAGE = 'as batch 1 on average'
 
 
@@ -417,8 +423,11 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
     energy per kg of robot), pack ((min, mode, max), label, source; None: from its energy; PACK_CELLS_ONLY), housing,
     boards, sensors, cables (and cable_quantity, CABLE_FOUR or CABLE_ETHERNET), screws, parts, cooler (ARM_COOLER
     unless its computer is an Intel or AMD processor's), shell, frame, and the labels and sources of its joints,
-    connectors, encoders and cells."""
+    connectors, encoders and cells. A block whose joints are AVERAGE may also have `stated_joints` (joint() each), which
+    take the place of their groups' rows of the template, and `added_joints` (its hands or grippers), which the
+    template leaves out (it counts body joints only: EVIDENCE.md E7.4, E7.5 points 2 and 4)."""
     b = dict(name=name, maker=maker, height=height, stated=stated, sources=sources, mass=mass, joints=joints,
+             stated_joints=[], added_joints=[],
              joints_stated=None, joint_label={'small': 'E', 'large': 'E'}, joint_sources='', voltage=None,
              capacity=None, pack=None, pack_source='', housing=HOUSING_MIXED,
              cells=('E', 'NMC cylindrical, E (E5.14 point 2)'),
@@ -443,12 +452,13 @@ def joint_group(j: tuple) -> tuple:
             'Elbows and wrists': ('Elbow and wrist joints', 'Elbows and wrists', 'Arms')}[j[5]]
 
 
-def average_joints(blocks: list) -> list:
+def average_joints(blocks: list, label: str = AVERAGE) -> list:
     """The joints of a robot whose sources give no joint torques (E5.17 point 1: "split into small and large joints as
     batch 1's are on average"): for each group of joints (hips, knees, ankles, waist, shoulders, elbows and wrists,
-    head) and class, its share of the joint modules' mass at the modes, averaged over the robots of batch 1; one row
-    each, the joints of the group and class together. The shares add up to 1, as each robot's do; nothing is
-    rescaled."""
+    head) and class, its share of the joint modules' mass at the modes, averaged over `blocks` (type 1: its batch 1;
+    type 2: its seven robots with every joint's torque, without their hands, E7.4); one row each, the joints of the
+    group and class together, named with `label`, what they average. The shares add up to 1, as each robot's do;
+    nothing is rescaled."""
     shares: dict = {}
     for b in blocks:
         total = sum(j[1] * j[4][1] for j in b['joints'])
@@ -457,7 +467,7 @@ def average_joints(blocks: list) -> list:
             shares[key] = shares.get(key, 0) + j[1] * j[4][1] / total / len(blocks)
     order = ['Hip joints', 'Knee joints', 'Ankle joints', 'Waist joints', 'Shoulder joints', 'Elbow and wrist joints',
              'Head joints']
-    return [(f'{name}, {size} ({AVERAGE})', 1, size, None, None, heat, region, share)
+    return [(f'{name}, {size} ({label})', 1, size, None, None, heat, region, share)
             for (name, heat, region, size), share in sorted(shares.items(), key=lambda kv: (order.index(kv[0][0]),
                                                                                           kv[0][3] == 'large'))]
 
@@ -470,6 +480,45 @@ def regions(joints: list) -> str:
     return ', '.join(f'{region} {n}' for region, n in counts.items())
 
 
+def template_joints(b: dict, averaged_joints: list) -> list:
+    """The joints of a block whose joints are AVERAGE: the template's rows in their order, each group of the template
+    for which the block states joints (`stated_joints`, the JingChu's knees) replaced by them, then its hands or
+    grippers (`added_joints`). Nothing is rescaled: the rows kept keep the template's shares (EVIDENCE.md E7.5 point 2,
+    open point A)."""
+    groups = [a[0].split(',')[0] for a in averaged_joints]
+    stated = {}
+    for j in b['stated_joints']:
+        group = joint_group(j)[0]
+        if group not in groups:
+            raise ValueError(f"{b['name']}: its stated joint {j[0]} is of no group of the template ({group}).")
+        stated.setdefault(group, []).append(j)
+    joints, placed = [], set()
+    for a, group in zip(averaged_joints, groups):
+        if group not in stated:
+            joints.append(a)
+        elif group not in placed:
+            joints += stated[group]
+            placed.add(group)
+    return joints + list(b['added_joints'])
+
+
+def template_block(name: str, maker: str, height: float, stated: float | None, mass: tuple, joints_stated: int,
+                   computer: str, *, computer_source: str, joint_sources: str, default_sources: str, **more) -> dict:
+    """A robot whose sources give no joint torques (type 1: E5.17; type 2: E7.4, E7.5): its joints a share of its
+    mass, split as its type's robots with torques are on average (its block's joints AVERAGE, `joint_sources` saying
+    so); its battery from the energy per kg of robot unless a voltage or capacity is given; a computer board as the
+    template's, named `computer` as its sources name it (`computer_source`), and the template's power distribution
+    board; the rest as E5.14 unless `more` says otherwise (its `sources` else `default_sources`). One copy for every
+    type (Matthias, 2026-10-30, "Yes, build it", open point C): each type's builder binds its own texts."""
+    defaults = dict(joints_stated=joints_stated,
+                    boards=[(computer, 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E', computer_source),
+                            ('Power distribution board', 1, 'Torso boards', 'Torso', POWER, 'PE_HVS', 'E',
+                             'as the G1 (E5.14 point 4)')],
+                    joint_sources=joint_sources)
+    defaults.update(more)
+    return block(name, maker, height, stated, defaults.pop('sources', default_sources), mass, AVERAGE, **defaults)
+
+
 def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) -> dict:
     """Every row of one robot's block on the sheets Robots, Joints, Parts, Boards, Sensors and Constants, and the car
     sensor elements of its sensors (sheet SensorElements, by the sensor's name). `robot_type` is the type of its file;
@@ -478,9 +527,10 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     out = {sheet: [] for sheet in ('Robots', 'Joints', 'Parts', 'Boards', 'Sensors', 'Constants', 'SensorElements')}
     out['Robots'].append((name, b['maker'], robot_type, b['height'], b['stated'], b['sources']))
 
-    # Its joints, their modules and driver boards, and two encoders and two connectors per joint.
+    # Its joints, their modules and driver boards, and two encoders and two connectors per joint. A robot of the
+    # template: the template's rows, its stated joints in place of their groups' rows, and its hands or grippers.
     averaged = b['joints'] == AVERAGE
-    joints = averaged_joints if averaged else b['joints']
+    joints = template_joints(b, averaged_joints) if averaged else b['joints']
     for number, (joint_name, count, size, torque, masses, heat, region, *share) in enumerate(joints, start=1):
         low, mode, high = masses or (None, None, None)
         out['Joints'].append((name, number, joint_name, count, size, torque, low, mode, high,
@@ -491,9 +541,10 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         mine = [j for j in joints if j[2] == size]
         if mine:
             count, where = sum(j[1] for j in mine), regions(mine)
+            shares = [len(j) > 7 for j in mine]   # a row of the template carries its share as an eighth item
+            basis = JOINT_SHARES if all(shares) else JOINT_MIXED if any(shares) else JOINT_MASSES
             out['Parts'].append((name, f'Joint module, {size}', count, 'In the joints', where, None, None, None, None,
-                                 None, JOINT_SHARES if averaged else JOINT_MASSES, b['joint_label'][size],
-                                 b['joint_sources']))
+                                 None, basis, b['joint_label'][size], b['joint_sources']))
             out['Boards'].append((name, f'Driver board, {size} joint', count, 'In the joints', where, None, None, None,
                                   DRIVER_FROM, 'PE_HVS', 'E', 'as the G1 (E5.12 point 2)'))
     label, source = b['encoders']

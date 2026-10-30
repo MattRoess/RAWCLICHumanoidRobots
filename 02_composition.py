@@ -1197,8 +1197,12 @@ def on_estimates(apart, drawn: list) -> dict:
     estimate_kinds: their joint modules a share of their mass, their joints' masses from their torques, their battery's
     energy a share of their mass, their mass itself."""
     # In plain words, without the sections of EVIDENCE.md (E5.17 points 1, 2 and 6; E5.12 point 4, E2.8e), which are
-    # project words on a page (Matthias's figure rule; 2026-10-29, "Yes, build them", point 7).
-    words = {'joint shares': "the joint modules a share of the robot's mass, split as batch 1's on average",
+    # project words on a page (Matthias's figure rule; 2026-10-29, "Yes, build them", point 7). What a template of
+    # joint shares averages in the words of its own rows, which name it in brackets (type 1: "as batch 1 on average";
+    # type 2: its seven robots with every joint's torque; 2026-10-30, "Yes, build it", open point B).
+    averaged = next((j.name[j.name.rfind('(') + 1:-1] for j in apart.joints
+                     if j.share is not None and j.name.endswith(')')), 'on average')
+    words = {'joint shares': f"the joint modules a share of the robot's mass, split {averaged}",
              'joint torques': "the joints' masses from their torques",
              'battery per kg': "the battery's energy a share of the robot's mass",
              'mass': 'the mass itself'}

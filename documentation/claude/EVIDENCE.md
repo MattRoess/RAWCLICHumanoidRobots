@@ -8,6 +8,488 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E8. Each robot of type 2 its own composition: research, batch 2b (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Yes, start batch 2b" (the sources of the 27 robots of type 2 not on wheels and not yet taken
+apart, nothing changed while his run of 02 goes). Read on 2026-10-30: the makers' pages through six web-fetch reads
+(HTML text only, no PDF opened) and, where those got no text (script-rendered, refused, rate-limited), in the built-in
+browser myself; two spec pictures read myself (Tien Kung 3.0, Walker Tienkung); the makers' model files through
+GitHub's interface, their masses summed and their joints' limits listed by script. Nothing is entered.
+
+### E8.1 Robot by robot: what the makers state
+
+The register's height and mass in brackets; **bold** where the maker's differs or where the robot does not stand on legs.
+
+| # | Robot (the register) | What the maker states | Source | Kind |
+|---|---|---|---|---|
+| 216 | Omni, X-Humanoid (**~165 cm, ~55–75 kg**) | "天工Omni": **"135cm/39.5kg"**, "小型全尺寸科研底座" (a small full-size research platform); 31 DoF ("腿部x6，手臂x7，腰部x3，颈部x2"); "2070 TFLOPS" domain controller (flagship); depth camera, LiDAR, IMU; dexterous hands optional. Battery, torques, materials: not stated | x-humanoid.com/detail/omni.html | maker, spec |
+| 221 | OPTIMUS GEN 3, Tesla (180 cm, 52 kg) | Tesla's page: Optimus "a general purpose, bi-pedal, autonomous humanoid robot"; no figures. E3: no maker's page with figures; AI Day 2022 (second-hand) | tesla.com/SI (from /AI) | maker, no figures |
+| 222 | Optimus Gen2, Tesla (173 cm, 56 kg) | as 221 | as 221 | maker, no figures |
+| 223 | OPTIMUS V2.5, Tesla (176.5 cm, 55 kg) | as 221 | as 221 | maker, no figures |
+| 224 | Orca, Cyan Robotics (160 cm, 50 kg) | no maker's site (the catalogue gives none) | — | none |
+| 229 | Phoenix, Sanctuary AI (170 cm, 70 kg) | named once ("the same task was executed on both Phoenix and a Franka arm"); no figures. A "17-DOF … hydraulic hand" is not said to be Phoenix's | sanctuary.ai/milestones, /product | maker, no figures |
+| 232 | PHYBOT M1, PHYBOT (172 cm, 60 kg) | the site shows its logo only, no text, no links | phybot.tech | maker, no figures |
+| 244 | Qinglong V3.0, OpenLoong (165 cm, **75 kg**) | the site names "“青龙”全尺寸通用人形机器人", open source, no figures, no "3.0". Its model `AzureLoong.urdf` (OpenLoong's GitHub): **86.14 kg**, 31 joints: hip roll 320, yaw 160, pitch 396, knee 396, ankles 58.5 × 2 N·m; waist pitch and roll 315, yaw 121; arms 80, 80, 58, 58, 11.5 × 3; head 26 × 2 | openloong.net; github.com/loongOpen/loong_base (`model/AzureLoong.urdf`) | maker, no figures; maker's model |
+| 256 | REEM-C, PAL Robotics (165 cm, 80 kg) | "165 cm", "80kg", "68 DoF"; "Battery autonomy: 3h walking / 6h stand-by"; "Torque sensors: In ankles and wrists"; hand payload 1 kg; a legacy robot ("Our first humanoid, conceived in 2013"). Torques, battery energy, computers, materials: not stated. Its model in PAL's repository as xacro, not expanded | pal-robotics.com/robot/reem-c; github.com/pal-robotics/reemc_robot | maker, spec; maker's model (xacro) |
+| 265 | Robotera L7 (171 cm, 65 kg) | "1.71 m"; "重量(不含灵巧手）65 KG" (without hands); "总自由度 (含灵巧手）55" (neck 2, arms 7 × 2, waist 3, legs 6 × 2, hands 12 × 2); "膝关节峰值扭矩 400 N · m"; "电池容量 60 V 15 Ah" (900 Wh, arith.); "80 TOPS (X86)+275 TOPS (Orin)"; depth camera, 3D LiDAR, microphone array and speaker. Its hand **XHAND 1: "重量 1100g"**, 12 active joints, gear-driven ("全直驱"), five fingertip tactile arrays. (Robotera's model file on GitHub is of its STAR1, another robot) | robotera.com/#/product/L7, /#/product/XHAND (in the browser) | maker, spec |
+| 271 | SE01, EngineAI (**180 cm**, 80 kg) | **"170CM Height"**, "32pcs Total DOF"; "6自由度灵巧手" (hands of 6 DoF; elsewhere "5指"); its joints "行星、谐波、直线" (planetary, harmonic, linear), no torques; battery "1000 mAh", "2hours" (no voltage); "激光雷达＋深度摄像头＋红外摄像头", "RGBD", "扬声器×2", IMU, a force-control sensor; "航空级铝材机身" (aerospace aluminium). Mass: not stated. EngineAI's model files are of its PM01 and T800, not the SE01 | engineai.com.cn/product-se01.html; en.engineai.com.cn | maker, spec |
+| 272 | Sean, Zeroth Robotics (155 cm, 45 kg) | **not on Zeroth's site** (its products: M1 EDU, a 50 cm desktop robot; W1; Jupiter, no figures in text) | zeroth0.com (in the browser) | maker, not listed |
+| 276 | Songxing, Siasun (165 cm, 85 kg) | no humanoid on Siasun's sites (industrial, mobile, special, healthcare robots) | en.siasun.com, siasun.com | maker, not listed |
+| 285 | Superman, Unitree (170 cm, 45 kg) | **no robot of that name on Unitree's site** (its list: As2 … H2-X, H2, H1 / H1-2, G1+, G1, R1, …) | unitree.com | maker, not listed |
+| 290 | TALOS, PAL Robotics (175 cm, 95 kg) | "175 cm", "95 kg"; "Full Toque sensors feedback in all joints" (but head, wrists, grippers); force/torque sensors in wrists and ankles, IMU, encoders, temperature; EtherCAT, 2 kHz; "1,5h (walking)"; 6 kg per arm. Torques, battery energy, computers, materials: not stated; a datasheet link not opened. A model file of TALOS (LAAS-CNRS's, from PAL's description): 93.34 kg, its torques: torso 200 × 2, head 8, 4; arms 100, 100, 70, 70, 20, 8, 8; legs 100, 160, 160, 300 (knee), 160, 100; grippers | pal-robotics.com/robot/talos; github.com/stack-of-tasks/talos-data (`urdf/talos_full_v2.urdf`) | maker, spec; a user's model, second-hand |
+| 294 | THEMIS V2, Westwood (160 cm, **32 kg**) | Westwood's site down (Cloudflare 522, twice). Its GitHub: "TH02-A7 is the newest and only model of THEMIS that is beeing mass produced", "7-DoF arms" and its "7-DoF three-finger end-effector" EN02; the model `TH02-A7-FULL.urdf` **37.92 kg**, 44 joints, **no torque limits** (all 0) | github.com/Westwood-Robotics/THEMIS-Simulation-Model | maker's model |
+| 297 | TianGong Ultra, X-Humanoid (180 cm, 55 kg) | **no page** (the site lists 天工3.0, 天轶2.0, 天工Omni only) | x-humanoid.com | maker, not listed |
+| 298 | Tianzhen Z1, Tlibot (167 cm, 45 kg) | **not on Tlibot's list** (天灵L3 in four versions, T1) | tlibot.com/cpzx/6.html | maker, not listed |
+| 299 | Tien Kung 2.0, X-Humanoid (170 cm, ~70–90 kg) | no page on the site. X-Humanoid's model `tiangong2.0_pro_urdf.urdf`: 67.96 kg, 30 joints: hip roll 235, pitch 330, yaw 235, knee 330, ankles 55 × 2; waist 91; head 6.3 × 3; arms 91, 95, 35, 35, 24, 6.3, 6.3 | github.com/Open-X-Humanoid/TienKung_URDF | maker's model |
+| 300 | Tien Kung 3.0, X-Humanoid (**169 cm, 62 kg**) | its parameter picture: **"身高：170cm 体重：64.5kg"**; "电池数据：15Ah+3Ah" (hot-swappable; no voltage); "最大关节扭矩400Nm"; "总自由度*31 / 头*2 / 腰*3 上肢*14 / 下肢*12", hands optional; "高性能主控4.8G主频", "高算力模组2070tops"; "深度相机+激光雷达+高精度IMU"; CAN FD / EtherCAT | x-humanoid.com/detail/jstg.html (its picture, read myself) | maker, spec |
+| 302 | TLIBOT T1, Tlibot (160 cm, 43 kg) | "整机重量 43Kg（含电池，不含皮肤）"; "本体41个自由度（不含灵巧手）" (head 5, arms 9 × 2, waist 4, legs 7 × 2); "髋关节450Nm；膝关节281Nm；脚踝关节148Nm"; "电池 1110Wh"; payload "大于100Kg". Height, computers, sensors, materials: not stated | tlibot.com/product_detail/36.html | maker, spec |
+| 307 | Torobo, Tokyo Robotics (166 cm, **160 kg**; form "not stated") | **"approx. 120 kg"**, "1615 mm"; "7-axis dual arms, 3-axis waist …, 3-axis neck …, and 4-axis undercarriage (**omni-directional mobile base**)"; torque sensors in arms and waist; "Up to approx. 3 hours"; one PC, an optional second with an Nvidia RTX 4070 (5070 elsewhere on the page); its hand option "Approx. 2 kg", 12 actuated joints | robotics.tokyo/technologies/torobo, /hand | maker, spec |
+| 312 | VB1-I, Lanxin (~165 cm, ~60–70 kg; form **"legs"**) | "Driving mode: **Dual-wheel differential motor**", 700 × 610 × 1650 mm, arms of 6 joints, "2~3h"; mass not stated | lanxinrobotics.com/humanoid-robots/vb1-i | maker, spec |
+| 313 | VB2, Lanxin (~170 cm, ~65–75 kg; form **"legs"**) | "Driving mode: **Four-wheel omnidirectional wheel**", 580 × 480 × 1700 mm, arms of 7 joints, "4~6 h"; mass not stated | lanxinrobotics.com/humanoid-robots/vb2-2 | maker, spec |
+| 323 | Walker II, DroidUp (170 cm, 32 kg) | "双足人形机器人—行者二号": "体重:32kg；身高:170cm"; "自由度:30DoF"; "基于仿生肌腱驱动技术" (tendons with distributed motors); "单机算力(tops):端6"; vision sensors "(深度、红外、颜色):6组", microphones "8阵列"; "动态续航达6小时". Battery energy, torques, materials: not stated | droidup.com/product/2 | maker, spec |
+| 326 | Walker Tienkung, UBTECH (170 cm, **55 kg**) | its specification picture, **two versions**: "Voice & Vision" **about 61 kg**, 21 DoF (arms 4, no neck), hands non-functional, one Jetson AGX Orin; "Embodied intelligence" **about 73 kg**, 42 DoF (neck 3, arms 7, hands of 6 DoF × 2), two AGX Orin, two 6-axis force/torque sensors. Both: "172cm", legs 6, waist 1, "Peak Torque 300N.m", IMU, RGB-D camera × 3, a 720p RGB camera, microphone arrays, speaker; "Capacity: 30Ah + 3Ah, Voltage: 48V" (1,584 Wh, arith.), 3 h; Intel Core i7. A model file `walker_tienkung.urdf` (owner "tienkungrobotics", not stated whose): 61.76 kg, 20 joints (hips 180, 300, 180; knee 300; ankles 60, 30; arms 52.5 × 4) | ubtrobot.com/en/ai-education/products/walker-tienkung (its picture, read myself); github.com/tienkungrobotics/Walker-TienKung-URDF | maker, spec; a model, owner not known |
+| 352 | H1, Unitree (180 cm, 47 kg) | "Weight about 47kg", "Height about 180CM"; legs 5 each (hip 3, knee, ankle), arms 4; "Knee Torque About 360N.m，Hip Joint Torque About 220N.m，Ankle Torque About 59N.m，Arm Joint Torque About 75N.m", "Peak Torque Density: 189N.m/Kg" (the M107's, 360 N·m / 1.9 kg: H1p's M107 table, E6.3); "15Ah(0.864KWh)，Max Voltage 67.2V"; Intel Core i5 and i7; "3D LIDAR + Depth Camera". Its model `h1.urdf`: **59.34 kg**, 19 joints, its limits lower than the page's (hips 200, knee 300, ankle 40, arms 40, 40, 18, 18) | unitree.com/h1; github.com/unitreerobotics/unitree_ros (`robots/h1_description/urdf/h1.urdf`) | maker, spec; maker's model |
+
+### E8.2 Batch 2b together, and the questions for Matthias
+
+| What the makers give | Robots |
+|---|---|
+| Joints and torques (a model file or the page per joint), mass, and most of the rest | H1, Qinglong, Tien Kung 2.0, Walker Tienkung (the Voice & Vision version by its model; the other version's arms and neck have no torques), TALOS (a user's model); TLIBOT T1 (torques per joint group, no file) |
+| Joints without torques per joint, mass and most of the rest | Robotera L7 (the knee's 400 N·m only), Tien Kung 3.0 (400 N·m at most), REEM-C (its model not expanded), THEMIS (its model without torques), SE01 (no mass) |
+| A few figures | Walker II (mass, DoF, tendon-driven), Omni (mass, DoF) |
+| Nothing from the maker | Optimus Gen 3, Gen2, V2.5; Orca; Phoenix; PHYBOT M1; TianGong Ultra; and not on their makers' sites: Sean, Songxing, Superman, Tianzhen Z1 |
+| **On wheels by the maker** | Torobo (an omni-directional base), VB1-I, VB2 |
+
+Nothing is entered until Matthias says yes:
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | Torobo, VB1-I and VB2 stand on wheels by their makers; the register says "not stated" or "legs" | their form "wheels": to the wheeled batch, as E7.3 question 1; batch 2b holds 24 |
+| 2 | The Omni is 135 cm and 39.5 kg by X-Humanoid, "a small full-size research platform"; the register (catalogue) ~165 cm, 55–75 kg, types 2 and 3 | its type by the register's rules (E4) with the maker's size; at 135 cm it would sit beside type 1's robots (the G1 at 132 cm): a register question, for his word before it is taken apart in type 2 |
+| 3 | The maker's mass differs: H1 47 kg by its page, 59.34 kg by its model; Qinglong 86.14 kg by its model (75); Tien Kung 3.0 64.5 kg (62); Walker Tienkung 61 or 73 kg (55); SE01 170 cm (180, its mass not stated); THEMIS 37.92 kg by its model (32) | as decided for batch 2 (E7.3, 2): the maker's in the parts file, the register's reported; the H1 its page's 47 kg the mode and its model's 59.34 kg the maximum, as the H2's (E6.8 point 5) |
+| 4 | The Walker Tienkung in two versions ("Voice & Vision", "Embodied intelligence") | two versions, each drawn as often, as the H2-X (E7.5 point 12) |
+| 5 | Sean, Songxing, Superman and Tianzhen Z1 are on no list of their makers; Orca has no site | kept, as decided for LimX CL and Nezha P01 (E7.3, 6): the template from the register's mass |
+| 6 | TALOS's only model file is LAAS-CNRS's, from PAL's description, not PAL's own | its torques used, labelled second-hand; its mass PAL's 95 kg |
+
+**Decided:** Matthias, 2026-10-30, "Yes, all six": Torobo, VB1-I and VB2 of form "wheels" in the register and in the
+wheeled batch, batch 2b 24 robots; the Omni's type checked by the register's rules (E4) with its maker's 135 cm and
+39.5 kg, his word on it before it is taken apart in type 2; the maker's mass in the parts file where the maker states
+it, the register's reported (the H1 47 kg the mode, its model's 59.34 kg the maximum); the Walker Tienkung in two
+versions, each drawn as often; Sean, Songxing, Superman, Tianzhen Z1 and Orca kept, from the register's mass; TALOS's
+torques from LAAS's model, labelled second-hand, its mass PAL's 95 kg. Nothing entered yet: the register's change is
+code, and the proposal of batch 2b's numbers (as E7.5) comes first.
+
+**The Omni, decided:** Matthias, 2026-10-30: "If 2 stay, it has to be included, as it is just slightly smaler and has
+slightly less weight". It stays in type 2 (the register's types unchanged) and is taken apart in batch 2b with its
+maker's 135 cm and 39.5 kg; no check of its type by E4. Batch 2b: 24 robots, the Omni among them.
+
+### E8.3 Proposal: batch 2b of type 2, robot by robot (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Propose batch 2b". The method is batch 2's, agreed in E7.5 (points 1 to 13, with E6.8 and the
+template of E7.4), with the decisions of E8.2 ("Yes, all six"; the Omni included); only the inputs are new, and where
+an input needs a choice E7.5 did not make, it is **bold**. Read for it besides E8.1: the masses of TALOS's grippers
+(1.094 kg each, eight links) and THEMIS's hands (0.463 kg each, palm and fingers, nine links) from their models' links.
+Numbers at the modes are Claude's arithmetic; the run draws every one from its min / mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **Joint modules by the torques** | H1, Qinglong, Tien Kung 2.0, Walker Tienkung, TALOS: E6.8's fit at each joint's torque, half to 1.5 times (E). The **H1** its page's peaks per joint group (hips 220, ankles 59, arms 75 N·m) and its model's torso (200 N·m); **its knees the M107, 1.805 / 1.9 / 1.995 kg (S, E)**: its page's "Knee Torque About 360N.m" and "Peak Torque Density: 189N.m/Kg" are the M107's 360 N·m over 1.9 kg, as at the H1-2's knees (E6.8 point 1). The **Walker Tienkung's waist**, not in its model: **its hip roll's 180 N·m (E)**, as the Atom's (E7.5 point 1); **its "Embodied intelligence" version's neck (3) and wrists (3 an arm), not in its model: 15.8 and 17.3 N·m (E: the medians of the head and the wrist joints of type 2's seven robots with every joint's torque)**. **TALOS's torques from LAAS's model, labelled second-hand** (E8.2, 6) |
+| 2 | **The template** (E7.4) | Every other robot: the joint modules 20.2 / 40.4 / 60.6 % of its mass, split as type 2's seven robots on average. Robotera L7 and Tien Kung 3.0 state a maximum torque only (400 N·m each), TLIBOT T1 its hips', knees' and ankles' (450, 281, 148 N·m) but not which of its joints they are: a check, not used |
+| 3 | **Inside each actuator** | E7.5 point 3: the G1's joint scaled; **the Walker II's tendon-driven joints ("仿生肌腱驱动") and the SE01's linear ones the same (E)**, said wherever shown, as the linear actuators of batch 2 |
+| 4 | **Hands and grippers** | Robotera L7: **two XHAND 1, "重量 1100g", 1.045 / 1.1 / 1.155 kg each (S)**; SE01 and the Walker Tienkung "Embodied": six joints a hand, as Fourier's (E); **THEMIS: its two EN02 hands, its model's 0.463 kg each (E)**; **TALOS: its two grippers, its model's 1.094 kg each (E)**. None for the rest (REEM-C's hands: no mass found, its model not expanded; reported) |
+| 5 | **The robot's mass** | E8.2, 3: the maker's (or its model's where it states none) the mode, ± 1 kg, its other masses the bounds; the register's where nothing else. H1 46 / 47 / 59.34 (decided); Qinglong 85.14 / 86.14 / 87.14 (its model; the register's 75 reported); Tien Kung 2.0 66.96 / 67.96 / 68.96 (its model; the register's 70–90 reported); THEMIS 36.92 / 37.92 / 38.92 (its model with its hands; the register's 32 reported); TALOS 93.34 (its model) / 95 / 96; **Robotera L7 66.2 / 67.2 / 68.2: its 65 kg "不含灵巧手" and its two hands**; TLIBOT T1 42 / 43 / 44 ("含电池，不含皮肤": its skin not in it, reported) |
+| 6 | **Battery** | Stated: H1 864 Wh (57.6 V × 15 Ah, 16 cells by its 67.2 V), L7 60 V × 15 Ah (900 Wh), Walker Tienkung 48 V × 33 Ah (1,584 Wh, its "30Ah + 3Ah"); **TLIBOT T1 its "1110Wh" at 48 V (E, its voltage not stated): 23.1 Ah**; **Tien Kung 3.0 its "15Ah+3Ah" at 48 V (E: as the Walker Tienkung's main and small battery at 48 V): 864 Wh** (the template would give 946 Wh). **The SE01's "1000 mAh" not used** (no voltage, too small for a robot of its size): the template. Every other robot the template, 14.67 Wh per kg |
+| 7 | **Boards** | E7.5 point 7. H1 two Intel computers (i5, i7); Walker Tienkung an Intel Core i7 and one or two Jetson AGX Orin (named: 87 cm², ± 5 %) with their carriers; **Robotera L7 an x86 computer ("80 TOPS (X86)") and an Orin of "275 TOPS" (E: AGX Orin-sized, 87 cm², half to 1.5 times; 275 TOPS is the AGX Orin's figure, my reading)**; **Tien Kung 3.0 its main controller ("4.8G主频", an Intel-class board, E) and its "2070tops" module, and the Omni's "2070 TFLOPS" controller: each as the H2 Plus's Jetson Thor, 87 cm² and a carrier 50 / 100 / 150 cm² (E; 2070 is the Thor's figure, my reading)**; the others one computer board (E) |
+| 8 | **Sensors** | E7.5 point 8, each by its kind. H1 a LiDAR, a depth camera, an IMU; L7 a depth camera, a LiDAR, a microphone array, a speaker; Walker Tienkung an IMU, three RGB-D cameras, a 720p camera, four microphone arrays ("Linear 4-Mic Array × 4"), a speaker; Tien Kung 3.0 and Omni a depth camera, a LiDAR, an IMU; SE01 a LiDAR, a depth camera, an infrared camera, two speakers, an IMU; **Walker II "(深度、红外、颜色):6组" as six depth cameras (E: a depth camera holds all three) and its "8阵列" as a microphone array**; TALOS an IMU; the rest one IMU (E). Force, torque and touch sensors left out (no kind yet; E7.5 point 13) |
+| 9 | **Cables** | E7.5 point 9, 8 m per metre of height. **TALOS ("EtherCAT communication network") two power conductors and an Ethernet line, as the Kangaroo; the Walker Tienkung and Tien Kung 3.0 ("CAN / EtherCAT", "CAN FD/EtherCAT") four conductors, CAN named for the joints (E)** |
+| 10 | **Shell, screws, frame** | E7.5 points 10, 11; the SE01's frame "航空级铝材" (S); the others aluminium (E) |
+| 11 | **Versions** | **The Walker Tienkung in two, "Voice & Vision" and "Embodied intelligence", each as often (decided, E8.2, 4)** |
+| 12 | **Not in this proposal** | Force, torque and touch sensors; REEM-C's hands; the T1's skin; every option; the register's form "wheels" for Torobo, VB1-I and VB2, made with the entry; every second-hand figure but TALOS's torques |
+
+**Robot by robot** (the register's mass in brackets where it differs; S stated, E estimated):
+
+| # Robot | Mass min / mode / max (kg) | Joints | Hands | Battery | Boards | Sensors | Cables (m) |
+|---|---|---|---|---|---|---|---|
+| 216 Omni (55–75) | 38.5 / 39.5 / 40.5 | template (31 DoF) | — | 579 Wh (E) | a "2070 TFLOPS" module and carrier (E) | depth camera, LiDAR, IMU | 5.5 / 11 / 16.5 |
+| 221 Optimus Gen 3 | 51 / 52 / 53 | template | — | 763 Wh (E) | one computer (E) | IMU (E) | 7.25 / 14.5 / 21.75 |
+| 222 Optimus Gen2 | 55 / 56 / 57 | template | — | 822 Wh (E) | one computer (E) | IMU (E) | 7 / 14 / 21 |
+| 223 Optimus V2.5 | 54 / 55 / 56 | template | — | 807 Wh (E) | one computer (E) | IMU (E) | 7 / 14 / 21 |
+| 224 Orca | 49 / 50 / 51 | template | — | 734 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 229 Phoenix | 69 / 70 / 71 | template | — | 1,027 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 232 PHYBOT M1 | 59 / 60 / 61 | template | — | 880 Wh (E) | one computer (E) | IMU (E) | 7 / 14 / 21 |
+| 244 Qinglong (75) | 85.14 / 86.14 / 87.14 | its model's 31 | — | 1,264 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 256 REEM-C | 79 / 80 / 81 | template (68 DoF) | — | 1,174 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 265 Robotera L7 | 66.2 / 67.2 / 68.2 | template (31 body) | 2 XHAND 1 (S) | 900 Wh (S) | x86 computer; Orin and carrier (E) | depth camera, LiDAR, microphones, speaker, IMU | 6.75 / 13.5 / 20.25 |
+| 271 SE01 | 79 / 80 / 81 | template (32 DoF) | 2 × 6 joints | 1,174 Wh (E) | one computer (E) | LiDAR, depth and infrared cameras, 2 speakers, IMU | 6.75 / 13.5 / 20.25 |
+| 272 Sean | 44 / 45 / 46 | template | — | 660 Wh (E) | one computer (E) | IMU (E) | 6.25 / 12.5 / 18.75 |
+| 276 Songxing | 84 / 85 / 86 | template | — | 1,247 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 285 Superman | 44 / 45 / 46 | template | — | 660 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 290 TALOS | 93.34 / 95 / 96 | LAAS's model, 30 body | 2 grippers | 1,394 Wh (E) | one computer (E) | IMU | 7 / 14 / 21, Ethernet |
+| 294 THEMIS (32) | 36.92 / 37.92 / 38.92 | template (30 body) | 2 EN02 | 556 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 297 TianGong Ultra | 54 / 55 / 56 | template | — | 807 Wh (E) | one computer (E) | IMU (E) | 7.25 / 14.5 / 21.75 |
+| 298 Tianzhen Z1 | 44 / 45 / 46 | template | — | 660 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 299 Tien Kung 2.0 (70–90) | 66.96 / 67.96 / 68.96 | its model's 30 | — | 997 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 300 Tien Kung 3.0 (62) | 63.5 / 64.5 / 65.5 | template (31 DoF) | — | 864 Wh (S, E) | a main controller; a "2070tops" module and carrier (E) | depth camera, LiDAR, IMU | 6.75 / 13.5 / 20.25 |
+| 302 TLIBOT T1 | 42 / 43 / 44 | template (41 DoF) | — | 1,110 Wh (S) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 323 Walker II | 31 / 32 / 33 | template (30 DoF, tendons) | — | 469 Wh (E) | one computer (E) | 6 depth cameras, microphone array, IMU | 6.75 / 13.5 / 20.25 |
+| 326 Walker Tienkung Voice & Vision (55) | 60 / 61 / 62 | its model's 20 and its waist | — | 1,584 Wh (S) | Intel i7; one AGX Orin and carrier | IMU, 3 RGB-D, a 720p camera, 4 microphone arrays, speaker | 7 / 14 / 21 |
+| 326 Walker Tienkung Embodied intelligence (55) | 72 / 73 / 74 | the same and its neck and wrists | 2 × 6 joints | 1,584 Wh (S) | Intel i7; two AGX Orin and carriers | the same | 7 / 14 / 21 |
+| 352 H1 | 46 / 47 / 59.34 | its page's 19, knees the M107 | — | 864 Wh (S) | Intel i5 and i7 | LiDAR, depth camera, IMU | 7.25 / 14.5 / 21.75 |
+
+Every robot also: a power distribution and a battery management board; screws by mass; a shell of plastics; the frame
+the remainder, aluminium.
+
+**What it gives at the modes** (Claude's arithmetic, `batch2b_inputs.py` and `batch2b_modes.py`, V91):
+
+| Robot | Joint modules | Share | Hands | Battery pack | Frame before cables, boards and sensors |
+|---|---|---|---|---|---|
+| the 14 robots of the template without hands or stated battery (Omni, the three Optimus, Orca, Phoenix, PHYBOT M1, REEM-C, Sean, Songxing, Superman, TianGong Ultra, Tianzhen Z1, Walker II) | 40.4 % of their mass | 40.4 % | — | 14.67 Wh/kg ÷ 164 | 38 % of their mass |
+| 244 Qinglong | 30.1 kg | 35.0 % | — | 7.71 kg | 37.2 kg (43 %) |
+| 265 Robotera L7 | 27.1 kg | 40.4 % | 2.20 kg | 5.49 kg | 23.7 kg (35 %) |
+| 271 SE01 | 32.3 kg | 40.4 % | 0.89 kg | 7.16 kg | 29.3 kg (37 %) |
+| 290 TALOS | 26.1 kg | 27.5 % | 2.19 kg | 8.50 kg | 45.9 kg (48 %) |
+| 294 THEMIS | 15.3 kg | 40.4 % | 0.93 kg | 3.39 kg | 13.4 kg (35 %) |
+| 299 Tien Kung 2.0 | 24.8 kg | 36.5 % | — | 6.08 kg | 28.3 kg (42 %) |
+| 300 Tien Kung 3.0 | 26.1 kg | 40.4 % | — | 5.27 kg | 24.8 kg (39 %) |
+| 302 TLIBOT T1 | 17.4 kg | 40.4 % | — | 6.77 kg | 13.3 kg (31 %) |
+| 326 Walker Tienkung Voice & Vision | 21.0 kg | 34.4 % | — | 9.66 kg | 22.5 kg (37 %) |
+| 326 Walker Tienkung Embodied | 24.1 kg | 33.0 % | 0.89 kg | 9.66 kg | 29.0 kg (40 %) |
+| 352 H1 | 21.7 kg | 46.1 % | — | 5.27 kg | 14.0 kg (30 %) |
+
+No remainder falls below zero at the modes; the least, the H1's, 30 % of its mass. TALOS's joints by LAAS's model are
+27.5 % of its 95 kg, the least of type 2: its model's limits may lie below PAL's peaks (none stated), so its joints may
+be lighter here than they are.
+
+**Agreed:** Matthias, 2026-10-30, choosing the answer offered: "Yes, agree E8.3" (points 1 to 12 and the robot-by-robot
+table, with their estimates). Not entered: the entry (type 2's builder, the register's three wheeled robots, tests
+first) is a step of its own, for his yes.
+
+### E8.4 The entry: what each decision of E8.2 and E8.3 landed in (2026-10-30, on "Yes, build it")
+
+Matthias, 2026-10-30: "Spec batch 2b's entry", then "Yes, build it" (the spec's points 1 to 6 and its open points A to
+C with their recommendations). Builder: `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`;
+register: `tools/make_humanoid_register.py`. Checks: VERIFICATION.md V93.
+
+| Decision | Where it landed |
+|---|---|
+| E8.2, 1: Torobo, VB1-I, VB2 on wheels | the register's rows 307, 312, 313: form "wheels", decided in "… E8.2"; with the 40 before, the 43 robots of type 2 not yet taken apart are all on wheels |
+| E8.2, the Omni kept in type 2 | `X_HUMANOID_OMNI`, 38.5 / 39.5 / 40.5 kg; the register's types unchanged |
+| E8.2, 3: the maker's mass | each block's `mass`; the H1 46 / 47 / 59.34 kg |
+| E8.2, 4: the Walker Tienkung in two versions | `walker_tienkung()`: 'Walker Tienkung Vision' and 'Walker Tienkung Embodied' (open point C), each as often |
+| E8.2, 5: robots found nowhere kept | `from_the_register()`: Orca, Phoenix, PHYBOT M1, Sean, Songxing, Superman, TianGong Ultra, Tianzhen Z1; `tesla_optimus()` for the three Optimus |
+| E8.2, 6: TALOS's torques second-hand | `TALOS_JOINTS`, its sources "LAAS-CNRS's model of PAL's robot, second-hand"; the sheet Sources 'TLu' of kind "Second-hand: a user's model" |
+| E8.3, 1: five robots by their torques | `H1_JOINTS` (the knees `M107`), `QINGLONG_JOINTS`, `TIEN_KUNG_2_JOINTS`, `WALKER_VISION_JOINTS` (its waist `WALKER_WAIST_NM`), `WALKER_EMBODIED_JOINTS` (`MEDIAN_HEAD_NM`, `MEDIAN_WRIST_NM`), `TALOS_JOINTS`; Qinglong's and TALOS's arms named by their place, TALOS's legs by their axes (open point B) |
+| E8.3, 2: the template | `template()`; E7.4's numbers and seven robots unchanged (open point A) |
+| E8.3, 3: tendons and linear joints | unchanged: the shared sheet JointParts, the Walker II's and SE01's sources say so |
+| E8.3, 4: hands and grippers | the L7's two XHAND 1 (`added_joints`, 1.045 / 1.1 / 1.155 kg, S), the SE01's and the Walker Tienkung Embodied's `SIX_JOINT_HAND`, THEMIS's two EN02 (0.463 kg, E), TALOS's two grippers (1.094 kg, E) |
+| E8.3, 6: batteries | `voltage_capacity()` for the H1, L7, Walker Tienkung; **Tien Kung 3.0 24 / 48 / 72 V (E) at its stated 18 Ah, as type 1's Booster T1 (E5.14 point 2): 01 asks every estimate to span half to 1.5 times**; the T1's stated 1,110 Wh at 48 V, labelled "S, E" (the voltage only splits the stated energy) |
+| E8.3, 7: boards | `THOR_SIZED` (Omni, Tien Kung 3.0), the L7's x86 board and Orin, the Walker Tienkung's Intel i7 and one or two AGX Orin, the H1's i5 and i7 |
+| E8.3, 8, 9: sensors, cables | each block's `sensors`; TALOS `cable_quantity=CABLE_ETHERNET` |
+| Also found at the entry | **the sheet Sources lacked batch 2b's codes** (cited in the rows, not listed: 01 then showed the makers' numbers as a third party's): 23 codes added (H1mu, OMp, TSL, SNC, PHY, OLu, RCp, L7p, XH1, SEp, ZRT, SIA, UNI, TLp, TLu, THu, XHN, TLB, TK2u, TK3p, DRU, WTp, WTu); **batch 2's two Orin NX rows** (ALICE 4, Oli) named no code: now `orin_nx_boards()` names the robot's own; **01's table: the battery's axis leaves room for the longest bar's label** (`WH_ROOM` = 0.9; "1584 Wh" ran into the cells; type 1's axis unchanged, 0 to 800 Wh) |
+
+Matthias, 2026-10-30: "Yes, start batch 2", for the first 27 of type 2's 55 robots not on wheels, in the register's
+order: sources only, nothing changed while his run of 02 goes. Earlier the same day: "All 97 first", and "but also look
+at the parts where you can find information" (each robot's own sources first; type 1's method, E5.17, only where they
+stop). Read myself on 2026-10-29 and 2026-10-30 in the built-in browser and through GitHub's interface, unless it says
+second-hand. A second-hand source was read only as a search summary or a press article: context, not a value. Nothing
+is entered.
+
+### E7.1 Robot by robot: what the makers state
+
+The register's height and mass in brackets; **bold** where the maker's differs.
+
+| # | Robot (the register) | What the maker states | Source | Kind |
+|---|---|---|---|---|
+| 25 | Alice (**157 cm, 50 kg**, 31 DoF, "China") | AeiROBOT (Ansan, **South Korea**) has two of the name with pages. **ALICE 4**: "160cm / 45kg", 41 DoF, "GENE-RAP6, Jetson Orin NX", "FSR Sensor, IMU, Depth Cam", "proprietary linear actuators" that "do not use a reducer", with their own motor drivers. **ALICE 3**: "144cm / 27.5kg", 27 DoF (legs 6 × 2, waist 1, arms 7 × 2, head 2), NUC11TNKi7 and Jetson AGX Xavier, an IMU (3DM-GX4-25), a stereo camera (ZED2i), a force-torque sensor (RFT82). A third, ALICE M1, is named without a page. Neither matches the register. Torques, actuator masses, battery: not stated | eng.arobot4all.com/ALICE4, …/ALICE3 | maker, spec |
+| 40 | Astribot S1 (170 cm, 80 kg; form "not stated") | "Height 170 cm", "Weight 80 kg"; arms of 7 DoF, 5 kg each; "Endurance 4~6 hours", "Supports plug-in". Its pictures show it **on a wheeled base**. The body's joints, battery capacity, boards: not stated. Second-hand: "1000 Wh", cable-driven actuators | astribot.com/en/product; a datasheet PDF at a.storyblok.com, not opened (a download) | maker, spec; second-hand |
+| 47 | Atom Max (170 cm, 55 kg) | DOBOT's page of the Atom answered 404. DOBOT's model files of the **Atom**: `atom-p2`, the whole body, 29 joints (the legs' limits a placeholder of 1000 N·m; arms 56, 36, 18.6; head 12), 58.91 kg; `atom-p3`, the legs only (207.76, 241.42, 104.16, 213.8, 89.896 N·m), 61.81 kg. Whether the Atom Max is this Atom: not stated | github.com/Dobot-Arm/dobot_atom_urdf | maker's models |
+| 53 | Bolt (175 cm, 75 kg) | "全尺寸人形机器人" (a full-size humanoid), 175 cm, 75 kg, 50 kg payload, a peak speed "突破11m/s" (above 11 m/s); nothing else | mirrormetech.com/cn/product_5.html | maker, spec |
+| 68 | CUE7 (218 cm, 74 kg; form "not stated") | Toyota's own page not found. Second-hand: 74 kg, down from 120 kg (Toyota's research centre on X, as reported); "an inverted two-wheel base", "a wheeled base instead of legs" | techrepublic.com; letsdatascience.com; stuff.co.za | second-hand |
+| 69 | CyberOne (177 cm, 52 kg) | Xiaomi's page: a whole-body control of "21个关节自由度" (21 degrees of freedom), depth vision to 8 m at 1 %. Second-hand, from the launch (2022-08-11): 177 cm, 52 kg; 13 joints and 21 DoF, five kinds of joint, 21 drive modules, a peak of 300 N·m at the hip; the arms' motors 500 g, up to 30 N·m rated. Battery: not found | mi.com/cyberone; wallstreetcn.com; inside.com.tw | maker; second-hand |
+| 80 | DR01 (170 cm, 80 kg) | Deep Robotics' page of its humanoid loads blank (2026-10-29, 2026-10-30). Second-hand: its own "J60" and "J100" joints (the J100-116P, 2.93 kg at 315 N·m, second-hand, E6.7). Height, mass, battery: not found | deeprobotics.cn/en/wap/humanoid.html (blank); huanqiu.com; roboticsandautomationnews.com | second-hand |
+| 98 | Figure 03 (168 cm, **60 kg**) | "9% less mass" than Figure 02; a camera in each palm; fingertip sensors down to "three grams"; "soft textiles", "multi-density foam"; charging coils in the feet, "2 kW"; made by "die-casting, injection molding, and stamping"; actuators, batteries, sensors, structures and electronics "designed completely in-house". No mass, joints or battery capacity. Figure's other page (E3): 1.73 m, **"61KG"**. Second-hand: 2.3 kWh in the torso | figure.ai/news/introducing-figure-03; figure.ai/figure (E3); Digital Today, 2026-09-14 | maker; second-hand |
+| 123 | H2-X (**182 cm, 70 kg**) | **"1725*455*245mm"**, **"65+Kg"** with battery; 31 DoF (legs 6, arms 7, waist 3, head 2); arm "150N.m", leg "300N.m" at most; internal-rotor PMSM, crossed roller bearings; "Aerospace-Grade Aluminum + High-Strength Engineering Plastic + Energy-Absorbing Cushioning Material"; local air cooling; "Dual Battery Capacity: 20 Ah (1.152 kWh), Hot-Swappable", "Maximum Voltage: 67.2V" (16 cells in series, arith.); PC1 "8-core high-performance CPU", PC2 "Intel Core i7 Or Orin NX", PC3 optional; a binocular and a monocular camera. The motors' masses: not stated | unitree.com/H2-X | maker, spec |
+| 132 | HONOR D1 (169 cm, 45 kg) | HONOR's page: no figures ("an in-house high-dynamic motion system"). Second-hand: 169 cm, 45 kg, 25 DoF, HONOR's own joint modules, liquid-cooled | honor.com/uk/events/honor-robot; marathonhandbook.com | maker, no figures; second-hand |
+| 134 | I-Series (175 cm, 60 kg) | No page of the robot found; the catalogue gives no website ("http://N/A"). Second-hand: Simplexity's first generation "produced in small batches" | yicaiglobal.com | second-hand |
+| 135 | IGRIS-C (154 cm, 56 kg) | "Height 154 cm", "Weight 56 kg", "17,000mAh 48V" (816 Wh, arith.), charged in 2.5 h; legs 6 × 2, waist 3, arms 7 × 2, neck 2 (31), hands 6 × 2; "RGB Stereo, Depth Camera", "6-Axis IMU, Encoders". Torques, actuator masses: not stated | robros.co.kr/ko/igrisc | maker, spec |
+| 144 | JingChu (170 cm, 65 kg) | 荆楚一号: "身高170cm，体重约65kg" (about 65 kg); "26个自由度（不含手）" (26 without the hands), hands of 6 DoF as standard; the knees "行星滚柱丝杠直线驱动模组" (planetary roller-screw linear modules), "大外径：65mm", **"关节重量：2kg"** (the joint's mass 2 kg); the other joints "高扭矩行星减速机模组" (high-torque planetary modules); "48V20AH" (960 Wh, arith.), about 8 h; "激光雷达" (LiDAR), "2个RGBD深度相机" (two RGB-D cameras), "6轴IMU"; "6核高性能CPU，32核GPU，AI算力高达67TOPS"; microphone array, speaker, WiFi 6, Bluetooth 5 | jingchurobot.cn/product_detail/1.html | maker, spec |
+| 151 | KAIST (165 cm, 75 kg) | The lab's page: "Full-size humanoid robot for dynamic locomotion", "Fully custom actuator system"; no figures, no page of its own. Second-hand: 75 kg, a knee of 320 N·m peak, a "3K compound planetary gearbox" | dynamicrobot.kaist.ac.kr/new-page; interestingengineering.com | maker, no figures; second-hand |
+| 153 | Kangaroo (160 cm, **40 kg**) | "Height 1,60 m", **"Weight 50-65 kg"**, "Total DoF 14-40" by configuration (legs 6, torso 2, arms 4, 5 or 7); "custom linear actuators with integrated force sensors"; "4x RGB-D Cameras", IMU; "Battery 15Ah, 63V. 976Wh"; EtherCAT. PAL's model files exist (github.com/pal-robotics/kangaroo_robot), not yet read | pal-robotics.com/robot/kangaroo | maker, spec |
+| 157 | Kepler (**170 cm, 88 kg**) | Kepler's page of its **K1** ("Forerunner"): "178cm", "85kg", 40 DoF, "100 TOPS". No robot of 170 cm and 88 kg on Kepler's pages | gotokepler.com/productDetailK1?id=2 | maker, spec |
+| 158 | Kepler K2 (**178 cm, 85 kg**) | **175 cm; 75 kg on legs**, 135 kg on wheels (a bipedal and a wheeled version); 52 DoF (legs 6, arms 7, hands 11 each); a "Planetary roller screw actuator" of "8200N" peak, a "Rotary actuator" of "220N.m" peak, micro actuators; flexible sensors, 6-axis force sensors, vision, inertial sensors; "1h charge/8h endurance"; 100 TOPS. The actuators' masses, battery capacity: not stated. The register's 178 cm and 85 kg are the K1's | gotokepler.com/productDetailK2?id=3 | maker, spec |
+| 163 | Kuavo-5 (**168 cm, 55 kg**; "legs or wheels") | Leju's parameter picture: KUAVO 5 **"607x270x1730mm", "63.5kg"**, 41 DoF ("6自由度灵巧手", with hands of 6 DoF), a motor's "400NM" at most, 5 kg per arm, "100~2070 TOPS", "4*深度相机/3d激光雷达" (four depth cameras, a 3D LiDAR), ≥ 2 h, WiFi 6, Bluetooth 5.2; the KUAVO 5-W, on wheels, 156 kg. Leju's model files of the Kuavo 5 (`biped_s50` to `s56`, versions 5.0 to 5.6 by Leju's numbering): s50 and s51 57.15 and 58.49 kg (legs 180 N·m at most); s52 to s56 66.34 to 69.44 kg, all with the same 29 joints (hips 127, 71, 132; knee 280; ankles 91.6, 68.4; waist 102; arms 66, 75, 57, 75, 14.1 × 3; head 1.5, 12). None at 63.5 kg | lejurobot.com/en/products/kuavo-5 (its sixth picture); github.com/LejuRobotics/kuavo-ros-opensource (`docs/robot_version版本号说明.md`) | maker, spec; maker's models |
+| 170 | LimX CL (164 cm, 45 kg) | Not on LimX's list of products (Luna, Oli, TRON 1, TRON 2). Second-hand: no figures from LimX; aggregators disagree (157 cm and 20 DoF; 45 kg and 31 DoF) | limxdynamics.com/en; newatlas.com | second-hand |
+| 171 | LimX Oli (165 cm, 55 kg) | "165cm", "≤55kg" with battery; 31 DoF (legs 6, arms 7, waist 3, neck 2); "150N·m" at most; "Battery Capacity 9,500mAh", "About 1.5h", "Charger 58.8V 10A", one "Slide-Out Battery Module" (14 cells in series: 479 Wh at 3.6 V, arith.); RK3588 (motion) and "Orin NX (157TOPS)" (perception); depth cameras in the head and the chest (mounts at the wrist and hip), a LiDAR, a 6-axis IMU; air-cooled | limxdynamics.com/en/products/oli/spec | maker, spec |
+| 176 | Luna (**165 cm, 55 kg**) | **"160cm"**, **"56kg"** with battery; 27 active DoF (legs 6, arms 5, waist 3, neck 2); "Max Motor Torque 200N·m"; "Slide-Out Battery Module (x2)", "Capacity 10,000mAh", charger "58.8V 10A", "≈4h", charged in "≈1h"; two RK3588 (motion; perception); a 6-axis IMU, an RGB camera, microphone, speaker; air-cooled. Its model file: 27 joints (hips and knee 200 N·m; ankles, waist, shoulders 70; elbow 30; head and wrist 15.8), 55.64 kg | limxdynamics.com/en/products/luna/spec; LimX's `HU_L04_01.urdf` (luna-description) | maker, spec; maker's model |
+| 177 | LUS2 (160 cm, **65 kg**) | "Height 160 cm", **"Weight 57 kg"**, "Material Aluminum alloy"; "Total DoF (Joint Modules) 28" (legs 6, waist 1, arms 7: 27, the 28th not named); "Max joint torque 360 N·m"; one arm 5.5 kg without the hand; "Rated voltage 54 V", "Ternary lithium battery" (NMC), "Battery capacity 10 Ah" (540 Wh, arith.), 2 h; "3D LiDAR + Binocular Depth Camera", four microphones, a speaker; "NVIDIA Jetson AGX Orin"; air-cooled. Lumos's own joints: **LUMOS-P-60-30, 570 g, 102 N·m** peak (a two-stage planetary gear, two absolute encoders, the driver inside) and **LUMOS-P-104-24, 1750 g, 380 N·m**. Which joint holds which: not stated | lumosbot.tech/products/lus2; …/products/motor | maker, spec |
+| 180 | MagicBot Gen1 (174 cm, 70 kg) | 1740 mm, about 70 kg; aluminium alloy and PC+ABS; 42 DoF; at least 350 N·m; an 8-core CPU, 100 TOPS; a 3D LiDAR, two depth and three fisheye cameras; 25 Ah (1.35 kWh). Its model file: 30 joints (hip roll and pitch, knee 360 N·m; hip yaw 60; ankles 120; waist roll 200, yaw 100; head 60; shoulder pitch and roll 110; shoulder yaw, elbow, wrist yaw 100; wrist roll and pitch 40), 66.4 kg. MagicLab's joint modules: E7.2 | magiclab.top/en/human; github.com/MagiclabRobotics/magicbot-gen1_description (`MAGICBOT.urdf`); magiclab.top/parts/… | maker, spec; maker's model |
+| 199 | Motion 2 (160–165 cm, 60–75 kg) | VinMotion's page of the Motion 2: a video, no figures; its news page has no article on it | vinmotion.net/product/motion-2 | maker, no figures |
+| 200 | Moz1 (160 cm, 70 kg; form "not stated") | "全向轮式底盘" (an **omnidirectional wheeled chassis**), "自由度达26个" (26 DoF), "七轴仿生臂" (arms of seven axes), its own force-controlled joints | spirit-ai.com/product | maker |
+| 203 | NAVAI-I3 (180 cm, 70 kg) | The centre's page of the "NAVIAI i3": "全地形多功能双足机器人" (an all-terrain biped); its figures only in pictures and animation, none readable as text. Its GitHub holds the SDK of the earlier Navigator 2, no model file. Second-hand: 1.8 m, 80 kg, 82 DoF, 2,250 TOPS (a wiki); 41 DoF (another); 9 km/h | zj-humanoid.com/zujian/2; github.com/ZJ-Humanoid; aiwiki.ai; chinadaily.com.cn | maker, no figures; second-hand |
+| 210 | Nezha P01 (145 cm, 65 kg) | Not on its maker's list: Digit Robotics (数字华夏) shows the Xialan R03 and S02 and the Xiaqi X02 only. Found nowhere else | digit.com.cn/Products.html | maker, not listed |
+
+### E7.2 Joint modules with a stated mass, against type 2's fit
+
+Type 2's fit (E6.8 point 1): 0.0689 kg × torque^0.566, its band half to 1.5 times the mode. The makers' modules found
+in batch 2, read myself:
+
+| Module | Maker | Gear | Peak torque | Mass | The fit at that torque | Mass / fit | Source |
+|---|---|---|---|---|---|---|---|
+| LUMOS-P-60-30 | Lumos | planetary, two stages | 102 N·m | 570 g | 944 g | 0.60 | lumosbot.tech/products/motor |
+| LUMOS-P-104-24 | Lumos | planetary | 380 N·m | 1750 g | 1988 g | 0.88 | lumosbot.tech/products/motor |
+| P60N30 | MagicLab | planetary | 60 N·m | 532 g | 699 g | 0.76 | magiclab.top/parts/p60n30 |
+| D90 | MagicLab | planetary | 25 N·m | 590 g | 426 g | 1.38 | magiclab.top/parts/d90 |
+| P90N20 | MagicLab | planetary | 130 N·m | 1100 g | 1083 g | 1.02 | magiclab.top/parts/p90n20 |
+| P110 | MagicLab | planetary | 360 N·m | 1900 g | 1928 g | 0.99 | magiclab.top/en/parts/p110 |
+| H60 | MagicLab | harmonic | 90 N·m | 590 g | 880 g | 0.67 | magiclab.top/parts/h60 |
+| H70 | MagicLab | harmonic | 96 N·m | 900 g | 912 g | 0.99 | magiclab.top/parts/h70 |
+| T28 | MagicLab | ball screw | 750 N | 340 g | (linear) | — | magiclab.top/parts/t28 |
+| The JingChu's knee | JCBOT | planetary roller screw | not stated | 2 kg | (linear) | — | jingchurobot.cn/product_detail/1.html |
+| *CyberOne's arm motor* | *Xiaomi* | *not stated* | *30 N·m rated* | *500 g* | — | — | *second-hand* |
+
+**What it gives:** all eight rotary modules lie inside the fit's band (0.60 to 1.38 times the mode), the two of 360 and
+380 N·m within 12 % of it, as the M107 (E6.7). Which joint of the LUS2 or the MagicBot holds which module: stated by
+neither maker.
+
+### E7.3 Batch 2 together, and the questions for Matthias
+
+| What the makers give | Robots | How they would be drawn (the method agreed for type 1 and batch 1) |
+|---|---|---|
+| Joints and torques (a model file or a page), mass, and most of battery, boards, sensors | H2-X, JingChu, Kuavo-5, LimX Oli, Luna, LUS2, MagicBot Gen1, Kepler K2; the Atom Max by the Atom's files | each joint's module from its torque (E6.8), the makers' modules as a check; the rest as batch 1 |
+| Joints without torques, mass, battery, sensors | IGRIS-C, Kangaroo (its model files not yet read) | the joints' share of the mass (E5.17 point 1); the rest as batch 1 |
+| The mass and a few figures only | Alice, Bolt, CyberOne, Figure 03, Kepler | type 1's template (E5.17) from the maker's mass, what is stated in its place |
+| Nothing from the maker | DR01, HONOR D1, I-Series, KAIST, LimX CL, Motion 2, NAVAI-I3, Nezha P01 | type 1's template from the register's mass; second-hand figures as context only |
+| **On wheels**, by the maker or the press | Astribot S1, Moz1 (makers), CUE7 (press) | question 1 |
+
+Nothing is entered until Matthias says yes:
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | Astribot S1 and Moz1 stand on wheels by their makers, CUE7 by the press; the register's form says "not stated" | their form "wheels" in the register: they go to the wheeled batch (B), and batch 2 holds 24 robots |
+| 2 | The maker's mass or height differs from the register's: LUS2 57 kg (65); Kangaroo 50–65 kg (40); H2-X 172.5 cm, 65+ kg (182 cm, 70 kg); Luna 160 cm, 56 kg (165 cm, 55 kg); Kuavo-5 173 cm, 63.5 kg (168 cm, 55 kg); Figure 03 61 kg (60); Kepler K2 175 cm, 75 kg on legs (178 cm, 85 kg, the K1's) | the maker's in the parts file, as for the H2 Plus (E6.6, 3); the register's reported, not changed |
+| 3 | The register's robot matches none of the maker's: Alice 157 cm, 50 kg (ALICE 4 160 cm, 45 kg; ALICE 3 144 cm, 27.5 kg; and AeiROBOT is Korean, the register says China); "Kepler" 170 cm, 88 kg (the K1 178 cm, 85 kg); Atom Max (the Atom's model files only) | Alice the ALICE 4, the one of type 2's size; "Kepler" the K1; the Atom Max the Atom, the whole body from `atom-p2` and the legs' torques from `atom-p3`, as the GR-1's two files (E6.6, 2) |
+| 4 | Kuavo-5: the maker's 63.5 kg and 400 N·m, no model file at 63.5 kg | the 29 joints of `biped_s56` (the newest version 5, the same joints as s52 to s55) and two hands of 6 DoF, with the maker's 63.5 kg |
+| 5 | Luna's battery, "Slide-Out Battery Module (x2)" with "10,000mAh": both together, or each? | each: two modules of 10,000 mAh (1,008 Wh at 50.4 V, arith.). The "(x2)" stands at the module, and the Luna lasts "≈4h" where LimX's Oli, as heavy and with one module of 9,500 mAh, lasts "About 1.5h". One reading, not a blend of both (a discrete state is drawn, never blended) |
+| 6 | LimX CL and Nezha P01 are on no list of their makers | kept, as the register has them (E4); type 1's template from the register's mass |
+
+**Decided:** Matthias, 2026-10-30, "Yes, all six": Astribot S1, Moz1 and CUE7 of form "wheels" in the register and in
+the wheeled batch (B), batch 2 24 robots; the maker's mass and height in the parts file where the maker states them,
+the register's reported, not changed; Alice the ALICE 4, "Kepler" the K1, the Atom Max the Atom (`atom-p2`, the legs'
+torques from `atom-p3`); the Kuavo-5 the 29 joints of `biped_s56` and two hands of 6 DoF, at 63.5 kg; the Luna two
+battery modules of 10,000 mAh; LimX CL and Nezha P01 kept, from the register's mass. Nothing entered yet: the
+register's change is code (`tools/make_humanoid_register.py`), and the proposal of batch 2's numbers (as E6.8 for
+batch 1) comes first.
+
+### E7.4 Test: a template from type 2's own robots against type 1's (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30, on question 6: "for 6 test, if you can develop a method just using 2 data and see if it is
+different than 1 model", then "Yes, build the test" (the spec's points 1 to 6). Type 1's template (E5.17) fills two
+inputs from type 1's robots for a robot whose maker gives nothing: **(a)** the joint modules' share of the robot's mass,
+49 % (24.5 / 49 / 73.5 %), split into small and large joints as type 1's robots are on average; **(b)** the battery's
+energy, 12 Wh per kg of robot (half to 1.5 times). The rest of the template (shell, boards, screws, cables, sensors) has
+no type 2 data behind it and stays as E6.8. Computed by a script in Claude's scratch folder, reading only the two parts
+files and the makers' model files (V87).
+
+**The robots.** Body joints only, no hands or grippers; each robot once (the H2 Plus is the H2's body; the GR-1 one
+version). Type 1: the robots E5.17 used, reproduced (49.3 %, 36.3 to 53.0 %; 12.3 Wh/kg, 6.85 to 21.3). Type 2, (a):
+every joint's torque stated, each joint's mass by type 2's fit (E6.8 point 1), the H1-2's knees the M107; the robot's
+mass the maker's. Type 2, (b): the makers' energy and mass (E6, E7.1).
+
+| (a) Robot | Joints | Modules | Share of the robot | Large joints' share of the modules |
+|---|---|---|---|---|
+| *type 1: G1 (weighed), Roboto Origin, RP1, PM01, AI Sapiens K1 (stated); Asimov 1, Booster T1, Booster K1, Unitree R1 (from their torques, 87.3 N·m/kg)* | 22 to 26 | 9.2 to 18.8 kg | **median 49.3 %**, 36.3 to 53.0 % | median 65.9 %, 42.3 to 77.8 % |
+| 120 Unitree H2 | 31 | 31.3 kg | 44.7 % of 70 kg | 90.4 % |
+| 119 Unitree H1-2 | 27 | 28.3 kg | 40.4 % of 70 kg | 90.0 % |
+| 117 Fourier GR-2 | 29 | 22.2 kg | 35.3 % of 63 kg | 61.0 % |
+| 116 Fourier GR-1 | 32 | 18.3 kg | 35.2 % of 52 kg | 52.4 % |
+| 163 Kuavo-5 (`biped_s56`) | 29 | 21.7 kg | 34.1 % of 63.5 kg | 89.8 % |
+| 176 Luna (`HU_L04_01.urdf`) | 27 | 23.2 kg | 41.5 % of 56 kg | 90.3 % |
+| 180 MagicBot Gen1 (`MAGICBOT.urdf`) | 30 | 32.6 kg | 46.6 % of 70 kg | 93.2 % |
+| **type 2, 7 robots** | | | **median 40.4 %**, 34.1 to 46.6 % | median 90.0 %, 52.4 to 93.2 % |
+
+Left out of (a): the Atom Max, whose waist joint has only the placeholder 1000 N·m in DOBOT's file (its other 28
+joints 21.4 kg, 36.3 % of 58.91 kg, a lower bound). Robots with only a maximum torque (H2-X, Oli, LUS2, Kepler K2) or
+none (IGRIS-C, Kangaroo, JingChu) cannot give a share.
+
+| (b) Wh per kg of robot | Robots | Median | Range |
+|---|---|---|---|
+| type 1 | G1, X1, N1, Roboto Origin, RP1, PM01, AI Sapiens K1, Asimov 1, Booster T1, Booster K1 5 Ah, Unitree R1 (11) | 12.3 | 6.85 to 21.3 |
+| type 2 | H2 13.9, H1-2 12.3, GR-2 15.1, GR-1 9.3, H2-X 17.7, IGRIS-C 14.6, JingChu 14.8, Kangaroo 17.0 (at 57.5 kg, the middle of "50-65 kg"), Oli 8.7, Luna 18.0, LUS2 9.5, MagicBot Gen1 19.3 (12) | **14.7** | 8.7 to 19.3 |
+
+**The test** (two-sided Mann–Whitney, robot by robot; different if p < 0.05):
+
+| Input | Type 1 | Type 2 | U | p | Different? |
+|---|---|---|---|---|---|
+| (a) joint modules, share of the robot | 49.3 % (9) | 40.4 % (7) | 56 | **0.008** | **yes** |
+| (a) large joints, share of the modules | 65.9 % (9) | 90.0 % (7) | 13 | 0.055 | no, at the edge |
+| (b) battery, Wh per kg | 12.3 (11) | 14.7 (12) | 47 | 0.25 | no |
+
+**Checked, the share's difference is the robots, not how their joints' masses were made:** type 1's four robots
+estimated at 87.3 N·m/kg, recomputed by type 2's fit, give 50.9, 49.3, 55.1 and 54.7 % (type 1 still 49.3 %, p = 0.008).
+Type 1's five robots with stated or weighed joints alone: median 48.0 % against 40.4 %, p = 0.11: five robots are too
+few for the test to settle, the medians stay apart. **The direction of what is left:** type 2's joint masses come from
+the fit, none but the M107 stated; the makers' modules of batch 2 lie at 0.60 to 1.38 times it (E7.2), Lumos's two at
+0.60 and 0.88, so type 2's true share may lie lower still, not higher.
+
+**What it changes** at the mode, for the two robots of question 6 (pack at 164 Wh/kg, shell 11.5 %, screws as E6.8):
+
+| Robot | By | Joint modules | Battery | Frame before cables, boards and sensors |
+|---|---|---|---|---|
+| 170 LimX CL, 45 kg | type 1's template | 22.1 kg | 540 Wh (pack 3.3 kg) | 13.8 kg |
+| | type 2's data | 18.2 kg | 660 Wh (pack 4.0 kg) | 17.0 kg |
+| 210 Nezha P01, 65 kg | type 1's template | 31.8 kg | 780 Wh (pack 4.8 kg) | 20.0 kg |
+| | type 2's data | 26.3 kg | 954 Wh (pack 5.8 kg) | 24.5 kg |
+
+The joint modules carry most of the copper and the magnets (E5.12 point 1): by type 2's data the modules are 18 % lighter
+(40.4 against 49.3 % of the robot), and the copper and magnets in them with them; the aluminium of the frame rises.
+
+**Proposal, for Matthias's yes** (point 6 of the spec; nothing entered): for type 2's robots whose makers give no joint
+torques, **the joint modules 40.4 % of the robot's mass (type 2's median), half to 1.5 times: 20.2 / 40.4 / 60.6 %**,
+split into small and large joints as type 2's own robots are on average, not type 1's. **The battery 14.7 Wh per kg
+(type 2's median), half to 1.5 times: 7.3 / 14.7 / 22.0**: not different from type 1's 12 by the test, but of the same
+kind of robot, as his rule for sources asks. Shell, boards, screws, cables and sensors as E6.8.
+
+**Agreed:** Matthias, 2026-10-30, choosing the answer offered: "Yes, agree E7.4". For type 2's robots whose makers give
+no joint torques, the joint modules 20.2 / 40.4 / 60.6 % of the robot's mass, split as type 2's own robots on average;
+the battery 7.3 / 14.7 / 22.0 Wh per kg of robot. Not entered: it enters with batch 2's proposal and its entry, each
+for his yes.
+
+### E7.5 Proposal: batch 2 of type 2, robot by robot (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Propose batch 2". The method is batch 1's, agreed in E6.8 (points 1 to 13), with the decisions
+of E7.3 ("Yes, all six") and the template of E7.4 ("Yes, agree E7.4") for what a maker does not give; only the inputs
+are new. 24 robots: Astribot S1, Moz1 and CUE7 go to the wheeled batch (E7.3, 1). Read for it besides E7.1:
+`MAGICBOT_with_hand.urdf` (MagicLab: 52 moving joints, 24 hand links of 1.178 kg for both hands; the finger joints'
+100 N·m a placeholder, so the hands by their mass, not their torque). Numbers at the modes are Claude's arithmetic; the
+run draws every one from its min / mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **Joint modules, robots with every joint's torque** | Atom Max, Kuavo-5, Luna, MagicBot Gen1: E6.8 point 1, type 2's fit at each joint's torque, half to 1.5 times (E); the torques from the makers' models, their pages giving none per joint. The Atom Max's waist: DOBOT's file holds only the placeholder 1000 N·m, so **104.16 N·m (E: its own hip yaw's; the Kuavo-5's single waist joint 102 N·m)**. The makers' modules of E7.2 (MagicLab's P110 1.9 kg at 360 N·m, 0.99 times the fit) are a check: neither maker says which joint holds which |
+| 2 | **Joint modules, every other robot** | E7.4: 20.2 / 40.4 / 60.6 % of the robot's mass, split by joint group and class as the seven type 2 robots of E7.4 on average (`average_joints()`, as type 1's). **The JingChu's knees the maker's "关节重量：2kg"**, 1.9 / 2 / 2.1 kg each (S, ± 5 % as E5.12 point 3), its other joint groups as the template: the template alone gives its knees 1.85 kg each (0.92 times the stated), a check |
+| 3 | **Inside each actuator** | E6.8 point 3: the G1's weighed small or large joint, scaled. **Linear actuators** (the ALICE 4's "do not use a reducer", the Kangaroo's, the JingChu's roller-screw knees, the Kepler K2's roller screws) **the same (E)**: no linear actuator has been taken apart part by part; MagicLab's T28 (a ball screw, 340 g at 750 N) is the one with a stated mass. Said wherever these robots are shown |
+| 4 | **Hands** | Six joints a hand as Fourier's, 0.22 / 0.443 / 0.66 kg each (E6.8 point 4): Kuavo-5, IGRIS-C, JingChu. The Kepler K2's of 11 joints Fourier's per joint × 11, 0.41 / 0.81 / 1.22 kg (E; the H2 Plus's hand of 22 joints, 0.825 kg, a check), the K1's as the K2's (E, the same maker; its hands' joints not stated). The MagicBot's its model's, 0.29 / 0.59 / 0.88 kg each (E). Figure 03's as the H2 Plus's, 0.41 / 0.825 / 1.24 kg (E: a hand of many joints, their number not stated). The Oli's two grippers of one joint as the X1's OmniPicker, 0.41 / 0.43 / 0.45 kg (E). None for the rest: the H2-X's, LUS2's, Luna's, Kangaroo's hands are options (Luna's standard hand a fist, no joints), the others name none |
+| 5 | **The robot's mass** | E6.8 point 5 and E7.3, 2: the maker's mass the mode, the bounds its other masses and its models' sums, else the mode ± 1 kg; the register's mass where no maker states one (the register's reported in the table where they differ). **The H2-X's "65+Kg": 65 / 66 / 70 kg (E: the stated floor the minimum, the H2's "About 70kg" the maximum)**; the Oli's "≤55kg" 54 / 55 / 55; the Kangaroo's "50-65 kg" by configuration 50 / 57.5 / 65 |
+| 6 | **Battery** | E6.8 point 6: the maker's energy ± 5 % where stated (H2-X, IGRIS-C, JingChu, Kangaroo, Oli, Luna, LUS2, MagicBot); else E7.4's 14.7 Wh per kg of robot, half to 1.5 times. NMC cylindrical cells (stated "Ternary lithium" for the LUS2; E for the others), the pack the energy ÷ 164 Wh/kg. **Figure 03**: the template's 895 Wh; the press's 2.3 kWh (second-hand) lies above the template's maximum (1,342 Wh): reported, not used |
+| 7 | **Boards** | E6.8 point 7: each computer the maker names (an Intel board 60 / 120 / 180 cm²; an AGX Orin 87, an Orin NX 31.3, an RK3588 module 22 cm² as the Radxa CM5's, each with a carrier 60 / 120 / 180 cm²); a power distribution board 30 / 60 / 100 and a battery management board 30 / 60 / 96 cm² each robot. **Where the maker names only computing power:** the JingChu's "67TOPS" with six cores, the Kepler robots' and the Kuavo-5's "100 TOPS", the MagicBot's "8-core CPU, 100 TOPS" each an Orin NX-sized module and carrier (E: NVIDIA's Orin modules give these figures, my reading, not stated). Where nothing is named: one computer board 60 / 120 / 180 cm² (E, E5.17 point 3) |
+| 8 | **Sensors** | E6.8 point 8, each by its kind: a binocular or a depth camera 37.5 / 75 / 112.5 g (E, as batch 1's); a camera of one sensor (RGB, monocular, fisheye, in the palm) and a LiDAR not named as type 1's of no named model (their kind's elements, no mass of their own); IMU, microphone array and speaker as the G1's (E where not named). **Robots whose makers name no sensor: one IMU (E: a robot that walks balances by one)** |
+| 9 | **Cables and connectors** | E6.8 point 9: 8 m per metre of height (batch 1's 14 m at 1.75 m), to the half metre, half to 1.5 times; four conductors and XT30 pairs (E). **The Kangaroo's "EtherCAT"** (an Ethernet line through its joints): two power conductors and an Ethernet line, as the Fourier robots |
+| 10 | **Shell** | 11.5 % of the robot's mass (E6.8 point 10), plastics; the makers' words in its name: H2-X "Engineering Plastic + Energy-Absorbing Cushioning Material", MagicBot PC+ABS, Figure 03 "soft textiles" and "multi-density foam" (polymers, E) |
+| 11 | **Screws, frame** | Screws E6.8 point 11 (0.2 / 0.5 / 1 kg × mass / 35 kg); the frame the remainder, aluminium (stated by Unitree for the H2-X, Lumos for the LUS2, MagicLab for the MagicBot; E for the others); no titanium named in batch 2 |
+| 12 | **Versions** | **The H2-X in two**, its PC2 "Intel Core i7 Or Orin NX" (one of two): each as often (a discrete state, drawn, as the GR-1's cameras). The Kuavo-5's basic computer only (its "2070 TOPS" an option) |
+| 13 | **Not in this proposal** | Force and touch sensors (the ALICE 4's FSR, the K2's 6-axis force and "flexible" sensors, Figure 03's fingertips, the Kangaroo's force sensors in its actuators): no kind with its elements in the model yet, grams each; the HONOR D1's liquid cooling (second-hand only); every option a maker sells (dexterous hands, the Oli's computing backpack, the Kuavo-5's 2070 TOPS); the register's form "wheels" for Astribot S1, Moz1 and CUE7, made with the entry; every second-hand figure |
+
+**Robot by robot** (the register's mass in brackets where it differs; S stated by the maker, E estimated):
+
+| # Robot | Mass min / mode / max (kg) | Joints | Hands | Battery | Boards | Sensors | Cables (m) |
+|---|---|---|---|---|---|---|---|
+| 25 Alice: the ALICE 4 | 44 / 45 / 46 (50) | template (41 DoF, linear) | — | 660 Wh (E) | GENE-RAP6 (Intel); Orin NX and carrier | depth camera, IMU | 6.5 / 13 / 19.5 |
+| 47 Atom Max: the Atom | 57.91 / 58.91 / 61.81, its models (55) | 29: arms 56, 36 × 3, 18.6 × 3, head 12 × 2 (`atom-p2`); legs 207.76, 241.42, 104.16, 213.8, 89.896 × 2 (`atom-p3`); waist 104.16 (E) | — | 864 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 53 Bolt | 74 / 75 / 76 | template | — | 1,100 Wh (E) | one computer (E) | IMU (E) | 7 / 14 / 21 |
+| 69 CyberOne | 51 / 52 / 53 | template (21 DoF) | — | 763 Wh (E) | one computer (E) | depth camera, microphone array, IMU (E) | 7 / 14 / 21 |
+| 80 DR01 | 79 / 80 / 81 | template | — | 1,174 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 98 Figure 03 | 60 / 61 / 62 (60) | template | 2, as the H2 Plus's | 895 Wh (E) | one computer (E) | binocular camera (E), 2 palm cameras, microphone, speaker, IMU (E) | 7 / 14 / 21 |
+| 123 H2-X, two versions | 65 / 66 / 70 (70) | template (31 DoF; legs ≤ 300, arms ≤ 150 N·m) | — | 1,152 Wh, 16 in series (S) | PC1 (E, Intel-sized); PC2 an Intel board, or an Orin NX and carrier | binocular and monocular camera, IMU (E) | 7 / 14 / 21 |
+| 132 HONOR D1 | 44 / 45 / 46 | template (25 DoF, second-hand) | — | 660 Wh (E) | one computer (E) | IMU (E) | 6.75 / 13.5 / 20.25 |
+| 134 I-Series | 59 / 60 / 61 | template | — | 880 Wh (E) | one computer (E) | IMU (E) | 7 / 14 / 21 |
+| 135 IGRIS-C | 55 / 56 / 57 | template (31 DoF) | 2 × 6 joints | 816 Wh (S) | one computer (E) | binocular camera, depth camera, 6-axis IMU | 6.25 / 12.5 / 18.75 |
+| 144 JingChu | 64 / 65 / 66 | template (26 DoF), knees 2 kg each (S) | 2 × 6 joints | 960 Wh (S) | a 67 TOPS module and carrier (E) | LiDAR, 2 RGB-D cameras, 6-axis IMU, microphone array, speaker | 6.75 / 13.5 / 20.25 |
+| 151 KAIST | 74 / 75 / 76 | template | — | 1,100 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 153 Kangaroo | 50 / 57.5 / 65 (40) | template (14 to 40 DoF, linear) | — | 976 Wh (S) | one computer (E) | 4 RGB-D cameras, IMU | 6.5 / 13 / 19.5, Ethernet |
+| 157 Kepler: the K1 | 84 / 85 / 86 (88) | template (40 DoF) | 2, as the K2's | 1,247 Wh (E) | a 100 TOPS module and carrier (E) | binocular camera, IMU (E) | 7 / 14 / 21 |
+| 158 Kepler K2 | 74 / 75 / 76 (85) | template (52 DoF with hands; roller screws) | 2 × 11 joints | 1,100 Wh (E) | a 100 TOPS module and carrier (E) | binocular camera, IMU (E) | 7 / 14 / 21 |
+| 163 Kuavo-5 | 62.5 / 63.5 / 69.44, its model (55) | `biped_s56`'s 29: hips 127, 71, 132; knee 280; ankles 91.6, 68.4; waist 102; arms 66, 75, 57, 75, 14.1 × 3; head 1.5, 12 | 2 × 6 joints | 932 Wh (E) | a 100 TOPS module and carrier (E) | 4 depth cameras, LiDAR, IMU (E) | 7 / 14 / 21 |
+| 170 LimX CL | 44 / 45 / 46 | template | — | 660 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 171 LimX Oli | 54 / 55 / 55 | template (31 DoF) | 2 grippers | 479 Wh (S) | RK3588 module and carrier; Orin NX and carrier | 2 depth cameras (head, chest), LiDAR, 6-axis IMU, microphone, speaker | 6.5 / 13 / 19.5 |
+| 176 Luna | 55 / 56 / 57 (55) | its model's 27: hips and knee 200; ankles, waist, shoulders 70; elbow 30; head, wrist 15.8 | — (fists) | 1,008 Wh, two modules (S) | 2 RK3588 modules and carriers | RGB camera, 6-axis IMU, microphone, speaker | 6.5 / 13 / 19.5 |
+| 177 LUS2 | 56 / 57 / 58 (65) | template (28 DoF) | — | 540 Wh, NMC (S) | AGX Orin and carrier | LiDAR, binocular depth camera, microphone array, speaker, IMU (E) | 6.5 / 13 / 19.5 |
+| 180 MagicBot Gen1 | 66.4 (its model) / 70 / 71 | its model's 30: hip roll and pitch, knee 360; hip yaw 60; ankles 120; waist 200, 100; head 60 × 2; shoulders 110 × 2; shoulder yaw, elbow, wrist yaw 100; wrist roll and pitch 40 | 2 × 6 joints | 1,350 Wh (S) | an "8-core, 100 TOPS" module and carrier (E) | LiDAR, 2 depth cameras, 3 fisheye cameras, IMU (E) | 7 / 14 / 21 |
+| 199 Motion 2 | 60 / 67.5 / 75 | template | — | 990 Wh (E) | one computer (E) | IMU (E) | 6.5 / 13 / 19.5 |
+| 203 NAVAI-I3 | 69 / 70 / 71 | template | — | 1,027 Wh (E) | one computer (E) | IMU (E) | 7.25 / 14.5 / 21.75 |
+| 210 Nezha P01 | 64 / 65 / 66 | template | — | 954 Wh (E) | one computer (E) | IMU (E) | 5.75 / 11.5 / 17.25 |
+
+Every robot also: a power distribution and a battery management board; screws by mass; a shell of plastics; the frame
+the remainder, aluminium.
+
+**What it gives at the modes** (Claude's arithmetic, `batch2_modes.py` in Claude's scratch folder, V88):
+
+| Robot | Joint modules | Share | Hands | Battery pack | Shell | Frame before cables, boards and sensors |
+|---|---|---|---|---|---|---|
+| Alice, HONOR D1, LimX CL (45 kg) | 18.2 kg | 40.4 % | — | 4.03 kg | 5.17 kg | 17.0 kg (38 %) |
+| Atom Max | 22.4 kg | 38.0 % | — | 5.27 kg | 6.77 kg | 23.7 kg (40 %) |
+| Bolt, KAIST (75 kg) | 30.3 kg | 40.4 % | — | 6.71 kg | 8.62 kg | 28.3 kg (38 %) |
+| CyberOne | 21.0 kg | 40.4 % | — | 4.65 kg | 5.98 kg | 19.6 kg (38 %) |
+| DR01 | 32.3 kg | 40.4 % | — | 7.16 kg | 9.20 kg | 30.2 kg (38 %) |
+| Figure 03 | 24.6 kg | 40.4 % | 1.65 kg | 5.46 kg | 7.02 kg | 21.4 kg (35 %) |
+| H2-X | 26.7 kg | 40.4 % | — | 7.02 kg | 7.59 kg | 23.8 kg (36 %) |
+| I-Series | 24.2 kg | 40.4 % | — | 5.37 kg | 6.90 kg | 22.6 kg (38 %) |
+| IGRIS-C | 22.6 kg | 40.4 % | 0.89 kg | 4.98 kg | 6.44 kg | 20.3 kg (36 %) |
+| JingChu | 26.6 kg (knees 4.0 S) | 40.9 % | 0.89 kg | 5.85 kg | 7.48 kg | 23.3 kg (36 %) |
+| Kangaroo | 23.2 kg | 40.4 % | — | 5.95 kg | 6.61 kg | 20.9 kg (36 %) |
+| Kepler (K1) | 34.3 kg | 40.4 % | 1.62 kg | 7.60 kg | 9.78 kg | 30.4 kg (36 %) |
+| Kepler K2 | 30.3 kg | 40.4 % | 1.62 kg | 6.71 kg | 8.62 kg | 26.7 kg (36 %) |
+| Kuavo-5 | 21.7 kg | 34.1 % | 0.89 kg | 5.68 kg | 7.30 kg | 27.1 kg (43 %) |
+| LimX Oli | 22.2 kg | 40.4 % | 0.86 kg | 2.92 kg | 6.33 kg | 21.9 kg (40 %) |
+| Luna | 23.2 kg | 41.5 % | — | 6.15 kg | 6.44 kg | 19.4 kg (35 %) |
+| LUS2 | 23.0 kg | 40.4 % | — | 3.29 kg | 6.56 kg | 23.3 kg (41 %) |
+| MagicBot Gen1 | 32.6 kg | 46.6 % | 1.18 kg | 8.23 kg | 8.05 kg | 19.0 kg (27 %) |
+| Motion 2 | 27.3 kg | 40.4 % | — | 6.04 kg | 7.76 kg | 25.5 kg (38 %) |
+| NAVAI-I3 | 28.3 kg | 40.4 % | — | 6.26 kg | 8.05 kg | 26.4 kg (38 %) |
+| Nezha P01 | 26.3 kg | 40.4 % | — | 5.81 kg | 7.48 kg | 24.5 kg (38 %) |
+| *for comparison: batch 1* | *18.3 to 31.3 kg* | *35 to 45 %* | | *2.95 to 5.93 kg* | | *about 22 to 26 kg* |
+
+No remainder falls below zero at the modes; the least, the MagicBot's, 27 % of its mass (its 30 joints' modules by the
+fit, 46.6 %, the highest share of the batch). Cables, boards and sensors outside the joints come off the frame too: in
+his run of 02 (2026-10-30, 05:04) they draw 1.2 to 1.6 kg for batch 1's robots (the medians of the three added: H2
+1.23, H1-2 1.42, GR-2 1.57, GR-1 1.31 kg).
+
+**Agreed:** Matthias, 2026-10-30, choosing the answer offered: "Yes, agree E7.5" (points 1 to 13 and the robot-by-robot
+table, with their estimates). Not entered: the entry (type 2's builder, the register's three wheeled robots, 01 and 02
+where they need it, tests first) is a step of its own, for his yes.
+
+### E7.6 The entry: what each decision of E7.3 to E7.5 landed in (2026-10-30, on "Yes, build it")
+
+Matthias, 2026-10-30: "Spec the entry", then "Yes, build it" (the spec's points 1 to 7 and its open points A to D with
+their recommendations). Builder: `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`; shared:
+`tools/parts_taken_apart.py`; register: `tools/make_humanoid_register.py`. Checks: VERIFICATION.md V89.
+
+| Decision | Where it landed |
+|---|---|
+| E7.3, 1: Astribot S1, Moz1, CUE7 on wheels | the register's rows 40, 68, 200: form "wheels", decided in "… E7.3"; not taken apart, so "not drawn: not yet taken apart" |
+| E7.3, 2: the maker's mass in the parts file | each block's `mass` (sheet Constants, 'Robot mass, with battery'); the register's masses unchanged, reported in each row's source |
+| E7.3, 3: Alice the ALICE 4, "Kepler" the K1, the Atom Max the Atom | `AEI_ALICE_4`, `KEPLER_K1`, `DOBOT_ATOM`; the register's `TAKEN_APART[2]` names them so ('AeiROBOT ALICE 4', 'Kepler K1', 'DOBOT Atom') |
+| E7.3, 4: the Kuavo-5 by `biped_s56` | `KUAVO_JOINTS`, with `SIX_JOINT_HAND`; 62.5 / 63.5 / 69.44 kg |
+| E7.3, 5: the Luna's two battery modules | `LIMX_LUNA`: 50.4 V × 20 Ah (1,008 Wh at the modes) |
+| E7.3, 6: LimX CL and Nezha P01 kept | `LIMX_CL`, `DIGIT_NEZHA_P01`, the template from the register's mass |
+| E7.4: type 2's template | `TYPE_TWO_SHARED`: 'Joint modules, share of the robot mass' 0.202 / 0.404 / 0.606 and 'Battery energy per kg of robot' 7.335 / 14.67 / 22.005; `SEVEN` and `AVERAGE_JOINTS` (the seven robots' joints without their hands) |
+| E7.5, 1: four robots by their models' torques | `ATOM_JOINTS` (the waist 104.16 N·m, E), `KUAVO_JOINTS`, `LUNA_JOINTS`, `MAGICBOT_JOINTS`; `own_joints()` |
+| E7.5, 2: the template; the JingChu's knees | `template()` over the shared `template_block()`; the JingChu's `stated_joints` (1.9 / 2 / 2.1 kg, S) in place of the template's knee rows (`template_joints()`), its other rows the template's shares; 01's check 18 (`TEMPLATE_OUTSIDE`; open point A) |
+| E7.5, 3: inside each actuator, linear ones too | unchanged: the shared sheet JointParts, scaled to each module's mass |
+| E7.5, 4: hands and grippers | `SIX_JOINT_HAND` (Kuavo-5, IGRIS-C, JingChu), `KEPLER_HAND` (K1, K2), the MagicBot's 0.589 kg each, Figure 03's as the H2 Plus's, the Oli's grippers as the X1's: `added_joints` of a template robot, beside its shares |
+| E7.5, 5: masses | each block's `mass`, as E7.5's table |
+| E7.5, 6: batteries | `voltage_capacity()`: H2-X, IGRIS-C, JingChu, Kangaroo, Oli, Luna, LUS2 (its cells "Ternary lithium", S), MagicBot; the others no voltage, so the energy per kg of the template |
+| E7.5, 7: boards | `compute_module()` (JingChu, K1, K2, Kuavo-5, MagicBot), `ORIN_NX_BOARDS`, `RK3588_BOARDS`, the LUS2's AGX Orin, the ALICE 4's GENE-RAP6; one computer board where none is named; a power distribution board each (`template_block()`) |
+| E7.5, 8: sensors | `binocular()`, `depth_camera()`, `camera()`, `lidar()`, `imu()`, `microphones()`, `speaker()`; `IMU_NOT_NAMED` where a maker names none |
+| E7.5, 9: cables | `cables_by_height()`; the Kangaroo `cable_quantity=CABLE_ETHERNET` |
+| E7.5, 10, 11: shell, screws, frame | `with_defaults()`; the H2-X's, MagicBot's and Figure 03's shells and the H2-X's, LUS2's and MagicBot's frames in their makers' words |
+| E7.5, 12: the H2-X in two versions | `unitree_h2x()`: 'Unitree H2-X Core i7' and 'Unitree H2-X Orin NX', each drawn as often |
+| Open point B: the template's rows name what they average | `average_joints(blocks, label)`: type 2's rows "(as type 2's seven robots with every joint's torque on average)", type 1's unchanged; 02's notes page takes the words from the rows (`on_estimates()`) |
+| Open point C: one copy of the template function | `template_block()` in `tools/parts_taken_apart.py`; type 1's `catalogue_block` binds type 1's texts to it; type 1's file unchanged, cell for cell |
+| Open point D: the Kuavo-5's joints named | by their axes in `biped_s56.urdf` (`KUAVO_JOINTS`'s comment) |
+
+**Made at the entry, not spelled out in E7.5** (for Matthias to see; each labelled in its row):
+- **The joints counted for encoders and connectors** of a template robot (two of each per joint): the maker's degrees of
+  freedom where stated (ALICE 4 41, CyberOne 21, H2-X 31, IGRIS-C 31, JingChu 26, K1 40, K2 30 of its 52 with hands, Oli
+  31, LUS2 28), else the register's (DR01 12, Figure 03 30, HONOR D1 25, I-Series 20, KAIST 25, Kangaroo 28, LimX CL 52,
+  Motion 2 36 the middle of "~32–40", NAVAI-I3 44, Nezha P01 54), the Bolt, counted nowhere, 29, the median of the seven
+  robots (E); each hand or gripper one, as batch 1's.
+- **Module sizes that are estimates** (an Orin NX-sized module where a maker names only its computing power, an RK3588
+  module as the Radxa CM5's) span half to 1.5 times their mode, by the rule for estimates (01 refused ± 5 %): 15.65 /
+  31.3 / 46.95 and 11 / 22 / 33 cm². Named modules (an Orin NX, an AGX Orin) keep their stated size ± 5 %.
+- **The Kangaroo's battery** at its stated 976 Wh and 63 V: 15.49 Ah; its "15Ah" gives 945 Wh, 3 % lower, inside the
+  ± 5 %.
+- **The H2-X's two names** shortened to fit 01's table (the first drawing overlapped its height column).
+
 ## E6. Each robot of type 2 its own composition: research, batch 1 (2026-10-29). Nothing entered
 
 Matthias, 2026-10-29: "commit and push and then to typ 2", then "Yes, as proposed" to: A, all register robots of type

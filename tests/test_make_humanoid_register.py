@@ -85,10 +85,18 @@ class TestMakeHumanoidRegister(unittest.TestCase):
 
     def test_every_robot_of_type_1_has_its_own_rows_in_the_parts_file(self):
         # Matthias, 2026-10-29: "Yes, build it" (the entry, point 2): every robot of type 1 its own rows; the K1 in its
-        # two versions, each drawn as often (point 3). Since 2026-10-30 also the five of type 2's batch 1.
+        # two versions, each drawn as often (point 3). Since 2026-10-30 also the five of type 2's batch 1 and the 24 of
+        # its batch 2 (E7.5), the H2-X in two versions.
         apart = {r.number: r.taken_apart for r in self.register if r.taken_apart}
-        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121})
+        batch_two = {25, 47, 53, 69, 80, 98, 123, 132, 134, 135, 144, 151, 153, 157, 158, 163, 170, 171, 176, 177,
+                     180, 199, 203, 210}
+        batch_two_b = {216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290, 294, 297, 298, 299,
+                       300, 302, 323, 326, 352}
+        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121}
+                         | batch_two | batch_two_b)
+        self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
         self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
+        self.assertEqual(apart[123], 'Unitree H2-X Core i7; Unitree H2-X Orin NX')
         self.assertEqual(apart[102], 'Unitree G1')
         self.assertEqual(apart[148], 'Booster K1 5 Ah; Booster K1 2 Ah')
         names = [n for v in apart.values() for n in v.split('; ')]
@@ -115,7 +123,7 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 1, Params(),
                                                                    set(APART[1]))], [])
 
-    def test_the_sheet_type_2_lists_every_robot_of_type_2_five_taken_apart(self):
+    def test_the_sheet_type_2_lists_every_robot_of_type_2_batches_1_and_2_taken_apart(self):
         # Matthias, 2026-10-29, "Yes, as proposed" (type 2 as type 1, step 5: its robots all listed): every robot whose
         # types include 2, leading or second. Since 2026-10-30 ("Yes, build C"): its batch 1 taken apart, the others not
         # yet (Q4), the Xialan S0 without a mass; 02 draws type 2 for stock-and-flow from the workbook until all are.
@@ -123,11 +131,41 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual([r.number for r in listed], [r.number for r in self.register if 2 in r.types])
         self.assertEqual(len(listed), 97)
         runs = {r.number: r.in_run for r in listed}
-        self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_OWN}, {116, 117, 119, 120, 121})
+        # Batch 1 (E6.8) and, since 2026-10-30 ("Yes, build it"), batch 2's 24 robots (E7.5) and batch 2b's 24 (E8.3);
+        # the 43 left all on wheels.
+        batch_two = {25, 47, 53, 69, 80, 98, 123, 132, 134, 135, 144, 151, 153, 157, 158, 163, 170, 171, 176, 177,
+                     180, 199, 203, 210}
+        batch_two_b = {216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290, 294, 297, 298, 299,
+                       300, 302, 323, 326, 352}
+        self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_OWN},
+                         {116, 117, 119, 120, 121} | batch_two | batch_two_b)
         self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_NOT}, {329})
-        self.assertEqual(sum(run == schemas.IN_RUN_LATER for run in runs.values()), 91)
+        later = {n for n, run in runs.items() if run == schemas.IN_RUN_LATER}
+        self.assertEqual(len(later), 43)
+        forms = {r.number: r.form for r in listed}
+        self.assertEqual({forms[n] for n in later}, {'wheels'})
         self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params(),
                                                                    set(APART[2]))], [])
+
+    def test_the_wheeled_robots_of_batch_2_on_wheels(self):
+        # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E7.3, question 1): the Astribot S1 and the Moz1 stand on
+        # wheels by their makers, the CUE7 by the press; to the wheeled batch, not taken apart yet.
+        by_number = {r.number: r for r in self.register}
+        for number in (40, 68, 200):
+            self.assertEqual(by_number[number].form, 'wheels', msg=number)
+            cells = dict(zip(schemas.REGISTER_HEADINGS, by_number[number].cells))
+            self.assertIn('E7.3', cells['Decided in'], msg=number)
+        runs = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 2)}
+        self.assertEqual({runs[n] for n in (40, 68, 200)}, {schemas.IN_RUN_LATER})
+
+    def test_the_wheeled_robots_of_batch_2b_on_wheels(self):
+        # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E8.2, question 1): Torobo, VB1-I and VB2 on wheels by their
+        # makers; to the wheeled batch.
+        by_number = {r.number: r for r in self.register}
+        for number in (307, 312, 313):
+            self.assertEqual(by_number[number].form, 'wheels', msg=number)
+            cells = dict(zip(schemas.REGISTER_HEADINGS, by_number[number].cells))
+            self.assertIn('E8.2', cells['Decided in'], msg=number)
 
     def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
         listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}
