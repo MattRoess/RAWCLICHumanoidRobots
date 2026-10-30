@@ -44,6 +44,7 @@ returns the settings in force after checking them; `flatten()` lists them for th
 
 from __future__ import annotations
 
+import glob
 import os
 from dataclasses import dataclass, field, fields
 
@@ -123,17 +124,19 @@ class DataParams:
         metadata={'doc': 'The element recipes: the cells and their datasheets, the compounds, and the parts of each '
                          'cell down to its elements.'})
 
-    # Robot type 1 (the Unitree G1) taken apart: its 12 joint kinds and where they sit (sheet Joints), the joint
-    # module part by part as China Post Securities weighed it (JointParts), every other part (Parts), the materials of
-    # the parts that hold more than one (Shares), its circuit boards and sensors (Boards, Sensors, SensorElements), the
-    # numbers used across the sheets (Constants) and the sources (Sources). Agreed by Matthias on 2026-10-27
-    # (documentation/claude/EVIDENCE.md, E2.8 to E2.8c, and his decisions of step 1); written by Claude, to be
-    # corrected by Matthias in Excel. 01_schemas.py checks it.
-    # SAFE TO CHANGE: only if the file moves.
+    # Each robot type's robots taken apart, one file per type in a folder of its own (Matthias, 2026-10-30: "Yes,
+    # build C"; "separate by folder, not by prefix"): {folder} is the type's folder, named as data/consolidated/'s
+    # ('1_compact_research_developer', '2_full_scale_general_purpose_ai_research'). Each file: the joints of every
+    # robot and where they sit (sheet Joints), the joint module part by part as China Post Securities weighed the
+    # G1's (JointParts), every other part (Parts), the materials of the parts that hold more than one (Shares), the
+    # circuit boards and sensors (Boards, Sensors, SensorElements), the numbers used across the sheets (Constants) and
+    # the sources (Sources). Written by its type's builder, tools/{folder}/make_parts_taken_apart.py, from the research
+    # Matthias agreed (documentation/claude/EVIDENCE.md E2, E5, E6); 01_schemas.py checks it, 02 draws from it.
+    # SAFE TO CHANGE: only if the files move; {folder} must stay in it.
     parts_taken_apart: str = field(
-        default=os.path.join('data', 'researched', 'parts_taken_apart.xlsx'),
-        metadata={'doc': 'Robot type 1 taken apart: its joints, the joint module part by part, every other part, '
-                         'their materials, boards and sensors, for where its critical materials sit.'})
+        default=os.path.join('data', 'researched', '{folder}', 'parts_taken_apart.xlsx'),
+        metadata={'doc': "Each robot type's robots taken apart ({folder} its folder): joints, the joint module part "
+                         'by part, every other part, their materials, boards and sensors.'})
 
     # The humanoid.guide catalogue as read on 2026-10-28 (https://humanoid.guide/humanoid-robots-database/, "349
     # humanoids"): each robot's attribute table, numbered in the order the robots were read (documentation/claude/
@@ -146,7 +149,7 @@ class DataParams:
     # The register of every known humanoid robot, each with its one or two robot types (Matthias, 2026-10-28: "I want
     # that all know humanoid robots at the end can be assigned to types"; his rules and decisions in EVIDENCE.md E4 to
     # E4.11). Built by tools/make_humanoid_register.py from the catalogue above and the decisions held there.
-    # 01_schemas.py checks it; 02_composition.py draws robot type 1 over its robots.
+    # 01_schemas.py checks it; 02_composition.py draws each robot type taken apart over its robots.
     # SAFE TO CHANGE: only if the file moves.
     register: str = field(
         default=os.path.join('data', 'researched', 'humanoid_register.xlsx'),
@@ -301,24 +304,27 @@ class OutputParams:
         default=os.path.join('figures', 'comparison'),
         metadata={'doc': 'Where 03_comparison.py draws the six robot types side by side.'})
 
-    # What 02_composition.py writes of robot type 1 taken apart, for 04's figures: its draws of every material and
-    # element in every kind of part. The project's own outputs (data/), until Matthias decides whether stock-and-flow
-    # reads them (open point F of its plan), which would move them to data/consolidated/. Outputs: not in git.
+    # What 02_composition.py writes of each robot type taken apart: its draws of every material and element in every
+    # kind of part, into a folder of its own below this one (<n>_<name>/, as data/consolidated/'s; 2026-10-30, "Yes,
+    # build C"). The project's own outputs (data/), until Matthias decides whether stock-and-flow reads them (open
+    # point F of its plan), which would move them to data/consolidated/. Outputs: not in git.
     parts_dir: str = field(
         default=os.path.join('data', 'parts_taken_apart'),
-        metadata={'doc': 'Where the draws of robot type 1 taken apart are written.'})
+        metadata={'doc': 'Where the draws of each robot type taken apart are written, a folder per type.'})
 
-    # The figure of robot type 1 taken apart, as Matthias approved it on 2026-10-27 ("Looks good to me").
+    # The figures of each robot type taken apart (type 1's approved on 2026-10-27, "Looks good to me"), a folder per
+    # type below this one (<n>_<name>/).
     parts_figures_dir: str = field(
         default=os.path.join('figures', 'parts_taken_apart'),
-        metadata={'doc': 'Where the figure of robot type 1 taken apart is drawn.'})
+        metadata={'doc': 'Where the figures of each robot type taken apart are drawn, a folder per type.'})
 
     # The robot types whose pages 01 and 02 draw (Matthias, 2026-10-29: "Why the hell are ther all thes figure for robot
     # types 2 to 6?", then "Type 1 only"; "I will only focus on 1", 2026-10-28). The same code draws every robot type's
-    # pages; a type comes back here when its steps begin. 02 writes the draws of all six types whatever is set here.
+    # pages; a type comes back here when its steps begin: type 2 on 2026-10-30 ("Yes, build C", point 6). 02 writes
+    # the draws of all six types whatever is set here.
     # SAFE TO CHANGE: yes, any of the robot types 1 to 6, each once.
     robot_types_with_pages: tuple = field(
-        default=(1,),
+        default=(1, 2),
         metadata={'doc': 'The robot types whose pages 01 and 02 draw; 02 writes the draws of all six.'})
 
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
@@ -349,6 +355,10 @@ def validate(params: Params) -> None:
     for name in ('workbook', 'shared_lists', 'element_recipes', 'parts_taken_apart'):
         if not getattr(data, name).lower().endswith('.xlsx'):
             raise ParameterError(f'data.{name} must be an .xlsx workbook, not {getattr(data, name)!r}.')
+    # One parts file per robot type, each in its type's folder: the path must name the folder.
+    if '{folder}' not in data.parts_taken_apart:
+        raise ParameterError("data.parts_taken_apart must name the robot type's folder as {folder}, such as "
+                             f"'data/researched/{{folder}}/parts_taken_apart.xlsx', not {data.parts_taken_apart!r}.")
     for name in ('taxonomy_sheet', 'components_sheet', 'materials_sheet', 'sources_dir'):
         if not str(getattr(data, name)).strip():
             raise ParameterError(f'data.{name} is empty.')
@@ -423,8 +433,11 @@ def source_status(params: Params) -> str:
     """Which of the input files and folders are on disk, one line each."""
     lines = []
     for label, path in (('workbook', params.data.workbook), ('shared lists', params.data.shared_lists),
-                        ('recipes', params.data.element_recipes),
-                        ('taken apart', params.data.parts_taken_apart), ('sources', params.data.sources_dir)):
+                        ('recipes', params.data.element_recipes), ('sources', params.data.sources_dir)):
         state = 'present' if os.path.exists(absolute(path)) else 'MISSING'
         lines.append(f'{label:<13} {path}: {state}')
+    # The parts files: one per robot type taken apart, each in its folder.
+    found = sorted(glob.glob(absolute(params.data.parts_taken_apart.format(folder='*'))))
+    lines.append(f"{'taken apart':<13} {params.data.parts_taken_apart}: "
+                 + (', '.join(os.path.basename(os.path.dirname(f)) for f in found) or 'none'))
     return '\n  '.join(lines)

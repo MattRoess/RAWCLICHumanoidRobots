@@ -15,8 +15,8 @@ Every setting is in `src/params_schema.py`.
 | Stage | Reads | Writes | Does |
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
-| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, `data/researched/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, robot type 1's robots and where its kinds of part sit; for a robot type whose steps have not begun, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
-| `02_composition.py` | The same files, through 01's functions; the register (its sheet Type 1 for robot type 1's robots); for robot type 1 the parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/`, `figures/composition/`, `figures/parts_taken_apart/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. Robot type 1 is drawn over the robots of the register's sheet Type 1, each from its own rows of the parts file; the others from the workbook. Writes the draws and a summary for each robot type, for stock-and-flow; type 1 part by part; the pages of the robot types `output.robot_types_with_pages` names: for type 1 its element and material pages, its two figures of where its critical elements sit (until 2026-10-29 the stage 04) and where each material sits. |
+| `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, each robot type's `data/researched/<n>_<name>/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, for each robot type taken apart (1 and 2) its robots' table and where its kinds of part sit, the same pages (type 2's since 2026-10-30: "Yes, as type 1's"); for a robot type with no parts file, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
+| `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows of its parts file (type 1 over all its robots, type 2 over five); its draws for stock-and-flow from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types. Writes the draws and a summary for each robot type, for stock-and-flow; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 and 2): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
 | `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. After robot type 6 (Matthias, 2026-10-29: "I am currently not interested in 03"). |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
@@ -24,12 +24,15 @@ them", and, choosing the answer offered: "One stage, 02_composition.py, with the
 writing each type's composition separately for stock-and-flow, and a comparison stage after it." 02 and 03 read the
 inputs through the functions of 01, so that what they draw is what the schemas show.
 
-The data file of the robots of type 1 part by part, `data/researched/parts_taken_apart.xlsx`, is written by
-`tools/make_parts_taken_apart.py` (Matthias, 2026-10-27: "Yes, put the builder in tools/make_parts_taken_apart.py as
+The data file of each robot type's robots part by part, `data/researched/<n>_<name>/parts_taken_apart.xlsx`, is written
+by its type's builder, `tools/<n>_<name>/make_parts_taken_apart.py`, both builders with the one copy of what they share,
+`tools/parts_taken_apart.py` (Matthias, 2026-10-27: "Yes, put the builder in tools/make_parts_taken_apart.py as
 proposed, with its test and documents"; rewritten on 2026-10-28, "Yes, rewrite"; every robot of type 1 its own rows on
-2026-10-29, "Yes, build it"). It is not a stage: it writes an input, not a result, and holds the values agreed in
-EVIDENCE.md E2.8 to E2.8e (the G1, X1 and N1) and E5.12 to E5.19 (every other robot of type 1, one block each); a
-change to them is made there, not in the `.xlsx`. Pressing Run on it replaces the file.
+2026-10-29, "Yes, build it"; a file and builder per type, each in its type's folder, on 2026-10-30, "Yes, build C").
+Neither is a stage: each writes an input, not a result. Type 1's holds the values agreed in EVIDENCE.md E2.8 to E2.8e
+(the G1, X1 and N1) and E5.12 to E5.19 (every other robot of type 1, one block each), type 2's those of E6.8 (the five
+robots of its batch 1); a change to them is made there, not in the `.xlsx`. Pressing Run on one replaces its file.
+Splitting the builder changed nothing of type 1's file: it equals the file before, cell for cell (VERIFICATION.md V84).
 `tests/test_make_parts_taken_apart.py` checks that what it writes passes 01's checks 18 to 20, holds every robot of the
 register's sheet Type 1 as agreed (the K1 in two versions, the G1+ the G1 with two head joints, the Asimov 2 the Asimov
 1 times 38 / 35, the actuators of batch 1 at their modes as E5.12 gives them) and equals the file on disk, cell by
@@ -208,8 +211,9 @@ list is `CHECKS_DONE` in `01_schemas.py`:
 17. Material recipes: every piece of a shared material that has recipes (so far aluminium, magnesium, plastics and
     fibre composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the
     sheet Recipe, and every row names a piece that exists.
-18. Robot type 1 part by part (`data/researched/parts_taken_apart.xlsx`, EVIDENCE.md E2.8 to E2.8e and E5): the robots
-    of type 1, 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), each named in the sheet Robots
+18. Each robot type part by part (`data/researched/<n>_<name>/parts_taken_apart.xlsx`; type 1's EVIDENCE.md E2.8 to
+    E2.8e and E5, type 2's E6.8; since 2026-10-30 the same checks for every type's file): the robots of the file, type
+    1's 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), type 2's 6, each named in the sheet Robots
     and with rows of its own on the sheets Joints, Parts, Boards, Sensors and Constants; JointParts, Shares and SensorElements are one set for all ("We can assume, they are similar within
     given ranges"), a joint with a module mass following the joint parts of its size scaled to that mass. Checked:
     every min, mode and max in order, and every estimate (E) at least half to 1.5 times its mode, cut only at 100 % for
@@ -260,7 +264,12 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     a robot of type 1 has rows (since 2026-10-29 every robot of type 1 has its own). A register without the sheet stops
     02. Since 2026-10-29, evening (on "Yes, as proposed", point A), the register has one sheet per type listed, Type 1
     and Type 2, and the check is the same for each sheet "Type n"; a type none of whose robots is taken apart yet says
-    "not drawn: its type drawn from the workbook, none of its robots taken apart yet" (type 2: 97 robots).
+    "not drawn: its type drawn from the workbook, none of its robots taken apart yet". Since 2026-10-30 ("Yes, build
+    C", Q2 and Q4): a robot is taken apart where all its versions are robots of its type's parts file; in a type some of
+    whose robots are, one with a mass and no rows of its own says "not drawn: not yet taken apart" (no longer a fault:
+    its type is then drawn from the workbook for stock-and-flow, point 4 of "Robot type 2 part by part"); and a robot
+    taken apart that no sheet of its types lists is a fault (so a register without its sheet Type 1 still stops 02).
+    Type 2: 5 robots drawn, 91 not yet taken apart, 1 without a mass.
 
 02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
 (the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row
@@ -410,6 +419,32 @@ RAWCLICDataCenters' oxygen; then "S and P can go also Na"). The draws keep them:
 the materials in every draw and stock-and-flow can read any of them. Each page says in a note which elements it leaves
 out. 02 stops when the setting names a symbol that is not an element.
 
+## Robot type 2 part by part, in 02 (since 2026-10-30)
+
+Matthias, 2026-10-29: "commit and push and then to typ 2", then "Yes, as proposed" (A: every robot of type 2 its own
+rows, in batches; C: a parts file and builder per type, 02 drawing each type the same way); 2026-10-30: "Yes, all
+three", "Yes, agree E6.8", "Yes, build C" (HANDOVER.md, the specification of C, points 1 to 8, with Q1 to Q4), and, of
+the other 92 robots, "All 97 first" and "but also look at the parts where you can find information". Type 2 is drawn
+by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"), its type a parameter:
+
+1. **Its robots:** batch 1, the five robots whose makers publish a model file (the Unitree H2, H2 Plus and H1-2, the
+   Fourier GR-2 and GR-1, the GR-1 in two versions, one or two depth cameras, each as often), each from its own rows of
+   `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`, written by its builder from E6.8.
+2. **What E6.8 changed against type 1:** each joint's mass from its peak torque by type 1's fit of mass on torque,
+   refit on the 12 makers' actuators with a stated mass, 0.0689 kg × torque^0.566, half to 1.5 times (the M107's
+   stated 1.9 kg at the H1-2's knees); the hands of the H2 Plus, GR-2 and GR-1 as small joints; the cables scaled by
+   the robot's height, the Fourier robots' two power conductors and an Ethernet line of eight; the screws scaled by the
+   robot's mass; the H2's titanium a share of its mass. The rest as type 1: the inside of every joint the G1's weighed
+   small or large joint scaled to its mass, the battery from its voltage and capacity, the boards and sensors by the
+   template, the shell a share of the mass, the frame the remainder.
+3. **Its recipes:** type 2's own aluminium and plastics ("Aluminium, robot type 2, Aluminum alloys", "Plastics, robot
+   type 2, Engineering plastics"; Q3); the steels, titanium, copper, magnets and cells by the shared recipes.
+4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass is taken apart (Q2: five
+   robots, three of them Unitree's, do not represent 97); its five robots drawn part by part on their own, into
+   `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 5 of its 97
+   robots"). The register's sheet Type 2 says "not drawn: not yet taken apart" of the 91 others with a mass (Q4).
+5. **Its random numbers:** its own, from the seed and its number (type 1's as before: its draws did not change, V84).
+
 ## Robot type 1 over its robots, in 02 (since 2026-10-28; each from its own rows since 2026-10-29)
 
 Matthias, 2026-10-28: "Do it for all the robots which are in type 1. Do the code and the figure!!", "Why is it in 04",
@@ -543,12 +578,12 @@ and the factor over its own) were replaced on 2026-10-29 by the section above; t
   remainder, aluminium or plastics each as often (the PM01's aluminium); brass Cu 58 / 62 / 65 %, zinc the
   remainder. The X1's grippers are two small joints (E5.19 point 2).
 
-**What it writes**, into `data/parts_taken_apart/` (answer D; not in git): `robots.npy` (the robot of the parts file
+**What it writes**, into `data/parts_taken_apart/<n>_<name>/` (answer D; not in git; a folder per type since 2026-10-30): `robots.npy` (the robot of the parts file
 each draw is, its mass, the robot of the register), `parts.npy` (every joint kind, part, board and sensor of every robot, kg; 0 in the draws of the
 other robots), `materials.npy` (every material in every kind of part), `elements.npy` (every element in every kind of
 part), each float32 with its columns in a `.txt`, row i the same draw in every file; and `summary.csv`.
 
-**Its figures**, into `figures/parts_taken_apart/`, on pages of a screen's shape (Matthias, 2026-10-28: "Have the
+**Its figures**, into `figures/parts_taken_apart/<n>_<name>/`, on pages of a screen's shape (Matthias, 2026-10-28: "Have the
 overview on several pages. I can not read it. too smal, you should notice this before you sjhow me. Elements is an
 edge case. Also quite small"): 16 × 9 inches, no text below 14 points, so that fit to a 1920 × 1080 screen the
 smallest text is about 23 pixels tall; `tests/test_parts_taken_apart.py` draws every page and fails below 18. On every
@@ -590,11 +625,11 @@ datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
   electronics. A material held in fewer than 2.5 % of the draws has no panel; one that is 0 in some draws (a robot or a
   version without it) shows the draws that hold it and says in what share of the draws it is held (Matthias,
   2026-10-29: "If it is just a bit and a large 0 then show me the distribution").
-- `figures/parts_taken_apart/sources/<material>.png`, "where its copper sits" (as the data centres' "where the copper
+- `figures/parts_taken_apart/<n>_<name>/sources/<material>.png`, "where its copper sits" (as the data centres' "where the copper
   comes from"): for copper, brass, the nickel strip, the magnets, each steel and each aluminium alloy, one row per kind
   of part holding it, its draws above 0 as a violin on a logarithmic axis, the median a filled dot and the mean an open
   one, the 95 % interval a line (from the left edge where it starts at 0), both numbers at the right.
-- The draws behind them: `data/parts_taken_apart/grades.npy` (with `grades.txt`), the kg of each material by grade,
+- The draws behind them: `data/parts_taken_apart/<n>_<name>/grades.npy` (with `grades.txt`), the kg of each material by grade,
   alloy or magnet class in every kind of part, in every draw. A grade or alloy is split by the shares its recipe's
   elements are drawn with (02's `RecipeDraws.leaves`: the gear stage 2's steel into its 20CrMnTi and GCr15, type 1's
   aluminium into its alloys), so that the grades of a material add up to it in every draw (tested).

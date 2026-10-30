@@ -243,6 +243,15 @@ def build(path, changes=None, taxonomy=None, coverage=3, material_changes=None):
     book.save(path)
 
 
+
+# The folders of the robot types taken apart (data/researched/<n>_<name>/parts_taken_apart.xlsx, since 2026-10-30).
+TYPE_FOLDERS = {1: '1_compact_research_developer', 2: '2_full_scale_general_purpose_ai_research'}
+
+
+def real_parts_file(robot_type: int = 1) -> str:
+    """A robot type's parts file on disk: 00's `data.parts_taken_apart` with the type's folder."""
+    return absolute(Params().data.parts_taken_apart.format(folder=TYPE_FOLDERS[robot_type]))
+
 class Small(unittest.TestCase):
     """Builds, reads and checks the small workbook; each test changes one thing."""
 
@@ -403,7 +412,7 @@ class TestScreenPages(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         params = Params()
-        paths = [absolute(params.data.parts_taken_apart), absolute(params.data.register),
+        paths = [real_parts_file(), absolute(params.data.register),
                  absolute(params.data.workbook)]
         if not all(os.path.exists(p) for p in paths):
             raise unittest.SkipTest('the parts file, the register or the workbook is not on disk')
@@ -414,10 +423,10 @@ class TestScreenPages(unittest.TestCase):
 
     def pages(self) -> list:
         reports = {c.number: None for c in self.book.categories}
-        return ([schemas.overview_flow(self.register, self.apart, self.params),
-                 schemas.overview_types(self.book, [], reports, self.apart, self.params, self.register),
+        return ([schemas.overview_flow(self.register, {1: self.apart}, self.params),
+                 schemas.overview_types(self.book, [], reports, {1: self.apart}, self.params, self.register),
                  schemas.notes_page(),
-                 schemas.type_one_robot_page(self.apart)] + schemas.type_one_robots_pages(self.apart))
+                 schemas.robot_type_page(self.apart)] + schemas.robots_table_pages(self.apart))
 
     def test_every_page_is_readable_fit_to_a_screen(self):
         import matplotlib.image
@@ -451,7 +460,7 @@ class TestScreenPages(unittest.TestCase):
                 self.assertNotIn(word, words)
 
     def test_the_table_of_robot_type_1_lists_every_robot_of_the_parts_file(self):
-        rows = schemas.type_one_robots_rows(self.apart)
+        rows = schemas.robots_table_rows(self.apart)
         self.assertEqual(sorted(r.name for r in rows), sorted(self.apart.robots))
         by_name = {r.name: r for r in rows}
         g1 = by_name['Unitree G1']
@@ -460,7 +469,7 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual(by_name['PrimeBOT Q1'].mass, (9.75, 19.5, 29.25))
 
     def test_the_table_groups_the_robots_by_what_their_joints_rest_on_lightest_first(self):
-        rows = schemas.type_one_robots_rows(self.apart)
+        rows = schemas.robots_table_rows(self.apart)
         groups: dict = {}
         for r in rows:
             groups.setdefault(r.group, []).append(r)
@@ -479,7 +488,7 @@ class TestScreenPages(unittest.TestCase):
         self.assertTrue(all(r.shares == (r.group == 'shares') for r in rows))
 
     def test_each_robots_five_cells_say_where_its_numbers_come_from(self):
-        by_name = {r.name: r for r in schemas.type_one_robots_rows(self.apart)}
+        by_name = {r.name: r for r in schemas.robots_table_rows(self.apart)}
         self.assertEqual(by_name['Unitree G1'].bases,
                          {'Mass': ('maker',), 'Joints': ('weighed', 'estimated'), 'Battery': ('third party',),
                           'Boards': ('weighed', 'estimated'), 'Frame and shell': ('estimated',)})
@@ -508,7 +517,7 @@ class TestScreenPages(unittest.TestCase):
 
     def test_the_table_pages_show_every_robot_once_and_no_text_overlaps_another(self):
         from matplotlib.text import Text
-        pages = schemas.type_one_robots_pages(self.apart)
+        pages = schemas.robots_table_pages(self.apart)
         shown = []
         for figure in pages:
             figure.canvas.draw()
@@ -524,6 +533,67 @@ class TestScreenPages(unittest.TestCase):
                     self.assertFalse(b.overlaps(boxes[j]), (texts[k].get_text(), texts[j].get_text()))
             schemas.plt.close(figure)
         self.assertEqual(sorted(shown), sorted(self.apart.robots))
+
+
+class TestTypeTwoPages(unittest.TestCase):
+    """01's pages of robot type 2 as robot type 1's (Matthias, 2026-10-30: "Why the hell do thw 01 figures of type 2
+    look like this the 1 look much better", then "Yes, as type 1's"): its robots' table and where its kinds of part
+    sit, drawn for every type with a parts file; the former pages of the workbook's anchor robot no longer for it."""
+
+    PROJECT_WORDS = schemas.PROJECT_WORDS
+    SCREEN, SMALLEST_PX = TestScreenPages.SCREEN, TestScreenPages.SMALLEST_PX
+
+    @classmethod
+    def setUpClass(cls):
+        params = Params()
+        paths = [real_parts_file(2), absolute(params.data.register)]
+        if not all(os.path.exists(p) for p in paths):
+            raise unittest.SkipTest("type 2's parts file or the register is not on disk")
+        cls.params = params
+        cls.apart = schemas.read_parts_taken_apart(paths[0])
+        cls.register = schemas.read_register(paths[1])
+
+    def pages(self) -> list:
+        return schemas.taken_apart_type_pages('categories/2_type', self.apart, 2, self.register)
+
+    def title(self, figure) -> str:
+        from matplotlib.text import Text
+        return next(t.get_text() for t in figure.findobj(Text) if t.get_fontweight() == 'bold' and t.get_text())
+
+    def test_its_pages_are_type_1s_with_its_own_title(self):
+        pages = self.pages()
+        self.assertEqual([name for name, _ in pages], ['categories/2_type_robots_1.png', 'categories/2_type_robot.png'])
+        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 5 of its 97 robots taken apart so far, each drawn '
+                                                  'from its own parts (1 of 1)')
+        self.assertEqual(self.title(pages[1][1]), 'Robot type 2: where its kinds of part sit')
+        for _, figure in pages:
+            schemas.plt.close(figure)
+
+    def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
+        from matplotlib.text import Text
+        for name, figure in self.pages():
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            texts = [t for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
+            sizes = [t.get_fontsize() for t in texts]
+            self.assertGreaterEqual(min(sizes) * self.params.output.dpi / 72 * min(
+                self.SCREEN[0] / (16 * self.params.output.dpi), self.SCREEN[1] / (9 * self.params.output.dpi)),
+                self.SMALLEST_PX, msg=name)
+            boxes = [t.get_window_extent(renderer) for t in texts]
+            page = figure.bbox
+            for k, b in enumerate(boxes):
+                self.assertTrue(page.x0 <= b.x0 and b.x1 <= page.x1 and page.y0 <= b.y0 and b.y1 <= page.y1,
+                                (name, texts[k].get_text()))
+                for j in range(k):
+                    self.assertFalse(b.overlaps(boxes[j]), (name, texts[k].get_text(), texts[j].get_text()))
+            words = ' '.join(t.get_text() for t in texts)
+            for word in self.PROJECT_WORDS:
+                self.assertNotIn(word, words, msg=name)
+            schemas.plt.close(figure)
+
+    def test_the_former_pages_only_for_a_type_with_no_parts_file(self):
+        self.assertEqual(schemas.former_page_types((1, 2), {1: None, 2: self.apart}), [])
+        self.assertEqual(schemas.former_page_types((1, 2, 3), {1: None, 2: self.apart}), [3])
 
 
 class TestMaterialFaults(Small):
@@ -1188,10 +1258,10 @@ class TestTheWorkbook(unittest.TestCase):
                                        msg=f'robot type {n}, {alloy}, {element}')
 
 
-# Robot type 1 taken apart (data/researched/parts_taken_apart.xlsx): Matthias, 2026-10-27, "Yes. Show me the steps and
-# then we move step by step through them", step 3: 01 checks the file; then, on "Yes, build points 1 to 8 as
-# specified, tests first" (EVIDENCE.md E2.8e), one file for every robot of the type: a sheet Robots and a column Robot.
-# The headings of each sheet, as the file has them.
+# Robot type 1 taken apart (data/researched/1_compact_research_developer/parts_taken_apart.xlsx): Matthias, 2026-10-27,
+# "Yes. Show me the steps and then we move step by step through them", step 3: 01 checks the file; then, on "Yes, build
+# points 1 to 8 as specified, tests first" (EVIDENCE.md E2.8e), one file for every robot of the type: a sheet Robots and
+# a column Robot. The headings of each sheet, as the file has them.
 APART = {
     'Robots': ['Robot', 'Maker', 'Type', 'Height (m)', 'Stated mass (kg)', 'Sources'],
     'Joints': ['Robot', 'Number', 'Joint', 'Joints in the robot', 'Module', 'Torque limit (N·m)',
@@ -1515,7 +1585,7 @@ class TestPartsTakenApart(unittest.TestCase):
 
     def test_the_real_file_holds_together(self):
         params = Params()
-        paths = [absolute(params.data.parts_taken_apart), absolute(params.data.shared_lists)]
+        paths = [real_parts_file(), absolute(params.data.shared_lists)]
         if not all(os.path.exists(p) for p in paths):
             self.skipTest('the parts taken apart or the shared lists are not on disk')
         apart = schemas.read_parts_taken_apart(paths[0])
@@ -1656,7 +1726,7 @@ class TestSiblingData(unittest.TestCase):
         params = Params()
         paths = [params.data.vehicle_pcb_composition, params.data.vehicle_sensor_composition,
                  params.data.data_center_element_composition, params.data.traction_motor_magnets,
-                 params.data.traction_motor_steels, absolute(params.data.parts_taken_apart)]
+                 params.data.traction_motor_steels, real_parts_file()]
         if not all(os.path.exists(p) for p in paths):
             self.skipTest('a sibling file or the parts taken apart are not on disk')
         apart = schemas.read_parts_taken_apart(paths[-1])
@@ -1738,7 +1808,7 @@ class TestGrades(unittest.TestCase):
 
     def test_the_real_grades_can_all_be_drawn(self):
         params = Params()
-        paths = [absolute(params.data.parts_taken_apart), absolute(params.data.element_recipes),
+        paths = [real_parts_file(), absolute(params.data.element_recipes),
                  params.data.traction_motor_steels]
         if not all(os.path.exists(p) for p in paths):
             self.skipTest('the parts file, the element recipes or the sibling steels are not on disk')
@@ -1770,12 +1840,14 @@ def register_cells(n, robot, low, mode, high, types, form, entry, apart):
 
 def in_the_run(row, any_apart: bool = True) -> str:
     """What a sheet Type n says of a robot in 02's run, as the register's builder writes it: drawn with its own parts
-    (taken apart); not drawn (no mass stated); or, where none of its type is taken apart (`any_apart` false), its type
-    drawn from the workbook."""
+    (taken apart); where none of its type is taken apart (`any_apart` false), its type drawn from the workbook; else not
+    drawn, its mass not stated, or not yet taken apart (since 2026-10-30)."""
     n, robot, low, mode, high, types, form, entry, apart = row
     if apart:
         return 'drawn: its own parts'
-    return 'not drawn: no mass stated' if any_apart else schemas.IN_RUN_WORKBOOK
+    if not any_apart:
+        return schemas.IN_RUN_WORKBOOK
+    return 'not drawn: no mass stated' if mode is None else schemas.IN_RUN_LATER
 
 
 def build_register(path, rows=None, headings=None, type_one=None, without_type_one=False, type_two=None):
@@ -1813,7 +1885,7 @@ class TestRegister(unittest.TestCase):
             path = os.path.join(folder, 'register.xlsx')
             build_register(path, rows)
             register = schemas.read_register(path)
-        return schemas.check_register(register, Params(), apart_names)
+        return schemas.check_register(register, Params(), {1: list(apart_names)})
 
     def assertFaultSays(self, faults, words):
         self.assertTrue(any(words in f.text for f in faults), msg=[f.text for f in faults])
@@ -1895,19 +1967,21 @@ class TestRegister(unittest.TestCase):
         self.assertEqual([f.text for f in self.faults(self.changed(0, apart='Unitree G1; AgiBot X1'))], [])
         self.assertFaultSays(self.faults(self.changed(0, apart='Unitree G1; Unitree G2')), "'Unitree G2'")
 
-    def test_a_robot_taken_apart_that_is_not_type_1(self):
-        self.assertFaultSays(self.faults(self.changed(1, apart='AgiBot X1')), 'type 1')
+    def test_a_robot_taken_apart_in_the_file_of_another_type(self):
+        # Robot B is of types 3 and 4; the AgiBot X1 is a robot of type 1's parts file (since 2026-10-30 one file per
+        # type: a robot taken apart is a robot of the file of one of its types).
+        self.assertFaultSays(self.faults(self.changed(1, apart='AgiBot X1')), 'parts file of its robot types (3, 4)')
 
     def test_the_real_register_holds_together(self):
+        # Against both parts files on disk (type 1's and type 2's, since 2026-10-30), every sheet Type n.
         params = Params()
-        path, apart_path = absolute(params.data.register), absolute(params.data.parts_taken_apart)
-        if not all(os.path.exists(p) for p in (path, apart_path)):
+        path, files = absolute(params.data.register), {n: real_parts_file(n) for n in TYPE_FOLDERS}
+        if not all(os.path.exists(p) for p in [path, *files.values()]):
             self.skipTest('the register or the parts taken apart are not on disk')
-        apart = schemas.read_parts_taken_apart(apart_path)
+        named = {n: list(schemas.read_parts_taken_apart(f).robots) for n, f in files.items()}
         register = schemas.read_register(path)
-        self.assertEqual([f.text for f in schemas.check_register(register, params, list(apart.robots))], [])
-        type_one = schemas.read_type_sheet(path, 1)
-        self.assertEqual([f.text for f in schemas.check_type_sheet(register, type_one, 1, params)], [])
+        self.assertEqual([f.text for f in schemas.check_register(register, params, named)], [])
+        self.assertEqual([f.text for f in schemas.check_type_sheets(path, register, params, named)], [])
 
 
 class TestGradeRecipes(unittest.TestCase):
@@ -1967,10 +2041,14 @@ class TestTypeOneSheet(unittest.TestCase):
             path = os.path.join(folder, 'register.xlsx')
             build_register(path, rows, type_one=type_one)
             register, listed = schemas.read_register(path), schemas.read_type_sheet(path, 1)
-        return schemas.check_type_sheet(register, listed, 1, Params())
+        return schemas.check_type_sheet(register, listed, 1, Params(), self.APART)
 
     def assertFaultSays(self, faults, words):
         self.assertTrue(any(words in f.text for f in faults), msg=[f.text for f in faults])
+
+    # The robots of the small type 1's parts file, and of a small type 2's (since 2026-10-30, one file per type).
+    APART = {'Unitree G1', 'AgiBot X1', 'Fourier N1'}
+    APART_TWO = {'Robot G parts'}
 
     # The small register with two more robots of type 1: one with a mass and its own rows in two versions, one
     # without a mass (rows 7 and 8).
@@ -1995,7 +2073,35 @@ class TestTypeOneSheet(unittest.TestCase):
             path = os.path.join(folder, 'register.xlsx')
             build_register(path, self.ROWS + self.TYPE_TWO, type_two=list(zip(self.TYPE_TWO, runs)))
             self.assertEqual(schemas.type_sheet_numbers(path), [1, 2])
-            return schemas.check_type_sheets(path, schemas.read_register(path), Params())
+            return schemas.check_type_sheets(path, schemas.read_register(path), Params(), {1: self.APART})
+
+    def partly_faults(self, runs, apart_two=None):
+        """As type_two_faults, Robot G taken apart (its rows 'Robot G parts' in type 2's file), Robot H not."""
+        two = [(8, 'Robot G', 64, 65, 66, '2', 'legs', '', 'Robot G parts'), self.TYPE_TWO[1]]
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS + two, type_two=list(zip(two, runs)))
+            return schemas.check_type_sheets(path, schemas.read_register(path), Params(),
+                                             {1: self.APART, 2: self.APART_TWO if apart_two is None else apart_two})
+
+    def test_a_type_partly_taken_apart(self):
+        # Since 2026-10-30 (Q2, Q4): a robot with a mass of a type some of whose robots are taken apart, itself not yet,
+        # is not drawn, its type drawn from the workbook until all are.
+        self.assertEqual([f.text for f in self.partly_faults([schemas.IN_RUN_OWN, schemas.IN_RUN_LATER])], [])
+        self.assertFaultSays(self.partly_faults([schemas.IN_RUN_OWN, schemas.IN_RUN_WORKBOOK]),
+                             "9 Robot H: 'In the run' is '" + schemas.IN_RUN_WORKBOOK + "', but a robot with a mass")
+        # Its rows not in its type's parts file: not taken apart, and its type then none of whose robots is.
+        self.assertFaultSays(self.partly_faults([schemas.IN_RUN_OWN, schemas.IN_RUN_LATER], apart_two=set()),
+                             "8 Robot G: 'In the run' is 'drawn: its own parts', but none of the type's robots")
+
+    def test_a_robot_taken_apart_that_no_sheet_lists(self):
+        # Robot A, taken apart, is of type 1; a register whose sheet Type 1 leaves it out says so twice: missing from
+        # the sheet, and taken apart in no sheet of its types (without it, type 1 would be drawn from the workbook).
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS, type_one=self.listed()[1:])
+            faults = schemas.check_type_sheets(path, schemas.read_register(path), Params(), {1: self.APART})
+        self.assertFaultSays(faults, '1 Robot A: taken apart, but no sheet of its robot types (1) lists it.')
 
     def test_a_type_none_of_whose_robots_is_taken_apart_is_drawn_from_the_workbook(self):
         self.assertEqual([f.text for f in self.type_two_faults([schemas.IN_RUN_WORKBOOK] * 2)], [])
@@ -2006,7 +2112,7 @@ class TestTypeOneSheet(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path = os.path.join(folder, 'register.xlsx')
             build_register(path, self.ROWS + self.TYPE_TWO, type_two=[(self.TYPE_TWO[0], schemas.IN_RUN_WORKBOOK)])
-            faults = schemas.check_type_sheets(path, schemas.read_register(path), Params())
+            faults = schemas.check_type_sheets(path, schemas.read_register(path), Params(), {1: self.APART})
         self.assertFaultSays(faults, '9 Robot H: a robot of type 2')
 
     def test_it_is_read_robot_by_robot_with_what_the_run_does(self):
@@ -2050,12 +2156,18 @@ class TestTypeOneSheet(unittest.TestCase):
         self.assertFaultSays(self.faults(self.ROWS, self.listed()[:1] + wrong + self.listed()[2:]), 'its own parts')
 
     def test_a_robot_of_type_1_with_a_mass_and_no_rows_of_its_own(self):
-        # Since 2026-10-29 (the entry, decision C) a robot of type 1 is drawn from its own rows only.
+        # Since 2026-10-29 (the entry, decision C) a robot is drawn from its own rows only; since 2026-10-30 (Q4) one
+        # with a mass and no rows of its own is not yet taken apart, and its sheet must say so.
         rows = [list(r) for r in self.ROWS]
         rows[5][8] = ''
         rows = [tuple(r) for r in rows]
         listed = [(r, 'drawn: its own parts') for r in rows if '1' in [t.strip() for t in r[5].split(',')]]
-        self.assertFaultSays(self.faults(rows, listed), 'no rows of its own')
+        self.assertFaultSays(self.faults(rows, listed), 'no rows of its own in its type\'s parts file is not yet '
+                                                        'taken apart')
+        listed = [(r, in_the_run(r)) for r in rows if '1' in [t.strip() for t in r[5].split(',')]]
+        self.assertEqual([run for _, run in listed], ['drawn: its own parts', schemas.IN_RUN_LATER,
+                                                      'not drawn: no mass stated'])
+        self.assertEqual([f.text for f in self.faults(rows, listed)], [])
 
     def test_a_robot_taken_apart_said_not_to_be_drawn(self):
         wrong = [(self.listed()[0][0], 'not drawn: no mass stated')]

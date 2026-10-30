@@ -34,9 +34,13 @@ def load(name: str, path: str):
 
 schemas = load('schemas', '01_schemas.py')
 builder = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
-parts_builder = load('make_parts_taken_apart', os.path.join('tools', 'make_parts_taken_apart.py'))
-# The robots of the parts file, as its builder writes them: the names the register's "Taken apart as" must use.
-APART = [row[0] for row in parts_builder.ROBOTS_ROWS]
+# The robots of each type's parts file, as its builder writes them: the names the register's "Taken apart as" must
+# use (since 2026-10-30 one file and builder per type, each in its type's folder).
+BUILDERS = {1: load('make_parts_taken_apart_1', os.path.join('tools', '1_compact_research_developer',
+                                                            'make_parts_taken_apart.py')),
+            2: load('make_parts_taken_apart_2', os.path.join('tools', '2_full_scale_general_purpose_ai_research',
+                                                            'make_parts_taken_apart.py'))}
+APART = {n: [row[0] for row in b.ROBOTS_ROWS] for n, b in BUILDERS.items()}
 from src.params_schema import Params, absolute  # noqa: E402
 
 
@@ -59,6 +63,7 @@ class TestMakeHumanoidRegister(unittest.TestCase):
 
     def test_what_it_writes_passes_every_check_of_01(self):
         self.assertEqual([f.text for f in schemas.check_register(self.register, Params(), APART)], [])
+        self.assertEqual([f.text for f in schemas.check_type_sheets(self.path, self.register, Params(), APART)], [])
 
     def test_every_robot_once_as_decided(self):
         # EVIDENCE.md E4.9 to E4.11 and V60: 349 entries of the catalogue and 5 added; 10 second entries of one robot;
@@ -80,9 +85,10 @@ class TestMakeHumanoidRegister(unittest.TestCase):
 
     def test_every_robot_of_type_1_has_its_own_rows_in_the_parts_file(self):
         # Matthias, 2026-10-29: "Yes, build it" (the entry, point 2): every robot of type 1 its own rows; the K1 in its
-        # two versions, each drawn as often (point 3).
+        # two versions, each drawn as often (point 3). Since 2026-10-30 also the five of type 2's batch 1.
         apart = {r.number: r.taken_apart for r in self.register if r.taken_apart}
-        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types})
+        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121})
+        self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
         self.assertEqual(apart[102], 'Unitree G1')
         self.assertEqual(apart[148], 'Booster K1 5 Ah; Booster K1 2 Ah')
         names = [n for v in apart.values() for n in v.split('; ')]
@@ -106,17 +112,22 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(len(listed), 31)
         self.assertIn(54, [r.number for r in listed])    # the Booster T1, 1.18 m: kept in type 1 (2026-10-29)
         self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, its mass an estimate (E5.17)
-        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 1, Params())], [])
+        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 1, Params(),
+                                                                   set(APART[1]))], [])
 
-    def test_the_sheet_type_2_lists_every_robot_of_type_2_drawn_from_the_workbook_for_now(self):
+    def test_the_sheet_type_2_lists_every_robot_of_type_2_five_taken_apart(self):
         # Matthias, 2026-10-29, "Yes, as proposed" (type 2 as type 1, step 5: its robots all listed): every robot whose
-        # types include 2, leading or second; none of them taken apart yet, so 02 draws type 2 from the workbook, and
-        # the sheet says so of each.
+        # types include 2, leading or second. Since 2026-10-30 ("Yes, build C"): its batch 1 taken apart, the others not
+        # yet (Q4), the Xialan S0 without a mass; 02 draws type 2 for stock-and-flow from the workbook until all are.
         listed = schemas.read_type_sheet(self.path, 2)
         self.assertEqual([r.number for r in listed], [r.number for r in self.register if 2 in r.types])
         self.assertEqual(len(listed), 97)
-        self.assertEqual({r.in_run for r in listed}, {schemas.IN_RUN_WORKBOOK})
-        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params())], [])
+        runs = {r.number: r.in_run for r in listed}
+        self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_OWN}, {116, 117, 119, 120, 121})
+        self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_NOT}, {329})
+        self.assertEqual(sum(run == schemas.IN_RUN_LATER for run in runs.values()), 91)
+        self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params(),
+                                                                   set(APART[2]))], [])
 
     def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
         listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}

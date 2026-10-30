@@ -111,6 +111,94 @@ to 200 N·m) gives 1.62 kg at 360 N·m, 15 % below it: a check only, not used.
 | 2 | The GR-1's legs: which of Fourier's two model files? | `GR1T2.urdf` (225 N·m): it fits the maker's "230N.m"; the arms from `gr1t2.urdf`, the only file with them |
 | 3 | The H2 Plus's mass: the maker gives none; the register has 68 kg (humanoid.guide) | the H2's "About 70kg" and its two hands, their mass the models' difference, 77.24 − 75.59 = 1.65 kg (E); the register's 68 kg reported, not changed |
 
+**Decided:** Matthias, 2026-10-30, "Yes, all three": the H1-2 without hands; the GR-1's legs from `GR1T2.urdf` (225
+N·m), its arms, waist and head from `gr1t2.urdf`; the H2 Plus the H2's 70 kg and 1.65 kg for its hands (E).
+
+### E6.7 The large joints: makers' actuators above 120 N·m with a stated mass (2026-10-30, on "continue")
+
+Matthias, 2026-10-30: "get handover and then continue". The handover's next step is the proposal for batch 1; where no
+maker states an actuator's mass, it comes from the joint's torque. Type 2's hips and knees reach 360 to 366 N·m, and
+the basis had one actuator above 200 N·m, the M107. Searched in English and Chinese for more; read myself unless
+said. Nothing is proposed here.
+
+| Actuator | Maker | Peak torque | Mass | N·m per kg | Gear, motor | Source | Kind | Same kind as type 2's joints? |
+|---|---|---|---|---|---|---|---|---|
+| M107 | Unitree | 360 N·m | 1.9 kg | 189 | hollow shaft, dual encoder, internal-rotor PMSM; gear not stated | unitree.com/h1, the M107 table; About_H1-2 | maker, spec | **yes**: Unitree's own, in the H1-2 |
+| R86-3 | AgiBot | 200 N·m | 1.28 kg | 156 | not stated | E2.8e (X1b) | maker, spec | yes in kind (a humanoid's joint), from a type 1 robot |
+| RMM10062-2E | RoboParty | 160 N·m (140 in the report's table) | 1197 g measured | 134 | planetary (third party); inner rotor | E5.11 | maker, measured | yes in kind, from a type 1 robot |
+| Q90H | EngineAI | 145 N·m | 1.1 kg | 132 | "Full Planetary", internal-rotor PMSM | E5.11 | maker, spec | yes in kind, from a type 1 robot |
+| DM-J10010L-2EC | DAMIAO | 120 N·m | 1375 g | 87 | not stated | E5.11 | maker, spec | yes in kind, from a type 1 robot |
+| J100-116P | Deep Robotics | 315 N·m | 2.93 kg | 107.5 | not stated | retailers (4gltemall.com, aifitlab.com); the maker's 107.5 N·m/kg only through a search summary, the maker's page (deeprobotics.cn/en/wap/j80j100.html) answered 404 | **second-hand** | a legged robot's joint, from a maker of four-legged robots; not a humanoid's |
+| Model 32; Model 25 | Huayan | 459 N·m; 204 N·m | 5.8 kg; 2.53 kg | 79; 81 | ratio 120; 100 ("precision reducer"), frameless torque motor, electromagnetic brake, optional torque sensor | huayan-robotics.net/humanoid-joint-module | maker, spec | **no**: high-ratio and braked, as in collaborative arms, unlike Unitree's joints; Fourier's gear is not stated |
+| T800's joints | EngineAI | "450 N·m" | not stated | — | internal-rotor PMSM, crossed roller bearing | en.engineai.com.cn/product-t800 | maker, spec | no mass |
+| R120 | Juxie | 450 N·m (from a search summary) | 4.1 kg (the same) | — | 161:1, brake | the maker's brochure, a PDF at worldrobotconference.com | not read: a download, not asked for | — |
+
+**What it gives:** above 200 N·m only the M107 is a humanoid's joint with a mass stated first-hand. Its 189 N·m per kg
+lies above every type 1 actuator (87 to 156), as type 1's fit expects: the mass grows more slowly than the torque
+(E2.8e, mass ∝ torque^0.441). The J100-116P (second-hand, a four-legged robot's) and Huayan's (another kind of joint)
+are context only. For Fourier's FSA neither the mass nor the gear is stated anywhere found (E6.4).
+
+### E6.8 Proposal: batch 1 of type 2, robot by robot, by type 1's method (2026-10-30). Agreed, entered 2026-10-30 (E6.9)
+
+Matthias, 2026-10-30: "Yes, all three" (E6.6). The method is type 1's, agreed: E5.12 (the actuators), E5.14 and E5.17
+(the rest), E5.18 (the steels by their use), E5.21 and E5.22 (the boards' rest, the sensors' housings, the coolers, the
+XT30 as a mated pair). Only the inputs are new, and where type 1's numbers do not carry to robots twice as heavy, the
+change is named. Read for it on 2026-10-30, besides E6.1 to E6.7: Fourier's GR-1 page again (its hands, its computer,
+its wiring), and Fourier's hand model `fourier_left_hand_6dof.urdf` and `fourier_right_hand_6dof.urdf`
+(Wiki-GRx-Models): 0.443 kg each. Numbers at the modes are Claude's arithmetic; the run draws every one from its min /
+mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **Actuators' masses** | **Changed from type 1:** type 1's torque density (E5.12 point 4) holds a joint's mass proportional to its torque, but the makers' actuators show the mass growing more slowly (E2.8e, E6.7): at 360 N·m it would give 4.1 kg, the M107 weighs 1.9. Instead **type 1's fit of E2.8e, refit on the 12 makers' actuators with a stated mass** (AgiBot's 3, E5.11's 8, the M107; the RMM8463-2E's "< 800 g" is a bound, left out): **mass = 0.0689 kg × torque^0.566**. Every one of the 12 lies within 0.79 to 1.33 times it; the M107 at 0.99. Checked on the G1, not fitted: its small joint 0.43 to 0.52 kg at 25 to 35 N·m against 0.525 weighed, its large 0.87 to 1.12 kg at 88 to 139 N·m against 1.1. Each joint's mass the fit at its peak torque, half to 1.5 times (E). The **M107 where Unitree names it**: the H1-2's knees, "About 360N.m", 1.805 / 1.9 / 1.995 kg (S, ± 5 % as E5.12 point 3) |
+| 2 | **Which torque** | As E5.12: the maker's stated peak where it gives one per joint (the H1-2's page: hips and waist 220, knees 360, ankles 75 for each of 2 motors, shoulders and elbows 120, wrists 30 N·m), else the maker's model (H2, H2 Plus, GR-2; the GR-1's legs from `GR1T2.urdf`, its arms, waist and head from `gr1t2.urdf`, decided). Checked: the H1-2's "Peak: About 21Kg" in the hand at its 685 mm arm is 141 N·m at the shoulder, so the page's 120 N·m is plausible and its model's 40 N·m is not the arm's peak |
+| 3 | **Inside each actuator** | As E5.12 point 1: the G1's weighed small (below 55 N·m) or large joint, scaled to the actuator's mass; magnets by the joint's heat (legs and waist SH, arms and head H). For a 360 N·m joint the large G1 joint (1.1 kg, 88 to 139 N·m) is the nearest weighed one; that its shares hold at twice the torque is an assumption, said wherever type 2 is shown |
+| 4 | **Hands** | As the X1's grippers (joints of small inside): the GR-2's and GR-1's two Fourier hands of 6 joints each (the GR-1's page: "一对灵巧手", 44 actuators = 32 + 12), 0.22 / 0.443 / 0.66 kg each (E: Fourier's hand model, a model's mass, not a datasheet's); the H2 Plus's two hands 0.41 / 0.825 / 1.24 kg each (E, decided: 1.65 kg for both); the H1-2 and the H2 none |
+| 5 | **The robot's mass** | As E5.14 point 1 (the maker's mass the mode; the bounds its other masses, its models' sums, the mode ± 1 kg): H2 69 / 70 / 75.59; H2 Plus 70.65 / 71.65 / 77.24; H1-2 66.98 (the hand-less model) / 70 / 71; GR-2 62 / 63 / 64 (its models 62.98 and 63.92; the register's and the press's 65 reported); GR-1 51 / 52 / 55.47 (its models 54.53 and 55.47) |
+| 6 | **Battery** | As E5.14 points 2 and 3: energy ± 5 % (H2 and H2 Plus 972, H1-2 864, GR-2 950, GR-1 483 Wh); NMC cylindrical cells (E: "lithium" only, stated for none), their mass the energy ÷ 232.5 / 241.5 / 256 Wh/kg; the pack the energy ÷ 164 Wh/kg, its minimum cut at the cells, its maximum 1.5 times, the GR-2's cut at its stated "≤9 kg": H2 5.93, H1-2 5.27, GR-2 5.79 (≤ 9), GR-1 2.95 kg. The GR-1's page also says "额定容量 5.2Ah 112.3Wh" beside its 483 Wh, unexplained: reported, not used |
+| 7 | **Boards** | As E5.14 point 4, one row per board the maker names: each Intel computer 60 / 120 / 180 cm² (E, the template's; H2 and H2 Plus PC1 and PC2, H1-2 PC1 and PC4, GR-2 one, GR-1 one, an ASUS PN64 mini PC); the H2 Plus's Jetson Thor module 87 cm² (E: as the AGX Orin's 100 × 87 mm, the Thor's size not read) and its carrier 50 / 100 / 150 cm² (E, as the T1's); the GR-2's 8-core ARM board 60 / 120 / 180 cm² (E); the GR-1's switch board (8 Ethernet ports, its page) 30 / 60 / 90 cm² (E, as the N1's) and its motion control unit 30 / 60 / 90 cm² (E, as the X1's control boards); each robot a power distribution board 30 / 60 / 100 and a battery management board 30 / 60 / 96 cm² (E, the template's); an Intel board's cooler the X86 one, an ARM board's the ARM one (E5.22) |
+| 8 | **Sensors** | As E5.14 point 8, each by its kind's elements and housing (E5.22): H1-2 Livox MID-360 265 g (S) and RealSense D435 72 / 75 / 80 g (S); H2 and H2 Plus a binocular camera 37.5 / 75 / 112.5 g (E: as a D435, a stereo camera too; its mass not stated), 2 IMUs, the microphone array and the speaker as the G1's (E); GR-2 its binocular camera as the H2's (E), an IMU, microphone and speaker as the G1's; GR-1 one or two RealSense cameras, each as often (its page says "双深度相机" in one place and "一个深度相机" in another: a discrete state, drawn), an IMU |
+| 9 | **Cables and connectors** | **Changed from type 1** (5 / 10 / 15 m, for robots of 1.2 to 1.3 m): the X1's 11 m listed and the G1's "not longer than 10m" at 1.3 m, scaled by height: 7 / 14 / 21 m for the H2, H2 Plus, H1-2 and GR-2 (1.75 to 1.82 m), 6.5 / 13 / 19.5 m for the GR-1 (1.65 m) (E). Four conductors and XT30 pairs as type 1 (E) for the Unitree robots; for the Fourier robots their page's "46V电源线和以太网线" (a 46 V power line and an Ethernet line through every joint): two power conductors as type 1 and an Ethernet cable of 8 conductors of 26 / 24 / 22 AWG (E: the gauge not stated) |
+| 10 | **Shell** | As E5.14 point 6: 11.5 % of the robot's mass, half to 1.5 times, plastics ("High-Strength Engineering Plastics", "工程塑料") (E: no source of type 2 gives a shell's mass) |
+| 11 | **Screws, bearings outside the actuators** | **Changed from type 1** (0.2 / 0.5 / 1 kg, the G1's, for robots of 19 to 44 kg): the G1's scaled by the robot's mass, 0.2 / 0.5 / 1 kg × mass / 35 kg: H2, H1-2 0.4 / 1.0 / 2.0, H2 Plus 0.41 / 1.02 / 2.05, GR-2 0.36 / 0.9 / 1.8, GR-1 0.3 / 0.74 / 1.49 kg (E); grades as E5.18 |
+| 12 | **Frame** | As E5.14 point 9, the remainder, aluminium (stated by Unitree for the H2, by Fourier; E for the H1-2). The H2's and H2 Plus's "Titanium Alloy" (no share stated): 0.6 / 1.2 / 1.8 % of the robot's mass, Ti-6Al-4V (E: the X1's 0.4 kg of TC4 in 33 kg, the one robot of this project with named titanium parts) |
+| 13 | **Not in this proposal** | The register's 68 kg for the H2 Plus (reported, E6.6); the cooling fans inside the joints (none stated); B, the wheeled robots; C, the parts file and builder of type 2 and how 02 draws type 2 (the next step, for his yes) |
+
+**What it gives at the modes** (Claude's arithmetic, to show the order of magnitude):
+
+| Robot | Actuators | Share of the robot | Battery pack | Shell | Frame, the remainder (about) |
+|---|---|---|---|---|---|
+| 120 H2 | 31.1 kg (8 × 1.93 at 360 N·m) | 44 % | 5.93 kg | 8.05 kg | 22 kg |
+| 121 H2 Plus | 31.1 kg and hands 1.65 kg | 46 % | 5.93 kg | 8.24 kg | 22 kg |
+| 119 H1-2 | 28.3 kg (6 × 1.46 at 220, 2 M107) | 40 % | 5.27 kg | 8.05 kg | 26 kg |
+| 117 GR-2 | 22.2 kg and hands 0.89 kg | 37 % | 5.79 kg | 7.25 kg | 25 kg |
+| 116 GR-1 | 18.3 kg and hands 0.89 kg | 37 % | 2.95 kg | 5.98 kg | 22 kg |
+| *for comparison: type 1* | | *36 to 53 %, median 49 % (E5.17)* | | | |
+
+No remainder falls below zero at the modes.
+
+**Agreed:** Matthias, 2026-10-30, choosing the answer offered: "Yes, agree E6.8" (points 1 to 13, with their
+estimates). Entered with C ("Yes, build C"), E6.9.
+
+### E6.9 The entry: what each point of E6.8 landed in (2026-10-30, on "Yes, build C")
+
+| Point of E6.8 | Where it landed |
+|---|---|
+| 1 Actuators' masses | `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`: `FIT_KG`, `FIT_POWER`, `from_torque()`, `fitted()`; `M107` at the H1-2's knees; the file's sheet Joints, columns Module mass min / mode / max |
+| 2 Which torque | the same builder: `H2_JOINTS` (H2u), `H1_2_JOINTS` (H1p's peaks), `GR2_JOINTS` (GR2u), `GR1_JOINTS` (the legs from GR1T2.urdf, the rest from gr1t2.urdf); sheet Joints, column Torque limit |
+| 3 Inside each actuator | unchanged: the shared sheet JointParts (`tools/parts_taken_apart.py`), drawn by 02's `draw_robot()`; the class by `LARGE_FROM_NM` |
+| 4 Hands | `H2_PLUS_HAND`, `FOURIER_HAND` (joints of small inside); 01's `JOINT_KIND` gains 'hand' (arms) |
+| 5 The robot's mass | each block's `mass`; sheet Constants, 'Robot mass, with battery' |
+| 6 Battery | each block's `voltage` and `capacity` (sheet Constants), the GR-2's `pack` (4.33 / 5.79 / 9 kg); the cells NMC (E), the pack from its energy over 164 Wh/kg (the shared constant) |
+| 7 Boards | each block's `boards` (sheet Boards), its `cooler` (sheet Parts: fans, heat pipes and fins, an ARM sink) |
+| 8 Sensors | each block's `sensors` (sheets Sensors, SensorElements); the GR-1's one or two cameras as two versions (`fourier_gr1()`; the register's "Taken apart as" names both) |
+| 9 Cables | `CABLES_TALL`, `CABLES_GR1`; the Fourier robots' `cable_quantity=CABLE_ETHERNET` and the shared number 'Ethernet conductor cross-section (8 conductors)' (0.1 / 0.205 / 0.326 mm²: 26 AWG's 0.129 widened to half the mode by the rule for estimates); 01's `CABLE_LENGTHS`, 02's cable copper in `draw_robot()` |
+| 10 Shell | each block's `shell`; the shared 'Shell, share of the robot mass' |
+| 11 Screws | `screws()`, the G1's 0.2 / 0.5 / 1 kg times the mass over 35 kg |
+| 12 Frame, titanium | each block's `frame` (the remainder, aluminium); `titanium()` for the H2 and H2 Plus (Ti-6Al-4V) |
+| 13 Not in it | as said there: the register's 68 kg for the H2 Plus unchanged; no joint fans; B, the wheeled robots, not begun |
+| Also needed | the G1's weighed driver board area (22.9 cm²), from which every joint's board is scaled, as a shared number in type 2's file ('Driver board area, small joint (the G1's, weighed)'; one copy, `DRIVER_BOARD_AREA`, the G1's row in type 1's file the same) |
+
 ## E5. Each robot of type 1 its own composition: research, batch 1 of 4 (2026-10-29). Entered 2026-10-29 (E5.20)
 
 ### E5.22 Type 1's last open parts: the X1's newer parts list, its found parts, the N1's switch, the XT connectors (2026-10-29). Entered on his word

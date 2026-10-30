@@ -11,10 +11,11 @@ Matthias, 2026-10-28: "Yes, build steps 5 and 6: stage 04 and its two approved f
 sandbox with few draws", with his answers A to E (documentation/claude/HANDOVER.md, 2026-10-28); then, the same day,
 "Yes in 02 it is all type 1 in.!" and "Yes, code it in 02": the drawing moved to 02, over all the register's robots of
 type 1; 2026-10-29, "Yes, build it": every robot of type 1 drawn from its own rows. The tests draw what the parts
-file's builder writes (tools/make_parts_taken_apart.py, into a temporary folder) and the sibling projects' files where
-they lie, a few hundred times, over the register's robots of type 1 and their versions (the register's builder,
-tools/make_humanoid_register.py), into temporary folders: press Run, nothing in the project is changed. Where a file is
-not on disk, the test that needs it is skipped and says so; where the inputs have a fault, it fails and names it.
+file's builder writes (tools/1_compact_research_developer/make_parts_taken_apart.py, into a temporary folder) and the
+sibling projects' files where they lie, a few hundred times, over the register's robots of type 1 and their versions
+(the register's builder, tools/make_humanoid_register.py), into temporary folders: press Run, nothing in the project is
+changed. Since 2026-10-30 also robot type 2, from its own builder's file. Where a file is not on disk, the test that
+needs it is skipped and says so; where the inputs have a fault, it fails and names it.
 
 The hand calculations draw every triangle at its mode (the test replaces 02's `triangle` by one that returns the mode)
 and give the magnets fixed element fractions, so that one robot can be added up by hand from the data file's modes
@@ -53,11 +54,18 @@ schemas = composition.schemas
 
 # The parts file as its builder writes it, built once into a temporary folder for all the tests here; and the register's
 # robots of type 1, every version of each, as the register's builder names them ("Taken apart as").
-PARTS_BUILDER = load('make_parts_taken_apart', os.path.join('tools', 'make_parts_taken_apart.py'))
+PARTS_BUILDER = load('make_parts_taken_apart', os.path.join('tools', '1_compact_research_developer',
+                                                             'make_parts_taken_apart.py'))
 REGISTER_BUILDER = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
 FOLDER = tempfile.TemporaryDirectory()
-PARTS_FILE = os.path.join(FOLDER.name, 'parts_taken_apart.xlsx')
+# In its type's folder, as 00's setting names it (data/researched/{folder}/parts_taken_apart.xlsx, since 2026-10-30).
+PARTS_PATTERN = os.path.join(FOLDER.name, '{folder}', 'parts_taken_apart.xlsx')
+PARTS_FILE = PARTS_PATTERN.format(folder='1_compact_research_developer')
 PARTS_BUILDER.build(PARTS_FILE)
+# Type 2's (2026-10-30, "Yes, build C"): its builder's file beside type 1's, in its own folder.
+PARTS_BUILDER_TWO = load('make_parts_taken_apart_2', os.path.join('tools', '2_full_scale_general_purpose_ai_research',
+                                                                 'make_parts_taken_apart.py'))
+PARTS_BUILDER_TWO.build(PARTS_PATTERN.format(folder='2_full_scale_general_purpose_ai_research'))
 
 # The magnets' element fractions the hand calculations use, the same for every grade class: neodymium 0.24,
 # praseodymium 0.06, dysprosium 0.05, boron 0.01, iron the remainder.
@@ -68,7 +76,7 @@ def inputs_or_skip(test: unittest.TestCase, params: Params):
     """02's inputs of robot type 1, from the parts file as its builder writes it, over the register's robots of type 1
     (each with its versions, its mass the parts file's, as its own); or the test skipped where a file is not on disk,
     failed where the inputs have a fault (01's checks and 02's)."""
-    params.data.parts_taken_apart = PARTS_FILE
+    params.data.parts_taken_apart = PARTS_PATTERN
     files = [absolute(params.data.workbook), absolute(params.data.shared_lists), absolute(params.data.element_recipes),
              params.data.vehicle_pcb_composition, params.data.vehicle_sensor_composition,
              params.data.data_center_element_composition, params.data.traction_motor_steels]
@@ -80,8 +88,9 @@ def inputs_or_skip(test: unittest.TestCase, params: Params):
     register = [schemas.RegisterRobot(row=0, number=number, name=names, maker='', types=(1,), types_text='1',
                                       mass=parts.constants[schemas.versions(names)[0]][composition.ROBOT_MASS][1],
                                       form='legs', entry='', taken_apart=names)
-                for number, names in sorted(REGISTER_BUILDER.TAKEN_APART.items())]
-    inputs = composition.read_apart_inputs(params, base, register)
+                for number, names in sorted(REGISTER_BUILDER.TAKEN_APART[1].items())]
+    category = next(c for c in base.book.categories if c.number == 1)
+    inputs = composition.read_apart_inputs(params, base, register, category)
     faults = composition.apart_faults(inputs, params)
     if faults:
         test.fail('faults in the inputs: ' + '; '.join(f'{f.sheet} {f.row}: {f.text}' for f in faults))
@@ -90,7 +99,7 @@ def inputs_or_skip(test: unittest.TestCase, params: Params):
 
 def draw(inputs, params: Params, magnets: dict):
     """Robot type 1 drawn by 02 over the register of `inputs`."""
-    return composition.draw_type_one(inputs, params, magnets)
+    return composition.draw_taken_apart(inputs, params, magnets)
 
 
 def fixed_magnets(inputs, n: int) -> dict:
@@ -207,7 +216,7 @@ class TestDraws(unittest.TestCase):
         # kilograms of the materials they come from, nothing below zero but where 02 allows it (draw_faults).
         inputs, d = self.drawn()
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         self.assertEqual(composition.draw_faults(c), [])
         self.assertFalse(c.column('materials', schemas.NOT_ALLOCATED).any())
         np.testing.assert_allclose(c.column('total', 'Total'), d.mass)
@@ -313,7 +322,7 @@ class TestHandCalculations(unittest.TestCase):
         inputs = inputs_or_skip(self, self.params)
         d = self.at()
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         rows = {r['Name']: r for r in composition.summary(c) if r['Kind'] == 'Material'}
         self.assertEqual(rows[composition.ELECTRONICS]['In the elements'], 'Yes')
 
@@ -435,14 +444,14 @@ class TestReadable(unittest.TestCase):
         inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         with tempfile.TemporaryDirectory() as folder:
             params.output.parts_dir = os.path.join(folder, 'data')
             pages = composition.parts_figure_pages(d)
-            self.assertEqual([name for name, _ in pages if '_notes_' not in name], list(composition.PARTS_FIGURES))
+            self.assertEqual([name for name, _ in pages if '_notes_' not in name], list(composition.parts_figures(1)))
             # 02's pages of robot type 1: its notes, its elements and its materials nine a page; where each material
             # sits.
-            pages += composition.type_one_pages(c, d, [], params) + composition.sources_pages(d)
+            pages += composition.taken_apart_pages(c, d, [], params) + composition.sources_pages(d)
             for name, figure in pages:
                 figure.canvas.draw()
                 sizes = [t.get_fontsize() for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
@@ -472,10 +481,10 @@ class TestElementsNotShown(unittest.TestCase):
         inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         for symbol in ('H', 'N', 'O', 'F', 'Na', 'P', 'S'):
             self.assertTrue(c.column('elements', symbol).any(), msg=symbol)   # in the draws
-        pages = composition.type_one_pages(c, d, [], params)
+        pages = composition.taken_apart_pages(c, d, [], params)
         titles = [axes.get_title(loc='left') for _, figure in pages for axes in figure.axes]
         notes = ' '.join(t.get_text() for name, figure in pages if '_notes_' in name for t in figure.texts)
         for _, figure in pages:
@@ -499,8 +508,8 @@ class TestProjectWords(unittest.TestCase):
         inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
-        pages = (composition.type_one_pages(c, d, [], params) + composition.parts_figure_pages(d)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        pages = (composition.taken_apart_pages(c, d, [], params) + composition.parts_figure_pages(d)
                  + composition.sources_pages(d))
         for name, figure in pages:
             words = ' '.join(' '.join(t.get_text() for t in figure.findobj(Text)).split())
@@ -522,10 +531,10 @@ class TestNoDeprecatedCalls(unittest.TestCase):
         inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         with warnings.catch_warnings():
             warnings.simplefilter('error', MatplotlibDeprecationWarning)
-            pages = (composition.type_one_pages(c, d, [], params) + composition.parts_figure_pages(d)
+            pages = (composition.taken_apart_pages(c, d, [], params) + composition.parts_figure_pages(d)
                      + composition.sources_pages(d))
         for _, figure in pages:
             composition.plt.close(figure)
@@ -541,7 +550,7 @@ class TestElementTitles(unittest.TestCase):
         inputs = inputs_or_skip(self, params)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
         for symbol in composition.shown_elements(c.tables['elements'][0], params):
             self.assertIn(symbol, composition.ELEMENT_NAMES, msg=symbol)
             self.assertEqual(composition.element_label(symbol), f'{composition.ELEMENT_NAMES[symbol]} ({symbol})')
@@ -589,8 +598,8 @@ class TestElementPages(unittest.TestCase):
         inputs = inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_type_one(category, d, inputs.base.lists)
-        pages = composition.type_one_pages(c, d, [], self.params)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        pages = composition.taken_apart_pages(c, d, [], self.params)
         panels = {axes.get_title(loc='left'): axes.get_title(loc='right')
                   for name, figure in pages if '_elements_' in name for axes in figure.axes}
         for _, figure in pages:
@@ -803,7 +812,7 @@ class TestRun(unittest.TestCase):
             params.output.parts_figures_dir = os.path.join(folder, 'figures')
             d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
             composition.write_taken_apart(d, params.output.parts_dir)
-            composition.draw_parts_figures(d, params)
+            composition.draw_parts_figures(d, params, params.output.parts_figures_dir)
             with open(os.path.join(params.output.parts_dir, 'register.txt'), encoding='utf-8') as file:
                 self.assertEqual(file.read().splitlines(), d.register)
             for table in composition.APART_TABLES:
@@ -812,9 +821,85 @@ class TestRun(unittest.TestCase):
                     columns = file.read().splitlines()
                 self.assertEqual(draws.shape, (300, len(columns)), msg=table)
             self.assertTrue(os.path.exists(os.path.join(params.output.parts_dir, 'summary.csv')))
-            for name in list(composition.PARTS_FIGURES) + [n for n, _ in composition.sources_pages(d)]:
+            for name in list(composition.parts_figures(1)) + [n for n, _ in composition.sources_pages(d)]:
                 self.assertGreater(os.path.getsize(os.path.join(params.output.parts_figures_dir, name)), 10_000,
                                    msg=name)
+
+
+
+def type_two_inputs_or_skip(test: unittest.TestCase, params: Params):
+    """02's inputs of robot type 2, from its parts file as its builder writes it, over the register's sheet Type 2 as
+    the register's builder writes it (its five robots taken apart, the others not yet); skipped where a file is not on
+    disk, failed where the inputs have a fault."""
+    params.data.parts_taken_apart = PARTS_PATTERN
+    files = [absolute(params.data.workbook), absolute(params.data.shared_lists), absolute(params.data.element_recipes),
+             absolute(params.data.humanoid_guide), params.data.vehicle_pcb_composition,
+             params.data.vehicle_sensor_composition, params.data.data_center_element_composition,
+             params.data.traction_motor_steels]
+    missing = [f for f in files if not os.path.exists(f)]
+    if missing:
+        test.skipTest(f'not on disk: {", ".join(missing)}')
+    base = composition.read_inputs(params)
+    with tempfile.TemporaryDirectory() as folder:
+        path = os.path.join(folder, 'register.xlsx')
+        REGISTER_BUILDER.build(path, params)
+        listed = schemas.read_type_sheet(path, 2)
+    category = next(c for c in base.book.categories if c.number == 2)
+    inputs = composition.read_apart_inputs(params, base, listed, category)
+    faults = composition.apart_faults(inputs, params)
+    if faults:
+        test.fail('faults in the inputs: ' + '; '.join(f'{f.sheet} {f.row}: {f.text}' for f in faults))
+    return inputs
+
+
+class TestTypeTwo(unittest.TestCase):
+    """Robot type 2 drawn by 02 part by part (Matthias, 2026-10-30, "Yes, build C"): over its five robots taken apart,
+    the GR-1 in two versions, by type 2's own recipes, the Fourier robots' Ethernet line by hand; the robots not yet
+    taken apart counted, so that its draws for stock-and-flow come from the workbook until all are (Q2, Q4)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def test_its_robots_and_those_not_yet_taken_apart(self):
+        inputs = type_two_inputs_or_skip(self, self.params)
+        self.assertEqual([r.number for r in inputs.robots], [116, 117, 119, 120, 121])
+        self.assertEqual([r.number for r in inputs.left_out], [329])       # the Xialan S0, no mass stated
+        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (91, 97, 2))
+
+    def test_drawn_over_its_five_robots_each_as_often(self):
+        inputs = type_two_inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 5 of its 97 robots'))
+        n, tolerance = d.n, 4 * np.sqrt(0.2 * 0.8 / d.n)
+        for k in range(5):
+            self.assertAlmostEqual((d.register_robot == k).mean(), 0.2, delta=tolerance, msg=d.register[k])
+        for version in ('Fourier GR-1 one camera', 'Fourier GR-1 two cameras'):
+            self.assertAlmostEqual((d.robot == d.robots.index(version)).mean(), 0.1, delta=4 * np.sqrt(0.09 / n))
+
+    def test_its_own_recipes_of_aluminium_and_plastics(self):
+        # Q3: type 2's own rows of the element recipes.
+        inputs = type_two_inputs_or_skip(self, self.params)
+        shared = composition.Shared(inputs, self.params, fixed_magnets(inputs, 10), np.random.default_rng(5), 10)
+        self.assertEqual(shared.recipe_name, {'Aluminium': 'Aluminium, robot type 2, Aluminum alloys',
+                                              'Plastics': 'Plastics, robot type 2, Engineering plastics'})
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        self.assertEqual(d.aluminium, 'die-cast 0 to 40 %, of the wrought rest 7075 39 to 97 % and 6061')
+
+    def test_the_copper_of_its_cables_by_hand(self):
+        inputs = type_two_inputs_or_skip(self, self.params)
+        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+            d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+        def copper(robot):
+            return d.elements[('cables', 'Cu')][d.robot == d.robots.index(robot)]
+
+        # The GR-2: 14 m × (2 × 0.82 + 8 × 0.205) mm2 × 8.96 g/cm3 = 411.4432 g, two power conductors and an Ethernet
+        # line of eight (E6.8 point 9); 62 mated XT30 × 2.12 g × 0.35 of contacts × 0.62 copper of their brass =
+        # 28.52248 g. The H2: 14 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 = 238.336 g, and the same 28.52248 g.
+        np.testing.assert_allclose(copper('Fourier GR-2'), 0.43996568, rtol=1e-9)
+        np.testing.assert_allclose(copper('Unitree H2'), 0.26685848, rtol=1e-9)
 
 
 if __name__ == '__main__':

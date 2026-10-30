@@ -1,5 +1,8 @@
 """
-Tests of tools/make_parts_taken_apart.py, the builder of data/researched/parts_taken_apart.xlsx.
+Tests of the builders of the parts files: tools/1_compact_research_developer/make_parts_taken_apart.py (type 1's,
+data/researched/1_compact_research_developer/parts_taken_apart.xlsx) and
+tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py (type 2's), with the machinery they share,
+tools/parts_taken_apart.py.
 
 **Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
 **Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
@@ -8,8 +11,9 @@ at the root of the repository.
 Matthias, 2026-10-27: "Yes, put the builder in tools/make_parts_taken_apart.py as proposed, with its test and
 documents"; 2026-10-29: "Yes, build it" (every robot of type 1 its own rows). The builder is the master of the data
 file: what it writes must pass every check 01 makes of the file, hold every robot of type 1 as agreed (EVIDENCE.md E5),
-and, while nobody has changed it, equal the file on disk cell by cell. Everything is written into temporary folders:
-press Run, nothing in the project is changed.
+and, while nobody has changed it, equal the file on disk cell by cell. Type 2's builder (2026-10-30, "Yes, build C")
+writes its batch 1 as agreed in EVIDENCE.md E6.8. Everything is written into temporary folders: press Run, nothing in
+the project is changed.
 """
 import importlib.util
 import os
@@ -33,20 +37,24 @@ def load(name: str, path: str):
 
 
 schemas = load('schemas', '01_schemas.py')
-builder = load('make_parts_taken_apart', os.path.join('tools', 'make_parts_taken_apart.py'))
+builder = load('make_parts_taken_apart', os.path.join('tools', '1_compact_research_developer',
+                                                       'make_parts_taken_apart.py'))
+builder_two = load('make_parts_taken_apart_2', os.path.join('tools', '2_full_scale_general_purpose_ai_research',
+                                                           'make_parts_taken_apart.py'))
 from src.params_schema import Params, absolute  # noqa: E402
 
 
 # The robots the register's sheet Type 1 names in its column "Taken apart as", every version once (its builder).
 REGISTER = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
-TYPE_ONE = [name for names in REGISTER.TAKEN_APART.values() for name in schemas.versions(names)]
+TYPE_ONE = [name for names in REGISTER.TAKEN_APART[1].values() for name in schemas.versions(names)]
+TYPE_TWO = [name for names in REGISTER.TAKEN_APART[2].values() for name in schemas.versions(names)]
 
 
-def written():
-    """What the builder writes, read with 01's reader, from a temporary folder."""
+def written(which=None):
+    """What a builder writes (type 1's unless `which` is another), read with 01's reader, from a temporary folder."""
     with tempfile.TemporaryDirectory() as folder:
         path = os.path.join(folder, 'parts_taken_apart.xlsx')
-        builder.build(path)
+        (which or builder).build(path)
         return schemas.read_parts_taken_apart(path), load_workbook(path)
 
 
@@ -143,7 +151,7 @@ class TestMakePartsTakenApart(unittest.TestCase):
         self.assertEqual(stator['Steel'], 'M19 or M27')
 
     def test_what_it_writes_equals_the_data_file_on_disk(self):
-        on_disk = absolute(Params().data.parts_taken_apart)
+        on_disk = builder.output_path()
         if not os.path.exists(on_disk):
             self.skipTest('the data file is not on disk')
         present = load_workbook(on_disk)
@@ -206,7 +214,11 @@ class TestMakePartsTakenApart(unittest.TestCase):
             self.assertEqual(j.heat_group, group_of[j.name.split()[0].lower()], msg=f'{j.robot}, {j.name}')
 
     def test_it_takes_no_arguments_and_writes_where_00_says(self):
-        self.assertEqual(builder.output_path(), absolute(Params().data.parts_taken_apart))
+        # In its type's folder, the folder the builder sits in (2026-10-30, "Yes, build C", Q1).
+        self.assertEqual(builder.output_path(), absolute(Params().data.parts_taken_apart.format(
+            folder='1_compact_research_developer')))
+        self.assertEqual(builder_two.output_path(), absolute(Params().data.parts_taken_apart.format(
+            folder='2_full_scale_general_purpose_ai_research')))
 
     def test_it_carries_the_masses_and_parts_decided_on_2026_10_28(self):
         """Matthias, 2026-10-28, on the X1's and N1's masses and the G1's parts not carried over: "X1 max 35.3 kg",
@@ -353,3 +365,118 @@ class TestTheLastOpenParts(unittest.TestCase):
         for item in ('XT30 (2+2) connectors (two per joint)', 'XT60 connector, mated pair'):
             contacts = [s for s in self.apart.shares if s.item == item and s.material == 'Copper']
             self.assertEqual([(s.grade, s.share) for s in contacts], [('Brass', (0.175, 0.35, 0.525))], msg=item)
+
+
+class TestTypeTwo(unittest.TestCase):
+    """Type 2's builder (Matthias, 2026-10-30: "Yes, agree E6.8", "Yes, build C"): what it writes passes every check of
+    01, holds the five robots of batch 1 as the register names them (the GR-1 in two versions), and each number as
+    E6.8 agreed it."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, cls.book = written(builder_two)
+
+    def parts(self, robot: str) -> dict:
+        return {p.name: p for p in self.apart.parts if p.robot == robot}
+
+    def constant(self, robot: str, quantity: str) -> tuple:
+        return self.apart.constants[robot][quantity][1]
+
+    def test_what_it_writes_passes_every_check_of_01(self):
+        params = Params()
+        lists_path, recipes_path = absolute(params.data.shared_lists), absolute(params.data.element_recipes)
+        if not all(os.path.exists(p) for p in (lists_path, recipes_path)):
+            self.skipTest('the shared lists or the element recipes are not on disk')
+        lists, recipes = schemas.read_shared_lists(lists_path), schemas.read_element_recipes(recipes_path)
+        faults = (schemas.check_parts_taken_apart(self.apart, lists, params)
+                  + schemas.check_sibling_data(self.apart, params) + schemas.check_grades(self.apart, recipes, params))
+        self.assertEqual([f.text for f in faults], [])
+
+    def test_its_robots_are_those_the_register_names(self):
+        self.assertEqual(sorted(self.apart.robots), sorted(TYPE_TWO))
+        self.assertEqual({r.type for r in self.apart.robots.values()}, {2})
+        self.assertEqual(len(TYPE_TWO), 6)   # five robots, the GR-1 in two versions
+
+    def test_the_joints_masses_by_the_refit_and_the_m107(self):
+        # E6.8 point 1: 0.0689 kg × torque^0.566, half to 1.5 times; the H1-2's knees the M107, 1.9 kg ± 5 %.
+        joints = {(j.robot, j.name): j for j in self.apart.joints}
+        hip = joints[('Unitree H2', 'Hip pitch')]
+        mode = 0.0689 * 360 ** 0.566
+        self.assertEqual(hip.module_mass, tuple(round(f * mode, 4) for f in (0.5, 1, 1.5)))
+        self.assertAlmostEqual(hip.module_mass[1], 1.928, places=3)
+        self.assertEqual(joints[('Unitree H1-2', 'Knee')].module_mass, (1.805, 1.9, 1.995))
+        # Its joint modules E: 25 of its 27 joints from their torques, so 01's table and 02's notes say so.
+        modules = {p.name: p.label for p in self.apart.parts if p.robot == 'Unitree H1-2'
+                   and p.name.startswith('Joint module')}
+        self.assertEqual(set(modules.values()), {'E'})
+        self.assertIn('joint torques', schemas.estimate_kinds(self.apart, 'Unitree H1-2'))
+        self.assertEqual(joints[('Unitree H1-2', 'Hip pitch')].torque, 220)           # its page's peak (point 2)
+        self.assertEqual(joints[('Fourier GR-1 one camera', 'Knee')].torque, 225)     # GR1T2.urdf (decided)
+        self.assertEqual(joints[('Fourier GR-1 one camera', 'Shoulder pitch')].torque, 38.46)   # gr1t2.urdf
+        counts = {r: sum(j.count for j in self.apart.joints if j.robot == r) for r in self.apart.robots}
+        self.assertEqual(counts, {'Fourier GR-1 one camera': 34, 'Fourier GR-1 two cameras': 34, 'Fourier GR-2': 31,
+                                  'Unitree H1-2': 27, 'Unitree H2': 31, 'Unitree H2 Plus': 33})
+
+    def test_the_hands(self):
+        # E6.8 point 4: the H2 Plus's two hands 1.65 kg for both (decided), the Fourier hands their model's 0.443 kg.
+        hands = {j.robot: j for j in self.apart.joints if j.name.startswith('Hand')}
+        self.assertEqual(set(hands), {'Unitree H2 Plus', 'Fourier GR-2', 'Fourier GR-1 one camera',
+                                      'Fourier GR-1 two cameras'})
+        self.assertEqual(hands['Unitree H2 Plus'].module_mass, (0.4125, 0.825, 1.2375))
+        self.assertEqual(hands['Fourier GR-2'].module_mass, (0.2215, 0.443, 0.6645))
+        self.assertEqual({j.module for j in hands.values()}, {'small'})
+
+    def test_the_batteries_by_voltage_and_capacity(self):
+        # E6.8 point 6: 972, 864, 950 and 483 Wh at the modes; the GR-2's pack cut at its stated 9 kg.
+        wh = {r: self.constant(r, 'Battery voltage')[1] * self.constant(r, 'Battery capacity')[1]
+              for r in self.apart.robots}
+        for robot, energy in (('Unitree H2', 972), ('Unitree H2 Plus', 972), ('Unitree H1-2', 864),
+                              ('Fourier GR-2', 950), ('Fourier GR-1 one camera', 483)):
+            self.assertAlmostEqual(wh[robot], energy, places=1, msg=robot)
+        self.assertEqual(self.parts('Fourier GR-2')['Battery pack'].bounds, (4.33, 5.79, 9))
+
+    def test_the_cables_by_height_and_the_fourier_robots_ethernet_line(self):
+        # E6.8 point 9: 7 / 14 / 21 m (the GR-1 6.5 / 13 / 19.5 m); the Fourier robots two power conductors and an
+        # Ethernet line of eight.
+        for robot in self.apart.robots:
+            own = self.apart.constants[robot]
+            cable = schemas.CABLE_ETHERNET if robot.startswith('Fourier') else schemas.CABLE_FOUR
+            self.assertIn(cable, own, msg=robot)
+            self.assertEqual(own[cable][1], (6.5, 13, 19.5) if 'GR-1' in robot else (7, 14, 21), msg=robot)
+        self.assertEqual(self.apart.constants['all'][schemas.ETHERNET_CS][1], (0.1, 0.205, 0.326))
+
+    def test_the_gr1s_two_versions_differ_in_their_cameras_only(self):
+        one, two = 'Fourier GR-1 one camera', 'Fourier GR-1 two cameras'
+
+        def rows(robot, items):
+            return sorted((p.name, p.count, p.bounds) for p in items if p.robot == robot)
+
+        self.assertEqual(rows(one, self.apart.parts), rows(two, self.apart.parts))
+        self.assertEqual(rows(one, self.apart.boards), rows(two, self.apart.boards))
+        cameras = {p.robot: p.count for p in self.apart.sensors if p.name.startswith('Depth camera')}
+        self.assertEqual((cameras[one], cameras[two]), (1, 2))
+
+    def test_screws_by_mass_and_the_h2s_titanium(self):
+        # E6.8 points 11 and 12.
+        self.assertEqual(self.parts('Unitree H2')['Screws'].bounds, (0.4, 1.0, 2.0))
+        self.assertEqual(self.parts('Fourier GR-2')['Screws'].bounds, (0.36, 0.9, 1.8))
+        titanium = self.parts('Unitree H2')['Titanium alloy parts']
+        self.assertEqual((titanium.bounds, titanium.material, titanium.grade),
+                         ((0.42, 0.84, 1.26), 'Titanium', 'Ti-6Al-4V'))
+        self.assertNotIn('Titanium alloy parts', self.parts('Fourier GR-2'))
+
+    def test_the_small_joints_driver_board_area_as_type_1s(self):
+        # The G1's weighed board, the area every joint's board is scaled from: one copy, in both files.
+        self.assertEqual(self.apart.constants['all'][schemas.DRIVER_AREA][1], (11.5, 22.9, 28.3))
+        one, _ = written()
+        g1 = next(b for b in one.boards if b.robot == 'Unitree G1' and b.name == 'Driver board, small joint')
+        self.assertEqual(g1.bounds, (11.5, 22.9, 28.3))
+
+    def test_what_it_writes_equals_the_data_file_on_disk(self):
+        on_disk = builder_two.output_path()
+        if not os.path.exists(on_disk):
+            self.skipTest('the data file is not on disk')
+        present = load_workbook(on_disk)
+        for name in self.book.sheetnames:
+            rows = [list(r) for r in self.book[name].iter_rows(values_only=True)]
+            self.assertEqual(rows, [list(r) for r in present[name].iter_rows(values_only=True)], msg=name)

@@ -309,6 +309,7 @@ class TestRun(Drawn):
         # Point 14: kg by material and kg by element, each with its 95 % interval; since 2026-10-29 only for the robot
         # types of `output.robot_types_with_pages` (Matthias: "Type 1 only"), the draws of all of them written.
         params = self.write()
+        params.output.robot_types_with_pages = (1,)
         self.assertEqual(composition.run(params), 0)
         figures = params.output.composition_figures_dir
         self.assertGreater(os.path.getsize(os.path.join(figures, '1_small.png')), 0)
@@ -359,9 +360,10 @@ class TestRun(Drawn):
 
     def test_a_register_without_its_sheet_type_1_stops_before_anything_is_written(self):
         # 02 draws robot type 1 over the robots of the register's sheet Type 1 (Matthias, 2026-10-29); without it,
-        # nothing is drawn.
+        # nothing is drawn: a robot taken apart (Robot A) that no sheet of its types lists stops it (since 2026-10-30).
         params = self.write()
-        small.build_register(params.data.register, rows=SMALL_REGISTER, without_type_one=True)
+        taken = [(1, 'Robot A', 34, 35, 36, '1', 'legs', '', 'Unitree G1')] + SMALL_REGISTER[1:]
+        small.build_register(params.data.register, rows=taken, without_type_one=True)
         self.assertEqual(composition.run(params), 1)
         self.assertFalse(os.path.exists(params.output.composition_dir))
 

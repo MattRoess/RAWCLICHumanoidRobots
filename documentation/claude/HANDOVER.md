@@ -49,7 +49,111 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
 Where type 2 stands (2026-10-29, night): step 5 built (the sheet Type 2, 97 robots; V81), step 7 begun (batch 1's
 source table, EVIDENCE E6); the rest not begun. See the next section.
 
-## 2026-10-29, night: type 2 begun (start here tomorrow morning)
+## 2026-10-30, C built: a parts file and builder per type, type 2's batch 1 drawn (start here)
+
+**Built on "Yes, build C"** (the specification below, points 1 to 8, Q1 to Q4; VERIFICATION.md V84, EVIDENCE.md E6.9).
+NOT committed (commit and push on his word only):
+- `tools/parts_taken_apart.py` (the shared machinery, one copy), `tools/1_compact_research_developer/
+  make_parts_taken_apart.py` (type 1's robots, moved by git from `tools/make_parts_taken_apart.py`),
+  `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py` (type 2's batch 1, from E6.8).
+- `src/params_schema.py`: `data.parts_taken_apart` = `data/researched/{folder}/parts_taken_apart.xlsx`;
+  `output.robot_types_with_pages` = (1, 2); the output folders a folder per type below them.
+- `tools/make_humanoid_register.py`: "taken apart" per type; "not drawn: not yet taken apart" (Q4).
+- `01_schemas.py`: one parts file per type read and checked; the register per type; hands are joints; the cable with
+  an Ethernet line; the overview's texts for both types.
+- `02_composition.py`: every type taken apart drawn by the same code; type 2's draws for stock-and-flow from the
+  workbook until all its robots are taken apart (Q2); its pages "Robot type 2, 5 of its 97 robots".
+- Tests, README, METHODOLOGY, EVIDENCE E6.9, VERIFICATION V84.
+- **Proved:** type 1's file cell for cell as before; 02's 84 draw arrays identical to this morning's (V84).
+
+**His runs, in this order** (in RAWCLICHumanoidRobots, press Run):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` (two settings changed);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/1_compact_research_developer/make_parts_taken_apart.py`;
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`;
+4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`;
+5. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+6. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run).
+
+**Left behind once he has run them** (point 8; removed on his word only; nothing reads them: no code of this
+repository names these paths, no other RAWCLIC repository reads `parts_taken_apart`):
+- `data/researched/parts_taken_apart.xlsx` (type 1's file at its old path);
+- `data/parts_taken_apart/`: elements, estimated, grades, materials, parts, robots (.npy and .txt each),
+  register.txt, summary.csv (type 1's draws at the old place);
+- `figures/parts_taken_apart/`: robot_type_1_elements_1.png, robot_type_1_elements_2.png, robot_type_1_notes_1.png,
+  robot_type_1_overview_1.png to robot_type_1_overview_5.png, and the folder sources/ (type 1's figures at the old
+  place).
+
+**Then** (2026-10-30, V85): "Why the hell do thw 01 figures of type 2 look like this", "Yes, as type 1's": 01 draws
+type 2's robots' table and where its kinds of part sit as type 1's; the H1-2's joint modules labelled E. Left behind,
+for his word: the three former pages of type 2 in `figures/schemas/categories/` (`2_full_scale_general_purpose_ai_
+research.png`, `…_robot.png`, `…_shared_lists.png`). His runs again: type 2's builder, 01, then 02.
+
+**Next, by his words:** the other 92 robots of type 2, in batches ("All 97 first"; "but also look at the parts where
+you can find information": each robot's own sources first, type 1's method of E5.17 only where none is found); B, the
+wheeled robots; then type 2's own pages in 01 (its robots' table).
+
+## 2026-10-30, morning: where type 2 stands
+
+- **Committed and pushed** on his "Yes, commit and push": GitHub `main` = `7515d13` (the sheet Type 2, V81, E6). The
+  section below was written before that commit.
+- **His runs not yet done** (V82): `humanoid_register.xlsx` is still of 2026-10-29 11:53:41. Still to run, in
+  RAWCLICHumanoidRobots: `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`, then
+  `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`.
+- **On "get handover and then continue":** the large joints' sources, EVIDENCE E6.7 (not committed). Above 200 N·m only
+  Unitree's M107 is a humanoid's joint with a mass stated first-hand; Deep Robotics' J100-116P (315 N·m, 2.93 kg) only
+  second-hand and a four-legged robot's; Huayan's (459 N·m, 5.8 kg) another kind of joint (high ratio, brake).
+- **Claude's scratch folder was emptied overnight:** the downloads of 2026-10-29 and the backup of
+  `element_recipes.xlsx` from before the 440C rows are gone. The file itself holds the 440C rows (V80).
+- **Decided:** "Yes, all three" (E6.6): the H1-2 without hands; the GR-1's legs from `GR1T2.urdf` (225 N·m), its
+  arms, waist and head from `gr1t2.urdf`; the H2 Plus the H2's 70 kg and 1.65 kg for its hands (E).
+- **Written on that:** the proposal for batch 1, EVIDENCE E6.8 (points 1 to 13; V83). New against type 1: the joints'
+  masses from type 1's fit refit with the M107 (mass = 0.0689 kg × torque^0.566), the cables scaled by height, the
+  screws by mass, the Fourier robots' hands and Ethernet line, the H2's titanium. Not committed.
+- **Agreed:** "Yes, agree E6.8" (points 1 to 13 with their estimates). Not entered.
+- **C:** "Yes, build C" (the specification below, with the recommendations of Q1 to Q4): built, see above. His runs of the
+  register builder (03:31:40) and of 01 (03:24 and 03:31:48) done; 01 found no fault, all 316 tests pass (V84).
+- **The other 92 robots of type 2:** "type 2 should have data from all type 2 data", then, asked which he meant, "All 97
+  first": every robot of type 2 researched and entered in batches, type 2 drawn from its parts once all are in, the
+  run's type 2 from the workbook until then (Q2). And: "but also look at the parts where you can find information":
+  each robot's own sources for its parts (motors, battery, boards, sensors, structure) wherever they exist; type 1's
+  method of E5.17 only where none is found.
+
+### C, the entry of type 2's batch 1: the specification (for his yes; nothing built)
+
+His words: "C: a parts file and builder per type, 02 drawing each type the same way" (in "Yes, as proposed"), "A: all
+register robots of type 2, each its own rows, in batches", "Yes, agree E6.8". Each point below is one of these.
+
+1. **Type 2's parts file**, written by type 2's own builder from E6.8 points 1 to 12: the five robots, each its own
+   rows, every row with its label (S, E) and its source, the sheets as type 1's (Robots, Joints, JointParts, Parts,
+   Shares, Boards, Sensors, SensorElements, MagnetGrades, Constants, Sources).
+2. **One copy of the code:** the builder's machinery (blocks, rows, the sheets, the G1's weighed joint, the grades, the
+   shared constants) in one module both builders use; each builder holds only its type's robots. Type 1's own rows do
+   not change: the file its builder writes equals today's, cell for cell (a test).
+3. **02 draws each type the same way:** type 1's code (its checks, its draws, its composition, its pages) made one for
+   every type with a parts file, its type a parameter, no copy. Type 1's draws do not change: the same seed gives the
+   same draws before and after (a test, in a sandbox, few draws).
+4. **What E6.8 adds to the code:** the joints' masses from the refit (in type 2's builder; type 1 keeps its own, agreed
+   in E5.12); the Fourier robots' Ethernet line, a cable of its own number of conductors and gauge (02 reads them from
+   its row); the GR-1's one or two cameras as two versions, each as often (as the Booster K1's); the rest exists in
+   type 1 (hands as joints, as the X1's grippers; titanium; the coolers; the XT30 pairs).
+5. **01 checks type 2's file as type 1's** (checks 18, 19, 22), every fault naming the type and the sheet.
+6. **Settings (00):** one parts file per type; `output.robot_types_with_pages` (1, 2), its comment: "a type comes back
+   here when its steps begin".
+7. **Tests first;** a sandbox run with few draws; every check in VERIFICATION.md; METHODOLOGY, README, 01's overview,
+   this handover in the same step. Then his runs: both builders, 01, 02.
+8. **Left behind** (listed with proof that nothing reads them; removed on his word only): type 1's file and outputs at
+   their present paths, if point Q1 moves them.
+
+**Four questions, each with a recommendation:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| Q1 | Where the files go ("separate by folder, not by prefix") | Each type in a folder of its own, named as `data/consolidated/`'s: `data/researched/1_compact_research_developer/parts_taken_apart.xlsx` and `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`; the builders `tools/1_compact_research_developer/make_parts_taken_apart.py` and the same for type 2; the shared machinery `tools/parts_taken_apart.py`; the outputs `data/parts_taken_apart/<n>_<name>/`, `figures/parts_taken_apart/<n>_<name>/`. Type 1's present file and outputs move (point 8) |
+| Q2 | Type 2 while only 5 of its 97 robots are taken apart | Stock-and-flow's type 2 (`data/consolidated/2_.../`) stays drawn from the workbook until every robot of type 2 with a mass has its own rows (five robots, three of them Unitree's, do not represent 97: his rule 8.2); batch 1 is drawn part by part into its own folder, with its pages, saying "5 of its 97 robots". The rule is general: a type's consolidated draws come from its parts once all its robots with a mass are taken apart |
+| Q3 | Type 2's aluminium and plastics: which element recipes | Type 2's own rows of `element_recipes.xlsx` ("Aluminium, robot type 2, Aluminum alloys", "Plastics, robot type 2, Engineering plastics"), already there (E1); the steels, titanium, copper, magnets and cells by the shared recipes, as type 1's |
+| Q4 | The register's sheet Type 2 for the 92 others | "not drawn: not yet taken apart", beside "not drawn: no mass stated"; 01 accepts it only for a type whose consolidated draws still come from the workbook (Q2) |
+
+## 2026-10-29, night: type 2 begun
 
 **His words:** "commit and push and then to typ 2", then "Yes, as proposed" to:
 - **A:** all register robots of type 2, each its own rows, in batches. Batch 1 is the five with the makers' model

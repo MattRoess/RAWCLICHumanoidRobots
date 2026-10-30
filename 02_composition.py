@@ -23,12 +23,13 @@ The workbook (`data.workbook`), the shared lists (`data.shared_lists`) and the e
 of 01 show (one copy of the code). And the settings `composition.draws`, `composition.seed` and the energy per kg of
 the NMC cells (`composition.nmc_wh_per_kg_min`, `_mode`, `_max`).
 
-The register (`data.register`): its sheet Robots, every known humanoid robot with its robot types, and its sheet
-Type 1, every robot of type 1 with what this run does with it (Matthias, 2026-10-29: "I want the all the know type 1
-robots are integrated and included in the run", "There has to be an excel sheet where all the robots of the different
-types are fully listed. For now it has to be just all for type 1."). Where the robots of the sheet Type 1 have rows of
-their own in the parts file (`data.parts_taken_apart`: all of them since 2026-10-29), type 1 is drawn over the robots
-of that sheet, each from its own rows; for it 02 also reads the sibling projects' files where they lie
+The register (`data.register`): its sheet Robots, every known humanoid robot with its robot types, and its sheets
+Type 1 and Type 2, every robot of the type with what this run does with it (Matthias, 2026-10-29: "I want the all the
+know type 1 robots are integrated and included in the run", "There has to be an excel sheet where all the robots of the
+different types are fully listed."). Where robots of a sheet Type n have rows of their own in their type's parts file
+(`data.parts_taken_apart` with the type's folder, data/researched/<n>_<name>/parts_taken_apart.xlsx: every robot of
+type 1 since 2026-10-29, five of type 2 since 2026-10-30, "Yes, build C"), the type is drawn part by part over them,
+each from its own rows; for it 02 also reads the sibling projects' files where they lie
 (RAWCLICVehicleElectronics' board metals and sensor elements, RAWCLICDataCenters' tantalum,
 RAWCLICVehicleTractionMotor's steels) and runs RAWCLICVehicleTractionMotor's own code in its own environment for the
 elements of the magnets.
@@ -63,13 +64,19 @@ HOW IT DRAWS (the same code for all six robot types, N = `composition.draws` tim
 Each robot type has random numbers of its own, from the seed and its number, so that it gives the same draws however
 many robot types are drawn. Nothing is normalised.
 
-HOW IT DRAWS ROBOT TYPE 1 (Matthias, 2026-10-28: "Yes in 02 it is all type 1 in.!"; 2026-10-29: "Yes, build it")
+HOW IT DRAWS A ROBOT TYPE TAKEN APART (type 1: Matthias, 2026-10-28, "Yes in 02 it is all type 1 in.!", 2026-10-29,
+"Yes, build it"; type 2: 2026-10-30, "Yes, build C", the same code)
 -----------------------------------------------------------------------------------------------------------
-  - Each draw is one of the robots of the register's sheet Type 1, all equally often; those without a stated mass
-    are not drawn (named on the notes page; the sheet says "not drawn"). A robot in several versions (the Booster K1,
-    5 Ah and 2 Ah) is one of them, each as often (a discrete state). Its mass: a triangle on its own mass in the parts
-    file (its sheet Constants); its parts: its own rows of the parts file, part by part, nothing scaled from another
-    robot.
+  - Each draw is one of the robots of the register's sheet Type n taken apart, all equally often; those without a
+    stated mass are not drawn (named on the notes page; the sheet says "not drawn"). A robot in several versions (the
+    Booster K1, 5 Ah and 2 Ah; the GR-1, one or two cameras) is one of them, each as often (a discrete state). Its
+    mass: a triangle on its own mass in the parts file (its sheet Constants); its parts: its own rows of the parts
+    file, part by part, nothing scaled from another robot. Each type has random numbers of its own, from the seed and
+    its number.
+  - Until every robot of a type with a mass is taken apart (type 2: 5 of its 97 robots so far), its draws for
+    stock-and-flow come from the workbook, as for a type none of whose robots is taken apart, and its robots taken
+    apart are drawn part by part on their own, with their pages (Q2); its sheet says "not drawn: not yet taken apart"
+    of the others (Q4).
   - The joints: each component of the G1's joint (sheet JointParts) drawn once in each draw for each joint size and
     shared by all the joints of that size; the large joint's the small one's grams times its factor. A joint whose
     module mass is given: its module mass drawn, its inside the G1's of its size times the module mass over the G1
@@ -78,9 +85,9 @@ HOW IT DRAWS ROBOT TYPE 1 (Matthias, 2026-10-28: "Yes in 02 it is all type 1 in.
     its joint modules one share of its mass, drawn, split among its joints by their fixed shares (EVIDENCE.md E5.17
     point 1). The G1's and G1+'s joints: as weighed.
   - A part of shares (sheet Shares): each share a triangle, the remainder 1 minus the others. Elements: aluminium and
-    plastics by type 1's recipes, the NMC cells by theirs with the energy per kg drawn; copper is copper; a part of
-    steel, titanium or a copper alloy by its grade (a recipe of the element recipes, or a steel of
-    RAWCLICVehicleTractionMotor's workbook read where it lies, each element a triangle, iron the remainder); a
+    plastics by the type's own recipes (RECIPE_FAMILY), the NMC cells by theirs with the energy per kg drawn; copper
+    is copper; a part of steel, titanium or a copper alloy by its grade (a recipe of the element recipes, or a steel
+    of RAWCLICVehicleTractionMotor's workbook read where it lies, each element a triangle, iron the remainder); a
     material or grade written 'A or B' is either, each as often, the same in every place of a draw; the magnets by
     the grade class drawn for their joint's heat group (sheet MagnetGrades), one draw of heat deciding for every joint
     how hot the robot is built for; boards: copper their mass times the copper share, gold, silver, palladium, tin and
@@ -90,7 +97,8 @@ HOW IT DRAWS ROBOT TYPE 1 (Matthias, 2026-10-28: "Yes in 02 it is all type 1 in.
     robot times its mass; its cells the energy over the cells' energy per kg; its housing the pack less its cells and
     its management board, the pack its stated mass or its energy over a pack's energy per kg (a pack lighter than its
     cells, the Asimov's: no housing). The shell, where no source weighs it: a share of the robot's mass. The cables:
-    their length times the four conductors' cross-sections times copper's density, and their insulation. The frame:
+    their length times their conductors' cross-sections (two for power and two for signals, or two for power and an
+    Ethernet line of eight: the Fourier robots of type 2) times copper's density, and their insulation. The frame:
     the robot's mass less every other part; where it falls below zero it is reported, not cut.
   - Its part groups and body regions: its ten kinds of part placed whole (KIND_PART_GROUP, KIND_BODY_REGION), kept so
     on his word (2026-10-29, "Yes, build them", point 5). A robot of two types is drawn in full in each (point 6).
@@ -108,24 +116,27 @@ reads; not in git):
         per material and per element: the mean, the median and the 95 % interval (2.5 % and 97.5 %), the share of
         draws below zero, and how much of each material is in the elements (point 11).
 
-For robot type 1 also, into `output.parts_dir` (`data/parts_taken_apart/`): robots.npy (the robot of the
-parts file each draw is, its mass, the robot of the register drawn), parts.npy, materials.npy, grades.npy,
-elements.npy and estimated.npy (every element in every kind of part, and its kg resting on masses labelled E), each
-with its columns in the .txt of the same name; register.txt (the robots of the register drawn) and summary.csv.
+For each robot type taken apart also, into `output.parts_dir`/<n>_<name>/ (`data/parts_taken_apart/<n>_<name>/`):
+robots.npy (the robot of the parts file each draw is, its mass, the robot of the register drawn), parts.npy,
+materials.npy, grades.npy, elements.npy and estimated.npy (every element in every kind of part, and its kg resting on
+masses labelled E), each with its columns in the .txt of the same name; register.txt (the robots of the register
+drawn) and summary.csv.
 
 Every robot type has the same columns of elements, all those any of them holds (0 where a robot type's materials hold
 none so far). Pages only of the robot types `output.robot_types_with_pages` names (Matthias, 2026-10-29: "Type 1
-only"); the draws of all six are written. Into `output.composition_figures_dir` (`figures/composition/`; not in git):
-for robot type 1 its notes (<n>_<name>_notes_<k>.png), its elements nine a page (<n>_<name>_elements_<k>.png) and its
+only"; types 1 and 2 since 2026-10-30); the draws of all six are written. Into `output.composition_figures_dir`
+(`figures/composition/`; not in git): for a robot type taken apart its notes (<n>_<name>_notes_<k>.png), its elements
+nine a page (<n>_<name>_elements_<k>.png) and its
 materials nine a page (<n>_<name>_materials_<k>.png: the steels by grade, the aluminium by alloy, the permanent magnets
 in all and by grade class; Matthias, 2026-10-29: "how much Copper and especially permanent magnets. The different
 steels and aluminum alyoys"), each as its total in one robot over the draws; for another robot type one page,
 <n>_<name>.png: its kg by material and its kg by element, each bar the mean with a line over 95 % of the draws (point
-14). Into `output.parts_figures_dir` (`figures/parts_taken_apart/`): robot type 1's two figures of where its critical
-elements sit, kind of part by kind of part (robot_type_1_elements_<k>.png, robot_type_1_overview_<k>.png; the stage 04
-until 2026-10-29, "Yes, into 02"), and sources/<material>.png, where copper, the magnets, each steel and each
-aluminium alloy sit, as RAWCLICDataCenters' "where the copper comes from". The draws behind the material pages are
-written with type 1's other tables: grades.npy, each material by grade, alloy or magnet class in every kind of part.
+14). Into `output.parts_figures_dir`/<n>_<name>/ (`figures/parts_taken_apart/<n>_<name>/`): a type taken apart its two
+figures of where its critical elements sit, kind of part by kind of part (robot_type_<n>_elements_<k>.png,
+robot_type_<n>_overview_<k>.png; type 1's the stage 04 until 2026-10-29, "Yes, into 02"), and sources/<material>.png,
+where copper, the magnets, each steel and each aluminium alloy sit, as RAWCLICDataCenters' "where the copper comes
+from". The draws behind the material pages are written with the type's other tables: grades.npy, each material by
+grade, alloy or magnet class in every kind of part.
 
 Where it sits: after 01_schemas.py. 03_comparison.py reads what it writes (after robot type 6).
 """
@@ -599,10 +610,10 @@ def write(c: Composition, folder: str) -> None:
 
 
 # ------------------------------------------------------------------------------------------------------
-# Robot type 1 over its robots, each part by part
+# A robot type over its robots, each part by part (type 1 since 2026-10-28, type 2 since 2026-10-30)
 # ------------------------------------------------------------------------------------------------------
 
-TYPE_ONE = 1   # the robot type of the workbook's Taxonomy whose robots the data file holds
+TYPE_ONE = 1   # robot type 1: its lowest mass (composition.type_one_lowest_kg) holds for it alone
 
 # The ten kinds of part of the figures with their names and colours, and the kind of a joint by the first word of its
 # name: 01's (one copy, drawn by 01's page of robot type 1 too).
@@ -632,21 +643,26 @@ DRIVER_BOARD = 'Driver board'
 # stated (the X1's, the N1's), split among them in the G1's weighed proportions at their modes. Aluminium and steel,
 # no copper or magnets; the housing alone was too small (below zero in 5.8 % of the large joints' draws, V57).
 STRUCTURE = ('Housing', 'Two end caps', 'Output flange', 'Two small bearings')
-# The recipes of type 1's aluminium and plastics: those its workbook rows of these families follow (sheet Rows of the
-# element recipes); and the recipe of the battery cells (the sheet Parts: "element_recipes.xlsx NMC cylindrical").
-RECIPE_FAMILY = {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering polymers'}
+# The recipes of a robot type's aluminium and plastics: those its workbook rows of these families follow (sheet Rows
+# of the element recipes): type 1's, and type 2's own (2026-10-30, "Yes, build C", Q3); and the recipe of the battery
+# cells (the sheet Parts: "element_recipes.xlsx NMC cylindrical").
+RECIPE_FAMILY = {1: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering polymers'},
+                 2: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering plastics'}}
 CELL_RECIPE = 'NMC cylindrical'
 COPPER, MAGNETS, CELL_MATERIAL, ELECTRONICS = 'Copper', 'Magnets (NdFeB)', 'Battery materials', 'Electronics'
 # The steel of the sibling's element workbook whose modes are a producer's typical values, the compound of the element
 # recipes that holds them (EVIDENCE.md E5.18: "304 ... modes Outokumpu's typical C 0.04, Cr 18.1, Ni 8.1"); every other
 # element of a sibling steel has the middle of its range as its mode (E), its remainder (iron) 1 minus the others.
 SIBLING_MODES = {'Type 304': 'Stainless steel 304'}
-# The materials of type 1 shown by their alloys on the material pages, through the recipes type 1's rows name (Matthias,
+# The materials shown by their alloys on the material pages, through the recipes the type's rows name (Matthias,
 # 2026-10-29: "The different steels and aluminum alyoys"); plastics are shown whole.
 ALLOYS = ('Aluminium',)
 
 # The quantities of the sheet Constants this stage uses, as the sheet writes them.
-ROBOT_MASS, CABLE_LENGTH = schemas.APART_ROBOT_CONSTANTS
+ROBOT_MASS, = schemas.APART_ROBOT_CONSTANTS
+# A robot's cables, by the conductors they hold: four (two for power, two for signals), or two for power and an Ethernet
+# line of eight (the Fourier robots of type 2, EVIDENCE.md E6.8 point 9).
+CABLE_FOUR, CABLE_ETHERNET, ETHERNET_CS = schemas.CABLE_FOUR, schemas.CABLE_ETHERNET, schemas.ETHERNET_CS
 VOLTAGE, CAPACITY = schemas.BATTERY_CONSTANTS
 JOINT_SHARE, ENERGY_PER_KG = schemas.JOINT_SHARE, schemas.ENERGY_PER_KG
 PACK_WH_PER_KG, SHELL_SHARE = schemas.PACK_WH_PER_KG, schemas.SHELL_SHARE
@@ -660,7 +676,7 @@ GLASS_RECIPE, EPOXY_RECIPE = schemas.BOARD_REST_RECIPES
 # The critical elements whose kilograms resting on estimates (E) are followed, for the overview figure (its hatching).
 TRACKED = {'Cu', 'Al', 'Ag', 'Au', 'Pd', 'Ta', 'Nd', 'Pr', 'Dy', 'Ga', 'In'}
 
-# What is written of robot type 1 part by part, in this order: each a file <name>.npy with its columns in
+# What is written of a robot type part by part, in this order: each a file <name>.npy with its columns in
 # <name>.txt.
 APART_TABLES = ('robots', 'parts', 'materials', 'grades', 'elements', 'estimated')
 
@@ -687,23 +703,26 @@ MAGNET_SCRIPT = '\n'.join([
 
 @dataclass
 class ApartInputs:
-    """Everything 02 reads for robot type 1, drawn part by part."""
+    """Everything 02 reads for one robot type, drawn part by part."""
 
     base: object          # Inputs: the workbook, the shared lists and the element recipes
-    apart: object         # schemas.PartsTakenApart: the robots of type 1, part by part
+    apart: object         # schemas.PartsTakenApart: the robots of the type, part by part
     pcb: dict             # car board category -> element -> (min, mode, max), mg per cm2 of board
     sensor_types: dict    # car sensor type -> element -> (min, mode, max), mg per unit
     tantalum: tuple       # kg of tantalum per kg of board: min, mode, max
     steels: dict          # the sibling's steels: grade -> ({element: (min, max)}, its remainder element)
-    robots: list          # the robots of the register's sheet Type 1 drawn (schemas.RegisterRobot), each with a mass
-    left_out: list        # the robots of the sheet Type 1 not drawn: no mass stated
+    robots: list          # the robots of the register's sheet Type n drawn (schemas.RegisterRobot): taken apart, a mass
+    left_out: list        # the robots of the sheet not drawn: no mass stated
+    robot_type: int = 1   # the robot type of the workbook's Taxonomy
+    later: list = None    # the robots of the sheet with a mass, not yet taken apart (its type then from the workbook)
+    listed: int = 0       # the robots of the sheet Type n, all of them
 
 
-def read_apart_inputs(params: Params, base: Inputs, register: list) -> ApartInputs:
-    """The parts file and the sibling projects' files, read with 01's functions, beside 02's inputs (`base`) and the
-    robots of the register's sheet Type 1 (`register`); those with a stated mass are drawn. Raises
-    schemas.WorkbookError when a file cannot be read."""
-    apart = schemas.read_parts_taken_apart(absolute(params.data.parts_taken_apart))
+def read_apart_inputs(params: Params, base: Inputs, register: list, category) -> ApartInputs:
+    """The parts file of the robot type of `category` and the sibling projects' files, read with 01's functions,
+    beside 02's inputs (`base`) and the robots of the register's sheet of that type (`register`); those taken apart in
+    the file with a stated mass are drawn. Raises schemas.WorkbookError when a file cannot be read."""
+    apart = schemas.read_parts_taken_apart(schemas.parts_path(params, category))
     triple = lambda row, keys: tuple(schemas.number(row.get(k)) for k in keys)  # noqa: E731
     pcb: dict = {}
     for row in schemas.sibling_rows(params.data.vehicle_pcb_composition, schemas.SIBLING_SHEETS[
@@ -727,9 +746,12 @@ def read_apart_inputs(params: Params, base: Inputs, register: list) -> ApartInpu
                      if schemas.text(r.get('Element')) == 'Ta']
     tantalum = triple(tantalum_rows[0], ('Min', 'Mode', 'Max')) if tantalum_rows else (None, None, None)
     steels = schemas.sibling_steels(params.data.traction_motor_steels)
-    of_type = [r for r in register if TYPE_ONE in r.types]
-    drawn = [r for r in of_type if None not in r.mass]
-    return ApartInputs(base, apart, pcb, sensor_types, tantalum, steels, drawn, [r for r in of_type if r not in drawn])
+    of_type = [r for r in register if category.number in r.types]
+    taken = [r for r in of_type if r.taken_apart and all(v in apart.robots for v in schemas.versions(r.taken_apart))]
+    drawn = [r for r in taken if None not in r.mass]
+    return ApartInputs(base, apart, pcb, sensor_types, tantalum, steels, drawn,
+                       [r for r in of_type if None in r.mass], category.number,
+                       [r for r in of_type if r not in taken and None not in r.mass], len(of_type))
 
 
 def weighed_boards(apart) -> list:
@@ -738,21 +760,33 @@ def weighed_boards(apart) -> list:
     return [b for b in apart.boards if b.kind in IN_THE_JOINTS and 'small' in b.name and None not in b.bounds]
 
 
-def check_parts(inputs: ApartInputs) -> list:
-    """The checks 02 adds to 01's for robot type 1: the small joint's driver board's area given, and the same wherever
-    given; every joint, part, board and sensor goes to a kind of part; every part computed in a way 02 knows; every
-    robot of type 1; the driver board a component of JointParts; the recipes it uses there; the tantalum row read."""
-    apart, faults = inputs.apart, []
-    on = 'parts_taken_apart.xlsx: '
+def driver_area(apart) -> tuple | None:
+    """The small joint's driver board's area, cm2 (min, mode, max): its weighed row of the sheet Boards where the
+    file holds the G1 (type 1's), else the shared number schemas.DRIVER_AREA (a file without the G1, type 2's); None
+    where neither is given."""
     weighed = weighed_boards(apart)
-    if not weighed or any(b.bounds != weighed[0].bounds for b in weighed):
+    if weighed:
+        return weighed[0].bounds
+    given = apart.constants.get(schemas.ALL_ROBOTS, {}).get(schemas.DRIVER_AREA)
+    return given[1] if given else None
+
+
+def check_parts(inputs: ApartInputs) -> list:
+    """The checks 02 adds to 01's for a robot type taken apart: the small joint's driver board's area given, and the
+    same wherever given; every joint, part, board and sensor goes to a kind of part; every part computed in a way 02
+    knows; every robot of the file's type; the driver board a component of JointParts; the recipes it uses there; the
+    tantalum row read."""
+    apart, faults, robot_type = inputs.apart, [], inputs.robot_type
+    on = apart.source + ': '
+    weighed = weighed_boards(apart)
+    if (not weighed and driver_area(apart) is None) or any(b.bounds != weighed[0].bounds for b in weighed):
         given = ', '.join(f'{b.robot} {b.bounds}' for b in weighed) or 'none'
         faults.append(Fault(on + 'Boards', 0, "the small joint's driver board needs its area, the same wherever it is "
-                                              f'given: {given}.'))
+                                              f"given (or '{schemas.DRIVER_AREA}' for all): {given}."))
     for robot in apart.robots.values():
-        if robot.type != TYPE_ONE:
+        if robot.type != robot_type:
             faults.append(Fault(on + 'Robots', robot.row, f'{robot.name} is of type {robot.type}; the robots of the '
-                                                          f'parts file are of type {TYPE_ONE} only.'))
+                                                          f'parts file are of type {robot_type} only.'))
     for j in apart.joints:
         if j.name.split()[0].lower() not in JOINT_KIND:
             faults.append(Fault(on + 'Joints', j.row, f"{j.robot}, {j.name}: no kind of the figures for a joint named "
@@ -769,9 +803,12 @@ def check_parts(inputs: ApartInputs) -> list:
         if needed not in {c.name for c in apart.joint_parts}:
             faults.append(Fault(on + 'JointParts', 0, f"no component '{needed}'."))
     rows = {(r.robot, r.family, r.shared): r.recipe for r in inputs.base.recipes.rows or []}
-    for shared, family in RECIPE_FAMILY.items():
-        if (TYPE_ONE, family, shared) not in rows:
-            faults.append(Fault('element_recipes.xlsx: Rows', 0, f"no recipe for type {TYPE_ONE}'s {shared} "
+    if robot_type not in RECIPE_FAMILY:
+        faults.append(Fault('element_recipes.xlsx: Rows', 0, f"02 names no recipes of type {robot_type}'s aluminium "
+                                                             'and plastics (RECIPE_FAMILY).'))
+    for shared, family in RECIPE_FAMILY.get(robot_type, {}).items():
+        if (robot_type, family, shared) not in rows:
+            faults.append(Fault('element_recipes.xlsx: Rows', 0, f"no recipe for type {robot_type}'s {shared} "
                                                                  f"('{family}')."))
     if None in inputs.tantalum:
         faults.append(Fault('data.data_center_element_composition', 0, 'no Ta row with min, mode and max.'))
@@ -779,8 +816,8 @@ def check_parts(inputs: ApartInputs) -> list:
 
 
 def apart_faults(inputs: ApartInputs, params: Params) -> list:
-    """The faults of robot type 1 part by part: 01's checks of the parts file (18 and 19), of the sibling files, of the
-    grades, and check_parts. (02's own and the register's are in all_faults.)"""
+    """The faults of a robot type part by part: 01's checks of its parts file (18 and 19), of the sibling files, of
+    the grades, and check_parts. (02's own and the register's are in all_faults.)"""
     base, apart = inputs.base, inputs.apart
     return (schemas.check_parts_taken_apart(apart, base.lists, params) + schemas.check_sibling_data(apart, params)
             + schemas.check_grades(apart, base.recipes, params) + check_parts(inputs))
@@ -823,7 +860,7 @@ def magnet_fractions(params: Params, classes: list, n: int) -> dict:
 
 @dataclass
 class Draws:
-    """Robot type 1, drawn N times, each draw one of its robots."""
+    """A robot type taken apart, drawn N times, each draw one of its robots."""
 
     n: int
     robots: list          # the robots of the parts file, in the order of its sheet Robots (a version each)
@@ -843,6 +880,9 @@ class Draws:
     register: list = None          # the register's robots drawn, '<number> <name>', in their order
     register_robot: np.ndarray = None   # the robot of the register of each draw, as its place in `register`
     on_estimates: dict = None      # what rests on estimates (E) -> the robots it does, for the notes page
+    robot_type: int = 1            # the robot type drawn
+    listed: int = 0                # the robots of its sheet Type n, all of them (those drawn and those not)
+    aluminium: str = ''            # its aluminium recipe in words, for the notes page
 
 
 class Shared:
@@ -887,7 +927,7 @@ class Shared:
         self.sensor = {(car_type, element): triangle(rng, *values, n)
                        for car_type in sorted({e[2] for e in apart.elements})
                        for element, values in inputs.sensor_types[car_type].items()}
-        # The recipes: type 1's aluminium and plastics; the NMC cells with their energy per kg drawn; the grades (a
+        # The recipes: the type's aluminium and plastics; the NMC cells with their energy per kg drawn; the grades (a
         # recipe of the element recipes, or a steel of the sibling's workbook), each drawn once and used wherever it
         # sits.
         settings = params.composition
@@ -895,7 +935,8 @@ class Shared:
                                   settings.nmc_wh_per_kg_max, n)
         self.recipes = RecipeDraws(inputs.base.recipes, rng, n)
         rows = {(r.robot, r.family, r.shared): r.recipe for r in inputs.base.recipes.rows or []}
-        self.recipe_name = {shared: rows[(TYPE_ONE, family, shared)] for shared, family in RECIPE_FAMILY.items()}
+        self.recipe_name = {shared: rows[(inputs.robot_type, family, shared)]
+                            for shared, family in RECIPE_FAMILY[inputs.robot_type].items()}
         self.recipe = {shared: self.recipes.elements(name) for shared, name in self.recipe_name.items()}
         self.recipe[COPPER] = {'Cu': np.ones(n)}
         self.cells = self.recipes.elements(CELL_RECIPE, self.wh_per_kg / settings.nmc_wh_per_kg_mode)
@@ -923,9 +964,8 @@ class Shared:
             self.magnet[group] = (names, fractions)
         # The driver board of each joint size: its area (cm2), the small joint's from the weighed row of the sheet
         # Boards, the large joint's the small one's times the same factor as its mass.
-        small = weighed_boards(apart)[0]
         board = next(c for c in apart.joint_parts if c.name == DRIVER_BOARD)
-        self.board_area = {'small': triangle(rng, *small.bounds, n)}
+        self.board_area = {'small': triangle(rng, *driver_area(apart), n)}
         self.board_area['large'] = self.board_area['small'] * self.joint['large'][DRIVER_BOARD] / (board.grams / 1000)
 
     def state(self, written: str) -> np.ndarray:
@@ -989,10 +1029,10 @@ class Robot:
     def material(self, part: str, kind: str, material: str, kg: np.ndarray, estimate: bool, heat_group: str = '',
                  grade: str = '') -> None:
         """kg of one material of a part in a kind, and the elements it holds: by its grade's recipe where it names one,
-        else by type 1's recipe, as copper, or as magnets of the grade class drawn for `heat_group`. A material or grade
-        written 'A or B' is either, drawn (Shared.state). A part of magnets outside the joints may name its grade
-        class, a part of battery cells follows the cells' recipe as the main pack (2026-10-29, "Yes, build them",
-        point 4). Electronics are added by board() and sensor()."""
+        else by the type's recipe, as copper, or as magnets of the grade class drawn for `heat_group`. A material or
+        grade written 'A or B' is either, drawn (Shared.state). A part of magnets outside the joints may name its grade
+        class, a part of battery cells follows the cells' recipe as the main pack (2026-10-29, "Yes, build them", point
+        4). Electronics are added by board() and sensor()."""
         for written, call in ((material, lambda m, k: self.material(part, kind, m, k, estimate, heat_group, grade)),
                               (grade, lambda g, k: self.material(part, kind, material, k, estimate, heat_group, g))):
             if schemas.OR in written:
@@ -1021,7 +1061,7 @@ class Robot:
         """The kg of a material by what it is, for the material pages (Matthias, 2026-10-29: "how much Copper and
         especially permanent magnets. The different steels and aluminum alyoys"): the magnets by the grade class drawn
         for their joint's heat; a material with a grade by the recipes the grade holds (the gear stage 2's steel as
-        20CrMnTi and GCr15); type 1's aluminium by its alloys; every other material whole ('')."""
+        20CrMnTi and GCr15); the type's aluminium by its alloys; every other material whole ('')."""
         s = self.shared
         if material == MAGNETS and grade:
             split = {grade: 1.0}
@@ -1092,14 +1132,15 @@ def triangles(rng: np.random.Generator, low: np.ndarray, mode: np.ndarray, high:
     return out
 
 
-def draw_type_one(inputs: ApartInputs, params: Params, magnets: dict) -> Draws:
-    """Robot type 1 over its robots of the register, drawn `composition.draws` times (HOW IT DRAWS ROBOT TYPE 1 in the
-    docstring at the top): each draw one of the register's robots of type 1, all equally often (Matthias, 2026-10-28:
-    "Do it for all the robots which are in type 1"); a robot in several versions (the Booster K1) one of them, each as
-    often (2026-10-29, decision B); its mass a triangle on its own mass in the parts file, its parts its own rows, part
-    by part (decision C: nothing scaled from another robot)."""
+def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict) -> Draws:
+    """A robot type over its robots of the register taken apart, drawn `composition.draws` times (HOW IT DRAWS A
+    ROBOT TYPE TAKEN APART in the docstring at the top): each draw one of the register's robots of the type taken
+    apart, all equally often (Matthias, 2026-10-28: "Do it for all the robots which are in type 1"); a robot in several
+    versions (the Booster K1, the GR-1) one of them, each as often (2026-10-29, decision B); its mass a triangle on its
+    own mass in the parts file, its parts its own rows, part by part (decision C: nothing scaled from another robot).
+    Its random numbers its own, from the seed and its type (type 1's as they were before type 2 came)."""
     apart, n = inputs.apart, params.composition.draws
-    rng = np.random.default_rng([params.composition.seed, TYPE_ONE])
+    rng = np.random.default_rng([params.composition.seed, inputs.robot_type])
     names = list(apart.robots)                                    # the robots of the parts file, a version each
     robots = inputs.robots
     which = rng.integers(len(robots), size=n)                     # each robot of the register as often
@@ -1128,7 +1169,27 @@ def draw_type_one(inputs: ApartInputs, params: Params, magnets: dict) -> Draws:
     d = assemble(n, names, robot, mass, done, apart, shared)
     d.register, d.register_robot = [f'{r.number} {r.name}' for r in robots], which
     d.on_estimates = on_estimates(apart, [v for r in robots for v in schemas.versions(r.taken_apart)])
+    d.robot_type, d.listed = inputs.robot_type, inputs.listed or len(robots)
+    d.aluminium = alloy_words(inputs.base.recipes, shared.recipe_name['Aluminium'])
     return d
+
+
+def alloy_words(recipes, name: str) -> str:
+    """A recipe of alloys in words, for the notes page: 'die-cast 0 to 40 %, of the wrought rest 7075 0 to 64 % and
+    6061' (type 1's aluminium): each item's share as its minimum to maximum, a remainder named last."""
+    items = [i for i in recipes.items if i.recipe == name]
+    share = lambda i: f'{100 * i.share[0]:g} to {100 * i.share[2]:g} %'   # noqa: E731
+    words = []
+    for top in (i for i in items if not i.within):
+        if not top.remainder:
+            words.append(f"{top.item.lower().replace(' ', '-')} {share(top)}")
+            continue
+        inner = [i for i in items if i.within == top.item]
+        rest = [i.item for i in inner if i.remainder]
+        words.append(f'of the {top.item.lower()} rest ' + ', '.join(f'{i.item} {share(i)}' for i in inner
+                                                                   if not i.remainder)
+                     + (f' and {rest[0]}' if rest else ''))
+    return ', '.join(words)
 
 
 def on_estimates(apart, drawn: list) -> dict:
@@ -1192,15 +1253,20 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             r.sensor(kind, units, e.count / in_robot * j.count, e.label.startswith('E'))
 
     # The parts: of one material or of shares, the cables from their length, the shell a share of the robot's mass.
-    # The battery follows below; the frame is added last, by draw_type_one().
+    # The battery follows below; the frame is added last, by draw_taken_apart().
     for p in apart.parts:
         if p.robot != name or p.kind in IN_THE_JOINTS or p.computed.startswith((PACK, CELLS, HOUSING, FRAME)):
             continue
         kind, estimate, column = KIND_OF[p.kind], p.label.startswith('E'), f'{name}: {p.name}'
         if p.computed.startswith(CABLES):
-            # Four conductors, two for power and two for signals: m × mm2 × g/cm3 is g.
-            mm2 = 2 * r.of(s.constant[POWER_CS]) + 2 * r.of(s.constant[SIGNAL_CS])
-            copper = triangle(rng, *constants[CABLE_LENGTH][1], n) * mm2 * r.of(s.constant[DENSITY]) / 1000
+            # Two conductors for power, and two for signals or an Ethernet line of eight (the robot's cable length says
+            # which): m × mm2 × g/cm3 is g.
+            if CABLE_ETHERNET in constants:
+                length, signals = constants[CABLE_ETHERNET][1], 8 * r.of(s.constant[ETHERNET_CS])
+            else:
+                length, signals = constants[CABLE_FOUR][1], 2 * r.of(s.constant[SIGNAL_CS])
+            mm2 = 2 * r.of(s.constant[POWER_CS]) + signals
+            copper = triangle(rng, *length, n) * mm2 * r.of(s.constant[DENSITY]) / 1000
             r.material(column, kind, COPPER, copper, estimate)
             r.material(column, kind, 'Plastics', copper * r.of(s.constant[INSULATION]), estimate)
             continue
@@ -1333,8 +1399,8 @@ def statistics(values: np.ndarray) -> list:
 
 
 def write_taken_apart(d: Draws, folder: str) -> None:
-    """Robot type 1 part by part, at every level, and its summary, into `folder` (WHAT IT WRITES in the
-    docstring at the top)."""
+    """A robot type part by part, at every level, and its summary, into `folder` (WHAT IT WRITES in the docstring at
+    the top)."""
     os.makedirs(folder, exist_ok=True)
     names = ', '.join(f'{k} {name}' for k, name in enumerate(d.robots))
     element_keys = [(kind, e) for kind in KINDS for e in element_order({e for k, e in d.elements if k == kind})]
@@ -1382,13 +1448,13 @@ def write_taken_apart(d: Draws, folder: str) -> None:
 
 
 # ------------------------------------------------------------------------------------------------------
-# Robot type 1 as 02 writes every robot type
+# A robot type taken apart as 02 writes every robot type
 # ------------------------------------------------------------------------------------------------------
 
-# The kinds of part of robot type 1 placed in the shared lists' part groups and body regions, so that its tables have
-# the columns of every other robot type (03 compares them): whole kinds, not part by part. Kept so (2026-10-29, "Yes,
-# build them", point 5): no repository reads these tables yet; rough where a kind holds parts of another group (the
-# head's joints in Sensors, the battery management board in Battery), as the notes page says.
+# The kinds of part of a robot type taken apart placed in the shared lists' part groups and body regions, so that its
+# tables have the columns of every other robot type (03 compares them): whole kinds, not part by part. Kept so
+# (2026-10-29, "Yes, build them", point 5): no repository reads these tables yet; rough where a kind holds parts of
+# another group (the head's joints in Sensors, the battery management board in Battery), as the notes page says.
 KIND_PART_GROUP = {'hips': 'Joint drives', 'knees': 'Joint drives', 'ankles': 'Joint drives', 'waist': 'Joint drives',
                    'arms': 'Joint drives', 'battery': 'Battery', 'boards': 'Computer', 'head': 'Sensors',
                    'cables': 'Cables', 'frame': 'Frame'}
@@ -1397,11 +1463,10 @@ KIND_BODY_REGION = {'hips': 'Legs', 'knees': 'Legs', 'ankles': 'Legs', 'waist': 
                     'frame': 'Whole body'}
 
 
-def compose_type_one(category, d: Draws, lists) -> Composition:
-    """Robot type 1 as 02 writes every robot type, from its draws over its robots: its materials (Not allocated 0, as
-    the frame takes the rest), its elements, its part groups and body
-    regions (its kinds placed by KIND_PART_GROUP and KIND_BODY_REGION), its total; and the kilograms of each material
-    whose elements are drawn."""
+def compose_taken_apart(category, d: Draws, lists) -> Composition:
+    """A robot type taken apart as 02 writes every robot type, from its draws over its robots: its materials (Not
+    allocated 0, as the frame takes the rest), its elements, its part groups and body regions (its kinds placed by
+    KIND_PART_GROUP and KIND_BODY_REGION), its total; and the kilograms of each material whose elements are drawn."""
     n, materials = d.n, lists.names[schemas.MATERIAL]
     columns, draws = d.materials
     kg_of = {name: np.zeros(n) for name in materials}
@@ -1424,8 +1489,8 @@ def compose_type_one(category, d: Draws, lists) -> Composition:
               'part_groups': (group_names, stack(group_names, groups, n)),
               'body_regions': (region_names, stack(region_names, regions, n)),
               'total': (['Total'], d.mass[:, None])}
-    return Composition(TYPE_ONE, folder_name(category), category.name, tables, stack(materials, followed, n), None,
-                       None)
+    return Composition(category.number, folder_name(category), category.name, tables, stack(materials, followed, n),
+                       None, None)
 
 
 def same_elements(drawn: list) -> None:
@@ -1620,7 +1685,8 @@ def draw_page(c: Composition, draws: int, path: str, params: Params) -> None:
 
 
 # ------------------------------------------------------------------------------------------------------
-# The pages of robot type 1: each element as its total in one robot
+# The pages of a robot type taken apart (type 1's since 2026-10-29, type 2's since 2026-10-30): each element as its
+# total in one robot
 # ------------------------------------------------------------------------------------------------------
 # Matthias, 2026-10-28: "I want to see the overall information on the element as total. Show me the distributions",
 # "Do it for all the robots which are in type 1. Do the code and the figure!!", on the preview "Yes, code it in 02",
@@ -1628,18 +1694,18 @@ def draw_page(c: Composition, draws: int, path: str, params: Params) -> None:
 # screen's shape, 16 × 9 inches, text 14 points and up (about 23 pixels fit to a 1920 × 1080 screen), as approved for
 # 04's pages ("Pages right"): a page of notes first, then the elements, nine a page.
 
-TYPE_ONE_PAGE = (16, 9)
-TYPE_ONE_TEXT, TYPE_ONE_LABEL, TYPE_ONE_TITLE, TYPE_ONE_HEADING = 14, 15, 16, 20   # points
-TYPE_ONE_ACROSS, TYPE_ONE_DOWN = 3, 3           # element panels on a page
-TYPE_ONE_BINS = 70                              # the bars of a distribution, as in RAWCLICDataCenters' figures
-TYPE_ONE_BAR = '#4477AA'                        # Paul Tol's bright blue, as published
-TYPE_ONE_INK = '#222222'                        # lines and numbers
-TYPE_ONE_NOTE_WIDTH = 140                       # characters in a line of a notes page
+APART_PAGE = (16, 9)
+APART_TEXT, APART_LABEL, APART_TITLE, APART_HEADING = 14, 15, 16, 20   # points
+APART_ACROSS, APART_DOWN = 3, 3           # element panels on a page
+APART_BINS = 70                              # the bars of a distribution, as in RAWCLICDataCenters' figures
+APART_BAR = '#4477AA'                        # Paul Tol's bright blue, as published
+APART_INK = '#222222'                        # lines and numbers
+APART_NOTE_WIDTH = 140                       # characters in a line of a notes page
 # The lines of a notes page, its blank lines counted: from the top of its text (0.83 of the page's height from the
 # foot) to 0.35 inches above the foot, one line of 14-point text at a spacing of 1.3 taking 0.269 inches, as measured;
 # tests/test_parts_taken_apart.py fails where a text runs off its page.
 NOTES_LINES = 26
-# The elements of robot type 1's other materials (boards, sensors, magnets) in plain words, beside those of the recipes.
+# The elements of the other materials (boards, sensors, magnets) in plain words, beside those of the recipes.
 ELEMENT_NAMES.update({'Ag': 'Silver', 'As': 'Arsenic', 'Au': 'Gold', 'Br': 'Bromine', 'Dy': 'Dysprosium',
                       'Ga': 'Gallium', 'In': 'Indium', 'Nb': 'Niobium', 'Nd': 'Neodymium', 'Pd': 'Palladium',
                       'Pr': 'Praseodymium', 'Ta': 'Tantalum', 'Tb': 'Terbium', 'W': 'Tungsten'})
@@ -1681,37 +1747,45 @@ def element_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
         kg = kg[kg > 0]
     per, unit = panel_unit(kg)
     values = kg / per
-    axes.set_title(title, fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
-    counts, edges = np.histogram(values, bins=TYPE_ONE_BINS)
-    axes.bar(edges[:-1], counts / values.size, width=np.diff(edges), align='edge', color=TYPE_ONE_BAR,
+    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    counts, edges = np.histogram(values, bins=APART_BINS)
+    axes.bar(edges[:-1], counts / values.size, width=np.diff(edges), align='edge', color=APART_BAR,
              edgecolor='none')
     median, mean = float(np.median(values)), float(values.mean())
-    axes.axvline(median, color=TYPE_ONE_INK, linewidth=1.8)
-    axes.axvline(mean, color=TYPE_ONE_INK, linewidth=1.8, linestyle=':')
+    axes.axvline(median, color=APART_INK, linewidth=1.8)
+    axes.axvline(mean, color=APART_INK, linewidth=1.8, linestyle=':')
     for bound in np.percentile(values, [2.5, 97.5]):
-        axes.axvline(bound, color=TYPE_ONE_INK, linewidth=1.2, linestyle='--')
+        axes.axvline(bound, color=APART_INK, linewidth=1.2, linestyle='--')
     # The bars up to about nine tenths of the panel (Matthias, 2026-10-28: "can you better adust the hight. we loose
     # quite a bit of space. Not full but much better"); the two numbers in the title line, right.
     axes.set_ylim(0, (counts / values.size).max() * 1.1)
     numbers = f'median {panel_number(median)}\u00a0{unit}\nmean {panel_number(mean)}\u00a0{unit}'
-    axes.set_title(f'{held_in}\n{numbers}' if held_in else numbers, loc='right', fontsize=TYPE_ONE_TEXT,
-                   color=TYPE_ONE_INK)
+    axes.set_title(f'{held_in}\n{numbers}' if held_in else numbers, loc='right', fontsize=APART_TEXT,
+                   color=APART_INK)
     axes.xaxis.set_major_locator(plt.MaxNLocator(5))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.yaxis.set_major_locator(plt.MaxNLocator(3))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(panel_number))
-    axes.tick_params(labelsize=TYPE_ONE_TEXT)
-    axes.set_xlabel(f'mass in one robot ({unit})', fontsize=TYPE_ONE_LABEL)
+    axes.tick_params(labelsize=APART_TEXT)
+    axes.set_xlabel(f'mass in one robot ({unit})', fontsize=APART_LABEL)
     if first_in_row:
-        axes.set_ylabel('share of draws', fontsize=TYPE_ONE_LABEL)
+        axes.set_ylabel('share of draws', fontsize=APART_LABEL)
     axes.grid(axis='x', alpha=0.3)
     for side in ('top', 'right'):
         axes.spines[side].set_visible(False)
 
 
-def type_one_notes(c: Composition, d: Draws, left_out: list, params: Params) -> list:
+def lead(d: Draws) -> str:
+    """The first words of a page's title: 'Robot type 1, all its 31 robots', or, while not all of a type's robots
+    are taken apart, 'Robot type 2, 5 of its 97 robots'."""
+    drawn, listed = len(d.register), max(d.listed, len(d.register))
+    return f'Robot type {d.robot_type}, ' + (f'all its {drawn} robots' if drawn >= listed else
+                                             f'{drawn} of its {listed} robots')
+
+
+def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None) -> list:
     """The notes page's paragraphs: how to read the element pages, what is drawn, what is not yet, what is not
-    shown."""
+    shown; `later` the robots of the type not yet taken apart (its draws for stock-and-flow then from the workbook)."""
     rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
     missing = [f"{name} (median {panel_number(rows[name]['Median (kg)'])} kg, mean "
                f"{panel_number(rows[name]['Mean (kg)'])} kg)" for name in rows
@@ -1724,22 +1798,26 @@ def type_one_notes(c: Composition, d: Draws, left_out: list, params: Params) -> 
         '(95 % of the draws between them). Each panel on its own scale and unit (kg, g, mg). An element or material '
         '0 in some draws: its panel shows the draws that hold it and says in what share of all the draws it is held; '
         'one held in fewer than 2.5 % of the draws has no panel.',
-        f"The draws: {d.n:,}, each one robot of type 1 in the register, each of its {len(d.register)} robots "
-        'drawn equally often (a robot in two versions, each as often); its mass a triangle on its own mass, its '
-        'parts its own, part by part (the parts file, from its sources).',
+        f"The draws: {d.n:,}, each one robot of type {d.robot_type} in the register, each of its {len(d.register)} "
+        'robots taken apart drawn equally often (a robot in two versions, each as often); its mass a triangle on its '
+        'own mass, its parts its own, part by part (the parts file, from its sources).',
+        (f'Not yet taken apart: {len(later)} of its {d.listed} robots of the register; until all are, robot type '
+         f'{d.robot_type} for stock-and-flow is drawn from the workbook, and these pages show the {len(d.register)} '
+         'taken apart.') if later else '',
         'The robots drawn: ' + '; '.join(d.register) + '. A robot of two robot types is drawn in full in each of them.',
         ('Resting most on estimates: ' + '; '.join(estimates) + '.') if estimates else '',
-        'Not drawn: ' + ('; '.join(f'{r.number} {r.name} (no mass stated)' for r in left_out) or 'none') +
-        '. A robot lighter than 15 kg is not of robot type 1.',
+        'Not drawn: ' + ('; '.join(f'{r.number} {r.name} (no mass stated)' for r in left_out) or 'none') + '.' +
+        (f' A robot lighter than {params.composition.type_one_lowest_kg:g} kg is not of robot type 1.'
+         if d.robot_type == TYPE_ONE else ''),
         'Not yet in the elements: ' + (', '.join(missing) + '; their elements are missing from the pages.'
                                        if missing else 'none.') +
         (f" In part: {', '.join(partly)} (its elements less than its mass)." if partly else ''),
         not_shown_note(params),
-        "The tables by part group and by body region (for stock-and-flow): type 1's ten kinds of part, each placed "
+        "The tables by part group and by body region (for stock-and-flow): the type's ten kinds of part, each placed "
         "whole; rough where a kind holds parts of another group: the head's joints are counted as sensors, the battery "
         'management board as battery.',
         'The material pages: each material in one robot, drawn as the elements; the steels by their grade, the '
-        "aluminium by its alloys (type 1's recipe: die-cast 0 to 40 %, of the wrought rest 7075 0 to 64 % and 6061), "
+        f"aluminium by its alloys (the type's recipe: {d.aluminium}), "
         "the permanent magnets in all and by the grade class each joint's heat draws. Copper is the metal of windings, "
         'wires, cables, busbars, contacts and heat pipes; the copper of the boards is in the electronics. Where '
         'copper, the magnets, each steel and each aluminium alloy sit: one row per kind of part, its draws as a violin '
@@ -1750,11 +1828,11 @@ def type_one_notes(c: Composition, d: Draws, left_out: list, params: Params) -> 
 
 def notes_pages(prefix: str, title: str, paragraphs: list) -> list:
     """The notes, as (file name, figure): `<prefix>_notes_<k>.png`, its title and its paragraphs, each wrapped at
-    TYPE_ONE_NOTE_WIDTH characters, as many to a page as fit within NOTES_LINES lines, a paragraph never split, on as
+    APART_NOTE_WIDTH characters, as many to a page as fit within NOTES_LINES lines, a paragraph never split, on as
     many pages as they need, '(k of n)' where more than one (Matthias's rule: the notes once, on pages of their own).
-    Type 1's element and material pages have their notes, its figures of where the critical elements sit theirs."""
+    A type's element and material pages have their notes, its figures of where the critical elements sit theirs."""
     pages, page, lines = [], [], 0
-    for paragraph in (textwrap.fill(p, TYPE_ONE_NOTE_WIDTH) for p in paragraphs):
+    for paragraph in (textwrap.fill(p, APART_NOTE_WIDTH) for p in paragraphs):
         tall = paragraph.count('\n') + 1 + (1 if page else 0)   # its lines, and the blank line before it
         if page and lines + tall > NOTES_LINES:
             pages.append(page)
@@ -1764,44 +1842,45 @@ def notes_pages(prefix: str, title: str, paragraphs: list) -> list:
     pages.append(page)
     out = []
     for k, page in enumerate(pages, 1):
-        figure = plt.figure(figsize=TYPE_ONE_PAGE)
+        figure = plt.figure(figsize=APART_PAGE)
         figure.text(0.04, 0.93, title + (f' ({k} of {len(pages)})' if len(pages) > 1 else ''),
-                    fontsize=TYPE_ONE_HEADING, va='top')
-        figure.text(0.04, 0.83, '\n\n'.join(page), fontsize=TYPE_ONE_TEXT, va='top', color=TYPE_ONE_INK,
+                    fontsize=APART_HEADING, va='top')
+        figure.text(0.04, 0.83, '\n\n'.join(page), fontsize=APART_TEXT, va='top', color=APART_INK,
                     linespacing=1.3)
         out.append((f'{prefix}_notes_{k}.png', figure))
     return out
 
 
-def type_one_pages(c: Composition, d: Draws, left_out: list, params: Params) -> list:
-    """Robot type 1's pages, as (file name, figure): the notes pages, then the elements nine a page, each element it
+def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None) -> list:
+    """A robot type's pages, as (file name, figure): the notes pages, then the elements nine a page, each element it
     holds but those not shown (`composition.elements_not_shown`), then its materials nine a page."""
     names = shown_elements(c.tables['elements'][0], params)
     shown = [e for e in names if held(c.column('elements', e))]   # in at least HELD_SHARE of the draws, as a material
-    per_page = TYPE_ONE_ACROSS * TYPE_ONE_DOWN
+    per_page = APART_ACROSS * APART_DOWN
     pages = [shown[k:k + per_page] for k in range(0, len(shown), per_page)]
-    out = notes_pages(c.name, f'Robot type 1, {c.title}: how to read its element and material pages',
-                      type_one_notes(c, d, left_out, params))
+    out = notes_pages(c.name, f'Robot type {d.robot_type}, {c.title}: how to read its element and material pages',
+                      taken_apart_notes(c, d, left_out, params, later))
     for p, page in enumerate(pages, 1):
-        figure, axes = plt.subplots(TYPE_ONE_DOWN, TYPE_ONE_ACROSS, figsize=TYPE_ONE_PAGE, squeeze=False)
+        figure, axes = plt.subplots(APART_DOWN, APART_ACROSS, figsize=APART_PAGE, squeeze=False)
         for k, symbol in enumerate(page):
-            element_panel(axes[k // TYPE_ONE_ACROSS, k % TYPE_ONE_ACROSS], c.column('elements', symbol),
+            element_panel(axes[k // APART_ACROSS, k % APART_ACROSS], c.column('elements', symbol),
                           element_label(symbol),
-                          k % TYPE_ONE_ACROSS == 0)
+                          k % APART_ACROSS == 0)
         for spare in axes.flatten()[len(page):]:
             spare.axis('off')
-        figure.suptitle(f'Robot type 1, all its {len(d.register)} robots: each element in one robot ({p} of '
-                        f'{len(pages)})', fontsize=TYPE_ONE_HEADING, y=0.985)
+        figure.suptitle(f'{lead(d)}: each element in one robot ({p} of {len(pages)})', fontsize=APART_HEADING,
+                        y=0.985)
         figure.tight_layout(rect=(0, 0, 1, 0.955), h_pad=0.4, w_pad=2.5)
         out.append((f'{c.name}_elements_{p}.png', figure))
     return out + material_pages(c, d)
 
 
-def draw_type_one_pages(c: Composition, d: Draws, left_out: list, folder: str, params: Params) -> list:
-    """Robot type 1's pages into `folder`; returns their file names."""
+def draw_taken_apart_pages(c: Composition, d: Draws, left_out: list, folder: str, params: Params,
+                           later: list | None = None) -> list:
+    """A robot type's pages into `folder`; returns their file names."""
     os.makedirs(folder, exist_ok=True)
     written = []
-    for name, figure in type_one_pages(c, d, left_out, params):
+    for name, figure in taken_apart_pages(c, d, left_out, params, later):
         figure.savefig(os.path.join(folder, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
         written.append(name)
@@ -1809,7 +1888,7 @@ def draw_type_one_pages(c: Composition, d: Draws, left_out: list, folder: str, p
 
 
 # ------------------------------------------------------------------------------------------------------
-# Robot type 1's two figures of where its critical elements sit (until 2026-10-29 the stage 04)
+# A robot type's two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04)
 # ------------------------------------------------------------------------------------------------------
 # Matthias, 2026-10-27, on the element figure: "Yes, the element figure is right now" (V49), and on the overview: "Looks
 # good to me"; 2026-10-29: "Yes, into 02" (04's two figures drawn by 02 from the draws it holds, 04 removed). The code
@@ -1822,7 +1901,7 @@ FIGURE_ELEMENTS = [('Cu', 'Copper'), ('Al', 'Aluminium'), ('Ag', 'Silver'), ('Au
 HELD_SHARE = 0.025    # a kind of part holding an element in fewer draws than this is not drawn (the 95 % rule)
 
 # The pages (Matthias, 2026-10-28: "Have the overview on several pages. I can not read it. too smal, you should notice
-# this before you sjhow me. Elements is an edge case. Also quite small"): TYPE_ONE_PAGE, no text below TYPE_ONE_TEXT
+# this before you sjhow me. Elements is an edge case. Also quite small"): APART_PAGE, no text below APART_TEXT
 # points; fit to a 1920 × 1080 screen the smallest text is about 23 pixels tall (tests/test_parts_taken_apart.py
 # requires 18 at least). No footnote under a page: the notes are once, on a page of their own, the first of the folder
 # (Matthias, 2026-10-29: "parts taken apart show each a long legend, you know, what I think about this").
@@ -1837,8 +1916,13 @@ OVERVIEW_COLUMNS = (1.01, 1.18, 1.35)
 NUMBER_COLUMNS = (1.02, 1.20)
 ELEMENT_PAGES = [FIGURE_ELEMENTS[:6], FIGURE_ELEMENTS[6:]]                                # three panels across
 OVERVIEW_PAGES = [FIGURE_ELEMENTS[k:k + 2] for k in range(0, len(FIGURE_ELEMENTS), 2)]    # two elements a page
-PARTS_FIGURES = tuple([f'robot_type_1_elements_{k}.png' for k in range(1, len(ELEMENT_PAGES) + 1)]
-                + [f'robot_type_1_overview_{k}.png' for k in range(1, len(OVERVIEW_PAGES) + 1)])
+
+
+def parts_figures(robot_type: int) -> tuple:
+    """The file names of a robot type's two figures, page by page: robot_type_<n>_elements_<k>.png, then
+    robot_type_<n>_overview_<k>.png."""
+    return tuple([f'robot_type_{robot_type}_elements_{k}.png' for k in range(1, len(ELEMENT_PAGES) + 1)]
+                 + [f'robot_type_{robot_type}_overview_{k}.png' for k in range(1, len(OVERVIEW_PAGES) + 1)])
 
 # Where each kind sits on the robot, its mark and the kinds whose colour takes white text: 01's (one copy).
 MARKS, DARK = schemas.MARKS, schemas.DARK
@@ -1869,8 +1953,9 @@ def held(values: np.ndarray) -> bool:
 
 def robots_note(d: Draws) -> str:
     """What every draw is, for the notes page of the figures of where the critical elements sit."""
-    return (f'{d.n:,} draws, each one of the {len(d.register)} robots of type 1 in the register, each as often (a '
-            'robot in two versions, each as often); each robot from its own parts, part by part.')
+    return (f'{d.n:,} draws, each one of the {len(d.register)} robots of type {d.robot_type} in the register taken '
+            'apart, each as often (a robot in two versions, each as often); each robot from its own parts, part by '
+            'part.')
 
 
 def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
@@ -1881,10 +1966,10 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
     boths"; his answer "Both, median first"); the 2.5th and 97.5th percentile dashed; its own scale and unit. Where the
     element is 0 in some draws (a robot or a version without it), the draws that hold it, and in what share of all the
     draws it is held, right of the title, as on the element pages (element_panel)."""
-    axes.set_title(title, fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     if not kinds:
-        axes.text(0.5, 0.5, 'none in robot type 1', transform=axes.transAxes, ha='center', va='center',
-                  fontsize=TYPE_ONE_TEXT)
+        axes.text(0.5, 0.5, 'none in these robots', transform=axes.transAxes, ha='center', va='center',
+                  fontsize=APART_TEXT)
         axes.set_xticks([])
         axes.set_yticks([])
         return
@@ -1892,13 +1977,13 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
     drawn = [k for k in kinds if held(kinds[k])]   # the kinds holding it in at least HELD_SHARE of all the draws
     inside = total > 0
     if not inside.all():
-        axes.set_title(f'in {panel_number(100 * inside.mean())} % of the draws', loc='right', fontsize=TYPE_ONE_TEXT,
-                       color=TYPE_ONE_INK)
+        axes.set_title(f'in {panel_number(100 * inside.mean())} % of the draws', loc='right', fontsize=APART_TEXT,
+                       color=APART_INK)
         kinds = {k: v[inside] for k, v in kinds.items()}
         total = total[inside]
     per, unit = panel_unit(total)
     values = total / per
-    edges = np.histogram_bin_edges(values, bins=TYPE_ONE_BINS)
+    edges = np.histogram_bin_edges(values, bins=APART_BINS)
     index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)   # the bar each draw falls into
     share_of_draws = np.bincount(index, minlength=len(edges) - 1) / values.size
     kg_all = np.bincount(index, weights=total, minlength=len(edges) - 1)
@@ -1910,22 +1995,22 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
                  edgecolor='none')
         bottom += height
     median, mean = float(np.median(values)), float(values.mean())
-    axes.axvline(median, color=TYPE_ONE_INK, linewidth=1.8)
-    axes.axvline(mean, color=TYPE_ONE_INK, linewidth=1.8, linestyle=':')
+    axes.axvline(median, color=APART_INK, linewidth=1.8)
+    axes.axvline(mean, color=APART_INK, linewidth=1.8, linestyle=':')
     for bound in np.percentile(values, [2.5, 97.5]):
-        axes.axvline(bound, color=TYPE_ONE_INK, linewidth=1.2, linestyle='--')
+        axes.axvline(bound, color=APART_INK, linewidth=1.2, linestyle='--')
     for x, y, what in ((median, 0.97, 'median'), (mean, 0.82, 'mean')):
         axes.text(x, y, f' {what} {panel_number(x)} {unit}', transform=axes.get_xaxis_transform(), ha='left',
-                  va='top', fontsize=TYPE_ONE_TEXT, color=TYPE_ONE_INK,
+                  va='top', fontsize=APART_TEXT, color=APART_INK,
                   bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1))
     axes.xaxis.set_major_locator(plt.MaxNLocator(4))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.yaxis.set_major_locator(plt.MaxNLocator(4))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(panel_number))
-    axes.tick_params(labelsize=TYPE_ONE_TEXT)
-    axes.set_xlabel(f'mass ({unit})', fontsize=TYPE_ONE_LABEL)
+    axes.tick_params(labelsize=APART_TEXT)
+    axes.set_xlabel(f'mass ({unit})', fontsize=APART_LABEL)
     if share_label:
-        axes.set_ylabel('share of the draws', fontsize=TYPE_ONE_LABEL)
+        axes.set_ylabel('share of the draws', fontsize=APART_LABEL)
     axes.grid(axis='x', alpha=0.3)
 
 
@@ -1933,17 +2018,17 @@ def element_page(d: Draws, page: list, number: int):
     """One page of the element figure Matthias approved (V49), for the three robots: its elements three across, each
     the stacked distribution of the robot's total; the legend of the kinds of part at the top."""
     columns = 3
-    figure, axes = plt.subplots(2, columns, figsize=TYPE_ONE_PAGE, squeeze=False)
+    figure, axes = plt.subplots(2, columns, figsize=APART_PAGE, squeeze=False)
     for k, (symbol, name) in enumerate(page):
         stacked_panel(axes[k // columns, k % columns], by_kind(d, symbol),
                       textwrap.fill(f'{name} ({symbol})', FIGURE_TITLE_WIDTH), k % columns == 0)
     for spare in axes.flatten()[len(page):]:
         spare.axis('off')
-    figure.suptitle(f'Robot type 1, all its {len(d.register)} robots: critical elements in one robot ({number} of '
-                    f'{len(ELEMENT_PAGES)})', fontsize=TYPE_ONE_HEADING, y=0.985)
+    figure.suptitle(f'{lead(d)}: critical elements in one robot ({number} of {len(ELEMENT_PAGES)})',
+                    fontsize=APART_HEADING, y=0.985)
     handles = [Patch(color=colour, label=label) for label, colour in KINDS.values()]
     figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=5, frameon=False,
-                  fontsize=TYPE_ONE_TEXT)
+                  fontsize=APART_TEXT)
     figure.tight_layout(rect=(0, 0.01, 1, 0.86))
     return figure
 
@@ -1957,10 +2042,10 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     overview's rows as the element panels: a kind of part holding it in only some draws showed a median of 0); one
     scale and unit for the panel."""
     shown = [k for k in KINDS if k in kinds and held(kinds[k])]
-    axes.set_title(title, fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     if not shown:
-        axes.text(0.5, 0.5, 'none in robot type 1', transform=axes.transAxes, ha='center', va='center',
-                  fontsize=TYPE_ONE_TEXT)
+        axes.text(0.5, 0.5, 'none in these robots', transform=axes.transAxes, ha='center', va='center',
+                  fontsize=APART_TEXT)
         axes.axis('off')
         return
     per, unit = panel_unit(sum(kinds[k] for k in shown))
@@ -1974,30 +2059,30 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         heights = 0.8 * counts / max(counts.max(), 1)
         hatched = float(estimated[kind].mean()) > 0.5 * float(kinds[kind].mean())
         axes.bar(edges[:-1], heights, width=np.diff(edges), align='edge', bottom=row + 0.05, color=KINDS[kind][1],
-                 edgecolor=TYPE_ONE_INK if hatched else 'none', linewidth=0, hatch='///' if hatched else None)
+                 edgecolor=APART_INK if hatched else 'none', linewidth=0, hatch='///' if hatched else None)
         median, mean = float(np.median(values)), float(values.mean())
-        axes.plot([median, median], [row + 0.05, row + 0.9], color=TYPE_ONE_INK, linewidth=1.8)
-        axes.plot([mean, mean], [row + 0.05, row + 0.9], color=TYPE_ONE_INK, linewidth=1.8, linestyle=':')
+        axes.plot([median, median], [row + 0.05, row + 0.9], color=APART_INK, linewidth=1.8)
+        axes.plot([mean, mean], [row + 0.05, row + 0.9], color=APART_INK, linewidth=1.8, linestyle=':')
         for bound in np.percentile(values, [2.5, 97.5]):
-            axes.plot([bound, bound], [row + 0.05, row + 0.9], color=TYPE_ONE_INK, linewidth=1.2, linestyle='--')
+            axes.plot([bound, bound], [row + 0.05, row + 0.9], color=APART_INK, linewidth=1.2, linestyle='--')
         share = holding[kind].size / kinds[kind].size
         for column, number in zip(OVERVIEW_COLUMNS, (panel_number(median), panel_number(mean),
                                                      f'{panel_number(100 * share)} %')):
-            axes.text(column, row + 0.45, number, transform=right, ha='left', va='center', fontsize=TYPE_ONE_TEXT,
-                      color=TYPE_ONE_INK)
+            axes.text(column, row + 0.45, number, transform=right, ha='left', va='center', fontsize=APART_TEXT,
+                      color=APART_INK)
     for column, what in zip(OVERVIEW_COLUMNS, ('median', 'mean', 'held in')):
-        axes.text(column, len(shown) + 0.1, what, transform=right, ha='left', va='bottom', fontsize=TYPE_ONE_TEXT,
-                  color=TYPE_ONE_INK)
-    axes.set_title(f'{title}, in {unit}', fontsize=TYPE_ONE_TITLE, fontweight='bold', loc='left')
+        axes.text(column, len(shown) + 0.1, what, transform=right, ha='left', va='bottom', fontsize=APART_TEXT,
+                  color=APART_INK)
+    axes.set_title(f'{title}, in {unit}', fontsize=APART_TITLE, fontweight='bold', loc='left')
     axes.set_ylim(0, len(shown))
     axes.set_yticks([row + 0.45 for row in range(len(shown))])
-    axes.set_yticklabels([f'{MARKS[k]}  {KINDS[k][0]}' for k in reversed(shown)], fontsize=TYPE_ONE_TEXT)
+    axes.set_yticklabels([f'{MARKS[k]}  {KINDS[k][0]}' for k in reversed(shown)], fontsize=APART_TEXT)
     axes.tick_params(axis='y', length=0)
     axes.set_xlim(0, edges[-1])
     axes.xaxis.set_major_locator(plt.MaxNLocator(6))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
-    axes.tick_params(axis='x', labelsize=TYPE_ONE_TEXT)
-    axes.set_xlabel(f'mass ({unit})', fontsize=TYPE_ONE_LABEL)
+    axes.tick_params(axis='x', labelsize=APART_TEXT)
+    axes.set_xlabel(f'mass ({unit})', fontsize=APART_LABEL)
     axes.grid(axis='x', alpha=0.3)
     for side in ('top', 'right'):
         axes.spines[side].set_visible(False)
@@ -2006,14 +2091,14 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
 def draw_schema(axes, d: Draws) -> None:
     """The robot of the overview: 01's robot with its kinds of part (draw_kinds), the joints whose magnets are for
     150 °C or more in most draws ringed red."""
-    schemas.draw_kinds(axes, d.hot, TYPE_ONE_TEXT)
+    schemas.draw_kinds(axes, d.hot, APART_TEXT)
 
 
 def overview_page(d: Draws, page: list, number: int):
     """One page of the overview Matthias approved ("Looks good to me", 2026-10-27), for three robots (answer E,
     "Groups, histograms"): left the robot with its joint groups numbered and its other kinds lettered; right two
     critical elements, one above the other, one row per kind of part holding them."""
-    figure = plt.figure(figsize=TYPE_ONE_PAGE)
+    figure = plt.figure(figsize=APART_PAGE)
     figure.add_axes((0.01, 0.04, 0.22, 0.85))
     draw_schema(figure.axes[0], d)
     panels = [(symbol, name, by_kind(d, symbol)) for symbol, name in page]
@@ -2026,8 +2111,8 @@ def overview_page(d: Draws, page: list, number: int):
         estimated = {kind: sum((d.estimated[(kind, e)] for e in symbol.split('+') if (kind, e) in d.estimated),
                                np.zeros(d.n)) for kind in kinds}
         ridge_panel(figure.add_axes((0.43, y, PANEL_WIDTH, tall)), kinds, estimated, f'{name} ({symbol})')
-    figure.suptitle('Robot type 1 taken apart: where the critical materials sit, and how sure we are '
-                    f'({number} of {len(OVERVIEW_PAGES)})', fontsize=TYPE_ONE_HEADING, y=0.975)
+    figure.suptitle(f'Robot type {d.robot_type} taken apart: where the critical materials sit, and how sure we are '
+                    f'({number} of {len(OVERVIEW_PAGES)})', fontsize=APART_HEADING, y=0.975)
     return figure
 
 
@@ -2054,23 +2139,22 @@ def parts_notes(d: Draws) -> list:
 
 def parts_figure_pages(d: Draws) -> list:
     """Every page of both figures, as (file name, figure): their notes pages first, then the figures in the order of
-    PARTS_FIGURES."""
+    parts_figures()."""
     pages = [element_page(d, page, k + 1) for k, page in enumerate(ELEMENT_PAGES)]
     pages += [overview_page(d, page, k + 1) for k, page in enumerate(OVERVIEW_PAGES)]
-    return notes_pages('robot_type_1', f'Robot type 1, all its {len(d.register)} robots: how to read the pages of '
-                       'where its critical elements sit', parts_notes(d)) + list(zip(PARTS_FIGURES, pages))
+    return notes_pages(f'robot_type_{d.robot_type}', f'{lead(d)}: how to read the pages of where its critical '
+                       'elements sit', parts_notes(d)) + list(zip(parts_figures(d.robot_type), pages))
 
 
-def draw_parts_figures(d: Draws, params: Params) -> None:
-    """Every page of both figures, and the figures of where each material sits (sources_pages), into
-    `output.parts_figures_dir`."""
-    folder = absolute(params.output.parts_figures_dir)
+def draw_parts_figures(d: Draws, params: Params, folder: str) -> None:
+    """Every page of both figures, and the figures of where each material sits (sources_pages), into `folder` (the
+    type's folder in `output.parts_figures_dir`)."""
     for name, figure in parts_figure_pages(d) + sources_pages(d):
         save_figure(figure, os.path.join(folder, name), params.output.dpi)
 
 
 # ------------------------------------------------------------------------------------------------------
-# Robot type 1's material pages, as RAWCLICDataCenters draws its materials
+# A robot type's material pages, as RAWCLICDataCenters draws its materials
 # ------------------------------------------------------------------------------------------------------
 # Matthias, 2026-10-29: "There are only figures on the element level I want to see, how much Copper and especially
 # permanent magnets. The different steels and aluminum alyoys. We had this differently in datacenters", then "Yes, 1 to
@@ -2128,7 +2212,7 @@ def material_panels(d: Draws) -> list:
 
 
 def material_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
-    """One material in one robot over the draws, drawn as an element of type 1's element pages (element_panel, also
+    """One material in one robot over the draws, drawn as an element of the element pages (element_panel, also
     where the material is 0 in some draws), its title wrapped."""
     element_panel(axes, kg, textwrap.fill(title, FIGURE_TITLE_WIDTH), first_in_row)
 
@@ -2137,18 +2221,18 @@ def material_pages(c: Composition, d: Draws) -> list:
     """Type 1's material pages, as (file name, figure): its materials nine a page, each the histogram of its kg in one
     robot over the draws."""
     panels = material_panels(d)
-    per_page = TYPE_ONE_ACROSS * TYPE_ONE_DOWN
+    per_page = APART_ACROSS * APART_DOWN
     pages = [panels[k:k + per_page] for k in range(0, len(panels), per_page)]
     out = []
     for p, page in enumerate(pages, 1):
-        figure, axes = plt.subplots(TYPE_ONE_DOWN, TYPE_ONE_ACROSS, figsize=TYPE_ONE_PAGE, squeeze=False)
+        figure, axes = plt.subplots(APART_DOWN, APART_ACROSS, figsize=APART_PAGE, squeeze=False)
         for k, (title, _, _, kinds) in enumerate(page):
-            material_panel(axes[k // TYPE_ONE_ACROSS, k % TYPE_ONE_ACROSS], sum(kinds.values()), title,
-                           k % TYPE_ONE_ACROSS == 0)
+            material_panel(axes[k // APART_ACROSS, k % APART_ACROSS], sum(kinds.values()), title,
+                           k % APART_ACROSS == 0)
         for spare in axes.flatten()[len(page):]:
             spare.axis('off')
-        figure.suptitle(f'Robot type 1, all its {len(d.register)} robots: each material in one robot ({p} of '
-                        f'{len(pages)})', fontsize=TYPE_ONE_HEADING, y=0.985)
+        figure.suptitle(f'{lead(d)}: each material in one robot ({p} of {len(pages)})', fontsize=APART_HEADING,
+                        y=0.985)
         figure.tight_layout(rect=(0, 0, 1, 0.955), h_pad=0.4, w_pad=2.5)
         out.append((f'{c.name}_materials_{p}.png', figure))
     return out
@@ -2162,12 +2246,12 @@ def log_mass(log_kg: float, _pos=None) -> str:
 
 
 def sources_figure(title: str, kinds: dict, d: Draws):
-    """Where one material sits in robot type 1, as RAWCLICDataCenters' "where the copper comes from": one row per kind
+    """Where one material sits in a robot type, as RAWCLICDataCenters' "where the copper comes from": one row per kind
     of part holding it (in at least 2.5 % of the draws), the largest median on top; each the violin of its kg over the
     draws above 0 on a logarithmic axis, the median a filled dot and the mean an open one, the 95 % interval a line
     (from the left edge where it starts at 0), the median and the mean written at the right."""
     shown = sorted((k for k in kinds if held(kinds[k])), key=lambda k: float(np.median(kinds[k])))
-    figure = plt.figure(figsize=TYPE_ONE_PAGE)
+    figure = plt.figure(figsize=APART_PAGE)
     axes = figure.add_axes((0.22, 0.12, 0.6, 0.76))
     lows = [np.log10(kinds[k][kinds[k] > 0]).min() for k in shown]
     highs = [np.log10(kinds[k][kinds[k] > 0]).max() for k in shown]
@@ -2184,31 +2268,31 @@ def sources_figure(title: str, kinds: dict, d: Draws):
             body.set_alpha(0.6)
         low, high = np.percentile(values, [2.5, 97.5])
         median, mean = float(np.median(values)), float(values.mean())
-        axes.plot([np.log10(low) if low > 0 else left, np.log10(high)], [row, row], color=TYPE_ONE_INK, linewidth=1.6)
+        axes.plot([np.log10(low) if low > 0 else left, np.log10(high)], [row, row], color=APART_INK, linewidth=1.6)
         if median > 0:
-            axes.plot(np.log10(median), row, 'o', color=TYPE_ONE_INK, markersize=8)
-        axes.plot(np.log10(mean), row, 'o', markerfacecolor='white', markeredgecolor=TYPE_ONE_INK, markersize=8)
+            axes.plot(np.log10(median), row, 'o', color=APART_INK, markersize=8)
+        axes.plot(np.log10(mean), row, 'o', markerfacecolor='white', markeredgecolor=APART_INK, markersize=8)
         for column, x in zip(NUMBER_COLUMNS, (median, mean)):
             per, unit = panel_unit(np.array([x]))
             axes.text(column, row, f'{panel_number(x / per)} {unit}', transform=numbers, ha='left', va='center',
-                      fontsize=TYPE_ONE_TEXT, color=TYPE_ONE_INK)
+                      fontsize=APART_TEXT, color=APART_INK)
     for column, what in zip(NUMBER_COLUMNS, ('median', 'mean')):
-        axes.text(column, len(shown) - 0.4, what, transform=numbers, ha='left', va='bottom', fontsize=TYPE_ONE_TEXT,
-                  color=TYPE_ONE_INK)
+        axes.text(column, len(shown) - 0.4, what, transform=numbers, ha='left', va='bottom', fontsize=APART_TEXT,
+                  color=APART_INK)
     axes.set_yticks(range(len(shown)))
-    axes.set_yticklabels([KINDS[k][0] for k in shown], fontsize=TYPE_ONE_TEXT)
+    axes.set_yticklabels([KINDS[k][0] for k in shown], fontsize=APART_TEXT)
     axes.set_ylim(-0.6, len(shown) - 0.4)
     axes.set_xlim(left, right)
     axes.xaxis.set_major_locator(plt.MultipleLocator(1))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(log_mass))
-    axes.tick_params(axis='x', labelsize=TYPE_ONE_TEXT)
+    axes.tick_params(axis='x', labelsize=APART_TEXT)
     axes.tick_params(axis='y', length=0)
-    axes.set_xlabel('mass in one robot (logarithmic axis)', fontsize=TYPE_ONE_LABEL)
+    axes.set_xlabel('mass in one robot (logarithmic axis)', fontsize=APART_LABEL)
     axes.grid(axis='x', alpha=0.3)
     for side in ('top', 'right'):
         axes.spines[side].set_visible(False)
-    figure.suptitle(f'Robot type 1, all its {len(d.register)} robots: where its {title[0].lower()}{title[1:]} sits',
-                    fontsize=TYPE_ONE_HEADING, y=0.96)
+    figure.suptitle(f'{lead(d)}: where its {title[0].lower()}{title[1:]} sits',
+                    fontsize=APART_HEADING, y=0.96)
     return figure
 
 
@@ -2228,19 +2312,22 @@ def run(params: Params) -> int:
     written, 1 when a fault stopped it (nothing written)."""
     try:
         inputs = read_inputs(params)
-        register = schemas.read_register(absolute(params.data.register))
-        # Robot type 1's robots: those of the register's sheet Type 1, checked below against its sheet Robots. Type 1 is
-        # drawn part by part where its robots have rows in the parts file.
-        type_one = schemas.read_type_sheet(absolute(params.data.register), TYPE_ONE)
-        apart = read_apart_inputs(params, inputs, type_one) if any(r.taken_apart for r in type_one) else None
+        path = absolute(params.data.register)
+        register = schemas.read_register(path)
+        # Each robot type of the register's sheets "Type n": its robots, checked below against its sheet Robots; a
+        # type some of whose robots are taken apart is drawn part by part from its parts file, each robot from its own
+        # rows (Matthias, 2026-10-30, "Yes, build C").
+        sheets = {n: schemas.read_type_sheet(path, n) for n in schemas.type_sheet_numbers(path)}
+        aparts = {c.number: read_apart_inputs(params, inputs, sheets[c.number], c) for c in inputs.book.categories
+                  if c.number in sheets and any(r.taken_apart for r in sheets[c.number])}
     except schemas.WorkbookError as error:
         print(error, file=sys.stderr)
         return 1
-    faults = (all_faults(inputs, params)
-              + schemas.check_register(register, params, list(apart.apart.robots) if apart else [])
-              + schemas.check_type_sheet(register, type_one, TYPE_ONE, params))
-    if apart is not None:
-        faults += apart_faults(apart, params)
+    named = {n: list(a.apart.robots) for n, a in aparts.items()}
+    faults = (all_faults(inputs, params) + schemas.check_register(register, params, named)
+              + schemas.check_type_sheets(path, register, params, named))
+    for a in aparts.values():
+        faults += apart_faults(a, params)
     if faults:
         print(f'{len(faults)} fault(s) in the inputs; nothing is drawn. 01_schemas.py shows them on faults.png.',
               file=sys.stderr)
@@ -2248,12 +2335,17 @@ def run(params: Params) -> int:
             print(f"  sheet '{fault.sheet}', row {fault.row}: {fault.text}", file=sys.stderr)
         return 1
 
-    drawn, taken = [], None
+    # Each robot type: part by part where its robots are taken apart; its draws for stock-and-flow from its parts once
+    # every robot of it with a mass is taken apart, from the workbook until then (Q2), its part by part draws then on
+    # their own, with their pages.
+    drawn, taken = [], {}
     for category in inputs.book.categories:
-        if apart is not None and category.number == TYPE_ONE:
-            magnets = magnet_fractions(params, grade_classes(apart), params.composition.draws)
-            taken = draw_type_one(apart, params, magnets)
-            drawn.append(compose_type_one(category, taken, inputs.lists))
+        a = aparts.get(category.number)
+        if a is not None:
+            magnets = magnet_fractions(params, grade_classes(a), params.composition.draws)
+            taken[category.number] = draw_taken_apart(a, params, magnets)
+        if a is not None and not a.later:
+            drawn.append(compose_taken_apart(category, taken[category.number], inputs.lists))
         else:
             drawn.append(compose(category, inputs, params))
     same_elements(drawn)
@@ -2266,12 +2358,16 @@ def run(params: Params) -> int:
 
     out, pages = absolute(params.output.composition_dir), absolute(params.output.composition_figures_dir)
     print(f'{params.composition.draws:,} draws per robot type, seed {params.composition.seed}.')
-    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"
+    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"; type 2 since 2026-10-30
     for c in drawn:
         write(c, os.path.join(out, c.name))
-        # Its draws are written for every robot type; its pages only where the setting names it.
-        if c.number in with_pages and taken is not None and c.number == TYPE_ONE:
-            draw_type_one_pages(c, taken, apart.left_out, pages, params)
+        # Its draws are written for every robot type; its pages only where the setting names it: a type taken apart
+        # its pages of its robots part by part, another its page of the workbook.
+        if c.number in with_pages and c.number in taken:
+            shown = c if not aparts[c.number].later else compose_taken_apart(
+                next(k for k in inputs.book.categories if k.number == c.number), taken[c.number], inputs.lists)
+            draw_taken_apart_pages(shown, taken[c.number], aparts[c.number].left_out, pages, params,
+                                   aparts[c.number].later)
         elif c.number in with_pages:
             draw_page(c, params.composition.draws, os.path.join(pages, c.name + '.png'), params)
         rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
@@ -2282,24 +2378,30 @@ def run(params: Params) -> int:
               f"{stats['97.5 % (kg)']:.1f}); Not allocated below zero in "
               f"{rows[NOT_ALLOCATED]['Draws below zero (%)']:.1f} % of the draws; not yet in the elements: "
               f"{', '.join(missing) or 'none'}.")
-    if taken is not None:
-        write_taken_apart(taken, absolute(params.output.parts_dir))
-        print(f"  Robot type 1 drawn over {len(taken.register)} robots of the register's sheet Type 1; not drawn (no "
-              f'mass stated): '
-              f"{', '.join(f'{r.number} {r.name}' for r in apart.left_out) or 'none'}.")
-        for column, share in below_zero(taken).items():
+    for category in inputs.book.categories:
+        if category.number not in taken:
+            continue
+        d, a, folder = taken[category.number], aparts[category.number], folder_name(category)
+        write_taken_apart(d, os.path.join(absolute(params.output.parts_dir), folder))
+        print(f"  Robot type {d.robot_type} drawn part by part over {len(d.register)} robots of the register's sheet "
+              f"Type {d.robot_type}; not drawn (no mass stated): "
+              f"{', '.join(f'{r.number} {r.name}' for r in a.left_out) or 'none'}"
+              + (f'; not yet taken apart: {len(a.later)}, so its draws for stock-and-flow are from the workbook.'
+                 if a.later else '.'))
+        for column, share in below_zero(d).items():
             if share > 0:
                 print(f'  {column} is below zero in {100 * share:.1f} % of its draws (reported, not cut).')
-        print(f'  Robot type 1 part by part written into {params.output.parts_dir}/.')
-        if TYPE_ONE in with_pages:
-            draw_parts_figures(taken, params)
+        print(f'  Robot type {d.robot_type} part by part written into {params.output.parts_dir}/{folder}/.')
+        if d.robot_type in with_pages:
+            draw_parts_figures(d, params, os.path.join(absolute(params.output.parts_figures_dir), folder))
             for symbol, name in FIGURE_ELEMENTS:
-                total = sum(by_kind(taken, symbol).values())
+                total = sum(by_kind(d, symbol).values())
                 per, unit = panel_unit(total)
                 mean, median, low, high = statistics(total / per)
                 print(f'  {name} in one robot: median {panel_number(median)} {unit}, mean {panel_number(mean)} {unit} '
                       f'(95 %: {panel_number(low)} to {panel_number(high)})')
-            print(f'  Its two figures and where each material sits drawn into {params.output.parts_figures_dir}/.')
+            print(f'  Its two figures and where each material sits drawn into {params.output.parts_figures_dir}/'
+                  f'{folder}/.')
     print(f'Written into {params.output.composition_dir}/, one folder per robot type, and the pages into '
           f'{params.output.composition_figures_dir}/.')
     return 0

@@ -5,6 +5,95 @@ by Claude, newest first.
 
 ## 2026-10-29
 
+### V85. 01's pages of type 2 as type 1's; the H1-2's joint modules labelled E
+
+- **His words:** "Why the hell do thw 01 figures of type 2 look like this the 1 look much better", then "Yes, as type
+  1's". The cause, mine: `output.robot_types_with_pages` (1, 2) (point 6 of C) made 01 draw type 2 with its former
+  pages of the workbook's anchor robot, the only pages it had for a type other than 1; I had not said so.
+- **Tests first** (failed, then passed): 01 draws for type 2 its robots' table and where its kinds of part sit, named
+  and titled for type 2 ("Robot type 2: 5 of its 97 robots taken apart so far, each drawn from its own parts"),
+  readable fit to a screen (18 px at least), no text over another or off the page, no project words; the former pages
+  only for a type with no parts file. Type 1's pages: the same functions, its titles as before.
+- **Looked at:** both pages drawn from his files of 04:41 (type 2's parts file, the register). The table first put
+  the H1-2 under "Joints whose masses are stated": I had labelled its large joint modules "S, E" for its two M107
+  knees, though 25 of its 27 joints' masses come from their torques. Labelled E now (the knees' M107 still in its
+  joints' rows and sources); drawn again, all five under "from their torques", and 02's notes page lists the H1-2
+  among the robots resting most on estimates. A test holds it.
+- **Left behind** (removed on his word only): `figures/schemas/categories/2_full_scale_general_purpose_ai_research.png`,
+  `…_robot.png`, `…_shared_lists.png`, of his 01 run at 04:42; no longer drawn.
+- **Not covered:** his runs of type 2's builder, 01 and 02 with the change.
+
+### V84. C built: a parts file and builder per type, 02 drawing each type the same way, type 2's batch 1 entered
+
+- **On his words:** "Yes, build C" (HANDOVER.md, the specification of C, points 1 to 8, with Q1 to Q4); "All 97 first"
+  (Q2 kept: type 2's draws for stock-and-flow from the workbook until all its robots are taken apart).
+- **His runs read back first:** 01 at 03:24 and 03:31:48, the register builder at 03:31:40 (`figures/schemas/`,
+  `humanoid_register.xlsx`); 01 found no fault; then all 316 tests passed.
+- **Type 1 unchanged, proved, not assumed:**
+  - the builder split into `tools/parts_taken_apart.py` and `tools/1_compact_research_developer/
+    make_parts_taken_apart.py` (moved by git): the file it writes equals the file the old builder wrote this morning,
+    every sheet, every row, every column width (12 sheets, 0 differing);
+  - 02 before and after, the same sandbox run (2,000 draws, seed 1, the real inputs and the register on disk): all 84
+    draw arrays identical (`data/consolidated/` of all six types, type 1 part by part). The two `summary.csv` differ in
+    the 16th digit for H and B; the new code run twice with two hash seeds differs in the same way: the order Python
+    adds a set of kinds, not the change (seen before it, not changed).
+- **Type 2 entered** (EVIDENCE E6.9): its file passes every check of 01 (0 faults); at the modes its joints weigh H2
+  31.32, H2 Plus 32.97 (with hands), H1-2 28.30, GR-2 23.11, GR-1 19.18 kg. E6.8's table had 31.1 kg for the H2, computed
+  with the power unrounded (0.5656); the builder follows the agreed formula (0.566).
+- **Type 2 drawn in the sandbox** (2,000 draws, the register as the new builder writes it, in the scratch folder): five
+  robots drawn part by part, the Xialan S0 not drawn (no mass), 91 not yet taken apart, its draws for stock-and-flow the
+  workbook's (identical to before); no frame or battery housing below zero; copper 3.9 kg, Nd+Pr 0.51 kg, Dy 96 g, 66
+  kg a robot at the mean. Its pages looked at: the notes page (1 of 2), the elements page 1 ("Robot type 2, 5 of its 97
+  robots"), the overview page 4 (the head holds magnets in 80 % of the draws: the H1-2 has no head joints).
+- **Found while building, and done within C:** type 2's file had no area for the small joint's driver board (type 1's
+  is the G1's weighed board, in type 1's file only): one shared constant now, the G1's row the same values; the
+  encoder's elements are written by the shared robot rows (type 1's file unchanged: it held them already).
+- **Tests:** 323; all pass but `test_what_it_writes_equals_the_register_on_disk` (his run of the register builder); 7
+  skipped where the files at the new paths are not yet on disk. New: the type 2 builder (its robots, the refit, the
+  M107, the hands, the batteries, the cables, the GR-1's versions, the screws and titanium, the board area), 02's type 2
+  (its robots and those not yet taken apart, each as often, its recipes, its cables' copper by hand), 01's sheets (a
+  type partly taken apart, a robot taken apart that no sheet lists). These were written after the code, not before it;
+  each was checked against a deliberate fault: the Ethernet line drawn as two signal conductors fails the hand test.
+- **By hand, at the modes:** the GR-2's cables 14 m × (2 × 0.82 + 8 × 0.205) mm² × 8.96 g/cm³ = 411.4432 g and 62
+  mated XT30 × 2.12 g × 0.35 × 0.62 = 28.52248 g, 439.96568 g, as 02 draws; my first figure, 411.4592 g, was my slip
+  in the multiplication. The H2's 238.336 + 28.52248 = 266.85848 g.
+- **01's overview with both types, drawn from the sandbox files and looked at:** the box "The robot types part by part"
+  ran into the next box; its text shortened to three lines, drawn again, it fits. The test that checks the overview
+  with the real files is skipped until the files at the new paths are on disk, so it did not catch this.
+- **Not covered:** his runs (00, both builders, the register builder, 01, 02); type 2's pages at 200,000 draws.
+
+### V83. The proposal for batch 1 of type 2 (EVIDENCE E6.8): its numbers recomputed
+
+- **The fit:** least squares of log mass on log torque over the 12 makers' actuators with a stated mass (E2.8e's 3,
+  E5.11's 8 with the QC060 and QC080 at the middle of their two stated masses, the M107; the RMM8463-2E's bound left
+  out): mass = 0.0689 kg × torque^0.5656. Each stated mass against it: 0.794 (Q25H) to 1.330 (DM-J10010L-2EC), the
+  M107 0.987. Type 1's fit gives 1.622 kg at 360 N·m, this one 1.925.
+- **Checked on what the fit did not use:** the G1's weighed joints, small 0.525 kg against 0.426 to 0.515 kg at 25 to
+  35 N·m, large 1.1 kg against 0.868 to 1.124 kg at 88 to 139 N·m.
+- **The H1-2's arm torques:** its page's "Peak: About 21Kg" at its "685mm" arm: 21 × 9.81 × 0.685 = 141 N·m at the
+  shoulder, near the page's 120 N·m, three times the model's 40 N·m.
+- **At the modes, by hand:** actuators H2 31.08 kg (8 × 1.9 kg M107-class and the fit), H1-2 28.27, GR-2 22.19, GR-1
+  18.28 kg; battery packs 972 / 164 = 5.93, 864 / 164 = 5.27, 950 / 164 = 5.79, 483 / 164 = 2.95 kg; shells 11.5 % of
+  70, 71.65, 63, 52 kg; the frames' remainders about 22, 22, 26, 25 and 22 kg (H2, H2 Plus, H1-2, GR-2, GR-1), none
+  below zero; the small parts (cables, connectors, boards, sensors, coolers) about 1 kg each, rounded.
+- **Read for it:** Fourier's GR-1 page (support-old.fftai.com, its hands, the ASUS PN64 computer, the 46 V power and
+  Ethernet line, one or two depth cameras); Fourier's hand models, 0.443 kg each (the left and the right).
+- **Not covered:** nothing is entered or run; the run's own draws will differ from these modes.
+
+### V82. 2026-10-30, morning: what is on disk, and the large joints' sources
+
+- **His runs:** `data/researched/humanoid_register.xlsx` 2026-10-29 11:53:41, `figures/schemas/overview_1.png`
+  16:39:07, `data/parts_taken_apart/summary.csv` 16:39:39; nothing in `data/` or `figures/` newer than 17:00. The
+  register builder and 01 have not been run since the sheet Type 2 (`7515d13`, 17:07:47).
+- **Committed and pushed:** `git status` clean, `main` = `origin/main` = `7515d13`.
+- **Claude's scratch folder** is empty: yesterday's downloads and the backup of `element_recipes.xlsx` from before the
+  440C rows are gone.
+- **The large joints' sources** (EVIDENCE E6.7): each torque per kg recomputed from the stated torque and mass (M107
+  360 / 1.9 = 189.5; J100-116P 315 / 2.93 = 107.5, as its maker's figure; Huayan 459 / 5.8 = 79.1 and 204 / 2.53 =
+  80.6). Read in the built-in browser: Unitree's H1 page, Huayan's page, EngineAI's T800 page; Deep Robotics' page
+  answered 404.
+- **Not covered:** his runs; nothing was entered or run.
+
 ### V81. His run of 16:38 read back; the register's sheet Type 2 and the check of every type's sheet
 
 - **Times, against the code's:** the builder 16:38:57, 01 16:39:07 to 16:39:08, 02 16:39:30 to 16:39:52; the code of

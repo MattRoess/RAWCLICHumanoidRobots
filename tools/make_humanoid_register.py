@@ -73,14 +73,18 @@ ABOUT = [
     'stated mass +- 1 kg (as the X1\'s and N1\'s own masses, EVIDENCE.md E2.8e) or the stated range; empty where no '
     'mass is stated.',
     'Mass of the PrimeBOT Q1: no source states one; the estimate (E) agreed on 2026-10-29 (EVIDENCE.md E5.17).',
-    'Taken apart as: the rows of data/researched/parts_taken_apart.xlsx that are this robot, for every robot of type 1; '
-    'a robot in several versions names each, separated by "; ", each drawn as often (the Booster K1\'s two batteries).',
+    'Taken apart as: the rows of its type\'s parts file (data/researched/<n>_<name>/parts_taken_apart.xlsx) that are '
+    'this robot, for every robot of type 1 and the robots of type 2 taken apart so far; a robot in several versions '
+    'names each, separated by "; ", each drawn as often (the Booster K1\'s two batteries, the GR-1\'s one or two '
+    'cameras).',
     None,
     'Sheet Type 1: every robot of the sheet Robots whose types include 1 (leading or second), with every cell of its '
     'row there, and "In the run": what 02_composition.py does with it, "drawn: its own parts". 02 draws robot type 1 '
     'over the robots of this sheet, each as often.',
-    'Sheet Type 2: every robot whose types include 2, as the sheet Type 1; none of them taken apart yet, so 02 draws '
-    'robot type 2 from the workbook, "In the run" says so of each (2026-10-29).',
+    'Sheet Type 2: every robot whose types include 2, as the sheet Type 1. Five taken apart so far (2026-10-30, "Yes, '
+    'build C"), each "drawn: its own parts", part by part on its own; the others "not drawn: not yet taken apart" or '
+    '"not drawn: no mass stated"; robot type 2 for stock-and-flow drawn from the workbook until every robot of it with '
+    'a mass is taken apart.',
 ]
 
 # --- The sheets of robot types --------------------------------------------------------------------------------------
@@ -88,10 +92,13 @@ ABOUT = [
 # be just all for type 1"; then for type 2, "Yes, as proposed" (type 2 as type 1, step 5).
 TYPES_LISTED = (1, 2)
 TYPE_SHEET = 'Type {}'
-# What a sheet Type n says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same three).
+# What a sheet Type n says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same four).
 IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'   # no robot of type 1 since 2026-10-29: each has a mass and its own rows
-IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'   # type 2 for now
+IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
+# A robot with a mass of a type some of whose robots are taken apart, itself not yet (2026-10-30, "Yes, build C", Q4):
+# its type drawn from the workbook for stock-and-flow until every robot of it with a mass is taken apart (Q2).
+IN_RUN_LATER = 'not drawn: not yet taken apart'
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
 HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
@@ -113,11 +120,13 @@ ADDED = {
     354: ('PR-OMNI', 'Perceptyne', 'India', 'Pre-order', '157', '120', 'https://www.perceptyne.com/product/omni'),
 }
 
-# Every robot of type 1 and its rows in data/researched/parts_taken_apart.xlsx: number -> the name of its own rows
-# there (Matthias, 2026-10-29, "Yes, build it": every robot of type 1 its own rows, EVIDENCE.md E5.12 to E5.19). A robot
-# in several versions names each, separated by '; ', each drawn as often: the Booster K1 with its 5 Ah and its 2 Ah
-# battery (E5.14, point 2). No brackets or commas in a name: 04 reads the names from between brackets, by commas.
-TAKEN_APART = {
+# The robots taken apart, robot type by robot type: number -> the name of its own rows in its type's parts file
+# (data/researched/<n>_<name>/parts_taken_apart.xlsx). Type 1: every robot (Matthias, 2026-10-29, "Yes, build it",
+# EVIDENCE.md E5.12 to E5.19); type 2: batch 1 (2026-10-30, "Yes, agree E6.8", "Yes, build C"). A robot in several
+# versions names each, separated by '; ', each drawn as often: the Booster K1 with its 5 Ah and its 2 Ah battery
+# (E5.14, point 2), the GR-1 with one or two depth cameras (E6.8 point 8). No brackets or commas in a name: 04 reads the
+# names from between brackets, by commas.
+TAKEN_APART = {1: {
     16: 'AgiBot X1', 19: 'ROBOTIS AI Sapiens K1', 23: 'AKINROBOTICS AKINCI-5', 37: 'Menlo Asimov 1',
     38: 'Menlo Asimov 2', 54: 'Booster T1', 55: 'Booster T2', 57: 'Noetix Bumi', 85: 'Noetix E1', 102: 'Unitree G1',
     103: 'Unitree G1+', 143: 'JAKA π', 147: 'ROBOTIS K0', 148: 'Booster K1 5 Ah; Booster K1 2 Ah',
@@ -125,7 +134,10 @@ TAKEN_APART = {
     236: 'PrimeBOT Q1', 246: 'AgiBot QUESTER1', 260: 'Leju Roban2', 268: 'RoboParty Roboto Origin',
     269: 'RoboParty RP1', 279: 'Fauna Sprout', 281: 'StarBot Astra', 308: 'WL Robotics Totan O1', 311: 'Unitree R1',
     332: 'TOPSTAR Xiao Tuo', 343: 'YMBOT E3', 350: 'Fourier N1',
-}
+}, 2: {
+    116: 'Fourier GR-1 one camera; Fourier GR-1 two cameras', 117: 'Fourier GR-2', 119: 'Unitree H1-2',
+    120: 'Unitree H2', 121: 'Unitree H2 Plus',
+}}
 
 # A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:
 # the Booster K1's 19.5 kg, the robot nearest in height (0.95 against 0.88 m) with a mass from its maker, half to 1.5
@@ -528,6 +540,15 @@ def read_catalogue(path: str) -> dict:
             for r in rows[1:] if r[at['Number']] is not None}
 
 
+def taken_apart_as(number: int) -> str:
+    """The name (or names) of a robot's own rows in its type's parts file, '' where it is not taken apart. One robot
+    taken apart in two types' files is not foreseen: it stops the building."""
+    names = [by_number[number] for by_number in TAKEN_APART.values() if number in by_number]
+    if len(names) > 1:
+        raise ValueError(f'robot {number} is taken apart in more than one robot type: {names}.')
+    return names[0] if names else ''
+
+
 def register_rows(catalogue: dict) -> list:
     """One row per robot, in the order of HEADINGS."""
     robots = {**catalogue, **ADDED}
@@ -538,7 +559,7 @@ def register_rows(catalogue: dict) -> list:
         if number in MASS_ESTIMATES:      # no mass stated anywhere: the agreed estimate (E)
             low, mode, high, basis = MASS_ESTIMATES[number]
         out.append([number, robot, maker, country, status, height, mass, low, mode, high, basis, types, form, entry,
-                    TAKEN_APART.get(number, ''), decided, source])
+                    taken_apart_as(number), decided, source])
     return out
 
 
@@ -547,22 +568,24 @@ def types_of(row: list) -> list:
     return [int(t) for t in (piece.strip() for piece in row[HEADINGS.index('Types')].split(',')) if t]
 
 
-def in_the_run(row: list, any_apart: bool) -> str:
-    """What 02_composition.py does with a robot of a type (its row of the register), `any_apart` whether any robot of
-    the type is taken apart: drawn with its own rows of the parts file, where it has them (every robot of type 1 since
-    2026-10-29); where it has none, not drawn (01 then reports it), or, while none of its type is taken apart, its type
-    drawn from the workbook (type 2 for now)."""
-    if row[HEADINGS.index('Taken apart as')]:
+def in_the_run(row: list, robot_type: int, any_apart: bool) -> str:
+    """What 02_composition.py does with a robot of `robot_type` (its row of the register), `any_apart` whether any
+    robot of the type is taken apart: drawn with its own rows of the type's parts file, where it has them (every robot
+    of type 1 since 2026-10-29); while none of its type is taken apart, its type drawn from the workbook; else not drawn
+    where no mass is stated, and not drawn where it is not yet taken apart (2026-10-30, Q4)."""
+    if row[0] in TAKEN_APART.get(robot_type, {}):
         return IN_RUN_OWN
-    return IN_RUN_NOT if any_apart else IN_RUN_WORKBOOK
+    if not any_apart:
+        return IN_RUN_WORKBOOK
+    return IN_RUN_NOT if row[HEADINGS.index('Mass mode (kg)')] in (None, '') else IN_RUN_LATER
 
 
 def type_rows(rows: list, robot_type: int) -> list:
     """The rows of the sheet of `robot_type`: every robot of the register whose types include it, in the register's
     order, each its row of the sheet Robots and what the run does with it."""
     of_type = [row for row in rows if robot_type in types_of(row)]
-    any_apart = any(row[HEADINGS.index('Taken apart as')] for row in of_type)
-    return [row + [in_the_run(row, any_apart)] for row in of_type]
+    any_apart = any(row[0] in TAKEN_APART.get(robot_type, {}) for row in of_type)
+    return [row + [in_the_run(row, robot_type, any_apart)] for row in of_type]
 
 
 def write_sheet(sheet, headings: list, rows: list, widths: list) -> None:
