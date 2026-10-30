@@ -92,8 +92,10 @@ class TestMakeHumanoidRegister(unittest.TestCase):
                      180, 199, 203, 210}
         batch_two_b = {216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290, 294, 297, 298, 299,
                        300, 302, 323, 326, 352}
+        on_wheels = {13, 15, 20, 21, 34, 35, 40, 41, 42, 49, 60, 68, 82, 86, 92, 104, 105, 122, 179, 184, 200, 230, 247,
+                     248, 251, 252, 253, 254, 255, 295, 307, 312, 313, 314, 315, 318, 335, 336, 337, 340, 341, 342, 349}
         self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121}
-                         | batch_two | batch_two_b)
+                         | batch_two | batch_two_b | on_wheels)   # since 2026-10-30 the 43 on wheels (E9.6)
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
         self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
         self.assertEqual(apart[123], 'Unitree H2-X Core i7; Unitree H2-X Orin NX')
@@ -137,13 +139,16 @@ class TestMakeHumanoidRegister(unittest.TestCase):
                      180, 199, 203, 210}
         batch_two_b = {216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290, 294, 297, 298, 299,
                        300, 302, 323, 326, 352}
+        # Since 2026-10-30 ("Yes, agree E9.6", "Yes, build it"): the 43 on wheels too; none with a mass left.
+        on_wheels = {13, 15, 20, 21, 34, 35, 40, 41, 42, 49, 60, 68, 82, 86, 92, 104, 105, 122, 179, 184, 200, 230, 247,
+                     248, 251, 252, 253, 254, 255, 295, 307, 312, 313, 314, 315, 318, 335, 336, 337, 340, 341, 342, 349}
+        self.assertEqual(len(on_wheels), 43)
         self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_OWN},
-                         {116, 117, 119, 120, 121} | batch_two | batch_two_b)
+                         {116, 117, 119, 120, 121} | batch_two | batch_two_b | on_wheels)
         self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_NOT}, {329})
-        later = {n for n, run in runs.items() if run == schemas.IN_RUN_LATER}
-        self.assertEqual(len(later), 43)
+        self.assertEqual({n for n, run in runs.items() if run == schemas.IN_RUN_LATER}, set())
         forms = {r.number: r.form for r in listed}
-        self.assertEqual({forms[n] for n in later}, {'wheels'})
+        self.assertEqual({forms[n] for n in on_wheels}, {'wheels'})
         self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params(),
                                                                    set(APART[2]))], [])
 
@@ -156,7 +161,7 @@ class TestMakeHumanoidRegister(unittest.TestCase):
             cells = dict(zip(schemas.REGISTER_HEADINGS, by_number[number].cells))
             self.assertIn('E7.3', cells['Decided in'], msg=number)
         runs = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 2)}
-        self.assertEqual({runs[n] for n in (40, 68, 200)}, {schemas.IN_RUN_LATER})
+        self.assertEqual({runs[n] for n in (40, 68, 200)}, {schemas.IN_RUN_OWN})   # taken apart since E9.6
 
     def test_the_wheeled_robots_of_batch_2b_on_wheels(self):
         # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E8.2, question 1): Torobo, VB1-I and VB2 on wheels by their

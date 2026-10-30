@@ -95,8 +95,8 @@ Two things to know when reading it:
 
 To compare the six robot types, every robot is written in the same words (Matthias, 2026-10-26: "I want that it is
 possible to compare on a material level between the 6 types of roboy"):
-- 11 part groups (what a part is);
-- 6 body regions (where it sits);
+- 12 part groups (what a part is; since 2026-10-30 "Wheels and wheel drives", of a robot on wheels);
+- 7 body regions (where it sits; since 2026-10-30 "Base", the wheeled base of a robot on wheels);
 - 13 materials;
 - the number of motors.
 
@@ -213,9 +213,10 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     fibre composites, the rest of a battery row included) has exactly one row in the sheet Rows, naming a recipe of the
     sheet Recipe, and every row names a piece that exists.
 18. Each robot type part by part (`data/researched/<n>_<name>/parts_taken_apart.xlsx`; type 1's EVIDENCE.md E2.8 to
-    E2.8e and E5, type 2's E6.8 and E7.5; since 2026-10-30 the same checks for every type's file): the robots of the file,
-    type 1's 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), type 2's 56 (its 53, the GR-1,
-    the H2-X and the Walker Tienkung in two versions each), each named in the sheet Robots
+    E2.8e and E5, type 2's E6.8, E7.5, E8.3 and E9.6; since 2026-10-30 the same checks for every type's file): the robots
+    of the file, type 1's 32 since 2026-10-29 (the register's 31, the Booster K1 in two versions), type 2's 102 (96 of
+    its 97; the GR-1, the H2-X, the Walker Tienkung, the AICO 2, the RB-Y1 and the R1-D in two versions each), each named
+    in the sheet Robots
     and with rows of its own on the sheets Joints, Parts, Boards, Sensors and Constants; JointParts, Shares and SensorElements are one set for all ("We can assume, they are similar within
     given ranges"), a joint with a module mass following the joint parts of its size scaled to that mass. Checked:
     every min, mode and max in order, and every estimate (E) at least half to 1.5 times its mode, cut only at 100 % for
@@ -234,7 +235,12 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     since 2026-10-30 (open point A of batch 2's entry) such a robot may also have joints with their masses: its hands
     or grippers, outside the template, and joints in place of the template's rows of their groups; the template is
     the share rows of the robots with no such stated body joint, alike in all of them, and a robot with stated body
-    joints has the template's rows less those of exactly the groups it states;
+    joints has the template's rows less those of exactly the groups it states; since 2026-10-30 (the robots on wheels,
+    E9.7 point 7) a file may hold two templates, each robot alike the others of its own (named by what its rows
+    average, in the last brackets of their names), the drive wheels', steering and lift motors outside it as hands are;
+    a robot on wheels (a joint of its wheeled base) takes the shared numbers on wheels ('Joint modules, share of the
+    robot mass, on wheels', 'Battery energy per kg of robot, on wheels'), has at least one drive wheel, and its lift
+    column and its lift motor come together;
     every robot its battery voltage and capacity both, or neither and the shared 'Battery energy per kg of robot'; a
     pack with no mass and a housing, the shared 'Battery pack, Wh per kg (packs not weighed)'; a part that is a share of
     the robot's mass (the shell), the shared 'Shell, share of the robot mass'; a material written 'A or B' (the battery
@@ -301,8 +307,8 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
   register, robot type 1 part by part with the builders that write them, the element recipes; the sibling projects'
   data in another colour), the stages (00, 01, 02, each with its file), what they write (the draws for
   stock-and-flow, type 1's pages; 03 in grey, after robot type 6).
-- **`overview_2.png`**: the six robot types as cards: type 1 in colour with its robots and their masses, types 2 to 6
-  grey, "not yet worked on"; the faults found and what is open.
+- **`overview_2.png`**: the six robot types as cards: the types taken apart (1 and 2) in colour with their robots and
+  their masses, types 3 to 6 grey, "not yet worked on"; the faults found and what is open.
 - **`notes.png`**: how to read the pages, once.
 - **`faults_<k>.png`**: the faults with where each is, or "No fault found"; what was checked (CHECKS_DONE) and what the
   checks cannot tell; as many pages as needed.
@@ -317,6 +323,11 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
 - **`categories/1_<name>_robot.png`**: robot type 1's kinds of part, where they sit on the robot (the marks and
   colours of 02's figures, one copy of the drawing in 01), the joints whose magnets are for 150 °C or more in most
   draws ringed red, and what each kind holds.
+- **`categories/2_<name>_robots_<k>.png`, `categories/2_<name>_robot.png`** (since 2026-10-30): the same for robot type
+  2; its robots on wheels in sections of their own ("On wheels, every joint from its maker", "On wheels, joints a share
+  of the robot's mass"), each row with its base in plain words (its drive wheels, steered or omni, its casters) and ‡
+  where it has a lift column; its robot drawn with, beside its feet, a base on wheels (F) and a lift column (G), the
+  twelve kinds listed.
 
 The pages described below are those of a robot type whose steps have not begun, drawn by its former code when the
 setting names it; they are redone by his rules when its steps begin. `01_schemas.py` draws them into
@@ -398,6 +409,13 @@ After drawing, 02 checks every draw (`draw_faults`), and writes nothing if one f
 
 ## What 02 writes
 
+**While it runs** (since 2026-10-30, "Yes, build them"), 02 says each step as it begins and its time when it ends:
+reading the inputs ("read in 12 s"); checking every input ("no fault, in 8 s", or the faults); each robot type as it
+is drawn, part by part over its robots (every tenth robot of its parts file said: "robot 10 of 102 drawn: Astribot
+T1") or from the workbook ("done in 3 min 40 s"); checking that the draws add up; each type's draws written and its
+pages drawn; and last "02 done in 6 min 57 s", or "02 stopped after …: nothing is written" where a fault stops it.
+What it prints changes no draw.
+
 For each robot type, a folder `data/consolidated/<n>_<name>/` (the folder another repository reads; not in git):
 
 | File | What it holds |
@@ -437,10 +455,10 @@ by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"),
    Fourier GR-2 and GR-1, the GR-1 in two versions, one or two depth cameras, each as often), and since 2026-10-30
    ("Yes, agree E7.5", "Yes, build it") batch 2, 24 robots not on wheels (the H2-X in two versions, its second computer
    an Intel Core i7 or an Orin NX), and batch 2b ("Yes, agree E8.3", "Yes, build it"), 24 more (the Walker Tienkung in
-   two versions; the Omni kept in type 2), each from its own rows of
-   `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`, written by its builder from E6.8,
-   E7.5 and E8.3. The Astribot S1, Moz1, CUE7, Torobo, VB1-I and VB2 stand on wheels (E7.3, E8.2): with the 37 before,
-   the 43 robots of type 2 not yet taken apart are all on wheels, for the wheeled batch.
+   two versions; the Omni kept in type 2), and since 2026-10-30 ("Yes, agree E9.4", "Yes, agree E9.6", "Yes, build
+   it" on E9.7) its 43 robots on wheels (the AICO 2, the RB-Y1 and the R1-D in two versions each), each from its own
+   rows of `data/researched/2_full_scale_general_purpose_ai_research/parts_taken_apart.xlsx`, written by its builder
+   from E6.8, E7.5, E8.3 and E9.6: 96 of its 97 robots. The Xialan S0 has no mass in any source and is not drawn.
 2. **What E6.8 changed against type 1:** each joint's mass from its peak torque by type 1's fit of mass on torque,
    refit on the 12 makers' actuators with a stated mass, 0.0689 kg × torque^0.566, half to 1.5 times (the M107's
    stated 1.9 kg at the H1-2's knees); the hands of the H2 Plus, GR-2 and GR-1 as small joints; the cables scaled by
@@ -459,12 +477,31 @@ by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"),
    exactly the groups it states). The four robots of batch 2 with every joint's torque in their makers' models (the
    Atom Max as DOBOT's Atom, the Kuavo-5, Luna, MagicBot Gen1) take E6.8's fit at each joint, their joints named by
    the model's axes.
+2c. **Its robots on wheels (E9.4, E9.6):** two kinds of part of their own, "Wheeled base" (each drive wheel's hub motor,
+   each steering motor, the casters, the base's sensors) and "Lift column" (its motor, its screw and guides of steel,
+   its profile of aluminium the remainder), in the body regions "Base" and "Torso" and the part groups "Wheels and wheel
+   drives" and "Joint drives". The hub, steering and lift motors are joints, their insides the G1's joint scaled to
+   their masses (a hub motor has no gears: its steel overstated, its other materials understated), their magnets as
+   the hips (the hub motors) and the waist (the steering and lift motors; E9.7 open point A). A hub motor where no source
+   weighs it: by the robot's mass per driven wheel, 1.4, 3.75, 4.85 or 8.5 kg (its makers' ratings, E9.5), half to 1.5
+   times; a steering motor 0.79 kg and a lift motor 0.89 kg (ROBOTIS's); a caster 0.27 kg (Tente's); a lift column
+   whose maker gives no mass 9.95 / 19.9 / 29.85 % of the robot's mass (the AI Worker's lift link), less its motor. The
+   Vega 1 Pro, RB-Y1, AI Worker and Reachy 2 by their makers' models; the others by the template on wheels: the joint
+   modules 7.8 / 15.6 / 23.4 % of the robot's mass, split as those four are on average (their hands, wheels, steering
+   and lift left out), the battery 4.62 / 10.28 / 22.86 Wh per kg of robot where the maker gives no energy, in the base.
 3. **Its recipes:** type 2's own aluminium and plastics ("Aluminium, robot type 2, Aluminum alloys", "Plastics, robot
-   type 2, Engineering plastics"; Q3); the steels, titanium, copper, magnets and cells by the shared recipes.
-4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass is taken apart (Q2: a
-   part of its robots does not represent 97); its 53 robots drawn part by part on their own, into
-   `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 53 of its 97
-   robots"). The register's sheet Type 2 says "not drawn: not yet taken apart" of the 43 others with a mass (Q4).
+   type 2, Engineering plastics"; Q3); the steels, titanium, copper, magnets and cells by the shared recipes, the cells
+   by their own chemistry: NMC cylindrical, and the CASBOT W1's LFP cylindrical (its maker's "磷酸铁锂"; E9.4 C), its
+   Wh per kg one LFP cell of the sheet Cells drawn in each draw. Its pack, with no mass from its maker, is its cells
+   times the NMC packs' pack-to-cell ratio in the same draw (the NMC cell's Wh/kg over the packs' Wh/kg; "Ratio, as
+   recommended", E9.8): the packs' Wh/kg is a figure of NMC packs, against which its heavier cells would leave its
+   housing below zero.
+4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass was taken apart (Q2: a
+   part of its robots does not represent 97); since its robots on wheels, from its 96 robots part by part, into
+   `data/consolidated/2_full_scale_general_purpose_ai_research/`, and each into
+   `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 96 of its 97
+   robots"). The register's sheet Type 2 says "drawn: its own parts" of the 96 and "not drawn: no mass stated" of the
+   Xialan S0 (Q4).
 5. **Its random numbers:** its own, from the seed and its number (type 1's as before: its draws did not change, V84).
 
 ## Robot type 1 over its robots, in 02 (since 2026-10-28; each from its own rows since 2026-10-29)
@@ -501,9 +538,11 @@ robot is drawn part by part, with these changes:
    inserts, sensor shield, silicone dampers and an XT60), the N1's network switch a board.
 4. **As 02 writes every robot type:** its materials (Not allocated 0, as the frame takes the rest), its elements (all
    it holds; every robot type now has the same element columns, 0 where none is drawn), its part groups and body
-   regions (its ten kinds placed whole: the joints in Joint drives, the battery in Battery, the torso boards in
+   regions (its kinds placed whole: the joints in Joint drives, the battery in Battery, the boards in
    Computer, the head in Sensors, the cables in Cables, the frame and shell in Frame; hips, knees, ankles in Legs,
-   waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body). Kept so
+   waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body; since
+   2026-10-30 a robot on wheels' wheeled base in Wheels and wheel drives and Base, its lift column in Joint drives and
+   Torso). Kept so
    (Matthias, 2026-10-29, "Yes, build them", point 5): no repository reads these two tables yet, and stock-and-flow
    will read the materials and the elements, which are exact; rough where a kind holds parts of another group (the
    head's joints counted as Sensors, the battery management board as Battery), as the notes page says.
@@ -512,8 +551,9 @@ robot is drawn part by part, with these changes:
    the register's, so nothing is counted twice.
 5. **Its pages:** its notes (`1_<name>_notes_<k>.png`, on as many pages as they need, a paragraph never split), then
    its elements nine a page, each the histogram of one robot's total over the draws, median solid and mean dotted with
-   their numbers above the panel, 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it
-   on a separate one"; "can you better adust the hight"); hydrogen, nitrogen, oxygen, fluorine, sodium, phosphorus and
+   their numbers above the panel, right, over its title's line (since 2026-10-30, "Yes, fix it": a long title ran into
+   them), 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it on a separate one"; "can
+   you better adust the hight"); hydrogen, nitrogen, oxygen, fluorine, sodium, phosphorus and
    sulfur not shown (above, "Elements not shown"), their draws kept. An element held in fewer than 2.5 % of the draws
    has no panel; one that is 0 in some draws (lead, vanadium, arsenic, indium, tungsten: a robot or a version without
    it) shows the draws that hold it and says in what share of all the draws it is held, as the material pages

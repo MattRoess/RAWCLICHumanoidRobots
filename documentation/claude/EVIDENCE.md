@@ -8,6 +8,426 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E9. Each robot of type 2 its own composition: research, the robots on wheels (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Yes, start sources" (the sources of type 2's 43 robots on wheels, decision B: their own kinds of
+part). Read on 2026-10-30: the makers' pages and documentation through seven web-fetch reads (HTML text only), and where
+those got no text (script-rendered, pictures, a manual behind a link), in the built-in browser myself; the makers' model
+files through GitHub's interface, their masses summed and their joints' limits listed by script. **No PDF was opened**
+until his word (E9.2 point 4); then four datasheets were read (E9.3). (The fetch tool saved PAL's two datasheet PDFs, ARI and
+TIAGo Pro, to its own folder unasked; neither was opened or read.) A search engine's summary is never a source here:
+it only pointed to pages. Nothing is entered.
+
+### E9.1 Robot by robot: what the makers state
+
+The register's height and mass in brackets (the catalogue humanoid.guide, E4); **bold** where the maker's differs.
+
+| # | Robot (the register) | What the maker states | Source | Kind |
+|---|---|---|---|---|
+| 13 | AGIBOT A2-W, AgiBot (163 cm, 230 kg) | **no longer on AgiBot's sites**: the address /products/A2_W shows the A2 flagship (远征A2 旗舰版, a walking robot); the product menus list A3 Ultra, A3, A2 旗舰版, A2 青春版; G2, G1 Max, G1. A2-W only as an option of the contact form | agibot.com/products/A2_W; agibot.com.cn/products/A2_W (in the browser) | maker, not listed |
+| 15 | AGIBOT G1, AgiBot (130–180 cm, 150 kg) | "150kg", "130~180cm"; "20 DoF" without end-effector (the text: "26 DOFs"; head turns and nods, waist bends, rises and lowers); end-effector "6 DoF（Can Replaced with Two-finger Gripper）"; "Jetson AGX Orin 64GB"; "Six-Axis Force" sensors on both arms; "RGBD Camera*3 & Fisheye*5", the chassis "RGBD cameras front and rear and LiDAR"; "Runtime: 4h+"; the chassis turns in place. Battery energy, base, torques: not stated | agibot.com/products/G1 | maker, spec |
+| 20 | AI Worker, ROBOTIS (162 cm, 90 kg) | FFW-SG2 (mobile): "90 kg", "604x602x1,623 (mm)"; "Total: 25 DOF; Arm: 7 DOF x 2; Gripper: 1 DOF x 2; Head: 2 DOF x 1; Lift: 1 DOF x 1; Mobile: 6 DOF"; "Swerve Drive", "three wheels positioned in a triangular arrangement", 1.5 m/s; lift 0 to 500 mm; "Battery: 25V, 80Ah (2,040Wh)"; "NVIDIA Jetson AGX Orin 32GB"; ZED Mini, RealSense D405 × 2, LiDAR LakiBeam 1 × 2, IMU; "Aluminum, Plastic". Its actuators by model: arm joints 1–3 YM080-230-R099-RH, 4–6 YM070-210-R099-RH, 7 PH42-020-S300-R; head XH540, XH430; lift YM080-230-B001-RH; wheel steering YM070-210-R051-RH; gripper RH-P12-RN (500 g). Its model `ffw_sg2.xml` (MuJoCo): **94.42 kg**, the base 35.99 kg, the lift 17.9 kg, three wheel-drive links 3.80 kg each; no torque limits (all 1000) | ai.robotis.com/ai_worker/hardware_ai_worker.html; github.com/ROBOTIS-GIT/ai_worker (`ffw_description/mujoco/ffw_sg2/ffw_sg2.xml`) | maker, spec; maker's model |
+| 21 | AICO 2, Flexiv (160 cm, 281 kg) | **two versions named AICO 2** (the values by the table's column order): AICO 2-4 "281kg", "2*7" DoF, "Dual-wheel differential", "6h", payload "2*4kg"; AICO 2-10 **"395kg"**, "2*7", "Dual-wheel differential", "4h", "2*10kg"; both "Laser SLAM", force sensing. Height, battery energy, computers: not stated (the panels are pictures) | flexiv.com/product/robot-system | maker, spec |
+| 34 | ARI, PAL Robotics (165 cm, 60 kg) | "2 DoF Head", "2 DoF Mobile base", "4 DoF Arms (2x)", a humanoid torso; "24V / 40VAh (Optional 60Ah)", "8-12 hours autonomy"; "CPU Intel i5 / i7 / i9", "GPU Nvidia Xavier NX or Orin … (optional)"; RealSense D435i × 2, T265, LiDAR (optional), 10.1" touchscreen, two LCD eyes, 4 microphones, 2 × 30 W speakers. Its datasheet (E9.3): "Height 165 cm", "Width 53 cm", "Depth 75 cm"; **"Arm (2X) 5"** (shoulder 2, upper arm 1, elbow 1, wrist 1; the docs: 4); "Standard differential drive API". **Mass: not stated, the datasheet neither**. Its model in PAL's repository as xacro, not expanded | docs.pal-robotics.com/edge/hardware/ari/hardware-overview; pal-robotics.com/datasheet/ari (PDF); github.com/pal-robotics/ari_robot | maker, spec, datasheet; maker's model (xacro) |
+| 35 | ARMAR-7, KIT (175 cm, 120 kg) | "two 8-DoF torque-controlled anthropomorphic arms and 4-DoF underactuated humanoid hands", "3-DoF head", "A 2-DoF knee/hip kinematic" (the torso bows and changes height), "a holonomic mobile platform … three omni-wheels"; an RGB camera in each hand. **Mass, height, battery, computers: not stated** | h2t.iar.kit.edu/397.php; src.stanford.edu/demo/armar | developer (a lab), spec |
+| 40 | Astribot S1, Astribot (170 cm, 80 kg) | "80kg", "170cm", arm span "194cm"; "Single arm DoF" "7"; "4~6hours", "Supports plug-in"; payload per arm "5kg". Torso, base, battery energy, computers, sensors: not stated | astribot.com/en/product | maker, spec |
+| 41 | Astribot T1, Astribot (155 cm, 66 kg) | only a banner "Meet Astribot T1", "From ¥89,900 CNY"; **no figures**; its "Buy now" leads to a contact form | astribot.com/en | maker, no figures |
+| 42 | AstroD. AD-01, Elu.AI (170 cm, 120 kg) | INFIFORCE (ELU.AI's brand; elu-ai.com leads there) names "AD-01" at work; its AstroDroid page "搭载Hyper-VLA端到端模型"; **no figures** | infiforce.cn, infiforce.cn/robot | maker, no figures |
+| 49 | Avatar, Honda (**155 cm, 101 kg**) | **"1700mm Height", "110kg Weight"**, "56 DOF": head 3, arm 8 × 2, hand 16 × 2, waist 3, wheel 2; "1.0m/s". Battery, torques, computers, sensors: not stated (Japanese page the same: 全高1700mm, 重量110kg, 車輪 2) | global.honda/en/RandD/field/hgrx/honda-multi-fingered-hand/avatar-robot.html; …/jp/… | maker, spec |
+| 60 | CASBOT W1, CASBOT (112–210 cm, ~260 kg) | "重量约260kg", "高度112cm - 210cm" (收缩 0.95 × 0.615 × 1.12 m, 伸展 … × 2.1 m); "20DoF": arm 7 × 2, neck 2, waist 1, lift column 1, chassis 2; "轮组形式 2+4，两轮差速" (two driven wheels, four more); "电池电压 48v", "电池容量 48V/25Ah", "电池类型 磷酸铁锂" (LFP; 1,200 Wh, arith.), "续航时间 4-5h"; "工控机（i9 cpu+4060显卡）", "交互 3588"; a 360° LiDAR, RGBD × 4, a stereo camera, 2 microphones; gripper 500 g; "合金、工程塑料". The page: its figures "来源于理论计算及实验室测试结果" | casbot.tech/product/w1 | maker, spec |
+| 68 | CUE7, Toyota (218 cm, 74 kg) | **no page of Toyota's found** (its global newsroom searched). Second-hand only: 219 cm (Japanese press), **74 kg** (one English article), **78 kg** (another), an inverted two-wheel base, about 30 motors | (press, not the maker) | second-hand |
+| 82 | Dual-Arm Lift, RealMan (178 cm, 157 kg) | "≈ 157 kg", "640 × 450 × 1780 mm"; "Lifting Stroke 900 mm"; "dual RM65-B-V arms" (6 DoF each; RM75-B-V optional), "Single Arm Payload 5 kg"; "1.5 m/s", turns in place; "Endurance 3–4 hours"; gripper CTAG2F90D. Battery energy, base, computers: not stated | realman-robotics.com/en/products/dual-arm-lift.html | maker, spec |
+| 86 | Eggie, Tangible Robots (160 cm, 45 kg) | the site names no robot, **no figures** | tangiblerobots.ai | maker, no figures |
+| 92 | Feather, Feather Robotics (180 cm, 105 kg) | "Total weight" "105 kg" (fully configured); 1200 to 1800 mm ("600 mm travel"); "23 DoF" ("7 per arm · 2 neck · 1 torso · 6 base"); "Holonomic (omnidirectional)", 1.3 m/s; "Dual hot-swappable packs", "48 V", "50 Ah" (2,400 Wh, arith.), "10 hour battery life with 240w load"; "Jetson Nano · Jetson Orin AGX · Jetson Thor"; ZED cameras, 4 microphones; hands of 6 DoF or grippers; its spec sheet (E9.3) the same, the energy not stated | feather.dev, feather.dev/technology, feather.dev/docs/feather-spec-sheet.pdf | maker, spec, datasheet |
+| 104 | G1-D, Unitree (160 cm, 90 kg) | two versions: **Standard has no mobile chassis** ("/"); **Ultimate** the wheeled one. Both "Approx. 90kg" with battery, 1260 to 1680 mm; Ultimate "19" DoF: arms 7 × 2, waist 2, column 1, base 2; "Diﬀerential drive", 1.5 m/s; "Upper Body Battery(Quick-release): 9Ah", "Chassis Battery (Built-in): 30Ah" (voltage not stated); "8-core High-performance CPU", optional Orin NX 16 GB; head binocular camera, wrist cameras × 2; chassis LiDAR, depth cameras × 2 | unitree.com/G1-D | maker, spec |
+| 105 | G2 Genie, AgiBot (175 cm, **55 kg**) | its user manual (an HTML page, 2026-04-28), 2.3 整机参数: "高度 1225 mm ~ 1795 mm", **"重量 185 kg"**, "自由度（不含末端） 25": head 3, arms 7 × 2 with "关节扭矩传感器 具备", torso 5 ("腰部3自由度", legs 2 "折叠升降"); "底盘 形式 4舵轮" (four steered wheels), 1.5 m/s; "电池数量 2", "电池总容量 1652Wh（34Ah）", "额定电压 48V", "约4h"; computing "500 TOPS (INT8)" or "2070 TFLOPS (FP4)"; head stereo camera 1, fisheye 3, RGBD 1, wrist RGBD 2, chassis LiDAR 2, ultrasonic 8, IMU, 4 microphones, an 8 W speaker, a 6.3" screen; "100%车规级零部件" (the product page) | agibot.com.cn/filepage/362.html (in the browser); agibot.com/products/G2 | maker, user manual |
+| 122 | H2-D, Unitree (170 cm, 120 kg) | two versions: "H2-D Standard" (a chassis moved by hand) "Approx. 148Kg"; **"H2-D Flagship" (mobile chassis) "Approx. 120Kg"** with battery. Flagship: 20 DoF: arms 7 × 2, waist 1, head 2, column 1, chassis 2; "dual-wheel differential drive", 1.5 m/s; lift "0.46m"; "48V/30Ah (1.44 kWh)" quick-release base battery; "Maximum Arm Joint Torque: 120N.M"; PCs Intel Core i5 and i7, optional Thor; binocular camera, wrist cameras × 2, LiDAR, depth camera, 2 collision and 2 ultrasonic sensors; "Aerospace-Grade Aluminum, Titanium Alloy, and High-Strength Engineering Plastics" | unitree.com/H2-D | maker, spec |
+| 179 | MagicBot D1, MagicLab (180 cm, 150 kg) | "150kg", "1190‑1800mm (H) × 620mm (W) × 670mm (L)"; "25 DoF": neck 2, arms 7 × 2, waist 3, legs 2, chassis "4‑6 DoF"; "four‑steering‑wheel chassis", 1.5 m/s; "Joint Torque Sensing Full‑joint enabled"; "Battery ×2", "Total Capacity 1652Wh", charger "54.75V / 15A", "Runtime 4h"; "Huawei R1, 500 TOPS (INT8)" or "2070 TOPS (FP4)"; RGB, stereo, fisheye × 3, wrist RGBD × 2, LiDAR × 2, ultrasonic × 3 (the text: 8). As the AgiBot G2 in battery and computing | magiclabglobal.com/magicbots/magicbot-d1 (in the browser) | maker, spec |
+| 184 | Mantis Standart, Blue Worm (140 cm, 50 kg) | "Mantis Standard「小白」", modular: 整机尺寸 633 × 552 × 1400 mm; "升降范围 550 mm"; "全身自由度 22"; "底盘能力 3 自由度全向移动"; "整机续航 3 h"; arm 7 DoF, "单臂负载 7 kg", "最大电机扭矩 80 N·m" (the single-arm version's table). **Mass: not stated** (second-hand press: about 35 kg) | bluewormrobotics.com/products/mantis-standard (in the browser) | maker, spec |
+| 200 | Moz1, Spirit AI (160 cm, 70 kg) | its product page names no robot: "七轴仿生臂", "全向轮式底盘", "自由度达26个", force-controlled joints. **Mass, battery: not stated** | spirit-ai.com/product | maker, no name, few figures |
+| 230 | Phoenix Gen 8, Sanctuary AI (170 cm, 70 kg) | "Phoenix Generation 8 … has a wheeled base"; improved cameras; **no figures** | sanctuary.ai/news/… (generation 8) | maker, no figures |
+| 247 | R1 PRO, Galaxea (170 cm, **96 kg**) | **"126 kg (277.8 lb) - including battery"** (96 kg is the R1 Lite's); 1700 mm; "26" DoF: arm 7 each, torso 4, chassis "6 , 360° Omnidirectional", 1.5 m/s; "NVIDIA Jetson AGX Orin, 32GB", 200 TOPS. The R1's guide (named the R1's, not the Pro's): "48 V", "35 Ah", "1680 Wh", lithium-ion; "a three-wheel steering vector chassis" (the R1's; the Pro counted with the steered bases below on it); torso torque rated 108, max 304 N·m; ZED 2, D435i × 2, 5 cameras, Livox MID-360 × 1–2 | galaxea-dynamics.com/products/galaxea-r1-series-… (in the browser); userguide-galaxea.github.io (R1) | maker, spec |
+| 248 | R1-D, Unitree (160 cm, **52 kg**) | the R1 page, mobile versions **R1-A5-D "Approx. 30kg", R1-A7-D "Approx. 32kg"**; raised "1600x520x440mm"; DoF with gripper 18 / 22: arms 5 or 7 each, waist 1, head 2, chassis 3; "Maximum torque of the shoulder: 60N·m"; "Li-ion Battery", "Approx. 1.5h"; 8-core CPUs, head 10 TOPS; chassis LiDAR, binocular camera | unitree.com/R1-D | maker, spec |
+| 251 | RB-Y1, Rainbow Robotics (160 cm, 131 kg) | two models: **A "Total: 131kg"** = upper body 38 (arm 11 × 2, torso 16) + lower body 42 + mobile 51; **M "Total: 170kg"** (mobile 90). 600 × 690 × 1,400 mm; wheel 1 DoF × 2 (A) or × 4 (M), leg 6, arm 7 × 2, head 2; "50V, 25Ah (1,250Wh)" (A), "50V, 50Ah (2,500Wh)" (M); FT sensors in both arms (V1.2); exterior "Aluminum". Its model `rby1a/urdf/model_v1.2.urdf`: **132.22 kg**, the base 60.08 kg; torso limits 270 × 3, 120 × 3 N·m; arms 70, 70, 70, 40, 10, 10, 8 N·m | rainbow-robotics.com/en/products/rb-y1; github.com/RainbowRobotics/rby1-sdk | maker, spec; maker's model |
+| 252 | Reachy 2, Pollen Robotics (166 cm, 50 kg) | "Up to 50 kg" (full robot), "136-166 cm"; arms 7 × 2 (Orbita 2D × 2: 60 W Maxon EC45 flat each motor; Orbita 3D × 1: 40 W Maxon ECXT22L), neck 3 (Orbita 3D); mobile base "Weight: 25kg", "3 omni wheels", LiDAR, "8 hours battery life"; "Solidrun Bedrock v3000". Battery voltage and energy: not stated; its two datasheets are no longer online (E9.3) | pollen-robotics.com/reachy-2; docs.pollen-robotics.com/hardware-guide/specifications/… | maker, spec |
+| 253 | RealBot-01, RealMan (168 cm, 125 kg) | "≈ 125 kg", "570 × 465 × 1680 mm"; "21 active degrees of freedom": arms 14, waist 3, legs 2, neck 2; "40 Ah (BMS)" (voltage not stated); dual RX75 arms, 5 kg each; "5 depth cameras, 3 fisheye cameras, 1 LiDAR, 2 IMUs", microphones | develop.realman-robotics.com/en/wheelRobot/RealBot01/; realman-robotics.com/en/products/realbot-humanoid.html | maker, spec |
+| 254 | RealBot-L2, RealMan (170 cm, 120 kg) | "≈ 120 kg", "650 × 512 × 1700 mm"; "17 DoF"; "Dual-wheel differential drive"; "Lifting stroke 0.3 m"; "48V 20Ah" (960 Wh, arith.), "≈ 6 h"; "Jetson AGX Orin 64G" | develop.realman-robotics.com/en/wheelRobot/RealBotL2/; …/realbot-l2.html | maker, spec |
+| 255 | RealBot-S2, RealMan (170 cm, 125 kg) | "≈ 125 kg", "614 × 552 × 1700 mm"; "20 DoF", arm 7 each; "Four-wheel steering, four-wheel drive"; "48V 20Ah" (960 Wh, arith.), "≈ 6 h"; "Nvidia Jetson AGX Orin 64G"; stereo and fisheye cameras, RGBD at the hands, dual LiDAR | develop.realman-robotics.com/en/wheelRobot/RealBotS2/; …/realbot-s2.html | maker, spec |
+| 295 | TIAGo Pro, PAL Robotics (**155 cm, 80 kg**) | **"Weight 95 Kg"**, **"Height 120 - 150 cm"**; DoF: mobile base 3, torso lift 1, arm 4, wrist 3, head 2, gripper 1 (one arm or two: not said); "Omnidirectional", "4x Meccanum Wheels", 1 m/s; "Lift stroke 35 cm"; "Series Elastic Actuators (SEA)"; "Battery 2 x 36 V, 20 Ah" (1,440 Wh, arith.), "8-10 hours"; 2 laser range-finders, IMU, wrist force/torque, RealSense D435, microphones; payload 3 kg. **Its datasheet (E9.3) differs: "Weight 80 kg"**, "Height 120–155 cm", "Autonomy 4 hours", "Total DoF 23 DoF Including Default Grippers": arms 7 DoF each, two by default ("Other configurations available (single and no arms)"), torque sensing "On Each Arm Actuator"; lift 1 DoF, "Torso Range 35 cm"; base "Omnidirectional (4 DoF)", "4x Mecanum Wheels"; "Intel i5, RAM 16 GB, 512GB SSD"; battery not stated, an "Additional Battery (for increased autonomy)" an upgrade | docs.pal-robotics.com/edge/hardware/tiagopro/hardware-overview; pal-robotics.com/datasheet/tiago-pro (PDF) | maker, spec, datasheet |
+| 307 | Torobo, Tokyo Robotics (166 cm, **160 kg**) | as E8.1: **"approx. 120 kg"**, 1615 mm, arms 7 × 2, waist 3, neck 3, "4-axis undercarriage (omni-directional mobile base)", torque sensors in arms and waist, about 3 h | robotics.tokyo/technologies/torobo | maker, spec |
+| 312 | VB1-I, Lanxin (~165 cm, ~60–70 kg) | as E8.1: "Dual-wheel differential motor" (its feature list: "Omnidirectional"), 700 × 610 × 1650 mm, arm 6 joints, "2~3h", gripping load 2 kg. **Mass: not stated** | lanxinrobotics.com/humanoid-robots/vb1-i | maker, spec |
+| 313 | VB2, Lanxin (~170 cm, ~65–75 kg) | as E8.1: "Four-wheel omnidirectional wheel", 580 × 480 × 1700 mm, arm 7 joints, "4~6 h", gripping load 5 kg. **Mass: not stated** | lanxinrobotics.com/humanoid-robots/vb2-2 | maker, spec |
+| 314 | Vega, Dexmate (171 cm, 135 kg) | "Vega 1 Pro": "298 lbs (135 kg)"; folded 0.66 m, arms raised 2.50 m; "24" DoF: arms 14, torso 3, head 3, "Base 4 (2 steering, 2 drive)", "Omni-directional"; "20 hrs of operation" (battery not stated); "NVIDIA Jetson AGX Thor"; LiDAR × 2, RGB cameras × 4, stereo head; payload 5 kg per arm; its spec sheet (E9.3) the same, no battery. Its model `vega_1p.urdf`: **141.00 kg**, the base 88.43 kg; torso limits 700, 380, 380 N·m; arms 150, 150, 80, 80, 25, 25, 25; head 6, 2.5, 6; two driven wheels 16 N·m (3.7 kg each), two steering 6 N·m | dexmate.com/product/vega-1-pro; github.com/dexmate-ai/dexmate-urdf (`robots/humanoid/vega_1p/vega_1p.urdf`) | maker, spec; maker's model |
+| 315 | VersaBot VB-1, Lanxin (165 cm, 75 kg) | Lanxin's "VB1" (taken as the VersaBot VB-1): "700×610×1650", arm 6 joints, "Four-wheel omnidirectional wheel", 0–1.2 m/s, "2~3h", gripping load 2 kg. **Mass: not stated** | lanxinrobotics.com/humanoid-robots/vb1 | maker, spec |
+| 318 | W-Bot, Yue Quan Bionics (178 cm, 60 kg) | "博文W-Bot 2.0": "全身尺寸 1.78m", "整机重量 60kg", "43个自由度"; arm 7 each; trunk "髋关节x3 + 膝关节x1 + 踝关节x1+底盘×2 =7" (a folding hip-knee-ankle on a wheeled chassis); "膝关节约 360N·m，踝关节约 160N·m，手臂关节约 60N·m"; "电池容量2400W·h，最大电压48V"; "NVIDIA Jetson Orin NX 16GB×2"; RealSense D435i and D455, Livox 360 LiDAR; a six-axis force sensor | yqbionics.com/W_Bot (in the browser) | maker, spec |
+| 335 | Y1, Tlibot (195 cm, 150 kg) | **not on Tlibot's list** (天灵L3 in four versions, T1) | tlibot.com/cpzx/6.html | maker, not listed |
+| 336 | Y2-B, Tlibot (160 cm, 85 kg) | as 335 | as 335 | maker, not listed |
+| 337 | Y2-P, Tlibot (156.5 cm, 95 kg) | as 335 | as 335 | maker, not listed |
+| 340 | YMBot D, Yunmu (165 cm, 100 kg) | YMBot's site has no product pages (home, about, news) | ymbot.com (in the browser) | maker, not listed |
+| 341 | YMBot D2, Yunmu (180 cm, 150 kg) | as 340 | as 340 | maker, not listed |
+| 342 | YMBot D4, Yunmu (165 cm, 100 kg) | its news of 2026-07-03: "双臂负载60kg的YMBot D4型工业重载搬运人形机器人", "底盘采用优化轮式承重结构与冗余动力系统". **Mass: not stated** | ymbot.com/news (in the browser) | maker, news, few figures |
+| 349 | ψ-SynRobot, PsiBot (145 cm, 65 kg) | the home page's "Psi SynRobot" links to "PsiBot-V1": "站立高度：<180cm", "腰部自由度：2个", "颈部自由度：2个", "续航：>8小时", "算力平台：Thor", "4个RGBD相机；3个鱼眼相机". **Mass: not stated** | psibot.ai; psibot.ai/products_zh/product_psibot-v1_zh/ | maker, spec |
+
+### E9.2 The robots on wheels together, and the questions for Matthias
+
+| What the makers give | Robots |
+|---|---|
+| Mass, joints by part, base, battery, and a model file | AI Worker, RB-Y1, Vega (the files give each part's mass; the RB-Y1's and Vega's also the torques) |
+| Mass, joints by part, base, battery (voltage × capacity or Wh) | G2 Genie, MagicBot D1, H2-D, CASBOT W1, Feather, W-Bot (also torques), R1 Pro (battery from the R1's guide), RealBot-L2, RealBot-S2, TIAGo Pro, G1-D (Ah without volts), RealBot-01 (Ah without volts), R1-D (no energy) |
+| Mass and joints, no battery | AGIBOT G1, AICO 2, Honda Avatar, Astribot S1, Dual-Arm Lift, Torobo, Reachy 2 (its base 25 kg) |
+| Joints and base, no mass | ARI, ARMAR-7, Mantis Standard, VB1-I, VB2, VersaBot VB-1, ψ-SynRobot, Moz1 (no name on the page) |
+| Nothing from the maker | A2-W (no longer listed); Astribot T1, AD-01, Eggie, Phoenix Gen 8, YMBot D4 (a news item only); CUE7 (no page of Toyota's found); not on their makers' sites: Y1, Y2-B, Y2-P, YMBot D, D2 |
+
+**What they have in common, for the spec of the kinds of part:** every one is an upper body (arms, head, a waist or
+torso of 1 to 6 joints, often a lift column or a folding leg of 2) on a wheeled base. The bases are of four kinds:
+two wheels driven differentially, with casters (H2-D, G1-D, AICO 2, RealBot-L2, VB1-I, CASBOT W1 "2+4"; RB-Y1 A by its two wheel joints); three
+or four steered wheels (AI Worker, G2 Genie, MagicBot D1, R1 Pro, RealBot-S2, Vega "2 steering, 2 drive"); omni or
+mecanum wheels (ARMAR-7, Reachy 2, TIAGo Pro, VB2, VersaBot VB-1, Torobo); one inverted pair (CUE7). The base is the
+heaviest part where a file shows it: 36 of 94 kg (AI Worker), 60 of 132 kg (RB-Y1), 88 of 141 kg (Vega), and 25 of 50 kg
+by Pollen's page (Reachy 2).
+
+**Questions, each with my recommendation:**
+1. **The maker's mass where the register's differs** (E8.2 decided "the maker's mass" for batch 2b): G2 Genie 185 kg
+   (register 55), R1 Pro 126 (96), R1-D 30 or 32 (52), TIAGo Pro 95 (80), Honda Avatar 110 (101). Recommended: the same
+   rule, the maker's mass.
+2. **Versions** (a discrete state, each drawn as often, as the Walker Tienkung): AICO 2 (2-4 281 kg, 2-10 395 kg), RB-Y1
+   (A 131 kg, M 170 kg), R1-D (A5-D 30 kg, A7-D 32 kg), H2-D (Standard 148 kg with a chassis moved by hand, Flagship
+   120 kg driven), G1-D (Standard without a mobile chassis, Ultimate driven). Recommended: the AICO 2, the RB-Y1 and the
+   R1-D in their two versions; the H2-D and G1-D only in their driven version (Flagship, Ultimate), since the other is
+   not a robot on wheels that drives.
+3. **The robots no maker's source describes** (A2-W, T1, AD-01, Eggie, Phoenix Gen 8, CUE7, Y1, Y2-B, Y2-P, YMBot D,
+   D2, D4): kept with the register's mass, as E8.2 kept the robots found nowhere. Recommended: kept; their parts from
+   the wheeled template that the spec will propose.
+4. **The makers' datasheets that are PDFs** (downloading needs his word): ARI and TIAGo Pro (pal-robotics.com/
+   datasheet/…), Reachy 2 (pollen-robotics.com, two datasheets), Vega 1 Pro (cdn.sanity.io, its spec sheet), Feather
+   (feather.dev/docs/feather-spec-sheet.pdf), AI Worker (its drawings, robotis.com). They would give ARI's mass and the
+   batteries of Reachy 2 and Vega. Recommended: yes, these six makers' own PDFs, read only.
+5. **The robots with no mass from their maker** keep the register's (the catalogue's) mass, labelled as the catalogue's:
+   ARI 60, ARMAR-7 120, Mantis 50 (press: about 35), VB1-I 60–70, VB2 65–75, VersaBot VB-1 75, ψ-SynRobot 65, Moz1 70.
+   Recommended: so, as type 1's robots without a maker's mass.
+
+**Decided:** Matthias, 2026-10-30, "Yes, all five": the maker's mass in the parts file where the maker states it, the
+register's reported (G2 Genie 185 kg, R1 Pro 126, R1-D 30 or 32, TIAGo Pro 95, Honda Avatar 110); the AICO 2 (2-4,
+2-10), the RB-Y1 (A, M) and the R1-D (A5-D, A7-D) in two versions, each drawn as often; the H2-D only as its Flagship
+and the G1-D only as its Ultimate (the driven versions); the 12 robots no maker's source describes kept, with the
+register's mass, their parts from the wheeled template the spec will propose; the six makers' PDF datasheets read (E9.3);
+the robots with no maker's mass keep the catalogue's, labelled as the catalogue's. The TIAGo Pro's mass was decided again on
+PAL's datasheet: 79 / 80 / 95 kg (E9.3). Nothing entered yet: the register's
+changes are code, and the spec of the wheeled robots' kinds of part comes first.
+
+Not yet looked at, for the spec: the actuators' own pages that some makers name (ROBOTIS's DYNAMIXEL-Y, Pollen's Orbita
+motors) and RealBot-01's joint-limit page.
+
+### E9.3 The makers' datasheets (on "Yes, all five", point 4)
+
+Downloaded on 2026-10-30, each into its own folder in Claude's scratch folder, and read first-hand:
+
+| Datasheet | Got | What it adds to E9.1 |
+|---|---|---|
+| ARI, pal-robotics.com/datasheet/ari | PDF, 5 pages, 761,989 bytes | its size 165 × 53 × 75 cm; arms 5 DoF each (the docs: 4); differential drive; **no mass** |
+| TIAGo Pro, pal-robotics.com/datasheet/tiago-pro | PDF, 2 pages, 1,045,043 bytes | **"Weight 80 kg"**, 4 hours, 23 DoF with two 7-DoF arms; a second battery an upgrade |
+| Vega 1 Pro, cdn.sanity.io (linked from dexmate.com) | PDF, 1 page, 517,270 bytes | the same as its page; **no battery** |
+| Feather, feather.dev/docs/feather-spec-sheet.pdf | PDF, 2 pages, 544,619 bytes | the same as its page (48 V, 50 Ah, dual packs); no energy in Wh |
+| Reachy 2, pollen-robotics.com (two datasheets) | **"Page not found"** (HTTP 404), both | nothing; the battery stays not stated |
+| AI Worker FFW-SG2 drawing, robotis.com/service/download.php?no=2215 | a ROBOTIS download page, not a PDF | nothing |
+
+**The TIAGo Pro, for his word:** PAL states two masses. The datasheet: 80 kg, 4 hours, a second battery an upgrade.
+The documentation: 95 kg, "2 x 36 V, 20 Ah", 8 to 10 hours. "Yes, all five" took 95 kg (point 1), which rests on the
+documentation alone; the register's 80 kg is the datasheet's. Recommended: as the H1's two figures (E8.2), the
+datasheet's 80 kg the mode and the documentation's 95 kg the maximum (79 / 80 / 95 kg), and one battery of 36 V, 20 Ah
+(720 Wh) as the datasheet's standard robot.
+
+**Decided:** Matthias, 2026-10-30, "Yes, 79 / 80 / 95": the TIAGo Pro's mass 79 / 80 / 95 kg (the datasheet's 80 kg
+the mode, the documentation's 95 kg the maximum), one battery of 36 V, 20 Ah (720 Wh). This replaces the 95 kg of
+"Yes, all five" (E9.2 point 1) for the TIAGo Pro.
+
+### E9.4 Spec: the kinds of part of a robot on wheels (2026-10-30). Nothing built
+
+Matthias, 2026-10-30: "Spec the wheeled parts" (decision B: "the wheeled robots their own kinds of part"). What exists:
+ten kinds of part, the figures' rows (`01_schemas.py` `KINDS`: hip, knee, ankle, waist and arm joints, battery pack,
+torso boards and heat sink, head, cables, frame and shell); each joint a module by its torque (E6.8's fit) or, without
+torques, a share of the robot's mass (type 2's template, E7.4, from seven robots on legs); the frame the remainder. The
+shared lists (`data/researched/shared_lists.xlsx`, placed by his decisions of 2026-10-26) have no body region for a base
+and no part group for wheels. The car sensor list (RAWCLICVehicleElectronics 07_) has an "ultrasonic sensor".
+
+What the 43 bring that a robot on legs has not (E9.1): a base on 2 to 4 driven wheels (two driven wheels, differential where
+stated: H2-D, G1-D, AICO 2, RealBot-L2, VB1-I, CASBOT W1, ARI; by their two wheel joints: RB-Y1 A, W-Bot, Avatar; steered: AI Worker 3, G2 Genie 4,
+MagicBot D1 4, RealBot-S2 4, Vega 2, R1 Pro; omni or mecanum: ARMAR-7 3, Reachy 2 3, TIAGo Pro 4, VB2 4, VersaBot VB-1
+4, Torobo, Feather, Mantis, Moz1; an inverted pair: CUE7); a lift column (AI Worker 500 mm, H2-D 460, RealBot-L2 300,
+Dual-Arm Lift 900, Feather 600, Mantis 550, TIAGo Pro 350; CASBOT W1, G1-D one joint) or a folding leg of 2 to 6 joints
+(G2 Genie, MagicBot D1, RealBot-01, ARMAR-7, W-Bot, RB-Y1); chassis sensors (LiDAR, ultrasonic, depth cameras, collision
+sensors); a battery in the base. The base is the heaviest part in the three model files: 36.0 of 94.4 kg (AI Worker,
+its lift 17.9 kg more), 60.1 of 132.2 kg (RB-Y1), 88.4 of 141.0 kg (Vega); the files do not split it alike (the RB-Y1's
+wheels 1.38 kg each with their motors in the base; the Vega's driven wheels 3.7 kg each; the AI Worker's drive links
+3.80 kg and steering links 0.76 kg each), so they cannot give a drive module's mass alone.
+
+| # | His words / what is to be built | Recommendation |
+|---|---|---|
+| 1 | "their own kinds of part": the kinds of a robot on wheels | **Two kinds added to the ten: "Wheeled base"** (the drive and steering modules: motor, gearbox, brake; the wheels and tyres; the casters; the chassis sensors; the motor-driver boards) **and "Lift column"** (its motor, screw or belt, guides and profile). The rest as the ten: arm, waist and neck joints and hands; a folding leg's joints as hip, knee and ankle joints by the maker's names (as decision B of batch 2b: joints named by their place); the battery; the boards; the head; the cables; the frame and shell, the remainder |
+| 2 | **Open A:** a computer that sits in the base is in the kind "Torso boards and heat sink" | rename that kind **"Boards and heat sinks"** for every robot type (type 1's legend changes by one word); the body region says where each board sits |
+| 3 | **Open B:** where the new kinds sit in the shared lists (his workbook) | one body region **"Base"** and one part group **"Wheels and wheel drives"** added to its sheet Lists, a backup first; the lift column in "Joint drives", body region "Torso" |
+| 4 | the drive and steering modules and the wheels: their number and kind | from the maker (E9.1); not stated: by the base's kind (two driven wheels and two casters), labelled E |
+| 5 | their mass | **sources first**: the makers of robot drive units (wheel motors with gearbox and brake, mass and torque) and of casters, and the three model files; then a mass per module proposed robot by robot (as E8.3), half to 1.5 times where estimated. Composition: a motor as a joint module's (copper winding, electrical steel, NdFeB magnets, gear steel, aluminium housing), the wheel's aluminium hub and polyurethane or rubber tyre (Plastics) |
+| 6 | the lift column | its stroke from the maker; its mass from lifting-column makers' datasheets by stroke and load (**sources first**); aluminium profile, steel screw and guides, its motor as a joint module's |
+| 7 | the battery in the base | as type 2's battery rows: cells from voltage × capacity (or the stated Wh) over the cells' Wh per kg, the pack from the pack's Wh per kg; body region Base. **Open C:** CASBOT W1's pack is LFP ("磷酸铁锂"), a cell type 2 has not: its own LFP cells (sources first); every other robot NMC as type 2 (E1.7e) |
+| 8 | the chassis sensors | type 2's sensor rows by the maker's counts; ultrasonic sensors as the car list's "ultrasonic sensor"; collision sensors E |
+| 9 | the joints of arms, waist, neck and folding legs | by their torque with E6.8's fit where the maker gives it (Vega, RB-Y1 by their model files; W-Bot; H2-D's arms 120 N·m; the R1's torso 304 N·m); hands and grippers as added joints |
+| 10 | **Open D:** the frame and shell, the remainder, in a base that may hold steel or ballast (Vega's base 88 of 141 kg) | **sources first** on how the bases are built; its material the maker's where stated (AI Worker and RB-Y1 aluminium; H2-D aluminium, titanium, plastics; CASBOT W1 alloy and plastics); no material proposed before the sources |
+| 11 | a template for robots with few figures and the 12 with none | **a wheeled template of their own, never the legged one**: as E7.4, from the wheeled robots whose makers state it: the joint modules' share of the robot mass (by torques: Vega, RB-Y1, W-Bot); the base's parts per robot mass; the battery energy per kg of robot from the 12 that state an energy (from 4.6 to 40 Wh/kg, median about 10.3, against the legged template's 14.67); the wheels by the most common base. Proposed with its numbers, as E7.4 was |
+| 12 | the versions (E9.2, decided) | the AICO 2, RB-Y1 and R1-D in two versions each; the H2-D as its Flagship, the G1-D as its Ultimate; the register changed at the entry |
+| 13 | **Open E:** the figures (type 2's pages hold both) | the robot drawn on 02's overview gets a base under its torso, a box on wheels, for "Wheeled base" and "Lift column", in two more colours of the same Tol scale; 01's table of type 2's robots shows the robots on wheels in sections of their own with their base and lift. Said in words here; drawn only on his yes |
+| 14 | the order of work | this spec's yes → sources for points 5, 6, 7 (LFP) and 10 → a proposal of each robot's numbers (as E8.3) → the spec of the entry → tests first, then the code → his runs. Type 2's stock-and-flow draws switch to its parts when all 96 with a mass are in (Q2) |
+
+**Decided:** Matthias, 2026-10-30, "Yes, agree E9.4": the 14 points as recommended, open A to E included: the kinds
+"Wheeled base" and "Lift column" added to the ten; "Torso boards and heat sink" renamed "Boards and heat sinks" for every
+robot type; the body region "Base" and the part group "Wheels and wheel drives" added to the shared lists' sheet Lists
+(a backup first), the lift column in "Joint drives", body region "Torso"; the CASBOT W1 its own LFP cells, every other
+robot NMC; the bases' material from sources first; the figures as point 13, drawn on his yes. Nothing built yet: by
+point 14, the sources come first.
+
+### E9.5 The sources for the wheeled base's parts (E9.4 points 5, 6, 7 and 10). Nothing proposed
+
+Matthias, 2026-10-30: "Yes, start sources". Read on 2026-10-30: the makers' pages through four web-fetch reads (HTML
+only) and Tente's two castor pages in the built-in browser myself (the weight read from the page's own data, the
+cookie banner declined); the three model files of E9.1 by script. No PDF opened (each PDF found is named, not read).
+Search engines' summaries only pointed to pages: none is used as a source, and a source known only from one is marked
+"not read".
+
+**Point 5, the drive and steering modules, wheels and casters**
+
+| Source | What it states | Kind | Same kind, representative |
+|---|---|---|---|
+| ZLTECH, hub servo motors "for robot" (robotmotor.com, 8 product pages) | brushless, gearless, encoder, tyre rubber or PU; per motor: **4.5" 200 W, 5 / 15 N·m (rated / peak), "150kg/2sets", 2.9–3.0 kg; 6.5" 350 W, 6 / 18 N·m, 150 kg per pair, 3.75 kg; 6.5" 500 W, 10 / 30 N·m, 200 kg per pair, 4.85 kg (its text: 5.4); 8" 150 W, 5.5 / 16 N·m, "120kg/2pcs", 3.40 kg (its text: 3.725); 8" 250 W, 4 / 12 N·m, 100 kg per pair, 3.40 kg; 8" 350 W, 6 / 18 N·m, 150 kg per pair, 4.25 kg; 8" 800 W, 20 / 60 N·m, 300 kg per pair, 8.5 kg**; 15" pneumatic 800 W, 9.7 kg (outdoor). Brake: not stated. Conflicts on the pages: the voltage of the title against the table; two weights on two pages | maker, catalogue (design values) | yes: drive wheels of service, cleaning and delivery robots, two driven wheels carrying 100 to 300 kg, as the bases on two driven wheels (E9.4); the 15" outdoor wheel left out |
+| UU Motor, 4" robot servo hub motor SVH4D (uumotor.com) | "Motor weight: 1.4kg", "Max load: 50KG" (its text: 35 kg), torques conflicting (20 / 50 N·m against "max torque 7N.m") | maker, catalogue | for the small robots (R1-D, Mantis, 30 to 50 kg); its torques not used |
+| The model files (E9.1, by script) | Vega 1 Pro: driven wheels **3.7 kg** each (16 N·m), steering links 0.358 kg (6 N·m), casters 0.2 and 0.3 kg; AI Worker FFW-SG2: drive links **3.80 kg** each, steering links 0.755 kg; RB-Y1 A: wheels 1.378 kg each, their motors inside the base (60.08 kg) | maker's model | yes, the robots' own; the Vega's and the AI Worker's drive wheels agree with ZLTECH's 8" (3.40 to 3.73 kg) |
+| ROBOTIS e-manual, DYNAMIXEL YM070-210-R051-RH (the AI Worker's wheel steering) | "Weight" 790 g, Ø70 × 71.1 mm, continuous 8.2, maximum 16.3 N·m, 51:1, frameless BLDC, 24 V, no brake | maker, datasheet | yes, the AI Worker's own steering actuator; the drive motor is not named |
+| Pollen, Reachy's mobile base (the 2021 documentation) | "3x Omnidirectional wheels", "300W Max power", "Stall Torque: 13Nm", rated "5Nm, 115rpm"; Hall sensors and an IMU on each wheel; no motor mass | maker, spec | yes, Reachy 2's base (the current page: the same 25 kg and 80 kg payload) |
+| Tente, swivel castors 75 mm (tente.com) | **Linea light 5920UAP075L51-10**: polyamide housing and body, injected PU tread, 100 kg (3 km/h), 200 kg static, **"Overall weight 0.18 kg"**; **Agila light 1470PAO075P40**: "light steel sheet" housing, polypropylene body, PU tread, 60 kg, **0.27 kg** | maker, catalogue | yes for the light bases (the Vega's casters 0.2 and 0.3 kg); **no castor read for the heavy bases** (CASBOT W1's "2+4" at 260 kg): RS, Fallshaw and Distrelec refused or sent nothing |
+| Left out, not read | industrial AGV drive units (Diequa, Sumitomo, Honpine TYD: 60 to 3,000 kg per wheel); FRC swerve modules (competition robots); Honpine's steering hub motor (its page gone, 404) | — | not the same kind (vehicles for 0.5 to 3 t, or toys of competition), or not read |
+
+**Point 6, the lift column**
+
+| Source | What it states | Kind | Same kind, representative |
+|---|---|---|---|
+| ROBOTIS, AI Worker | lift "0 ~ 500 mm"; its lift actuator DYNAMIXEL **YM080-230-B001-RH: 890 g**, a motor with a "Spring applied brake", no gear, continuous 0.62 N·m; its model's lift link **17.9 kg** | maker, spec, datasheet, model | yes, a robot's own column; the mechanism around the motor (belt or screw, guides) not described |
+| Oriental Motor, EL series (catalog.orientalmotor.com) | ball screw, 6 mm lead, brake; **EL605 50 mm: body 20.4 kg, moving parts 5.5 kg; EL610 100 mm: 22.1 / 5.7 kg; EL620 200 mm: 26.3 / 6.9 kg; EL630 300 mm: 30.5 / 8.1 kg**; "Max. Vertical Transportable Mass ~30 kg"; materials not stated | maker, catalogue | **in part**: an industrial column for at most 30 kg and 300 mm, built heavier than a robot's, and shorter than most of the robots' strokes (300 to 900 mm) |
+| Phoenix Mecano, RK PowerLift | stroke "max. 500 mm" (its table: 650), 3,000 N; **no mass** | maker, catalogue | a medical column; no mass, so not usable |
+| Left out, not read | Ewellix LIFTKIT (its pages now redirect to Schaeffler's linear-motion list; a summary's 21 kg not used) | — | not read |
+| The makers' strokes (E9.1) | AI Worker 500, H2-D 460, RealBot-L2 300, Dual-Arm Lift 900, Feather 600, Mantis 550, TIAGo Pro 350 mm; CASBOT W1, G1-D one lift joint | makers | — |
+
+**Point 7, LFP cells:** the project has them: "LFP cylindrical", its three cells (Antbatt 26650 3.2 Ah and 3.0 Ah,
+Power-Sonic 18650; makers' datasheets, E1.7k) and its recipe, decided on 2026-10-26 (E1.7i). The CASBOT W1's page states
+"磷酸铁锂" and 48 V 25 Ah, not its cells' format. Nothing new to read.
+
+**Point 10, how the bases are built**
+
+| Source | What it states | Kind |
+|---|---|---|
+| The makers (E9.1) | AI Worker "Aluminum, Plastic"; RB-Y1 exterior "Aluminum"; H2-D "Aerospace-Grade Aluminum, Titanium Alloy, and High-Strength Engineering Plastics"; CASBOT W1 "合金、工程塑料"; G2 Genie "100%车规级零部件" (no material) | makers, spec |
+| Pollen, Reachy's mobile base (2021 documentation) | **"Aluminium, MJF 3D printed plastic parts, Steel"**; 25 kg; its battery "OlenBox M": "24V, 35Ah", **6.5 kg** (840 Wh, arith.; chemistry not stated) | maker, spec |
+| The model files | the base's share of the robot: AI Worker 36.0 of 94.4 kg (its lift 17.9 kg more), RB-Y1 60.1 of 132.2 kg, Vega 88.4 of 141.0 kg; the files do not say what the base holds | makers' models |
+| Not found | **no source states a steel frame or a ballast in a wheeled humanoid's base**; AMR chassis pages (a fabricator, a patent) known only from a search summary, about carts, not read | — |
+
+**What the sources settle, and what not:**
+- The drive wheels of a base on two driven wheels: a hub servo motor of 2.9 to 4.85 kg for 100 to 200 kg per pair,
+  8.5 kg for 300 kg per pair (ZLTECH), 1.4 kg for a small robot (UU Motor); two models of the robots agree (3.7, 3.80 kg).
+- Steering: one actuator read (ROBOTIS, 0.79 kg) and two models' steering links (0.36, 0.76 kg); no steering drive
+  unit's datasheet read.
+- Casters: 0.18 to 0.27 kg at 60 to 100 kg (Tente; the Vega's model 0.2 and 0.3 kg); heavy bases not covered.
+- Lift column: a robot's own (AI Worker: a 0.89 kg motor, a 17.9 kg lift link) and an industrial one (Oriental Motor,
+  20.4 to 30.5 kg, built for 30 kg); no robot column of 300 to 900 mm with a stated mass besides the AI Worker's model.
+- The bases' material: aluminium and plastics by every maker who says, steel too in Pollen's, titanium in Unitree's; no
+  ballast stated anywhere.
+- LFP: settled by E1.7k.
+
+### E9.6 Proposal: type 2's 43 robots on wheels, robot by robot (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Propose the numbers". The method is E9.4's (agreed), on E9.5's sources, with the decisions of E9.2
+and E9.3; everything else as type 2's batches (E7.5 points 1 to 13, E6.8's fit, E8.3). Where an input needs a choice
+none of these made, it is **bold**. Read for it besides E9.5: ROBOTIS's e-manual for the AI Worker's other three
+actuators (PH42-020-S300-R "340 [g]", XH540-V150-R "165 [g]", XH430-V210-R "82 [g]") and its gripper (RH-P12-RN
+"500g"); the RB-Y1's grippers in its model (0.533 kg each). Numbers at the modes are Claude's arithmetic
+(`wheeled_modes.py`, V99); the run draws every one from its min / mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **The robot's mass** | E9.2: the maker's the mode, ± 1 kg; **its model's the maximum where higher (AI Worker 94.42, RB-Y1 A 132.22, Vega 141.00 kg), as the H1's (E8.2)**; TIAGo Pro 79 / 80 / 95 (decided); Reachy 2 its "Up to 50 kg" 49 / 50 / 51; Torobo its maker's 120 (the register's 160 reported); the robots with no maker's mass the register's (the catalogue's, so labelled), ± 1 kg, or its range (VB1-I 60 / 65 / 70, VB2 65 / 70 / 75) |
+| 2 | **Joint modules stated or by the torques** | Vega 1 Pro and RB-Y1: E6.8's fit at their models' limits, half to 1.5 times (E); the RB-Y1's neck its "Neck Joint Module", 1.5 kg × 2 (S). AI Worker: ROBOTIS's actuators, an arm 3 × 1.2 + 3 × 0.79 + 0.34 kg, its head 0.165 + 0.082 kg (S, ± 5 %). Reachy 2: Pollen's Orbita 2D 1.9 kg × 4 and Orbita 3D 0.95 kg × 3 (S). W-Bot: its page's knee 360, ankle 160, arm joints 60 N·m (14) by the fit; **its three hip joints at its knee's 360 N·m (E)**. Not used, a maximum only: H2-D's arms 120, the R1's torso 304, R1-D's shoulder 60, Mantis's 80 N·m |
+| 3 | **The wheeled template** (E9.4 point 11) | **Joint modules 7.8 / 15.6 / 23.4 % of the robot mass**: the four with every joint (Vega 13.2 %, RB-Y1 13.9 %, AI Worker 14.3 %, Reachy 2 20.9 %), their mean, half to 1.5 times as E7.4 (the legged template: 40.4 %); **split as the four on average: waist 20.5 %, shoulders 38.3 %, elbows and wrists 33.6 %, head 7.6 %** (a folding leg's joints with the waist). **Battery 4.62 / 10.28 / 22.86 Wh per kg of robot**: the median of the 12 that state an energy, their least and their most, **the W-Bot's 40 left out of the maximum as the one outlier** (the legged template: 14.67). **Base: two driven wheels and two casters**, the most common of the bases stated (10 of 26). No lift column unless the maker states one |
+| 4 | **Drive wheels** | their number by the maker (E9.1), the template's two where not stated; **each a hub motor by the robot's mass per driven wheel: up to 35 kg 1.4 kg (UU Motor); to 75 kg 3.75 kg (ZLTECH's 6.5" and 8", 3.40 to 4.25 kg); to 100 kg 4.85 kg; above 8.5 kg (ZLTECH's 800 W)**, half to 1.5 times (E). The models': Vega 3.7, AI Worker 3.80 kg (E); **Reachy 2 by its motors' torque (rated 5 N·m): ZLTECH's 4.5", 2.9 kg (E)**. **Inside: as a joint module (the G1's joint scaled, E7.5 point 3), its tyre among its plastics (E)**: a hub motor has no gears (ZLTECH: "gearless"), so its steel is overstated here and its other materials understated |
+| 5 | **Steering** | per steered wheel 0.79 kg (ROBOTIS YM070-210-R051-RH: S for the AI Worker, E elsewhere, half to 1.5 times); the Vega's model 0.358 kg (E); inside as a joint module |
+| 6 | **Casters** | two to a base of two driven wheels, four for CASBOT W1 ("2+4"); 0.27 kg each (Tente's steel-housed 75 mm, half to 1.5 times, E); the Vega's model 0.2 and 0.3 kg; **inside: steel 50 %, plastics the remainder (E: a steel housing, a polypropylene body, a PU tread; no source weighs them)** |
+| 7 | **Lift column** | where the maker states one: AI Worker, CASBOT W1, Dual-Arm Lift, Feather, G1-D, H2-D, Mantis, RealBot-L2, TIAGo Pro. The AI Worker's model's 17.9 kg (E); **the others 19.9 % of the robot mass (the AI Worker's 17.9 of 90 kg), half to 1.5 times (E)**: Oriental Motor's industrial columns, 20.4 to 30.5 kg, lie within it for robots of 100 to 150 kg. **Inside: a motor of 0.89 kg as a joint module (ROBOTIS YM080-230-B001-RH: S for the AI Worker, E elsewhere), the rest steel 20 / 30 / 40 % (screw and guides) and aluminium the remainder (profile; E, no source weighs them)**. The catalogue's lifts of Y1 and Y2-P not used (second-hand; the template, as decided) |
+| 8 | **Battery** | Stated: AI Worker 25 V × 80 Ah (2,040 Wh); ARI 24 V × 40 Ah (960); CASBOT W1 48 V × 25 Ah, LFP (1,200; decided); Feather 48 V × 50 Ah (2,400); G2 Genie 48 V × 34 Ah (1,652); H2-D 48 V × 30 Ah (1,440); RB-Y1 A 50 V × 25 Ah (1,250), M 50 V × 50 Ah (2,500); RealBot-L2 and -S2 48 V × 20 Ah (960); TIAGo Pro 36 V × 20 Ah (720; decided); W-Bot 2,400 Wh at its "最大电压48V"; **R1 Pro the R1's 48 V × 35 Ah (S for the R1, E for the Pro); Reachy 2 the 2021 base's 24 V × 35 Ah, its pack 6.5 kg (S for that base, E for Reachy 2); MagicBot D1 1,652 Wh at 48 V (E: its charger 54.75 V); G1-D its 9 Ah (upper body) and 30 Ah (base) at 48 V (E, as Unitree's H2-D): 1,872 Wh; RealBot-01 its 40 Ah at 48 V (E, as RealMan's S2 and L2): 1,920 Wh**. Every other robot the template. Packs from their energy over the pack's Wh per kg (E5.14), Reachy 2's stated; body region Base, the G1-D's 9 Ah pack Torso; cells NMC, CASBOT W1's LFP |
+| 9 | **Boards** | E7.5 point 7, as each maker names: Jetson AGX Orin (G1, AI Worker, R1 Pro, RealBot-L2, -S2; Feather the middle of its three options), AGX Thor (Vega, ψ-SynRobot, as the H2 Plus's), two Orin NX (W-Bot), Intel boards (ARI, H2-D two, TIAGo Pro, Torobo), an AMD board (Reachy 2's Bedrock v3000, as an Intel board), CASBOT W1's i9 PC and RTX 4060 graphics board and RK3588; **G2 Genie's "500 TOPS (INT8)", "24*A78" as two AGX Orin-sized modules (E, my reading: an AGX Orin has 12 A78 cores); MagicBot D1's "Huawei R1, 500 TOPS" as one AGX Orin-sized module (E); RB-Y1's "dual-PC", "GPU-Equipped" as an Intel board and an AGX Orin-sized module (E); R1-D's two 8-core boards (E)**; the others one computer board (E). Motor drivers inside the joint and wheel modules, as type 2's joints |
+| 10 | **Sensors** | E7.5 point 8, each by its kind, robot by robot below; **ultrasonic sensors as the car list's "ultrasonic sensor" (E)**. Left out (no kind yet, as force and touch sensors, E7.5 point 13): collision and low-obstacle sensors, screens and LED eyes, force and torque sensors |
+| 11 | **Hands and grippers** | AI Worker's RH-P12-RN "500g" (S); CASBOT W1's gripper "500g" (S); RB-Y1 its model's 0.533 kg (E); **the grippers named without a mass (R1 Pro, R1-D, Reachy 2, TIAGo Pro, Dual-Arm Lift; Lanxin's three by their "gripping load") as the RH-P12-RN's 0.5 kg (E)**; hands of N joints as Fourier's per joint (E7.5 point 4): AGIBOT G1 6, Feather 6, ARMAR-7 4, Honda Avatar 16. Options left out (H2-D's, G1-D's, W-Bot's) |
+| 12 | **Cables, shell, screws, frame** | E7.5 points 9 to 11: cables by the height (a range: its top); shell 11.5 %, screws; the frame the remainder, aluminium (the makers who say: AI Worker, RB-Y1, H2-D, CASBOT W1; E elsewhere); the H2-D's titanium as the H2's titanium parts (E); **Reachy 2's frame aluminium (its base "Aluminium, … Steel": the steel not weighed, E)** |
+| 13 | **Versions** (decided, E9.2) | AICO 2-4 and 2-10, RB-Y1 A and M, R1-A5-D and R1-A7-D, each as often; H2-D Flagship; G1-D Ultimate |
+| 14 | **Not in this proposal** | force, torque and touch sensors; collision sensors; screens; every option; the catalogue's lifts and second-hand masses (CUE7, Mantis); a ballast (no source) |
+
+**Robot by robot** (the register's mass in brackets where it differs; S stated, E estimated, C the catalogue's;
+base: driven wheels × kg, steered, casters):
+
+| # Robot | Mass (kg) | Joints | Hands | Base | Lift | Battery (Wh) | Boards | Sensors |
+|---|---|---|---|---|---|---|---|---|
+| 13 AGIBOT A2-W | 229 / 230 / 231 (C) | template | — | 2 × 8.5, 2 casters | — | 2,364 (E) | one (E) | IMU (E) |
+| 15 AGIBOT G1 | 149 / 150 / 151 | template (20 DoF) | 2 × 6 joints | 2 × 3.75, 2 casters (E) | — | 1,542 (E) | AGX Orin 64GB | 8 cameras (3 RGB-D, 5 fisheye), base RGB-D × 2, LiDAR, IMU (E) |
+| 20 AI Worker FFW-SG2 | 89 / 90 / 94.42 | ROBOTIS's (S) | 2 × 0.5 (S) | 3 × 3.80, 3 steered | 17.9 kg | 2,040 (S) | AGX Orin 32GB | ZED Mini, D405 × 2, LiDAR × 2, IMU |
+| 21 AICO 2-4 | 280 / 281 / 282 | template (2 × 7 arms) | — | 2 × 8.5, 2 casters (E) | — | 2,888 (E) | one (E) | LiDAR, IMU (E) |
+| 21 AICO 2-10 | 394 / 395 / 396 | template | — | 2 × 8.5, 2 casters (E) | — | 4,060 (E) | one (E) | LiDAR, IMU (E) |
+| 34 ARI | 59 / 60 / 61 (C) | template (14 DoF) | — | 2 × 1.4, 2 casters (E) | — | 960 (S) | Intel | head camera, D435i, 4 microphones, 2 speakers, IMU (E) |
+| 35 ARMAR-7 | 119 / 120 / 121 (C) | template (2 × 8 arms, head 3, torso 2) | 2 × 4 joints | 3 × 3.75 (omni) | — | 1,233 (E) | one (E) | 2 hand cameras, binocular (E), IMU (E) |
+| 40 Astribot S1 | 79 / 80 / 81 | template | — | 2 × 3.75, 2 casters (E) | — | 822 (E) | one (E) | IMU (E) |
+| 41 Astribot T1 | 65 / 66 / 67 (C) | template | — | 2 × 1.4, 2 casters (E) | — | 678 (E) | one (E) | IMU (E) |
+| 42 AD-01 | 119 / 120 / 121 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 1,233 (E) | one (E) | IMU (E) |
+| 49 Honda Avatar (155 cm, 101) | 109 / 110 / 111 | template (56 DoF) | 2 × 16 joints | 2 × 3.75, 2 casters (E) | — | 1,131 (E) | one (E) | binocular (E), IMU (E) |
+| 60 CASBOT W1 | 259 / 260 / 261 | template (20 DoF) | 2 × 0.5 (S) | 2 × 8.5, 4 casters | 51.7 kg (E) | 1,200 (S, LFP) | i9 PC, RTX 4060, RK3588 | LiDAR, RGB-D × 4, stereo, 2 microphones |
+| 68 CUE7 | 73 / 74 / 75 (C) | template | — | 2 × 3.75 (inverted pair) | — | 761 (E) | one (E) | IMU (E) |
+| 82 Dual-Arm Lift | 156 / 157 / 158 | template (2 × 6 arms) | 2 × 0.5 (E) | 2 × 4.85, 2 casters (E) | 31.2 kg (E) | 1,614 (E) | one (E) | depth camera (E), IMU (E) |
+| 86 Eggie | 44 / 45 / 46 (C) | template | — | 2 × 1.4, 2 casters (E) | — | 462 (E) | one (E) | IMU (E) |
+| 92 Feather | 104 / 105 / 106 | template (23 DoF) | 2 × 6 joints | 3 × 1.4, 3 steered (E: its "6 base" joints) | 20.9 kg (E) | 2,400 (S) | AGX Orin (E) | ZED, 4 microphones, speaker, IMU (E) |
+| 104 G1-D Ultimate | 89 / 90 / 91 | template (19 DoF) | — | 2 × 3.75, 2 casters (E) | 17.9 kg (E) | 1,872 (S, E) | one 8-core (E) | binocular, 2 wrist cameras, LiDAR, 2 depth cameras, IMU (E) |
+| 105 G2 Genie (55) | 184 / 185 / 186 | template (25 DoF) | — | 4 × 3.75, 4 steered | — | 1,652 (S) | two AGX Orin-sized (E) | stereo, 3 fisheye, 3 RGB-D, 2 LiDAR, 8 ultrasonic, IMU, 4 microphones, speaker |
+| 122 H2-D Flagship | 119 / 120 / 121 | template (20 DoF) | — | 2 × 3.75, 2 casters (E) | 23.9 kg (E) | 1,440 (S) | Intel i5, i7 | binocular, 2 wrist cameras, LiDAR, depth camera, 2 ultrasonic, microphones, speaker, IMU (E) |
+| 179 MagicBot D1 | 149 / 150 / 151 | template (25 DoF) | — | 4 × 3.75, 4 steered | — | 1,652 (S, E) | one AGX Orin-sized (E) | RGB, stereo, 3 fisheye, 2 RGB-D, 2 LiDAR, 3 ultrasonic, microphones, 2 speakers, IMU (E) |
+| 184 Mantis Standard | 49 / 50 / 51 (C) | template (22 DoF) | — | 4 × 1.4 (omni, E) | 9.9 kg (E) | 514 (E) | one (E) | IMU (E) |
+| 200 Moz1 | 69 / 70 / 71 (C) | template (26 DoF) | — | 4 × 1.4 (omni, E) | — | 719 (E) | one (E) | IMU (E) |
+| 230 Phoenix Gen 8 | 69 / 70 / 71 (C) | template | — | 2 × 1.4, 2 casters (E) | — | 719 (E) | one (E) | IMU (E) |
+| 247 R1 Pro (96) | 125 / 126 / 127 | template (26 DoF) | 2 × 0.5 (E) | 3 × 3.75, 3 steered (the R1's) | — | 1,680 (S, E) | AGX Orin 32GB | ZED 2, D435i × 2, 5 cameras, LiDAR, IMU |
+| 248 R1-A5-D (52) | 29 / 30 / 31 | template (18 DoF) | 2 × 0.5 (E) | 4 × 1.4 (E) | — | 308 (E) | two 8-core (E) | binocular, LiDAR, 4 microphones, 2 speakers, IMU (E) |
+| 248 R1-A7-D (52) | 31 / 32 / 33 | template (22 DoF) | 2 × 0.5 (E) | 4 × 1.4 (E) | — | 329 (E) | two 8-core (E) | the same |
+| 251 RB-Y1 A | 130 / 131 / 132.22 | its model's 20, neck 2 × 1.5 | 2 × 0.533 (E) | 2 × 3.75, 2 casters (E) | — | 1,250 (S) | Intel, AGX Orin-sized (E) | IMU (E) |
+| 251 RB-Y1 M | 169 / 170 / 171 | the same | 2 × 0.533 (E) | 4 × 3.75 | — | 2,500 (S) | the same | IMU (E) |
+| 252 Reachy 2 | 49 / 50 / 51 | Pollen's Orbita (S) | 2 × 0.5 (E) | 3 × 2.9 (omni) | — | 840 (S, E), pack 6.5 kg | AMD (E) | binocular, depth camera, LiDAR, 3 IMU |
+| 253 RealBot-01 | 124 / 125 / 126 | template (21 DoF) | — | 2 × 3.75, 2 casters (E) | — | 1,920 (S, E) | one (E) | 5 depth cameras, 3 fisheye, LiDAR, 2 IMU, microphones |
+| 254 RealBot-L2 | 119 / 120 / 121 | template (17 DoF) | — | 2 × 3.75, 2 casters (E) | 23.9 kg (E) | 960 (S) | AGX Orin 64G | stereo, 2 RGB-D, IMU (E) |
+| 255 RealBot-S2 | 124 / 125 / 126 | template (20 DoF) | — | 4 × 1.4, 4 steered | — | 960 (S) | AGX Orin 64G | stereo, 2 fisheye, 2 RGB-D, 2 LiDAR, IMU (E) |
+| 295 TIAGo Pro (80) | 79 / 80 / 95 | template (23 DoF) | 2 × 0.5 (E) | 4 × 1.4 (mecanum) | 15.9 kg (E) | 720 (S) | Intel i5 | RGB-D, 2 LiDAR (2D), 4 microphones, 2 speakers, IMU |
+| 307 Torobo (160) | 119 / 120 / 121 | template (2 × 7, waist 3, neck 3) | — | 4 × 1.4 (omni, E) | — | 1,233 (E) | Intel (E) | IMU (E) |
+| 312 VB1-I | 60 / 65 / 70 (C) | template (2 × 6 arms) | 2 × 0.5 (E) | 2 × 1.4, 2 casters (E) | — | 668 (E) | one (E) | depth camera (E), LiDAR, IMU (E) |
+| 313 VB2 | 65 / 70 / 75 (C) | template (2 × 7 arms) | 2 × 0.5 (E) | 4 × 1.4 (omni) | — | 719 (E) | one (E) | the same |
+| 314 Vega 1 Pro | 134 / 135 / 141.00 | its model's 23 | — | 2 × 3.7, 2 × 0.358 steered, casters 0.2 and 0.3 (its model) | — | 1,387 (E) | AGX Thor | stereo, 2 LiDAR, 4 RGB cameras, IMU (E) |
+| 315 VersaBot VB-1 | 74 / 75 / 76 (C) | template (2 × 6 arms) | 2 × 0.5 (E) | 4 × 1.4 (omni) | — | 771 (E) | one (E) | depth camera (E), LiDAR, IMU (E) |
+| 318 W-Bot | 59 / 60 / 61 | its page's torques, 19 | — | 2 × 1.4, 2 casters (E) | — | 2,400 (S) | 2 × Orin NX 16GB | D435i, D455, LiDAR, IMU (E) |
+| 335 Y1 | 149 / 150 / 151 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 1,542 (E) | one (E) | IMU (E) |
+| 336 Y2-B | 84 / 85 / 86 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 874 (E) | one (E) | IMU (E) |
+| 337 Y2-P | 94 / 95 / 96 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 976 (E) | one (E) | IMU (E) |
+| 340 YMBot D | 99 / 100 / 101 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 1,028 (E) | one (E) | IMU (E) |
+| 341 YMBot D2 | 149 / 150 / 151 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 1,542 (E) | one (E) | IMU (E) |
+| 342 YMBot D4 | 99 / 100 / 101 (C) | template | — | 2 × 3.75, 2 casters (E) | — | 1,028 (E) | one (E) | IMU (E) |
+| 349 ψ-SynRobot | 64 / 65 / 66 (C) | template (waist 2, neck 2) | — | 2 × 1.4, 2 casters (E) | — | 668 (E) | AGX Thor (E) | 4 RGB-D, 3 fisheye, IMU (E) |
+
+**What it gives at the modes** (Claude's arithmetic, `wheeled_modes.py`, V99): joint modules 10.7 to 31.2 % of the
+robot mass (the template's 15.6 %; the W-Bot's 31.2 % by its stated torques, its hips E); the base's wheels, steering and
+casters 3.3 to 18.2 kg; the lift columns 9.9 to 51.7 kg; the battery packs 1.9 to 24.8 kg. **The frame before cables,
+boards and sensors** stays above zero for every robot: least the AI Worker's, 23.5 % of its mass (its lift and battery
+large), then the W-Bot's 26.5 %, the G1-D's 30.9 %, Feather's 31.5 %; without a lift most lie at 53 to 62 %. That
+remainder is the frame and the base's chassis, in aluminium by every maker who says: **the largest part of a robot on
+wheels and the least known**; a ballast or a steel chassis, which no source states, would sit in it.
+
+**Agreed:** Matthias, 2026-10-30, choosing the answer offered: "Yes, agree E9.6" (points 1 to 14 and the robot-by-robot
+table, with their estimates). Not entered: the entry (the wheeled kinds of part, the shared lists' region and group,
+the register's versions and masses, type 2's builder, tests first) is a step of its own, for his yes.
+
+### E9.7 Spec: the entry of the 43 robots on wheels (2026-10-30). Nothing built
+
+Matthias, 2026-10-30: "Spec the entry". It enters what was agreed: E9.2 ("Yes, all five"), E9.3 ("Yes, 79 / 80 / 95"),
+E9.4 ("Yes, agree E9.4", A to E) and E9.6 ("Yes, agree E9.6"). Found in the code for it (V100): 02 takes type 2's
+draws for stock-and-flow from its parts by itself once no robot of it with a mass is left (Q2), so this entry makes that
+switch (the Xialan S0 has no mass); 02 has one cell recipe for every robot taken apart ("NMC cylindrical"); every
+battery row is written to the body region "Torso"; joints go to their kind by their name (`JOINT_KIND`); the magnets'
+heat groups are Knees, Hips, Waist, Ankles, Shoulders, Elbows and wrists; the kind name "Torso boards" is in 173 cells of
+type 1's parts file, 326 of type 2's, and about 120 places in the builders.
+
+| # | What is built (his words: the agreed points) | Where |
+|---|---|---|
+| 1 | **The kinds** (E9.4 points 1, 2): "Wheeled base" and "Lift column" added, the kind "Torso boards and heat sink" renamed "Boards and heat sinks" for every robot type (its short name in the parts files "Torso boards" → "Boards"; type 1's parts file changes in that column only, its numbers not) | `01_schemas.py` `KINDS`, `KIND_HOLDS`, `JOINT_KIND` ('wheel', 'steering' → base; 'lift' → lift); the three builders |
+| 2 | **Their place in the shared lists** (E9.4 point 3, his workbook): the body region "Base" and the part group "Wheels and wheel drives" added to the sheet Lists, with what each holds; a backup first; `SHARED_LISTS.md` says so | `data/researched/shared_lists.xlsx`; 02's `KIND_PART_GROUP`, `KIND_BODY_REGION` (base → Wheels and wheel drives, Base; lift → Joint drives, Torso) |
+| 3 | **A robot on wheels in the shared machinery**: a block's driven wheels (number, hub motor kg), steered wheels, casters, lift column, the battery's body region, its cells' chemistry; the hub, steering and lift motors written as rows of the sheet Joints (inside as a joint module, E9.6 points 4, 5, 7), the casters' and the column's other parts as rows of the sheet Parts with their shares (steel 50 % / plastics the remainder; steel 20 / 30 / 40 % / aluminium the remainder); the wheeled template as a block of its own, its Constants named "… , on wheels" (joint modules 0.078 / 0.156 / 0.234; battery 4.62 / 10.28 / 22.86 Wh per kg; lift column 0.0995 / 0.199 / 0.2985 of the robot mass), its split averaged over the four (E9.6 point 3) | `tools/parts_taken_apart.py` (`block()`, `robot_rows()`, a wheeled `template_block`) |
+| 4 | **The 43 robots** (E9.6, 46 blocks with the versions), in the register's order, every source's code in the sheet Sources; the hub motor of each base by its class (E9.6 point 4); the ultrasonic sensors through the car list's "ultrasonic sensor" | `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py` |
+| 5 | **LFP** (E9.4 C): a robot's cells by its own chemistry: the CASBOT W1's "LFP cylindrical" (its cells' Wh per kg from the sheet Cells' LFP cells, its recipe E1.7k), every other robot as now | 02's `CELL_RECIPE` per robot, the parts machinery |
+| 6 | **The register**: type 2's 43 taken apart (the versions joined as now), the decisions E9.2, E9.3, E9.6 in its sheet of decisions; its masses unchanged, the makers' in the parts file and the register's reported (as E8.2). After it: 96 of type 2's 97 taken apart, the Xialan S0 "not drawn: no mass" | `tools/make_humanoid_register.py` |
+| 7 | **01's checks**: check 18 knows two templates per type, the legged (E7.4) and the wheeled (E9.6): a template robot's shares equal its own template's; every robot on wheels has at least one driven wheel; a lift column only where its block names one | `01_schemas.py` |
+| 8 | **01's table of type 2's robots** (E9.4 point 13): the robots on wheels in sections of their own ("On wheels, every joint from its maker", "On wheels, joints a share of the robot's mass"), each row its base (driven wheels, steered, casters) and its lift; its overview box: "96 of its 97 robots …" | `01_schemas.py` |
+| 9 | **02's pages** (E9.4 point 13): the twelve kinds in every legend and stacked bar; the robot drawn on type 2's overview gets, beside its feet, a base on wheels with a lift column above it, so that both new kinds have a place; type 1's drawing unchanged | `01_schemas.py` (the drawing, one copy), `02_composition.py` |
+| 10 | **Tests first** (each failing before its code): the 46 blocks (masses, hub classes, steering, casters, lifts, batteries, LFP for CASBOT W1 only, versions, hands and grippers); type 1's file unchanged but the one renamed column; the register (96 taken apart, none with a mass left); 02 (each robot as often, a version half as often; LFP cells only in CASBOT W1's draws; type 2's stock-and-flow from its parts); 01 (twelve kinds; check 18 with two templates; the table's pages; no label over another) | `tests/` |
+| 11 | **Sandbox** before his runs: both builders, the register, 01's pages of type 2 and 02 whole at 2,000 draws into Claude's scratch folder; no remainder below zero; the pages looked at | scratch only |
+| 12 | **Documents**: README, METHODOLOGY (type 2 on wheels, the twelve kinds), SHARED_LISTS.md, EVIDENCE E9.8 (where each decision landed, as E8.4), VERIFICATION, HANDOVER with his runs by full path | `documentation/claude/`, `README.md` |
+| 13 | **Not in** (as E9.6 point 14): force, torque, touch and collision sensors; screens; options; the catalogue's lifts and second-hand masses; a ballast. Commit and push on his word | — |
+
+**Open points, each with my recommendation:**
+- **A. The magnets of the wheel, steering and lift motors** need a heat group (sheet MagnetGrades, E2.11). No source
+  grades a robot's hub motor. Recommended: **the hub motors as the hips** ("carry the body": SH 50 %, UH 40 %, EH 10 %),
+  **the steering and lift motors as the waist** ("moves often": SH 60 %, UH 40 %); no new group.
+- **B. Type 2's drawing holds robots on legs and on wheels.** Recommended as point 9: the body as now, and beside its feet a
+  base on wheels with its lift column, labelled by kind like the joints; the figure's text says which robots have which.
+- **C. The two new colours.** Recommended: two colours of Paul Tol's discrete rainbow not yet used, chosen so that no two
+  neighbouring kinds look alike; the ten colours unchanged (type 1's figures keep theirs); shown on the sandbox's pages
+  first.
+- **D. The backup of the shared lists** (his workbook; Claude's scratch folder is emptied overnight, so not there).
+  Recommended: a copy beside it, `data/researched/shared_lists_before_wheels_2026-10-30.xlsx` (data, not in git),
+  removed only on his word.
+
+### E9.8 The entry: what each point of E9.7 landed in (2026-10-30, on "Yes, build it")
+
+Matthias, 2026-10-30: "Yes, build it" (E9.7's points 1 to 13 and its open points A to D with their recommendations).
+Builder: `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`; machinery: `tools/parts_taken_apart.py`;
+register: `tools/make_humanoid_register.py`. Checks: VERIFICATION.md V101. Nothing committed.
+
+| Point of E9.7 | Where it landed |
+|---|---|
+| 1, the kinds | `01_schemas.py` `KINDS` (twelve: 'base' "Wheeled base", 'lift' "Lift column", last), `PART_KIND`, `KIND_HOLDS`, `JOINT_KIND` ('wheel', 'steering' → base; 'lift' → lift); "Boards and heat sinks", its short name "Boards" in the three builders; type 1's file differs from the one on disk in that column only (173 cells, V101) |
+| 2, the shared lists | his `shared_lists.xlsx`, sheet Lists: ('Part group', 'Wheels and wheel drives', …) before 'Mixed', ('Body region', 'Base', …) before 'Whole body'; every other sheet and row unchanged (V101); `SHARED_LISTS.md`; 02's `KIND_PART_GROUP`, `KIND_BODY_REGION` |
+| 3, the machinery | `tools/parts_taken_apart.py`: `block()`'s battery region, cells' recipe, averaged template and lift column; `robot_rows()`; the sheet Shares' rows "Casters" (C45 steel 50 %, plastics the remainder) and "Lift column: aluminium profile, steel screw and guides"; the builder's `wheeled()`, `on_wheels_own()`, `hub_motors()`, `steering()`, `lift_motor()`, `casters()`, `grippers()`, `hands()`, `WHEELED_AVERAGE_JOINTS` and the three Constants "…, on wheels" |
+| 4, the 43 robots | 46 blocks in the register's order (`GENERATED`, 102 in all); 45 source codes added to the sheet Sources (AGA2 … ORM); the base's ultrasonic sensors through the car list's "ultrasonic sensor" |
+| 5, LFP | the CASBOT W1's cells row grade 'LFP cylindrical'; 01's `CELL_MATERIAL` grade rule; 02's `Shared.cell_draws(recipe)`: one LFP cell of the sheet Cells drawn per draw, its elements by the LFP recipe; its pack its cells times the NMC packs' pack-to-cell ratio (decided, below) |
+| 6, the register | `TAKEN_APART[2]`: the 43 added (versions joined by "; "); its sheet Type 2: 96 "drawn: its own parts", the Xialan S0 "not drawn: no mass stated" |
+| 7, 01's checks | check 18 by each template's label (`template_of()`, two templates in one file); `TEMPLATE_OUTSIDE` adds wheel, steering, lift; `template_quantity()` takes the numbers on wheels; a robot on wheels without a drive wheel, and a lift column without its lift motor or the reverse, are faults (tests `test_a_robot_on_wheels_with_no_drive_wheel`, `test_a_lift_column_and_its_motor_come_together`) |
+| 8, 01's table | the sections "On wheels, every joint from its maker" and "On wheels, joints a share of the robot's mass"; the column Base in plain words (`base_words()`); ‡ for a lift column (`LIFT_MARK`); the layout `T_WHEELS`; the overview box "96 of its 97 robots …" and "Its draws for stock-and-flow from its parts: every robot with a mass is taken apart." |
+| 9, the drawing | `draw_kinds()`: the body as before and, beside its feet, a base on wheels (F) and a lift column (G) where the type has them; type 1's drawing unchanged |
+| 10, tests first | `tests/test_make_parts_taken_apart.py` `TestTypeTwoOnWheels`; `tests/test_parts_taken_apart.py` `TestTypeTwoOnWheels`; `tests/test_schemas.py` (the wheeled fixtures, the table, the drawing); `tests/test_make_humanoid_register.py` |
+| 11, sandbox | scratch only, 2,000 draws (V101) |
+| 12, documents | README, METHODOLOGY ("Robot type 2 part by part", point 2c; check 18; the pages), SHARED_LISTS.md, this section, V101, HANDOVER |
+| 13, not in | as E9.6 point 14 |
+| A, heat groups | the hub motors 'Hips', the steering and lift motors 'Waist' |
+| B, the drawing | as point 9 |
+| C, the colours | Wheeled base '#BA8DB4', Lift column '#42150A' (Paul Tol's discrete rainbow, not used before); the ten unchanged |
+| D, the backup | `data/researched/shared_lists_before_wheels_2026-10-30.xlsx`, waiting for his word to remove it |
+
+**Also found at the entry** (each a consequence of an agreed point, none a new decision):
+- **The lift column's steel 15 / 30 / 45 %, not E9.6 point 7's 20 / 30 / 40 %:** 01 refused 20 / 40 as an estimate (E)
+  narrower than half to 1.5 times its mode; widened to the rule, the mode unchanged.
+- **The AI Worker's voltage 25.5 V, not 25 V:** its maker states "25V, 80Ah (2,040Wh)"; 25 × 80 = 2,000 Wh, so the
+  voltage is the stated energy over the stated capacity, as the sources text says.
+- **The Unitree G1-D Ultimate's two batteries ("9Ah" and "30Ah") as one pack of 39 Ah at 48 V, in the base,** labelled
+  "S, E" (its voltage Unitree's H2-D's, E9.6 point 8).
+- **'Battery energy per kg of robot, on wheels' labelled E,** not "S, E": no one source states it (the median of 12).
+- **The Vega 1 Pro's casters 2 × 0.25 kg** (its model's 0.2 and 0.3 kg as one figure, half to 1.5 times).
+- **A robot on wheels' hands or grippers count one joint each for its encoders and connectors,** as batch 1's do
+  (`template()`); the first build counted a pair as one (the AgiBot G1 46 encoders instead of 48; caught by the
+  sandbox's table, test `test_encoders_count_each_hand_and_wheel`).
+- **01's overview, "Open:"** now says type 2's last robot has no mass yet (it said "robot type 2's other robots").
+- **01's small test file** still wrote the old kind "Torso boards" in three rows: now "Boards".
+
+**The CASBOT W1's battery pack with LFP cells** (found at the entry; decided below). Its pack has no mass from its maker, so 02
+takes it as its energy over the shared 'Battery pack, Wh per kg (packs not weighed)', 109.3 / 164 / 232.5 Wh/kg, a
+figure of NMC packs; its cells are LFP, 117.8 to 125.6 Wh/kg (the sheet Cells' three LFP cells). The pack then weighs
+less than its own cells: 7.2 kg against 9.9 kg at the medians, below them in 98.0 % of 2,000 draws (V101), so its
+housing, the remainder, falls below zero and 02 stops ("robot type 2: Ni is below zero in 5 draws"). Recommended: for
+a pack with no mass whose cells are not NMC, the pack its cells times the NMC packs' pack-to-cell ratio in the same
+draw (the NMC cells' Wh/kg over the pack's Wh/kg, 1.45 at the median, never below 1 since the NMC cells' least, 232.5,
+is the packs' most): 14.3 kg at the median, 84 Wh/kg, its housing as an NMC pack's in proportion. The other way:
+PACK_CELLS_ONLY for it (no housing, its cells alone).
+
+**Decided** (Matthias, 2026-10-30: "Ratio, as recommended"), built after his 02 run of 11:53 had ended (it stopped on
+this fault and wrote nothing): `02_composition.py`, the battery step: a pack with no mass whose cells are not
+'NMC cylindrical' weighs its cells times the NMC cell's Wh/kg over 'Battery pack, Wh per kg (packs not weighed)', both
+of the same draw; `tools/parts_taken_apart.py`: such a pack's row says so (`PACK_BY_RATIO`, its sources "; its cells
+not NMC (E9.8)"), and a cells row of another recipe says its cells' Wh/kg is a cell of its recipe in the sheet Cells
+(`CELL_OF_RECIPE`; every NMC row's text unchanged). Only the CASBOT W1's three cells change in type 2's file. Checks:
+V102.
+
 ## E8. Each robot of type 2 its own composition: research, batch 2b (2026-10-30). Nothing entered
 
 Matthias, 2026-10-30: "Yes, start batch 2b" (the sources of the 27 robots of type 2 not on wheels and not yet taken

@@ -15,8 +15,10 @@ Run, nothing in the project is changed. A mean is compared with the triangle's m
 frequency with its probability the same way; the seed is fixed, so a test that passes keeps passing.
 """
 
+import contextlib
 import csv
 import importlib.util
+import io
 import math
 import os
 import sys
@@ -319,6 +321,33 @@ class TestRun(Drawn):
         self.assertEqual(composition.run(params), 0)
         for name in ('1_small.png', '2_large.png'):
             self.assertGreater(os.path.getsize(os.path.join(figures, name)), 0)
+
+    def test_its_steps_are_said_as_they_happen_with_their_times(self):
+        # Matthias, 2026-10-30: "Information on the working of 02 is poor", "Yes, build them" (points 1 to 7): each step
+        # said when it begins and its time when it ends, in the order they run, and the whole run's time last.
+        params = self.write()
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(composition.run(params), 0)
+        lines = out.getvalue().splitlines()
+        steps = ('Reading the inputs', '  read in ', 'Checking every input', '  no fault, in ', 'Robot type 1: drawing',
+                 '  done in ', 'Robot type 2: drawing', 'Checking that the draws add up', '  they add up, in ',
+                 'Robot type 1: writing its draws', 'Robot type 2: writing its draws', '02 done in ')
+        found = [next((k for k, line in enumerate(lines) if line.startswith(step)), None) for step in steps]
+        self.assertNotIn(None, found, dict(zip(steps, found)))
+        self.assertEqual(found, sorted(found), lines)
+        self.assertRegex(lines[-1], r'^02 done in [0-9.]+ s\.$')
+
+    def test_a_fault_says_when_02_stopped(self):
+        params = self.write(changes={(5, 'Evidence'): 'Measured'})
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            self.assertEqual(composition.run(params), 1)
+        self.assertRegex(err.getvalue().splitlines()[-1], r'^02 stopped after [0-9.]+ s: nothing is written\.$')
+
+    def test_a_time_in_plain_words(self):
+        self.assertEqual([composition.duration(s) for s in (0.44, 12.3, 220, 3725)],
+                         ['0.4 s', '12 s', '3 min 40 s', '1 h 2 min'])
 
     def test_small_masses_keep_three_significant_figures(self):
         # An element of a few grams or less must not be printed as 0 kg.

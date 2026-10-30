@@ -46,11 +46,56 @@ stands after it. Type 1 is not finished either: what is still open for it is sai
 10. **Checks and documents with every step:** tests first, deliberate faults, a sandbox run with few draws, every check
     in VERIFICATION.md; METHODOLOGY, README and this handover in the same step; his runs; commit and push on his word.
 
-Where type 2 stands (2026-10-30, late morning): step 5 built (the sheet Type 2, 97 robots; V81); steps 6 to 8 for 53 of
-its robots (batch 1, E6; batch 2, E7; batch 2b, E8), the other 43 with a mass all on wheels (B), the Xialan S0 without a
-mass; step 9 its pages as type 1's (V85, V89, V93); step 4 open beyond type 1's recipes. See the next section.
+Where type 2 stands (2026-10-30, midday): step 5 built (the sheet Type 2, 97 robots; V81); steps 6 to 8 for 96 of its
+robots (batch 1, E6; batch 2, E7; batch 2b, E8; the 43 on wheels, E9, built and not yet run by him), the Xialan S0
+without a mass; step 9 its pages as type 1's (V85, V89, V93, V101); step 4 open beyond type 1's recipes. See the next
+section.
 
-## 2026-10-30, late morning: batch 2b of type 2 entered (start here)
+## 2026-10-30, midday: type 2's 43 robots on wheels entered (start here)
+
+**Done since the section below** (EVIDENCE E9.8, VERIFICATION V101): "Yes, build it" on the spec of the entry (E9.7,
+its points 1 to 13 and open points A to D as recommended). Nothing committed.
+- `01_schemas.py`: twelve kinds (the wheeled base and the lift column; "Boards and heat sinks", short name "Boards");
+  check 18 with two templates; a robot on wheels needs a drive wheel, a lift column its lift motor; type 2's table with
+  its sections on wheels, the column Base and ‡; the drawing with a base on wheels and a lift column beside the feet;
+  the overview's box and open line.
+- `02_composition.py`: the two kinds placed in "Wheels and wheel drives" / "Base" and "Joint drives" / "Torso"; a
+  robot's cells by its own chemistry (the CASBOT W1's LFP); the template on wheels; a lift column a share less its motor.
+- `tools/parts_taken_apart.py`, `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py` (46 blocks,
+  102 in all, 45 source codes), `tools/1_compact_research_developer/make_parts_taken_apart.py` ("Boards" only),
+  `tools/make_humanoid_register.py` (96 of type 2 taken apart).
+- His `data/researched/shared_lists.xlsx`: the two agreed rows added to the sheet Lists, nothing else changed (V101);
+  its copy before, `data/researched/shared_lists_before_wheels_2026-10-30.xlsx`, waits for his word to remove it.
+- Tests (395, all pass since his runs of 13:50), README, METHODOLOGY, SHARED_LISTS.md, EVIDENCE E9.8, VERIFICATION
+  V101 to V105.
+
+**The CASBOT W1's battery pack, decided** ("Ratio, as recommended", E9.8, V102): with its LFP cells its pack, taken
+from the shared NMC packs' 164 Wh/kg, weighed less than its cells and 02 stopped. Now its pack is its cells times the
+NMC packs' pack-to-cell ratio in each draw. His 02 run of 11:53 had started before the fix; it stopped on this fault and
+wrote nothing (V102). The register and type 1's file he ran at 11:52 are final.
+
+**02 says each step while it runs** ("Information on the working of 02 is poor", "Yes, build them", V103): reading,
+checking, each type drawn (every tenth robot said), the draws checked, writing and pages, each with its time, and last
+"02 done in …" or "02 stopped after …: nothing is written". It changes no draw.
+
+**His runs of 13:50 read back** (V104): type 2's file equals its builder; 01 no fault; 02 (13:50:48 to 13:56:42) wrote
+everything; type 2's draws for stock-and-flow from its 96 robots, 84.3 kg at the mean (95 %: 37.8 to 230.1); one
+remainder below zero, the R1-A5-D's battery housing in 1 of its 1,081 draws by 1.6 g, reported. **Found:** on every
+material page (types 1 and 2) the titles of the magnets' grade classes ran into their "mean …"; fixed on "Yes, fix
+it" (V105): every panel's numbers above its title. His pages change with his next run of
+`/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`.
+
+**His runs, done 13:50** (all in RAWCLICHumanoidRobots):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`
+   (three cells of the CASBOT W1's rows change, nothing else);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run; type 2's stock-and-flow
+   draws then from its 96 robots).
+
+**Waiting for his word:** commit and push; the Xialan S0's mass estimate; the
+removal of the shared lists' backup, of C's leftovers and of type 2's two former 01 pages.
+
+## 2026-10-30, late morning: batch 2b of type 2 entered
 
 **Done since the section below** (EVIDENCE E8, VERIFICATION V90 to V93): his runs of 08:39 read back (V92: 01 no
 fault; type 2 over 29 robots, nothing below zero; the files on disk equal to the builders'). "Yes, start batch 2b": the
@@ -61,7 +106,7 @@ slightly less weight": kept in type 2. "Propose batch 2b" (E8.3), "Yes, agree E8
 build it" (open points A: the template unchanged; B: joints named by their place and axis; C: the Walker Tienkung's
 names).
 
-**Built on "Yes, build it"** (E8.4, V93). NOT committed (commit and push on his word only):
+**Built on "Yes, build it"** (E8.4, V93); committed and pushed on "Yes, commit and push" (60491dd, 09:49):
 - `tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`: the 24 robots of batch 2b; 23 source
   codes added to its sheet Sources; batch 2's two Orin NX rows now name their robots' codes.
 - `tools/make_humanoid_register.py`: the 24 taken apart; 307, 312, 313 on wheels.
@@ -71,15 +116,22 @@ names).
 - **Found and fixed at the entry:** the makers' numbers of batch 2b first showed as a third party's (the codes not in
   the sheet Sources); "1584 Wh" ran into its cells; the Tien Kung 3.0's estimated voltage now 24 / 48 / 72 V.
 
-**His runs, in this order** (in RAWCLICHumanoidRobots, press Run; 00 and type 1's builder need no run):
+**His runs, in this order**, done 09:49 to 09:51 and read back in V94 (01 no fault; type 2 over its 53 robots; one
+remainder below zero, the Omni's battery housing in 1 of its 3,796 draws, by 0.9 g, reported, not cut):
 1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`;
 2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`;
 3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
 4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run).
 
 **Next, by his words ("All 97 first"; B, the wheeled robots their own kinds of part):** the 43 robots of type 2 on
-wheels: their sources first, then a spec of the wheeled robots' kinds of part (wheels, drive motors, base) for his
-yes. Type 2's draws for stock-and-flow switch to its parts once they are in (Q2). The leftovers of C wait for his word;
+wheels: their sources are read ("Yes, start sources", EVIDENCE E9, V95); E9.2 decided ("Yes, all five"), four makers'
+datasheets read (E9.3, V96); the TIAGo Pro's mass decided, 79 / 80 / 95 kg with one 720 Wh battery ("Yes, 79 / 80 /
+95"). The spec of the wheeled robots' kinds of part written ("Spec the wheeled parts", EVIDENCE E9.4, V97): 14 points,
+open A to E; agreed ("Yes, agree E9.4", A to E as recommended). Its sources read ("Yes, start sources", E9.5,
+V98): hub motors, castors, lift columns, LFP (E1.7k), the bases' materials; gaps named there. The proposal of each
+wheeled robot's numbers written ("Propose the numbers", E9.6, V99): 14 points, 46 rows; agreed ("Yes, agree E9.6").
+The spec of the entry written ("Spec the entry", E9.7, V100): 13 points, open A to D; it waits for his yes. It makes
+type 2's stock-and-flow switch to its parts (Q2: all 96 with a mass then in). Type 2's draws for stock-and-flow switch to its parts once they are in (Q2). The leftovers of C wait for his word;
 commit and push on his word.
 
 ## 2026-10-30, early morning: batch 2 of type 2 entered

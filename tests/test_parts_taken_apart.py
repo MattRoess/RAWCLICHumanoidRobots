@@ -132,6 +132,16 @@ class TestDraws(unittest.TestCase):
         inputs = inputs_or_skip(self, self.params)
         return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
+    def test_every_tenth_robot_is_said_as_it_is_drawn(self):
+        # Matthias, 2026-10-30: "Information on the working of 02 is poor", "Yes, build them" (point 4): while a type
+        # taken apart is drawn, every tenth robot of its parts file is said (the versions counted apart, as drawn).
+        inputs = inputs_or_skip(self, self.params)
+        said = []
+        composition.draw_taken_apart(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws),
+                                     say=lambda done, of, name: said.append((done, of, name)))
+        names = list(inputs.apart.robots)
+        self.assertEqual(said, [(k, len(names), names[k - 1]) for k in range(10, len(names) + 1, 10)])
+
     def test_each_robot_of_the_register_is_drawn_equally_often(self):
         inputs, d = self.drawn()
         self.assertEqual(len(d.register), 31)
@@ -469,6 +479,27 @@ class TestReadable(unittest.TestCase):
                 self.assertEqual(outside, [], msg=name)
                 self.assertGreaterEqual(smallest, self.SMALLEST_PX,
                                         msg=f'{name}: {width} × {height} px, smallest text {smallest:.1f} px')
+
+    def test_no_panel_title_runs_into_its_numbers(self):
+        # Matthias, 2026-10-30, "Yes, fix it" (V104: "Magnets, grade class UH" ran into its "mean 583 g"): on the element
+        # and material pages of types 1 and 2, a panel's title (left) and its share, median and mean (right) never
+        # overlap; the numbers sit above the title's line.
+        params = Params()
+        params.composition.draws = 300
+        for robot_type, inputs_of in ((1, inputs_or_skip), (2, type_two_inputs_or_skip)):
+            inputs = inputs_of(self, params)
+            d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+            category = next(c for c in inputs.base.book.categories if c.number == robot_type)
+            c = composition.compose_taken_apart(category, d, inputs.base.lists)
+            for name, figure in composition.taken_apart_pages(c, d, [], params):
+                figure.canvas.draw()
+                renderer = figure.canvas.get_renderer()
+                for axes in figure.axes:
+                    left, right = axes._left_title, axes._right_title
+                    if left.get_text().strip() and right.get_text().strip():
+                        self.assertFalse(left.get_window_extent(renderer).overlaps(right.get_window_extent(renderer)),
+                                         msg=f'{name}: {left.get_text()!r} over {right.get_text()!r}')
+                composition.plt.close(figure)
 
 
 class TestElementsNotShown(unittest.TestCase):
@@ -860,6 +891,9 @@ class TestTypeTwo(unittest.TestCase):
     BATCHES = [25, 47, 53, 69, 80, 98, 116, 117, 119, 120, 121, 123, 132, 134, 135, 144, 151, 153, 157, 158, 163, 170,
                171, 176, 177, 180, 199, 203, 210, 216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290,
                294, 297, 298, 299, 300, 302, 323, 326, 352]
+    # The 43 on wheels (2026-10-30, "Yes, agree E9.6", "Yes, build it"): with them every robot of type 2 with a mass.
+    ON_WHEELS = [13, 15, 20, 21, 34, 35, 40, 41, 42, 49, 60, 68, 82, 86, 92, 104, 105, 122, 179, 184, 200, 230, 247, 248,
+                 251, 252, 253, 254, 255, 295, 307, 312, 313, 314, 315, 318, 335, 336, 337, 340, 341, 342, 349]
 
     @classmethod
     def setUpClass(cls):
@@ -868,20 +902,23 @@ class TestTypeTwo(unittest.TestCase):
 
     def test_its_robots_and_those_not_yet_taken_apart(self):
         inputs = type_two_inputs_or_skip(self, self.params)
-        self.assertEqual([r.number for r in inputs.robots], self.BATCHES)
+        self.assertEqual([r.number for r in inputs.robots], sorted(self.BATCHES + self.ON_WHEELS))
         self.assertEqual([r.number for r in inputs.left_out], [329])       # the Xialan S0, no mass stated
-        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (43, 97, 2))
+        # None with a mass left: type 2's draws for stock-and-flow from its parts now (Q2).
+        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (0, 97, 2))
 
     def test_drawn_over_its_robots_each_as_often(self):
         inputs = type_two_inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
-        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 53 of its 97 robots'))
-        n, p = d.n, 1 / 53
+        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 96 of its 97 robots'))
+        n, p = d.n, 1 / 96
         tolerance = 4 * np.sqrt(p * (1 - p) / n)
-        for k in range(53):
+        for k in range(96):
             self.assertAlmostEqual((d.register_robot == k).mean(), p, delta=tolerance, msg=d.register[k])
         for version in ('Fourier GR-1 one camera', 'Fourier GR-1 two cameras', 'Unitree H2-X Core i7',
-                        'Unitree H2-X Orin NX', 'Walker Tienkung Vision', 'Walker Tienkung Embodied'):
+                        'Unitree H2-X Orin NX', 'Walker Tienkung Vision', 'Walker Tienkung Embodied',
+                        'Flexiv AICO 2-4', 'Flexiv AICO 2-10', 'Rainbow Robotics RB-Y1 A', 'Rainbow Robotics RB-Y1 M',
+                        'Unitree R1-A5-D', 'Unitree R1-A7-D'):
             self.assertAlmostEqual((d.robot == d.robots.index(version)).mean(), p / 2,
                                    delta=4 * np.sqrt(p / 2 * (1 - p / 2) / n))
 
@@ -936,6 +973,80 @@ class TestTypeTwo(unittest.TestCase):
         np.testing.assert_allclose(copper('Fourier GR-2'), 0.43996568, rtol=1e-9)
         np.testing.assert_allclose(copper('Unitree H2'), 0.26685848, rtol=1e-9)
 
+
+class TestTypeTwoOnWheels(unittest.TestCase):
+    """Type 2's robots on wheels drawn by 02 (Matthias, 2026-10-30, "Yes, agree E9.6", "Yes, build it", E9.7 points 3
+    and 5): the wheeled template's joint share and energy for a robot on wheels of the template, its lift column a share
+    of its mass (its structure the share less its motor), the CASBOT W1's cells LFP and no other robot's; the two new
+    kinds of part drawn."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def drawn(self):
+        inputs = type_two_inputs_or_skip(self, self.params)
+        return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def kind_kg(self, d, robot: str, kind: str):
+        columns, draws = d.materials
+        rows = d.robot == d.robots.index(robot)
+        return sum(draws[rows, i] for i, (k, _) in enumerate(columns) if k == kind)
+
+    def test_the_wheeled_template_share_for_a_robot_of_it(self):
+        inputs, d = self.drawn()
+        columns, draws = d.parts
+        robot = 'Toyota CUE7'
+        rows = d.robot == d.robots.index(robot)
+        body = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':') and c.endswith('joints)')
+                   and not c.startswith((robot + ': Wheel', robot + ': Steering', robot + ': Lift')))
+        share = body / d.mass[rows]
+        self.assertTrue(np.all((share >= 0.078 - 1e-9) & (share <= 0.234 + 1e-9)))
+
+    def test_the_lift_column_a_share_of_the_robot_mass(self):
+        inputs, d = self.drawn()
+        rows = d.robot == d.robots.index('Unitree H2-D Flagship')
+        share = self.kind_kg(d, 'Unitree H2-D Flagship', 'lift') / d.mass[rows]
+        self.assertTrue(np.all((share >= 0.0995 - 1e-9) & (share <= 0.2985 + 1e-9)))
+        self.assertTrue(np.all(self.kind_kg(d, 'Toyota CUE7', 'lift') == 0))
+
+    def test_lfp_cells_only_in_the_casbot_w1(self):
+        inputs, d = self.drawn()
+        key = ('battery', composition.CELL_MATERIAL, 'LFP cylindrical')
+        lfp = d.details[key]
+        casbot = d.robot == d.robots.index('CASBOT W1')
+        self.assertTrue(np.all(lfp[casbot] > 0))
+        self.assertTrue(np.all(lfp[~casbot] == 0))
+        nmc = d.details[('battery', composition.CELL_MATERIAL, 'NMC cylindrical')]
+        self.assertTrue(np.all(nmc[casbot] == 0))
+
+    def test_the_casbot_w1s_pack_by_the_nmc_packs_ratio(self):
+        # Matthias, 2026-10-30, "Ratio, as recommended" (EVIDENCE.md E9.8): its pack has no mass from its maker and its
+        # cells are LFP, so the pack is its cells times the NMC packs' pack-to-cell ratio in each draw: at the modes
+        # 241.5 / 164; and its housing, the pack's remainder, above zero in every draw.
+        inputs = type_two_inputs_or_skip(self, self.params)
+        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+            d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        columns, draws = d.parts
+        rows = d.robot == d.robots.index('CASBOT W1')
+
+        def part(name):
+            return draws[rows, columns.index(f'CASBOT W1: {name}')]
+
+        cells, housing = part('Battery cells'), part('Battery housing, busbars and wires')
+        np.testing.assert_allclose((cells + part('Battery management board') + housing) / cells, 241.5 / 164,
+                                   rtol=1e-9)
+        _, d = self.drawn()
+        columns, draws = d.parts
+        rows = d.robot == d.robots.index('CASBOT W1')
+        self.assertTrue(np.all(draws[rows, columns.index('CASBOT W1: Battery housing, busbars and wires')] > 0))
+
+    def test_the_wheeled_base_drawn(self):
+        inputs, d = self.drawn()
+        self.assertTrue(np.all(self.kind_kg(d, 'Toyota CUE7', 'base') > 0))
+        self.assertTrue(np.all(self.kind_kg(d, 'Unitree H2', 'base') == 0))
+        self.assertIn('base', {k for k, _ in d.materials[0]})
 
 if __name__ == '__main__':
     unittest.main()

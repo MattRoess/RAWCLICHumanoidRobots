@@ -243,6 +243,18 @@ SHARES_ROWS = [
      'count only (E5.14 point 9, E5.18)'),
     ('Frame: aluminium, with steel 45 and P20 parts', 'Aluminium', None, None, None, None, 'Yes', 'E',
      'The aluminium parts: AL6061-T6, AL7075, AL5052 (RP1a); E5.14 point 9'),
+    # The casters and the lift column of a robot on wheels (EVIDENCE.md E9.6 points 6 and 7, agreed 2026-10-30): no
+    # source weighs their parts; the steel's grade the nearest the recipes hold (E).
+    ('Casters', 'Steel', 'C45', 0.25, 0.5, 0.75, None, 'E',
+     "The housing and fork: Tente's \"light steel sheet\" (1470PAO075P40); half to 1.5 times; C45 the nearest "
+     'plain carbon steel of the recipes (E9.6 point 6)'),
+    ('Casters', 'Plastics', None, None, None, None, 'Yes', 'E',
+     "The wheel's body and tread: polypropylene or polyamide, injected polyurethane (Tente; E9.6 point 6)"),
+    ('Lift column: aluminium profile, steel screw and guides', 'Steel', '42CrMo4', 0.15, 0.3, 0.45, None, 'E',
+     'Its screw and guides (Oriental Motor\'s EL columns: "Ball Screw", ball splines); E9.6 point 7\'s 20 / 30 / 40 % '
+     'widened to half to 1.5 times by the rule for estimates (the entry, E9.8); 42CrMo4 a ball screw\'s steel'),
+    ('Lift column: aluminium profile, steel screw and guides', 'Aluminium', None, None, None, None, 'Yes', 'E',
+     'Its profile, the remainder (E9.6 point 7)'),
 ]
 
 # --- Constants: the shared numbers ----------------------------------------------------------------------------
@@ -334,11 +346,11 @@ CONNECTOR_KG = (0.0019, 0.00212, 0.0023)
 # the G1's aluminium heat sink, for an Intel or AMD laptop-class processor the X1's and N1's copper heat pipes and fins
 # (E2.8e). Each an entry of a block's `cooler`, as one of its `parts`.
 FAN_KG = (0.005, 0.01, 0.02)
-COOLER_FAN = ('Main board fan', 1, 'Torso boards', 'Torso', FAN_KG, None, None, 'E',
+COOLER_FAN = ('Main board fan', 1, 'Boards', 'Torso', FAN_KG, None, None, 'E',
               "as the G1's main board fan (E2.8e; 2026-10-29, point 4)")
-ARM_SINK = ('Main board heat sink', 1, 'Torso boards', 'Torso', (0.05, 0.1, 0.2), 'Aluminium', None, 'E',
+ARM_SINK = ('Main board heat sink', 1, 'Boards', 'Torso', (0.05, 0.1, 0.2), 'Aluminium', None, 'E',
             "an ARM board's: as the G1's (E2.8e; 2026-10-29, point 4)")
-X86_SINK = ('Main board heat sink: heat pipes and fins', 1, 'Torso boards', 'Torso', (0.055, 0.12, 0.19), 'Copper',
+X86_SINK = ('Main board heat sink: heat pipes and fins', 1, 'Boards', 'Torso', (0.055, 0.12, 0.19), 'Copper',
             None, 'E', "an Intel or AMD laptop-class processor's: as the X1's and N1's (E2.8e; 2026-10-29, point 4)")
 ARM_COOLER = [COOLER_FAN, ARM_SINK]
 X86_COOLER = [COOLER_FAN, X86_SINK]
@@ -356,7 +368,7 @@ CAMERA = [('CMOS image sensor', 1)]
 MICROPHONES = [('MEMS microphone array', 4)]   # as the G1's four (T1 slide 33)
 ENCODER = [('angle sensor', 1)]                # a joint's encoder: the car's angle sensor (as the G1's, E2.8b)
 # A power distribution board where a robot's sources name none (as the G1's; E5.14 point 4).
-POWER_BOARD = ('Power distribution board', 1, 'Torso boards', 'Torso', POWER, 'PE_HVS', 'E',
+POWER_BOARD = ('Power distribution board', 1, 'Boards', 'Torso', POWER, 'PE_HVS', 'E',
                'as the G1 (E5.14 point 4)')
 
 # The texts of the sheets that 02 reads as what a row is computed from (its column "Remainder of, or computed from"),
@@ -375,11 +387,24 @@ PACK_FROM_ENERGY = ('its cells, its management board (Boards) and its housing (t
                     "over Constants' Battery pack, Wh per kg")
 PACK_CELLS_ONLY = ("its cells, its management board (Boards) and no housing: the maker's pack is lighter than its "
                    'cells (E5.14 point 3)')
-CELLS_FROM_CHARGE = "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg"
-CELLS_FROM_MASS = ("from the energy: Constants' Battery energy per kg of robot times the robot's mass, over the NMC "
-                   "cell's Wh/kg")
+# A pack with no mass whose cells are not NMC (the CASBOT W1's LFP; Matthias, 2026-10-30, "Ratio, as recommended",
+# EVIDENCE.md E9.8): Constants' Battery pack, Wh per kg is a figure of NMC packs, so its pack is its cells times the NMC
+# packs' pack-to-cell ratio in the same draw.
+PACK_BY_RATIO = ("its cells, its management board (Boards) and its housing (the rows below); its mass its cells times "
+                 "the NMC packs' pack-to-cell ratio: the NMC cell's Wh/kg over Constants' Battery pack, Wh per kg")
+# The cells from their energy, over the Wh/kg of their own cells: the NMC cell's, or for cells of another recipe (the
+# grade of their row) one cell of that recipe in the sheet Cells, drawn.
+CELLS_FROM_CHARGE = 'from the energy: Constants voltage × capacity over {}'
+CELLS_FROM_MASS = "from the energy: Constants' Battery energy per kg of robot times the robot's mass, over {}"
+NMC_CELL = "the NMC cell's Wh/kg"
+CELL_OF_RECIPE = "the Wh/kg of a cell of its recipe (its grade) in the sheet Cells"
 HOUSING = 'the battery pack, less its cells and its management board'
 SHELL = "a share of the robot's mass: Constants' Shell, share of the robot mass"
+# A lift column whose maker gives it no mass: a share of the robot's mass less its motor, a joint of the sheet Joints
+# (EVIDENCE.md E9.6 point 7; 01 and 02 read the shared number it names).
+LIFT_SHARE = 'Lift column, share of the robot mass, on wheels'
+LIFT = f"a share of the robot's mass: Constants' {LIFT_SHARE}; less its motor"
+LIFT_PART = 'Lift column: aluminium profile, steel screw and guides'
 FRAME = 'the robot (Constants), less every other part'
 MAGNETS_BASIS = 'Its magnets: the grade classes of its heat group, sheet MagnetGrades (EVIDENCE.md E2.11)'
 # The housing of a battery pack: its shares in the sheet Shares, the housing aluminium or plastics (each as often), or
@@ -437,7 +462,11 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
              encoders=('E', 'two per joint, as type 1 (E5.14)'),
              screws=[('Screws', 1, SCREWS_KG, '42CrMo4', 'E', 'as the G1 (E5.14 point 7); grade E5.18')],
              parts=[], cooler=ARM_COOLER, shell=('Shell: plastics', 'not stated; plastics as type 1 (E5.14 point 6)'),
-             frame=('Frame', 'Aluminium', 'not stated; aluminium as type 1 (E5.14 point 9)'))
+             frame=('Frame', 'Aluminium', 'not stated; aluminium as type 1 (E5.14 point 9)'),
+             # A robot on wheels (EVIDENCE.md E9.7 point 3): its battery in its base, its cells' recipe where not NMC
+             # (the CASBOT W1's LFP), its template's rows where not its type's (the template on wheels), its lift
+             # column ((min, mode, max) kg, label, source; its kg None: a share of its mass, LIFT).
+             battery_region='Torso', cell_recipe=None, averaged=None, lift_column=None)
     b.update(more)
     return b
 
@@ -511,8 +540,8 @@ def template_block(name: str, maker: str, height: float, stated: float | None, m
     board; the rest as E5.14 unless `more` says otherwise (its `sources` else `default_sources`). One copy for every
     type (Matthias, 2026-10-30, "Yes, build it", open point C): each type's builder binds its own texts."""
     defaults = dict(joints_stated=joints_stated,
-                    boards=[(computer, 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E', computer_source),
-                            ('Power distribution board', 1, 'Torso boards', 'Torso', POWER, 'PE_HVS', 'E',
+                    boards=[(computer, 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E', computer_source),
+                            ('Power distribution board', 1, 'Boards', 'Torso', POWER, 'PE_HVS', 'E',
                              'as the G1 (E5.14 point 4)')],
                     joint_sources=joint_sources)
     defaults.update(more)
@@ -530,7 +559,7 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     # Its joints, their modules and driver boards, and two encoders and two connectors per joint. A robot of the
     # template: the template's rows, its stated joints in place of their groups' rows, and its hands or grippers.
     averaged = b['joints'] == AVERAGE
-    joints = template_joints(b, averaged_joints) if averaged else b['joints']
+    joints = template_joints(b, b['averaged'] or averaged_joints) if averaged else b['joints']
     for number, (joint_name, count, size, torque, masses, heat, region, *share) in enumerate(joints, start=1):
         low, mode, high = masses or (None, None, None)
         out['Joints'].append((name, number, joint_name, count, size, torque, low, mode, high,
@@ -555,24 +584,29 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     for car_type, per_sensor in ENCODER:
         out['SensorElements'].append(('Encoder', car_type, per_sensor))
 
-    # Its battery: the pack, its cells from their energy, its housing the pack's remainder, its management board.
+    # Its battery: the pack, its cells from their energy, its housing the pack's remainder, its management board; in
+    # its torso, or for a robot on wheels in its base; its cells NMC unless its block names their recipe.
+    region = b['battery_region']
     if b['pack'] == PACK_CELLS_ONLY:
-        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', 'Torso', None, None, None, None, None,
+        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, None, None, None, None, None,
                              PACK_CELLS_ONLY, 'S', b['pack_source']))
     elif b['pack'] is None:
-        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', 'Torso', None, None, None, None, None,
-                             PACK_FROM_ENERGY, 'S, E', 'its mass not stated (E5.14 point 3)'))
+        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, None, None, None, None, None,
+                             PACK_BY_RATIO if b['cell_recipe'] else PACK_FROM_ENERGY, 'S, E',
+                             'its mass not stated (E5.14 point 3)' + ('; its cells not NMC (E9.8)' if b['cell_recipe']
+                                                                      else '')))
     else:
         (low, mode, high), label, source = b['pack']
-        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', 'Torso', low, mode, high, None, None,
+        out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, low, mode, high, None, None,
                              PACK_STATED, label, source))
     label, source = b['cells']
-    out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials', None,
-                         CELLS_FROM_CHARGE if b['voltage'] else CELLS_FROM_MASS, label, source))
+    out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', region, None, None, None, 'Battery materials',
+                         b['cell_recipe'], (CELLS_FROM_CHARGE if b['voltage'] else CELLS_FROM_MASS).format(
+                             CELL_OF_RECIPE if b['cell_recipe'] else NMC_CELL), label, source))
     if b['housing']:
-        out['Parts'].append((name, b['housing'], 1, 'Battery pack', 'Torso', None, None, None, None, None, HOUSING,
+        out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None, HOUSING,
                              'E', 'E5.19 point 1'))
-    out['Boards'].append((name, 'Battery management board', 1, 'Battery pack', 'Torso', *BATTERY_BOARD,
+    out['Boards'].append((name, 'Battery management board', 1, 'Battery pack', region, *BATTERY_BOARD,
                           'area times Constants board mass per cm2', 'BMS', 'E', 'as the G1 (E5.14 point 4)'))
 
     # Its other boards and its sensors, as its sources name them.
@@ -595,6 +629,11 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
                              source))
     for part, count, kind, region, kg, material, grade, label, source in b['cooler'] + b['parts']:
         out['Parts'].append((name, part, count, kind, region, *kg, material, grade, None, label, source))
+    if b['lift_column']:
+        # Its lift column beside its motor (a joint): its stated mass, or a share of the robot's mass less its motor.
+        kg, label, source = b['lift_column']
+        out['Parts'].append((name, LIFT_PART, 1, 'Lift column', 'Torso', *(kg or (None, None, None)), None, None,
+                             None if kg else LIFT, label, source))
     shell, source = b['shell']
     out['Parts'].append((name, shell, 1, 'Frame and shell', 'Whole body', None, None, None, 'Plastics', None, SHELL,
                          'E', source))

@@ -46,6 +46,7 @@ estimates.
 | Cables | Wiring, connectors, power distribution. |
 | Cooling | Fans, heat pipes, cooling loops. |
 | Screws and bearings | Fasteners, pins, structural bearings. |
+| Wheels and wheel drives | The wheels of a robot on wheels, their hub and steering motors, and its casters (since 2026-10-30, see below). |
 | Mixed | A part the workbook lists as two groups in one (e.g. "wiring and thermal management"). |
 
 ## List 2: body regions
@@ -57,6 +58,7 @@ estimates.
 | Hands | The hands. |
 | Torso | Waist, chest, the battery and computer bays. |
 | Head | Head and neck. |
+| Base | The wheeled base of a robot on wheels: its wheels, casters, and what sits in the base (since 2026-10-30, see below). |
 | Whole body | Parts spread over the body (frame, shell, cables), and parts the workbook places in several regions without saying how many sit where. |
 
 **The rule.** A part goes to the region the workbook's "Location / Joint" column names. A part placed in several
@@ -194,3 +196,14 @@ and name the recipe their cells follow (the NMC cylindrical cell, E1.7e);
 robot types 1, 3, 4 and 5 count their cells from each pack's voltage and capacity, and the rest of the row goes to
 plastics, electronics and copper (robot type 1) or to Not allocated (robot types 3, 4, 5). METHODOLOGY.md, "The
 battery as cells only", says how; 01 checks it (check 16).
+
+## The robots on wheels (2026-10-30)
+
+Decided by Matthias on 2026-10-30: "Yes, agree E9.4" (EVIDENCE.md E9.4 point 3: a robot on wheels gets its own kinds
+of part, "Wheeled base" and "Lift column", and their place in these lists), then "Yes, build it" (E9.7 point 2 and open
+point D). Two rows were added to the sheet Lists of `data/researched/shared_lists.xlsx`, each with what it holds, in the
+words of the tables above: the part group "Wheels and wheel drives" (before "Mixed") and the body region "Base" (before
+"Whole body"). Nothing else in the workbook changed (its other sheets compared cell by cell, VERIFICATION.md V101).
+02 places a robot on wheels' kinds whole: its wheeled base in "Wheels and wheel drives" and "Base", its lift column (a
+joint drive that lifts the torso) in "Joint drives" and "Torso". The workbook as it was before is kept beside it,
+`data/researched/shared_lists_before_wheels_2026-10-30.xlsx` (data, not in git), until Matthias says to remove it.

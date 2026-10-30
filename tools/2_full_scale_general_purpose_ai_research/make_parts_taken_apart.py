@@ -10,7 +10,8 @@ Matthias, 2026-10-29: "commit and push and then to typ 2", then "Yes, as propose
 rows, in batches; C: a parts file and builder per type); 2026-10-30: "Yes, all three" (EVIDENCE.md E6.6), "Yes, agree
 E6.8" (the proposal for batch 1, points 1 to 13), "Yes, build C"; for batch 2 "Yes, all six" (E7.3), "Yes, agree E7.4"
 (type 2's own template), "Yes, agree E7.5", "Yes, build it"; for batch 2b "Yes, all six" (E8.2), "Yes, agree E8.3",
-"Yes, build it".
+"Yes, build it"; for the robots on wheels "Yes, all five" (E9.2), "Yes, 79 / 80 / 95" (E9.3), "Yes, agree E9.4", "Yes,
+agree E9.6", "Yes, build it" (E9.7, its open points A to D as recommended).
 
 WHAT IT DOES
 ------------
@@ -18,15 +19,19 @@ It writes the data file of the robots of type 2 taken apart so far, each part by
 type 1's (the same sheets, the same machinery in tools/parts_taken_apart.py): batch 1, the five robots whose makers
 publish a model file, the Unitree H2, H2 Plus and H1-2 and the Fourier GR-2 and GR-1 (EVIDENCE.md E3, "Those with model
 files"), the GR-1 in two versions (one or two depth cameras); batch 2, 24 robots not on wheels (E7.5), the H2-X in
-two versions (its second computer an Intel Core i7 or an Orin NX); and batch 2b, the 24 others not on wheels (E8.3), the
-Walker Tienkung in two versions ("Voice & Vision", "Embodied intelligence"). Each block gives what the robot's own sources give
+two versions (its second computer an Intel Core i7 or an Orin NX); batch 2b, the 24 others not on wheels (E8.3), the
+Walker Tienkung in two versions ("Voice & Vision", "Embodied intelligence"); and the 43 robots on wheels (E9.6), the
+AICO 2, the RB-Y1 and the R1-D in two versions each: 96 of type 2's 97 robots, all but the Xialan S0, which has no mass
+in any source. Each block gives what the robot's own sources give
 (E6.1 to E6.7, E7.1) and, where they stop, what E6.8 and E7.5 agreed: each joint's mass from its torque by type 1's
 fit refit with the M107 (E6.8 point 1), its battery from its voltage and capacity (point 6), its boards and sensors by
 the template (points 7 and 8), its cables scaled by its height (point 9), its shell and screws by its mass (points 10
 and 11), its frame the remainder (point 12). A robot of batch 2 whose maker gives no joint torques takes type 2's own
 template (E7.4): its joint modules a share of its mass, split as type 2's seven robots with every joint's torque are
-on average (AVERAGE_JOINTS), its battery's energy per kg of robot where its maker gives none. Each row names its own
-sources.
+on average (AVERAGE_JOINTS), its battery's energy per kg of robot where its maker gives none. A robot on wheels (E9.6)
+has its drive wheels' hub motors, its steering motors and its lift column's motor as joints, its casters and lift
+column as parts; one whose maker gives no joint's torque or mass takes the template on wheels (WHEELED_AVERAGE_JOINTS,
+the average of the four robots on wheels with every joint), its battery in its base. Each row names its own sources.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -61,8 +66,9 @@ FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 # --- About ----------------------------------------------------------------------------------------------------------
 # The file's own description, one line per row of its first column (None leaves the row empty).
 ABOUT = [
-    'Robot type 2 part by part: the 53 of its robots taken apart so far (batches 1, 2 and 2b; the GR-1, the H2-X and the '
-    'Walker Tienkung in two versions each), for where their critical materials sit',
+    'Robot type 2 part by part: 96 of its 97 robots taken apart so far (batches 1, 2 and 2b and the robots on wheels; '
+    'the GR-1, the H2-X, the Walker Tienkung, the AICO 2, the RB-Y1 and the R1-D in two versions each), for where their '
+    'critical materials sit',
     None,
     'The Unitree H2, H2 Plus and H1-2 and the Fourier GR-2 and GR-1, the robots of type 2 whose makers publish a model '
     'file, agreed by Matthias on 2026-10-30 (documentation/claude/EVIDENCE.md E6.1 to E6.8: "Yes, all three", "Yes, '
@@ -90,6 +96,15 @@ ABOUT = [
     "40.4 / 60.6 % of the robot's mass, split as type 2's seven robots with every joint's torque on average (their "
     'hands left out), the battery 14.67 Wh per kg of robot where the maker gives no energy; the JingChu\'s knees its '
     "maker's 2 kg, in place of the template's knees.",
+    None,
+    'The robots on wheels (EVIDENCE.md E9.6, agreed 2026-10-30, "Yes, agree E9.6"; entered on "Yes, build it", E9.7): '
+    '43 robots, the AICO 2, the RB-Y1 and the R1-D in two versions each. Each drive wheel a hub motor, by the robot\'s '
+    'mass per driven wheel (1.4, 3.75, 4.85 or 8.5 kg, half to 1.5 times), each steering motor 0.79 kg and each lift '
+    "motor 0.89 kg (ROBOTIS's), as joints (kinds Wheeled base and Lift column); casters 0.27 kg each; a lift column 19.9 "
+    "% of the robot's mass, less its motor, where its maker gives no mass. The Vega 1 Pro, RB-Y1, AI Worker and Reachy 2 "
+    "by their models; the others by the template on wheels: the joint modules 7.8 / 15.6 / 23.4 % of the robot's mass, "
+    'split as those four on average (their hands, wheels, steering and lift left out), the battery 10.28 Wh per kg of '
+    "robot where the maker gives no energy, in the base. The CASBOT W1's cells LFP (its maker's).",
 ]
 
 # --- Constants: the shared numbers, and type 2's own ----------------------------------------------------------------
@@ -228,6 +243,104 @@ SOURCES_ROWS = [
      'https://www.ubtrobot.com/en/ai-education/products/walker-tienkung', "Manufacturer's specification"),
     ('WTu', 'tienkungrobotics, walker_tienkung.urdf (20 joints, 61.76 kg; its owner not stated)',
      'https://github.com/tienkungrobotics/Walker-TienKung-URDF', 'Model file, owner not known'),
+    # The robots on wheels (EVIDENCE.md E9.1 to E9.5, read 2026-10-30).
+    ('AGA2', 'AgiBot, its address of the A2-W (now the A2 flagship; the A2-W no longer listed)',
+     'https://www.agibot.com.cn/products/A2_W', "Manufacturer's page"),
+    ('AGG1', 'AgiBot, AGIBOT G1 (its page: "150kg", "130~180cm", "20 DoF")', 'https://agibot.com/products/G1',
+     "Manufacturer's specification"),
+    ('AGG2m', 'AgiBot, 精灵G2 产品用户手册 (2.3 整机参数: "重量 185 kg", "1652Wh（34Ah）")',
+     'https://www.agibot.com.cn/filepage/362.html', "Manufacturer's user manual"),
+    ('RBT', 'ROBOTIS, AI Worker hardware (FFW-SG2: "90 kg", "25V, 80Ah (2,040Wh)", its actuators)',
+     'https://ai.robotis.com/ai_worker/hardware_ai_worker.html', "Manufacturer's specification"),
+    ('RBTe', 'ROBOTIS e-manual, DYNAMIXEL-Y, -P, -X (YM080-230-R099-RH 1,200 g; YM070-210 790 g; PH42-020-S300-R '
+             '340 g; XH540-V150-R 165 g; XH430-V210-R 82 g; YM080-230-B001-RH 890 g)',
+     'https://emanual.robotis.com/docs/en/dxl/y/', "The actuators' maker's datasheets"),
+    ('RBTm', 'ROBOTIS, ffw_sg2.xml (the AI Worker FFW-SG2: 94.42 kg; its drive links 3.80 kg, its lift link 17.9 kg)',
+     'https://github.com/ROBOTIS-GIT/ai_worker', "Manufacturer's model file"),
+    ('FLX', 'Flexiv, its robot systems (AICO 2-4 "281kg", AICO 2-10 "395kg", "Dual-wheel differential")',
+     'https://flexiv.com/product/robot-system', "Manufacturer's specification"),
+    ('ARId', 'PAL Robotics, ARI hardware overview and datasheet ("24V / 40VAh", arms of 5 DoF)',
+     'https://docs.pal-robotics.com/edge/hardware/ari/hardware-overview', "Manufacturer's specification"),
+    ('KIT', 'KIT H²T, the ARMAR family (ARMAR-7: "8-DoF" arms, "three omni-wheels")', 'https://h2t.iar.kit.edu/397.php',
+     "Manufacturer's page"),
+    ('ASTp', 'Astribot, Astribot S1 (its page: "80kg", "170cm"; the T1 a banner only)',
+     'https://www.astribot.com/en/product', "Manufacturer's specification"),
+    ('INF', 'INFIFORCE (ELU.AI), AstroDroid (AD-01 named, no figures)', 'https://infiforce.cn/robot',
+     "Manufacturer's page"),
+    ('HON', 'Honda, Avatar Robot (its SPEC: "1700mm", "110kg", "56 DOF", wheel 2)',
+     'https://global.honda/en/RandD/field/hgrx/honda-multi-fingered-hand/avatar-robot.html',
+     "Manufacturer's specification"),
+    ('CAS', 'CASBOT, W1 (its parameters: "重量约260kg", "48V/25Ah", "磷酸铁锂", "2+4，两轮差速")',
+     'https://casbot.tech/product/w1', "Manufacturer's specification"),
+    ('RMD', 'RealMan, Dual-Arm Lift ("≈ 157 kg", "Lifting Stroke 900 mm")',
+     'https://www.realman-robotics.com/en/products/dual-arm-lift.html', "Manufacturer's specification"),
+    ('TAN', 'Tangible Robots, its site (Eggie not named, no figures)', 'https://tangiblerobots.ai/',
+     "Manufacturer's page"),
+    ('FEA', 'Feather Robotics, Feather (its technology page and spec sheet: "105 kg", "48 V", "50 Ah")',
+     'https://feather.dev/technology', "Manufacturer's specification"),
+    ('UNG1D', 'Unitree, G1-D (Ultimate: "Approx. 90kg", "9Ah" and "30Ah", "Diﬀerential drive")',
+     'https://www.unitree.com/G1-D/', "Manufacturer's specification"),
+    ('UNH2D', 'Unitree, H2-D (Flagship: "Approx. 120Kg", "48V/30Ah (1.44 kWh)", "dual-wheel differential")',
+     'https://www.unitree.com/H2-D/', "Manufacturer's specification"),
+    ('MGD1', 'MagicLab, MagicBot D1 ("150kg", "Total Capacity 1652Wh", "four‑steering‑wheel chassis")',
+     'https://www.magiclabglobal.com/magicbots/magicbot-d1/', "Manufacturer's specification"),
+    ('BWM', 'Blue Worm, Mantis Standard (its 核心参数: 1400 mm, "升降范围 550 mm", no mass)',
+     'https://www.bluewormrobotics.com/products/mantis-standard', "Manufacturer's specification"),
+    ('SPA', 'Spirit AI, its products (no robot named: "全向轮式底盘", "自由度达26个")', 'https://www.spirit-ai.com/product',
+     "Manufacturer's page"),
+    ('SNC8', 'Sanctuary AI, Phoenix Generation 8 ("It has a wheeled base"; no figures)',
+     'https://sanctuary.ai/news/sanctuary-ai-releases-new-generation-of-ai-robots-for-high-quality-data-capture/',
+     "Manufacturer's page"),
+    ('GAL', 'Galaxea, R1 series (R1 Pro: "126 kg ... including battery", 26 DoF, Jetson AGX Orin 32GB)',
+     'https://galaxea-dynamics.com/products/galaxea-r1-series-pioneering-wheeled-dual-arm-robotics',
+     "Manufacturer's specification"),
+    ('GALg', "Galaxea, the R1's hardware guide (\"48 V\", \"35 Ah\", \"1680 Wh\"; the R1's, not the Pro's)",
+     'https://userguide-galaxea.github.io/Product_User_Guide/Guide/R1/Hardware_Guide', "Manufacturer's documentation"),
+    ('UNR1', 'Unitree, R1 (R1-A5-D "Approx. 30kg", R1-A7-D "Approx. 32kg", "Chassis DOF 3")',
+     'https://www.unitree.com/R1-D/', "Manufacturer's specification"),
+    ('RBY', 'Rainbow Robotics, RB-Y1 (A "Total: 131kg", M "Total: 170kg", "50V, 25Ah (1,250Wh)")',
+     'https://rainbow-robotics.com/en/products/rb-y1/', "Manufacturer's specification"),
+    ('RBYu', 'Rainbow Robotics, rby1a model_v1.2.urdf (132.22 kg; its torque limits)',
+     'https://github.com/RainbowRobotics/rby1-sdk', "Manufacturer's model file"),
+    ('POL', 'Pollen Robotics, Reachy 2 and its hardware guide ("Up to 50 kg", Orbita 2D "1.900 g", 3D "950 g")',
+     'https://docs.pollen-robotics.com/hardware-guide/specifications/general/', "Manufacturer's specification"),
+    ('POL21', 'Pollen Robotics, the mobile base (2021: "24V, 35Ah", "6.5kg", "Aluminium, MJF 3D printed plastic '
+              'parts, Steel")',
+     'https://pollen-robotics.github.io/reachy-2021-docs/advanced/specifications/mobile-base-specs/',
+     "Manufacturer's documentation"),
+    ('RM01', 'RealMan, RealBot-01 ("≈ 125 kg", "40 Ah (BMS)", 21 DoF)',
+     'https://develop.realman-robotics.com/en/wheelRobot/RealBot01/', "Manufacturer's documentation"),
+    ('RML2', 'RealMan, RealBot-L2 ("≈ 120 kg", "48V 20Ah", "Lifting stroke 0.3 m")',
+     'https://develop.realman-robotics.com/en/wheelRobot/RealBotL2/', "Manufacturer's documentation"),
+    ('RMS2', 'RealMan, RealBot-S2 ("≈ 125 kg", "48V 20Ah", "Four-wheel steering, four-wheel drive")',
+     'https://develop.realman-robotics.com/en/wheelRobot/RealBotS2/', "Manufacturer's documentation"),
+    ('TPd', 'PAL Robotics, TIAGo Pro hardware overview ("Weight 95 Kg", "2 x 36 V, 20 Ah")',
+     'https://docs.pal-robotics.com/edge/hardware/tiagopro/hardware-overview', "Manufacturer's documentation"),
+    ('TPs', 'PAL Robotics, TIAGo Pro datasheet ("Weight 80 kg", "4x Mecanum Wheels", arms of 7 DoF)',
+     'https://pal-robotics.com/datasheet/tiago-pro/', "Manufacturer's datasheet"),
+    ('TOR', 'Tokyo Robotics, Torobo ("approx. 120 kg", "omni-directional mobile base")',
+     'https://robotics.tokyo/technologies/torobo/', "Manufacturer's specification"),
+    ('LXV', 'Lanxin Robotics, VB1, VB1-I and VB2 (their tables; no mass)', 'https://www.lanxinrobotics.com/humanoid-robots/',
+     "Manufacturer's specification"),
+    ('DXM', 'Dexmate, Vega 1 Pro and its spec sheet ("298 lbs (135 kg)", "Base 4 (2 steering, 2 drive)")',
+     'https://www.dexmate.com/product/vega-1-pro', "Manufacturer's specification"),
+    ('DXMu', 'Dexmate, vega_1p.urdf (141.00 kg; its torque limits)', 'https://github.com/dexmate-ai/dexmate-urdf',
+     "Manufacturer's model file"),
+    ('YQB', 'Yue Quan Bionics, 博文W-Bot 2.0 (its 产品参数: "整机重量 60kg", "电池容量2400W·h")',
+     'https://www.yqbionics.com/W_Bot', "Manufacturer's specification"),
+    ('YMB', 'Yunmu (YMBot), its site and its news of 2026-07-03 (D4: "双臂负载60kg"; no product pages)',
+     'https://www.ymbot.com/news', "Manufacturer's page"),
+    ('PSI', 'PsiBot, PsiBot-V1 (its parameters: "腰部自由度：2个", "算力平台：Thor"; no mass)',
+     'https://www.psibot.ai/products_zh/product_psibot-v1_zh/', "Manufacturer's specification"),
+    ('ZLT', 'ZLTECH, hub servo motors for robots (4.5" 2.9 kg to 8" 800 W 8.5 kg, their loads per pair)',
+     'https://www.robotmotor.com/hub-motor/', "Component maker's catalogue"),
+    ('UUM', 'UU Motor, 4" robot servo hub motor SVH4D ("Motor weight: 1.4kg")',
+     'https://www.uumotor.com/4-inch-robot-brushless-servo-hub-motor.html', "Component maker's catalogue"),
+    ('TEN', 'Tente, swivel castors 75 mm (5920UAP075L51-10 "Overall weight 0.18 kg"; 1470PAO075P40 0.27 kg)',
+     'https://www.tente.com/en-sg/swivel-castor-75-mm/1470pao075p40-tente', "Component maker's catalogue"),
+    ('ORM', "Oriental Motor, EL series lifting columns (20.4 to 30.5 kg for 50 to 300 mm)",
+     'https://catalog.orientalmotor.com/viewitems/-linear-actuator-dc-input-electric-lifting-columns/'
+     'lifting-columns-el-series-electric-lifting-columns', "Component maker's catalogue"),
     SHARED_SOURCES['L1'],
     SHARED_SOURCES['T1'],
     SHARED_SOURCES['T3'],
@@ -282,7 +395,7 @@ def titanium(robot_kg: float, source: str) -> tuple:
 
 def fans(count: int, why: str) -> tuple:
     """The fans of a robot's computers, one each, as the G1's main board fan (E6.8 point 7)."""
-    return ('Main board fan', count, 'Torso boards', 'Torso', FAN_KG, None, None, 'E',
+    return ('Main board fan', count, 'Boards', 'Torso', FAN_KG, None, None, 'E',
             f"{why}, a fan each: as the G1's main board fan (E6.8 point 7)")
 
 
@@ -362,16 +475,16 @@ GR1_JOINTS = [
 UNITREE_CELLS = ('E', 'NMC cylindrical, E: "Premium Lithium Battery with Low Internal Resistance" (H2p), no chemistry '
                       'stated (E6.8 point 6)')
 H2_BOARDS = [
-    ('Computer board PC1, Intel Core i5 (motion control)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    ('Computer board PC1, Intel Core i5 (motion control)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
      "H2d (10 cores, 8 GB); as the X1's and N1's computer boards (E6.8 point 7)"),
-    ('Computer board PC2, Intel Core i7 (development)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    ('Computer board PC2, Intel Core i7 (development)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
      "H2d (10 cores, 16 or 32 GB); as the X1's and N1's computer boards (E6.8 point 7)"),
     POWER_BOARD]
 H2_MICROPHONES = ('Microphone array (4 microphones)', 1, 'Head', 'Head', MICROPHONES_G, 'E',
                   'H2p "Array Microphone"; as the G1\'s four (E6.8 point 8)', MICROPHONES)
 H2_SPEAKER = ('Speaker, high-power', 1, 'Head', 'Head', SPEAKER_G, 'E', 'H2p "High-Power Speaker"; as the G1\'s (E6.8 '
                                                                          'point 8)', [])
-H2_IMUS = ('Motion sensor (IMU), torso and pelvis', 2, 'Torso boards', 'Torso', IMU_G, 'E',
+H2_IMUS = ('Motion sensor (IMU), torso and pelvis', 2, 'Boards', 'Torso', IMU_G, 'E',
            "H2u (imu_in_torso, imu_in_pelvis); as the G1's (E6.8 point 8)", [('IMU', 1)])
 
 
@@ -407,9 +520,9 @@ UNITREE_H2_PLUS = h2(
                                     '2026-10-30); H2Pu its model 77.24 kg the max; 1 kg below the min (E6.8 point 5)'),
     H2_JOINTS + [H2_PLUS_HAND], H2_JOINT_SOURCES + "; its hands 1.65 kg for both, the models' difference (E)",
     H2_BOARDS + [
-        ('Compute module PC3, NVIDIA Jetson Thor T5000', 1, 'Torso boards', 'Torso', estimate(87), 'ITC', 'E',
+        ('Compute module PC3, NVIDIA Jetson Thor T5000', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
          "H2d (its camera on PC3, GMSL2); as the AGX Orin's 100 × 87 mm, the Thor's size not read (E6.8 point 7)"),
-        ('Carrier board of the Jetson Thor', 1, 'Torso boards', 'Torso', (50, 100, 150), 'ITC', 'E',
+        ('Carrier board of the Jetson Thor', 1, 'Boards', 'Torso', (50, 100, 150), 'ITC', 'E',
          "as the Booster T1's carrier board (E6.8 point 7)")],
     [fans(3, 'its two Intel computers and its Jetson Thor'), x86_sinks(2), ARM_SINK],
     ('Binocular camera, 2 sensors (2560 × 1984)', 1, 'Head', 'Head', STEREO_CAMERA_G, 'E',
@@ -429,9 +542,9 @@ UNITREE_H1_2 = block(
                                       '67.2V" = 16 × 4.2 V; E6.3)'),
     capacity=(spread(15), 'S', 'H1p "15Ah"; ± 5 % (E6.8 point 6)'),
     cells=('E', 'NMC cylindrical, E: no chemistry stated (E6.8 point 6)'),
-    boards=[('Computer board PC1, Intel i5-1235U (motion control)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board PC1, Intel i5-1235U (motion control)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "H1d; as the X1's and N1's computer boards (E6.8 point 7)"),
-            ('Computer board PC4, Intel i7-1255U or i7-1265U (development)', 1, 'Torso boards', 'Torso', COMPUTER,
+            ('Computer board PC4, Intel i7-1255U or i7-1265U (development)', 1, 'Boards', 'Torso', COMPUTER,
              'ITC', 'E', "H1d; as the X1's and N1's computer boards (E6.8 point 7)"),
             POWER_BOARD],
     cooler=[fans(2, 'its two Intel computers'), x86_sinks(2)],
@@ -439,7 +552,7 @@ UNITREE_H1_2 = block(
               LIDAR),
              ('Depth camera, Intel RealSense D435', 1, 'Head', 'Head', D435_G, 'S',
               'H1d "D435 depth camera"; Intel D400 datasheet, D435 75 g (second-hand), as the G1', DEPTH_CAMERA),
-             ('Motion sensor (IMU)', 1, 'Torso boards', 'Torso', IMU_G, 'E', "H1u imu_link; as the G1's (E6.8 point "
+             ('Motion sensor (IMU)', 1, 'Boards', 'Torso', IMU_G, 'E', "H1u imu_link; as the G1's (E6.8 point "
                                                                              '8)', [('IMU', 1)])],
     encoders=('E', 'two per joint, as type 1; the M107 "Dual Encoder" (H1p)'),
     cables=(CABLES_TALL, 'E', CABLES_SOURCE), screws=screws(70),
@@ -463,15 +576,15 @@ FOURIER_GR2 = block(
                                    'its heaviest cells (997.5 Wh at 232.5 Wh/kg) and its management board (E6.8 point '
                                    '6)'),
     cells=('E', 'NMC cylindrical, E: GR2a "锂离子电池", no chemistry stated (E6.8 point 6)'),
-    boards=[('Computer board, Intel Core i7 (14 cores)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board, Intel Core i7 (14 cores)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "GR2a \"14核高性能CPU\"; as the X1's and N1's computer boards (E6.8 point 7)"),
-            ('Perception board, 8-core ARM', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Perception board, 8-core ARM', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "GR2a (E3); as the X1's and N1's computer boards (E6.8 point 7)"),
             POWER_BOARD],
     cooler=[fans(2, 'its Intel computer and its ARM board'), x86_sinks(1), ARM_SINK],
     sensors=[('Binocular camera', 1, 'Head', 'Head', STEREO_CAMERA_G, 'E',
               'GR2a "双目摄像头"; its mass not stated: as a D435, a stereo camera too (E6.8 point 8)', STEREO),
-             ('Motion sensor (IMU), 6-axis', 1, 'Torso boards', 'Torso', IMU_G, 'E', 'GR2a "IMU 6轴"; as the G1\'s',
+             ('Motion sensor (IMU), 6-axis', 1, 'Boards', 'Torso', IMU_G, 'E', 'GR2a "IMU 6轴"; as the G1\'s',
               [('IMU', 1)]),
              FOURIER_MICROPHONES, FOURIER_SPEAKER],
     encoders=('S', 'GR2a: dual encoders (E3)'),
@@ -492,19 +605,19 @@ def fourier_gr1(cameras: int) -> dict:
         capacity=(spread(483 / 40), 'S', 'GR1a "483Wh" at 40 V; ± 5 %; its "额定容量 5.2Ah 112.3Wh" unexplained, not '
                                          'used (E6.8 point 6)'),
         cells=('E', 'NMC cylindrical, E: GR1a "锂离子电池", no chemistry stated (E6.8 point 6)'),
-        boards=[('Computer board, Intel Core i7-13700H (ASUS PN64 mini PC)', 1, 'Torso boards', 'Torso', COMPUTER,
+        boards=[('Computer board, Intel Core i7-13700H (ASUS PN64 mini PC)', 1, 'Boards', 'Torso', COMPUTER,
                  'ITC', 'E', "GR1a; as the X1's and N1's computer boards (E6.8 point 7)"),
-                ('Switch board (8 Ethernet ports)', 1, 'Torso boards', 'Torso', (30, 60, 90), 'ITC', 'E',
+                ('Switch board (8 Ethernet ports)', 1, 'Boards', 'Torso', (30, 60, 90), 'ITC', 'E',
                  'GR1a "交换模块配有8个标准千兆以太网接口"; as the N1\'s network switch board (E6.8 point 7)'),
-                ('Motion control unit', 1, 'Torso boards', 'Torso', (30, 60, 90), 'ITC', 'E',
+                ('Motion control unit', 1, 'Boards', 'Torso', (30, 60, 90), 'ITC', 'E',
                  "GR1a \"主运动控制单元\"; as the X1's control boards (E6.8 point 7)"),
-                ('Power management module', 1, 'Torso boards', 'Torso', POWER, 'PE_HVS', 'E',
+                ('Power management module', 1, 'Boards', 'Torso', POWER, 'PE_HVS', 'E',
                  'GR1a "电源管理模块"; as the G1\'s power distribution board (E6.8 point 7)')],
         cooler=X86_COOLER,
         sensors=[('Depth camera, Intel RealSense (its model not named)', cameras, 'Head', 'Head', estimate(75), 'E',
                   'GR1a "Realsense"; as a D435, 75 g, half to 1.5 times; one or two, each as often (E6.8 point 8)',
                   DEPTH_CAMERA),
-                 ('Motion sensor (IMU)', 1, 'Torso boards', 'Torso', IMU_G, 'E', "GR1a \"IMU 有\"; as the G1's",
+                 ('Motion sensor (IMU)', 1, 'Boards', 'Torso', IMU_G, 'E', "GR1a \"IMU 有\"; as the G1's",
                   [('IMU', 1)])],
         encoders=('S, E', 'GR1a: an absolute encoder at every active leg joint beside its motor\'s; two per joint, as '
                           'type 1'),
@@ -524,7 +637,7 @@ FOURIER_GR1_ONE, FOURIER_GR1_TWO = fourier_gr1(1), fourier_gr1(2)
 # stated), one motion sensor (its maker names none: a robot that walks balances by one), the cables by its height, the
 # screws by its mass, a shell of plastics, an aluminium frame.
 CELLS_NOT_STATED = ('E', 'NMC cylindrical, E: no chemistry stated (E7.5 point 6)')
-IMU_NOT_NAMED = ('Motion sensor (IMU)', 1, 'Torso boards', 'Torso', IMU_G, 'E',
+IMU_NOT_NAMED = ('Motion sensor (IMU)', 1, 'Boards', 'Torso', IMU_G, 'E',
                  "its maker names none: one, as every robot that walks balances by one; as the G1's (E7.5 point 8)",
                  [('IMU', 1)])
 SHELL_NOT_STATED = ('Shell: plastics', 'not stated; plastics, 11.5 % of the robot (E7.5 point 10)')
@@ -579,7 +692,7 @@ def own_joints(name: str, maker: str, height: float, stated: float | None, sourc
                **more) -> dict:
     """A robot of batch 2 with every joint's torque in its maker's model (E7.5 point 1), with the defaults of batch 2
     and one computer board where its maker names none."""
-    more.setdefault('boards', [(COMPUTER_NOT_NAMED, 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E', COMPUTER_SOURCE),
+    more.setdefault('boards', [(COMPUTER_NOT_NAMED, 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E', COMPUTER_SOURCE),
                                POWER_BOARD])
     return block(name, maker, height, stated, sources, mass, joints, **with_defaults(height, mass, more))
 
@@ -596,23 +709,23 @@ KEPLER_HAND = joint('Hand (eleven joints)', 2, None, estimate(0.443 * 11 / 6), '
 
 def compute_module(power: str, source: str) -> list:
     """The module and its carrier, named by the computing power its maker states (E7.5 point 7)."""
-    return [(f'Compute module, {power} (not named)', 1, 'Torso boards', 'Torso', estimate(ORIN_NX[1]), 'ITC', 'E',
+    return [(f'Compute module, {power} (not named)', 1, 'Boards', 'Torso', estimate(ORIN_NX[1]), 'ITC', 'E',
              f"{source}; an Orin NX-sized module, 69.6 × 45 mm (E5.13), half to 1.5 times: NVIDIA's Orin modules give "
              'such figures, my reading, not stated (E7.5 point 7)'),
-            ('Carrier board of the compute module', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Carrier board of the compute module', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "as the X1's and N1's computer boards (E7.5 point 7)")]
 
 
 def orin_nx_boards(named: str) -> list:
     """A Jetson Orin NX its maker names (`named`, its source's code and words first) at its size, and its carrier."""
-    return [('Compute module, NVIDIA Jetson Orin NX', 1, 'Torso boards', 'Torso', ORIN_NX, 'ITC', 'S',
+    return [('Compute module, NVIDIA Jetson Orin NX', 1, 'Boards', 'Torso', ORIN_NX, 'ITC', 'S',
              f'{named}; 69.6 × 45 mm (E5.13), ± 5 %'),
-            ('Carrier board of the Orin NX', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Carrier board of the Orin NX', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "as the X1's and N1's computer boards (E7.5 point 7)")]
-RK3588_BOARDS = [('Compute module, Rockchip RK3588', 1, 'Torso boards', 'Torso', estimate(RADXA_CM5[1]), 'ITC', 'E',
+RK3588_BOARDS = [('Compute module, Rockchip RK3588', 1, 'Boards', 'Torso', estimate(RADXA_CM5[1]), 'ITC', 'E',
                   "its module not named: as the Radxa CM5's 55 × 40 mm, an RK3588 module, half to 1.5 times (E5.13; "
                   'E7.5 point 7)'),
-                 ('Carrier board of the RK3588', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+                 ('Carrier board of the RK3588', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                   "as the X1's and N1's computer boards (E7.5 point 7)")]
 # Sensors whose makers name their kind but not their model (E7.5 point 8): a binocular or depth camera as a D435, 75 g,
 # half to 1.5 times (STEREO_CAMERA_G); a camera of one sensor and a LiDAR as type 1's of no named model (their kind's
@@ -640,7 +753,7 @@ def lidar(source: str) -> tuple:
 
 
 def imu(source: str, name: str = 'Motion sensor (IMU)') -> tuple:
-    return (name, 1, 'Torso boards', 'Torso', IMU_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [('IMU', 1)])
+    return (name, 1, 'Boards', 'Torso', IMU_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [('IMU', 1)])
 
 
 def microphones(source: str, name: str = 'Microphone array') -> tuple:
@@ -760,11 +873,11 @@ def unitree_h2x(pc2: str) -> dict:
     """The H2-X in one of its two versions (E7.5 point 12; a discrete state, each drawn as often): its second computer
     an Intel Core i7 or an Orin NX ("PC2：Intel Core i7 Or Orin NX", one of two)."""
     intel = pc2 == 'Intel Core i7'
-    second = ([('Computer board PC2, Intel Core i7', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    second = ([('Computer board PC2, Intel Core i7', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                 "H2Xp \"Intel Core i7 Or Orin NX\"; as the X1's and N1's computer boards (E7.5 point 7)")] if intel else
-              [('Compute module PC2, NVIDIA Jetson Orin NX', 1, 'Torso boards', 'Torso', ORIN_NX, 'ITC', 'S',
+              [('Compute module PC2, NVIDIA Jetson Orin NX', 1, 'Boards', 'Torso', ORIN_NX, 'ITC', 'S',
                 'H2Xp "Intel Core i7 Or Orin NX"; 69.6 × 45 mm (E5.13), ± 5 %'),
-               ('Carrier board of the Orin NX', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+               ('Carrier board of the Orin NX', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                 "as the X1's and N1's computer boards (E7.5 point 7)")])
     return template(
         f"Unitree H2-X {'Core i7' if intel else 'Orin NX'}", 'Unitree', 1.725, 65, ((65, 66, 70), 'S, E',
@@ -773,7 +886,7 @@ def unitree_h2x(pc2: str) -> dict:
         31, sources='H2Xp (Unitree); E7.1',
         **voltage_capacity(57.6, 'H2Xp "Dual Battery Capacity: 20 Ah (1.152 kWh)": 1152 / 20 = 57.6 V, 16 cells of '
                                  '3.6 V ("Maximum Voltage: 67.2V" = 16 × 4.2 V)', 20, 'H2Xp "20 Ah", both batteries'),
-        boards=[('Computer board PC1, 8-core CPU (motion control)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+        boards=[('Computer board PC1, 8-core CPU (motion control)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                  'H2Xp "8-core high-performance CPU", not named: as the X1\'s and N1\'s computer boards (E7.5 point '
                  '7)')] + second + [POWER_BOARD],
         cooler=[fans(2, 'its two computers'), ARM_SINK, x86_sinks(1) if intel else ARM_SINK],
@@ -789,7 +902,7 @@ AEI_ALICE_4 = template(
     'AeiROBOT ALICE 4', 'AeiROBOT', 1.60, 45, ((44, 45, 46), 'S', 'AL4 "160cm / 45kg"; ± 1 kg (E7.5 point 5); the '
                                                                   "register's Alice, 50 kg, reported (E7.3 question 3)"),
     41, 'Computer board, GENE-RAP6 (Intel)', sources='AL4 (AeiROBOT); E7.1',
-    boards=[('Computer board, GENE-RAP6 (Intel)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board, GENE-RAP6 (Intel)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "AL4 \"GENE-RAP6\"; as the X1's and N1's computer boards (E7.5 point 7)")] + orin_nx_boards(
         'AL4 "Jetson Orin NX"') + [POWER_BOARD],
     cooler=[fans(2, 'its Intel board and its Orin NX'), x86_sinks(1), ARM_SINK],
@@ -894,9 +1007,9 @@ LUMOS_LUS2 = template(
     28, sources='LS2 (Lumos: "Total DoF (Joint Modules) 28"); E7.1',
     **voltage_capacity(54, 'LS2 "Rated voltage 54 V"', 10, 'LS2 "Battery capacity 10 Ah"'),
     cells=('S', 'NMC cylindrical: LS2 "Ternary lithium battery"; the cell format E (E7.5 point 6)'),
-    boards=[('Compute module, NVIDIA Jetson AGX Orin', 1, 'Torso boards', 'Torso', AGX_ORIN, 'ITC', 'S',
+    boards=[('Compute module, NVIDIA Jetson AGX Orin', 1, 'Boards', 'Torso', AGX_ORIN, 'ITC', 'S',
              'LS2 "NVIDIA Jetson AGX Orin"; 100 × 87 mm (E5.13), ± 5 %'),
-            ('Carrier board of the AGX Orin', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Carrier board of the AGX Orin', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "as the X1's and N1's computer boards (E7.5 point 7)"), POWER_BOARD],
     sensors=[lidar('LS2 "3D LiDAR"'), depth_camera('LS2 "Binocular Depth Camera"'),
              microphones('LS2 "4-mic array"'), speaker('LS2 "Speaker"'), IMU_NOT_NAMED],
@@ -928,10 +1041,10 @@ DIGIT_NEZHA_P01 = template(
 WALKER_WAIST_NM, MEDIAN_HEAD_NM, MEDIAN_WRIST_NM = 180, 15.8, 17.3
 # A controller its maker names by "2070" (TOPS or TFLOPS), the Omni's and Tien Kung 3.0's: as the H2 Plus's Jetson Thor
 # (2070 is the Thor's figure, my reading), 87 cm², half to 1.5 times, and its carrier as the H2 Plus's (E8.3 point 7).
-THOR_SIZED = [('Compute module, "2070" (not named)', 1, 'Torso boards', 'Torso', estimate(87), 'ITC', 'E',
+THOR_SIZED = [('Compute module, "2070" (not named)', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
                "its maker's \"2070\" read as a Jetson Thor's (my reading, not stated); as the H2 Plus's, the AGX "
                "Orin's 100 × 87 mm, half to 1.5 times (E8.3 point 7)"),
-              ('Carrier board of the compute module', 1, 'Torso boards', 'Torso', (50, 100, 150), 'ITC', 'E',
+              ('Carrier board of the compute module', 1, 'Boards', 'Torso', (50, 100, 150), 'ITC', 'E',
                "as the H2 Plus's carrier board (E8.3 point 7)")]
 LAAS = 'TLu, LAAS-CNRS\'s model of PAL\'s robot, second-hand (decided, E8.2 question 6)'
 
@@ -1010,9 +1123,9 @@ UNITREE_H1 = own_joints(
                    'refit at their torque, half to 1.5 times (E8.3 point 1)'),
     **voltage_capacity(57.6, 'H1p "15Ah(0.864KWh)": 864 / 15 = 57.6 V, 16 cells of 3.6 V ("Max Voltage 67.2V" = 16 × '
                              '4.2 V)', 15, 'H1p "15Ah"'),
-    boards=[('Computer board, Intel Core i5 (platform functions)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board, Intel Core i5 (platform functions)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "H1p; as the X1's and N1's computer boards (E8.3 point 7)"),
-            ('Computer board, Intel Core i7 (user development)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Computer board, Intel Core i7 (user development)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "H1p; as the X1's and N1's computer boards (E8.3 point 7)"), POWER_BOARD],
     cooler=[fans(2, 'its two Intel computers'), x86_sinks(2)],
     sensors=[lidar('H1p "3D LIDAR"'), depth_camera('H1p "Depth Camera"'), IMU_NOT_NAMED])
@@ -1044,11 +1157,11 @@ def walker_tienkung(embodied: bool) -> dict:
                                + ('; its neck and wrists, not in its model, the medians of type 2\'s seven robots, 15.8 '
                                   'and 17.3 N·m (E); its hands of six joints as Fourier\'s (E)' if embodied else '')),
         **voltage_capacity(48, 'WTp "Voltage: 48V"', 33, 'WTp "Capacity: 30Ah + 3Ah"'),
-        boards=[('Computer board, Intel Core i7 (motion control)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+        boards=[('Computer board, Intel Core i7 (motion control)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                  "WTp \"CPU: Intel Core i7\"; as the X1's and N1's computer boards (E8.3 point 7)"),
-                ('Compute module, NVIDIA Jetson AGX Orin', orins, 'Torso boards', 'Torso', AGX_ORIN, 'ITC', 'S',
+                ('Compute module, NVIDIA Jetson AGX Orin', orins, 'Boards', 'Torso', AGX_ORIN, 'ITC', 'S',
                  f'WTp "NVIDIA Jetson AGX Orin{" x 2" if embodied else ""}"; 100 × 87 mm (E5.13), ± 5 %'),
-                ('Carrier board of the AGX Orin', orins, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+                ('Carrier board of the AGX Orin', orins, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                  "as the X1's and N1's computer boards (E8.3 point 7)"), POWER_BOARD],
         cooler=[fans(1 + orins, 'its Intel computer and its AGX Orin'), x86_sinks(1), arm_sinks(orins)],
         sensors=[imu('WTp "High-Precision IMU"'), depth_camera('WTp "RGB-D Camera x 3"', 3),
@@ -1112,12 +1225,12 @@ ROBOTERA_L7 = template(
     added_joints=[joint('Hand (XHAND 1, twelve joints)', 2, None, spread(1.1), 'Elbows and wrists', 'Arms',
                         size='small')],
     **voltage_capacity(60, 'L7p "电池容量 60 V 15 Ah"', 15, 'L7p "15 Ah"'),
-    boards=[('Computer board, x86 (80 TOPS)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board, x86 (80 TOPS)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "L7p \"80 TOPS (X86)\"; as the X1's and N1's computer boards (E8.3 point 7)"),
-            ('Compute module, Orin (275 TOPS)', 1, 'Torso boards', 'Torso', estimate(87), 'ITC', 'E',
+            ('Compute module, Orin (275 TOPS)', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
              'L7p "275 TOPS (Orin)": the AGX Orin\'s figure (my reading), 100 × 87 mm, half to 1.5 times (E8.3 point '
              '7)'),
-            ('Carrier board of the Orin', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+            ('Carrier board of the Orin', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "as the X1's and N1's computer boards (E8.3 point 7)"), POWER_BOARD],
     cooler=[fans(2, 'its x86 computer and its Orin'), x86_sinks(1), ARM_SINK],
     sensors=[depth_camera('L7p "深度相机"'), lidar('L7p "3D激光雷达"'), microphones('L7p "麦克风阵列"'),
@@ -1155,7 +1268,7 @@ X_HUMANOID_TIEN_KUNG_3 = template(
     voltage=((24, 48, 72), 'E', 'TK3p no voltage: 48 V as the Walker Tienkung\'s main and small battery, half to 1.5 '
                                 'times (E8.3 point 6; as type 1\'s Booster T1, E5.14 point 2)'),
     capacity=(spread(18), 'S', 'TK3p "电池数据：15Ah+3Ah"; ± 5 % (E8.3 point 6)'),
-    boards=[('Computer board, main controller (4.8 GHz)', 1, 'Torso boards', 'Torso', COMPUTER, 'ITC', 'E',
+    boards=[('Computer board, main controller (4.8 GHz)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
              "TK3p \"高性能主控4.8G主频\", an Intel-class board (E); as the X1's and N1's computer boards"),
             ] + THOR_SIZED + [POWER_BOARD],
     cooler=[fans(2, 'its main controller and its module'), x86_sinks(1), ARM_SINK],
@@ -1172,19 +1285,553 @@ DROIDUP_WALKER_II = template(
              IMU_NOT_NAMED])
 WALKER_TIENKUNG_VISION, WALKER_TIENKUNG_EMBODIED = walker_tienkung(False), walker_tienkung(True)
 
-# Every robot of type 2 taken apart, in the register's order of numbers (25 Alice to 352 H1; batch 1: 116 GR-1, 117
-# GR-2, 119 H1-2, 120 H2, 121 H2 Plus; batch 2b from 216 Omni), the robots of the template with its rows
-# (AVERAGE_JOINTS).
+
+# ======================================================================================================================
+# The robots on wheels: 43 robots, 46 blocks (EVIDENCE.md E9.1 to E9.6; agreed 2026-10-30, "Yes, agree E9.4", "Yes,
+# agree E9.6"; entered on "Yes, build it", E9.7, its open points A to D as recommended). The AICO 2, the RB-Y1 and the
+# R1-D in two versions each; the H2-D as its Flagship, the G1-D as its Ultimate (E9.2).
+# ======================================================================================================================
+
+# A drive wheel's hub motor where no source of the robot weighs it (E9.6 point 4): by the robot's mass per driven
+# wheel, each class its makers' rating per motor (E9.5), half to 1.5 times (E); inside as a joint module (the G1's joint
+# scaled, though a hub motor has no gears: its steel overstated, its other materials understated).
+HUB_CLASSES = [(35, 1.4, 'UUM "Motor weight: 1.4kg", 35 to 50 kg a motor'),
+               (75, 3.75, 'ZLT\'s 6.5" and 8" robot hub motors, 3.40 to 4.25 kg for 100 to 150 kg a pair'),
+               (100, 4.85, 'ZLT\'s 6.5" 500 W hub motor, 4.85 kg for 200 kg a pair'),
+               (float('inf'), 8.5, 'ZLT\'s 8" 800 W hub motor, 8.5 kg for 300 kg a pair')]
+# A steered wheel's steering motor (E9.6 point 5): ROBOTIS's YM070-210-R051-RH, the AI Worker's, "790 [g]", 16.3 N·m;
+# and a lift column's motor (point 7): its YM080-230-B001-RH, "890 [g]" with a spring-applied brake.
+STEERING_KG, STEERING_NM, LIFT_MOTOR_KG, LIFT_MOTOR_NM = 0.79, 16.3, 0.89, 1.24
+# A caster (E9.6 point 6): Tente's steel-housed 75 mm, "0.27 kg", half to 1.5 times (E); inside by the sheet Shares.
+CASTER_KG = 0.27
+# A gripper named without a mass (E9.6 point 11): as ROBOTIS's RH-P12-RN, "500g", half to 1.5 times (E).
+GRIPPER_KG = 0.5
+# The template on wheels (E9.6 point 3): its rows name what they average.
+WHEELED_TEMPLATE_LABEL = "as type 2's four robots on wheels with every joint on average"
+WHEELED_TEMPLATE_SOURCES = ("its maker gives no joint's torque or mass: its joint modules 7.8 / 15.6 / 23.4 % of its "
+                            "mass, split as type 2's four robots on wheels with every joint (Vega 1 Pro, RB-Y1, AI "
+                            'Worker, Reachy 2) are on average, their hands, wheels, steering and lift left out (E9.6 '
+                            'point 3)')
+# A robot on wheels whose maker names no body joints: the median of the stated ones (E9.6; 12 to 26, median 18).
+WHEELED_JOINTS_MEDIAN = 18
+# A lift column whose maker gives it no mass (E9.6 point 7): 19.9 % of the robot, the AI Worker's lift link (17.9 of
+# 90 kg), half to 1.5 times, less its motor.
+LIFT_BY_SHARE = (None, 'E', "its maker gives no mass: 19.9 % of the robot (the AI Worker's lift link, 17.9 of 90 kg), "
+                            'half to 1.5 times, less its motor (E9.6 point 7)')
+TYPE_TWO_SHARED += [
+    # The template on wheels (EVIDENCE.md E9.6 point 3, agreed 2026-10-30, "Yes, agree E9.6"); 01 and 02 take them for
+    # a robot on wheels.
+    ('all', 'Joint modules, share of the robot mass, on wheels', 0.078, 0.156, 0.234, 'share', 'E',
+     "type 2's four robots on wheels with every joint (Vega 1 Pro 13.2, RB-Y1 13.9, AI Worker 14.3, Reachy 2 20.9 %): "
+     'their mean, 15.6 %; half to 1.5 times (E9.6 point 3)'),
+    ('all', 'Battery energy per kg of robot, on wheels', 4.62, 10.28, 22.86, 'Wh/kg', 'E',
+     "the 12 robots on wheels whose makers state an energy: their median 10.28, their least 4.62 (CASBOT W1) and most "
+     "22.86 (Feather), the W-Bot's 40.0 left out as the one outlier (E9.6 point 3)"),
+    ('all', 'Lift column, share of the robot mass, on wheels', 0.0995, 0.199, 0.2985, 'share', 'E',
+     "the AI Worker's lift link in its model, 17.9 of 90 kg; half to 1.5 times (E9.6 point 7)"),
+]
+
+
+def hub_motors(count: int, robot_kg: float) -> tuple:
+    """The drive wheels of a robot on wheels: their hub motors by its mass per driven wheel (E9.6 point 4)."""
+    load = robot_kg / count
+    mode, why = next((kg, why) for limit, kg, why in HUB_CLASSES if load <= limit)
+    return joint('Wheel hub motor', count, None, estimate(mode), 'Hips', 'Base', size='large'), why
+
+
+def steering(count: int, stated: bool = False) -> tuple:
+    """The steering motors of a robot's steered wheels: ROBOTIS's YM070-210-R051-RH, stated for the AI Worker (± 5 %),
+    else as it (E)."""
+    return joint('Steering motor', count, STEERING_NM, (spread if stated else estimate)(STEERING_KG), 'Waist', 'Base',
+                 size='small')
+
+
+def lift_motor(stated: bool = False) -> tuple:
+    """The motor of a lift column: ROBOTIS's YM080-230-B001-RH, stated for the AI Worker (± 5 %), else as it (E)."""
+    return joint('Lift column motor', 1, LIFT_MOTOR_NM, (spread if stated else estimate)(LIFT_MOTOR_KG), 'Waist',
+                 'Torso', size='small')
+
+
+def casters(count: int, kg: float = CASTER_KG, source: str = 'TEN: a 75 mm castor, 0.27 kg (E9.6 point 6)') -> tuple:
+    """A robot's casters (E9.6 point 6), inside by the sheet Shares (steel and plastics)."""
+    return ('Casters', count, 'Wheeled base', 'Base', estimate(kg), None, None, 'E', source)
+
+
+def grippers(name: str = 'Gripper', kg: float = GRIPPER_KG, label: str = 'E') -> tuple:
+    """Two grippers, as small joints: as the RH-P12-RN (E), or a stated mass ± 5 % (S)."""
+    return joint(name, 2, None, (spread if label == 'S' else estimate)(kg), 'Elbows and wrists', 'Arms', size='small')
+
+
+def hands(joints_each: int) -> tuple:
+    """Two hands of `joints_each` joints, as Fourier's six-joint hand per joint (E7.5 point 4), as small joints."""
+    return joint(f'Hand ({joints_each} joints)', 2, None, estimate(0.443 * joints_each / 6), 'Elbows and wrists', 'Arms',
+                 size='small')
+
+
+# Sensors of a robot's base (E9.6 point 10): its LiDAR, depth cameras and cameras of no named model as type 1's, its
+# ultrasonic sensors as the car list's "ultrasonic sensor".
+def base_lidar(source: str, count: int = 1) -> tuple:
+    return ('LiDAR in the base (not named)', count, 'Wheeled base', 'Base', None, 'S',
+            f"{source}; as type 1's LiDAR of no named model (E9.6 point 10)", LIDAR)
+
+
+def base_depth_camera(source: str, count: int = 1) -> tuple:
+    return ('Depth camera in the base (not named)', count, 'Wheeled base', 'Base', STEREO_CAMERA_G, 'E',
+            f'{source}; its mass not stated: as a D435 (E9.6 point 10)', DEPTH_CAMERA)
+
+
+def base_camera(source: str, count: int) -> tuple:
+    return ('Camera in the base', count, 'Wheeled base', 'Base', None, 'S',
+            f"{source}; as type 1's cameras of no named model (E9.6 point 10)", CAMERA)
+
+
+def ultrasonic(source: str, count: int) -> tuple:
+    return ('Ultrasonic sensor', count, 'Wheeled base', 'Base', None, 'S',
+            f'{source}; as the car list\'s "ultrasonic sensor" (E9.6 point 10)', [('ultrasonic sensor', 1)])
+
+
+def agx_orin(source: str, count: int = 1, label: str = 'S') -> list:
+    """An NVIDIA Jetson AGX Orin its maker names (± 5 %), or one read from a figure (E), and its carrier."""
+    size = AGX_ORIN if label == 'S' else estimate(87)
+    return [('Compute module, NVIDIA Jetson AGX Orin', count, 'Boards', 'Torso', size, 'ITC', label,
+             f'{source}; 100 × 87 mm (E5.13)' + (', ± 5 %' if label == 'S' else ', half to 1.5 times (E9.6 point 9)')),
+            ('Carrier board of the AGX Orin', count, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "as the X1's and N1's computer boards (E9.6 point 9)")]
+
+
+def intel(what: str, source: str) -> tuple:
+    """An Intel (or AMD) computer board, as the X1's and N1's (E9.6 point 9)."""
+    return (f'Computer board, {what}', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+            f"{source}; as the X1's and N1's computer boards (E9.6 point 9)")
+
+
+def thor(source: str) -> list:
+    """An NVIDIA Jetson AGX Thor its maker names: as the H2 Plus's, the AGX Orin's 100 × 87 mm, half to 1.5 times, and
+    its carrier (E9.6 point 9)."""
+    return [('Compute module, NVIDIA Jetson AGX Thor', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
+             f"{source}; as the H2 Plus's, the AGX Orin's 100 × 87 mm, half to 1.5 times (E9.6 point 9)"),
+            ('Carrier board of the compute module', 1, 'Boards', 'Torso', (50, 100, 150), 'ITC', 'E',
+             "as the H2 Plus's carrier board (E9.6 point 9)")]
+
+
+def wheeled(name: str, maker: str, height: float, stated: float | None, mass: tuple, body_joints: int, *, sources: str,
+            driven: int, steered: int = 0, caster_count: int = 0, lift: bool = False, added: tuple = (),
+            computer: str = COMPUTER_NOT_NAMED, **more) -> dict:
+    """A robot on wheels whose maker gives no joint's torque or mass (E9.6 point 3): the template on wheels for its body
+    joints (WHEELED_AVERAGE_JOINTS), its hands or grippers (`added`), its drive wheels by its mass per driven wheel, its
+    steering and lift motors and casters, its lift column a share of its mass, its battery in its base (its energy per kg
+    of robot on wheels where its maker gives none). `body_joints` counts its body joints, for its encoders and
+    connectors; its hands or grippers count one each, as batch 1's (`template`)."""
+    wheel, why = hub_motors(driven, mass[0][1])
+    joints = [wheel] + ([steering(steered)] if steered else []) + ([lift_motor()] if lift else [])
+    sources_of_joints = (WHEELED_TEMPLATE_SOURCES + f'; its {driven} drive wheels each a hub motor as {why}, half to 1.5 '
+                         'times (E9.6 point 4)' + ('; its steering and lift motors as ROBOTIS\'s (E)' if steered or lift
+                                                   else ''))
+    return template(name, maker, height, stated, mass,
+                    body_joints + sum(hand[1] for hand in added) + driven + steered + int(lift), computer,
+                    sources=sources,
+                    averaged=WHEELED_AVERAGE_JOINTS, joint_sources=sources_of_joints,
+                    added_joints=list(added) + joints, battery_region='Base',
+                    parts=([casters(caster_count)] if caster_count else []) + more.pop('parts', []),
+                    lift_column=LIFT_BY_SHARE if lift else None, **more)
+
+
+def from_the_register_on_wheels(name: str, maker: str, height: float, kg: float, why: str, *, driven: int = 2,
+                                caster_count: int = 2, body_joints: int = WHEELED_JOINTS_MEDIAN, **more) -> dict:
+    """A robot on wheels no maker's source describes (E9.2 point 3) or with no maker's mass (point 5): the register's
+    (the catalogue's) mass, ± 1 kg, labelled as the catalogue's; the template on wheels on two driven wheels and two
+    casters unless more is known."""
+    return wheeled(name, maker, height, kg, ((kg - 1, kg, kg + 1), 'S', f'HG "{kg:g}" (the register, the catalogue\'s); '
+                                                                         f'± 1 kg; {why}'),
+                   body_joints, sources=f'HG (the register); {why}; E9.1', driven=driven, caster_count=caster_count,
+                   **more)
+
+
+# --- The robots on wheels with every joint (E9.6 point 2): the template on wheels is their average ------------------
+# The Vega 1 Pro: vega_1p.urdf's torque limits, its joints named by their place in its chain; its two driven wheels
+# (3.7 kg each), two steering links (0.358 kg) and two casters (0.2 and 0.3 kg) its model's, half to 1.5 times (E).
+VEGA_JOINTS = [
+    fitted('Waist 1', 1, 700, 'Waist', 'Torso'), fitted('Waist 2', 1, 380, 'Waist', 'Torso'),
+    fitted('Waist 3', 1, 380, 'Waist', 'Torso'),
+    fitted('Head 1', 1, 6, 'Elbows and wrists', 'Head'), fitted('Head 2', 1, 2.5, 'Elbows and wrists', 'Head'),
+    fitted('Head 3', 1, 6, 'Elbows and wrists', 'Head'),
+    fitted('Shoulder 1', 2, 150, 'Shoulders', 'Arms'), fitted('Shoulder 2', 2, 150, 'Shoulders', 'Arms'),
+    fitted('Shoulder 3', 2, 80, 'Shoulders', 'Arms'), fitted('Elbow', 2, 80, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 1', 2, 25, 'Elbows and wrists', 'Arms'), fitted('Wrist 2', 2, 25, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 3', 2, 25, 'Elbows and wrists', 'Arms'),
+    joint('Wheel hub motor', 2, 16, estimate(3.7), 'Hips', 'Base', size='large'),
+    joint('Steering motor', 2, 6, estimate(0.358), 'Waist', 'Base', size='small')]
+# The RB-Y1: model_v1.2.urdf's torque limits, its six joints below the arms ("Leg 6 DOF", its model's torso) with the
+# waist (E9.6 point 3); its neck its "Neck Joint Module", 1.5 kg each (S); its grippers its model's 0.533 kg (E).
+RBY1_JOINTS = [
+    fitted('Waist 1', 1, 270, 'Waist', 'Torso'), fitted('Waist 2', 1, 270, 'Waist', 'Torso'),
+    fitted('Waist 3', 1, 270, 'Waist', 'Torso'), fitted('Waist 4', 1, 120, 'Waist', 'Torso'),
+    fitted('Waist 5', 1, 120, 'Waist', 'Torso'), fitted('Waist 6', 1, 120, 'Waist', 'Torso'),
+    fitted('Shoulder 1', 2, 70, 'Shoulders', 'Arms'), fitted('Shoulder 2', 2, 70, 'Shoulders', 'Arms'),
+    fitted('Shoulder 3', 2, 70, 'Shoulders', 'Arms'), fitted('Elbow', 2, 40, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 1', 2, 10, 'Elbows and wrists', 'Arms'), fitted('Wrist 2', 2, 10, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 3', 2, 8, 'Elbows and wrists', 'Arms'),
+    joint('Neck module (Rainbow)', 2, 30, spread(1.5), 'Elbows and wrists', 'Head', size='small'),
+    grippers('Gripper (its model)', 0.533)]
+# The AI Worker FFW-SG2: ROBOTIS's actuators by model (RBTe), ± 5 % (S); its drive links its model's 3.80 kg (E).
+AI_WORKER_JOINTS = [
+    joint('Shoulder 1', 2, 61.4, spread(1.2), 'Shoulders', 'Arms'),
+    joint('Shoulder 2', 2, 61.4, spread(1.2), 'Shoulders', 'Arms'),
+    joint('Shoulder 3', 2, 61.4, spread(1.2), 'Shoulders', 'Arms'),
+    joint('Elbow', 2, 31.7, spread(0.79), 'Elbows and wrists', 'Arms'),
+    joint('Wrist 1', 2, 31.7, spread(0.79), 'Elbows and wrists', 'Arms'),
+    joint('Wrist 2', 2, 31.7, spread(0.79), 'Elbows and wrists', 'Arms'),
+    joint('Wrist 3', 2, 5.1, spread(0.34), 'Elbows and wrists', 'Arms'),
+    joint('Head pitch', 1, 6.4, spread(0.165), 'Elbows and wrists', 'Head'),
+    joint('Head yaw', 1, 2.6, spread(0.082), 'Elbows and wrists', 'Head'),
+    joint('Wheel drive motor', 3, None, estimate(3.80), 'Hips', 'Base', size='large'), steering(3, stated=True),
+    lift_motor(stated=True), grippers('Gripper (RH-P12-RN)', label='S')]
+# Reachy 2: Pollen's Orbita 2D ("Weight 1.900 g") at its shoulders and elbows, Orbita 3D ("950 g") at its wrists and
+# neck, ± 5 % (S); its three omni wheels' motors by their rated 5 N·m as ZLTECH's 4.5" (2.9 kg; E).
+REACHY_JOINTS = [
+    joint('Shoulder (Orbita 2D)', 2, 16.5, spread(1.9), 'Shoulders', 'Arms'),
+    joint('Elbow (Orbita 2D)', 2, 16.5, spread(1.9), 'Elbows and wrists', 'Arms'),
+    joint('Wrist (Orbita 3D)', 2, 15, spread(0.95), 'Elbows and wrists', 'Arms'),
+    joint('Neck (Orbita 3D)', 1, 15, spread(0.95), 'Elbows and wrists', 'Head'),
+    joint('Wheel hub motor', 3, 5, estimate(2.9), 'Hips', 'Base', size='large'), grippers()]
+# The W-Bot: its page's torques ("膝关节约 360N·m，踝关节约 160N·m，手臂关节约 60N·m"), its three hip joints at its knee's
+# 360 N·m (E9.6 point 2, E); its arm "肩关节x3 + 肘关节x1 + 小臂关节x1 + 手腕关节x2".
+W_BOT_JOINTS = [
+    fitted('Hip 1', 1, 360, 'Hips', 'Legs'), fitted('Hip 2', 1, 360, 'Hips', 'Legs'),
+    fitted('Hip 3', 1, 360, 'Hips', 'Legs'), fitted('Knee', 1, 360, 'Knees', 'Legs'),
+    fitted('Ankle', 1, 160, 'Ankles', 'Legs'),
+    fitted('Shoulder 1', 2, 60, 'Shoulders', 'Arms'), fitted('Shoulder 2', 2, 60, 'Shoulders', 'Arms'),
+    fitted('Shoulder 3', 2, 60, 'Shoulders', 'Arms'), fitted('Elbow', 2, 60, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 1 (forearm)', 2, 60, 'Elbows and wrists', 'Arms'), fitted('Wrist 2', 2, 60, 'Elbows and wrists', 'Arms'),
+    fitted('Wrist 3', 2, 60, 'Elbows and wrists', 'Arms'), hub_motors(2, 60)[0]]
+
+
+def on_wheels_own(name: str, maker: str, height: float, stated: float | None, sources: str, mass: tuple, joints: list,
+                  **more) -> dict:
+    """A robot on wheels with every joint from its maker (E9.6 point 2): its battery in its base."""
+    more.setdefault('battery_region', 'Base')
+    return own_joints(name, maker, height, stated, sources, mass, joints, **more)
+
+
+DEXMATE_VEGA = on_wheels_own(
+    'Dexmate Vega 1 Pro', 'Dexmate', 1.71, 135, 'DXM (Dexmate), DXMu (its model, 141.00 kg); E9.1',
+    ((134, 135, 141.0), 'S', 'DXM "298 lbs (135 kg)" the mode, ± 1 kg; DXMu its model 141.00 kg the max (E9.6 point 1)'),
+    VEGA_JOINTS, joint_sources='DXMu: ' + TORQUES_SOURCE + "; its wheels, steering and casters its model's masses (E)",
+    parts=[casters(2, 0.25, "DXMu: its model's casters, 0.2 and 0.3 kg (E9.6 point 6)")],
+    boards=thor('DXM "NVIDIA Jetson AGX Thor"') + [POWER_BOARD],
+    sensors=[binocular('DXM "Stereo RGB camera"'), base_lidar('DXM "2× LiDAR, one front and one rear"', 2),
+             base_camera('DXM "4× RGB cameras"', 4), IMU_NOT_NAMED])
+RAINBOW_RBY1_A, RAINBOW_RBY1_M = (on_wheels_own(
+    f'Rainbow Robotics RB-Y1 {model}', 'Rainbow Robotics', 1.40, kg, 'RBY (Rainbow Robotics), RBYu (its model); E9.1',
+    (((130, 131, 132.22), 'S', 'RBY "Total: 131kg" the mode, ± 1 kg; RBYu its model 132.22 kg the max (E9.6 point 1)')
+     if model == 'A' else ((169, 170, 171), 'S', 'RBY "Total: 170kg" (its model M); ± 1 kg')),
+    RBY1_JOINTS + [hub_motors(wheels_, kg)[0]],
+    joint_label={'small': 'S, E', 'large': 'E'},
+    joint_sources=('RBYu: ' + TORQUES_SOURCE + '; its neck its "Neck Joint Module", "1.5 kg" each, ± 5 % (S); its '
+                   f'grippers its model\'s 0.533 kg (E); its {wheels_} drive wheels as {hub_motors(wheels_, kg)[1]} (E)'),
+    parts=[casters(2)] if model == 'A' else [],
+    **voltage_capacity(50, 'RBY "50V"', 25 if model == 'A' else 50, f'RBY "{25 if model == "A" else 50}Ah"'),
+    boards=[intel('Intel (its Robot PC)', 'RBY "dual-PC", the Robot PC'),
+            ('Compute module, GPU (not named)', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
+             'RBY "GPU-Equipped" User PC: as an AGX Orin, 100 × 87 mm, half to 1.5 times (my reading; E9.6 point 9)'),
+            ('Carrier board of the compute module', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
+    cooler=[fans(2, 'its two computers'), x86_sinks(1), ARM_SINK])
+    for model, kg, wheels_ in (('A', 131, 2), ('M', 170, 4)))
+ROBOTIS_AI_WORKER = on_wheels_own(
+    'ROBOTIS AI Worker', 'ROBOTIS', 1.623, 90, 'RBT (ROBOTIS: the FFW-SG2), RBTe (its actuators), RBTm (its model); E9.1',
+    ((89, 90, 94.42), 'S', 'RBT "90 kg" the mode, ± 1 kg; RBTm its model 94.42 kg the max (E9.6 point 1)'),
+    AI_WORKER_JOINTS, joint_label={'small': 'S', 'large': 'S, E'},
+    joint_sources=('RBTe: ROBOTIS\'s actuators by model, their weights ± 5 % (S): arm joints 1-3 YM080-230-R099-RH '
+                   '1,200 g, 4-6 YM070-210-R099-RH 790 g, 7 PH42-020-S300-R 340 g; head XH540-V150-R 165 g, '
+                   'XH430-V210-R 82 g; steering YM070-210-R051-RH 790 g; lift YM080-230-B001-RH 890 g; gripper '
+                   'RH-P12-RN "500g"; its drive links its model\'s 3.80 kg (RBTm, E)'),
+    lift_column=(estimate(17.01), 'E', "RBTm its model's lift link 17.9 kg less its motor's 0.89 kg, half to 1.5 times "
+                                       '(E9.6 point 7)'),
+    **voltage_capacity(25.5, 'RBT "Battery: 25V, 80Ah (2,040Wh)": 2,040 / 80 = 25.5 V', 80, 'RBT "80Ah"'),
+    boards=agx_orin('RBT "NVIDIA Jetson AGX Orin 32GB"') + [POWER_BOARD],
+    sensors=[binocular('RBT "Stereolabs ZED Mini"'), depth_camera('RBT "Intel RealSense D405 (x2)"', 2),
+             base_lidar('RBT "LakiBeam 1 (x2)"', 2), imu('RBT "IMU"')],
+    frame=('Frame', 'Aluminium', 'RBT "Exterior Materials Aluminum, Plastic"; the remainder (E9.6 point 12)'))
+POLLEN_REACHY_2 = on_wheels_own(
+    'Pollen Robotics Reachy 2', 'Pollen Robotics', 1.66, 50, 'POL (Pollen Robotics), POL21 (its base, 2021); E9.1',
+    ((49, 50, 51), 'S', 'POL "Up to 50 kg"; ± 1 kg (E9.6 point 1)'), REACHY_JOINTS,
+    joint_label={'small': 'S, E', 'large': 'E'},
+    joint_sources=('POL: Orbita 2D "1.900 g" and Orbita 3D "950 g", ± 5 % (S); its wheels\' motors (POL21: rated '
+                   '5 N·m) as ZLT\'s 4.5", 2.9 kg, half to 1.5 times (E); its grippers as the RH-P12-RN (E)'),
+    **voltage_capacity(24, 'POL21 "24V, 35Ah" (the 2021 base\'s battery, E for Reachy 2)', 35, 'POL21 "35Ah"',
+                       label='S, E'),
+    pack=(spread(6.5), 'S, E', 'POL21 "6.5kg" (the 2021 base\'s battery, E for Reachy 2); ± 5 %'),
+    boards=[intel('Solidrun Bedrock v3000 (AMD)', 'POL "Solidrun Bedrock v3000", "Fanless industrial PC"'),
+            POWER_BOARD],
+    cooler=[x86_sinks(1)],
+    sensors=[binocular('POL "Stereo"'), depth_camera('POL "RGB-D"'), base_lidar('POL "LiDAR"'),
+             ('Motion sensor (IMU)', 3, 'Wheeled base', 'Base', IMU_G, 'E',
+              "POL21 \"Hall Sensors and IMU on each wheel\"; as the G1's (E9.6 point 10)", [('IMU', 1)])],
+    frame=('Frame', 'Aluminium', 'POL21 "Aluminium, MJF 3D printed plastic parts, Steel" (its base); aluminium the '
+                                 'remainder, its steel not weighed (E9.6 point 12)'))
+YUE_QUAN_W_BOT = on_wheels_own(
+    'Yue Quan Bionics W-Bot', 'Yue Quan Bionics', 1.78, 60, 'YQB (Yue Quan Bionics, 博文W-Bot 2.0); E9.1',
+    ((59, 60, 61), 'S', 'YQB "整机重量 60kg"; ± 1 kg'), W_BOT_JOINTS,
+    joint_sources=('YQB: "膝关节约 360N·m，踝关节约 160N·m，手臂关节约 60N·m"; its three hip joints at its knee\'s 360 N·m '
+                   '(E); mass the refit at the torque, half to 1.5 times; its drive wheels as ' + hub_motors(2, 60)[1]
+                   + ' (E)'),
+    parts=[casters(2)],
+    **voltage_capacity(48, 'YQB "最大电压48V", taken as its voltage (E)', 2400 / 48, 'YQB "电池容量2400W·h" at 48 V',
+                       label='S, E'),
+    boards=[('Compute module, NVIDIA Jetson Orin NX', 2, 'Boards', 'Torso', ORIN_NX, 'ITC', 'S',
+             'YQB "NVIDIA Jetson Orin NX 16GB×2"; 69.6 × 45 mm (E5.13), ± 5 %'),
+            ('Carrier board of the Orin NX', 2, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
+    cooler=[fans(2, 'its two Orin NX'), arm_sinks(2)],
+    sensors=[depth_camera('YQB "Intel Realsense D435i深度相机＆D455深度相机"', 2), base_lidar('YQB "Iivox 360雷达"'),
+             IMU_NOT_NAMED])
+# The template on wheels: the joints of the four with every joint, their hands, wheels, steering and lift left out.
+WHEELED_AVERAGE_JOINTS = average_joints(
+    [dict(b, joints=[j for j in b['joints'] if j[0].split()[0] not in ('Wheel', 'Steering', 'Lift', 'Gripper', 'Hand')])
+     for b in (DEXMATE_VEGA, RAINBOW_RBY1_A, ROBOTIS_AI_WORKER, POLLEN_REACHY_2)], label=WHEELED_TEMPLATE_LABEL)
+
+# --- The robots on wheels of the template (E9.6 points 3 to 12) -------------------------------------------------------
+AGIBOT_A2_W = from_the_register_on_wheels('AgiBot A2-W', 'AgiBot', 1.63, 230,
+                                          "AGA2: no longer on AgiBot's sites")
+AGIBOT_G1 = wheeled(
+    'AgiBot G1', 'AgiBot', 1.80, 150, ((149, 150, 151), 'S', 'AGG1 "150kg"; ± 1 kg'), 20,
+    sources='AGG1 (AgiBot: "20 DoF", its hands of six); E9.1', driven=2, caster_count=2, added=(hands(6),),
+    boards=agx_orin('AGG1 "Jetson AGX Orin 64GB"') + [POWER_BOARD],
+    sensors=[depth_camera('AGG1 "RGBD Camera*3"', 3), camera('Camera, fisheye', 5, 'Head', 'AGG1 "Fisheye*5"'),
+             base_depth_camera('AGG1 "RGBD cameras front and rear"', 2), base_lidar('AGG1 "LiDAR"'), IMU_NOT_NAMED])
+FLEXIV_AICO_2_4, FLEXIV_AICO_2_10 = (wheeled(
+    f'Flexiv AICO 2-{n}', 'Flexiv', 1.60, kg, ((kg - 1, kg, kg + 1), 'S', f'FLX "{kg}kg" (AICO 2-{n}); ± 1 kg'), 14,
+    sources=f'FLX (Flexiv: AICO 2-{n} "2*7" DoF, "Dual-wheel differential"); E9.1', driven=2, caster_count=2,
+    sensors=[base_lidar('FLX "Laser SLAM"'), IMU_NOT_NAMED]) for n, kg in ((4, 281), (10, 395)))
+PAL_ARI = wheeled(
+    'PAL ARI', 'PAL Robotics', 1.65, None, ((59, 60, 61), 'S', 'HG "60" (the register, the catalogue\'s); ± 1 kg; PAL '
+                                                              'states none (E9.2 point 5)'), 12,
+    sources='ARId (PAL: head 2, arms 5 × 2, base 2; "Standard differential drive"), HG; E9.1', driven=2,
+    caster_count=2, computer='Computer board, Intel i5',
+    **voltage_capacity(24, 'ARId "24V / 40VAh"', 40, 'ARId "40VAh"'),
+    boards=[intel('Intel i5', 'ARId "CPU Intel i5 / i7 / i9"'), POWER_BOARD], cooler=[fans(1, 'its computer'), x86_sinks(1)],
+    sensors=[camera('Camera, head', 1, 'Head', 'ARId "Head Camera 8 MP RGB"'), depth_camera('ARId "RealSense D435i"'),
+             microphones('ARId "4x high performance digital microphone array"'),
+             ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "ARId \"2 x 30 W Hi-Fi\"; as the G1's (E9.6 point 10)", []),
+             IMU_NOT_NAMED])
+KIT_ARMAR_7 = wheeled(
+    'KIT ARMAR-7', 'KIT', 1.75, None, ((119, 120, 121), 'S', 'HG "120" (the register, the catalogue\'s); ± 1 kg; KIT '
+                                                             'states none (E9.2 point 5)'), 21,
+    sources='KIT (arms 8 × 2, head 3, torso 2, hands of four, "three omni-wheels"), HG; E9.1', driven=3,
+    added=(hands(4),),
+    sensors=[camera('Camera, hand', 2, 'Head', 'KIT "A RGB camera is integrated in each of these hands"'),
+             binocular('KIT "several integrated camera systems" (E: one binocular)'), IMU_NOT_NAMED])
+ASTRIBOT_S1 = wheeled('Astribot S1', 'Astribot', 1.70, 80, ((79, 80, 81), 'S', 'ASTp "80kg"; ± 1 kg'), 14,
+                      sources='ASTp (Astribot: arms of 7 DoF); E9.1', driven=2, caster_count=2)
+ASTRIBOT_T1 = from_the_register_on_wheels('Astribot T1', 'Astribot', 1.55, 66, 'ASTp: a banner only')
+ELU_AI_AD_01 = from_the_register_on_wheels('ELU.AI AstroDroid AD-01', 'ELU.AI', 1.70, 120, 'INF: AD-01 named, no figures')
+HONDA_AVATAR = wheeled(
+    'Honda Avatar', 'Honda', 1.70, 110, ((109, 110, 111), 'S', 'HON "110kg Weight"; ± 1 kg; the register\'s 101 kg '
+                                                               'reported'), 22,
+    sources='HON (Honda: head 3, arms 8 × 2, hands 16 × 2, waist 3, wheel 2); E9.1', driven=2, caster_count=2,
+    added=(hands(16),), sensors=[binocular('HON "the robot\'s eyes" (E: one binocular)'), IMU_NOT_NAMED])
+CASBOT_W1 = wheeled(
+    'CASBOT W1', 'CASBOT', 2.10, 260, ((259, 260, 261), 'S', 'CAS "重量约260kg"; ± 1 kg'), 17,
+    sources='CAS (CASBOT: arms 7 × 2, neck 2, waist 1, lift 1, "2+4，两轮差速"); E9.1', driven=2, caster_count=4,
+    lift=True, added=(grippers('Gripper (CASBOT)', label='S'),), computer='Computer board, Intel i9',
+    **voltage_capacity(48, 'CAS "电池电压 48v"', 25, 'CAS "电池容量 48V/25Ah"'), cell_recipe='LFP cylindrical',
+    cells=('S', 'LFP cylindrical: CAS "电池类型 磷酸铁锂"; the cell format E (E9.6 point 8)'),
+    boards=[intel('Intel i9', 'CAS "工控机（i9 cpu+4060显卡）"'),
+            ('Graphics board, NVIDIA RTX 4060', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "CAS \"4060显卡\"; as the X1's and N1's computer boards (E9.6 point 9)")] + RK3588_BOARDS + [POWER_BOARD],
+    cooler=[fans(2, 'its PC and graphics board'), x86_sinks(2), ARM_SINK],
+    sensors=[base_lidar('CAS "腹部可扩展360球型激光"'), depth_camera('CAS "RGBD相机（结构光）" 4', 4),
+             binocular('CAS "双目相机 1，头部"'), microphones('CAS "胸部2麦线阵"'), IMU_NOT_NAMED],
+    frame=('Frame', 'Aluminium', 'CAS "合金、工程塑料": alloy, aluminium (E); the remainder (E9.6 point 12)'))
+TOYOTA_CUE7 = from_the_register_on_wheels('Toyota CUE7', 'Toyota', 2.18, 74, 'no page of Toyota\'s found (E9.1)',
+                                          caster_count=0)
+REALMAN_DUAL_ARM_LIFT = wheeled(
+    'RealMan Dual-Arm Lift', 'RealMan', 1.78, 157, ((156, 157, 158), 'S', 'RMD "≈ 157 kg"; ± 1 kg'), 12,
+    sources='RMD (RealMan: dual RM65-B-V arms of 6 DoF, "Lifting Stroke 900 mm"); E9.1', driven=2, caster_count=2,
+    lift=True, added=(grippers('Gripper (CTAG2F90D)'),),
+    sensors=[depth_camera('RMD "Vision Sensor: Integrated" (E: one depth camera)'), IMU_NOT_NAMED])
+TANGIBLE_EGGIE = from_the_register_on_wheels('Tangible Robots Eggie', 'Tangible Robots', 1.60, 45,
+                                             'TAN: Eggie not named, no figures')
+FEATHER = wheeled(
+    'Feather Robotics Feather', 'Feather Robotics', 1.80, 105, ((104, 105, 106), 'S', 'FEA "Total weight 105 kg"; ± 1 '
+                                                                                      'kg'), 16,
+    sources='FEA (Feather: "7 per arm · 2 neck · 1 torso · 6 base", its hands of six); E9.1', driven=3, steered=3,
+    lift=True, added=(hands(6),), **voltage_capacity(48, 'FEA "Battery voltage 48 V"', 50, 'FEA "Battery capacity 50 Ah"'),
+    boards=agx_orin('FEA "Jetson Nano · Jetson Orin AGX · Jetson Thor": the middle one (E)', label='E') + [POWER_BOARD],
+    sensors=[binocular('FEA "Zed 2i · Zed X · Zed X Mini"'), microphones('FEA "4-microphone array with speaker"'),
+             speaker('FEA "with speaker"'), IMU_NOT_NAMED])
+UNITREE_G1_D = wheeled(
+    'Unitree G1-D Ultimate', 'Unitree', 1.68, 90, ((89, 90, 91), 'S', 'UNG1D "Approx. 90kg"; ± 1 kg'), 16,
+    sources='UNG1D (Unitree: arms 7 × 2, waist 2, column 1, base 2, "Diﬀerential drive"); E9.1', driven=2,
+    caster_count=2, lift=True,
+    **voltage_capacity(48, "UNG1D states no voltage: 48 V as Unitree's H2-D (E9.6 point 8)", 39,
+                       'UNG1D "Upper Body Battery(Quick-release): 9Ah", "Chassis Battery (Built-in): 30Ah"',
+                       label='S, E'),
+    computer='Computer board, 8-core',
+    sensors=[binocular('UNG1D "Head HD Binocular Camera *1"'), camera('Camera, wrist', 2, 'Head',
+                                                                       'UNG1D "Wrist HD Camera *2"'),
+             base_lidar('UNG1D "LiDAR *1"'), base_depth_camera('UNG1D "Depth Camera *2"', 2), IMU_NOT_NAMED])
+AGIBOT_G2 = wheeled(
+    'AgiBot G2', 'AgiBot', 1.795, 185, ((184, 185, 186), 'S', 'AGG2m "重量 185 kg"; ± 1 kg; the register\'s 55 kg '
+                                                              'reported'), 22,
+    sources='AGG2m (AgiBot: head 3, arms 7 × 2, torso 5, "4舵轮"); E9.1', driven=4, steered=4,
+    **voltage_capacity(48, 'AGG2m "额定电压 48V"', 1652 / 48, 'AGG2m "电池总容量 1652Wh（34Ah）" at 48 V'),
+    boards=[('Compute module, "500 TOPS" (not named)', 2, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
+             'AGG2m "500 TOPS (INT8)", "24*A78": two AGX Orin, 100 × 87 mm, half to 1.5 times (my reading; E9.6 '
+             'point 9)'),
+            ('Carrier board of the compute module', 2, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
+    cooler=[fans(2, 'its two modules'), arm_sinks(2)],
+    sensors=[binocular('AGG2m "头部双目 1"'), camera('Camera, fisheye', 3, 'Head', 'AGG2m "头部鱼眼 3"'),
+             depth_camera('AGG2m "头部RGBD 1", "腕部RGBD 2"', 3), base_lidar('AGG2m "底盘激光雷达 2"', 2),
+             ultrasonic('AGG2m "底盘超声波雷达 8"', 8), imu('AGG2m "底盘IMU"'), microphones('AGG2m "4麦克风阵列"'),
+             speaker('AGG2m "头部扬声器 1"')])
+UNITREE_H2_D = wheeled(
+    'Unitree H2-D Flagship', 'Unitree', 1.70, 120, ((119, 120, 121), 'S', 'UNH2D "Approx. 120Kg" (Flagship); ± 1 kg'),
+    17, sources='UNH2D (Unitree: arms 7 × 2, waist 1, head 2, column 1, chassis 2); E9.1', driven=2, caster_count=2,
+    lift=True, **voltage_capacity(48, 'UNH2D "48V/30Ah (1.44 kWh)"', 30, 'UNH2D "30Ah"'),
+    boards=[intel('Intel Core i5 (PC1)', 'UNH2D "PC1: Intel Core i5"'),
+            intel('Intel Core i7 (PC2)', 'UNH2D "PC2: Intel Core i7"'), POWER_BOARD],
+    cooler=[fans(2, 'its two Intel computers'), x86_sinks(2)],
+    sensors=[binocular('UNH2D "Humanoid Binocular Camera"'), camera('Camera, wrist', 2, 'Head',
+                                                                     'UNH2D "Wrist HD Camera ×2"'),
+             microphones('UNH2D "Microphone Array"'), speaker('UNH2D "High-Power Speaker"'),
+             base_lidar('UNH2D "LiDAR ×1"'), base_depth_camera('UNH2D "Depth Camera ×1"'),
+             ultrasonic('UNH2D "Ultrasonic Sensor ×2"', 2), IMU_NOT_NAMED],
+    parts=[titanium(120, 'UNH2D "Titanium Alloy": a share of its mass as the H2\'s (E6.8 point 12)')],
+    frame=('Frame', 'Aluminium', 'UNH2D "Aerospace-Grade Aluminum, Titanium Alloy, and High-Strength Engineering '
+                                 'Plastics"; the remainder (E9.6 point 12)'))
+MAGICLAB_MAGICBOT_D1 = wheeled(
+    'MagicLab MagicBot D1', 'MagicLab', 1.80, 150, ((149, 150, 151), 'S', 'MGD1 "150kg"; ± 1 kg'), 21,
+    sources='MGD1 (MagicLab: neck 2, arms 7 × 2, waist 3, legs 2, "four‑steering‑wheel chassis"); E9.1', driven=4,
+    steered=4, **voltage_capacity(48, 'MGD1 "Total Capacity 1652Wh"; its charger "54.75V": 48 V (E)', 1652 / 48,
+                                  'MGD1 "1652Wh" at 48 V', label='S, E'),
+    boards=[('Compute module, Huawei R1 (500 TOPS)', 1, 'Boards', 'Torso', estimate(87), 'ITC', 'E',
+             'MGD1 "Huawei R1, 500 TOPS (INT8)": as an AGX Orin, 100 × 87 mm, half to 1.5 times (E9.6 point 9)'),
+            ('Carrier board of the compute module', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
+    sensors=[camera('Camera, head', 1, 'Head', 'MGD1 "Head RGB Camera ×1"'), binocular('MGD1 "Head Stereo Camera ×1"'),
+             camera('Camera, fisheye', 3, 'Head', 'MGD1 "Head Fisheye Camera ×3"'),
+             depth_camera('MGD1 "Wrist RGBD Camera ×2"', 2), base_lidar('MGD1 "Chassis 3D LiDAR ×2"', 2),
+             ultrasonic('MGD1 "Chassis Ultrasonic Sensor ×3" (its text: 8)', 3), microphones('MGD1 "Microphone Array"'),
+             ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "MGD1 \"Hi‑Fi driver ×2\"; as the G1's (E9.6 point 10)", []),
+             IMU_NOT_NAMED])
+BLUE_WORM_MANTIS = from_the_register_on_wheels(
+    'Blue Worm Mantis Standard', 'Blue Worm', 1.40, 50, 'BWM: no mass (the press: about 35 kg, second-hand)',
+    driven=4, caster_count=0, body_joints=18, lift=True)
+SPIRIT_AI_MOZ1 = from_the_register_on_wheels('Spirit AI Moz1', 'Spirit AI', 1.60, 70,
+                                             'SPA: no robot named ("全向轮式底盘", "自由度达26个")', driven=4,
+                                             caster_count=0, body_joints=26)
+SANCTUARY_PHOENIX_8 = from_the_register_on_wheels('Sanctuary Phoenix Gen 8', 'Sanctuary AI', 1.70, 70,
+                                                  'SNC8: "a wheeled base", no figures')
+GALAXEA_R1_PRO = wheeled(
+    'Galaxea R1 Pro', 'Galaxea', 1.70, 126, ((125, 126, 127), 'S', 'GAL "126 kg ... including battery"; ± 1 kg; the '
+                                                                   "register's 96 kg (the R1 Lite's) reported"), 18,
+    sources="GAL (Galaxea: arms 7 × 2, torso 4, chassis 6), GALg (the R1's: three steered wheels); E9.1", driven=3,
+    steered=3, added=(grippers('Gripper (Galaxea)'),),
+    **voltage_capacity(48, 'GALg "48 V" (the R1\'s battery, E for the Pro)', 35, 'GALg "35 Ah"', label='S, E'),
+    boards=agx_orin('GAL "NVIDIA Jetson AGX Orin, 32GB"') + [POWER_BOARD],
+    sensors=[binocular('GALg "Zed 2" (the R1\'s)'), depth_camera('GALg "RealSense D435i" × 2', 2),
+             base_camera('GALg "5 x Monocular Camera"', 5), base_lidar('GALg "LIVOX MID-360"'), imu('GALg "IMU"')])
+UNITREE_R1_A5_D, UNITREE_R1_A7_D = (wheeled(
+    f'Unitree R1-{model}', 'Unitree', 1.60, kg, ((kg - 1, kg, kg + 1), 'S', f'UNR1 "Approx. {kg}kg" ({model}); ± 1 kg; '
+                                                                          "the register's 52 kg reported"),
+    body, sources=f'UNR1 (Unitree: {model}, arms {arm} × 2, waist 1, head 2, "Chassis DOF 3"); E9.1', driven=4,
+    added=(grippers('Gripper (Unitree)'),),
+    boards=[('Computer board, 8-core (body)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "UNR1 \"Body: 8-core high-performance CPU\"; as the X1's and N1's computer boards (E9.6 point 9)"),
+            ('Computer board, 8-core (head, 10 TOPS)', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             "UNR1 \"Head: 8-core high-performance CPU + 10 TOPS\"; as the X1's and N1's computer boards"), POWER_BOARD],
+    cooler=[fans(2, 'its two computers'), arm_sinks(2)],
+    sensors=[binocular('UNR1 "Binocular Camera"'), base_lidar('UNR1 "Chassis LiDAR"'), microphones('UNR1 "4-Array"'),
+             ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "UNR1 \"Dual Speakers (3W×2)\"; as the G1's", []),
+             IMU_NOT_NAMED])
+    for model, kg, body, arm in (('A5-D', 30, 13, 5), ('A7-D', 32, 17, 7)))
+REALMAN_REALBOT_01 = wheeled(
+    'RealMan RealBot-01', 'RealMan', 1.68, 125, ((124, 125, 126), 'S', 'RM01 "≈ 125 kg"; ± 1 kg'), 21,
+    sources='RM01 (RealMan: arms 14, waist 3, legs 2, neck 2); E9.1', driven=2, caster_count=2,
+    **voltage_capacity(48, "RM01 states no voltage: 48 V as RealMan's S2 and L2 (E9.6 point 8)", 40,
+                       'RM01 "40 Ah (BMS)"', label='S, E'),
+    sensors=[depth_camera('RM01 "5 depth cameras"', 5), camera('Camera, fisheye', 3, 'Head', 'RM01 "3 fisheye cameras"'),
+             base_lidar('RM01 "1 LiDAR"'), ('Motion sensor (IMU)', 2, 'Boards', 'Torso', IMU_G, 'E',
+                                            "RM01 \"2 IMUs\"; as the G1's (E9.6 point 10)", [('IMU', 1)]),
+             microphones('RM01 "a head-mounted microphone array"')])
+REALMAN_REALBOT_L2 = wheeled(
+    'RealMan RealBot-L2', 'RealMan', 1.70, 120, ((119, 120, 121), 'S', 'RML2 "≈ 120 kg"; ± 1 kg'), 16,
+    sources='RML2 (RealMan: "17 DoF", "Dual-wheel differential drive", "Lifting stroke 0.3 m"); E9.1', driven=2,
+    caster_count=2, lift=True, **voltage_capacity(48, 'RML2 "48V 20Ah"', 20, 'RML2 "20Ah"'),
+    boards=agx_orin('RML2 "Jetson AGX Orin 64G"') + [POWER_BOARD],
+    sensors=[binocular('RML2 "Stereo RGB"'), depth_camera('RML2 hand "RGBD"', 2), IMU_NOT_NAMED])
+REALMAN_REALBOT_S2 = wheeled(
+    'RealMan RealBot-S2', 'RealMan', 1.70, 125, ((124, 125, 126), 'S', 'RMS2 "≈ 125 kg"; ± 1 kg'), 20,
+    sources='RMS2 (RealMan: "20 DoF", "Four-wheel steering, four-wheel drive"); E9.1', driven=4, steered=4,
+    **voltage_capacity(48, 'RMS2 "48V 20Ah"', 20, 'RMS2 "20Ah"'),
+    boards=agx_orin('RMS2 "Nvidia Jetson AGX Orin 64G"') + [POWER_BOARD],
+    sensors=[binocular('RMS2 "Stereo RGB ×1"'), camera('Camera, fisheye', 2, 'Head', 'RMS2 "fisheye ×2"'),
+             depth_camera('RMS2 hand "RGBD"', 2), base_lidar('RMS2 "dual LiDAR"', 2), IMU_NOT_NAMED])
+PAL_TIAGO_PRO = wheeled(
+    'PAL TIAGo Pro', 'PAL Robotics', 1.55, 80, ((79, 80, 95), 'S', 'TPs "Weight 80 kg" the mode, TPd "Weight 95 Kg" '
+                                                                  'the max, 1 kg below (decided, E9.3)'), 16,
+    sources='TPs, TPd (PAL: arms 7 × 2, lift 1, head 2, "Omnidirectional (4 DoF)", "4x Mecanum Wheels"); E9.1',
+    driven=4, lift=True, added=(grippers('Gripper (PAL Pro)'),), computer='Computer board, Intel i5',
+    **voltage_capacity(36, 'TPd "2 x 36 V, 20 Ah": one battery, the datasheet\'s standard robot (decided, E9.3)', 20,
+                       'TPd "20 Ah"'),
+    boards=[intel('Intel i5', 'TPs "Intel i5, RAM 16 GB"'), POWER_BOARD], cooler=[fans(1, 'its computer'), x86_sinks(1)],
+    sensors=[depth_camera('TPs "RGB-D Camera"'), base_lidar('TPs "2x Laser Range Finder"', 2),
+             microphones('TPs "4-Mic Array"'),
+             ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "TPs \"2x 4W Loudspeakers\"; as the G1's", []), imu('TPd "IMU"')])
+TOKYO_ROBOTICS_TOROBO = wheeled(
+    'Tokyo Robotics Torobo', 'Tokyo Robotics', 1.615, 120, ((119, 120, 121), 'S', 'TOR "approx. 120 kg"; ± 1 kg; the '
+                                                                                 "register's 160 kg reported"), 20,
+    sources='TOR (Tokyo Robotics: arms 7 × 2, waist 3, neck 3, "omni-directional mobile base"); E8.1, E9.1',
+    driven=4, computer='Computer board (one PC)',
+    boards=[intel('one PC', 'TOR "one PC"'), POWER_BOARD], cooler=[fans(1, 'its PC'), x86_sinks(1)])
+LANXIN_VB1_I, LANXIN_VB2, LANXIN_VERSABOT_VB_1 = (wheeled(
+    f'Lanxin {model}', 'Lanxin Robotics', height, None, (mass, 'S', f'HG "{words}" (the register, the catalogue\'s); '
+                                                                     'Lanxin states none (E9.2 point 5)'),
+    body, sources=f'LXV (Lanxin: {model}, arms of {arm} joints, {base_}); HG; E9.1', driven=driven,
+    caster_count=caster_count, added=(grippers('Gripper (Lanxin)'),),
+    sensors=[depth_camera('LXV "Panoramic RGB-D Depth Vision System" (E: one)'), base_lidar('LXV "3D Laser SLAM"'),
+             IMU_NOT_NAMED])
+    for model, height, mass, words, body, arm, base_, driven, caster_count in (
+        ('VB1-I', 1.65, (60, 65, 70), '~60–70', 12, 6, '"Dual-wheel differential motor"', 2, 2),
+        ('VB2', 1.70, (65, 70, 75), '~65–75', 14, 7, '"Four-wheel omnidirectional wheel"', 4, 0),
+        ('VersaBot VB-1', 1.65, (74, 75, 76), '75', 12, 6, '"Four-wheel omnidirectional wheel"', 4, 0)))
+TLIBOT_Y1, TLIBOT_Y2_B, TLIBOT_Y2_P = (
+    from_the_register_on_wheels(f'Tlibot {model}', 'Tlibot', height, kg, "TLB: not on its maker's list")
+    for model, height, kg in (('Y1', 1.95, 150), ('Y2-B', 1.60, 85), ('Y2-P', 1.565, 95)))
+YUNMU_YMBOT_D, YUNMU_YMBOT_D2, YUNMU_YMBOT_D4 = (
+    from_the_register_on_wheels(f'Yunmu YMBot {model}', 'Yunmu', height, kg, why)
+    for model, height, kg, why in (('D', 1.65, 100, 'YMB: no product pages'), ('D2', 1.80, 150, 'YMB: no product pages'),
+                                    ('D4', 1.65, 100, 'YMB: a news item only ("双臂负载60kg")')))
+PSIBOT_SYNROBOT = from_the_register_on_wheels(
+    'PsiBot ψ-SynRobot', 'PsiBot', 1.45, 65, 'PSI: waist 2, neck 2, "算力平台：Thor", no mass',
+    boards=thor('PSI "算力平台：Thor"') + [POWER_BOARD],
+    sensors=[depth_camera('PSI "4个RGBD相机"', 4), camera('Camera, fisheye', 3, 'Head', 'PSI "3个鱼眼相机"'),
+             IMU_NOT_NAMED])
+
+# Every robot of type 2 taken apart, in the register's order of numbers (13 A2-W to 352 H1; batch 1: 116 GR-1, 117
+# GR-2, 119 H1-2, 120 H2, 121 H2 Plus; batch 2b from 216 Omni; the robots on wheels among them), the robots of the
+# template with its rows (AVERAGE_JOINTS), those of the template on wheels with theirs (their blocks name them).
 GENERATED = [robot_rows(b, ROBOT_TYPE, AVERAGE_JOINTS) for b in (
-    AEI_ALICE_4, DOBOT_ATOM, MIRRORME_BOLT, XIAOMI_CYBERONE, DEEP_ROBOTICS_DR01, FIGURE_03, FOURIER_GR1_ONE,
-    FOURIER_GR1_TWO, FOURIER_GR2, UNITREE_H1_2, UNITREE_H2, UNITREE_H2_PLUS, UNITREE_H2X_INTEL, UNITREE_H2X_ORIN,
+    AGIBOT_A2_W, AGIBOT_G1, ROBOTIS_AI_WORKER, FLEXIV_AICO_2_4, FLEXIV_AICO_2_10,
+    AEI_ALICE_4, PAL_ARI, KIT_ARMAR_7, ASTRIBOT_S1, ASTRIBOT_T1, ELU_AI_AD_01, DOBOT_ATOM, HONDA_AVATAR, MIRRORME_BOLT,
+    CASBOT_W1, TOYOTA_CUE7, XIAOMI_CYBERONE, DEEP_ROBOTICS_DR01, REALMAN_DUAL_ARM_LIFT, TANGIBLE_EGGIE, FEATHER,
+    FIGURE_03, UNITREE_G1_D, AGIBOT_G2, FOURIER_GR1_ONE, FOURIER_GR1_TWO, FOURIER_GR2, UNITREE_H1_2, UNITREE_H2,
+    UNITREE_H2_PLUS, UNITREE_H2_D, UNITREE_H2X_INTEL, UNITREE_H2X_ORIN,
     HONOR_D1, SIMPLEXITY_I_SERIES, ROBROS_IGRIS_C, JCBOT_JINGCHU, KAIST_HUMANOID, PAL_KANGAROO, KEPLER_K1, KEPLER_K2,
-    LEJU_KUAVO_5, LIMX_CL, LIMX_OLI, LIMX_LUNA, LUMOS_LUS2, MAGICLAB_MAGICBOT, VINMOTION_MOTION_2, ZHEJIANG_NAVAI_I3,
+    LEJU_KUAVO_5, LIMX_CL, LIMX_OLI, LIMX_LUNA, LUMOS_LUS2, MAGICLAB_MAGICBOT_D1, MAGICLAB_MAGICBOT, BLUE_WORM_MANTIS,
+    VINMOTION_MOTION_2, SPIRIT_AI_MOZ1, ZHEJIANG_NAVAI_I3,
     DIGIT_NEZHA_P01, X_HUMANOID_OMNI, TESLA_OPTIMUS_GEN_3, TESLA_OPTIMUS_GEN_2, TESLA_OPTIMUS_V2_5, CYAN_ROBOTICS_ORCA,
-    SANCTUARY_PHOENIX, PHYBOT_M1, OPENLOONG_QINGLONG, PAL_REEM_C, ROBOTERA_L7, ENGINEAI_SE01, ZEROTH_SEAN,
-    SIASUN_SONGXING, UNITREE_SUPERMAN, PAL_TALOS, WESTWOOD_THEMIS, X_HUMANOID_TIANGONG_ULTRA, TLIBOT_TIANZHEN_Z1,
-    X_HUMANOID_TIEN_KUNG_2, X_HUMANOID_TIEN_KUNG_3, TLIBOT_T1, DROIDUP_WALKER_II, WALKER_TIENKUNG_VISION,
-    WALKER_TIENKUNG_EMBODIED, UNITREE_H1)]
+    SANCTUARY_PHOENIX, SANCTUARY_PHOENIX_8, PHYBOT_M1, OPENLOONG_QINGLONG, GALAXEA_R1_PRO, UNITREE_R1_A5_D,
+    UNITREE_R1_A7_D, RAINBOW_RBY1_A, RAINBOW_RBY1_M, POLLEN_REACHY_2, REALMAN_REALBOT_01, REALMAN_REALBOT_L2,
+    REALMAN_REALBOT_S2, PAL_REEM_C, ROBOTERA_L7, ENGINEAI_SE01, ZEROTH_SEAN,
+    SIASUN_SONGXING, UNITREE_SUPERMAN, PAL_TALOS, WESTWOOD_THEMIS, PAL_TIAGO_PRO, X_HUMANOID_TIANGONG_ULTRA,
+    TLIBOT_TIANZHEN_Z1, X_HUMANOID_TIEN_KUNG_2, X_HUMANOID_TIEN_KUNG_3, TLIBOT_T1, TOKYO_ROBOTICS_TOROBO, LANXIN_VB1_I,
+    LANXIN_VB2, DEXMATE_VEGA, LANXIN_VERSABOT_VB_1, YUE_QUAN_W_BOT, DROIDUP_WALKER_II, WALKER_TIENKUNG_VISION,
+    WALKER_TIENKUNG_EMBODIED, TLIBOT_Y1, TLIBOT_Y2_B, TLIBOT_Y2_P, YUNMU_YMBOT_D, YUNMU_YMBOT_D2, YUNMU_YMBOT_D4,
+    PSIBOT_SYNROBOT, UNITREE_H1)]
 
 
 def generated(sheet: str) -> list:

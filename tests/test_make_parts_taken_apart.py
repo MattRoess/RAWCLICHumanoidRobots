@@ -256,6 +256,7 @@ class TestMakePartsTakenApart(unittest.TestCase):
             self.assertEqual((sink.bounds, sink.material, sink.label), ((0.055, 0.12, 0.19), 'Copper', 'E'))
 
 
+
 if __name__ == '__main__':
     unittest.main()
 
@@ -400,7 +401,7 @@ class TestTypeTwo(unittest.TestCase):
         self.assertEqual({r.type for r in self.apart.robots.values()}, {2})
         # Batch 1, five robots (the GR-1 in two versions), batch 2, 24 (the H2-X in two versions; E7.5), and batch 2b,
         # 24 (the Walker Tienkung in two versions; E8.3).
-        self.assertEqual(len(TYPE_TWO), 56)
+        self.assertEqual(len(TYPE_TWO), 56 + 46)   # since 2026-10-30, the robots on wheels (E9.6)
         self.assertTrue(set(BATCH_ONE_TWO) <= set(TYPE_TWO))
 
     def test_the_joints_masses_by_the_refit_and_the_m107(self):
@@ -691,7 +692,7 @@ class TestTypeTwoBatchTwo(unittest.TestCase):
     def test_a_compute_module_where_the_maker_names_only_its_power(self):
         # E7.5 point 7: an Orin NX-sized module and its carrier, estimates, so half to 1.5 times the Orin NX's 31.3 cm2.
         for robot in ('JCBOT JingChu', 'Kepler K1', 'Kepler K2', 'Leju Kuavo 5', 'MagicLab MagicBot Gen1'):
-            boards = [b for b in self.apart.boards if b.robot == robot and b.kind == 'Torso boards']
+            boards = [b for b in self.apart.boards if b.robot == robot and b.kind == 'Boards']
             modules = [b for b in boards if b.name.startswith('Compute module')]
             carriers = [b for b in boards if b.name.startswith('Carrier board')]
             self.assertEqual([b.bounds for b in modules], [(15.65, 31.3, 46.95)], msg=robot)
@@ -785,7 +786,7 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
 
     def test_the_walker_tienkungs_two_versions(self):
         vision, embodied = 'Walker Tienkung Vision', 'Walker Tienkung Embodied'
-        boards = {r: {b.name: b.count for b in self.apart.boards if b.robot == r and b.kind == 'Torso boards'}
+        boards = {r: {b.name: b.count for b in self.apart.boards if b.robot == r and b.kind == 'Boards'}
                   for r in (vision, embodied)}
         self.assertEqual(boards[vision]['Compute module, NVIDIA Jetson AGX Orin'], 1)
         self.assertEqual(boards[embodied]['Compute module, NVIDIA Jetson AGX Orin'], 2)
@@ -805,3 +806,181 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
                       'X-Humanoid Tien Kung 2.0'):
             sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
             self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
+
+# Type 2's robots on wheels (EVIDENCE.md E9.6, agreed 2026-10-30, "Yes, agree E9.6"; entered on "Yes, build it", E9.7):
+# each as (its mass, its driven wheels and the hub motor's mode in kg, its steered wheels, its casters, its lift column
+# ('stated', a share of its mass, or none), its battery's energy in Wh where stated or derived, else None).
+ON_WHEELS = {
+    'AgiBot A2-W': ((229, 230, 231), 2, 8.5, 0, 2, None, None),
+    'AgiBot G1': ((149, 150, 151), 2, 3.75, 0, 2, None, None),
+    'ROBOTIS AI Worker': ((89, 90, 94.42), 3, 3.8, 3, 0, 'stated', 2040),
+    'Flexiv AICO 2-4': ((280, 281, 282), 2, 8.5, 0, 2, None, None),
+    'Flexiv AICO 2-10': ((394, 395, 396), 2, 8.5, 0, 2, None, None),
+    'PAL ARI': ((59, 60, 61), 2, 1.4, 0, 2, None, 960),
+    'KIT ARMAR-7': ((119, 120, 121), 3, 3.75, 0, 0, None, None),
+    'Astribot S1': ((79, 80, 81), 2, 3.75, 0, 2, None, None),
+    'Astribot T1': ((65, 66, 67), 2, 1.4, 0, 2, None, None),
+    'ELU.AI AstroDroid AD-01': ((119, 120, 121), 2, 3.75, 0, 2, None, None),
+    'Honda Avatar': ((109, 110, 111), 2, 3.75, 0, 2, None, None),
+    'CASBOT W1': ((259, 260, 261), 2, 8.5, 0, 4, 'share', 1200),
+    'Toyota CUE7': ((73, 74, 75), 2, 3.75, 0, 0, None, None),
+    'RealMan Dual-Arm Lift': ((156, 157, 158), 2, 4.85, 0, 2, 'share', None),
+    'Tangible Robots Eggie': ((44, 45, 46), 2, 1.4, 0, 2, None, None),
+    'Feather Robotics Feather': ((104, 105, 106), 3, 1.4, 3, 0, 'share', 2400),
+    'Unitree G1-D Ultimate': ((89, 90, 91), 2, 3.75, 0, 2, 'share', 1872),
+    'AgiBot G2': ((184, 185, 186), 4, 3.75, 4, 0, None, 1652),
+    'Unitree H2-D Flagship': ((119, 120, 121), 2, 3.75, 0, 2, 'share', 1440),
+    'MagicLab MagicBot D1': ((149, 150, 151), 4, 3.75, 4, 0, None, 1652),
+    'Blue Worm Mantis Standard': ((49, 50, 51), 4, 1.4, 0, 0, 'share', None),
+    'Spirit AI Moz1': ((69, 70, 71), 4, 1.4, 0, 0, None, None),
+    'Sanctuary Phoenix Gen 8': ((69, 70, 71), 2, 1.4, 0, 2, None, None),
+    'Galaxea R1 Pro': ((125, 126, 127), 3, 3.75, 3, 0, None, 1680),
+    'Unitree R1-A5-D': ((29, 30, 31), 4, 1.4, 0, 0, None, None),
+    'Unitree R1-A7-D': ((31, 32, 33), 4, 1.4, 0, 0, None, None),
+    'Rainbow Robotics RB-Y1 A': ((130, 131, 132.22), 2, 3.75, 0, 2, None, 1250),
+    'Rainbow Robotics RB-Y1 M': ((169, 170, 171), 4, 3.75, 0, 0, None, 2500),
+    'Pollen Robotics Reachy 2': ((49, 50, 51), 3, 2.9, 0, 0, None, 840),
+    'RealMan RealBot-01': ((124, 125, 126), 2, 3.75, 0, 2, None, 1920),
+    'RealMan RealBot-L2': ((119, 120, 121), 2, 3.75, 0, 2, 'share', 960),
+    'RealMan RealBot-S2': ((124, 125, 126), 4, 1.4, 4, 0, None, 960),
+    'PAL TIAGo Pro': ((79, 80, 95), 4, 1.4, 0, 0, 'share', 720),
+    'Tokyo Robotics Torobo': ((119, 120, 121), 4, 1.4, 0, 0, None, None),
+    'Lanxin VB1-I': ((60, 65, 70), 2, 1.4, 0, 2, None, None),
+    'Lanxin VB2': ((65, 70, 75), 4, 1.4, 0, 0, None, None),
+    'Dexmate Vega 1 Pro': ((134, 135, 141.0), 2, 3.7, 2, 2, None, None),
+    'Lanxin VersaBot VB-1': ((74, 75, 76), 4, 1.4, 0, 0, None, None),
+    'Yue Quan Bionics W-Bot': ((59, 60, 61), 2, 1.4, 0, 2, None, 2400),
+    'Tlibot Y1': ((149, 150, 151), 2, 3.75, 0, 2, None, None),
+    'Tlibot Y2-B': ((84, 85, 86), 2, 3.75, 0, 2, None, None),
+    'Tlibot Y2-P': ((94, 95, 96), 2, 3.75, 0, 2, None, None),
+    'Yunmu YMBot D': ((99, 100, 101), 2, 3.75, 0, 2, None, None),
+    'Yunmu YMBot D2': ((149, 150, 151), 2, 3.75, 0, 2, None, None),
+    'Yunmu YMBot D4': ((99, 100, 101), 2, 3.75, 0, 2, None, None),
+    'PsiBot ψ-SynRobot': ((64, 65, 66), 2, 1.4, 0, 2, None, None),
+}
+# The four robots on wheels whose makers give every joint (E9.6 point 2), their body joints' modules at the modes (kg),
+# the template's source; and the W-Bot, by its page's torques.
+OWN_ON_WHEELS = {'Dexmate Vega 1 Pro': 17.83, 'Rainbow Robotics RB-Y1 A': 18.17, 'Rainbow Robotics RB-Y1 M': 18.17,
+                 'ROBOTIS AI Worker': 12.867, 'Pollen Robotics Reachy 2': 10.45, 'Yue Quan Bionics W-Bot': 18.72}
+OUTSIDE_THE_BODY = ('Wheel', 'Steering', 'Lift', 'Hand', 'Gripper')
+
+
+class TestTypeTwoOnWheels(unittest.TestCase):
+    """Type 2's 43 robots on wheels entered (Matthias, 2026-10-30: "Yes, agree E9.4", "Yes, agree E9.6", "Spec the
+    entry", "Yes, build it" with the spec's open points A to D as recommended): 46 blocks with the AICO 2, the RB-Y1 and
+    the R1-D in two versions; their drive wheels, steering, casters and lift columns; the wheeled template; the CASBOT
+    W1's LFP cells; the kind "Torso boards" renamed "Boards"."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.apart, _ = written(builder_two)
+
+    def joints(self, robot: str) -> list:
+        return [j for j in self.apart.joints if j.robot == robot]
+
+    def test_the_46_are_the_registers(self):
+        self.assertTrue(set(ON_WHEELS) <= set(self.apart.robots))
+        self.assertTrue(set(ON_WHEELS) <= set(TYPE_TWO))
+        self.assertEqual(len(TYPE_TWO), 56 + 46)
+
+    def test_the_masses_as_agreed(self):
+        for robot, (mass, *_rest) in ON_WHEELS.items():
+            self.assertEqual(self.apart.constants[robot]['Robot mass, with battery'][1], mass, msg=robot)
+
+    def test_drive_wheels_steering_and_casters(self):
+        for robot, (_m, driven, hub, steered, casters, _l, _w) in ON_WHEELS.items():
+            with self.subTest(robot=robot):
+                wheels = [j for j in self.joints(robot) if j.name.startswith('Wheel')]
+                self.assertEqual(sum(j.count for j in wheels), driven)
+                self.assertEqual({j.module_mass[1] for j in wheels}, {hub})
+                self.assertEqual({(j.heat_group, j.region) for j in wheels}, {('Hips', 'Base')})   # open point A
+                steering = [j for j in self.joints(robot) if j.name.startswith('Steering')]
+                self.assertEqual(sum(j.count for j in steering), steered)
+                self.assertTrue(all(j.heat_group == 'Waist' for j in steering))
+                found = [p for p in self.apart.parts if p.robot == robot and p.name == 'Casters']
+                self.assertEqual(sum(p.count for p in found), casters)
+                self.assertTrue(all(p.kind == 'Wheeled base' and p.region == 'Base' for p in found))
+
+    def test_the_lift_columns(self):
+        shared = self.apart.constants['all']
+        self.assertEqual(shared['Lift column, share of the robot mass, on wheels'][1], (0.0995, 0.199, 0.2985))
+        for robot, (*_x, lift, _w) in ON_WHEELS.items():
+            with self.subTest(robot=robot):
+                column = [p for p in self.apart.parts if p.robot == robot and p.kind == 'Lift column']
+                motor = [j for j in self.joints(robot) if j.name.startswith('Lift')]
+                self.assertEqual(len(column), 0 if lift is None else 1)
+                self.assertEqual(sum(j.count for j in motor), 0 if lift is None else 1)
+                if lift == 'stated':
+                    self.assertEqual(column[0].bounds, half_to_one_and_a_half(17.01))
+                elif lift == 'share':
+                    self.assertTrue(column[0].computed.startswith(schemas.ROBOT_SHARE))
+                    self.assertIn('Lift column, share of the robot mass, on wheels', column[0].computed)
+
+    def test_the_wheeled_template(self):
+        shared = self.apart.constants['all']
+        self.assertEqual(shared['Joint modules, share of the robot mass, on wheels'][1], (0.078, 0.156, 0.234))
+        self.assertEqual(shared['Battery energy per kg of robot, on wheels'][1], (4.62, 10.28, 22.86))
+        template = [r for r in ON_WHEELS if r not in OWN_ON_WHEELS]
+        first = {(j.name, j.share) for j in self.joints(template[0]) if j.share is not None}
+        groups: dict = {}
+        for name, share in first:
+            groups[name.split(',')[0]] = groups.get(name.split(',')[0], 0) + share
+            self.assertIn("type 2's four robots on wheels", name)
+        self.assertAlmostEqual(sum(groups.values()), 1, places=9)
+        for group, share in {'Waist joints': 0.205, 'Shoulder joints': 0.383, 'Elbow and wrist joints': 0.336,
+                             'Head joints': 0.076}.items():
+            self.assertAlmostEqual(groups[group], share, delta=0.002, msg=group)
+        for robot in template:
+            self.assertEqual({(j.name, j.share) for j in self.joints(robot) if j.share is not None}, first, msg=robot)
+
+    def test_the_robots_with_every_joint(self):
+        for robot, modules in OWN_ON_WHEELS.items():
+            body = [j for j in self.joints(robot) if not j.name.startswith(OUTSIDE_THE_BODY)]
+            with self.subTest(robot=robot):
+                self.assertTrue(all(j.share is None for j in self.joints(robot)))
+                self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in body), modules, delta=0.01)
+
+    def test_the_batteries(self):
+        for robot, (*_x, wh) in ON_WHEELS.items():
+            own = self.apart.constants[robot]
+            with self.subTest(robot=robot):
+                if wh is None:
+                    self.assertNotIn('Battery voltage', own)
+                else:
+                    self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], wh, places=0)
+                packs = [p for p in self.apart.parts if p.robot == robot and p.kind == 'Battery pack']
+                self.assertEqual({p.region for p in packs}, {'Base'})
+        reachy = [p for p in self.apart.parts if p.robot == 'Pollen Robotics Reachy 2' and p.name == 'Battery pack']
+        self.assertEqual(reachy[0].bounds, (6.175, 6.5, 6.825))   # the 2021 base's "6.5kg", ± 5 %
+
+    def test_encoders_count_each_hand_and_wheel(self):
+        # Two encoders per joint, its hands or grippers one each, as batch 1's (template()): the AgiBot G1's "20 DoF", two
+        # hands and two drive wheels; the Honda Avatar's 22 body joints, two hands and two wheels; the CASBOT W1's 17
+        # body joints, two grippers, two drive wheels and its lift.
+        for robot, joints in (('AgiBot G1', 20 + 2 + 2), ('Honda Avatar', 22 + 2 + 2), ('CASBOT W1', 17 + 2 + 2 + 1)):
+            encoders = [p for p in self.apart.parts if p.robot == robot and p.name == 'Encoders (two per joint)']
+            self.assertEqual(encoders[0].count, 2 * joints, msg=robot)
+
+    def test_lfp_cells_for_the_casbot_w1_only(self):
+        cells = {p.robot: p.grade for p in self.apart.parts if p.name == 'Battery cells'}
+        self.assertEqual({r for r, g in cells.items() if g}, {'CASBOT W1'})
+        self.assertEqual(cells['CASBOT W1'], 'LFP cylindrical')
+        # Its rows say how 02 draws them (Matthias, 2026-10-30, "Ratio, as recommended", E9.8): its cells over a cell of
+        # their recipe, its pack its cells times the NMC packs' ratio; every other robot's as before.
+        rows = {(p.robot, p.name): p.computed for p in self.apart.parts}
+        self.assertIn('a cell of its recipe', rows[('CASBOT W1', 'Battery cells')])
+        self.assertIn("the NMC packs' pack-to-cell ratio", rows[('CASBOT W1', 'Battery pack')])
+        others = {(robot, name): text for (robot, name), text in rows.items() if robot != 'CASBOT W1'}
+        self.assertTrue(all("NMC cell's Wh/kg" in text for (_, name), text in others.items() if name == 'Battery cells'))
+        self.assertFalse(any('pack-to-cell' in text for text in others.values()))
+
+    def test_no_kind_torso_boards_left(self):
+        for which in (builder, builder_two):
+            apart, _ = written(which)
+            kinds = {p.kind for p in apart.parts + apart.boards + apart.sensors}
+            self.assertNotIn('Torso boards', kinds)
+            self.assertIn('Boards', kinds)
+
+    def test_every_joint_goes_to_a_kind(self):
+        for j in self.apart.joints:
+            self.assertIn(j.name.split()[0].lower(), schemas.JOINT_KIND, msg=f'{j.robot}, {j.name}')

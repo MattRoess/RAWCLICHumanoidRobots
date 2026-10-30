@@ -125,7 +125,8 @@ ADDED = {
 # EVIDENCE.md E5.12 to E5.19); type 2: batch 1 (2026-10-30, "Yes, agree E6.8", "Yes, build C") and batch 2
 # (2026-10-30, "Yes, agree E7.5", "Yes, build it"; the Alice as the ALICE 4, the Atom Max as DOBOT's Atom, the
 # "Kepler" as the K1, E7.3 question 3) and batch 2b (2026-10-30, "Yes, agree E8.3", "Yes, build it"; the Omni kept in
-# type 2, E8.2). A robot in several versions names each, separated by '; ', each drawn as often: the Booster K1 with
+# type 2, E8.2) and its 43 robots on wheels (2026-10-30, "Yes, agree E9.6", "Yes, build it"). A robot in several
+# versions names each, separated by '; ', each drawn as often: the Booster K1 with
 # its 5 Ah and its 2 Ah battery (E5.14, point 2), the GR-1 with one or two depth cameras (E6.8 point 8), the H2-X with
 # an Intel Core i7 or an Orin NX as its second computer (E7.5 point 12), the Walker Tienkung "Voice & Vision" or
 # "Embodied intelligence" (E8.2 question 4). No brackets or commas in a name: 04 reads the names from between brackets,
@@ -152,6 +153,19 @@ TAKEN_APART = {1: {
     290: 'PAL TALOS', 294: 'Westwood THEMIS', 297: 'X-Humanoid TianGong Ultra', 298: 'Tlibot Tianzhen Z1',
     299: 'X-Humanoid Tien Kung 2.0', 300: 'X-Humanoid Tien Kung 3.0', 302: 'Tlibot T1', 323: 'DroidUp Walker II',
     326: 'Walker Tienkung Vision; Walker Tienkung Embodied', 352: 'Unitree H1',
+    # The robots on wheels (2026-10-30, "Yes, agree E9.6", "Yes, build it"; EVIDENCE.md E9.6, E9.7): the AICO 2, the
+    # RB-Y1 and the R1-D in two versions each (E9.2 point 2), the H2-D as its Flagship and the G1-D as its Ultimate.
+    13: 'AgiBot A2-W', 15: 'AgiBot G1', 20: 'ROBOTIS AI Worker', 21: 'Flexiv AICO 2-4; Flexiv AICO 2-10', 34: 'PAL ARI',
+    35: 'KIT ARMAR-7', 40: 'Astribot S1', 41: 'Astribot T1', 42: 'ELU.AI AstroDroid AD-01', 49: 'Honda Avatar',
+    60: 'CASBOT W1', 68: 'Toyota CUE7', 82: 'RealMan Dual-Arm Lift', 86: 'Tangible Robots Eggie',
+    92: 'Feather Robotics Feather', 104: 'Unitree G1-D Ultimate', 105: 'AgiBot G2', 122: 'Unitree H2-D Flagship',
+    179: 'MagicLab MagicBot D1', 184: 'Blue Worm Mantis Standard', 200: 'Spirit AI Moz1', 230: 'Sanctuary Phoenix Gen 8',
+    247: 'Galaxea R1 Pro', 248: 'Unitree R1-A5-D; Unitree R1-A7-D',
+    251: 'Rainbow Robotics RB-Y1 A; Rainbow Robotics RB-Y1 M', 252: 'Pollen Robotics Reachy 2',
+    253: 'RealMan RealBot-01', 254: 'RealMan RealBot-L2', 255: 'RealMan RealBot-S2', 295: 'PAL TIAGo Pro',
+    307: 'Tokyo Robotics Torobo', 312: 'Lanxin VB1-I', 313: 'Lanxin VB2', 314: 'Dexmate Vega 1 Pro',
+    315: 'Lanxin VersaBot VB-1', 318: 'Yue Quan Bionics W-Bot', 335: 'Tlibot Y1', 336: 'Tlibot Y2-B', 337: 'Tlibot Y2-P',
+    340: 'Yunmu YMBot D', 341: 'Yunmu YMBot D2', 342: 'Yunmu YMBot D4', 349: 'PsiBot ψ-SynRobot',
 }}
 
 # A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:

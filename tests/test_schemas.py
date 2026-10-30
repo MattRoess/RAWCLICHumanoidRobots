@@ -473,7 +473,8 @@ class TestScreenPages(unittest.TestCase):
         groups: dict = {}
         for r in rows:
             groups.setdefault(r.group, []).append(r)
-        self.assertEqual(list(groups), list(schemas.JOINT_GROUPS))
+        # Type 1 has no robot on wheels (its groups on wheels, since 2026-10-30, E9.7 point 8, are type 2's).
+        self.assertEqual(list(groups), [g for g in schemas.JOINT_GROUPS if not g.startswith('wheels')])
         self.assertEqual([r.name for r in groups['weighed']], ['Unitree G1', 'Unitree G1+'])
         self.assertEqual({r.name for r in groups['stated']},
                          {'AgiBot X1', 'ROBOTIS AI Sapiens K1', 'ROBOTIS K0', 'EngineAI PM01',
@@ -576,15 +577,51 @@ class TestTypeTwoPages(unittest.TestCase):
 
     def test_its_pages_are_type_1s_with_its_own_title(self):
         pages = self.pages()
-        # Batches 1, 2 and 2b: 53 robots, 56 rows (the GR-1, the H2-X and the Walker Tienkung in two versions each), on
-        # four pages of 18 lines.
-        self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in (1, 2, 3, 4)]
+        # Batches 1, 2, 2b and since 2026-10-30 the robots on wheels: 96 robots, 102 rows, on pages of 18 lines.
+        tables = len(pages) - 1
+        self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in range(1, tables + 1)]
                          + ['categories/2_type_robot.png'])
-        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 53 of its 97 robots taken apart so far, each drawn '
-                                                  'from its own parts (1 of 4)')
-        self.assertEqual(self.title(pages[4][1]), 'Robot type 2: where its kinds of part sit')
+        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 96 of its 97 robots taken apart so far, each drawn '
+                                                  f'from its own parts (1 of {tables})')
+        self.assertEqual(self.title(pages[-1][1]), 'Robot type 2: where its kinds of part sit')
         for _, figure in pages:
             schemas.plt.close(figure)
+
+    def test_its_robots_on_wheels_in_sections_of_their_own_with_their_base_and_lift(self):
+        # E9.7 point 8: the robots on wheels in sections of their own, each row its base and its lift.
+        rows = {r.name: r for r in schemas.robots_table_rows(self.apart)}
+        self.assertEqual(rows['Toyota CUE7'].group, 'wheels shares')
+        self.assertEqual(rows['Dexmate Vega 1 Pro'].group, 'wheels own')
+        self.assertEqual(rows['ROBOTIS AI Worker'].group, 'wheels own')
+        self.assertEqual(schemas.JOINT_GROUPS['wheels own'], 'On wheels, every joint from its maker')
+        self.assertEqual(schemas.JOINT_GROUPS['wheels shares'], "On wheels, joints a share of the robot's mass")
+        self.assertEqual((rows['Toyota CUE7'].base, rows['Toyota CUE7'].lift), ('2 wheels', False))
+        self.assertEqual((rows['AgiBot G2'].base, rows['AgiBot G2'].lift), ('4 steered wheels', False))
+        self.assertEqual((rows['Unitree H2-D Flagship'].base, rows['Unitree H2-D Flagship'].lift),
+                         ('2 wheels, 2 casters', True))
+        self.assertEqual(rows['PAL TIAGo Pro'].base, '4 omni wheels')
+        self.assertEqual(rows['Unitree H2'].base, '')
+        groups = [r.group for r in schemas.robots_table_rows(self.apart)]
+        self.assertGreater(groups.index('wheels own'), max(k for k, g in enumerate(groups) if not g.startswith('wheels')))
+
+    def test_where_its_kinds_sit_with_a_base_on_wheels(self):
+        # E9.7 point 9, open points B and C: twelve kinds, the two of a robot on wheels drawn beside the feet for a type
+        # that has them; type 1's drawing unchanged.
+        self.assertEqual([name for name, _ in schemas.KINDS.values()],
+                         ['Hip joints', 'Knee joints', 'Ankle joints', 'Waist joints', 'Arm joints and hands',
+                          'Battery pack', 'Boards and heat sinks', 'Head', 'Cables', 'Frame and shell', 'Wheeled base',
+                          'Lift column'])
+        self.assertEqual({schemas.JOINT_KIND[w] for w in ('wheel', 'steering', 'lift')}, {'base', 'lift'})
+        self.assertTrue({'wheel', 'steering', 'lift', 'hand', 'gripper'} <= schemas.TEMPLATE_OUTSIDE)
+        self.assertEqual(set(schemas.kinds_of(self.apart)), set(schemas.KINDS))
+        figure, axes = schemas.plt.subplots()
+        schemas.draw_kinds(axes, {}, 10, set(schemas.KINDS))
+        with_base = len(axes.patches)
+        schemas.plt.close(figure)
+        figure, axes = schemas.plt.subplots()
+        schemas.draw_kinds(axes, {}, 10, set(schemas.KINDS) - {'base', 'lift'})
+        self.assertLess(len(axes.patches), with_base)
+        schemas.plt.close(figure)
 
     def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
         from matplotlib.text import Text
@@ -1368,10 +1405,10 @@ SMALL_APART = {
                ('Motor stator', 'Steel', 'M19 or M27', None, None, None, 'Yes', 'E', 'For the tests.')],
     'Boards': [('Robot A', 'Driver board, small joint', 2, 'Ankles', 'Legs', 11.5, 22.9, 28.3, 'JointParts', 'PE_HVS',
                 'W, E', 'T1'),
-               ('Robot B', 'Mini PC board', 1, 'Torso boards', 'Torso', 60, 120, 180,
+               ('Robot B', 'Mini PC board', 1, 'Boards', 'Torso', 60, 120, 180,
                 'area times Constants board mass per cm2', 'ITC', 'E', 'X1a')],
-    'Sensors': [('Robot A', 'Motion sensor', 1, 'Torso boards', 'Torso', 1, 2, 5, 'E', 'U3'),
-                ('Robot B', 'Motion sensor, YIS320', 2, 'Torso boards', 'Torso', 1, 2, 5, 'E', 'X1a')],
+    'Sensors': [('Robot A', 'Motion sensor', 1, 'Boards', 'Torso', 1, 2, 5, 'E', 'U3'),
+                ('Robot B', 'Motion sensor, YIS320', 2, 'Boards', 'Torso', 1, 2, 5, 'E', 'X1a')],
     'SensorElements': [('Motion sensor', 'IMU', 1), ('Motion sensor, YIS320', 'IMU', 1)],
     'Constants': [('all', 'Board mass per cm2 (boards not weighed)', 0.28, 0.56, 0.84, 'g/cm2', 'E', 'E2.8'),
                   ('all', "Copper share of a board's mass", 0.125, 0.2, 0.287, 'share', 'S', 'Bizzo'),
@@ -1394,7 +1431,8 @@ SMALL_APART = {
     'Sources': [('T1', 'China Post Securities, teardown', 'https://example.org', 'A teardown')],
 }
 APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),
-               ('Body region', 'Whole body'), ('Part group', 'Joint drives'), ('Material', 'Aluminium'),
+               ('Body region', 'Whole body'), ('Body region', 'Base'), ('Part group', 'Joint drives'),
+               ('Material', 'Aluminium'),
                ('Material', 'Copper'), ('Material', 'Steel'), ('Material', 'Plastics'), ('Material', 'Mixed'),
                ('Material', 'Not allocated')]
 
@@ -1595,6 +1633,44 @@ class TestPartsTakenApart(unittest.TestCase):
                                    'Elbows and wrists', 'Arms', 'U3', 'grades'),
                    ('Parts', 0, 2): 4, **self.NO_ANKLES}
         self.assertEqual([f.text for f in self.faults(changes)], [])
+
+    # Matthias, 2026-10-30, "Yes, build it" (EVIDENCE.md E9.7 point 7): two templates in one file, type 2's on legs
+    # (E7.4) and its on wheels (E9.6), each robot of a template alike the others of its own, named by what its rows
+    # average; the wheels, steering and lift motors outside it, as hands are. Robot B the template on legs (SHARES);
+    # Robot A on wheels: its two shares of the wheeled template and two hub motors with their masses.
+    ON_WHEELS = {**SHARES, ('Joints', 0, 2): 'Hip (as the robots on wheels)', ('Joints', 0, 9): 0.6,
+                 ('Joints', 0, 5): None,
+                 ('Joints', 1, 2): 'Elbow (as the robots on wheels)', ('Joints', 1, 4): 'small', ('Joints', 1, 5): None,
+                 ('Joints', 1, 9): 0.4, ('Joints', 1, 11): 'Elbows and wrists', ('Joints', 1, 12): 'Arms',
+                 ('Joints', 9): ('Robot A', 3, 'Wheel hub motor', 2, 'large', None, 1.875, 3.75, 5.625, None, '',
+                                 'Hips', 'Base', 'U3', 'E9.6'),
+                 ('Parts', 1, 2): 4,
+                 ('Constants', 98): ('all', 'Joint modules, share of the robot mass, on wheels', 0.078, 0.156, 0.234,
+                                     'share', 'E', 'E9.6'),
+                 ('MagnetGrades', 3): None, ('MagnetGrades', 4): None}
+
+    def test_two_templates_each_alike_within_itself(self):
+        self.assertEqual([f.text for f in self.faults(self.ON_WHEELS)], [])
+
+    def test_a_wheeled_template_needs_its_own_shared_share(self):
+        without = {key: value for key, value in self.ON_WHEELS.items() if key != ('Constants', 98)}
+        self.assertFaultSays(self.faults(without), "'Joint modules, share of the robot mass, on wheels'")
+
+    # E9.7 point 7: a robot on wheels drives on at least one wheel; its lift column and its lift motor come together.
+    STEERED_ONLY = {**ON_WHEELS, ('Joints', 9): ('Robot A', 3, 'Steering motor', 2, 'large', None, 1.875, 3.75, 5.625,
+                                                 None, '', 'Hips', 'Base', 'U3', 'E9.6')}
+    LIFT_MOTOR = {('Joints', 10): ('Robot A', 4, 'Lift column motor', 1, 'small', None, 0.445, 0.89, 1.335, None, '',
+                                   'Elbows and wrists', 'Torso', 'U3', 'E9.6'), ('Parts', 0, 2): 3}
+    LIFT_COLUMN = {('Parts', 7): ('Robot A', 'Lift column', 1, 'Lift column', 'Torso', 2, 4, 6, 'Aluminium', '', '', 'E',
+                                  'E9.6')}
+
+    def test_a_robot_on_wheels_with_no_drive_wheel(self):
+        self.assertFaultSays(self.faults(self.STEERED_ONLY), 'no drive wheel')
+
+    def test_a_lift_column_and_its_motor_come_together(self):
+        self.assertEqual([f.text for f in self.faults({**self.ON_WHEELS, **self.LIFT_MOTOR, **self.LIFT_COLUMN})], [])
+        self.assertFaultSays(self.faults({**self.ON_WHEELS, **self.LIFT_MOTOR}), 'no lift column')
+        self.assertFaultSays(self.faults({**self.ON_WHEELS, **self.LIFT_COLUMN}), 'no lift motor')
 
     def test_a_mixed_robots_shares_unlike_the_templates(self):
         self.assertFaultSays(self.faults({**self.MIXED, ('Joints', 1, 9): 0.2}), "not the template's")

@@ -5,6 +5,279 @@ by Claude, newest first.
 
 ## 2026-10-30
 
+### V105. The panels' numbers above their titles ("Yes, fix it")
+
+- **His words:** "Yes, fix it" (V104's finding 1: on the material pages the titles of the magnets' grade classes ran
+  into their "mean …").
+- **The cause:** `02_composition.py` `element_panel`, which draws every panel of the element and material pages:
+  its numbers were the panel's right title, on the same line as its title (left); a long title reached them.
+  Matplotlib's title pad moves all of a panel's titles together, so the numbers now have an offset of their own
+  above the panel: the title's pad, its lines at 1.2 times its size, the numbers' descent and 2 points
+  (`PANEL_NUMBERS_GAP`).
+- **Test first:** `tests/test_parts_taken_apart.py` `test_no_panel_title_runs_into_its_numbers` (every element and
+  material page of types 1 and 2 at 300 draws: no panel's title box overlaps its numbers' box): failed on the old
+  layout (type 1's "Nickel strips, battery"), and on a first fix that used the title's pad (which moved the title too);
+  passes on the second.
+- **After:** the whole suite, 395 tests, all pass (type 2's file equal to his of 13:50, V104).
+- **Looked at** (sandbox, scratch, 2,000 draws): type 2's materials page 1 of 3 (the magnets' four grade classes clear
+  of their numbers; "in 68 % of the draws" and the two lines under it above "Magnets, grade class H") and type 1's
+  elements page 1 of 4 (short titles, the numbers above them as on the material pages); no text over another, the
+  numbers clear of the row above's axis label. The bars are a little lower: the tight layout gives the numbers their
+  line.
+- **Not covered:** his pages on disk keep the old layout until he reruns 02; the other pages one by one.
+
+### V104. His runs of 13:50 read back: type 2's builder, 01 and 02 with the robots on wheels
+
+- **His words:** "I run 02, what is next".
+- **Times** (files and the process, not his console, which Claude cannot see): type 2's parts file 13:50:17; 01's
+  pages 13:50:37 to 13:50:38; 02 started 13:50:48, ended 13:56:42 (5 min 54 s). Its outputs: `data/consolidated/` 72
+  of 72 files new (13:55:46 to 13:55:58), `figures/composition/` 19 of 19 (13:55:49 to 13:55:56),
+  `data/parts_taken_apart/` 28 of 42 (13:55:59 to 13:56:23), `figures/parts_taken_apart/` 48 of 74 (13:56:13 to
+  13:56:38). The older ones are the 40 files of 2026-10-29 at the top of the last two folders (C's leftovers, waiting
+  for his word); none in a type's folder. The register and type 1's file of 11:52 equal their builders (V102).
+- **His type 2 file against its builder, cell by cell:** 0 differences.
+- **01:** "No fault found"; its overview: type 2 "96 of its 97 robots … Its draws for stock-and-flow from its parts",
+  the open line on its last robot.
+- **Type 2's draws for stock-and-flow** (`data/consolidated/2_full_scale_general_purpose_ai_research/`), from its 96
+  robots: 200,000 draws, 84.3 kg at the mean (95 %: 37.8 to 230.1); Not allocated below zero in 0 draws; the materials
+  add up to the total in every draw (to 1e-4).
+- **Remainders below zero, all of type 2's frames and housings:** one, the Unitree R1-A5-D's battery housing in 1 of
+  its 1,081 draws, by 1.6 g (its cells 1.055 kg, its management board 0.030 kg, its pack 1.084 kg in that draw; its
+  housing 0.62 kg at the median), reported, not cut, as the Omni's 0.9 g in V94.
+- **The CASBOT W1** in its 2,114 draws: cells 9.95 kg, pack 14.38 kg, housing 4.45 kg at the medians; its housing at
+  least 0.14 kg; its pack 1.02 to 2.28 times its cells (E9.8).
+- **Looked at:** type 2's notes page 1 of 3 (200,000 draws, its 96 robots, the robots drawn); its materials page 1 of
+  3; type 1's materials page 1 of 3, for the fault below.
+- **Found, on his pages:** (1) **On every material page with the magnets' grade classes, the panel title runs into
+  its "mean …"** (type 2: "Magnets, grade class UH" into "mean 583 g", SH into "mean 710 g"; type 1's page the same, SH,
+  UH, EH): the layout of the material pages, older than today's work. Not changed: his word first. (2) Type 2's
+  "Nickel strips, battery" says "in 100 % of the draws": held in 99.9995 %, all but the one R1-A5-D draw of (above),
+  where the housing's nickel strips are below zero; the share rounds to 100. Reported, not changed.
+- **Not covered:** his console's lines; the other pages one by one (types 1 and 2, 02's and 01's).
+
+### V103. 02 says each step while it runs ("Yes, build them")
+
+- **His words:** "Information on the working of 02 is poor. What next", then "Yes, build them" (the seven lines
+  proposed: reading, checking, each type drawn, every tenth robot, the draws checked, writing and pages, the whole
+  time).
+- **Found first:** 02 printed nothing while it read, checked and drew; its first line came after all the drawing. His
+  run of 11:53:26 was silent for 6 min 57 s, then printed the fault. No run of his was going while this was built.
+- **Tests first** (each failing before its code: an unknown function, an unknown argument, no such lines):
+  `tests/test_composition.py` `test_its_steps_are_said_as_they_happen_with_their_times` (on the small files: the
+  twelve lines found, in the order they run, the last "02 done in … s."), `test_a_fault_says_when_02_stopped` (the
+  last line on stderr "02 stopped after … s: nothing is written."), `test_a_time_in_plain_words` (0.4 s, 12 s, 3 min
+  40 s, 1 h 2 min); `tests/test_parts_taken_apart.py` `test_every_tenth_robot_is_said_as_it_is_drawn` (type 1: robots
+  10, 20 and 30 of its 32, by name).
+- **After:** the whole suite, 394 tests; 393 pass. The one that fails is type 2's builder against his file of 11:52
+  (V102), until he reruns it.
+- **Sandbox** (scratch, 2,000 draws, the CASBOT W1's LFP cells as they are): every line in order; type 1 drawn in 0.9 s
+  (robots 10, 20, 30 of 32 said), type 2 in 1.2 s (robots 10 to 100 of 102), each type from the workbook in under
+  0.1 s, its pages 4.1 s, each type's two figures about 7 s; "02 done in 26 s."; its results the same as V102's (type 2
+  84.2 kg at the mean, 95 %: 37.7 to 229.5).
+- **Deviations from the proposal, both small:** the robots are counted as the parts file holds them, versions apart
+  ("robot 10 of 102", the line before saying "its 96 robots (102 with their versions)"); the line "200,000 draws per
+  robot type, seed 1." now comes before the drawing, which it describes, not after it.
+- **Not covered:** the times of a 200,000-draw run (his); matplotlib's warning "More than 20 figures", still printed
+  between the lines (seen, not changed, as before).
+
+### V102. The CASBOT W1's pack by the NMC packs' ratio (EVIDENCE E9.8, "Ratio, as recommended")
+
+- **His words:** "Ratio, as recommended"; then, mid-turn, "02 is runing", ". Next steps".
+- **His run of 11:52 to 12:00** (read from the files' times and the process, not his console): the register 11:52:43,
+  type 1's file 11:52:53, type 2's 11:52:58, 01's pages 11:53:12; 02 started 11:53:26 and ended 12:00:23, with the code
+  before this fix. No file in `data/consolidated/`, `data/parts_taken_apart/`, `figures/composition/` or
+  `figures/parts_taken_apart/` is newer than 11:53 (0 files): it stopped before writing, as V101 foresaw; his outputs of
+  09:51 are untouched. The fix was prepared in Claude's scratch folder while it ran and put in after it ended.
+- **Tests first:** `tests/test_parts_taken_apart.py` `test_the_casbot_w1s_pack_by_the_nmc_packs_ratio` (at the modes
+  the pack over its cells 241.5 / 164; its housing above zero in all its draws of 3,000) and the texts of its rows in
+  `tests/test_make_parts_taken_apart.py` `test_lfp_cells_for_the_casbot_w1_only` (its cells over a cell of its recipe,
+  its pack by the ratio, no other robot's text changed): both failed on the old code, both pass on the new.
+- **After:** the whole suite, 390 tests; 389 pass. The one that fails compares type 2's builder with his file of
+  11:52:58: by program, 3 cells differ, all the CASBOT W1's (sheet Parts, row 198 its pack's text and sources, row 199
+  its cells' text); it passes once he reruns type 2's builder. The register and type 1's file equal his.
+- **Sandbox with the CASBOT W1's LFP cells** (scratch, 2,000 draws; the register, both builders, 01, 02): 01 "No fault
+  found"; 02 writes everything; type 2 over 96 robots, 84.2 kg at the mean (95 %: 37.7 to 229.5), Not allocated below
+  zero in 0.0 % of the draws, no remainder of type 2 below zero. The CASBOT W1 in its 20 draws: its cells 10.16 kg, its
+  pack 15.61 kg, its housing 5.59 kg at the medians, the housing at least 1.59 kg; the pack 1.18 to 2.00 times its cells.
+- **Not covered:** his runs; the CASBOT W1 over many draws (20 here; the test's 3,000 draws hold about 30 of it).
+
+### V101. The 43 robots on wheels entered (EVIDENCE E9.8): tests, the sandbox, the pages looked at, one fault left
+
+- **His words:** "Spec the entry", "Yes, build it" (E9.7's points 1 to 13, open points A to D as recommended).
+- **Tests:** `tests/test_make_parts_taken_apart.py` TestTypeTwoOnWheels (the 46 blocks against the register; the masses
+  as agreed; drive wheels, hub classes, steering, casters and their heat groups; the lift columns, stated or a share,
+  with their motors; the wheeled template's shares and split; the four with every joint; the batteries, the Reachy 2's
+  stated pack; LFP cells for the CASBOT W1 only; no kind "Torso boards" left; every joint to a kind; the encoders of a
+  hand or gripper, one each); `tests/test_parts_taken_apart.py` TestTypeTwoOnWheels (02: the wheeled template's
+  share, the lift column's share less its motor, LFP only in the CASBOT W1's draws, the wheeled base drawn);
+  `tests/test_schemas.py` (the wheeled fixtures of check 18: two templates, each alike within itself, the shared share
+  on wheels needed; no drive wheel; a lift column and its motor together; type 2's table sections, base and ‡, after
+  the robots on legs; the twelve kinds; the drawing with the base and the column, and without them for a type that has
+  none); `tests/test_make_humanoid_register.py` (96 taken
+  apart, none with a mass left). Shown failing before their code today: the encoder count (46 ≠ 48 for the AgiBot G1)
+  and 01's two checks of point 7 (no fault found before the check).
+- **Faults found during the build, and their fixes:** (1) 01 refused the lift column's steel 20 / 30 / 40 % as an
+  estimate narrower than half to 1.5 times: 15 / 30 / 45 %. (2) 01 refused the grade "LFP cylindrical" of a cells row:
+  `CELL_MATERIAL` may name its cells' recipe. (3) The AI Worker's 25 V × 80 Ah gave 2,000 Wh against its stated 2,040:
+  25.5 V (the stated energy over the stated capacity). (4) 'Battery energy per kg of robot, on wheels' was labelled
+  "S, E" with no source code: E. (5) 02's notes named the first template of the file for every robot: each its own.
+  (6) Overlaps on the table pages (the battery ticks, the mass ticks, the key): measured widths, `T_WHEELS`. (7) The
+  overview box said "from the workbook until all are" when all with a mass are in: conditioned on it. (8) A pair of
+  hands or grippers counted as one joint for the encoders: one each, as batch 1. (9) 01's point 7 checks (a drive wheel;
+  a lift column with its motor) were missing: built, tests first. (10) 01's "Open:" line still said type 2's "other
+  robots": now its last robot, with no mass.
+- **His shared lists against their backup, cell by cell** (`data/researched/shared_lists.xlsx` against
+  `shared_lists_before_wheels_2026-10-30.xlsx`): the same six sheets; the sheet Lists 31 → 33 rows, the two agreed rows
+  added and every other row the same, in the same order; About, Parts, Materials, Splits and Battery cells identical.
+  Its time 11:00:27, unchanged by the sandbox's 01 (01 reads it only).
+- **Type 1's file:** the builder's output against the file on disk differs in 173 cells, all the kind "Torso boards" →
+  "Boards" (Parts 65, Boards 94, Sensors 14); no number differs.
+- **After:** the whole suite, 389 tests; 386 pass. The three that fail compare the builders' output with the files on
+  disk (the register, type 1's and type 2's parts files) and pass once he reruns the three builders.
+- **Sandbox** (Claude's scratch folder, 2,000 draws): the register and both builders, then 01 and 02. **With the CASBOT
+  W1's LFP cells, 02 stops** before writing: "robot type 2: Ni is below zero in 5 draws". Measured by
+  `casbot_pack.py` (Claude's arithmetic of 02's battery steps for that robot, its own inputs): its energy 1,200 Wh, its
+  LFP cells 9.93 kg (117.8 to 125.6 Wh/kg, the sheet Cells' three LFP cells), its pack 7.16 kg (the shared 164 Wh/kg of
+  NMC packs), at the medians; the pack lighter than its cells in 98.0 % of the draws, so its housing is below zero.
+  V99's arithmetic took every pack at 164 Wh/kg and did not compare the CASBOT W1's pack with its LFP cells: missed
+  there. **With its cells made NMC in the scratch copy only:** 01 "No fault found"; 02 writes everything; type 2 drawn
+  over 96 robots (the Xialan S0 not drawn, no mass), its stock-and-flow draws from its parts: 84.2 kg at the mean
+  (95 %: 37.5 to 229.5), Not allocated below zero in 0.0 % of the draws; no frame of type 2 below zero. Per robot of
+  type 2, the medians: copper 3.6 kg, aluminium 32 kg, Nd and Pr 437 g (V93, 53 robots: 3.4 kg, 25 kg, 447 g).
+- **Looked at:** 01's overview 2 (type 2's box and the open line), type 2's table pages 5, 6 and 7 (the sections on
+  wheels, the base column, ‡, no overlap), its robot page (the base F and the column G beside the feet, twelve kinds);
+  02's type 2 page "where the critical materials sit" 1 of 5 and its elements page 1 of 2 (twelve kinds in the legend).
+- **Not covered:** his runs; the CASBOT W1's pack (open, his word); type 2's table pages 1 to 4, the other pages of 02
+  one by one; the materials of a hub motor taken as a geared joint's (stated in E9.6).
+
+### V100. What the spec of the wheeled entry (EVIDENCE E9.7) rests on, checked in the code and data
+
+- **His words:** "Spec the entry".
+- **Checked in the code (read only):** 02 takes a type's draws for stock-and-flow from its parts once its robots with a
+  mass not yet taken apart (`later`) are none (`02_composition.py`, the type loop and `taken_apart_notes`); one cell recipe
+  for every robot taken apart (`CELL_RECIPE = 'NMC cylindrical'`); the battery rows written to the body region "Torso"
+  (`tools/parts_taken_apart.py`, `robot_rows`); joints to kinds by name (`01_schemas.py` `JOINT_KIND`).
+- **Checked in the data (read only):** type 2's sheet MagnetGrades: the heat groups Knees, Hips, Waist, Ankles,
+  Shoulders, Elbows and wrists with their grade classes (Hips SH 0.5, UH 0.4, EH 0.1; Waist SH 0.6, UH 0.4); the kind name
+  "Torso boards" in 173 cells of type 1's parts file and 326 of type 2's; in the code: 01 1, 02 1, the shared machinery
+  6, type 1's builder 66, type 2's 44, the tests 5.
+- **Not covered:** nothing built.
+
+### V99. The proposal of the 43 robots on wheels (EVIDENCE E9.6) at its modes, and the table against the script
+
+- **His words:** "Propose the numbers".
+- **How:** `wheeled_modes.py` in Claude's scratch folder (Claude's arithmetic, not the model): E6.8's fit at the torques
+  of the Vega's and RB-Y1's models (by script from the files of V95) and of the W-Bot's page; the makers' module masses
+  (ROBOTIS's seven actuators, read on their e-manual pages; Pollen's Orbita); the template's share as the four's mean;
+  the hub motor of each base by the robot's mass per driven wheel; the packs at 164 Wh per kg; the shell 11.5 % and the
+  screws 0.5 kg; the frame before cables, boards and sensors the rest.
+- **Results:** the four with every joint: Vega 17.83 kg (13.2 %), RB-Y1 A 18.17 kg (13.9 %), AI Worker 12.87 kg
+  (14.3 %), Reachy 2 10.45 kg (20.9 %); mean 15.6 %, median 14.1 %; their split waist 20.5, shoulders 38.3, elbows and
+  wrists 33.6, head 7.6 % (sum 100 %). Battery energy per kg of the 12: median 10.28, least 4.62, most 22.86 without the
+  W-Bot (40.0). No frame below zero at the modes; least the AI Worker's 23.5 %.
+- **The table against the script, by program:** 46 rows (43 robots, three in two versions), in the same order; each
+  base's hub motor class, each battery's energy and each lift's mass equal the script's. **A fault it found first:**
+  five rows written by hand with the wrong hub class (AGIBOT G1, Y1, YMBot D2: 8.5 kg instead of 3.75; Dual-Arm Lift:
+  8.5 instead of 4.85; Astribot S1 a leftover); corrected, then 0 differences.
+- **Not covered:** the run's draws (only the modes); cables, boards and sensors in the remainder (they take 1 to 3 kg,
+  as in E8.3); the bases' material, which no source settles beyond the makers' words.
+
+### V98. The sources of the wheeled base's parts (EVIDENCE E9.5): read first-hand
+
+- **His words:** "Yes, start sources" (E9.4 points 5, 6, 7 and 10).
+- **How:** four web-fetch reads of makers' pages (ROBOTIS's e-manual, ZLTECH's and UU Motor's hub motors, Oriental
+  Motor's and Phoenix Mecano's lifting columns, Pollen's base pages), Tente's two castor pages in the built-in browser
+  myself (the weight from the page's data; the cookie banner declined, "click here" not to agree), the three model
+  files by script, the project's own cell sheet (`element_recipes.xlsx`, sheet Cells, read only).
+- **Agreement between sources:** the Vega's driven wheels (3.7 kg) and the AI Worker's drive links (3.80 kg) in their
+  makers' models fall in ZLTECH's 8" hub motors (3.40 to 3.725 kg); the Vega's casters (0.2, 0.3 kg) in Tente's 75 mm
+  castors (0.18, 0.27 kg).
+- **Refused or failed, not substituted:** RS, Fallshaw (403), Distrelec (empty); Honpine's steering hub motor (404);
+  Pollen's blog (403); Ewellix's LIFTKIT (now a redirect to Schaeffler, not followed). Conflicts on the makers' pages
+  named in E9.5 (ZLTECH's weights and voltages, UU Motor's torques, Phoenix Mecano's stroke).
+- **Not opened:** two PDFs found (Oriental Motor's EL manual, RK Rose+Krieger's PowerLift catalogue).
+- **Not covered:** a steering drive unit's datasheet, castors for heavy bases, a robot lift column of 300 to 900 mm
+  other than the AI Worker's model, any ballast.
+
+### V97. What the spec of the wheeled kinds of part (EVIDENCE E9.4) rests on, checked in the code and data
+
+- **His words:** "Spec the wheeled parts".
+- **Checked:** the ten kinds of part in `01_schemas.py` (`KINDS`, `KIND_HOLDS`) and their placing in `02_composition.py`
+  (`KIND_PART_GROUP`, `KIND_BODY_REGION`); the shared block of a robot in `tools/parts_taken_apart.py` (`block()`, the
+  parts sheet's columns: kind and body region per row); the shared lists' sheet Lists (read only): no body region for a
+  base, no part group for wheels; the car sensor list's sheet Sensor Details (read only): 61 types, among them
+  "ultrasonic sensor"; the wheel and base links of the three model files (V95's): AI Worker drive links 3.80 kg and
+  steering links 0.76 kg each, base 35.99 kg, lift 17.9 kg; RB-Y1 wheels 1.378 kg each, base 60.08 kg; Vega driven
+  wheels 3.7 kg, steering 0.358 kg, casters 0.2 and 0.3 kg, base 88.43 kg.
+- **The battery energy per kg of robot** of the 12 wheeled robots whose makers state an energy (E9.1; the R1 Pro by the
+  R1's guide, the RB-Y1 as its A, the TIAGo Pro one battery): 4.6 (CASBOT W1) to 40.0 Wh/kg (W-Bot), median 10.3.
+- **Not covered:** nothing built; the numbers of points 5, 6, 10 and 11 wait for sources and a proposal.
+
+### V96. The makers' datasheets read (EVIDENCE E9.3), on "Yes, all five"
+
+- **His words:** "Yes, all five" (E9.2: point 4, the six makers' PDF datasheets, read only).
+- **How:** each downloaded with its status, size and type reported, into its own new folder in Claude's scratch folder;
+  the PDFs read first-hand page by page (text and the page pictures). Four are PDFs (ARI 5 pages, TIAGo Pro 2, Vega 1
+  Pro 1, Feather 2; their SHA-256 in the scratch folder); Reachy 2's two answered HTTP 404 "Page not found"; the AI
+  Worker drawing's link answered a ROBOTIS download page, not a PDF. The three that are not PDFs were removed from the
+  scratch folder by exact name; none was read beyond its title.
+- **Found:** PAL states two masses for the TIAGo Pro: 80 kg in its datasheet (4 hours, a second battery an upgrade),
+  95 kg in its documentation (2 × 36 V 20 Ah, 8 to 10 hours). "Yes, all five" took 95 kg from the documentation alone;
+  brought to him the same day (E9.3). ARI's datasheet gives arms of 5 DoF (the docs: 4) and no mass. Vega's and
+  Feather's sheets repeat their pages; Vega states no battery.
+- **Not covered:** Reachy 2's battery (not stated anywhere read); the AI Worker drawing.
+
+### V95. The source table of type 2's 43 robots on wheels (EVIDENCE E9): read first-hand, checked against the register
+
+- **His words:** "Yes, start sources".
+- **How:** the register's sheet Type 2 read: 44 robots not yet taken apart, 43 of them on wheels (the 44th, Xialan S0,
+  has no mass and waits for his word). Each maker's own page read first-hand: seven web-fetch reads (HTML only), and in
+  the built-in browser myself where those got no text (AgiBot's G2 manual, W-Bot, MagicBot D1, R1 Pro, Mantis Standard,
+  YMBot, Astribot). Search results only pointed to pages; none of their summaries is used as a source.
+- **Model files**, fetched through GitHub's interface into Claude's scratch folder and read by script (masses summed,
+  joint limits listed): `ffw_sg2.xml` (AI Worker) 94.42 kg; `model_v1.2.urdf` (RB-Y1 A) 132.22 kg, against the maker's
+  131 kg; `vega_1p.urdf` (Vega 1 Pro) 141.00 kg, against the maker's 135 kg. PAL's and Pollen's models are xacro, not
+  expanded.
+- **Checked:** E9.1 holds exactly the register's 43 wheeled robots (by script: none missing, none extra).
+- **Found against the register** (E9.2 point 1): the makers' masses of G2 Genie (185 kg, register 55), R1 Pro (126, 96),
+  R1-D (30 or 32, 52), TIAGo Pro (95, 80), Honda Avatar (110, 101); A2-W no longer on AgiBot's sites.
+- **Not opened:** every PDF (E9.2 point 4, for his word). The fetch tool saved PAL's two datasheet PDFs to its own folder
+  unasked; they were not opened. RB-Y1's torque table in its web manual came back only as the fetch tool's summary, not
+  as text: not used (its model file's limits are).
+- **Not covered:** the robots no maker's source describes (12, E9.2 point 3); second-hand figures (CUE7, Mantis) are
+  named as such, not used.
+
+### V94. His runs of 09:49 read back: the register, type 2's builder, 01 and 02 with batch 2b
+
+- **His words:** "02 run is done. What is next".
+- **Times:** commit 60491dd at 09:49:13, the working tree clean since, so his runs ran the committed code. The register
+  09:49:30, type 2's parts file 09:49:41, 01's pages 09:49:55 to 09:49:57, 02's outputs 09:51:09 to 09:51:59
+  (`data/consolidated/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`,
+  `figures/parts_taken_apart/<n>_<name>/`). Older in `figures/schemas/categories/`: only type 2's two former pages
+  (`2_full_scale_general_purpose_ai_research.png`, `…_shared_lists.png`, 04:42), left behind as V85 says, waiting
+  for his word; the third, `…_robot.png`, is now 01's page of type 2's robots.
+- **The files on disk equal the builders':** the register, type 1's and type 2's parts files, cell for cell (the two
+  tests that failed until his runs, V93, now pass).
+- **01:** "No fault found in the inputs"; type 2 "53 of its 97 robots of the register taken apart so far …; their
+  masses 31 to 96 kg. Its draws for stock-and-flow from the workbook until all are." Its table of type 2's robots on
+  four pages, "(4 of 4)" looked at: labels clear, no battery label over the cells.
+- **02, type 2:** 200,000 draws over its 53 robots (`register.txt`, the 53 of the register), each drawn 3,655 to 3,923
+  times (200,000 / 53 = 3,774); the three robots in two versions each version 1,811 to 1,979 times (the GR-1, the
+  H2-X, the Walker Tienkung). Per robot, the medians: mass 61.0 kg (95 %: 37.7 to 86.4), copper 3.35 kg, aluminium
+  25.6 kg, iron 15.5 kg, nickel 0.82 kg, Nd 0.37 kg, Pr 0.070 kg, Dy 82 g, lithium 0.096 kg, cobalt 0.14 kg: as the
+  sandbox of V93 at 2,000 draws (copper 3.4 kg, aluminium 25 kg, Nd and Pr 447 g against 441 g here).
+- **One remainder below zero, of 868:** the X-Humanoid Omni's battery housing, in 1 of its 3,796 draws (0.026 %),
+  by 0.9 g. The housing is the pack (energy over the pack's Wh per kg) less its cells (energy over the NMC cell's Wh per
+  kg) and its management board; in that draw 1.71 kg less 1.67 kg less 0.041 kg. The same tail as type 1's Booster
+  K1 2 Ah (1.6 % of its draws, as in V92). Reported, not cut. The sandbox of V93 drew the Omni about 38 times and could
+  not show it.
+- **02, type 1:** unchanged: 25 of its 416 remainders below zero in some draw, at most the Booster K1 2 Ah's housing,
+  1.6 %, as in V92. Type 2's draws for stock-and-flow from the workbook (`data/consolidated/2_…/summary.csv`).
+- **Looked at:** 01's faults page and overview of the six types; type 2's last table page; 02's type 2 notes page and
+  first element page (copper 3.4 kg, aluminium 26 kg at the median; the kinds of part stacked).
+- **Not covered:** the other pages of this run one by one; type 1's draws against the run of 08:39 (overwritten, no copy
+  kept).
+
 ### V93. Batch 2b of type 2 entered (EVIDENCE E8.4): tests first, a sandbox run, the pages looked at
 
 - **His words:** "Spec batch 2b's entry", "Yes, build it" (points 1 to 6, open points A to C).
