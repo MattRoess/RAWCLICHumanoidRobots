@@ -41,13 +41,13 @@ compounds and the recipe of each cell down to its elements (documentation/claude
 reads `data.parts_taken_apart` (`data/researched/<n>_<name>/parts_taken_apart.xlsx`, one file for each robot type
 whose robots are taken apart): every robot of type 1, part by part, the Unitree G1, the AgiBot X1 and the Fourier N1
 as taken apart (EVIDENCE.md E2.8 to E2.8e, agreed by Matthias on 2026-10-27) and the others from their own sources
-(E5, agreed 2026-10-29), and the robots of type 2 taken apart so far (E6 and E7, agreed 2026-10-30), and checks each file
-against the sibling
+(E5, agreed 2026-10-29), the robots of type 2 (E6 to E9, agreed 2026-10-30) and batch 1 of types 3 and 4 (E11.6, entered
+on "Yes, build it", E11.7), and checks each file against the sibling
 projects' files it names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_composition`,
 `data.data_center_element_composition`, `data.traction_motor_magnets`, `data.traction_motor_steels`), read where they
 lie, and its grades against the element recipes. It reads the register `data.register`
 (`data/researched/humanoid_register.xlsx`, written by tools/make_humanoid_register.py): its sheet Robots, every known
-humanoid robot with its robot types, and its sheets Type 1 and Type 2, every robot of that type with what 02's run
+humanoid robot with its robot types, and its sheets Type 1 to Type 4, every robot of that type with what 02's run
 does with it, checked against the sheet Robots (`check_register`, `check_type_sheets`). And it looks in
 `data.sources_dir` (`documentation/sources/`) for the report of each category.
 
@@ -1687,6 +1687,40 @@ class PartsTakenApart:
     sources: dict         # code -> (row, source, link, what it is)
     faults: list          # Fault, found while reading
     source: str = 'parts_taken_apart.xlsx'   # the file read, '<n>_<name>/parts_taken_apart.xlsx', for the faults
+    origin: dict = None   # in a type's view over several files (type_parts): robot name -> the file its rows are in
+
+
+def shared_of(apart: PartsTakenApart, robot: str) -> dict:
+    """The shared numbers (robot "all") a robot's rows go with: its own file's, also in a type's view over several
+    files (EVIDENCE.md E11.7 point 4)."""
+    return (apart.origin or {}).get(robot, apart).constants.get(ALL_ROBOTS, {})
+
+
+def type_parts(files: dict, register: list | None, robot_type: int) -> PartsTakenApart | None:
+    """The robots of one robot type part by part (EVIDENCE.md E11.7 point 4): every robot of the type with its own rows
+    in one of the parts files read (`files`: robot type -> its file), each robot from its own rows, its file kept beside
+    it (`origin`, for its shared numbers: shared_of). A type all of whose robots stand in its own file (types 1 and 2)
+    is that file itself, unchanged; None where no file holds a robot of it."""
+    own = files.get(robot_type)
+    names = {v for r in register or [] if robot_type in r.types and r.taken_apart for v in versions(r.taken_apart)}
+    if own is not None and (register is None or names <= set(own.robots)):
+        return own
+    holding = {t: a for t, a in sorted(files.items()) if names & set(a.robots)}
+    if not holding:
+        return own
+    keep = lambda rows: [x for x in rows if x.robot in names]  # noqa: E731
+    first = holding.get(robot_type) or next(iter(holding.values()))
+    elements = list({(e[1], e[2]): e for a in holding.values() for e in a.elements}.values())
+    constants = {name: a.constants[name] for a in holding.values() for name in a.robots if name in names}
+    constants[ALL_ROBOTS] = first.constants.get(ALL_ROBOTS, {})
+    return PartsTakenApart(
+        robots={n: r for a in holding.values() for n, r in a.robots.items() if n in names},
+        joints=[j for a in holding.values() for j in keep(a.joints)], grades=first.grades,
+        joint_parts=first.joint_parts, parts=[p for a in holding.values() for p in keep(a.parts)],
+        shares=first.shares, boards=[b for a in holding.values() for b in keep(a.boards)],
+        sensors=[x for a in holding.values() for x in keep(a.sensors)], elements=elements, constants=constants,
+        sources={c: s for a in holding.values() for c, s in a.sources.items()}, faults=[], source=first.source,
+        origin={n: a for a in holding.values() for n in a.robots if n in names})
 
 
 def read_parts_taken_apart(path: str) -> PartsTakenApart:
@@ -1748,10 +1782,18 @@ def on_wheels(apart: PartsTakenApart, robot: str) -> bool:
     return any(JOINT_KIND.get(j.name.split()[0].lower()) == 'base' for j in apart.joints if j.robot == robot)
 
 
+# The templates of types 3 and 4 carry names of their own (EVIDENCE.md E11.7 point 2): a robot of a file of type 3 or 4
+# takes "<quantity>, types 3 and 4" (and on wheels "…, on wheels"), so that no shared value has two numbers under one
+# name when a type is drawn over several files.
+TEMPLATE_OF_TYPE = {3: ', types 3 and 4', 4: ', types 3 and 4'}
+
+
 def template_quantity(apart: PartsTakenApart, robot: str, quantity: str) -> str:
     """The shared number of the template a robot takes: JOINT_SHARE or ENERGY_PER_KG, or for a robot on wheels the
-    same on wheels (E9.6 point 3)."""
-    return quantity + ON_WHEELS if on_wheels(apart, robot) else quantity
+    same on wheels (E9.6 point 3); for a robot of a file of type 3 or 4, types 3 and 4's (TEMPLATE_OF_TYPE)."""
+    own = apart.robots.get(robot)
+    return (quantity + TEMPLATE_OF_TYPE.get(own.type if own else None, '')
+            + (ON_WHEELS if on_wheels(apart, robot) else ''))
 
 
 def share_quantity(computed: str) -> str:
@@ -2323,13 +2365,22 @@ TYPE_SHEET = 'Type {}'
 IN_RUN = 'In the run'
 TYPE_SHEET_HEADINGS = REGISTER_HEADINGS + [IN_RUN]
 # What a sheet Type n says of a robot in 02's run (tools/make_humanoid_register.py writes the same): drawn with its own
-# rows of its type's parts file, or not drawn (no mass stated), or not drawn as its type is drawn from the workbook,
-# none of its robots taken apart yet, or not drawn as it is not yet taken apart, its type drawn from the workbook
-# until every robot of the type with a mass is (2026-10-30, "Yes, build C", Q2 and Q4).
+# rows, in the parts file of one of its types (since 2026-10-30 a robot of types 3 or 4 also from type 1's or 2's file,
+# EVIDENCE.md E11.7 point 5), or not drawn (no mass stated: a robot without a mass is not in the evaluation, in every
+# sheet, E10.1 point 4), or not drawn as its type is drawn from the workbook, none of its robots taken apart yet, or not
+# drawn as it is not yet taken apart, its type drawn from the workbook until every robot of the type with a mass is
+# (2026-10-30, "Yes, build C", Q2 and Q4).
 IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'
 IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
 IN_RUN_LATER = 'not drawn: not yet taken apart'
+
+
+def drawn_part_by_part(sheet: list) -> bool:
+    """Whether a robot type is drawn part by part: some robot of its sheet Type n is drawn with its own parts, in the
+    parts file of one of its types (EVIDENCE.md E11.7 point 4: types 3 and 4 also over their robots of types 1's and 2's
+    files). 01 and 02 both decide by it."""
+    return any(r.in_run == IN_RUN_OWN for r in sheet)
 
 
 @dataclass
@@ -2462,11 +2513,13 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
                      ) -> list[Fault]:
     """Whether the sheet Type n of `robot_type` (`listed`) lists every robot of that type of the sheet Robots
     (`register`), leading or second type, each once and nothing else, every cell as in the sheet Robots; and whether its
-    "In the run" says what 02 does with it. `apart` holds the robots of the type's parts file (none where the type has
-    none). A robot taken apart (all its versions robots of that file) is drawn with its own parts; where none of the
-    type is, the type is drawn from the workbook and each robot says so (IN_RUN_WORKBOOK); else a robot without a mass
-    is not drawn (IN_RUN_NOT), and one with a mass not yet taken apart is not drawn either (IN_RUN_LATER), its type
-    drawn from the workbook until every robot with a mass is (2026-10-30, "Yes, build C", Q2 and Q4)."""
+    "In the run" says what 02 does with it. `apart` holds the robots of the parts files a robot of the type may stand
+    in (every file read: a robot's rows stand in the file of one of its types, check_register). A robot taken apart
+    (all its versions robots of those files) is drawn with its own parts; a robot without a mass is not drawn
+    (IN_RUN_NOT; since 2026-10-30 also while its type is drawn from the workbook, E10.1 point 4); where none of the type
+    is taken apart, the type is drawn from the workbook and each robot says so (IN_RUN_WORKBOOK); else one with a mass
+    not yet taken apart is not drawn either (IN_RUN_LATER), its type drawn from the workbook until every robot with a
+    mass is (2026-10-30, "Yes, build C", Q2 and Q4)."""
     where = os.path.basename(params.data.register) + ': ' + TYPE_SHEET.format(robot_type)
     of_type = {r.number: r for r in register if robot_type in r.types}
     numbers = [r.number for r in listed]
@@ -2491,10 +2544,10 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
                                               f'{of_type[r.number].row} of the sheet {REGISTER_SHEET}.'))
         if is_apart(r):
             want, why = IN_RUN_OWN, 'a robot taken apart is drawn with its own parts'
+        elif None in r.mass:
+            want, why = IN_RUN_NOT, 'a robot without a stated mass is not drawn (not in the evaluation)'
         elif not any_apart:
             want, why = IN_RUN_WORKBOOK, "none of the type's robots is taken apart, so it is drawn from the workbook"
-        elif None in r.mass:
-            want, why = IN_RUN_NOT, 'a robot without a stated mass is not drawn'
         else:
             want, why = IN_RUN_LATER, ('a robot with a mass and no rows of its own in its type\'s parts file is not '
                                        'yet taken apart')
@@ -2524,7 +2577,8 @@ def check_type_sheets(path: str, register: list, params: Params, apart: dict | N
     for robot_type in type_sheet_numbers(path):
         sheet = read_type_sheet(path, robot_type)
         listed[robot_type] = {r.number for r in sheet}
-        faults += check_type_sheet(register, sheet, robot_type, params, set((apart or {}).get(robot_type, ())))
+        # A robot of the type taken apart in the file of any of its types (E11.7 point 4): every file's robots.
+        faults += check_type_sheet(register, sheet, robot_type, params, set().union(*(apart or {}).values()))
     where = os.path.basename(params.data.register) + ': ' + REGISTER_SHEET
     for r in register:
         if r.taken_apart and not any(r.number in listed.get(t, ()) for t in r.types):
@@ -2544,9 +2598,10 @@ def parts_path(params: Params, category: Category) -> str:
 
 
 def types_taken_apart(path: str) -> list:
-    """The robot types of the register at `path` some of whose robots are taken apart (named in 'Taken apart as' in
-    their sheet "Type n"): the types whose parts files are read."""
-    return [t for t in type_sheet_numbers(path) if any(r.taken_apart for r in read_type_sheet(path, t))]
+    """The robot types of the register at `path` some of whose robots are drawn with their own parts in their sheet
+    "Type n" (drawn_part_by_part): the types whose parts files are read. A robot taken apart in another of its types
+    does not count (EVIDENCE.md E10.1 point 2)."""
+    return [t for t in type_sheet_numbers(path) if drawn_part_by_part(read_type_sheet(path, t))]
 
 
 def battery_pieces(materials: MaterialsList, battery: Material, lists: SharedLists, recipes: ElementRecipes) -> list:
@@ -3637,6 +3692,53 @@ def screen_arrow(axes, start: tuple, end: tuple, colour: str = SCREEN_INK) -> No
     axes.add_patch(FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=18, color=colour, linewidth=1.4))
 
 
+def taken_words(n: int, register: list | None, apart) -> str:
+    """How many of robot type `n`'s robots of the register are drawn from their own rows of its parts file (`apart`),
+    counted over those with a mass: 'all its 31 robots', 'all its 96 robots with a mass', '5 of its 96 robots with a
+    mass'. A robot without a mass is not in the evaluation and not counted (Matthias, 2026-10-30: "If there is no mass
+    then it should not be taken into the evaluation"; EVIDENCE.md E10.1 point 4)."""
+    of_type = [r for r in register or [] if n in r.types]
+    with_mass = [r for r in of_type if None not in r.mass]
+    taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart)) for r in with_mass)
+    tail = ' with a mass' if len(with_mass) < len(of_type) else ''
+    return (f'all its {len(with_mass)} robots{tail}' if taken >= len(with_mass) else
+            f'{taken} of its {len(with_mass)} robots{tail}')
+
+
+def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bool) -> str | None:
+    """The words of robot type `n`'s card on the overview's second page. A type taken apart (`apart`, its parts file):
+    its robots drawn from their own parts and their masses, counted over those with a mass, those without named as not
+    in the evaluation (EVIDENCE.md E10.1 point 4); while not all are, how many so far. A type listed in the register
+    (`listed`: its sheet Type n) and drawn from the workbook: its robots listed and how many have a mass (point 5).
+    None for any other type, whose card says its anchor robot, as before."""
+    of_type = [r for r in register or [] if n in r.types]
+    with_mass = [r for r in of_type if None not in r.mass]
+    without = [r.name for r in of_type if None in r.mass]
+    if apart is not None:
+        masses = [apart.constants[r][APART_ROBOT_CONSTANTS[0]][1] for r in apart.robots]
+        span = f'their masses {kg(min(m[0] for m in masses))} to {kg(max(m[2] for m in masses))} kg'
+        if register:
+            total = len(with_mass)
+            taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart))
+                        for r in with_mass)
+        else:
+            total = taken = len(apart.robots)
+        if taken < total:
+            return (f'{taken} of its {total} robots of the register with a mass taken apart so far, each drawn part by '
+                    f'part; {span}. Its draws for stock-and-flow from the workbook until all are.')
+        if not without:
+            return (f'Its {total} robots of the register, each drawn from its own parts; {span}. The workbook\'s '
+                    f'anchor robot, {anchor}, is one of them.')
+        names = (without[0] if len(without) == 1 else ', '.join(without[:-1]) + ' and ' + without[-1]
+                 if len(without) <= 3 else f'{len(without)} robots')
+        return (f'Its {total} robots of the register with a mass, each drawn from its own parts; {span}. The {names}, '
+                f"with no mass, {'is' if len(without) == 1 else 'are'} not in the evaluation.")
+    if listed:
+        return (f'Its {len(of_type)} robots of the register listed, {len(with_mass)} with a mass; drawn from the '
+                'workbook until they are taken apart.')
+    return None
+
+
 def overview_flow(register: list | None, aparts: dict | None, params: Params):
     """The overview's first page: how the model works, from its inputs through its stages to what they write, as
     boxes joined by arrows; Matthias's inputs, the sibling projects' data, the stages and the outputs each in its
@@ -3645,10 +3747,7 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
     axes.text(0.4, 0.35, 'How the model works: from the inputs through the stages to the results',
               fontsize=SCREEN_HEADING, fontweight='bold', va='top')
     of_type = {n: sum(n in r.types for r in register) if register else 0 for n in range(1, 7)}
-    taken = {n: sum(bool(r.taken_apart) and n in r.types for r in register) if register else 0 for n in range(1, 7)}
-    apart = '; '.join(f'type {n}: ' + (f'all its {of_type[n]} robots' if taken[n] >= of_type[n] else
-                                        f'{taken[n]} of its {of_type[n]} robots')
-                      for n in sorted(aparts or {})) or 'none yet'
+    apart = '; '.join(f'type {n}: ' + taken_words(n, register, aparts[n]) for n in sorted(aparts or {})) or 'none yet'
     inputs = [
         ('The research workbook', 'six robot types, an anchor robot each, its parts and materials', 'his'),
         ('The register of humanoid robots', f'{len(register) if register else 0} robots, each in at most two robot '
@@ -3692,9 +3791,10 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
 
 
 def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | None, params: Params,
-                   register: list | None = None):
+                   register: list | None = None, listed: tuple = ()):
     """The overview's second page: the six robot types as cards, those whose steps have begun (`output.
-    robot_types_with_pages`) in colour with what the model holds of them, the others in grey; below them the faults
+    robot_types_with_pages`) in colour with what the model holds of them, the others in grey (a type `listed` in the
+    register's sheets, drawn from the workbook, says how many robots it lists: type_card_text); below them the faults
     found and what is open."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, 'The six robot types', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
@@ -3705,22 +3805,7 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
         anchor = category.anchor.splitlines()[0] if category.anchor else 'none'
         apart = (aparts or {}).get(category.number)
         if category.number in worked and apart is not None:
-            n = category.number
-            masses = [apart.constants[r][APART_ROBOT_CONSTANTS[0]][1] for r in apart.robots]
-            of_type = sum(n in r.types for r in register) if register else len(apart.robots)
-            taken = sum(bool(r.taken_apart) and n in r.types for r in register) if register else of_type
-            span = f'their masses {kg(min(m[0] for m in masses))} to {kg(max(m[2] for m in masses))} kg'
-            if taken >= of_type:
-                text = (f'Its {of_type} robots of the register, each drawn from its own parts; {span}. The '
-                        f'workbook\'s anchor robot, {anchor}, is one of them.')
-            else:
-                # 02 takes a type's draws for stock-and-flow from its parts once every robot of it with a mass is taken
-                # apart (Q2); one with no mass waits (type 2's Xialan S0, since 2026-10-30).
-                with_mass = (sum(n in r.types and None not in r.mass for r in register) if register else of_type)
-                rest = ('Its draws for stock-and-flow from its parts: every robot with a mass is taken apart.'
-                        if taken >= with_mass else 'Its draws for stock-and-flow from the workbook until all are.')
-                text = (f'{taken} of its {of_type} robots of the register taken apart so far, each drawn part by part; '
-                        f'{span}. {rest}')
+            text = type_card_text(category.number, anchor, apart, register, category.number in listed)
             colour = TOL_LIGHT['output']
         elif category.number in worked:
             text = f'The workbook\'s anchor robot: {anchor}.'
@@ -3731,8 +3816,9 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
                 notes.append('a configuration, not a robot that exists')
             if not reports.get(category.number):
                 notes.append('no report of its own')
-            text = (f'The workbook\'s anchor robot: {anchor}' + (f' ({"; ".join(notes)})' if notes else '') +
-                    '. Not yet worked on.')
+            text = type_card_text(category.number, anchor, None, register, category.number in listed) or (
+                f'The workbook\'s anchor robot: {anchor}' + (f' ({"; ".join(notes)})' if notes else '') +
+                '. Not yet worked on.')
             colour = TOL_LIGHT['later']
         screen_box(axes, x, y, width, f'{category.number}  {category.name}', text, colour, height)
     y = 7.55
@@ -3740,10 +3826,8 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
              'No fault found in the inputs (what was checked: the faults pages).')
     y = screen_text(axes, 0.4, y, found, 15.2, colour='#CC3311' if faults else SCREEN_INK,
                     weight='bold' if faults else 'normal')
-    # Type 2's one robot not taken apart has no mass in any source (the Xialan S0, EVIDENCE.md E9.7).
-    screen_text(axes, 0.4, y + 0.05, 'Open: robot type 2\'s last robot, which has no mass yet, then robot types 3 to 6, '
-                                     'one after the other, each by the steps of robot type 1; then the six compared.',
-                15.2)
+    # What is open (Matthias, 2026-10-30: "Can we move to type 3 and 4 together?", "Yes, together"; E10.1 point 5).
+    screen_text(axes, 0.4, y + 0.05, 'Open: robot types 3 and 4 together, then 5 and 6; then the six compared.', 15.2)
     return figure
 
 
@@ -3895,7 +3979,7 @@ def cell_rows(apart: PartsTakenApart, robot: str) -> dict:
     (sheet Constants), its joint modules (Parts), its battery's voltage and capacity (Constants; where it has none, the
     energy per kg of robot, for all robots), its boards (Boards), its frame and shell (Parts)."""
     own = apart.constants.get(robot, {})
-    shared = apart.constants.get(ALL_ROBOTS, {})
+    shared = shared_of(apart, robot)   # its own file's (E11.7 point 4)
     constant = lambda given, quantity: (given[quantity][3], given[quantity][4])  # noqa: E731
     battery = ([constant(own, q) for q in BATTERY_CONSTANTS if q in own]
                or [constant(shared, template_quantity(apart, robot, ENERGY_PER_KG))])
@@ -3969,7 +4053,7 @@ def robots_table_rows(apart: PartsTakenApart) -> list:
         if BATTERY_CONSTANTS[0] in own:
             wh = own[BATTERY_CONSTANTS[0]][1][1] * own[BATTERY_CONSTANTS[1]][1][1]
         else:
-            wh = shared[template_quantity(apart, name, ENERGY_PER_KG)][1][1] * mass[1]
+            wh = shared_of(apart, name)[template_quantity(apart, name, ENERGY_PER_KG)][1][1] * mass[1]
         lift = any(j.robot == name and JOINT_KIND.get(j.name.split()[0].lower()) == 'lift' for j in apart.joints)
         rows.append(RobotRow(name, group, robot.height, mass, int(encoders // 2), group.endswith('shares'), wh, bases,
                              base_words(apart, name), lift))
@@ -4006,7 +4090,7 @@ def axis_ticks(top: float, bins: int) -> list:
 
 
 def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int | None = None,
-                       listed: int | None = None) -> list:
+                       listed: int | None = None, without: int = 0) -> list:
     """The table of a robot type's robots, its pages as table_pages splits them: the heading band with the two axes'
     ticks and the five cells' names, the rows, the key at the foot. Its title says how many of the type's robots of the
     register (`listed`) are taken apart (`taken`) where not all are (type 2's, since 2026-10-30)."""
@@ -4031,8 +4115,15 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
     figures = []
     for p, lines in enumerate(split, 1):
         figure, axes = screen_page()
-        robots = (f'{taken} of its {listed} robots taken apart so far' if taken and listed and taken < listed else
-                  f'its {len(rows)} robots')
+        # Counted over the robots with a mass (`listed`); those without, `without`, are not in the evaluation
+        # (2026-10-30, E10.1 point 4). A type partly taken apart says how many of them, in type 2's form (2026-10-30,
+        # E11.7: "… taken apart so far" ran off type 3's page).
+        if taken and listed and taken < listed:
+            robots = f"{taken} of its {listed} robots{' with a mass' if without else ''}"
+        elif without:
+            robots = f'all its {taken} robots with a mass'
+        else:
+            robots = f'its {len(rows)} robots'
         axes.text(0.4, 0.35, f'Robot type {robot_type}: {robots}, each drawn from its own parts ({p} of '
                              f'{len(split)})', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
 
@@ -4119,11 +4210,14 @@ def taken_apart_type_pages(stem: str, apart: PartsTakenApart, robot_type: int, r
     """The pages 01 draws of a robot type with a parts file, as (file name, figure), each name beginning with `stem`
     (its folder and name in `output.schemas_dir`): its robots' table, then where its kinds of part sit, as type 1's
     (Matthias, 2026-10-30, "Yes, as type 1's"). How many of its robots of the register are taken apart: those whose
-    versions are all robots of its parts file."""
+    versions are all robots of its parts file, counted over those with a mass (one without is not in the evaluation,
+    2026-10-30, E10.1 point 4)."""
     of_type = [r for r in register or [] if robot_type in r.types]
-    taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart)) for r in of_type)
+    with_mass = [r for r in of_type if None not in r.mass]
+    taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart)) for r in with_mass)
     pages = [(f'{stem}_robots_{k}.png', figure) for k, figure in
-             enumerate(robots_table_pages(apart, robot_type, taken, len(of_type)), 1)]
+             enumerate(robots_table_pages(apart, robot_type, taken, len(with_mass), len(of_type) - len(with_mass)),
+                       1)]
     return pages + [(f'{stem}_robot.png', robot_type_page(apart, robot_type))]
 
 
@@ -4165,10 +4259,11 @@ def main() -> int:
         except WorkbookError as error:
             print(f'{error} The robot pages show the battery rows as the workbook gives them.')
     # The register of every known humanoid robot, and the robot types some of whose robots it names as taken apart.
-    register, types = None, []
+    register, types, listed = None, [], ()
     try:
         register = read_register(absolute(params.data.register))
         types = types_taken_apart(absolute(params.data.register))
+        listed = tuple(type_sheet_numbers(absolute(params.data.register)))   # the types with a sheet Type n
     except WorkbookError as error:
         print(f'{error} The register is not checked.')
     # Each of those robot types taken apart: its parts file read and checked here; drawn by 02.
@@ -4185,6 +4280,9 @@ def main() -> int:
                 aparts[category.number] = apart
             except WorkbookError as error:
                 print(f'{error} Robot type {category.number} taken apart is not checked.')
+    # Each robot type taken apart as 02 draws it: its robots of every file read (E11.7 point 4); types 1 and 2 their own
+    # file, unchanged.
+    views = {n: v for n in aparts if (v := type_parts(aparts, register, n)) is not None}
     # The register against the robots taken apart; then each of its sheets Type n against it.
     if register is not None:
         named = {number: list(a.robots) for number, a in aparts.items()}
@@ -4207,18 +4305,18 @@ def main() -> int:
     # The pages (2026-10-29: the overview, the notes and the faults by his figure rules; robot type 1 as 02 draws it;
     # pages only for the robot types `output.robot_types_with_pages` names, "Type 1 only").
     with_pages = params.output.robot_types_with_pages
-    pages = [('overview_1.png', overview_flow(register, aparts, params)),
-             ('overview_2.png', overview_types(book, faults, reports, aparts, params, register)),
+    pages = [('overview_1.png', overview_flow(register, views, params)),
+             ('overview_2.png', overview_types(book, faults, reports, views, params, register, listed)),
              ('notes.png', notes_page(params))]
     pages += [(f'faults_{k}.png', figure) for k, figure in enumerate(fault_pages(faults), 1)]
-    former = former_page_types(with_pages, aparts)
+    former = former_page_types(with_pages, views)
     for category in book.categories:
         if category.number not in with_pages:
             continue
         stem = os.path.join('categories', file_name(category)[:-len('.png')])
         if category.number not in former:
             # A robot type taken apart: the pages of its robots, as type 1's (2026-10-30, "Yes, as type 1's").
-            pages += taken_apart_type_pages(stem, aparts[category.number], category.number, register)
+            pages += taken_apart_type_pages(stem, views[category.number], category.number, register)
             continue
         # A robot type whose steps have not begun: its former pages, of the workbook's anchor robot.
         parts_list = book.parts_lists.get(category.number)

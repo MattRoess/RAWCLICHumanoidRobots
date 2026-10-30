@@ -5,6 +5,199 @@ by Claude, newest first.
 
 ## 2026-10-30
 
+### V114. The entry of batch 1 of types 3 and 4 (EVIDENCE E11.7, E11.8), built and run in the sandbox
+
+- **His words:** "Yes, build it" (E11.7, open points A to C as recommended).
+- **Tests first, as far as it is on record:** the tests of the 28 blocks, the templates, the register's sheets and the
+  drawing over several files were written before their code was finished; that each failed before its code is not on
+  record for all of them (the builders' check against 01 is seen failing), so it is not claimed. The test that each
+  robot of type 3 is drawn with its own file's shared numbers (`test_each_robot_drawn_with_its_own_files_shared_numbers`)
+  was written after its code, so it was proved by two deliberate faults in 02, the file restored byte for byte
+  afterwards (checked with `cmp`):
+  every robot with the first file's numbers stopped 02 with a KeyError (a template name type 1's file does not hold);
+  type 4's robots with type 3's file's numbers, whose names are the same, failed the test ("3 != 4 : AgiBot X2").
+- **Corrected in the tests, against the register:** type 3 has 75 versions (the AgiBot X2, the Flexiv AICO 2 and the
+  Rainbow RB-Y1 in two each), type 4 34 (the X2): I had written 74 and 35. The register's test of every robot with its
+  own rows got batch 1's 27 numbers from E11.7's list (not from the code), and then caught a name of mine with
+  brackets, 'DOBOT Atom (base)', now 'DOBOT Atom 153 cm' (E11.8, point 2).
+- **The pages, by test:** 01's pages of types 3 and 4 had no test; the new `TestTypesThreeAndFourPages` (type 2's
+  checks: readable fit to a screen, every text inside the page, none overlapping another, no project words) failed on
+  type 3's table title, which ran off the page; fixed (E11.8). 02's page tests now run over types 1 to 4 (every page
+  readable and inside the page; no panel title over its numbers): pass.
+- **The whole suite:** 412 tests; 1 failure, the comparison of the register's builder with his register on disk (it
+  holds batch 1 only after his run); 1 skipped, the check of his real register and files (types 3 and 4's files are not
+  on disk yet).
+- **Sandbox** (`sandbox_types34.py` in Claude's scratch folder: the register, the four parts files, 01 and 02 at 2,000
+  draws, every output into the scratch folder; nothing written into the project's `data/` or `figures/`): 01 no fault;
+  02 no fault, type 3 drawn over 72 robots (75 versions), type 4 over 33 (34).
+  - **Types 1 and 2 unchanged, by program:** their 13 draw files each (`.npy` and `.txt`) identical to the sandbox of
+    14:38 (before the entry), 26 of 26; their `summary.csv` differs in the last digits only (V108). The draws for
+    stock-and-flow of all six types identical, 60 of 60 files.
+  - **Remainders below zero**, measured at 20,000 draws of each type (`below_zero_34.py`, the tests' inputs, writes
+    nothing): type 3 none; type 4 the 1X NEO's frame 13.46 % of its draws (E11.8), the others below 1 % (type 1's known
+    ones as in type 1; the AgiBot A3 Ultra's frame 0.16 %); type 2 none. At 2,000 draws the NEO had 56 draws (14.3 %).
+  - **Looked at:** 01's table of type 3 (its title cut, before the fix) and where its kinds sit; 02's notes of type 3
+    (its 72 robots, the 97 not yet taken apart); type 4's figure of copper and aluminium by kind (its wheeled base and
+    lift column in 24 % and 3.2 % of the draws).
+  - **Size at 200,000 draws** (×100 the sandbox's): type 3's part-by-part draws about 2.3 GB, type 4's 1.4 GB.
+- **Read in the code and data:** only the AgiBot A3 and A3 Ultra have magnesium (their frames), both of type 4 only, so
+  type 3's magnesium recipe was taken out (E11.7 point 7). 02 uses a battery's voltage only times its capacity
+  (`draw_robot`), so the 48 V (E) of a battery stated by its energy leaves its energy the stated one ± 5 %.
+- **What the entry leaves behind (open point C):** `IN_RUN_ELSEWHERE` and its branch removed from the register and 01;
+  a search of the code, tests, README and documents finds it only in a test that asserts it is gone and in the
+  history of EVIDENCE E10.1 and V108; README's and METHODOLOGY's descriptions of it rewritten.
+- **Not covered:** his runs (the register, the two new files, 01 and 02 at 200,000 draws); the DOBOT Atom's mass and
+  joints and the NEO's frame wait for his word (E11.8).
+
+### V113. What the spec of batch 1's entry (EVIDENCE E11.7) rests on, checked in the code and data
+
+- **His words:** "Spec the entry".
+- **In the code (read only):** 02's `read_apart_inputs` reads one parts file per type (`schemas.parts_path` of its
+  category); its `Shared` is built once per type from that file's constants ("all"), joint parts, shares and magnet
+  grades; `RECIPE_FAMILY` names types 1 and 2 only; the register's `taken_apart_as` stops where a robot stands in two
+  types' files.
+- **In the data (read only, by program):** no robot of the register is of types 1 and 2 both; type 1's and type 2's
+  files share 13 constants of robot "all", 11 equal, 2 different under one name ("Joint modules, share of the robot
+  mass" 0.245 / 0.49 / 0.735 against 0.202 / 0.404 / 0.606; "Battery energy per kg of robot" 6 / 12 / 18 against
+  7.335 / 14.67 / 22.005); type 2's file alone has 5 more (the wheeled template's three, the driver board area, the
+  Ethernet line). The element recipes: "Aluminium, robot type 3/4, Aluminum alloys", "Plastics, robot type 3,
+  Engineering plastics", "Plastics, robot type 4, Polymers & elastomers", "Magnesium, robot type 4, Magnesium alloys"
+  (and "Magnesium AZ91D", type 3's in E1.2). Batch 1 by its first type among 3 and 4: 19 and 8 robots (listed in
+  E11.7); of type 3 21, of type 4 16.
+- **Corrected while writing:** "163 with a mass not yet taken apart" was 178 less 27, 151.
+- **Not covered:** nothing built or run.
+
+### V112. Batch 1's proposal (EVIDENCE E11.6) at its modes
+
+- **His words:** "Propose the numbers".
+- **How:** `types34/every_joint.py` and `types34/batch1_modes.py` in Claude's scratch folder (Claude's arithmetic, not
+  the model), reading his register and his type 1 and type 2 parts files (read only): which of the 68 robots of types 3
+  and 4 already taken apart have every joint's module mass (by their rows in the files: shares or not, module masses
+  given or the joint parts), their joint modules' share of their mass at the modes, by kind (01's `JOINT_KIND`); batch
+  1's Adam Lite and SP from the wiki's actuator masses (the shoulders by E6.8's fit at 60 N·m), the Atom by E6.8's fit
+  at its model's limits; the batteries' energy per kg of robot where stated (his files' voltage × capacity; batch 1's
+  makers); each robot's battery, cables (8 m per metre), hub motor class (E9.6 point 4) at the modes.
+- **Results:** on legs, seven of types 3 or 4 with every joint, 34.1 to 53.0 %, median 44.7 % (mean 44.8 %), split
+  hips 34.2, knees 16.1, ankles 11.3, waist 8.1, arms 28.2, head 2.2 %; on wheels three, 13.2 to 14.3 %, median 13.9 %;
+  energy per kg, 16 on legs: median 14.67 (10.14 to 28.07), 14 on wheels: median 10.84 (4.62 to 22.86) Wh/kg. No frame
+  below zero at the modes; the least the NEO's, about 3 kg (by hand: 29.9 kg less its template joints 13.4, its two
+  22-joint hands 3.2, its pack 5.1, shell 3.4, screws 0.5 and about 0.9 kg of cables, boards and sensors).
+- **Not covered:** the run's draws (only the modes); the type 1 robots of types 3 and 4 whose joints follow the weighed
+  joint parts (the G1, G1+), not in the template; the wheeled template's split (taken as E9.6's).
+
+### V111. Batch 1's downloads and the wider search for weights (EVIDENCE E11.3 to E11.5)
+
+- **His words:** "Yes, all four" (point 4: the downloads), then "Try to find more information on the weight. See if
+  there is more out in the internet".
+- **Downloads** (curl, each into its own new folder of Claude's scratch folder; sizes as fetched): NEURA's two
+  datasheets (472 kB, 2.1 MB), Boston Dynamics' spec sheet (433 kB), the Agile Hand flyer (357 kB), Anigon's overview
+  (7 kB); read with the file reader, all pages. AgiBot's manuals are online pages (read in the browser, their
+  specification sections); the X2's Feishu manual loaded its contents list only (not read); the ALICE M1 URDF's link
+  refused outside a signed-in session (not obtained).
+- **Wider search:** twelve web searches (A2 Max, Apollo, Apollo 2, Agile One, CALVIN-40, 4NE1 Gen 4, Abi, ATOM, Billi,
+  Anigon, ALPHA, Borg 01), then two web-fetch reads of the pages they named: AgiBot's A2 and A2Max URLs and its Chinese
+  site; Notebookcheck; Engadget (IoT World Today refused, 403); heise in English and German; Origin of Bots (twice);
+  The Next Web; Robotics Tomorrow (Waste Today empty; aiwiki.ai refused, 429; asiae.co.kr reset twice); Xinhua, 36Kr,
+  Gelonghui; VentureSquare and hellot.net. A search engine's summary was used only to find pages: its "175 cm, 85 kg"
+  for the A2 Max was on no page read, and is not reported as found.
+- **Found:** the A2's own page states 69 kg (the first read had missed the page); the Gen 3.5's datasheet 80 kg; the
+  Gen 3's 80 kg; the Gen 4's own page contradicts itself (80 kg against 20 % lighter): E11.5, question 5.
+- **Not covered:** the press figures' own sources (none named); the X2's manuals; the ALICE M1 URDF.
+
+### V110. His runs of 14:44 read back: the register with four sheets, 01, 02
+
+- **Times:** the register 14:44:20 (sheets About, Robots, Type 1 to Type 4), 01's pages 14:44:32 to 14:44:34, 02 from
+  14:44:54 to 14:55:40. 02's outputs all rewritten: `data/consolidated/` 72 of 72, `data/parts_taken_apart/` 28 of 28,
+  `figures/composition/` 19 of 19, `figures/parts_taken_apart/` 48 of 48 (no older file left, V106).
+- **01:** its overview 2 as V108's sandbox (looked at): type 2's card, types 3 and 4's, the open line.
+- **02, for stock-and-flow, 200,000 draws:** type 2 84.3 kg at the mean (95 %: 37.8 to 230.1), as V104; type 3 72.9
+  (70.8 to 75.0) and type 4 69.3 (67.0 to 71.7), from the workbook.
+- **Not covered:** his console; the pages one by one.
+
+### V109. Types 3 and 4, batch 1's sources (EVIDENCE E11): read first-hand
+
+- **His words:** "Yes, start sources".
+- **Which robots:** the register's robots of type 3 or 4 with a mass and no rows of their own (178, by program from
+  his register of 14:44), the first 27 in its order: 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 17, 18, 22, 26, 28, 29,
+  31, 32, 33, 43, 45, 46, 51, 56, 58.
+- **How:** six web-fetch reads (the catalogue page for the maker's link, then the maker's own pages; no PDF and no
+  download opened), and myself in the built-in browser where they got no text: PNDbotics' site (its pages words only)
+  and its wiki (the Adam line's table, its joints' actuators, the actuators' pages), NEUBILITY, AeiROBOT (refused to
+  the fetch with 403, read in the browser). TeknTrash's site refused both. PNDbotics' models `adam_lite.urdf` and
+  `adam_sp.urdf` read through GitHub's raw files in the page: their links' masses summed (58.48 and 60.25 kg) and the
+  limits of their moving joints listed, by script (Claude's arithmetic). DOBOT's `atom_p3.urdf`: its links' masses as
+  the read reported them, summed by hand to 61.82 kg, as E7.1's 61.81 kg.
+- **Against what:** each figure in E11.1 is the maker's words as read, with its page; the catalogue's figures are
+  named second-hand where they are given. Conflicts named in the table (4NE1 Gen 4's mass, Adam Lite's height, the
+  catalogue's DoF and runtimes against AlphaBot 2's and AEON's makers').
+- **Not covered:** the PDFs and downloads (E11.2 point 4, his word); AgiBot's Chinese product pages; the other news
+  pages of Hexagon; whether the catalogue's A2 and A2 Max are AgiBot's A2 Ultra and A2 Lite (not stated anywhere read).
+
+### V108. The register's sheets Type 3 and Type 4 built (EVIDENCE E10.1, "Yes, build it")
+
+- **His words:** "Yes, build it" (E10.1's points 1 to 8, open point A as recommended).
+- **Tests first** (each failing before its code, 5 of them: an unknown constant, an unknown function, the old
+  wording, the old count): `tests/test_make_humanoid_register.py` `test_the_sheets_type_3_and_type_4` (181 and 135
+  robots in the register's order; type 3: 47 "its own parts in type 2", 4 "in type 1", 12 "no mass stated", 118
+  from the workbook; type 4: 11, 6, 4, 114; 01's check finds nothing; `types_taken_apart` still 1 and 2);
+  `tests/test_schemas.py` `test_a_robot_with_its_own_parts_in_another_of_its_types`,
+  `test_a_robot_without_a_mass_is_not_drawn_while_its_type_is_drawn_from_the_workbook`,
+  `test_its_card_and_its_words_on_the_overview_count_only_the_robots_with_a_mass` (type 2's card naming the Xialan
+  S0, types 3 and 4's, type 5's as before, the input box's words), type 2's table title "all its 96 robots with a
+  mass"; `tests/test_parts_taken_apart.py` 02's title "Robot type 2, all its 96 robots" and its count of the robots
+  with a mass, 96 (it held 97: changed to the agreed rule, point 4).
+- **After:** the whole suite, 399 tests; 398 pass. The one that fails compares the register's builder with his
+  register on disk (2 sheets there, 4 now), until he reruns it.
+- **Sandbox** (scratch, 2,000 draws; the register, both builders, 01, 02): 01 "No fault found"; 02 reads the parts
+  files of types 1 and 2 only, draws types 3 to 6 from the workbook, "02 done in 27 s". **The draws of types 3 and 4
+  against the sandbox's run before the sheets** (14:07, the same seed), by program: all 11 files of each identical.
+  Types 1 and 2: every `.npy` and `.txt` identical; their `summary.csv` differ in the 16th significant digit (e.g.
+  0.21402169130393084 against …087), and **two runs of the same code differ the same way** (31 and 25 lines): the
+  summary's last digits vary from run to run (floating-point sums in an order that changes between runs), not from
+  this change. Reported, not changed.
+- **Looked at:** 01's overview 2 (type 2's card with the Xialan S0 not in the evaluation; types 3 and 4 "Its 181
+  robots of the register listed, 169 with a mass; drawn from the workbook until they are taken apart", 135 and 131;
+  the open line "Open: robot types 3 and 4 together, then 5 and 6; then the six compared.").
+- **Not covered:** his runs; the other pages one by one; why the summaries' last digits vary (seen, not investigated).
+
+### V107. What the spec of types 3 and 4's register sheets (EVIDENCE E10.1) rests on, checked in the data and code
+
+- **His words:** "Can we move to type 3 and 4 together?", "Yes, together".
+- **In the register** (`data/researched/humanoid_register.xlsx` of his run of 11:52, its sheet Robots, by program):
+  type 3 181 robots, 169 with a mass (forms: wheels 76, legs 46, not stated 40, no wheels named 11, legs or wheels 7,
+  four arms 1); type 4 135, 131 with a mass (wheels 44, not stated 43, legs 36, no wheels named 8, legs or wheels 3, a
+  ball 1); of both 58; together 258. Taken apart already ("Taken apart as" filled): 68 (type 3 51, type 4 17); by
+  types: 3 alone 63, 4 alone 60, 3 and 4 58, 2 and 3 47, 2 and 4 11, 3 and 5 8, 1 and 4 6, 1 and 3 4, 3 and 6 1; still
+  to do 190, 178 with a mass, 12 without. Its sheets: About, Robots, Type 1, Type 2.
+- **In the code (read only):** `tools/make_humanoid_register.py` writes the sheets of `TYPES_LISTED = (1, 2)`; a
+  sheet's row is the robot's row of Robots, its "Taken apart as" included (`taken_apart_as()`, any type's file;
+  a robot in two types' files stops the building); `in_the_run()` gives "drawn: its own parts" only for the robots of
+  the type's own `TAKEN_APART`, else, while none of the type is, "not drawn: its type drawn from the workbook, none of
+  its robots taken apart yet". `01_schemas.py` `types_taken_apart()` and `02_composition.py` `run()` take a type as
+  taken apart when any robot of its sheet has "Taken apart as" filled, and then read its parts file
+  (`parts_path()`); 01's `check_type_sheet()` counts a robot as taken apart only where all its versions are in the
+  type's own file.
+- **Not covered:** nothing built or run; the 190 robots' sources.
+
+### V106. The leftovers removed ("Remove leftoveres")
+
+- **His words:** "Remove leftoveres" (the three lists waiting for his word: C's leftovers, HANDOVER "Left behind once
+  he has run them"; type 2's two former 01 pages, V85 and V94; the shared lists' backup, E9.7 open point D).
+- **Before removing, each checked:** all 44 files on disk with the dates their lists give (2026-10-26 15:27 the backup;
+  2026-10-29 16:38 to 16:39 type 1's old file and outputs; 2026-10-30 04:42 type 2's two pages); none tracked by git;
+  no code of this repository reads any of them (01 writes `<n>_<name>_shared_lists.png` only for a type still drawn by
+  its former pages, and did not rewrite type 2's in his runs of 11:53 and 13:50); no other repository in the GitHub
+  folder names RAWCLICHumanoidRobots in its code; the old `figures/parts_taken_apart/sources/` held only the 18 files
+  listed.
+- **Removed, each by its exact name** (no pattern): `data/researched/parts_taken_apart.xlsx`,
+  `data/researched/shared_lists_before_wheels_2026-10-30.xlsx`; in `data/parts_taken_apart/` elements, estimated,
+  grades, materials, parts, robots (.npy and .txt each), register.txt, summary.csv; in `figures/parts_taken_apart/`
+  robot_type_1_elements_1 and _2, robot_type_1_notes_1, robot_type_1_overview_1 to _5 (.png) and the 18 files of
+  `sources/` (then the empty folder); in `figures/schemas/categories/` 2_full_scale_general_purpose_ai_research.png and
+  2_full_scale_general_purpose_ai_research_shared_lists.png. 44 files, none left; what remains in those folders is
+  the types' own folders and 01's current pages.
+- **Not covered:** nothing else was looked for; the shared lists themselves are unchanged (V101).
+
 ### V105. The panels' numbers above their titles ("Yes, fix it")
 
 - **His words:** "Yes, fix it" (V104's finding 1: on the material pages the titles of the magnets' grade classes ran

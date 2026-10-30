@@ -51,7 +51,74 @@ robots (batch 1, E6; batch 2, E7; batch 2b, E8; the 43 on wheels, E9, built and 
 without a mass; step 9 its pages as type 1's (V85, V89, V93, V101); step 4 open beyond type 1's recipes. See the next
 section.
 
-## 2026-10-30, midday: type 2's 43 robots on wheels entered (start here)
+Where types 3 and 4 stand (2026-10-30, afternoon): step 5 built (their sheets, V108); steps 6 to 8 for batch 1, 27
+robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 and 2 that are also of type 3 or 4:
+type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
+draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
+
+## 2026-10-30, afternoon: batch 1 of types 3 and 4 entered (start here)
+
+### Monday, on the other Mac, first
+
+Matthias, 2026-10-30: "handover, commit push for Monday on another mac". Committed and pushed to `main` on 2026-10-30:
+everything since cbb4255 (the register's sheets Type 3 and Type 4, E10.1, V108; batch 1's research, E11.1 to E11.6;
+its entry, E11.7, E11.8, V114). His runs of the entry are not done yet (below).
+- **Git:** the files come through iCloud, the git folder (`$HOME/gitdirs/RAWCLICHumanoidRobots.git`) does not. In the
+  project folder run `git fetch` and `git status` first. If that Mac's git is behind `origin/main` while iCloud already
+  holds these files, the files equal `origin/main`: align the index on Matthias's word with `git reset origin/main`
+  (keeps the files), then `git status` must be clean. If any file differs from `origin/main`, it is work of his: stop
+  and ask. "Not a git repository": say so and ask whether to attach it.
+- **The `.venv`** there may be evicted by iCloud: `KeyError: 'backend_fallback'` at `import matplotlib`, or an import
+  that hangs, means "dataless" files (`stat -f '%Sf' <file>`), not a bug. RAWCLICVehicleTractionMotor's `.venv` is
+  needed too (02 runs its magnet code there).
+- **His data** (git-ignored) comes through iCloud only: the register, the parts files of types 1 and 2, the workbook,
+  the shared lists, the element recipes, the sibling projects' files. Check that they are downloaded before his runs.
+- **The tests**, before his runs: 412, one failure (the register's builder against his register on disk) and one
+  skipped (his real register and parts files, as types 3 and 4's files are not on disk); after his runs 1 to 3 below,
+  both should pass. Run them with `.venv/bin/python -m unittest discover -s tests` in the project folder.
+- **Claude's scratch folder** (the sandbox of V114 and its scripts) is gone by Monday; what it showed is in V114.
+- **Open, for his word:** the 1X NEO's frame below zero in 13.5 % of its draws (E11.8); batch 2 of types 3 and 4
+  (151 robots with a mass still to take apart, a source table first, as batch 1); `00_parameters.py` (can wait).
+
+**Done** on "Yes, build it" (EVIDENCE E11.7, open points A to C as recommended; where each point landed, E11.8; checks,
+V114). Nothing committed.
+- New: `tools/parts_types_3_and_4.py` (the templates and the 28 blocks, one copy), the builders
+  `tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py` (19 robots) and
+  `tools/4_service_healthcare_interaction/make_parts_taken_apart.py` (8 robots, the X2 in two versions).
+- `tools/make_humanoid_register.py`: batch 1 taken apart; a robot taken apart in a file of any of its types is "drawn:
+  its own parts" in every sheet of its types; E10.1's wording removed.
+- `01_schemas.py`: a type over its robots of every file (`type_parts()`); types 3 and 4's template names; their pages.
+  Its table title of a type partly taken apart now in type 2's form (type 3's ran off its page).
+- `02_composition.py`: a type over several files, each robot with its own file's shared numbers; types 3 and 4's
+  recipes (type 4's magnesium). Types 1 and 2's draws and every type's draws for stock-and-flow unchanged (by program).
+- `src/params_schema.py`: pages of types 1 to 4. Tests (412: one fails until his run of the register, one skips until
+  his files are on disk), README, METHODOLOGY, EVIDENCE E11.8, VERIFICATION V114.
+
+**For his word** (E11.8):
+1. **The DOBOT Atom (register 45), decided** ("Keep as built"): as type 2's Atom Max block (57.91 / 58.91 / 61.81 kg,
+   joints 22.4 kg), not E11.6's row 45 (60.81 / 61.81 / 62.81 kg, joints 25.5 kg). Nothing changes in the code.
+2. **The 1X NEO's frame below zero in 13.5 % of its draws** (30 kg: template joints 13.4 kg, two 22-joint hands 3.2 kg,
+   battery 5 kg, shell 3.5 kg; frame 3.4 kg on average, 95 %: −1.9 to 8.3). Reported, not cut.
+3. Commit and push.
+
+**His runs, in this order** (all in RAWCLICHumanoidRobots; each says what it changes):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (rewrites the register: batch 1's
+   27 "Taken apart as", the sheets Type 3 and Type 4 "drawn: its own parts" for 72 and 33; needed);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+   (writes a new file, `data/researched/3_industrial_logistics_warehousing/parts_taken_apart.xlsx`; needed);
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/4_service_healthcare_interaction/make_parts_taken_apart.py`
+   (writes a new file, `data/researched/4_service_healthcare_interaction/parts_taken_apart.xlsx`; needed);
+4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (new pages: types 3 and 4's tables and where their
+   kinds sit, in `figures/schemas/categories/`; on `overview_2.png` the boxes of types 3 and 4 say how many of their
+   robots are taken apart; only for the pages, 02 makes 01's checks itself);
+5. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run: types 3 and 4 drawn
+   part by part, new folders `data/parts_taken_apart/3_…` about 2.3 GB and `4_…` about 1.4 GB, their pages; types 1 and
+   2 and every type's draws for stock-and-flow unchanged).
+Not needed: types 1's and 2's builders (their files equal what they write now, by test);
+`/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` only rewrites the settings' register (pages of
+types 1 to 4) and can wait.
+
+## 2026-10-30, midday: type 2's 43 robots on wheels entered
 
 **Done since the section below** (EVIDENCE E9.8, VERIFICATION V101): "Yes, build it" on the spec of the entry (E9.7,
 its points 1 to 13 and open points A to D as recommended). Nothing committed.
@@ -92,8 +159,41 @@ it" (V105): every panel's numbers above its title. His pages change with his nex
 3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run; type 2's stock-and-flow
    draws then from its 96 robots).
 
-**Waiting for his word:** commit and push; the Xialan S0's mass estimate; the
-removal of the shared lists' backup, of C's leftovers and of type 2's two former 01 pages.
+**Decided, the Xialan S0** (Matthias, 2026-10-30): "If there is no mass then it should not be taken into the
+evaluation. This does not make any sense": a robot with no mass is left out of the evaluation, not estimated; no mass
+for it is proposed. It is not drawn (the register's "not drawn: no mass stated"). Committed and pushed: cbb4255.
+
+**Leftovers removed** ("Remove leftoveres", V106): C's 41 files at the old places, type 2's two former 01 pages, the
+shared lists' backup; each by its exact name, after checking that nothing reads it.
+
+**Types 3 and 4 together** ("Can we move to type 3 and 4 together?", "Yes, together"): the spec of their register
+sheets written (EVIDENCE E10.1, V107) and built on "Yes, build it" (V108): the sheets Type 3 (181) and Type 4 (135);
+a type drawn part by part only from its own parts file; the 68 robots taken apart in type 1 or 2 say where their own
+parts are; a robot without a mass "not drawn: no mass stated" everywhere, the pages counting only robots with a mass
+(type 2 "all its 96 robots"); 01's overview cards and open line. Types 3 and 4's draws unchanged (by program). Not
+committed.
+
+**His runs, in this order** (all in RAWCLICHumanoidRobots):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (the sheets Type 3 and Type 4);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws; its titles of type 2 and its
+   panels' numbers above their titles, V105).
+
+**Types 3 and 4, batch 1's sources** ("Yes, start sources", EVIDENCE E11, V109): the first 27 of the 178 in the
+register's order, read first-hand; four questions decided ("Yes, all four": the maker's mass; the catalogue's mass for
+those with none; the X2's two versions; the downloads). The downloads read (E11.3) and, on "Try to find more
+information on the weight", the wider internet searched (E11.4, V111): the A2 69 kg and the 4NE1 Gen 3.5 80 kg from
+their makers; eleven still without a maker's mass. Question 5 decided ("Yes, 64 kg"): the 4NE1 Gen 4 63 / 64 / 65 kg
+(S, E), in place of its box's 80 kg. Nothing entered. The proposal of batch 1's numbers written ("Propose the
+numbers", E11.6, V112): types 3 and 4's own templates (on legs 44.7 % from seven robots, on wheels 13.9 % from three;
+14.67 and 10.84 Wh/kg), the 28 rows, four questions; agreed ("Yes, agree E11.6"). The spec of the entry written
+("Spec the entry", E11.7, V113): 11 points, a parts file and builder per type, each robot in the file of its first type
+among 3 and 4, a type drawn over robots of several files (each with its own file's shared values), open A to C; it
+waits for his yes. Nothing built.
+
+**His runs after the sheets** (done 14:44 to 14:55, read back in V110): the register (writes its sheets Type 3 and Type 4),
+01 (rewrites its overview pages' words and type 2's table titles; no new page), 02 (redraws the panels' numbers above
+their titles and type 2's titles; its draws unchanged).
 
 ## 2026-10-30, late morning: batch 2b of type 2 entered
 

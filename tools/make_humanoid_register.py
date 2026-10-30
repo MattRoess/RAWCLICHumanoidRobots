@@ -74,27 +74,35 @@ ABOUT = [
     'mass is stated.',
     'Mass of the PrimeBOT Q1: no source states one; the estimate (E) agreed on 2026-10-29 (EVIDENCE.md E5.17).',
     'Taken apart as: the rows of its type\'s parts file (data/researched/<n>_<name>/parts_taken_apart.xlsx) that are '
-    'this robot, for every robot of type 1 and the robots of type 2 taken apart so far; a robot in several versions '
+    'this robot, for every robot of type 1 and the robots of types 2, 3 and 4 taken apart so far (a robot of types 3 '
+    'and 4 in the file of its first type among them); a robot in several versions '
     'names each, separated by "; ", each drawn as often (the Booster K1\'s two batteries, the GR-1\'s one or two '
     'cameras).',
     None,
     'Sheet Type 1: every robot of the sheet Robots whose types include 1 (leading or second), with every cell of its '
     'row there, and "In the run": what 02_composition.py does with it, "drawn: its own parts". 02 draws robot type 1 '
     'over the robots of this sheet, each as often.',
-    'Sheet Type 2: every robot whose types include 2, as the sheet Type 1. Five taken apart so far (2026-10-30, "Yes, '
-    'build C"), each "drawn: its own parts", part by part on its own; the others "not drawn: not yet taken apart" or '
-    '"not drawn: no mass stated"; robot type 2 for stock-and-flow drawn from the workbook until every robot of it with '
-    'a mass is taken apart.',
+    'Sheet Type 2: every robot whose types include 2, as the sheet Type 1. Since 2026-10-30 96 taken apart, each '
+    '"drawn: its own parts", robot type 2 drawn over them; the Xialan S0 "not drawn: no mass stated": a robot without '
+    'a mass is not in the evaluation (Matthias, 2026-10-30: "If there is no mass then it should not be taken into the '
+    'evaluation").',
+    'Sheets Type 3 and Type 4 (2026-10-30, "Yes, together", EVIDENCE.md E10.1; batch 1 entered on "Yes, build it", '
+    'E11.7): every robot whose types include 3, or 4, as the sheet Type 1. "drawn: its own parts" where its rows stand '
+    "in the parts file of one of its types (types 1 to 4); \"not drawn: not yet taken apart\" of the others with a "
+    'mass, their types drawn for stock-and-flow from the workbook until all are; "not drawn: no mass stated".',
 ]
 
 # --- The sheets of robot types --------------------------------------------------------------------------------------
 # The robot types whose robots are listed in a sheet of their own, "Type n". Matthias, 2026-10-29: "For now it has to
-# be just all for type 1"; then for type 2, "Yes, as proposed" (type 2 as type 1, step 5).
-TYPES_LISTED = (1, 2)
+# be just all for type 1"; then for type 2, "Yes, as proposed" (type 2 as type 1, step 5); 2026-10-30 types 3 and 4,
+# "Yes, together", "Yes, build it" (EVIDENCE.md E10.1 point 1).
+TYPES_LISTED = (1, 2, 3, 4)
 TYPE_SHEET = 'Type {}'
 # What a sheet Type n says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same four).
 IN_RUN_OWN = 'drawn: its own parts'
-IN_RUN_NOT = 'not drawn: no mass stated'   # no robot of type 1 since 2026-10-29: each has a mass and its own rows
+# A robot without a mass is not in the evaluation, in every sheet, also while its type is drawn from the workbook
+# (Matthias, 2026-10-30: "If there is no mass then it should not be taken into the evaluation"; E10.1 point 4).
+IN_RUN_NOT = 'not drawn: no mass stated'
 IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
 # A robot with a mass of a type some of whose robots are taken apart, itself not yet (2026-10-30, "Yes, build C", Q4):
 # its type drawn from the workbook for stock-and-flow until every robot of it with a mass is taken apart (Q2).
@@ -166,6 +174,17 @@ TAKEN_APART = {1: {
     307: 'Tokyo Robotics Torobo', 312: 'Lanxin VB1-I', 313: 'Lanxin VB2', 314: 'Dexmate Vega 1 Pro',
     315: 'Lanxin VersaBot VB-1', 318: 'Yue Quan Bionics W-Bot', 335: 'Tlibot Y1', 336: 'Tlibot Y2-B', 337: 'Tlibot Y2-P',
     340: 'Yunmu YMBot D', 341: 'Yunmu YMBot D2', 342: 'Yunmu YMBot D4', 349: 'PsiBot ψ-SynRobot',
+}, 3: {
+    # Types 3 and 4's batch 1 (2026-10-30, "Yes, agree E11.6", "Yes, build it": EVIDENCE.md E11.7), each robot in the
+    # file of its first type among 3 and 4 (E11.7 point 1).
+    3: 'NEURA 4NE1 Gen 3', 4: 'NEURA 4NE1 Gen 3.5', 5: 'NEURA 4NE1 Gen 4', 7: 'AgiBot A2 Max',
+    10: 'PNDbotics Adam Lite', 11: 'PNDbotics Adam SP', 12: 'Hexagon AEON', 18: 'Agile Robots Agile One',
+    22: 'AIDOL Lab AIDOL', 26: 'AeiROBOT ALICE M1', 28: 'TeknTrash ALPHA', 29: 'AI² Robotics AlphaBot 2', 31: 'Anigon',
+    32: 'Apptronik Apollo', 33: 'Apptronik Apollo 2', 43: 'Boston Dynamics Atlas', 51: 'NEUBILITY Billi',
+    56: 'Borg Robotics Borg 01', 58: 'Wandercraft CALVIN-40',
+}, 4: {
+    1: '1X NEO', 6: 'AgiBot A2', 8: 'AgiBot A3 Ultra', 9: 'Andromeda Abi', 14: 'AgiBot A3',
+    17: 'AgiBot X2; AgiBot X2 Ultra', 45: 'DOBOT Atom 153 cm', 46: 'Vbot ATOM',
 }}
 
 # A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:
@@ -597,23 +616,30 @@ def types_of(row: list) -> list:
     return [int(t) for t in (piece.strip() for piece in row[HEADINGS.index('Types')].split(',')) if t]
 
 
+def taken_apart(row: list) -> bool:
+    """Whether a robot has its own rows in the parts file of one of its types (types 1 to 4): 02 draws it with them in
+    each of its types (E11.7 point 4)."""
+    return any(row[0] in TAKEN_APART.get(t, {}) for t in types_of(row))
+
+
 def in_the_run(row: list, robot_type: int, any_apart: bool) -> str:
     """What 02_composition.py does with a robot of `robot_type` (its row of the register), `any_apart` whether any
-    robot of the type is taken apart: drawn with its own rows of the type's parts file, where it has them (every robot
-    of type 1 since 2026-10-29); while none of its type is taken apart, its type drawn from the workbook; else not drawn
-    where no mass is stated, and not drawn where it is not yet taken apart (2026-10-30, Q4)."""
-    if row[0] in TAKEN_APART.get(robot_type, {}):
+    robot of the type is taken apart: drawn with its own rows, where it has them in the parts file of one of its types
+    (every robot of type 1 since 2026-10-29; since 2026-10-30 a robot of types 3 or 4 also from type 1's or 2's file,
+    E11.7 point 5); not drawn where no mass is stated (in every sheet, E10.1 point 4); while none of its type is taken
+    apart, its type drawn from the workbook; else not drawn where it is not yet taken apart (Q4)."""
+    if taken_apart(row):
         return IN_RUN_OWN
-    if not any_apart:
-        return IN_RUN_WORKBOOK
-    return IN_RUN_NOT if row[HEADINGS.index('Mass mode (kg)')] in (None, '') else IN_RUN_LATER
+    if row[HEADINGS.index('Mass mode (kg)')] in (None, ''):
+        return IN_RUN_NOT
+    return IN_RUN_WORKBOOK if not any_apart else IN_RUN_LATER
 
 
 def type_rows(rows: list, robot_type: int) -> list:
     """The rows of the sheet of `robot_type`: every robot of the register whose types include it, in the register's
     order, each its row of the sheet Robots and what the run does with it."""
     of_type = [row for row in rows if robot_type in types_of(row)]
-    any_apart = any(row[0] in TAKEN_APART.get(robot_type, {}) for row in of_type)
+    any_apart = any(taken_apart(row) for row in of_type)
     return [row + [in_the_run(row, robot_type, any_apart)] for row in of_type]
 
 

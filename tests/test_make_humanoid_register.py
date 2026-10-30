@@ -16,6 +16,7 @@ import os
 import sys
 import tempfile
 import unittest
+from collections import Counter
 
 from openpyxl import load_workbook
 
@@ -39,6 +40,10 @@ builder = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_re
 BUILDERS = {1: load('make_parts_taken_apart_1', os.path.join('tools', '1_compact_research_developer',
                                                             'make_parts_taken_apart.py')),
             2: load('make_parts_taken_apart_2', os.path.join('tools', '2_full_scale_general_purpose_ai_research',
+                                                            'make_parts_taken_apart.py')),
+            3: load('make_parts_taken_apart_3', os.path.join('tools', '3_industrial_logistics_warehousing',
+                                                            'make_parts_taken_apart.py')),
+            4: load('make_parts_taken_apart_4', os.path.join('tools', '4_service_healthcare_interaction',
                                                             'make_parts_taken_apart.py'))}
 APART = {n: [row[0] for row in b.ROBOTS_ROWS] for n, b in BUILDERS.items()}
 from src.params_schema import Params, absolute  # noqa: E402
@@ -94,8 +99,13 @@ class TestMakeHumanoidRegister(unittest.TestCase):
                        300, 302, 323, 326, 352}
         on_wheels = {13, 15, 20, 21, 34, 35, 40, 41, 42, 49, 60, 68, 82, 86, 92, 104, 105, 122, 179, 184, 200, 230, 247,
                      248, 251, 252, 253, 254, 255, 295, 307, 312, 313, 314, 315, 318, 335, 336, 337, 340, 341, 342, 349}
+        # Since 2026-10-30 ("Yes, build it", EVIDENCE.md E11.7) batch 1 of types 3 and 4: 19 in type 3's file, 8 in
+        # type 4's.
+        types_34_batch_one = {3, 4, 5, 7, 10, 11, 12, 18, 22, 26, 28, 29, 31, 32, 33, 43, 51, 56, 58} | {
+            1, 6, 8, 9, 14, 17, 45, 46}
         self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121}
-                         | batch_two | batch_two_b | on_wheels)   # since 2026-10-30 the 43 on wheels (E9.6)
+                         | batch_two | batch_two_b | on_wheels         # since 2026-10-30 the 43 on wheels (E9.6)
+                         | types_34_batch_one)
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
         self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
         self.assertEqual(apart[123], 'Unitree H2-X Core i7; Unitree H2-X Orin NX')
@@ -151,6 +161,24 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual({forms[n] for n in on_wheels}, {'wheels'})
         self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 2, Params(),
                                                                    set(APART[2]))], [])
+
+    def test_the_sheets_type_3_and_type_4(self):
+        # Matthias, 2026-10-30: "Yes, together", "Yes, build it" (EVIDENCE.md E10.1; since the entry of batch 1, E11.7
+        # point 5): every robot whose types include 3 or 4, as in the sheet Robots; drawn with its own parts where they
+        # are in a parts file of one of its types (types 1 to 4), not drawn where it has no mass ("If there is no mass
+        # then it should not be taken into the evaluation"), else not yet taken apart; 01 finds nothing.
+        for robot_type, count, own, without in ((3, 181, 72, 12), (4, 135, 33, 4)):
+            listed = schemas.read_type_sheet(self.path, robot_type)
+            self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
+            self.assertEqual(len(listed), count)
+            runs = Counter(r.in_run for r in listed)
+            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_LATER]),
+                             (own, without, count - own - without))
+            named = set().union(*APART.values())
+            self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, robot_type, Params(),
+                                                                       named)], [])
+        self.assertEqual(schemas.type_sheet_numbers(self.path), [1, 2, 3, 4])
+        self.assertEqual(schemas.types_taken_apart(self.path), [1, 2, 3, 4])
 
     def test_the_wheeled_robots_of_batch_2_on_wheels(self):
         # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E7.3, question 1): the Astribot S1 and the Moz1 stand on

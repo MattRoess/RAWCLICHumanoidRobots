@@ -984,3 +984,97 @@ class TestTypeTwoOnWheels(unittest.TestCase):
     def test_every_joint_goes_to_a_kind(self):
         for j in self.apart.joints:
             self.assertIn(j.name.split()[0].lower(), schemas.JOINT_KIND, msg=f'{j.robot}, {j.name}')
+
+
+# Types 3 and 4's builders (Matthias, 2026-10-30, "Yes, build it": EVIDENCE.md E11.7, open points A to C as
+# recommended): batch 1's 27 robots, each in the file of its first type among 3 and 4.
+builder_three = load('make_parts_taken_apart_3', os.path.join('tools', '3_industrial_logistics_warehousing',
+                                                             'make_parts_taken_apart.py'))
+builder_four = load('make_parts_taken_apart_4', os.path.join('tools', '4_service_healthcare_interaction',
+                                                            'make_parts_taken_apart.py'))
+TYPE_THREE_BATCH_1 = {
+    'NEURA 4NE1 Gen 3': (79, 80, 81), 'NEURA 4NE1 Gen 3.5': (79, 80, 81), 'NEURA 4NE1 Gen 4': (63, 64, 65),
+    'AgiBot A2 Max': (84, 85, 86), 'PNDbotics Adam Lite': (58.48, 60, 61), 'PNDbotics Adam SP': (60.25, 62, 63),
+    'Hexagon AEON': (59, 60, 61), 'Agile Robots Agile One': (68, 69, 70), 'AIDOL Lab AIDOL': (94, 95, 96),
+    'AeiROBOT ALICE M1': (96, 97, 98), 'TeknTrash ALPHA': (89, 90, 91), 'AI² Robotics AlphaBot 2': (134, 135, 136),
+    'Anigon': (119, 120, 121), 'Apptronik Apollo': (71, 72, 73), 'Apptronik Apollo 2': (74, 75, 76),
+    'Boston Dynamics Atlas': (89, 90, 91), 'NEUBILITY Billi': (109, 110, 111), 'Borg Robotics Borg 01': (61, 62, 63),
+    'Wandercraft CALVIN-40': (79, 80, 81)}
+TYPE_FOUR_BATCH_1 = {
+    '1X NEO': (28.9, 29.9, 30.9), 'AgiBot A2': (68, 69, 70), 'AgiBot A3 Ultra': (59, 60, 61),
+    'Andromeda Abi': (49, 50, 51), 'AgiBot A3': (54, 55, 56), 'AgiBot X2': (34, 35, 36),
+    'AgiBot X2 Ultra': (38, 39, 40), 'DOBOT Atom 153 cm': (57.91, 58.91, 61.81), 'Vbot ATOM': (49, 50, 51)}
+TYPES_34_ON_WHEELS = {'Andromeda Abi', 'AeiROBOT ALICE M1', 'AI² Robotics AlphaBot 2', 'Anigon', 'NEUBILITY Billi'}
+
+
+class TestTypesThreeAndFour(unittest.TestCase):
+    """Types 3 and 4's batch 1 entered (E11.6 agreed, "Yes, agree E11.6"; E11.7, "Yes, build it")."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.three, _ = written(builder_three)
+        cls.four, _ = written(builder_four)
+
+    def test_each_robot_in_the_file_of_its_first_type_among_3_and_4(self):
+        self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1))
+        self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1))
+        self.assertEqual({r.type for r in self.three.robots.values()}, {3})
+        self.assertEqual({r.type for r in self.four.robots.values()}, {4})
+        self.assertFalse(set(self.three.robots) & set(self.four.robots))
+        two, _ = written(builder_two)
+        self.assertFalse((set(self.three.robots) | set(self.four.robots))
+                         & (set(two.robots) | set(written()[0].robots)))
+
+    def test_what_they_write_passes_every_check_of_01(self):
+        lists = schemas.read_shared_lists(absolute(Params().data.shared_lists))
+        for apart in (self.three, self.four):
+            self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, Params())], [])
+
+    def test_the_masses_as_decided(self):
+        for apart, masses in ((self.three, TYPE_THREE_BATCH_1), (self.four, TYPE_FOUR_BATCH_1)):
+            for robot, mass in masses.items():
+                self.assertEqual(apart.constants[robot]['Robot mass, with battery'][1], mass, msg=robot)
+        self.assertEqual(self.three.constants['NEURA 4NE1 Gen 4']['Robot mass, with battery'][3], 'S, E')
+
+    def test_their_templates_under_names_of_their_own(self):
+        for apart in (self.three, self.four):
+            shared = apart.constants['all']
+            self.assertEqual(shared['Joint modules, share of the robot mass, types 3 and 4'][1],
+                             (0.2235, 0.447, 0.6705))
+            self.assertEqual(shared['Joint modules, share of the robot mass, types 3 and 4, on wheels'][1],
+                             (0.0695, 0.139, 0.2085))
+            self.assertEqual(shared['Battery energy per kg of robot, types 3 and 4'][1], (7.335, 14.67, 22.005))
+            self.assertEqual(shared['Battery energy per kg of robot, types 3 and 4, on wheels'][1],
+                             (5.42, 10.84, 16.26))
+            self.assertNotIn('Joint modules, share of the robot mass', shared)
+        # The median of the seven robots on legs, at the modes, is the template's mode (E11.6 point 1).
+        module = sys.modules[builder_three.SHARED.__name__]
+        self.assertAlmostEqual(module.median_share(module.SEVEN), 0.447, delta=0.0005)
+
+    def test_the_adam_by_its_actuators_and_the_atom_as_type_twos(self):
+        knee = [j for j in self.three.joints if j.robot == 'PNDbotics Adam Lite' and j.name == 'Knee']
+        self.assertEqual(knee[0].module_mass, (3.8, 4.0, 4.2))
+        shoulder = [j for j in self.three.joints if j.robot == 'PNDbotics Adam Lite' and j.name == 'Shoulder pitch']
+        self.assertAlmostEqual(shoulder[0].module_mass[1], 0.0689 * 60 ** 0.566, places=3)
+        mine = [(j.name, j.count, j.torque) for j in self.four.joints if j.robot == 'DOBOT Atom 153 cm']
+        two, _ = written(builder_two)
+        self.assertEqual(mine, [(j.name, j.count, j.torque) for j in two.joints if j.robot == 'DOBOT Atom'])
+
+    def test_the_batteries(self):
+        def wh(apart, robot):
+            own = apart.constants[robot]
+            return own['Battery voltage'][1][1] * own['Battery capacity'][1][1]
+        for apart, robot, energy in ((self.four, '1X NEO', 842), (self.four, 'AgiBot A2', 700),
+                                     (self.four, 'AgiBot A3', 1152), (self.four, 'AgiBot A3 Ultra', 1152),
+                                     (self.four, 'AgiBot X2', 500), (self.three, 'PNDbotics Adam Lite', 1172),
+                                     (self.three, 'AI² Robotics AlphaBot 2', 1440)):
+            self.assertAlmostEqual(wh(apart, robot), energy, delta=1, msg=robot)
+        self.assertNotIn('Battery voltage', self.three.constants['Boston Dynamics Atlas'])
+
+    def test_on_wheels_and_the_magnesium_frames(self):
+        both = {**{n: self.three for n in self.three.robots}, **{n: self.four for n in self.four.robots}}
+        wheeled = {n for n, a in both.items() if schemas.on_wheels(a, n)}
+        self.assertEqual(wheeled, TYPES_34_ON_WHEELS)
+        self.assertTrue(any(p.robot == 'Anigon' and p.kind == 'Lift column' for p in self.three.parts))
+        frames = {p.robot: p.material for p in self.four.parts if p.name == 'Frame'}
+        self.assertEqual((frames['AgiBot A3'], frames['AgiBot A3 Ultra']), ('Magnesium', 'Magnesium'))

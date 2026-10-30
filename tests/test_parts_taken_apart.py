@@ -447,19 +447,28 @@ class TestReadable(unittest.TestCase):
     SMALLEST_PX = 18
 
     def test_every_page_is_readable_fit_to_a_screen(self):
+        # Type 1's pages, and since 2026-10-30 ("Yes, build it", EVIDENCE.md E11.7 open point B) types 3 and 4's, each
+        # over its robots of every parts file (type 2's in TestTypeTwo).
+        for robot_type in (1, 3, 4):
+            with self.subTest(robot_type=robot_type):
+                self.readable(robot_type)
+
+    def readable(self, robot_type: int) -> None:
+        """02's pages of one robot type, each readable fit to a screen, no text of the page running off it."""
         import matplotlib.image
         from matplotlib.text import Text
         params = Params()
         params.composition.draws = 300
-        inputs = inputs_or_skip(self, params)
+        inputs = inputs_or_skip(self, params) if robot_type == 1 else type_inputs_or_skip(self, params, robot_type)
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
-        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        category = next(c for c in inputs.base.book.categories if c.number == robot_type)
         c = composition.compose_taken_apart(category, d, inputs.base.lists)
         with tempfile.TemporaryDirectory() as folder:
             params.output.parts_dir = os.path.join(folder, 'data')
             pages = composition.parts_figure_pages(d)
-            self.assertEqual([name for name, _ in pages if '_notes_' not in name], list(composition.parts_figures(1)))
-            # 02's pages of robot type 1: its notes, its elements and its materials nine a page; where each material
+            self.assertEqual([name for name, _ in pages if '_notes_' not in name],
+                             list(composition.parts_figures(robot_type)))
+            # 02's pages of the robot type: its notes, its elements and its materials nine a page; where each material
             # sits.
             pages += composition.taken_apart_pages(c, d, [], params) + composition.sources_pages(d)
             for name, figure in pages:
@@ -486,7 +495,10 @@ class TestReadable(unittest.TestCase):
         # overlap; the numbers sit above the title's line.
         params = Params()
         params.composition.draws = 300
-        for robot_type, inputs_of in ((1, inputs_or_skip), (2, type_two_inputs_or_skip)):
+        # Types 3 and 4 since 2026-10-30 (E11.7 open point B), over their robots of every parts file.
+        for robot_type, inputs_of in ((1, inputs_or_skip), (2, type_two_inputs_or_skip),
+                                      (3, lambda t, p: type_inputs_or_skip(t, p, 3)),
+                                      (4, lambda t, p: type_inputs_or_skip(t, p, 4))):
             inputs = inputs_of(self, params)
             d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
             category = next(c for c in inputs.base.book.categories if c.number == robot_type)
@@ -904,13 +916,14 @@ class TestTypeTwo(unittest.TestCase):
         inputs = type_two_inputs_or_skip(self, self.params)
         self.assertEqual([r.number for r in inputs.robots], sorted(self.BATCHES + self.ON_WHEELS))
         self.assertEqual([r.number for r in inputs.left_out], [329])       # the Xialan S0, no mass stated
-        # None with a mass left: type 2's draws for stock-and-flow from its parts now (Q2).
-        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (0, 97, 2))
+        # None with a mass left: type 2's draws for stock-and-flow from its parts now (Q2). Its robots with a mass, 96:
+        # one without is not in the evaluation and not counted (2026-10-30, E10.1 point 4).
+        self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (0, 96, 2))
 
     def test_drawn_over_its_robots_each_as_often(self):
         inputs = type_two_inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
-        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, 96 of its 97 robots'))
+        self.assertEqual((d.robot_type, composition.lead(d)), (2, 'Robot type 2, all its 96 robots'))   # E10.1 point 4
         n, p = d.n, 1 / 96
         tolerance = 4 * np.sqrt(p * (1 - p) / n)
         for k in range(96):
@@ -1047,6 +1060,92 @@ class TestTypeTwoOnWheels(unittest.TestCase):
         self.assertTrue(np.all(self.kind_kg(d, 'Toyota CUE7', 'base') > 0))
         self.assertTrue(np.all(self.kind_kg(d, 'Unitree H2', 'base') == 0))
         self.assertIn('base', {k for k, _ in d.materials[0]})
+
+# Types 3 and 4's builders (2026-10-30, E11.7): their files beside types 1's and 2's, each in its own folder.
+PARTS_BUILDER_THREE = load('make_parts_taken_apart_3', os.path.join('tools', '3_industrial_logistics_warehousing',
+                                                                   'make_parts_taken_apart.py'))
+PARTS_BUILDER_THREE.build(PARTS_PATTERN.format(folder='3_industrial_logistics_warehousing'))
+PARTS_BUILDER_FOUR = load('make_parts_taken_apart_4', os.path.join('tools', '4_service_healthcare_interaction',
+                                                                  'make_parts_taken_apart.py'))
+PARTS_BUILDER_FOUR.build(PARTS_PATTERN.format(folder='4_service_healthcare_interaction'))
+
+
+def type_inputs_or_skip(test: unittest.TestCase, params: Params, robot_type: int):
+    """02's inputs of `robot_type` over every parts file as the builders write them (E11.7 point 4), over the register's
+    sheet of the type as its builder writes it; skipped where a file is not on disk, failed where they have a fault."""
+    params.data.parts_taken_apart = PARTS_PATTERN
+    if not os.path.exists(absolute(params.data.humanoid_guide)):
+        test.skipTest('the catalogue is not on disk')
+    base = composition.read_inputs(params)
+    with tempfile.TemporaryDirectory() as folder:
+        path = os.path.join(folder, 'register.xlsx')
+        REGISTER_BUILDER.build(path, params)
+        listed = schemas.read_type_sheet(path, robot_type)
+    files = composition.read_parts_files(params, base)
+    category = next(c for c in base.book.categories if c.number == robot_type)
+    inputs = composition.read_apart_inputs(params, base, listed, category, files)
+    faults = [f for t, file in files.items() for f in composition.apart_faults(composition.file_inputs(inputs, t, file),
+                                                                               params)]
+    if faults:
+        test.fail('faults in the inputs: ' + '; '.join(f'{f.sheet} {f.row}: {f.text}' for f in faults))
+    return inputs
+
+
+class TestTypesThreeAndFour(unittest.TestCase):
+    """Types 3 and 4 drawn part by part over the robots of every file that holds one (E11.7 point 4): each robot from
+    its own rows with its own file's shared values; types 1 and 2 from their own file, as before."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def test_type_3_over_its_72_and_type_4_over_its_33(self):
+        # Versions: type 3's 72 robots and the AgiBot X2, the Flexiv AICO 2 and the Rainbow RB-Y1 in two each; type 4's
+        # 33 and the AgiBot X2 in two.
+        for robot_type, count, versions in ((3, 72, 75), (4, 33, 34)):
+            inputs = type_inputs_or_skip(self, self.params, robot_type)
+            self.assertEqual(len(inputs.robots), count, msg=robot_type)
+            self.assertGreater(len(inputs.files), 1)
+            d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+            self.assertEqual(len(d.register), count)
+            self.assertEqual(len(d.robots), versions, msg=robot_type)
+
+    def test_a_robot_of_another_file_drawn_from_its_own_rows(self):
+        inputs = type_inputs_or_skip(self, self.params, 3)
+        self.assertIn('Unitree H2', inputs.apart.robots)
+        self.assertIs(inputs.apart.origin['Unitree H2'], inputs.files[2])
+        self.assertEqual(len([j for j in inputs.apart.joints if j.robot == 'Unitree H2']),
+                         len([j for j in inputs.files[2].joints if j.robot == 'Unitree H2']))
+
+    def test_each_robot_drawn_with_its_own_files_shared_numbers(self):
+        # The robots of type 3 come from the files of types 1 to 4; each is drawn with the shared numbers (the joints'
+        # parts, the shares, the constants for all robots) of the file its rows stand in, never of another file.
+        inputs = type_inputs_or_skip(self, self.params, 3)
+        seen = {}
+        robot = composition.Robot
+
+        def recording(name, rows, shared, mass):
+            seen[name] = shared.apart
+            return robot(name, rows, shared, mass)
+        shared = composition.Shared
+
+        def keeping(inputs, *args):
+            s = shared(inputs, *args)
+            s.apart = inputs.apart
+            return s
+        with mock.patch.object(composition, 'Robot', recording), mock.patch.object(composition, 'Shared', keeping):
+            draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        self.assertEqual(set(seen), set(inputs.apart.robots))
+        file_of = {id(f): t for t, f in inputs.files.items()}     # a file by the type it is the parts file of
+        for name, apart in seen.items():
+            self.assertEqual(file_of[id(apart)], file_of[id(inputs.apart.origin[name])], msg=name)
+
+    def test_types_1_and_2_from_their_own_file_only(self):
+        for robot_type in (1, 2):
+            inputs = type_inputs_or_skip(self, self.params, robot_type)
+            self.assertIs(inputs.apart, inputs.files[robot_type])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,6 +8,338 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E11. Robot types 3 and 4: research, batch 1 (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Yes, together", then "Yes, start sources" (the sources of types 3 and 4's 178 robots with a mass
+still to do, in batches, a source table first, each robot of both types researched once). Batch 1, as type 2's batches:
+the first 27 in the register's order (numbers 1 to 58). Read on 2026-10-30: the makers' pages through six web-fetch
+reads, and myself in the built-in browser where those got no text (PNDbotics' site and wiki, NEUBILITY, AeiROBOT);
+PNDbotics' two model files through GitHub, their masses summed and their limits listed in the page (V109). No PDF and
+no download opened (they wait for his word, E11.2 point 4). Catalogue figures (humanoid.guide) are second-hand and
+only context. Nothing is entered.
+
+### E11.1 Robot by robot: what the makers state
+
+The register's height, mass and form in brackets; **bold** where the maker's differs or where the robot stands on wheels.
+
+| # | Robot (the register) | What the maker states | Source | Kind |
+|---|---|---|---|---|
+| 1 | 1X NEO, 1X Technologies (170 cm, 30 kg) | "5'6\"" (167.6 cm, arith.), "66 lbs" (29.9 kg, arith.); DoF hands "22x2", arms "7x2", neck "3", spine "2", legs "6x2" (75, arith.); "1X Tendon Drive actuation", "Low inertia tendon drives"; battery "842 Wh", "4h"; "1X NEO Cortex (Nvidia Jetson Thor)"; "Dual 8.85MP 90Hz Stereo Fisheye", "4 beamforming microphones", speakers in pelvis and chest; "custom 3D lattice polymer", suit and shoes "machine washable nylon"; lift "154 lbs". Torques, battery voltage, frame: not stated | 1x.tech/neo | maker, spec |
+| 3 | 4NE1, NEURA Robotics (~180 cm, ~80 kg; legs or wheels) | its spec box, under the heading "Meet 4NE1 Gen 4": "Height (cm) 180", "Weight (kg) 80", "Payload (kg) 10-20", "speed (km/h) 5"; "versions on wheels for industrial floors or with a 7th axis"; a datasheet PDF not opened. Which generation the figures are: the Gen 4's (the heading) | neura-robotics.com/products/4ne1/ | maker, spec (Gen 4's page) |
+| 4 | 4NE1 Gen 3.5, NEURA Robotics (180 cm, 80 kg) | no figures: "integrated high-dexterity hands, a high-capacity battery"; "expected to be available end of 2026"; 98,000 €; a datasheet PDF not opened | neura-robotics.com/product/4ne1-reservation/ | maker, no figures |
+| 5 | 4NE1 Gen 4, NEURA Robotics (180 cm, **65 kg**; legs or wheels) | "Height (cm) 180", **"Weight (kg) 80"**, "Payload (kg) 10-20"; "A slimmer body with a sleek textile skin, 20% lighter than the generation before"; "Advanced hands"; compute, battery, joints: not stated | as 3 | maker, spec |
+| 6 | A2, AgiBot (170 cm, 60 kg) | **no A2 on AgiBot's sites** (English and Chinese); the nearest, A2 Ultra / A2 Lite: "169cm", "≈69kg" / "≈64kg", DoF "40" / "23" (legs 6 × 2, arms 7 / 5 × 2, neck 2 / 1), "Peak Knee Torque 270N·m", "Battery Capacity 14.4Ah", charger "54.6V 8A", "16-core high-performance CPU", "NVIDIA Jetson Orin 64G" (Ultra), 3D LiDAR, RGB-D, RGB, fisheye cameras (Ultra) | agibot.com/products/A2_Ultra | maker, not listed |
+| 7 | A2 Max, AgiBot (178 cm, 85 kg) | **not listed**: "AGIBOT A2-Max" only as an option of the inquiry form | as 6 | maker, not listed |
+| 8 | A3 Ultra, AgiBot (174 cm, 60 kg) | "174 cm", "60 kg"; arms "7 DOF per arm", legs "6 DOF per leg", waist "3 DOF", hands "Up to 20 DOF"; "700 TOPS"; "Dual battery bays", "8 h", "10-second battery swap"; frame "Magnesium alloy + carbon-fiber nylon"; "LiDAR + 360° surround view", RGB-D in chest, terrain and knee, binocular RGB, "3 wide-angle fisheye cameras", shoulder touch sensors, microphones; its table on agibot.com an image, not read. Torques, battery voltage and energy: not stated | store.agibot.com/products/a3u | maker, spec |
+| 14 | AGIBOT A3, AgiBot (173 cm, 55 kg) | "173 cm", "55 kg"; "Dual battery packs · 1152 Wh · Full-tab cells", "10 h", "10-second battery swap"; "150 A maximum current, 12 kW power"; "magnesium alloy, titanium alloy, and TPU flexible materials"; shoulder touch sensing, microphones. DoF, torques, compute: not stated (the catalogue's 31 DoF and 320 N·m not on the page) | agibot.com/products/A3 | maker, spec |
+| 17 | AgiBot X2, AgiBot (130 cm, 36 kg) | **two versions**, X2 / X2 Ultra: "Approx.1.31 m", "Approx.35kg" / "Approx.39kg"; DoF "25" / "30" (neck 0 / 1, arms 5 / 7 × 2, waist 3, legs 6 × 2); "Peak Joint Torque 120N·m"; "Approx.500Wh", charger "54.6V 10A"; "RK3588 ×2", Ultra also "Orin NX (157 TOPS)"; 3D LiDAR and RGB-D on the Ultra only; hands only for the Ultra, sold apart | agibot.com/products/X2 | maker, spec |
+| 9 | Abi, Andromeda Robotics (120 cm, 50 kg; wheels) | no hardware figures: "Fluent in 90 languages"; legs or wheels not stated (the catalogue: "a wheeled base") | andromedarobotics.ai/product | maker, no figures |
+| 10 | Adam Lite, PNDbotics (**160 cm**, 60 kg) | its wiki: **"1.67m"**, "60kg", "25 degrees of freedom" (legs 6 × 2, arms 5 × 2, waist 3); "Knee ~ 340N·m, Hip ~ 340N·m, Ankle ~ 46N·m, Arm ~ 60N·m"; each joint's actuator named (below); "1172W·h capacity, 46.2V max voltage"; "NUC12WSKi7 for motion control" (Intel Core i7-1260P); "Spherical Hand". Its model `adam_lite.urdf`: 58.48 kg over 27 links, 25 joints, limits hips 230, 160, 105, knee 230, ankle 40, 12, waist 110 × 3, arms 65 × 3, 30, 6.4 N·m. The actuators (their pages, "Maximum torque", "Weight/kg"): knee PND-130-7F-P 340 N·m, 4 kg; hip pitch PND-130A-7F-7-P 340, 4; hip roll PND-80-20-50-S 180, 1.5; hip yaw PND-60-17-30-S 48, 1; waist PND-60-17-50-S 89, 1; ankle PND-50-6F5S-30-P 46, 0.7; shoulder pitch and roll PND-50-14A-50-S (its page PND-50-14-S: 60, mass "/"); shoulder yaw and elbow PND-30-14A-50-S 17.5, 0.4; wrist yaw PND-20-14A-50-S 6.2, 0.3 | wiki.pndbotics.com/en/robot/humanoid_robot/, /en/actuator/…; github.com/pndbotics/pnd_models | maker, spec; maker's model |
+| 11 | Adam SP, PNDbotics (167 cm, 62 kg) | as 10: "1.67m", "62kg", "41 degrees of freedom" (arms "Shoulder x3 + Elbow x1 + Forearm x1 + Wrist x2 + Dexterous Fingers x6 = 13" each); the same torques, actuators and battery; wrist pitch and roll PND-20-08-50-S 6.4 N·m, 0.2 kg; "NVIDIA Jetson Orin NX 16GB"; "Intel Realsense D455"; "Dexterous Hand" (six joints). Its model `adam_sp.urdf`: 60.25 kg over 55 links, 29 joints, limits as 10's and wrists 6.4 N·m | as 10 | maker, spec; maker's model |
+| 12 | AEON, Hexagon (165 cm, 60 kg; legs or wheels) | "Height: 165cm", "Weight: 60kg", "Degrees of freedom: 34"; "Battery: Auto-swap", "5 hours of autonomous work on a single charge"; "Payload: 15 kg short-term, 8 kg constant carry"; "go up the stairs"; its article: "NVIDIA Jetson Thor", "cameras and depth sensors", IMUs, "time-of-flight sensors"; partners maxon, Microsoft, NVIDIA (who supplies what: not stated). Battery voltage and energy, torques, materials, hands: not stated | robotics.hexagon.com/product/; …/aeon-perception-capabilities-nvidia-holoscan/ | maker, spec |
+| 18 | Agile One, Agile Robots (174 cm, 69 kg) | "modular fingers, 21 joints, and integrated force and tactile sensors"; "a walking speed of 2 meters per second"; "intelligent cameras, LiDARs"; a proximity sensor; height, mass, battery, torques: not stated. Its Agile Hand page (not said to be Agile ONE's hand): "21 joints and 15 or 16 degrees of freedom, the 1.5 kg Agile Hand" | agile-robots.com/en/products/humanoid-robots/agile-one/; …/agile-hand/ | maker, partial |
+| 22 | AIDOL, AIDOL Lab (186 cm, 95 kg) | walking version: "67" degrees of freedom, "186 см", "95 кг", "6 км/ч", payload "10 кг", "до 6 часов" (up to 6 hours); "вычислительному модулю на основе графического процессора" (a GPU-based computing module, not named). Torques, battery, materials: not stated | aidoltech.ru/walking | maker, spec |
+| 26 | Alice M1, AeiROBOT (130–180 cm, 97 kg; **wheels**) | "130 - 180cm / 97kg"; "DoF 31 Waist(3), Arm(7*2), Head(2), Hand(6*2)"; "AFE-R360 \| NVIDIA AGX Orin"; "Stereo Camera", "IMU \| 3D Lidar \| Laser Sensor"; a "Mobile platform", its waist "from 1.3m to 1.8m"; a button "URDF DOWNLOAD" (not pressed: a download). Battery, torques, base: not stated | eng.arobot4all.com/2069803258 (in the browser; refused to the fetch, 403) | maker, spec |
+| 28 | ALPHA, TeknTrash (200 cm, 90 kg) | **not reachable**: its site refused the connection, to the fetch and to the browser | tekntrash.com | not reachable |
+| 29 | AlphaBot 2, AI² Robotics (180 cm, 135 kg; **wheels**) | "a wheeled dual-arm humanoid robot", "1800mm", "135kg (standard configuration)"; "22 degrees of freedom (excluding end effectors)": its legs "a three-joint folding lifting structure with waist yaw", arms "7 degrees of freedom" each, neck "2", chassis "two-wheel differential drive"; peak torques: neck 3.3, waist yaw 66, waist pitch 207, knee 436, ankle 436 N·m (the arms' not stated; its arm "Six-Axis Force Range 200N/7Nm", "Supply Voltage DC 20~30V"; its SDK's example "arm_type": "realman"); "Battery 48V 30Ah", "4~6h"; "NVIDIA Orin AGX 64G"; "Realsense D435" in head, chest and back, "Realsense D405" at the arms' ends, a chassis RGB-D camera, "2D LiDAR", "linear MIC*4"; chassis "Payload ≤100kg", 505 × 650 mm | docs.ai2robotics.com/en/alphabot2/hardware/architecture | maker, spec |
+| 31 | Anigon, Anigon Humanoid Robotics (189 cm, 120 kg; **wheels**) | "Height 189 cm", "Full Body 28 DoF", "Each Arm 7 DoF"; "Dual Hot-Swap Batteries"; "Mobile Base: Adaptive Lifting"; "Integrated Torque Sensors", "Electromagnetic" holding brakes; "Wheeled Humanoid Robot, … Dexterous Hands, … Cameras, Torque Sensors, Tactile Sensors, Edge Compute Controller". Mass, battery, compute: not stated; a "Technical Overview" (.txt) not opened. The catalogue's maker, "Aimbo Robotics", is not named on the maker's site | anigon.ch/robot-platform/, anigon.ch | maker, partial |
+| 32 | Apollo, Apptronik (173 cm, 72 kg) | **its page answered 404**; the home page: "both bipedal and wheeled mobility options" | apptronik.com | maker, no page |
+| 33 | Apollo 2, Apptronik (173 cm, 75 kg; legs or wheels) | no figures: "A bipedal configuration … while a wheeled base offers stability"; "Apptronik's patented actuator technology", "90%+ energy efficiency"; "Swappable batteries"; a chest display | apptronik.com/apollo/apollo-2 | maker, no figures |
+| 43 | Atlas, Boston Dynamics (190 cm, 90 kg; types 5 and 3) | "Height 1.9 m", "Weight 90 kg", "DoF 56"; "Battery Life 4 hours", "self-swappable batteries"; "Weight Capacity (Instant) 50 kg", "(Sustained) 30 kg"; "Tactile and 360° camera view"; "IP67"; "all electric"; its spec sheet (PDF) not opened. Torques, battery energy, compute, materials: not stated | bostondynamics.com/atlas | maker, spec |
+| 45 | Atom, DOBOT (153 cm, 62 kg) | "28 upper-body degrees of freedom (DoF)", "binocular RGB vision"; its ATOM Max: "41-DoF", "6-DoF hands", "Intel RealSense D455", "1500 TOPS", "high-precision URDF models"; height, mass, battery: not stated. Its model `atom_p3.urdf` (DOBOT's repository): 61.81 kg (E7.1), legs' limits 207.76, 241.42, 104.16, 213.8 (knee), 89.896, 89.896 N·m, torso 182.28, arms 93, 70, 70, 70, 34, 34, 34, head 12. The same files E7.5 took for type 2's Atom Max | dobot-robots.com/products/humanoid-robots/atom.html; github.com/Dobot-Arm/dobot_atom_urdf | maker, partial; maker's model |
+| 46 | ATOM, Vbot (160 cm, 50 kg) | **not listed**: Vbot's site shows a robot dog only | vbot.cn | maker, not listed |
+| 51 | Billi, NEUBILITY (149.7 cm, 110 kg; **wheels**) | no figures: "Hybrid humanoid combining mobility and manipulation" (in the browser) | neubility.ai/en | maker, no figures |
+| 56 | Borg 01, Borg Robotics (173 cm, 62 kg; legs or wheels) | no figures: "IN DEVELOPMENT" | borgrobotic.com | maker, no figures |
+| 58 | CALVIN-40, Wandercraft (170 cm, 80 kg) | no figures: "High-torque motors, high-strength structure"; "3D sensor and vision"; "First series delivery expected in H1 2027" | en.wandercraft.eu/calvin-40 | maker, no figures |
+
+### E11.2 Batch 1 together, and the questions for Matthias
+
+| What the makers give | Robots |
+|---|---|
+| Joints and torques (the maker's table or model file), mass, battery | Adam Lite, Adam SP (the wiki's actuators with their masses, and the models), AlphaBot 2 (torques of its legs, waist and neck), Atom (DOBOT's model) |
+| Mass and joints, a battery or not, no torques per joint | NEO, A3 Ultra, AGIBOT A3, X2 (one peak torque), AEON, AIDOL, Alice M1, Atlas, 4NE1 / 4NE1 Gen 4 (mass only) |
+| A few words, or nothing | 4NE1 Gen 3.5, A2, A2 Max, Abi, Agile One, ALPHA, Anigon (no mass), Apollo, Apollo 2, ATOM (Vbot), Billi, Borg 01, CALVIN-40 |
+| On wheels, by their makers | Alice M1, AlphaBot 2, Anigon, Billi ("hybrid"); Abi by the catalogue |
+
+**Questions, each with my recommendation** (as decided for type 2, E8.2 and E9.2):
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | The mass where the maker's differs from the register's (4NE1 Gen 4: 80 against 65 kg) | the maker's, as E8.2 point 3 |
+| 2 | The robots whose makers give no mass (13 above) | the register's (the catalogue's) mass ± 1 kg, labelled the catalogue's, as E8.2 point 5 and E9.2 point 5 |
+| 3 | The X2 in two versions (X2, X2 Ultra) | each as often, as the AICO 2 and the RB-Y1 (E9.2) |
+| 4 | Downloads, his word first (sizes unknown until fetched): NEURA's two 4NE1 datasheets (PDF), Boston Dynamics' Atlas spec sheet (PDF), AgiBot's manuals of the A3, A3 Ultra and X2, AeiROBOT's ALICE M1 URDF, Anigon's technical overview (text), the Agile Hand flyer (PDF) | yes: they may hold the batteries and joints the pages lack |
+
+**Decided** (Matthias, 2026-10-30: "Yes, all four"): 1 the maker's mass where it differs (4NE1 Gen 4 80 kg); 2 the
+register's (the catalogue's) mass ± 1 kg, labelled the catalogue's, for the 13 whose makers give none; 3 the X2 and
+the X2 Ultra each as often; 4 the downloads, read in E11.3.
+
+### E11.3 The downloads (on "Yes, all four", point 4), read myself
+
+Downloaded on 2026-10-30 into Claude's scratch folder, each file in a folder of its own (sizes as fetched); read with
+the file reader. Nothing entered.
+
+| File (source, size) | What it states |
+|---|---|
+| NEURA, `NEURA_Robotics_4NE1_Datasheet_Web.pdf` (neurarobotics.px.media, 472 kB, "V7 / 05.06.2026") | **titled "4NE1 Gen 3"**: "Weight 80 kg", "Height 180 cm", "Hands (DoF) 12", "Arms Payload 20 kg" ("Leg-supported configurations can carry up to 100 kg"), "Speed 5 km/h", "Operating Time (h) 24/7", "55 Degrees of Freedom", "Touch-Sensitive Sensor Skin", a Qualcomm logo (compute not named further) |
+| NEURA, `4NE1Gen3.5Datasheet.pdf` (2.1 MB, "V6 / 02.01.2026") | "4NE1 Gen 3.5": **"Weight 80 kg"**, "Height 180 cm", "Own Hands (DoF) 12", "Payload 10–100 kg", "Speed 5 km/h", "NVIDIA Thor T5000", "Exchangeable Forearms", "Advanced Intelligent Battery Management", "Sensor Skin". Battery energy, joints: not stated |
+| Boston Dynamics, `atlas-spec-sheet.pdf` (433 kB, "Rev: 10/15/2026") | "Height 1.9 m", "Weight 90 kg", "Degrees of Freedom 56"; "Tactile fingers and palm", "360° camera view"; "Battery Life 4 hrs", "with Heavy Lifting 2 hrs", "Autonomous Battery Swap Time 3 min (Charge Time 1.5 hrs)", "Charge Power Requirements 110 V"; "Weight Capacity: Instant 50 kg, Sustained 30 kg, One-Handed 20 kg"; "IP67". Battery energy, joints, materials: not stated |
+| Agile Robots, `AR-AgileHand-Productflyer-SCREEN-en.pdf` (357 kB, "10008-REV.2-250530") | the Agile Hand: "Weight 1.5kg", "Joints 21", "Degrees of Freedom 16", "an aluminum open skeleton structure with injection molded plastic shells", "Joint torque and position sensors are integrated in every actuated joint". Agile ONE's page gives its hands "21 joints", the flyer does not name Agile ONE |
+| Anigon, `anigon-technical-overview.txt` (7 kB) | "ANIGON FA-L Series … A wheeled humanoid platform": "28 DoF", "Force-controlled dual arms with dexterous hands", "Mobile base", "Integrated RGB-D cameras and tactile sensors", "Dual hot-swap batteries". Mass: not stated |
+| AgiBot, the A3 Ultra's user manual (agibot.com/filepage/319.html, an online page, no file) | "Height 1.74 m", "Weight 60 KG", "Active Degrees of Freedom 51–71" (neck 2, arms 7, waist 3, legs 6, hands "10 (optional, up to 20 DOF)"), "Knee Joint Peak Torque 320 N·m", "Battery Capacity 1152 W·h", "Total 8 h", "RK3588 * 2", "NVIDIA Thor"; 3D LiDAR, RGB-D cameras, GPS RTK, UWB |
+| AgiBot, the A3 series' user manual (/filepage/290.html; the link of E11.2, /filepage/336, empty) | "Height 1.73 m", "Weight 55 KG", "Active Degrees of Freedom 31" (neck 2, arms 7, waist 3, legs 6), "Knee Joint Peak Torque 320 N·m", "Single Arm Payload 5 kg", "Battery Capacity 1152 W·h", "10 hour", "RK3588 * 2"; no LiDAR, no RGB-D (A3) |
+| AgiBot, the X2's user manuals (Feishu wiki) | **not read**: the page loads its contents list only |
+| AeiROBOT, the ALICE M1 URDF ("URDF DOWNLOAD") | **not obtained**: the link answers "Invalid access" outside a signed-in session of the maker's site (an account would be needed: not done) |
+
+### E11.4 More on the weights, from the wider internet (on "Try to find more information on the weight")
+
+Matthias, 2026-10-30: "Try to find more information on the weight. See if there is more out in the internet". For the
+robots whose makers gave no mass (E11.2), and the 4NE1's two figures. Searched (twelve web searches), then the pages
+that name a weight read myself through two web-fetch reads (V111). A search engine's summary is not a source: a figure
+counts only where a page read states it.
+
+| # | Robot | Weight found, and where | Kind |
+|---|---|---|---|
+| 4 | 4NE1 Gen 3.5 | **80 kg**, its datasheet (E11.3) | maker, datasheet |
+| 3 | 4NE1 (Gen 3) | **80 kg**, its datasheet (E11.3); Notebookcheck (2025-06-25, on the third generation): "weighing around 110 pounds", not attributed | maker, datasheet; press, against it |
+| 5 | 4NE1 Gen 4 | its page's box "Weight (kg) 80", and its text "20% lighter than the generation before"; with Gen 3 and 3.5 at 80 kg, 20 % lighter is 64 kg (arith.), the register's 65 kg. **The maker contradicts itself** (E11.5) | maker, conflicting |
+| 6 | A2 | **"Weight 69 kg"**, "Height 169 cm", "Battery 700 wh", "Runtime 2 h", on AgiBot's own A2 page (agibot.com/products/A2; the first read missed it) | maker, spec |
+| 7 | A2 Max | none: no AgiBot page states one ("A2-Max" only in its inquiry form, its A2Max URLs serving the A2 Ultra); the search engine's "175 cm, 85 kg" was found on no page read | none |
+| 32 | Apollo | Engadget (2023-08-23, its launch): "The 5-foot-8, 160-lb Apollo can lift up to 55 lbs" (72.6 kg, arith.), not attributed in the sentence | press, at launch |
+| 33 | Apollo 2 | none (databases repeat the Apollo's) | none |
+| 18 | Agile One | heise (2025-11-21, its launch): "Der humanoide Roboter Agile One ist 174 cm groß, wiegt 69 kg und ist in der Lage, Gewichte bis zu 20 kg zu tragen" (174 cm, 69 kg, 20 kg payload), not attributed in the sentence; Origin of Bots the same, not attributed | press, at launch |
+| 56 | Borg 01 | Origin of Bots (2026-02-14): "At 173 x 50 x 40 cm and 62 kg", "in-house actuators delivering 270 Nm", "2 m/s top speed wheeled"; editorial, not attributed | second-hand |
+| 46 | ATOM (Vbot) | none; Xinhua (2026-08-22, its launch at WRC): "160cm 身高、180cm 臂展和 95cm 腿长" (height, arm span, leg length), "31 个本体自由度" (31 body DoF); a co-founder: its sensors, computer and battery as its robot dog's, "最大的区别主要在关节电机" (the main difference the joint motors) | press, at launch |
+| 51 | Billi | none; hellot.net (2026-10-01), "사측에 따르면" (according to the company): payload under 15 kg directly, up to 60 kg in its cargo unit, 4–6 h of work | press, the company's words |
+| 28 | ALPHA | none; The Next Web (2026-05-05): "built by RealMan Robotics in China and adapted … by … TeknTrash", not attributed | press |
+| 9, 31, 58 | Abi, Anigon, CALVIN-40 | none beyond the catalogue's and databases repeating it | none |
+
+### E11.5 What E11.3 and E11.4 change in E11.2's decisions, and one question
+
+- **Two robots now have a maker's mass:** the A2, 69 kg (its page), and the 4NE1 Gen 3.5, 80 kg (its datasheet). By
+  decision 1 (the maker's mass), the A2 69 kg against the register's 60, the Gen 3.5 80 kg as the register's.
+- **Eleven robots still have none:** A2 Max, Abi, Agile One, ALPHA, Anigon, Apollo, Apollo 2, ATOM (Vbot), Billi,
+  Borg 01, CALVIN-40: decision 2 (the catalogue's ± 1 kg). For three of them the press at their launch gives the same
+  weight as the catalogue (Apollo 160 lb = 72.6 kg against 72; Agile One 69 kg; Borg 01 62 kg), not attributed to the
+  maker: context, not a source of its own.
+- **The 4NE1 Gen 4 (decision 1, 80 kg) is in question:** its page's box says 80 kg, but its text says "20% lighter than
+  the generation before", and the datasheets give Gen 3 and Gen 3.5 80 kg each, so the text means 64 kg (arith.). The
+  box looks like the earlier generations' figure carried over; the 20 % is the one statement about the Gen 4 itself.
+
+| # | Question | Recommendation |
+|---|---|---|
+| 5 | The 4NE1 Gen 4's mass: its box's 80 kg (decision 1) or its text's 20 % lighter than 80 kg | 64 kg ± 1 kg from its text ("20% lighter", arith., label S, E), the box's 80 kg reported beside it |
+
+**Decided** (Matthias, 2026-10-30: "Yes, 64 kg"): the 4NE1 Gen 4 63 / 64 / 65 kg, label S, E (its "20% lighter than
+the generation before" and its datasheets' 80 kg of Gen 3 and Gen 3.5), its page's box of 80 kg reported beside it; in
+place of decision 1's 80 kg for it. The A2 69 kg and the Gen 3.5 80 kg by decision 1; the eleven others by decision 2.
+
+### E11.6 Proposal: batch 1 of types 3 and 4, robot by robot (2026-10-30). Nothing entered
+
+Matthias, 2026-10-30: "Propose the numbers". The method is type 2's (E6.8, E7.5, E8.3, and E9.6 for the robots on
+wheels) with the decisions of E11.2 and E11.5; where types 3 and 4 need a choice type 2 did not make, it is **bold**
+and a question below. Numbers at the modes are Claude's arithmetic (`types34/batch1_modes.py`, V112); the run draws
+every one from its min / mode / max.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **Types 3 and 4's own templates** (question 1) | **on legs: the joint modules 22.4 / 44.7 / 67.1 % of the robot's mass**, the median of the seven robots of types 3 or 4 with every joint (H2 44.7 %, Kuavo 5 34.1, Luna 41.5, MagicBot Gen1 46.6, from type 2's file; Adam Lite 53.0, Adam SP 52.6, Atom 41.2, batch 1), split by kind as they are on average: hips 34.2, knees 16.1, ankles 11.3, waist 8.1, arms 28.2, head 2.2 %. **On wheels: 6.95 / 13.9 / 20.85 %**, the median of the three of types 3 or 4 with every joint (AI Worker 14.3, RB-Y1 A 13.9, Vega 13.2 %; the Reachy 2 is of type 2 only), split as E9.6's. **The battery 7.3 / 14.67 / 22.0 Wh per kg of robot on legs, 5.4 / 10.84 / 16.3 on wheels**: the medians of the robots of types 3 or 4 that state an energy (16 on legs, 14 on wheels). One template for both types: a robot of both has one block |
+| 2 | **Joint modules by the makers' figures** | **Adam Lite, Adam SP: each joint its actuator's stated mass** (the wiki: knee and hip pitch 4 kg, hip roll 1.5, hip yaw and waist 1, ankle 0.7, shoulder yaw and elbow 0.4, wrist yaw 0.3, wrist pitch and roll 0.2 kg; ± 5 %, S); **the shoulders' PND-50-14A, whose page gives no mass, E6.8's fit at its 60 N·m, 0.70 kg (E)**. **Atom: E6.8's fit at its model's limits** (as type 2's Atom Max block, E7.5). **AlphaBot 2: E6.8's fit at its stated peaks** (neck 3.3, waist yaw 66, waist pitch 207, knee 436, ankle 436 N·m: 0.14 to 2.15 kg), **its folding legs' knee and ankle as joints, its arms (not stated) the wheeled template's shoulders and elbows (question 3)**. X2's "Peak Joint Torque 120N·m" and the A3's knee 320 N·m: a check, not used |
+| 3 | **The template** | every other robot: 1's on legs or on wheels by its form (question 2) |
+| 4 | **Hands and grippers** | **as Fourier's six-joint hand per joint (E7.5 point 4), small joints**: 4NE1 Gen 3 and 3.5 two of six ("Hands (DoF) 12"), Gen 4 as Gen 3.5; A2 two of six (its A2 Ultra's "6-DOF Dexterous Hand"); A3 Ultra two of ten (0.74 kg each); NEO two of 22 ("22x2", 1.62 kg each); Adam SP, Alice M1 ("Hand(6*2)"), Anigon, Atlas ("Tactile fingers and palm") two of six. **Agile One: two Agile Hands, 1.5 kg each (E: its flyer's "Weight 1.5kg", 21 joints as Agile ONE's hands; the flyer does not name Agile ONE)**. AlphaBot 2: two grippers as the RH-P12-RN, 0.5 kg (E). None where the maker names none (A3, X2, Adam Lite's "Spherical Hand", AEON, AIDOL, Apollo, Apollo 2, Atom, ATOM, Billi, Borg 01, CALVIN-40, Abi, ALPHA, A2 Max) |
+| 5 | **The robot's mass** | decided (E11.2, E11.5): the maker's the mode ± 1 kg, its model's the bound; the catalogue's ± 1 kg for the eleven without |
+| 6 | **Battery** | stated: NEO 842 Wh; A2 700; A3 and A3 Ultra 1,152; X2 and X2 Ultra 500; **Adam Lite and SP 1,172 Wh at 39.6 V (E: its "46.2V max voltage" is 11 cells at 4.2 V, 3.6 V each nominal), 29.6 Ah (arith.)**; AlphaBot 2 48 V × 30 Ah (1,440 Wh). Every other robot 1's energy per kg. In the base for a robot on wheels (E9.6) |
+| 7 | **Boards** | E7.5 point 7 and E9.6 point 9: a named module its size (E). NEO, 4NE1 Gen 3.5 ("Thor T5000"), AEON and A3 Ultra a Jetson Thor (as the H2 Plus's) and a carrier; A3 Ultra, A3 and X2 two RK3588 boards (as the X1's computer board, E), the X2 Ultra also an Orin NX; Adam Lite and SP an Intel i7 (NUC12WSKi7), the SP also an Orin NX; Alice M1, AlphaBot 2 an AGX Orin and a carrier; **AIDOL's "GPU-based computing module" as an AGX Orin (E)**; the others one computer board (E). A power board each |
+| 8 | **Sensors** | each by its kind, as the makers name them (E11.1, E11.3): NEO two fisheye cameras, four microphones, speakers; A3 Ultra a LiDAR, three RGB-D, a binocular, three fisheye cameras, microphones; A3 a binocular camera; X2 Ultra a LiDAR and an RGB-D; Adam SP a RealSense D455; AEON cameras and depth sensors; Agile One cameras and LiDARs; Alice M1 a stereo camera, a LiDAR, an IMU; AlphaBot 2 three D435, two D405, an RGB-D, a 2D LiDAR, a microphone array; the others one IMU (E). Force, torque, touch and tactile sensors left out (E9.6 point 14) |
+| 9 | **Cables** | E7.5 point 9: 8 m per metre of height, half to 1.5 times; the Alice M1 at the middle of its 1.3 to 1.8 m (E) |
+| 10 | **Shell, screws, frame** | E7.5 points 10, 11: the shell 11.5 % of the mass, the screws 0.5 kg, the frame the remainder, aluminium (E); **A3 and A3 Ultra a frame of magnesium alloy (S: "magnesium alloy, titanium alloy, and TPU", "Magnesium alloy + carbon-fiber nylon"), its titanium and TPU not drawn (no share stated; question 4)** |
+| 11 | **On wheels** (E9.6 points 4 to 7) | two driven wheels and two casters unless more is known (AlphaBot 2 "two-wheel differential"); each hub motor by the robot's mass per driven wheel: Abi 1.4 kg, Alice M1, AlphaBot 2, Anigon, Billi 3.75 kg (E); **Anigon a lift column** ("Adaptive Lifting Base"), a share of its mass (E9.6 point 7); the Alice M1's height change its waist's ("dual parallel-link waist"), no column |
+| 12 | **Versions** | the X2 and the X2 Ultra each as often (decided) |
+| 13 | **Not in** | force, torque, touch and tactile sensors; NEO's lattice polymer and nylon suit beyond the shell; the A3's titanium and TPU; every option; the catalogue's figures beside the makers' |
+
+**Robot by robot** (S stated, E estimated; joints at the modes, the template on legs 44.7 %):
+
+| # Robot | Mass (kg) | Form | Joints | Hands | Battery | Boards | Cables (m) |
+|---|---|---|---|---|---|---|---|
+| 1 NEO | 28.9 / 29.9 / 30.9 | legs | template (13.4 kg) | 2 × 22 joints | 842 Wh (S) | Jetson Thor, carrier | 6.7 / 13.4 / 20.1 |
+| 3 4NE1 (Gen 3) | 79 / 80 / 81 | legs | template (35.8 kg) | 2 × 6 | 1,174 Wh (E) | one computer (E) | 7.2 / 14.4 / 21.6 |
+| 4 4NE1 Gen 3.5 | 79 / 80 / 81 | legs | template | 2 × 6 | 1,174 Wh (E) | Jetson Thor, carrier | 7.2 / 14.4 / 21.6 |
+| 5 4NE1 Gen 4 | 63 / 64 / 65 | legs | template (28.6 kg) | 2 × 6 | 939 Wh (E) | one computer (E) | 7.2 / 14.4 / 21.6 |
+| 6 A2 | 68 / 69 / 70 | legs | template (30.8 kg) | 2 × 6 | 700 Wh (S) | one computer (E) | 6.8 / 13.5 / 20.3 |
+| 7 A2 Max | 84 / 85 / 86 | legs | template (38.0 kg) | — | 1,247 Wh (E) | one computer (E) | 7.1 / 14.2 / 21.4 |
+| 8 A3 Ultra | 59 / 60 / 61 | legs | template (26.8 kg) | 2 × 10 | 1,152 Wh (S) | 2 RK3588, Thor, carrier | 7.0 / 13.9 / 20.9 |
+| 14 AGIBOT A3 | 54 / 55 / 56 | legs | template (24.6 kg) | — | 1,152 Wh (S) | 2 RK3588 | 6.9 / 13.8 / 20.8 |
+| 17 X2 | 34 / 35 / 36 | legs | template (15.6 kg) | — | 500 Wh (S) | 2 RK3588 | 5.2 / 10.5 / 15.7 |
+| 17 X2 Ultra | 38 / 39 / 40 | legs | template (17.4 kg) | — | 500 Wh (S) | 2 RK3588, Orin NX | 5.2 / 10.5 / 15.7 |
+| 9 Abi | 49 / 50 / 51 | wheels | wheeled template | — | 542 Wh (E) | one computer (E) | 4.8 / 9.6 / 14.4 |
+| 10 Adam Lite | 58.48 / 60 / 61 | legs | its actuators (31.8 kg) | — | 1,172 Wh (S) | Intel i7 | 6.7 / 13.4 / 20.0 |
+| 11 Adam SP | 60.25 / 62 / 63 | legs | its actuators (32.6 kg) | 2 × 6 | 1,172 Wh (S) | Intel i7, Orin NX | 6.7 / 13.4 / 20.0 |
+| 12 AEON | 59 / 60 / 61 | legs | template (26.8 kg) | — | 880 Wh (E) | Jetson Thor, carrier | 6.6 / 13.2 / 19.8 |
+| 18 Agile One | 68 / 69 / 70 | legs | template (30.8 kg) | 2 Agile Hands | 1,012 Wh (E) | one computer (E) | 7.0 / 13.9 / 20.9 |
+| 22 AIDOL | 94 / 95 / 96 | legs | template (42.5 kg) | — | 1,394 Wh (E) | AGX Orin-sized (E) | 7.4 / 14.9 / 22.3 |
+| 26 Alice M1 | 96 / 97 / 98 | wheels | wheeled template | 2 × 6 | 1,051 Wh (E) | AGX Orin, carrier | 6.2 / 12.4 / 18.6 |
+| 28 ALPHA | 89 / 90 / 91 | legs (question 2) | template (40.2 kg) | — | 1,320 Wh (E) | one computer (E) | 8.0 / 16.0 / 24.0 |
+| 29 AlphaBot 2 | 134 / 135 / 136 | wheels | stated + wheeled arms | 2 grippers | 1,440 Wh (S) | AGX Orin, carrier | 7.2 / 14.4 / 21.6 |
+| 31 Anigon | 119 / 120 / 121 | wheels | wheeled template; lift column | 2 × 6 | 1,301 Wh (E) | one computer (E) | 7.6 / 15.1 / 22.7 |
+| 32 Apollo | 71 / 72 / 73 | legs | template (32.2 kg) | — | 1,056 Wh (E) | one computer (E) | 6.9 / 13.8 / 20.8 |
+| 33 Apollo 2 | 74 / 75 / 76 | legs (question 2) | template (33.5 kg) | — | 1,100 Wh (E) | one computer (E) | 6.9 / 13.8 / 20.8 |
+| 43 Atlas | 89 / 90 / 91 | legs | template (40.2 kg) | 2 × 6 | 1,320 Wh (E) | one computer (E) | 7.6 / 15.2 / 22.8 |
+| 45 Atom (DOBOT) | 60.81 / 61.81 / 62.81 | legs | its model's (25.5 kg) | — | 907 Wh (E) | one computer (E) | 6.1 / 12.2 / 18.4 |
+| 46 ATOM (Vbot) | 49 / 50 / 51 | legs | template (22.4 kg) | — | 734 Wh (E) | one computer (E) | 6.4 / 12.8 / 19.2 |
+| 51 Billi | 109 / 110 / 111 | wheels | wheeled template | — | 1,192 Wh (E) | one computer (E) | 6.0 / 12.0 / 18.0 |
+| 56 Borg 01 | 61 / 62 / 63 | legs (question 2) | template (27.7 kg) | — | 910 Wh (E) | one computer (E) | 6.9 / 13.8 / 20.8 |
+| 58 CALVIN-40 | 79 / 80 / 81 | legs | template (35.8 kg) | — | 1,174 Wh (E) | one computer (E) | 6.8 / 13.6 / 20.4 |
+
+At the modes no frame falls below zero; the least is the NEO's, about 3 kg of its 29.9 kg (its two 22-joint hands 3.2 kg,
+its pack 5.1 kg at 164 Wh/kg): in some draws it may fall below zero, reported, not cut.
+
+**Questions, each with my recommendation:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | Types 3 and 4's own templates (point 1), or type 2's (E7.4: 40.4 %, 14.67 Wh/kg; E9.6: 15.6 %, 10.28 Wh/kg) | their own: the same kind of robot (rule 1 of the sources), seven on legs and three on wheels |
+| 2 | The form of the five the register gives "legs or wheels" (4NE1 Gen 3 and Gen 4, AEON, Apollo 2, Borg 01) and of ALPHA ("not stated") | on legs: their makers' figures and pictures are of the robot on legs (AEON "go up the stairs", Apollo 2 "A bipedal configuration" first); ALPHA none, "stands at the line like a human worker" |
+| 3 | AlphaBot 2's arms, which its maker does not give | the wheeled template's shoulders and elbows (as the JingChu's stated knees beside its template, E7.5 point 2) |
+| 4 | The A3's titanium and TPU, named without a share | not drawn (reported); the frame magnesium alloy |
+
+**Agreed** (Matthias, 2026-10-30: "Yes, agree E11.6"): points 1 to 13 and the four questions as recommended: types 3
+and 4's own templates (on legs 22.4 / 44.7 / 67.1 %, on wheels 6.95 / 13.9 / 20.85 %, 14.67 and 10.84 Wh/kg); the
+five "legs or wheels" robots and ALPHA on legs; AlphaBot 2's arms the wheeled template's; the A3's titanium and TPU not
+drawn, its frame magnesium alloy. Nothing entered: the entry is a step of its own, for his yes.
+
+### E11.7 Spec: the entry of batch 1 of types 3 and 4 (2026-10-30). Nothing built
+
+Matthias, 2026-10-30: "Spec the entry". It enters what was agreed: E11.2 ("Yes, all four"), E11.5 ("Yes, 64 kg") and
+E11.6 ("Yes, agree E11.6"), and settles E10.1 point 8 (how types 3 and 4 draw their robots taken apart in type 1 or
+2). Found in the code and data for it (V113): 02 draws a type from its own parts file only, with one set of shared
+values (constants, joint parts, shares, magnet grades) read from that file; type 1's and type 2's files share 13
+constants, 11 equal and 2 under the same names with different values (the templates: "Joint modules, share of the
+robot mass" 49 % and 40.4 %, "Battery energy per kg of robot" 12 and 14.67 Wh/kg); no robot is of types 1 and 2 both;
+a robot's rows stand in one file only (the register stops otherwise); the element recipes hold types 3 and 4's
+aluminium and plastics ("Engineering plastics", "Polymers & elastomers") and type 4's magnesium, 02's `RECIPE_FAMILY`
+only types 1 and 2's. Batch 1 by its first type among 3 and 4: 19 robots for type 3 (3, 4, 5, 7, 10, 11, 12, 18, 22,
+26, 28, 29, 31, 32, 33, 43, 51, 56, 58), 8 for type 4 (1, 6, 8, 9, 14, 17, 45, 46).
+
+| # | What is built (his words: the agreed points) | Where |
+|---|---|---|
+| 1 | **A parts file and builder for each of types 3 and 4** (decision C, 2026-10-29: "a parts file and a builder per type"), each robot in the file of its first type among 3 and 4, its block once | `data/researched/3_industrial_logistics_warehousing/parts_taken_apart.xlsx`, `…/4_service_healthcare_interaction/…`; `tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`, `tools/4_…/make_parts_taken_apart.py` |
+| 2 | **Types 3 and 4's templates** (E11.6 point 1) in both files, **under names of their own** ("Joint modules, share of the robot mass, types 3 and 4", "…, types 3 and 4, on wheels", "Battery energy per kg of robot, types 3 and 4", "…, on wheels"), so that no shared value has two numbers under one name; their rows named by what they average; one copy of them for both builders (open point A) | the builders; 01's names of the template quantities |
+| 3 | **The 27 robots, 28 blocks** (the X2 in two versions), by E11.6 point by point; every source's code in its file's sheet Sources; the Atom (DOBOT) by the same function as type 2's Atom Max (E7.5), from DOBOT's same model | the builders |
+| 4 | **A type drawn over robots of several files** (E10.1 point 8): 02 reads, for each type with a sheet, the parts files of its robots' types; each robot drawn from its own rows with its own file's shared values (one set per file); types 1 and 2 drawn as now, their draws unchanged (by program). Types 3 and 4 then drawn part by part over the robots taken apart so far, on their own with their draws written: type 3 over 72 (51 from types 1 and 2, 21 of batch 1), type 4 over 33 (17 and 16); their draws for stock-and-flow still from the workbook (Q2: 151 with a mass not yet taken apart, 178 less batch 1's 27) | `02_composition.py` (`read_apart_inputs`, `Shared`, `draw_taken_apart`) |
+| 5 | **The register**: `TAKEN_APART` of types 3 and 4; the sheets Type 3 and Type 4 "drawn: its own parts" of the 95 taken apart (in any of their types' files), "not drawn: not yet taken apart" of the 151 others with a mass, "not drawn: no mass stated" of the 12 | `tools/make_humanoid_register.py`, 01's `check_type_sheet` |
+| 6 | **01** reads and checks every type's file (each as now, check 18 with the templates of point 2); a robot taken apart in a file of one of its types counts for each of its types | `01_schemas.py` |
+| 7 | **02's recipes of types 3 and 4** (the workbook's, E1.1): type 3 aluminium "Aluminum alloys", plastics "Engineering plastics"; type 4 aluminium "Aluminum alloys", plastics "Polymers & elastomers", **magnesium "Magnesium alloys"** (the A3's and A3 Ultra's frames, both of type 4 only) | 02's `RECIPE_FAMILY` |
+| 8 | **Tests first** (each failing before its code): the 28 blocks against E11.6; the templates' numbers against the seven and three robots; types 1 and 2's draws unchanged; types 3 and 4 over their 72 and 33 robots, each robot as often, a robot of two files' types from its own file's rows; the register's sheets | `tests/` |
+| 9 | **Sandbox** before his runs (the register, the four builders, 01, 02 at 2,000 draws, Claude's scratch folder); no remainder below zero, the pages looked at | scratch |
+| 10 | **Documents**: README, METHODOLOGY (types 3 and 4 part by part; a type over several files), EVIDENCE E11.8 (where each point landed), VERIFICATION, HANDOVER with his runs by full path, each run saying what it changes | `documentation/claude/`, `README.md` |
+| 11 | **Not in**: batch 2 of types 3 and 4; their draws for stock-and-flow from their parts (when all 151 are in); force, torque, touch sensors | — |
+
+**Open points, each with my recommendation:**
+- **A. Where the one copy of the templates and of the blocks shared by the two builders lives** (the seven robots on
+  legs sit in type 2's builder, type 3's and type 4's). Recommended: one module for types 3 and 4,
+  `tools/parts_types_3_and_4.py`, holding their templates and every block of their batches; each builder imports it and
+  writes the robots of its type. A new file: your word.
+- **B. Pages of types 3 and 4** (01's table of their robots and where their kinds sit; 02's element and material pages
+  and the two figures): `output.robot_types_with_pages` 1 and 2 now. Recommended: 1 to 4, so that the entry is looked
+  at as type 2's was.
+- **C. What the entry leaves behind:** E10.1's wording "not drawn: its type drawn from the workbook; its own parts in
+  type n" (`IN_RUN_ELSEWHERE` in the register and in 01, its test, its documents): after point 5 no sheet says it.
+  Recommended: removed in the entry, the proof that nothing reads it in VERIFICATION.
+
+### E11.8 Built: the entry of batch 1 of types 3 and 4 (2026-10-30). Nothing committed
+
+Matthias, 2026-10-30: "Yes, build it" (E11.7, open points A to C as recommended). Checks: VERIFICATION.md V114. Not run
+on his data: the register, the four parts files and the pages are written by his runs (HANDOVER.md).
+
+| Point | Where it landed |
+|---|---|
+| 1, A | `tools/parts_types_3_and_4.py` (the one copy: the templates and the 28 blocks; type 2's builder's functions and blocks reused, not copied); `tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py` (19 blocks), `tools/4_service_healthcare_interaction/make_parts_taken_apart.py` (9 blocks, the X2 in two versions) |
+| 2 | the templates in `TYPES_34_SHARED`, written into both files; 01's `TEMPLATE_OF_TYPE` and `template_quantity()` (a robot takes the names of its own file's type) |
+| 3 | the 28 blocks, by E11.6 point by point; their sources' codes in each file's sheet Sources (`sources()`) |
+| 4 | 01's `type_parts()` and `shared_of()`; 02's `read_parts_files()`, `read_apart_inputs(…, files)`, `file_inputs()`, `draw_taken_apart()` (one `Shared` per file, each robot its own file's; `heat_of()`) |
+| 5, C | the register's `TAKEN_APART[3]`, `TAKEN_APART[4]`, `taken_apart()`, `in_the_run()`; `IN_RUN_ELSEWHERE` removed from the register and 01, with its branch (V114: nothing reads it) |
+| 6 | 01's `check_type_sheets()` (a robot taken apart in any file of its types), each file checked as its own type's |
+| 7 | 02's `RECIPE_FAMILY[3]`, `RECIPE_FAMILY[4]` |
+| 8 | tests: `TestTypesThreeAndFour` in `test_make_parts_taken_apart.py` and in `test_parts_taken_apart.py`, `test_the_sheets_type_3_and_type_4`, `TestTypesThreeAndFourPages`, 02's page tests over types 1 to 4 |
+| 9 | the sandbox at 2,000 draws, V114 |
+| 10 | README, METHODOLOGY ("Robot types 3 and 4 part by part, in 02"; checks 18 and 22), this section, V114, HANDOVER |
+| B | `output.robot_types_with_pages = (1, 2, 3, 4)` |
+
+**Where the build departs from the text, for his word:**
+1. **The DOBOT Atom (register 45).** E11.6's table gives it 60.81 / 61.81 / 62.81 kg and joints of its model's 25.5 kg
+   (41.2 % of its mass); E11.7 point 3 says "by the same function as type 2's Atom Max (E7.5), from DOBOT's same model".
+   I built it by the second: type 2's Atom Max block, 57.91 / 58.91 / 61.81 kg and type 2's joints, 22.4 kg (38.0 %).
+   The templates are the same either way (the median of the seven, 44.7 %, is the H2's). **Decided** (Matthias,
+   2026-10-30: "Keep as built"): as built; E11.6's row 45 (60.81 / 61.81 / 62.81 kg, 25.5 kg of joints) is not used.
+2. **Its name** in the files: 'DOBOT Atom 153 cm'. 'DOBOT Atom' holds the Atom Max's rows since E7.3, and a name may
+   hold no brackets (the register's test; my first name, 'DOBOT Atom (base)', failed it).
+3. **The AlphaBot 2's arms**: its stated neck, waist, knee and ankle joints lie outside the template on wheels' groups,
+   so its arms are joints of their own: the template on wheels' share (13.9 %) of its mass at the mode (135 kg), split
+   as the template splits its shoulders and elbows, per joint, half to 1.5 times (E). They do not follow the drawn
+   mass, as a template's share would.
+4. **A battery whose maker states only its energy** (NEO 842 Wh, A2 700, A3 and A3 Ultra 1,152, X2 and X2 Ultra 500)
+   is written as 48 V (E, as type 2's TLIBOT T1, E8.3 point 6) times the energy over 48 V, the capacity ± 5 % (E7.5
+   point 6). 02 uses the voltage only times the capacity (`draw_robot`), so each draw's energy is the stated one ± 5 %,
+   whatever the voltage.
+5. **Type 3's magnesium recipe**: built first for types 3 and 4; no robot of type 3 has magnesium (the A3's and A3
+   Ultra's frames are of type 4 only), so taken out again for type 3, as point 7 says.
+
+**What the sandbox found (V114), for his word:**
+- **The 1X NEO's frame falls below zero in 13.5 % of its draws** (20,000 draws of type 4, 590 of them the NEO's): its
+  30 kg hold the template's joint modules, 44.7 % (13.4 kg), two hands of 22 joints (3.2 kg), the battery (5 kg) and
+  the shell (3.5 kg), so its frame, the remainder, is 3.4 kg on average (95 %: −1.9 to 8.3). Reported, not cut. Every
+  other robot of types 3 and 4 below 1 % (type 1's known small ones; the A3 Ultra 0.16 %).
+- 01's table title of type 3 ran off its page ("… taken apart so far, each drawn from its own parts (1 of 5)"): it now
+  reads as type 2's, "Robot type 3: 72 of its 169 robots with a mass, each drawn from its own parts (1 of 5)".
+- Seen in passing, not changed: a robot drawn in another of its types takes that type's recipes; were one to name a
+  material that type has no recipe for (none does now), 02 would stop with a KeyError rather than a fault.
+
+
+
+## E10. Robot types 3 and 4 together (2026-10-30). Nothing built
+
+Matthias, 2026-10-30: "Can we move to type 3 and 4 together?", then "Yes, together" (to: types 3 and 4 together,
+starting with their register sheets, step 5 of the steps robot type 1 went through, HANDOVER).
+
+### E10.1 Spec: the register's sheets Type 3 and Type 4 (step 5). Nothing built
+
+Found in the register and the code (V107): type 3 has 181 robots of the register, 169 with a mass; type 4 135, 131
+with a mass; 58 are of both, 258 together. 68 of them are already taken apart in type 1 or 2 (51 of type 3: 47 also of
+type 2, 4 also of type 1; 17 of type 4: 11 also of type 2, 6 also of type 1); 190 are still to do, 178 with a mass and
+12 without. The column "Taken apart as" holds a robot's rows wherever they are, and a sheet Type n copies it from the
+robot's row: 01 (`types_taken_apart()`) and 02 (`run()`) read a type as taken apart when any robot of its sheet has it,
+so with sheets Type 3 and Type 4 both would look for the parts files of types 3 and 4, which do not exist, and 02 would
+stop. The register writes "not drawn: its type drawn from the workbook, none of its robots taken apart yet" for every
+robot of a type none of whose robots is in that type's own file: not true of the 68.
+
+| # | What is built (his words: "Yes, together", the register sheets first; "If there is no mass then it should not be taken into the evaluation") | Where |
+|---|---|---|
+| 1 | **The sheets Type 3 and Type 4**: every robot of the register whose types include 3 (181) or 4 (135), in the register's order, each its row of the sheet Robots and "In the run" | `tools/make_humanoid_register.py` (`TYPES_LISTED`) |
+| 2 | **A type is drawn part by part only from its own parts file**: 01 and 02 read a type as taken apart when a robot of its sheet is "drawn: its own parts" (the register writes it only for the robots of the type's own file), not when its "Taken apart as" is filled; types 3 and 4 stay drawn from the workbook, their draws unchanged | `01_schemas.py` `types_taken_apart()`, `02_composition.py` `run()` |
+| 3 | **"In the run" of the 68 taken apart in another of their types**: open point A | the register, 01's check of the sheets |
+| 4 | **No mass, no evaluation**: a robot without a mass says "not drawn: no mass stated" in every sheet, also while its type is drawn from the workbook (the 12 of types 3 and 4); the pages count only the robots with a mass: type 2 "all its 96 robots" (02's titles; 01's table titles, its overview's box and input box), no "open" line on the Xialan S0 | the register `in_the_run()`, 01's `check_type_sheet()`, 01's and 02's texts |
+| 5 | **01's overview**: the boxes of types 3 and 4 "Its 181 robots of the register listed, 169 with a mass; drawn from the workbook until they are taken apart" (type 4: 135, 131); the open line "Open: robot types 3 and 4 together, then 5 and 6; then the six compared." | `01_schemas.py` |
+| 6 | **Tests first**; a sandbox run (the register, 01, 02 at 2,000 draws, Claude's scratch folder): the draws of types 3 and 4 the same as without their sheets (the same seed), compared by program | `tests/`, scratch |
+| 7 | **Documents**: README (the register's sheets), METHODOLOGY (check 22), HANDOVER, VERIFICATION; his runs by full path | `documentation/claude/`, `README.md` |
+| 8 | **Not in**: the research of their robots (the next step, in batches, a source table first); pages of types 3 and 4 (`output.robot_types_with_pages` stays 1 and 2); how type 3 or 4 will draw a robot taken apart in type 1 or 2 (at their entry: from that file, one copy) | — |
+
+**Open point, with my recommendation:**
+- **A. What the sheets Type 3 and Type 4 say of the 68 already taken apart in type 1 or 2.** Recommended: "not drawn:
+  its type drawn from the workbook; its own parts in type 2" (or "in type 1"), written by the register and checked by
+  01, in place of "… none of its robots taken apart yet", which is not true of them.
+
+**Built** (Matthias, 2026-10-30: "Yes, build it", A as recommended; checks V108; nothing committed):
+
+| Point | Where it landed |
+|---|---|
+| 1 | `tools/make_humanoid_register.py` `TYPES_LISTED = (1, 2, 3, 4)`; its About sheet |
+| 2 | `01_schemas.py` `drawn_part_by_part()`, used by `types_taken_apart()` and by `02_composition.py` `run()` |
+| 3, A | `IN_RUN_ELSEWHERE` in the register and in 01; the register's `in_the_run()` (the type whose `TAKEN_APART` holds it), 01's `check_type_sheet()` (the robot's other type) |
+| 4 | the register's `in_the_run()` and 01's check: no mass first; 02's `ApartInputs.listed` and 01's titles count the robots with a mass (`lead()`, `robots_table_pages()`, `taken_words()`, `type_card_text()`) |
+| 5 | 01's `type_card_text()`, `overview_types(…, listed)`, the open line |
+| 6 | tests: `test_the_sheets_type_3_and_type_4`, `test_a_robot_with_its_own_parts_in_another_of_its_types`, `test_a_robot_without_a_mass_is_not_drawn_while_its_type_is_drawn_from_the_workbook`, `test_its_card_and_its_words_on_the_overview_count_only_the_robots_with_a_mass`, type 2's titles; the sandbox |
+| 7 | README, METHODOLOGY check 22 and its table of stages, HANDOVER, VERIFICATION V108 |
+
 ## E9. Each robot of type 2 its own composition: research, the robots on wheels (2026-10-30). Nothing entered
 
 Matthias, 2026-10-30: "Yes, start sources" (the sources of type 2's 43 robots on wheels, decision B: their own kinds of

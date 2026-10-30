@@ -245,7 +245,8 @@ def build(path, changes=None, taxonomy=None, coverage=3, material_changes=None):
 
 
 # The folders of the robot types taken apart (data/researched/<n>_<name>/parts_taken_apart.xlsx, since 2026-10-30).
-TYPE_FOLDERS = {1: '1_compact_research_developer', 2: '2_full_scale_general_purpose_ai_research'}
+TYPE_FOLDERS = {1: '1_compact_research_developer', 2: '2_full_scale_general_purpose_ai_research',
+                3: '3_industrial_logistics_warehousing', 4: '4_service_healthcare_interaction'}   # 3, 4: E11.7
 
 
 def real_parts_file(robot_type: int = 1) -> str:
@@ -536,6 +537,31 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual(sorted(shown), sorted(self.apart.robots))
 
 
+def readable_pages(test: unittest.TestCase, pages: list) -> None:
+    """Every page (name, figure) readable fit to a screen (its smallest text at least SMALLEST_PX pixels tall),
+    every text inside the page, none overlapping another, no project words; each figure closed."""
+    from matplotlib.text import Text
+    dpi, screen = Params().output.dpi, TestScreenPages.SCREEN
+    for name, figure in pages:
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        texts = [t for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
+        sizes = [t.get_fontsize() for t in texts]
+        test.assertGreaterEqual(min(sizes) * dpi / 72 * min(screen[0] / (16 * dpi), screen[1] / (9 * dpi)),
+                                TestScreenPages.SMALLEST_PX, msg=name)
+        boxes = [t.get_window_extent(renderer) for t in texts]
+        page = figure.bbox
+        for k, b in enumerate(boxes):
+            test.assertTrue(page.x0 <= b.x0 and b.x1 <= page.x1 and page.y0 <= b.y0 and b.y1 <= page.y1,
+                            (name, texts[k].get_text()))
+            for j in range(k):
+                test.assertFalse(b.overlaps(boxes[j]), (name, texts[k].get_text(), texts[j].get_text()))
+        words = ' '.join(t.get_text() for t in texts)
+        for word in schemas.PROJECT_WORDS:
+            test.assertNotIn(word, words, msg=name)
+        schemas.plt.close(figure)
+
+
 class TestTypeTwoPages(unittest.TestCase):
     """01's pages of robot type 2 as robot type 1's (Matthias, 2026-10-30: "Why the hell do thw 01 figures of type 2
     look like this the 1 look much better", then "Yes, as type 1's"): its robots' table and where its kinds of part
@@ -581,11 +607,28 @@ class TestTypeTwoPages(unittest.TestCase):
         tables = len(pages) - 1
         self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in range(1, tables + 1)]
                          + ['categories/2_type_robot.png'])
-        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: 96 of its 97 robots taken apart so far, each drawn '
-                                                  f'from its own parts (1 of {tables})')
+        # Since 2026-10-30 (E10.1 point 4): only the robots with a mass are counted; the Xialan S0 is not in it.
+        self.assertEqual(self.title(pages[0][1]), 'Robot type 2: all its 96 robots with a mass, each drawn from its '
+                                                  f'own parts (1 of {tables})')
         self.assertEqual(self.title(pages[-1][1]), 'Robot type 2: where its kinds of part sit')
         for _, figure in pages:
             schemas.plt.close(figure)
+
+    def test_its_card_and_its_words_on_the_overview_count_only_the_robots_with_a_mass(self):
+        # Matthias, 2026-10-30, "Yes, build it" (EVIDENCE.md E10.1 points 4 and 5): type 2 counts its robots with a mass
+        # and names the one without, which is not in the evaluation; types 3 and 4, listed in the register, are drawn
+        # from the workbook; a type without a sheet keeps its card as before (None here).
+        self.assertEqual(schemas.type_card_text(2, 'Anchor', self.apart, self.register, True),
+                         'Its 96 robots of the register with a mass, each drawn from its own parts; their masses 29 to '
+                         '396 kg. The Xialan S0, with no mass, is not in the evaluation.')
+        self.assertEqual(schemas.type_card_text(3, 'Anchor', None, self.register, True),
+                         'Its 181 robots of the register listed, 169 with a mass; drawn from the workbook until they '
+                         'are taken apart.')
+        self.assertEqual(schemas.type_card_text(4, 'Anchor', None, self.register, True),
+                         'Its 135 robots of the register listed, 131 with a mass; drawn from the workbook until they '
+                         'are taken apart.')
+        self.assertIsNone(schemas.type_card_text(5, 'Anchor', None, self.register, False))
+        self.assertEqual(schemas.taken_words(2, self.register, self.apart), 'all its 96 robots with a mass')
 
     def test_its_robots_on_wheels_in_sections_of_their_own_with_their_base_and_lift(self):
         # E9.7 point 8: the robots on wheels in sections of their own, each row its base and its lift.
@@ -624,26 +667,7 @@ class TestTypeTwoPages(unittest.TestCase):
         schemas.plt.close(figure)
 
     def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
-        from matplotlib.text import Text
-        for name, figure in self.pages():
-            figure.canvas.draw()
-            renderer = figure.canvas.get_renderer()
-            texts = [t for t in figure.findobj(Text) if t.get_visible() and t.get_text().strip()]
-            sizes = [t.get_fontsize() for t in texts]
-            self.assertGreaterEqual(min(sizes) * self.params.output.dpi / 72 * min(
-                self.SCREEN[0] / (16 * self.params.output.dpi), self.SCREEN[1] / (9 * self.params.output.dpi)),
-                self.SMALLEST_PX, msg=name)
-            boxes = [t.get_window_extent(renderer) for t in texts]
-            page = figure.bbox
-            for k, b in enumerate(boxes):
-                self.assertTrue(page.x0 <= b.x0 and b.x1 <= page.x1 and page.y0 <= b.y0 and b.y1 <= page.y1,
-                                (name, texts[k].get_text()))
-                for j in range(k):
-                    self.assertFalse(b.overlaps(boxes[j]), (name, texts[k].get_text(), texts[j].get_text()))
-            words = ' '.join(t.get_text() for t in texts)
-            for word in self.PROJECT_WORDS:
-                self.assertNotIn(word, words, msg=name)
-            schemas.plt.close(figure)
+        readable_pages(self, self.pages())
 
     def test_every_stated_number_behind_the_cells_names_a_source_of_the_sheet_sources(self):
         # As type 1's (2026-10-30, batch 2b's entry: its source codes were first missing from the sheet Sources, so its
@@ -675,6 +699,40 @@ class TestTypeTwoPages(unittest.TestCase):
     def test_the_former_pages_only_for_a_type_with_no_parts_file(self):
         self.assertEqual(schemas.former_page_types((1, 2), {1: None, 2: self.apart}), [])
         self.assertEqual(schemas.former_page_types((1, 2, 3), {1: None, 2: self.apart}), [3])
+
+
+class TestTypesThreeAndFourPages(unittest.TestCase):
+    """01's pages of robot types 3 and 4 (Matthias, 2026-10-30, "Yes, build it", EVIDENCE.md E11.7 open point B: pages
+    for types 1 to 4), each type over its robots of every parts file, as type 2's: readable, every text inside the
+    page, none overlapping another."""
+
+    @classmethod
+    def setUpClass(cls):
+        # The register and the four parts files as their builders write them now, in a temporary folder.
+        def load(name, path):
+            spec = importlib.util.spec_from_file_location(name, os.path.join(ROOT, path))
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[name] = module
+            spec.loader.exec_module(module)
+            return module
+
+        params = Params()
+        if not os.path.exists(absolute(params.data.humanoid_guide)):
+            raise unittest.SkipTest('the humanoid.guide catalogue, which the register is built from, is not on disk')
+        register = load('make_humanoid_register', os.path.join('tools', 'make_humanoid_register.py'))
+        with tempfile.TemporaryDirectory() as folder:
+            files = {}
+            for n, name in TYPE_FOLDERS.items():
+                builder = load(f'make_parts_taken_apart_{n}', os.path.join('tools', name, 'make_parts_taken_apart.py'))
+                builder.build(os.path.join(folder, f'{n}.xlsx'))
+                files[n] = schemas.read_parts_taken_apart(os.path.join(folder, f'{n}.xlsx'))
+            register.build(os.path.join(folder, 'register.xlsx'), params)
+            cls.register = schemas.read_register(os.path.join(folder, 'register.xlsx'))
+        cls.views = {n: schemas.type_parts(files, cls.register, n) for n in (3, 4)}
+
+    def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
+        for n, view in self.views.items():
+            readable_pages(self, schemas.taken_apart_type_pages(f'categories/{n}_type', view, n, self.register))
 
 
 class TestMaterialFaults(Small):
@@ -2001,16 +2059,16 @@ def in_the_run(row, any_apart: bool = True) -> str:
     n, robot, low, mode, high, types, form, entry, apart = row
     if apart:
         return 'drawn: its own parts'
-    if not any_apart:
-        return schemas.IN_RUN_WORKBOOK
-    return 'not drawn: no mass stated' if mode is None else schemas.IN_RUN_LATER
+    if mode is None:     # since 2026-10-30, also while its type is drawn from the workbook (E10.1 point 4)
+        return 'not drawn: no mass stated'
+    return schemas.IN_RUN_WORKBOOK if not any_apart else schemas.IN_RUN_LATER
 
 
-def build_register(path, rows=None, headings=None, type_one=None, without_type_one=False, type_two=None):
+def build_register(path, rows=None, headings=None, type_one=None, without_type_one=False, type_two=None, others=None):
     """A small register in the layout of data/researched/humanoid_register.xlsx: the sheet Robots, and the sheet Type 1
     with every robot of type 1 and what the run does with it. `type_one` replaces the rows of the sheet Type 1 (each a
     row of REGISTER_ROWS and its 'In the run'); `without_type_one` leaves the sheet out; `type_two`, where given, the
-    rows of a sheet Type 2 (as `type_one`)."""
+    rows of a sheet Type 2 (as `type_one`); `others` the rows of more sheets, robot type -> rows (as `type_one`)."""
     rows = REGISTER_ROWS if rows is None else rows
     book = Workbook()
     book.active.title = 'About'
@@ -2025,10 +2083,11 @@ def build_register(path, rows=None, headings=None, type_one=None, without_type_o
         of_type = [(r, in_the_run(r, any(t[8] for t in typed))) for r in typed]
         for row, run in (of_type if type_one is None else type_one):
             listed.append(register_cells(*row) + [run])
-    if type_two is not None:
-        listed = book.create_sheet('Type 2')
+    typed = ({2: type_two} if type_two is not None else {}) | (others or {})
+    for robot_type, typed_rows in sorted(typed.items()):
+        listed = book.create_sheet(f'Type {robot_type}')
         listed.append(REGISTER_HEADINGS + ['In the run'])
-        for row, run in type_two:
+        for row, run in typed_rows:
             listed.append(register_cells(*row) + [run])
     book.save(path)
 
@@ -2129,7 +2188,7 @@ class TestRegister(unittest.TestCase):
         self.assertFaultSays(self.faults(self.changed(1, apart='AgiBot X1')), 'parts file of its robot types (3, 4)')
 
     def test_the_real_register_holds_together(self):
-        # Against both parts files on disk (type 1's and type 2's, since 2026-10-30), every sheet Type n.
+        # Against every parts file on disk (types 1 to 4, since 2026-10-30), every sheet Type n.
         params = Params()
         path, files = absolute(params.data.register), {n: real_parts_file(n) for n in TYPE_FOLDERS}
         if not all(os.path.exists(p) for p in [path, *files.values()]):
@@ -2263,6 +2322,48 @@ class TestTypeOneSheet(unittest.TestCase):
         self.assertEqual([f.text for f in self.type_two_faults([schemas.IN_RUN_WORKBOOK] * 2)], [])
         self.assertFaultSays(self.type_two_faults([schemas.IN_RUN_WORKBOOK, schemas.IN_RUN_OWN]),
                              "9 Robot H: 'In the run' is 'drawn: its own parts'")
+
+    # Matthias, 2026-10-30, "Yes, build it" (EVIDENCE.md E11.7 point 5): Robot E, of types 4 and 1, has its own parts in
+    # type 1's file: the sheet Type 4 draws it with them, and type 4 is drawn part by part; Robot B (3, 4) waits.
+    def type_four(self, runs):
+        four = [r for r in self.ROWS if '4' in [t.strip() for t in r[5].split(',')]]
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS, others={4: list(zip(four, runs))})
+            return (schemas.check_type_sheets(path, schemas.read_register(path), Params(), {1: self.APART}),
+                    schemas.types_taken_apart(path))
+
+    def test_a_robot_with_its_own_parts_in_another_of_its_types(self):
+        faults, types = self.type_four([schemas.IN_RUN_LATER, schemas.IN_RUN_OWN])
+        self.assertEqual([f.text for f in faults], [])
+        self.assertEqual(types, [1, 4])
+        faults, _ = self.type_four([schemas.IN_RUN_WORKBOOK, schemas.IN_RUN_OWN])
+        self.assertFaultSays(faults, "2 Robot B: 'In the run' is '" + schemas.IN_RUN_WORKBOOK + "', but")
+        self.assertFalse(hasattr(schemas, 'IN_RUN_ELSEWHERE'))   # E11.7 open point C: the wording of E10.1 goes
+
+    def test_template_quantities_of_types_3_and_4_have_names_of_their_own(self):
+        # E11.7 point 2: a robot of a file of type 3 or 4 takes "…, types 3 and 4"; of types 1 and 2 as before.
+        with tempfile.TemporaryDirectory() as folder:
+            build_apart(os.path.join(folder, 'apart.xlsx'), {('Robots', 0, 2): 3})
+            apart = schemas.read_parts_taken_apart(os.path.join(folder, 'apart.xlsx'))
+        self.assertEqual(schemas.template_quantity(apart, 'Robot A', schemas.JOINT_SHARE),
+                         'Joint modules, share of the robot mass, types 3 and 4')
+        self.assertEqual(schemas.template_quantity(apart, 'Robot B', schemas.ENERGY_PER_KG),
+                         'Battery energy per kg of robot')
+
+    def test_a_robot_without_a_mass_is_not_drawn_while_its_type_is_drawn_from_the_workbook(self):
+        # "If there is no mass then it should not be taken into the evaluation" (2026-10-30; E10.1 point 4): Robot D,
+        # of type 6, no mass.
+        six = [r for r in self.ROWS if r[5] == '6']
+        for run in (schemas.IN_RUN_NOT, schemas.IN_RUN_WORKBOOK):
+            with tempfile.TemporaryDirectory() as folder:
+                path = os.path.join(folder, 'register.xlsx')
+                build_register(path, self.ROWS, others={6: [(six[0], run)]})
+                faults = schemas.check_type_sheets(path, schemas.read_register(path), Params(), {1: self.APART})
+            if run == schemas.IN_RUN_NOT:
+                self.assertEqual([f.text for f in faults], [])
+            else:
+                self.assertFaultSays(faults, "5 Robot D: 'In the run' is '" + schemas.IN_RUN_WORKBOOK + "', but")
 
     def test_a_robot_of_type_2_missing_from_its_sheet(self):
         with tempfile.TemporaryDirectory() as folder:
