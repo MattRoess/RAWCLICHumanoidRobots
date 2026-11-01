@@ -570,11 +570,25 @@ DECISIONS = [
 MASS_SPREAD_KG = 1.0
 
 
-def mass_bounds(stated: str) -> tuple:
+def stated(text: str) -> str:
+    """A cell of the catalogue as the register writes it: '' where it reads 0, else as it is. The catalogue writes "0.0"
+    where a robot's height or mass is not stated (the Reflex, 257), and a 0 in a source cell means "not stated", never a
+    value of 0 (Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution", "There needs to be a
+    rule"; CLAUDE.md §7)."""
+    try:
+        return '' if float(text) == 0 else text
+    except ValueError:
+        return text
+
+
+def mass_bounds(stated_mass: str) -> tuple:
     """The minimum, mode and maximum of a stated mass, kg, and how they were made: a range as it is (its middle the
     mode), one mass +- MASS_SPREAD_KG; where two masses are given ("43, 73"), the larger (the smaller is another
-    robot's, EVIDENCE.md E4.11); (None, None, None, '') where none is stated."""
-    text = stated.replace('kg', '').replace('~', '').strip()
+    robot's, EVIDENCE.md E4.11); (None, None, None, '') where none is stated, and where the catalogue reads 0 (stated):
+    no mass, so the robot is listed but not in the evaluation (E10.1 point 4)."""
+    if stated_mass.strip() and not stated(stated_mass.strip()):
+        return None, None, None, 'the catalogue reads 0.0: not stated, so no mass (CLAUDE.md §7)'
+    text = stated_mass.replace('kg', '').replace('~', '').strip()
     if ',' in text:
         text = max(text.split(','), key=lambda v: float(re.match(r'\s*([\d.]+)', v).group(1))).strip()
         basis = 'the larger of the two masses stated, +- 1 kg'
@@ -619,6 +633,7 @@ def register_rows(catalogue: dict) -> list:
     for number, types, form, entry, decided in DECISIONS:
         robot, maker, country, status, height, mass, source = robots[number]
         low, mode, high, basis = mass_bounds(mass)
+        height, mass = stated(height), stated(mass)   # a 0 of the catalogue is not stated: written empty
         if number in NO_MASS_STATED:      # no mass stated (E12.4): listed, not in the evaluation
             low, mode, high, basis = None, None, None, NO_MASS_STATED[number]
         out.append([number, robot, maker, country, status, height, mass, low, mode, high, basis, types, form, entry,

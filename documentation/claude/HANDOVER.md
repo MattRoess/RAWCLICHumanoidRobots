@@ -56,7 +56,41 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-01: batch 2 of types 3 and 4 entered (start here)
+## 2026-11-01, afternoon: the zero rule and the axis built; the research pass paused (start here)
+
+Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it is NOT part of the distribution", "Check
+for all with 0 values. There needs to be a rule, if it is generally 0 then, it is not part of the distribution", then
+"Yes, build it". Nothing committed.
+- **The rule:** the GitHub folder's `CLAUDE.md` §7, "A 0 is not part of a distribution", for every RAWCLIC project.
+- **Checked** (V125): what counted the zeros (the pages of where a material sits, both summaries, the page of a workbook
+  type, 03, the run log); the inputs (one fault, the Reflex 257, 0 / 0 / 1 kg from the catalogue's "0.0").
+- **Built** (V126): `02_composition.py` `statistics_of` the one function of every statistic of 02 and 03, over the draws
+  not 0 with "Held in"; the pages of where a material sits with three columns; both summaries with "Held in";
+  `03_comparison.py` `beside`; the register's `stated` (the Reflex listed, no mass). Tests, README, METHODOLOGY ("A 0 is
+  not part of a distribution"). Sandbox: the draws unchanged (54 of 54 files), no median or 2.5 % of 0 for anything held.
+- **Built since** on "Yes, build it" (V127): every distribution panel's axis ends at its 99.5th percentile
+  (`AXIS_END`), its draws beyond not drawn and said ("0.5 % beyond the axis, up to 12 kg"); the overview's at its
+  largest row's, nothing piled into the last bar.
+- **Paused:** E13 rule 3's research pass. The makers' model files read and every number read again (V123: Booster T2,
+  AgiBot X2, A3, G2, Unitree H2-D, H2-X, G1-D, R1-A7-D, R1-A5, Galaxea R1 Pro, RealMan RM65-B and RM75-B, Tien Kung 3.0,
+  LimX Oli, PAL REEM-C, ARI, Kangaroo; Noetix's Bumi and E1 pages); E14, the findings robot by robot with their
+  questions, not yet written. Not found so far: AgiBot A2 and G1, TianGong Ultra, Omni, SE01, Robotera L7, LimX CL,
+  Leju Roban2; Kepler not yet searched.
+- **RAWCLICDataCenters:** the same fault (its IT materials summary 607 rows, its board-area statistics 264), in a session
+  of its own ("Apply the zero rule in RAWCLICDataCenters").
+
+**His runs, in this order**, the six of batch 2 below, which now carry this change too, and 03:
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (as below; and the Reflex "not
+   drawn: no mass stated", no height or mass of 0);
+2. to 4. the builders of types 1, 3 and 4, as below;
+5. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (as below; type 3's card "168 with a mass");
+6. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (as below; every `summary.csv` and `.xlsx`
+   rewritten with "Held in", every page of where a material sits rewritten, every distribution panel's axis to its
+   99.5th percentile; the draws as below, these two changes move none);
+7. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py` (new pages in `figures/comparison/`, never run on
+   his machine; it reads the draws 02 wrote, not timed at 200,000 draws).
+
+## 2026-11-01: batch 2 of types 3 and 4 entered
 
 **Done** on "Yes, build it" (EVIDENCE E12.6, open points A to C as recommended; where each point landed, E12.7; checks,
 V122). Nothing committed.

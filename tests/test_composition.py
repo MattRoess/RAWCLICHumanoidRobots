@@ -405,3 +405,41 @@ class TestRun(Drawn):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestZeroNotInDistribution(unittest.TestCase):
+    """Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it is NOT part of the distribution",
+    "Check for all with 0 values. There needs to be a rule" (CLAUDE.md §7, "A 0 is not part of a distribution"): every
+    statistic of 02 and 03 over the draws that are not 0, with the share of the draws that hold it; a remainder below
+    zero keeps its negative draws; a quantity 0 in every draw has none."""
+
+    def test_the_statistics_leave_out_the_zeros(self):
+        s = composition.statistics_of(np.array([0.0, 0.0, 1.0, 2.0, 3.0]))
+        self.assertEqual((s['Mean (kg)'], s['Median (kg)']), (2.0, 2.0))
+        self.assertEqual((s['2.5 % (kg)'], s['97.5 % (kg)']), tuple(np.percentile([1.0, 2.0, 3.0], [2.5, 97.5])))
+        self.assertEqual(s['Held in (% of the draws)'], 60.0)
+        self.assertIn('Held in (% of the draws)', composition.SUMMARY_HEADINGS)
+
+    def test_a_remainder_below_zero_keeps_its_negative_draws(self):
+        s = composition.statistics_of(np.array([-1.0, 0.0, 2.0, 5.0]))
+        self.assertEqual(s['Mean (kg)'], 2.0)
+        self.assertEqual(s['Held in (% of the draws)'], 75.0)
+        self.assertEqual(s['Draws below zero (%)'], 25.0)   # a share of all the draws, as before
+
+    def test_a_quantity_0_in_every_draw_has_no_statistics(self):
+        s = composition.statistics_of(np.zeros(4))
+        self.assertEqual([s[h] for h in ('Mean (kg)', 'Median (kg)', '2.5 % (kg)', '97.5 % (kg)')], [None] * 4)
+        self.assertEqual(s['Held in (% of the draws)'], 0.0)
+
+    def test_a_page_row_held_in_some_draws_says_so_and_is_drawn_over_those_draws(self):
+        held = np.r_[np.zeros(60), np.linspace(1.0, 3.0, 40)]          # held in 40 % of the draws
+        rows = [('Held in some', held), ('Held in all', np.linspace(1.0, 2.0, 100)), ('Never', np.zeros(100))]
+        figure, page = composition.schemas.new_page(composition.PAGE_WIDTH, 4)
+        composition.interval_chart(figure, page, 4, composition.MARGIN, 0.3, 'Title', 'What', rows)
+        texts = [t.get_text() for t in page.texts]
+        composition.plt.close(figure)
+        self.assertIn(composition.mass(2.0), texts)                    # its mean over the 40 draws, not 0.8
+        self.assertIn('40 %', texts)
+        self.assertEqual(texts.count('40 %'), 1)                       # nothing written for the row held in all
+        self.assertIn('–', texts)
+        self.assertNotIn(composition.mass(0.8), texts)

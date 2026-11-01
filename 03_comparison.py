@@ -33,8 +33,10 @@ Into `output.comparison_dir` (`figures/comparison/`; not in git), one page per v
 
   materials.png, elements.png, part_groups.png, body_regions.png
         one small chart per material (element, part group, body region), with one row per robot type: a bar of the
-        mean and a line over 95 % of the draws (02's interval_bars), and the mean written beside it. Each chart has
-        its own kg scale, so that a material of a few grams can be read as well as one of 25 kg.
+        mean and a line over 95 % of the draws (02's interval_bars), and the mean written beside it, all of the draws
+        that hold it (those not 0: a 0 is not part of a distribution, CLAUDE.md §7), with the share of the draws that
+        hold it in brackets where not all. Each chart has its own kg scale, so that a material of a few grams can be
+        read as well as one of 25 kg.
 
 Where it sits: after 02_composition.py, the last stage.
 """
@@ -84,7 +86,7 @@ FLOAT32_TOLERANCE = 1e-4
 COLUMNS = 4                 # charts side by side on a page
 PANEL_LABEL = 1.05          # the robot types left of a chart, inches
 PANEL_CHART = 2.35          # the width of a chart, inches
-PANEL_NUMBER = 0.6          # the means right of a chart, inches
+PANEL_NUMBER = 1.1          # the means right of a chart, with the share held where not all ("2.00 (40 %)"), inches
 PANEL_GAP = 0.45            # between two charts, inches
 PANEL_ROW = 0.21            # the height of one robot type's row, inches
 PAGE_WIDTH = 2 * composition.MARGIN + COLUMNS * (PANEL_LABEL + PANEL_CHART + PANEL_NUMBER) + (COLUMNS - 1) * PANEL_GAP
@@ -153,9 +155,20 @@ def problems(robots: list) -> list:
 
 
 def statistics(draws: np.ndarray) -> tuple:
-    """(any mass in any draw, the mean, 2.5 %, 97.5 %) of one quantity, with 02's statistics_of."""
+    """(any mass in any draw, the mean, 2.5 %, 97.5 %, the share of the draws that hold it, %) of one quantity, with
+    02's statistics_of: over the draws that hold it, those not 0 (CLAUDE.md §7); None where it is 0 in every draw."""
     s = composition.statistics_of(draws)
-    return bool(draws.any()), s['Mean (kg)'], s['2.5 % (kg)'], s['97.5 % (kg)']
+    return bool(draws.any()), s['Mean (kg)'], s['2.5 % (kg)'], s['97.5 % (kg)'], s['Held in (% of the draws)']
+
+
+def beside(draws: np.ndarray) -> str:
+    """The number beside a robot type's row: its mean over the draws that hold it, with in brackets the share of the
+    draws that hold it where it is not all ("2.00 (40 %)"; Matthias, 2026-11-01: "If a value is 0 then it is NOT part
+    of the distribution"); '–' where it is 0 in every draw."""
+    present, mean, _, _, held = statistics(draws)
+    if not present:
+        return '–'
+    return composition.mass(mean) + (f' ({composition.panel_number(held)} %)' if held < 100 else '')
 
 
 def label(table: str, name: str) -> str:
@@ -185,8 +198,9 @@ def draw_view(robots: list, table: str, path: str, params: Params) -> None:
     page.text(composition.MARGIN, 0.35, f'{VIEWS[table]}: the robot types side by side', fontsize=15,
               fontweight='bold', va='top')
     page.text(composition.MARGIN, 0.75, f'kg per robot, from {draws:,} draws of each robot type. Each bar is the '
-                                         'mean, written beside it; its line spans 95 % of the draws, from 2.5 % to '
-                                         '97.5 %. Each chart has its own kg scale.', fontsize=10,
+                                         'mean of the draws that hold it, written beside it; its line spans 95 % of '
+                                         'them, from 2.5 % to 97.5 %; in brackets the share of the draws that hold '
+                                         'it, where not all. Each chart has its own kg scale.', fontsize=10,
               color=composition.MUTED, va='top')
     schemas.write(page, composition.MARGIN, 1.05, key, size=9, colour=composition.MUTED)
     for k, name in enumerate(names):
@@ -200,9 +214,8 @@ def draw_view(robots: list, table: str, path: str, params: Params) -> None:
         composition.interval_bars(axes, rows, size=8.5, grey=name in ('Mixed', composition.NOT_ALLOCATED))
         axes.xaxis.set_major_locator(MaxNLocator(4))   # a narrow chart: few kg marks, so that they never touch
         for i, (_, values) in enumerate(rows):
-            present, mean, _, _ = statistics(values)
-            page.text(x + PANEL_LABEL + PANEL_CHART + PANEL_NUMBER, y + (i + 0.5) * PANEL_ROW,
-                      composition.mass(mean) if present else '–', fontsize=8.5, ha='right', va='center')
+            page.text(x + PANEL_LABEL + PANEL_CHART + PANEL_NUMBER, y + (i + 0.5) * PANEL_ROW, beside(values),
+                      fontsize=8.5, ha='right', va='center')
     below = top + rows_of_charts * block + 0.2
     schemas.write(page, composition.MARGIN, below, notes, size=9)
     schemas.save(figure, path, params.output.dpi)

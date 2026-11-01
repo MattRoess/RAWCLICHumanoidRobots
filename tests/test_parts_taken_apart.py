@@ -22,6 +22,7 @@ and give the magnets fixed element fractions, so that one robot can be added up 
 (EVIDENCE.md E2.8, E2.8b, E5).
 """
 
+import csv
 import importlib.util
 import os
 import sys
@@ -683,11 +684,11 @@ class TestElementPages(unittest.TestCase):
             composition.plt.close(figure)
             self.assertNotIn(' median 0 ', texts, msg=symbol)
             held = total > 0
-            if held.all():
-                self.assertEqual(share, '', msg=symbol)
+            if held.all():   # since 2026-11-01 the right may say what lies beyond the axis (TestAxisEnd), never a share
+                self.assertNotIn('of the draws', share, msg=symbol)
                 continue
             partly.append(symbol)
-            self.assertEqual(share, f'in {composition.panel_number(100 * held.mean())} % of the draws')
+            self.assertEqual(share.split('\n')[0], f'in {composition.panel_number(100 * held.mean())} % of the draws')
             per, unit = composition.panel_unit(total[held])
             self.assertIn(f' median {composition.panel_number(np.median(total[held]) / per)} {unit}', texts)
         self.assertIn('In', partly)
@@ -1165,3 +1166,174 @@ class TestTypesThreeAndFour(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestZeroNotInDistribution(unittest.TestCase):
+    """Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it is NOT part of the distribution",
+    "Check for all with 0 values. There needs to be a rule" (CLAUDE.md §7): the pages of where a material sits and the
+    summary of a type taken apart over the draws that are not 0, each with the share of the draws that hold it. Type 2,
+    whose wheeled base and lift column are in some draws only (its robots on wheels), and whose legs in others."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def drawn(self):
+        inputs = type_two_inputs_or_skip(self, self.params)
+        return draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def test_where_a_material_sits_over_the_draws_that_hold_it(self):
+        d = self.drawn()
+        partly = []
+        for name, figure in composition.sources_pages(d):
+            figure.canvas.draw()
+            page = figure.bbox
+            axes = figure.axes[0]
+            for t in axes.texts:   # every number within the page
+                box = t.get_window_extent()
+                self.assertTrue(all(page.contains(*c) for c in box.get_points()), msg=f'{name}: {t.get_text()}')
+            at = {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text() for t in axes.texts}
+            labels = [t.get_text() for t in axes.get_yticklabels()]
+            composition.plt.close(figure)
+            title = next(p for p in composition.material_panels(d)
+                         if os.path.join(composition.SOURCES_FOLDER, '_'.join(
+                             ''.join(ch if ch.isalnum() else ' ' for ch in p[0]).split()) + '.png') == name)
+            kinds = title[3]
+            by_label = {composition.KINDS[k][0]: k for k in kinds}
+            medians = []
+            for row, label in enumerate(labels):
+                kg = kinds[by_label[label]]
+                held = kg != 0
+                median_x, mean_x, share_x = (round(x, 3) for x in composition.NUMBER_COLUMNS)
+                for x, value in ((median_x, np.median(kg[held])), (mean_x, kg[held].mean())):
+                    per, unit = composition.panel_unit(np.array([value]))
+                    self.assertEqual(at[(x, row)], f'{composition.panel_number(value / per)}\u00a0{unit}',
+                                     msg=f'{name}, {label}')
+                self.assertEqual(at[(share_x, row)], f'{composition.panel_number(100 * held.mean())} %')
+                medians.append(np.median(kg[held]))
+                if not held.all():
+                    partly.append((name, label))
+            self.assertEqual(medians, sorted(medians), msg=name)   # the largest median on top, of the held draws
+        self.assertIn((os.path.join(composition.SOURCES_FOLDER, 'Copper.png'), 'Wheeled base'), partly)
+
+    def test_its_summary_over_the_draws_that_hold_it(self):
+        d = self.drawn()
+        with tempfile.TemporaryDirectory() as folder:
+            composition.write_taken_apart(d, folder)
+            with open(os.path.join(folder, 'summary.csv'), encoding='utf-8', newline='') as file:
+                lines = list(csv.reader(file))
+        heading, rows = lines[0], [r for r in lines[1:] if r and r[1:2] and r[0] != 'Remainder'][:]
+        self.assertEqual(heading, ['Element', 'Kind of part', 'Mean (kg)', 'Median (kg)', '2.5 % (kg)', '97.5 % (kg)',
+                                   'Held in (% of the draws)'])
+        by_name = {(kind, e): v for (kind, e), v in d.elements.items()}
+        names = {composition.KINDS[k][0]: k for k in composition.KINDS}
+        partly = 0
+        for row in rows:
+            if len(row) < 7 or row[1] not in names:
+                continue
+            kg = by_name[(names[row[1]], row[0])]
+            held = kg != 0
+            self.assertAlmostEqual(float(row[6]), 100 * held.mean(), places=6, msg=row[:2])
+            if not held.any():
+                self.assertEqual(row[2:6], [''] * 4, msg=row[:2])
+                continue
+            self.assertAlmostEqual(float(row[3]), float(np.median(kg[held])), places=9, msg=row[:2])
+            self.assertGreater(float(row[3]), 0, msg=row[:2])
+            self.assertGreater(float(row[4]), 0, msg=row[:2])
+            partly += not held.all()
+        self.assertGreater(partly, 0)
+
+
+class TestAxisEnd(unittest.TestCase):
+    """Matthias, 2026-11-01: "The distribution figures show the distribution pressed to the left side. You give away
+    have of the x axis. This can be done much better", then "Yes, build it" (VERIFICATION V124): each distribution
+    panel's axis ends at the 99.5th percentile of its draws, its 70 bars up to there, their heights still the share of
+    all the panel's draws (nothing rescaled); the draws beyond are not drawn, and the panel says how many and the
+    largest; on the overview nothing piled into the last bar. On draws with a long tail (a lognormal), as type 2's."""
+
+    def setUp(self):
+        rng = np.random.default_rng(7)
+        self.kg = rng.lognormal(0.8, 0.6, 20_000)           # kg, a long right tail
+        self.end = np.percentile(self.kg, composition.AXIS_END)
+        self.beyond = f'{composition.panel_number(100 * (self.kg > self.end).mean())} % beyond the axis, up to ' \
+                      f'{composition.panel_number(self.kg.max())} kg'
+
+    def bars(self, axes):
+        return [p for p in axes.patches if p.get_width() > 0]
+
+    def test_the_setting(self):
+        self.assertEqual(composition.AXIS_END, 99.5)
+
+    def test_an_element_panel_ends_at_its_99_5th_percentile(self):
+        figure, axes = composition.plt.subplots()
+        composition.element_panel(axes, self.kg, 'Copper (Cu)', True)
+        bars = self.bars(axes)
+        right = max(p.get_x() + p.get_width() for p in bars)
+        numbers = axes.get_title(loc='right')
+        limit = axes.get_xlim()[1]
+        composition.plt.close(figure)
+        self.assertEqual(len(bars), composition.APART_BINS)
+        self.assertAlmostEqual(right, self.end, places=9)
+        self.assertLess(limit, 1.1 * self.end)                     # not to the largest draw
+        self.assertAlmostEqual(sum(p.get_height() for p in bars), (self.kg <= self.end).mean(), places=9)
+        self.assertIn(self.beyond, numbers)
+
+    def test_a_critical_element_panel_ends_at_its_99_5th_percentile(self):
+        kinds = dict(zip(list(composition.KINDS)[:2], (0.3 * self.kg, 0.7 * self.kg)))
+        figure, axes = composition.plt.subplots()
+        composition.stacked_panel(axes, kinds, 'Copper (Cu)', True)
+        bars = self.bars(axes)
+        right = max(p.get_x() + p.get_width() for p in bars)
+        heights = sum(p.get_height() for p in bars)
+        numbers = axes.get_title(loc='right')
+        limit = axes.get_xlim()[1]
+        composition.plt.close(figure)
+        self.assertAlmostEqual(right, self.end, places=9)
+        self.assertLess(limit, 1.1 * self.end)
+        self.assertAlmostEqual(heights, (self.kg <= self.end).mean(), places=9)   # both kinds' bars together
+        self.assertIn(self.beyond, numbers)
+
+    def test_an_overview_panel_ends_at_its_largest_rows_99_5th_percentile_nothing_piled(self):
+        first, second = list(composition.KINDS)[:2]
+        kinds = {first: self.kg, second: 0.1 * self.kg}
+        estimated = {k: np.zeros_like(v) for k, v in kinds.items()}
+        figure, axes = composition.plt.subplots()
+        composition.ridge_panel(axes, kinds, estimated, 'Copper (Cu)')
+        label = axes.get_xlabel()
+        limit = axes.get_xlim()[1]
+        # The rows from the bottom in the reverse order of KINDS: the first kind's bars stand on row 1 (at 1.05).
+        heights = [p.get_height() for p in self.bars(axes) if abs(p.get_y() - 1.05) < 1e-9]
+        composition.plt.close(figure)
+        self.assertAlmostEqual(limit, self.end, places=9)
+        # The first kind's row: the draws beyond are left out, not piled into the last bar.
+        edges = np.linspace(0, self.end, 51)
+        counts, _ = np.histogram(self.kg[self.kg <= self.end], bins=edges)
+        self.assertEqual(len(heights), 50)
+        self.assertAlmostEqual(heights[-1] / max(heights), counts[-1] / counts.max(), places=9)
+        self.assertIn('beyond the axis', label)
+
+    def test_no_words_where_nothing_lies_beyond(self):
+        kg = np.repeat([1.0, 2.0, 3.0], 1000)                     # its 99.5th percentile its largest draw
+        figure, axes = composition.plt.subplots()
+        composition.element_panel(axes, kg, 'Copper (Cu)', True)
+        numbers = axes.get_title(loc='right')
+        composition.plt.close(figure)
+        self.assertNotIn('beyond', numbers)
+
+    def test_no_critical_element_title_runs_into_its_numbers(self):
+        # As the element and material pages (test_no_panel_title_runs_into_its_numbers): the share held and the words
+        # on the axis's end above the title's line, never over a long title.
+        kinds = dict(zip(list(composition.KINDS)[:2], (np.r_[np.zeros(5000), 0.3 * self.kg],
+                                                       np.r_[np.zeros(5000), 0.7 * self.kg])))
+        figure, axes = composition.plt.subplots(figsize=(5.3, 4))
+        composition.stacked_panel(axes, kinds, 'Neodymium and praseodymium (Nd+Pr)', True)
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        left, right = axes._left_title, axes._right_title
+        overlap = left.get_window_extent(renderer).overlaps(right.get_window_extent(renderer))
+        text = right.get_text()
+        composition.plt.close(figure)
+        self.assertIn('% of the draws', text)
+        self.assertIn('beyond the axis', text)
+        self.assertFalse(overlap)

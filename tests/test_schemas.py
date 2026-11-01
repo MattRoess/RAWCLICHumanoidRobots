@@ -623,8 +623,9 @@ class TestTypeTwoPages(unittest.TestCase):
                          'Its 96 robots of the register with a mass, each drawn from its own parts; their masses 29 to '
                          '396 kg. The Xialan S0, with no mass, is not in the evaluation. Most of its robots rest on '
                          'templates: the joints of 80 of its 102 robots and versions, the battery of 64.')
+        # 168 since 2026-11-01: the Reflex's catalogue "0.0" is not a mass (CLAUDE.md §7, VERIFICATION V126).
         self.assertEqual(schemas.type_card_text(3, 'Anchor', None, self.register, True),
-                         'Its 181 robots of the register listed, 169 with a mass; drawn from the workbook until they '
+                         'Its 181 robots of the register listed, 168 with a mass; drawn from the workbook until they '
                          'are taken apart.')
         self.assertEqual(schemas.type_card_text(4, 'Anchor', None, self.register, True),   # 129 since E12.6
                          'Its 135 robots of the register listed, 129 with a mass; drawn from the workbook until they '

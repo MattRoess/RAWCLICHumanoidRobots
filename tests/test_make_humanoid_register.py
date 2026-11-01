@@ -131,6 +131,26 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(set(builder.NO_MASS_STATED), {65, 236})
         self.assertFalse(hasattr(builder, 'MASS_ESTIMATES'))
 
+    def test_a_zero_in_the_catalogue_is_not_stated(self):
+        # Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution", "There needs to be a rule"
+        # (CLAUDE.md §7: a 0 in a source cell means "not stated", never a value of 0). The Reflex (257): the
+        # catalogue's height, mass, degrees of freedom and speed all "0.0"; it was 0 / 0 / 1 kg. Now listed with no
+        # mass, so not in the evaluation, and no height or mass of 0 written anywhere in the register.
+        self.assertEqual(builder.mass_bounds('0.0')[:3], (None, None, None))
+        self.assertIn('not stated', builder.mass_bounds('0.0')[3])
+        self.assertEqual(builder.stated('0.0'), '')
+        self.assertEqual(builder.stated('35'), '35')
+        reflex = next(r for r in self.register if r.number == 257)
+        self.assertIn(None, reflex.mass)
+        rows = builder.register_rows(builder.read_catalogue(absolute(Params().data.humanoid_guide)))
+        for row in rows:
+            for heading in ('Height (cm)', 'Mass (kg), stated', 'Mass min (kg)', 'Mass mode (kg)', 'Mass max (kg)'):
+                try:   # a text such as "~180" is not a 0
+                    zero = float(row[builder.HEADINGS.index(heading)]) == 0
+                except (TypeError, ValueError):
+                    zero = False
+                self.assertFalse(zero, msg=f'{row[0]} {row[1]}: {heading}')
+
     def test_the_sheet_type_1_lists_every_robot_of_type_1_as_in_the_sheet_robots(self):
         # Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of the different types are fully
         # listed. For now it has to be just all for type 1." Every robot whose types include 1, leading or second, in
@@ -177,8 +197,9 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # point 5): every robot whose types include 3 or 4, as in the sheet Robots; drawn with its own parts where they
         # are in a parts file of one of its types (types 1 to 4), not drawn where it has no mass ("If there is no mass
         # then it should not be taken into the evaluation"), else not yet taken apart; 01 finds nothing.
-        # Since batch 2 (E12.6): type 3 91 drawn, type 4 47; the Clone Alpha and the PrimeBOT Q1 without a mass.
-        for robot_type, count, own, without in ((3, 181, 91, 12), (4, 135, 47, 6)):
+        # Since batch 2 (E12.6): type 3 91 drawn, type 4 47; the Clone Alpha and the PrimeBOT Q1 without a mass. Since
+        # 2026-11-01 the Reflex of type 3 too, its catalogue's "0.0" not a mass (test_a_zero_in_the_catalogue_...).
+        for robot_type, count, own, without in ((3, 181, 91, 13), (4, 135, 47, 6)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)

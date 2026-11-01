@@ -65,11 +65,23 @@ class TestComparison(Compared):
                 summary = {(r['Kind'], r['Name']): r for r in csv.DictReader(file)}
             for kind, table in (('Material', 'materials'), ('Element', 'elements')):
                 for name in robot.tables[table][0]:
-                    present, mean, low, high = comparison.statistics(robot.column(table, name))
+                    present, mean, low, high, held = comparison.statistics(robot.column(table, name))
                     row = summary[(kind, name)]
+                    self.assertAlmostEqual(held, float(row['Held in (% of the draws)']), places=6)
+                    if not present:   # 0 in every draw: no statistics (Matthias, 2026-11-01, CLAUDE.md §7)
+                        self.assertEqual([row[h] for h in ('Mean (kg)', '2.5 % (kg)', '97.5 % (kg)')], [''] * 3)
+                        continue
                     for got, heading in ((mean, 'Mean (kg)'), (low, '2.5 % (kg)'), (high, '97.5 % (kg)')):
                         self.assertAlmostEqual(got, float(row[heading]), delta=1e-5 * max(1, abs(got)),
                                                msg=f'{folder}, {name}, {heading}')
+
+    def test_the_number_beside_a_row_is_over_the_draws_that_hold_it(self):
+        # Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution" (CLAUDE.md §7): the mean
+        # beside a robot type's row over the draws that are not 0, with the share that hold it where it is not all.
+        held = np.r_[np.zeros(60), np.full(40, 2.0)]
+        self.assertEqual(comparison.beside(held), f"{composition.mass(2.0)} (40 %)")
+        self.assertEqual(comparison.beside(np.full(10, 2.0)), composition.mass(2.0))
+        self.assertEqual(comparison.beside(np.zeros(10)), '–')
 
     def test_a_page_is_drawn_for_each_view(self):
         params = self.drawn()

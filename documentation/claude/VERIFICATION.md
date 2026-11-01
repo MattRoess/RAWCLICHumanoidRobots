@@ -5,6 +5,142 @@ by Claude, newest first.
 
 ## 2026-11-01
 
+### V127. The axis of the distribution panels at the 99.5th percentile, built
+
+- **His words:** "Yes, build it", his answer to the next-step box's question, which asked about the axis of V124. The
+  question of the RAWCLICDataCenters session is a separate one and was left for him to answer there.
+- **Tests first** (`TestAxisEnd`, on 20,000 lognormal draws with a long tail, as type 2's): written before the code, all
+  6 erred (no `AXIS_END`). They check the following:
+  - the setting is 99.5;
+  - the element panel's 70 bars end at the 99.5th percentile, its axis below 1.1 times it, and its bars' heights add up
+    to the share of the draws on the axis (nothing rescaled), with "… % beyond the axis, up to … kg" above the panel;
+  - the same for the critical elements' panel, both kinds' bars together;
+  - the overview's axis ends at its largest row's 99.5th percentile, with nothing piled into the last bar;
+  - no words where nothing lies beyond;
+  - a long title of a critical element is clear of its words.
+- **After the code:** the 6 pass, and the 21 figure tests of `test_parts_taken_apart.py` pass (readability, overlap,
+  centre, notes, held in). One older test now checks the first line of the critical panel's right-hand words (the
+  share held), as that text may now also hold the words on the axis's end. **The whole suite:** 435 tests, the same 5
+  failing as in V126 (they compare with his files on disk).
+- **Built:** `02_composition.py`:
+  - `AXIS_END = 99.5`, `axis_end`, `beyond_words`;
+  - `element_panel` and `stacked_panel`: bars from the smallest draw to the end, the words above the title's line;
+  - `ridge_panel`: the end at the largest row's 99.5th percentile (the 99.9th before), the draws beyond left out (they
+    were piled into the last bar), the words on its axis's label;
+  - the notes pages, one sentence each.
+- **Sandbox** (`sandbox_zero/run.py` into `sandbox_zero/axis/`, 2,000 draws): 01, 02 and 03 ran to the end. The draws
+  are identical to V126's run, 54 of 54 files.
+- **Looked at, type 2:**
+  - the material page 1: copper's axis to about 7 kg, where it ran to 13 kg before, and "0.5 % beyond the axis, up to
+    12 kg"; the magnets' classes held in some draws, "in 68 % of the draws", then their numbers and the words;
+  - the critical elements page 1: its panels' words above their titles, clear of them;
+  - the overview page 1: copper's axis to 3.6 kg (4.7 before), aluminium's to about 137 kg (225), the label "0.071 %
+    beyond the axis, up to 7.3 kg (of its rows' draws)". Its rows share one axis, so aluminium's small rows stay
+    narrow.
+  - At 2,000 draws the shares beyond read 0.51 to 0.6 % where few draws hold a material; at 200,000 they are 0.5 %.
+- **Not covered:** his 02 run at 200,000 draws. The share of the axis the 95 % interval now takes was measured in V124
+  for an axis from 0 to the 99.5th percentile, not again on these pages, which begin at the smallest draw as before.
+
+### V126. The zero rule built: every statistic over the draws that are not 0
+
+- **His words:** "Yes, build it", to the fix of V125 (test first; the axis of V124 not asked for, not built).
+- **Tests first:** written before the code and run: 10 failed or erred (`statistics_of` over the draws not 0, a
+  remainder's negative draws kept, none for a quantity 0 in every draw; the page of a workbook type; 03's number beside
+  a row and its agreement with 02's summary; the pages of where a material sits, type 2; the summary of a type taken
+  apart, type 2; the catalogue's "0.0" not a mass; type 3's sheet, 13 robots without a mass). After the code: all 15
+  of the new and changed tests pass. **The whole suite:** 429 tests; 6 failed, one of them type 3's card ("169 with a
+  mass", now 168: the Reflex), changed with the reason beside it and passing; the other 5 the same as before the change
+  (V122): they compare with his files on disk (the register, type 1's parts file, 01's three tests of type 1's file)
+  and pass after his runs.
+- **Built:** `02_composition.py` `statistics_of` (the one function of every statistic of 02 and 03: mean, median and
+  95 % over the draws not 0, "Held in (% of the draws)", None where 0 in every draw; the share below zero of all the
+  draws as before); `statistics` and `summary.csv` of a type taken apart with "Held in"; `summary.csv` and `.xlsx` of
+  every type with "Held in", "In the elements, mean" over the same draws; `interval_chart` with a column "Held in";
+  `sources_figure` over the draws that hold it, three columns as the overview (its axes 0.52 of the page); the notes'
+  "Not yet in the elements" with the share held; the run log. `03_comparison.py` `statistics` with the share held,
+  `beside` ("2.00 (40 %)"). `tools/make_humanoid_register.py` `stated` and `mass_bounds`: a catalogue's 0 not stated.
+- **Sandbox** (`sandbox_zero/run.py`, Claude's scratch folder: the register, the four builders, 01, 02 and 03 at 2,000
+  draws, every output there, his files only read), from the working tree and from e34c0b7 (a scratch worktree, removed
+  after):
+  - **The draws unchanged:** all 54 `.npy` files of `data/consolidated/` and `data/parts_taken_apart/` identical.
+  - **No median or 2.5 % of 0 for something held** in any of the ten summaries (6 consolidated, 4 taken apart); held in
+    some draws only: 5, 6, 1, 1, 1, 1 rows (consolidated, types 1 to 6; 2 for type 3) and 110, 246, 277, 262 (taken
+    apart, types 1 to 4); 0 in every draw: their statistics empty.
+  - **The Reflex:** in the register no height, no stated mass, no min, mode or max, its basis "the catalogue reads 0.0:
+    not stated, so no mass"; on the sheet Type 3 "not drawn: no mass stated"; 02 names it among type 3's 13 not drawn.
+  - 01 no fault; 02 and 03 ran to the end (0).
+- **Looked at:** type 2's "where its copper sits" (the wheeled base 533 g, held in 47 %; the lift column 69 g, 9.9 %;
+  the hips 566 g, 54 %; no line from the left edge; every number within the page); 03's `materials.png` (titanium
+  "0.400 (3.8 %)" for type 1, "1.12 (3 %)" for type 2, where the mean of all the draws was 0.013 and 0.033 kg).
+- **Not covered:** his runs (the register, 01, 02 at 200,000 draws, 03); the other RAWCLIC repositories (RAWCLICDataCenters
+  is a session of its own).
+
+### V125. Every 0 in the statistics, the figures and the inputs
+
+- **His words:** "It can not be that median is 0. If a value is 0 then it is NOT part of the distribution", then "Check
+  for all with 0 values. There needs to be a rule, if it is generally 0 then, it is not part of the distribution".
+- **How:** every statistic in `01_schemas.py`, `02_composition.py`, `03_comparison.py` and `tools/` read (grep of
+  median, percentile, mean, histogram, violin); his outputs of 1 November 10:56 to 10:58 (`data/consolidated/*/`,
+  `data/parts_taken_apart/*/`, `figures/`) only read; the inputs scanned for a minimum, mode or maximum of 0 (the four
+  parts files built from the committed code into Claude's scratch folder, the register, his workbook
+  `data/02_HumanoidlRobots.xlsx`, the catalogue `data/raw/humanoid_guide_2026-10-28.xlsx`). Scripts in Claude's
+  scratch folder: `axis_measure_apart.py`, `zero_inputs.py`.
+- **Counting the zeros (wrong):**
+  - `sources_figure`, the pages "where its … sits" (`figures/parts_taken_apart/<type>/sources/`): the violins over the
+    draws above 0, but the dots, the 95 % lines, the written median and mean and the order of the rows over all the
+    draws. Type 2's copper: the wheeled base and the lift column "0 mg" as their median; the lift column's mean 6.7 g
+    while its violin sits near 70 g; the hips', knees', ankles' and waist's 95 % lines from the left edge.
+  - `write_taken_apart`'s `statistics`, `data/parts_taken_apart/<type>/summary.csv`: a median of 0 for an element in
+    a kind of part held in some draws in 37 (type 1), 86 (2), 97 (3) and 83 (4) rows.
+  - `statistics_of`, `data/consolidated/<type>/summary.csv` and `.xlsx`: a median of 0 for one held in some draws in
+    5, 5, 1, 0, 1 and 0 rows (types 1 to 6: titanium, V, As, In, W; titanium, V, As, In, Zr; Pb; Pb); the notes
+    page's "Not yet in the elements: … (median …, mean …)" is written from these rows.
+  - `interval_bars` (02's page of a type drawn from the workbook, 03's comparison pages) and 03's `statistics`: the
+    mean bar and the 95 % line over all the draws.
+  - 02's run log, the critical elements in one robot: over all the draws.
+- **Over the draws above 0 already (right):** `element_panel` (the material and element pages), `stacked_panel` (the
+  critical elements), `ridge_panel` (the overview), each with "in … % of the draws".
+- **The inputs:** no minimum, mode or maximum of 0 in the four parts files or in his workbook. One in the register:
+  robot 257, Reflex (Reflex Robotics, type 3, on wheels), a mass of 0 / 0 / 1 kg, made by `mass_bounds` from the
+  catalogue's row 258, whose height, mass, degrees of freedom and walking speed all read "0.0" (not stated). It is not
+  taken apart, so it is not drawn; it is counted among type 3's robots with a mass (and "not yet taken apart").
+- **RAWCLICDataCenters** (read only, its summaries of 22 and 23 October): the same counting of zeros, a median of 0 for
+  one held in some draws in `data_center_it_materials/material_summary.csv` 607 rows, `data_center_pcb_area/
+  summary_statistics.csv` 264, `data_center_infrastructure_materials/quantity_summary.csv` 30, `item_summary.csv` 15,
+  `material_summary.csv` 12, `data_center_pcb_area/pcb_area_summary.csv` and `pcb_counts_summary.csv` 13 each; its 03
+  "where the copper comes from" and its distribution panels over all the draws.
+- **Rule written:** `/Users/rm/Documents/GitHub/CLAUDE.md` §7, "A 0 is not part of a distribution".
+- **Not covered:** nothing is changed yet; the other RAWCLIC repositories are not checked.
+
+### V124. How much of each distribution panel's axis the tail takes
+
+- **His words:** "The distribution figures show the distribution pressed to the left side. You give away have of the x
+  axis."
+- **How:** `axis_measure_apart.py` and `axis_cut.py` (Claude's scratch folder) on his draws of 1 November
+  (`data/parts_taken_apart/*/`, 200,000 draws a type, only read): each material and element summed over its kinds of
+  part, the draws above 0, as the pages draw them.
+- **Result:** the axis runs from the smallest to the largest draw. The 97.5th percentile sits at 62 % (type 1), 34 %
+  (2), 36 % (3) and 47 % (4) of the axis, the median over the panels; type 2's copper runs to 13 kg with 97.5 % of the
+  draws below 5 kg. An axis ending at each panel's 99.5th percentile would put it at 86, 66, 70 and 77 %; at the 99th
+  at 91, 79, 82 and 85 %; at the 99.9th at 77, 51, 54 and 65 %. RAWCLICDataCenters bins its histograms the same way,
+  from the smallest to the largest draw.
+- **Not covered:** nothing is changed yet; proposed to him (the 99.5th percentile), not agreed.
+
+### V123. The model files of the research pass, read again (E13 rule 3)
+
+- **What:** the torque limits and link masses four reading agents reported from the makers' model files.
+- **How:** each file opened in the browser pane (raw.githubusercontent.com), parsed on the page: every moving joint's
+  `effort`, the sum of the `<mass>` values.
+- **Result:** every value as reported: Booster T2 (31 joints, 41.99 kg); AgiBot X2-Ultra v1.4.0 (31, 44.80 kg), X2-EDU
+  (29, 41.20 kg), A3 T3.0 (31, 56.80 kg) and T2.5 (57.98 kg), G2's body and arm macros (body 5 × 50, head 3 × 50, arms
+  108 / 108 / 35 / 35 / 35 / 18 / 18); Unitree H2-D (24, 133.94 kg), H2-X (31, 67.60 kg), G1-D (34, 71.00 kg), R1-A7-D
+  (29, 38.54 kg; its lift's effort written as 0), R1-A5 (13, 14.79 kg); Galaxea R1 Pro 2025 (28, 93.27 kg) and 2026
+  (92.83 kg, its grippers' effort 0); RealMan RM65-B (6, 7.17 kg) and RM75-B (7, 7.78 kg); Tien Kung 3.0 (31, 65.82
+  kg); LimX Oli HU_D04 (31, 52.55 kg); PAL REEM-C's legs (v0 and v1), arms, wrists (joint 5 "TODO: Check effort
+  value!"), torso and head, ARI's arms and wheels, Kangaroo's legs, ankles and pelvis. Read on Noetix's own pages: Bumi
+  "关节模组最大扭矩 70N.m", "48V 5.1Ah", "17kg"; E1 "膝关节最大扭矩150Nm", "整机重量40kg", "10.6Ah" (no voltage).
+- **Not covered:** the files' efforts are limits of simulation models (rated or peak not stated); nothing is entered.
+
 ### V122. The entry of batch 2 of types 3 and 4 (EVIDENCE E12.6, E12.7), built and run in the sandbox
 
 - **His words:** "Yes, build it" (E12.6, open points A to C as recommended).

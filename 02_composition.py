@@ -126,14 +126,19 @@ reads; not in git):
         recommendation e). Each has its columns, one name per line, in the .txt of the same name. Row i is the same
         draw in every array, so that stock-and-flow can pair them.
   summary.xlsx, summary.csv
-        per material and per element: the mean, the median and the 95 % interval (2.5 % and 97.5 %), the share of
-        draws below zero, and how much of each material is in the elements (point 11).
+        per material and per element: the mean, the median and the 95 % interval (2.5 % and 97.5 %) over the draws
+        that hold it (those not 0: a 0 is not part of a distribution, CLAUDE.md §7), the share of the draws that hold
+        it, the share of all the draws below zero, and how much of each material is in the elements (point 11).
 
 For each robot type taken apart also, into `output.parts_dir`/<n>_<name>/ (`data/parts_taken_apart/<n>_<name>/`):
 robots.npy (the robot of the parts file each draw is, its mass, the robot of the register drawn), parts.npy,
 materials.npy, grades.npy, elements.npy and estimated.npy (every element in every kind of part, and its kg resting on
 masses labelled E), each with its columns in the .txt of the same name; register.txt (the robots of the register
-drawn) and summary.csv.
+drawn) and summary.csv (each element in all and in each kind of part: its mean, median and 95 % interval over the
+draws that hold it, and the share of the draws that hold it).
+
+The draws keep their zeros (a robot without a part holds 0 kg in it), since sums are made on raw draws; only the
+statistics, the tables and the pages leave them out.
 
 Every robot type has the same columns of elements, all those any of them holds (0 where a robot type's materials hold
 none so far). Pages only of the robot types `output.robot_types_with_pages` names (Matthias, 2026-10-29: "Type 1
@@ -214,8 +219,9 @@ KEPT, BUILD, REST = schemas.KEPT, schemas.BUILD, schemas.REST
 # The draws written for each robot type, in this order: each is a file <name>.npy with its columns in <name>.txt.
 TABLES = ('materials', 'elements', 'part_groups', 'body_regions', 'total')
 # The columns of summary.csv and summary.xlsx.
+# Its statistics are over the draws that hold the quantity, those not 0, with their share in 'Held in' (statistics_of).
 SUMMARY_HEADINGS = ['Robot type', 'Kind', 'Name', 'Mean (kg)', 'Median (kg)', '2.5 % (kg)', '97.5 % (kg)',
-                    'Draws below zero (%)', 'In the elements', 'In the elements, mean (kg)']
+                    'Held in (% of the draws)', 'Draws below zero (%)', 'In the elements', 'In the elements, mean (kg)']
 # 01 lets the mass shares of a compound add up to 1 within this (check_element_recipes): the compounds written as mass
 # shares are rounded to five decimals. The elements may miss the materials that have recipes by as much, and no more.
 COMPOUND_TOLERANCE = 0.001
@@ -575,16 +581,27 @@ def draw_faults(c: Composition) -> list:
 
 
 def statistics_of(draws: np.ndarray) -> dict:
-    """The mean, the median, the 95 % interval and the share of draws below zero of one quantity."""
-    low, median, high = np.percentile(draws, [2.5, 50, 97.5])
-    return {'Mean (kg)': float(draws.mean()), 'Median (kg)': float(median), '2.5 % (kg)': float(low),
-            '97.5 % (kg)': float(high), 'Draws below zero (%)': float((draws < 0).mean() * 100)}
+    """The mean, the median and the 95 % interval of one quantity over the draws that hold it, those not 0, with the
+    share of the draws they are ('Held in (% of the draws)'), and the share of all the draws below zero. A 0 is not
+    part of a distribution (Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution", "There
+    needs to be a rule"; CLAUDE.md §7): a robot without a part holds 0 kg in it, which is no mass of that part. A
+    remainder below zero keeps its negative draws, which show a fault. A quantity 0 in every draw has no statistics
+    (None: an empty cell in a table, '–' on a page). Every statistic of 02 and 03 is made here."""
+    draws = np.asarray(draws, dtype=float)
+    held = draws[draws != 0]
+    out = {'Held in (% of the draws)': float(100 * held.size / draws.size) if draws.size else 0.0,
+           'Draws below zero (%)': float((draws < 0).mean() * 100) if draws.size else 0.0}
+    if not held.size:
+        return {'Mean (kg)': None, 'Median (kg)': None, '2.5 % (kg)': None, '97.5 % (kg)': None, **out}
+    low, median, high = np.percentile(held, [2.5, 50, 97.5])
+    return {'Mean (kg)': float(held.mean()), 'Median (kg)': float(median), '2.5 % (kg)': float(low),
+            '97.5 % (kg)': float(high), **out}
 
 
 def summary(c: Composition) -> list:
-    """Point 11: per material and per element of one robot type its statistics; for each material whether it is in
-    the elements (Yes, Partly, No), and its kilograms that are, at the mean. One dict per row, keyed by
-    SUMMARY_HEADINGS."""
+    """Point 11: per material and per element of one robot type its statistics (statistics_of: over the draws that
+    hold it); for each material whether it is in the elements (Yes, Partly, No), and its kilograms that are, at the
+    mean over the same draws. One dict per row, keyed by SUMMARY_HEADINGS."""
     rows = []
     columns, draws = c.tables['materials']
     for i, name in enumerate(columns):
@@ -598,7 +615,8 @@ def summary(c: Composition) -> list:
         else:
             status = 'Partly'
         rows.append({'Robot type': c.number, 'Kind': 'Material', 'Name': name, **statistics_of(kg),
-                     'In the elements': status, 'In the elements, mean (kg)': float(followed.mean())})
+                     'In the elements': status,
+                     'In the elements, mean (kg)': float(followed[kg != 0].mean()) if kg.any() else None})
     columns, draws = c.tables['elements']
     for i, name in enumerate(columns):
         rows.append({'Robot type': c.number, 'Kind': 'Element', 'Name': name, **statistics_of(draws[:, i]),
@@ -627,7 +645,7 @@ def write(c: Composition, folder: str) -> None:
         cell.font = Font(bold=True)
     for row in rows:
         sheet.append([row[heading] for heading in SUMMARY_HEADINGS])
-    for letter, width in zip('ABCDEFGHIJ', (11, 9, 24, 11, 11, 11, 11, 12, 22, 14)):
+    for letter, width in zip('ABCDEFGHIJK', (11, 9, 24, 11, 11, 11, 11, 12, 12, 22, 14)):
         sheet.column_dimensions[letter].width = width
     sheet.freeze_panes = 'A2'
     book.save(os.path.join(folder, 'summary.xlsx'))
@@ -1527,8 +1545,10 @@ def element_order(elements) -> list:
 # ------------------------------------------------------------------------------------------------------
 
 def statistics(values: np.ndarray) -> list:
-    """Mean, median, 2.5 % and 97.5 % of draws, kg."""
-    return [float(values.mean()), float(np.median(values)), *map(float, np.percentile(values, [2.5, 97.5]))]
+    """Mean, median, 2.5 % and 97.5 % of the draws that hold it (kg), and the share of the draws they are (%), with
+    statistics_of: a 0 is not part of a distribution (CLAUDE.md §7); empty where it is 0 in every draw."""
+    s = statistics_of(values)
+    return [s['Mean (kg)'], s['Median (kg)'], s['2.5 % (kg)'], s['97.5 % (kg)'], s['Held in (% of the draws)']]
 
 
 def write_taken_apart(d: Draws, folder: str) -> None:
@@ -1569,7 +1589,8 @@ def write_taken_apart(d: Draws, folder: str) -> None:
                 rows.append([element, KINDS[kind][0], *statistics(d.elements[(kind, element)])])
     with open(os.path.join(folder, 'summary.csv'), 'w', encoding='utf-8', newline='') as file:
         out = csv.writer(file)
-        out.writerow(['Element', 'Kind of part', 'Mean (kg)', 'Median (kg)', '2.5 % (kg)', '97.5 % (kg)'])
+        out.writerow(['Element', 'Kind of part', 'Mean (kg)', 'Median (kg)', '2.5 % (kg)', '97.5 % (kg)',
+                      'Held in (% of the draws)'])
         out.writerows(rows)
         out.writerow([])
         out.writerow(['Remainder', 'Share of its robot\'s draws below zero'])
@@ -1648,7 +1669,7 @@ def same_elements(drawn: list) -> None:
 ROW = 0.25                 # the height of one row of a chart, inches
 LABEL = 1.9                # the names left of a chart, inches
 CHART = 4.4                # the width of a chart, inches
-NUMBERS = 2.2              # the numbers right of a chart, inches
+NUMBERS = 2.75             # the numbers right of a chart (the mean, the 95 %, the share held), inches
 MARGIN = 0.4               # the margin of the page, inches
 GAP = 0.6                  # between the two charts, inches
 PAGE_WIDTH = 2 * MARGIN + 2 * (LABEL + CHART + NUMBERS) + GAP
@@ -1688,9 +1709,10 @@ def element_label(symbol: str) -> str:
 
 def interval_bars(axes, rows: list, size: float = 9, grey: bool = False) -> None:
     """On `axes`, one row per (name, its draws): a bar of the mean from zero (grey for Mixed and Not allocated, or for
-    every row with `grey`) and a line with end ticks over 95 % of the draws (2.5 % to 97.5 %); nothing where there is
-    no mass in any draw. The kg scale is fitted to the lines, with the zero line and hairlines; the names stand on the
-    left. 03_comparison.py draws its charts with it too."""
+    every row with `grey`) and a line with end ticks over 95 % of the draws (2.5 % to 97.5 %), both of the draws that
+    hold it (statistics_of: a 0 is not part of a distribution); nothing where there is no mass in any draw. The kg
+    scale is fitted to the lines, with the zero line and hairlines; the names stand on the left. 03_comparison.py draws
+    its charts with it too."""
     stats = [(name, draws.any(), statistics_of(draws)) for name, draws in rows]
     lows = [s['2.5 % (kg)'] for _, present, s in stats if present]
     highs = [s['97.5 % (kg)'] for _, present, s in stats if present]
@@ -1720,14 +1742,16 @@ def interval_bars(axes, rows: list, size: float = 9, grey: bool = False) -> None
 def interval_chart(figure, page, page_height: float, x: float, y: float, title: str, what: str,
                    rows: list) -> float:
     """One chart of a page, under its title and a line saying what it covers: interval_bars, with the mean and the
-    interval of each row written beside it, '–' for a row with no mass in any draw. (x, y): the chart's top left,
-    inches. Returns the y below it."""
+    interval of each row written beside it, both of the draws that hold it, and the share of the draws that hold it
+    where it is not all (Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution"); '–' for a
+    row with no mass in any draw. (x, y): the chart's top left, inches. Returns the y below it."""
     schemas.write(page, x, y, [title], size=11, weight='bold')
     schemas.write(page, x, y + 0.27, [what], size=9, colour=MUTED)
     y += 0.6
     numbers = x + LABEL + CHART + 0.15
     schemas.write(page, numbers + 0.55, y, ['Mean'], size=8.5, colour=MUTED, align='right')
     schemas.write(page, numbers + 0.75, y, ['95 % of the draws'], size=8.5, colour=MUTED)
+    schemas.write(page, numbers + 2.15, y, ['Held in'], size=8.5, colour=MUTED)
     y += 0.25
     height = ROW * len(rows)
     axes = figure.add_axes([(x + LABEL) / PAGE_WIDTH, 1 - (y + height) / page_height, CHART / PAGE_WIDTH,
@@ -1743,6 +1767,9 @@ def interval_chart(figure, page, page_height: float, x: float, y: float, title: 
         page.text(numbers + 0.55, row_y, mass(s['Mean (kg)']), fontsize=9, ha='right', va='center')
         page.text(numbers + 0.75, row_y, f"{mass(s['2.5 % (kg)'])} to {mass(s['97.5 % (kg)'])}", fontsize=9,
                   va='center')
+        if s['Held in (% of the draws)'] < 100:   # held in some draws only: their share
+            page.text(numbers + 2.15, row_y, f"{panel_number(s['Held in (% of the draws)'])} %", fontsize=9,
+                      va='center')
     return y + height + 0.55
 
 
@@ -1805,8 +1832,9 @@ def draw_page(c: Composition, draws: int, path: str, params: Params) -> None:
     height = top + 0.85 + ROW * max(len(materials), len(elements)) + 0.55 + len(notes) * schemas.LINE + 0.4
     figure, page = schemas.new_page(PAGE_WIDTH, height)
     page.text(MARGIN, 0.35, f'Robot type {c.number}: {c.title}', fontsize=15, fontweight='bold', va='top')
-    page.text(MARGIN, 0.75, f'What one robot is made of, from {draws:,} draws. Each bar is the mean; its line spans '
-                            '95 % of the draws, from 2.5 % to 97.5 %.', fontsize=10, color=MUTED, va='top')
+    page.text(MARGIN, 0.75, f'What one robot is made of, from {draws:,} draws. Each bar is the mean of the draws that '
+                            'hold it; its line spans 95 % of them, from 2.5 % to 97.5 %; Held in: the share of the '
+                            'draws that hold it, where not all.', fontsize=10, color=MUTED, va='top')
     below = interval_chart(figure, page, height, MARGIN, top, 'By material',
                            f"All of the robot's {mass(total.mean())} kg at the mean: its materials, and Not allocated",
                            materials)
@@ -1832,6 +1860,11 @@ APART_PAGE = (16, 9)
 APART_TEXT, APART_LABEL, APART_TITLE, APART_HEADING = 14, 15, 16, 20   # points
 APART_ACROSS, APART_DOWN = 3, 3           # element panels on a page
 APART_BINS = 70                              # the bars of a distribution, as in RAWCLICDataCenters' figures
+# Where a distribution panel's axis ends: this percentile of its draws (Matthias, 2026-11-01: "The distribution figures
+# show the distribution pressed to the left side. You give away have of the x axis", then "Yes, build it"; V124: up to
+# the largest draw, type 2's 97.5th percentile sat at a third of the axis, at the 99.5th it sits at two thirds). The
+# draws beyond are not drawn; the panel says how many and the largest (beyond_words).
+AXIS_END = 99.5
 APART_BAR = '#4477AA'                        # Paul Tol's bright blue, as published
 APART_INK = '#222222'                        # lines and numbers
 PANEL_NUMBERS_GAP = 2                        # points between a panel's title and its numbers above it
@@ -1844,6 +1877,22 @@ NOTES_LINES = 26
 ELEMENT_NAMES.update({'Ag': 'Silver', 'As': 'Arsenic', 'Au': 'Gold', 'Br': 'Bromine', 'Dy': 'Dysprosium',
                       'Ga': 'Gallium', 'In': 'Indium', 'Nb': 'Niobium', 'Nd': 'Neodymium', 'Pd': 'Palladium',
                       'Pr': 'Praseodymium', 'Ta': 'Tantalum', 'Tb': 'Terbium', 'W': 'Tungsten'})
+
+
+def axis_end(values: np.ndarray) -> float:
+    """Where a distribution panel's axis ends: the AXIS_END-th percentile of its draws, or its largest draw where that
+    percentile is its smallest (draws that are nearly all the same)."""
+    end = float(np.percentile(values, AXIS_END))
+    return end if end > float(values.min()) else float(values.max())
+
+
+def beyond_words(values: np.ndarray, end: float, unit: str) -> str:
+    """What a panel says of the draws beyond its axis's end, in the panel's unit: '0.5 % beyond the axis, up to 13 kg';
+    '' where none lies beyond. Their share is of all the panel's draws."""
+    over = values > end
+    if not over.any():
+        return ''
+    return f'{panel_number(100 * over.mean())} % beyond the axis, up to {panel_number(float(values.max()))}\u00a0{unit}'
 
 
 def panel_unit(values_kg: np.ndarray) -> tuple:
@@ -1883,7 +1932,10 @@ def element_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
     per, unit = panel_unit(kg)
     values = kg / per
     axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
-    counts, edges = np.histogram(values, bins=APART_BINS)
+    # Its 70 bars from the smallest draw to the axis's end (AXIS_END), each the share of all the panel's draws; the
+    # draws beyond the end not drawn, said above the panel.
+    end = axis_end(values)
+    counts, edges = np.histogram(values[values <= end], bins=APART_BINS, range=(float(values.min()), end))
     axes.bar(edges[:-1], counts / values.size, width=np.diff(edges), align='edge', color=APART_BAR,
              edgecolor='none')
     median, mean = float(np.median(values)), float(values.mean())
@@ -1898,11 +1950,12 @@ def element_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
     # own descent and a gap of PANEL_NUMBERS_GAP above the panel (in points: the title's pad moves all of a panel's
     # titles, so the numbers get an offset of their own); the page's tight layout makes room for them.
     axes.set_ylim(0, (counts / values.size).max() * 1.1)
-    numbers = f'median {panel_number(median)}\u00a0{unit}\nmean {panel_number(mean)}\u00a0{unit}'
+    numbers = '\n'.join(line for line in (held_in, f'median {panel_number(median)}\u00a0{unit}',
+                                           f'mean {panel_number(mean)}\u00a0{unit}', beyond_words(values, end, unit))
+                        if line)
     above = (plt.rcParams['axes.titlepad'] + (title.count('\n') + 1) * APART_TITLE * 1.2 + APART_TEXT * 0.3
              + PANEL_NUMBERS_GAP)
-    right = axes.set_title(f'{held_in}\n{numbers}' if held_in else numbers, loc='right', fontsize=APART_TEXT,
-                           color=APART_INK)
+    right = axes.set_title(numbers, loc='right', fontsize=APART_TEXT, color=APART_INK)
     right.set_transform(axes.transAxes + ScaledTranslation(0, above / 72, axes.figure.dpi_scale_trans))
     axes.xaxis.set_major_locator(plt.MaxNLocator(5))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
@@ -1930,8 +1983,11 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
     """The notes page's paragraphs: how to read the element pages, what is drawn, what is not yet, what is not
     shown; `later` the robots of the type not yet taken apart (its draws for stock-and-flow then from the workbook)."""
     rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
+    # Each with its median and mean over the draws that hold it, and their share where not all (CLAUDE.md §7).
     missing = [f"{name} (median {panel_number(rows[name]['Median (kg)'])} kg, mean "
-               f"{panel_number(rows[name]['Mean (kg)'])} kg)" for name in rows
+               f"{panel_number(rows[name]['Mean (kg)'])} kg"
+               + (f", held in {panel_number(rows[name]['Held in (% of the draws)'])} % of the draws"
+                  if rows[name]['Held in (% of the draws)'] < 100 else '') + ')' for name in rows
                if rows[name]['In the elements'] == 'No' and name != NOT_ALLOCATED]
     partly = [name for name in rows if rows[name]['In the elements'] == 'Partly']
     estimates = [f"{what}: {', '.join(robots)}" for what, robots in (d.on_estimates or {}).items()]
@@ -1940,7 +1996,8 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'dotted line: the mean; both written above the panel, right. Dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit (kg, g, mg). An element or material '
         '0 in some draws: its panel shows the draws that hold it and says in what share of all the draws it is held; '
-        'one held in fewer than 2.5 % of the draws has no panel.',
+        'one held in fewer than 2.5 % of the draws has no panel. Each axis ends at the 99.5th percentile of its draws: '
+        'the 0.5 % beyond are not drawn, and the panel says so and names the largest.',
         f"The draws: {d.n:,}, each one robot of type {d.robot_type} in the register, each of its {len(d.register)} "
         'robots taken apart drawn equally often (a robot in two versions, each as often); its mass a triangle on its '
         'own mass, its parts its own, part by part (the parts file, from its sources).',
@@ -1964,8 +2021,10 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         f"aluminium by its alloys (the type's recipe: {d.aluminium}), "
         "the permanent magnets in all and by the grade class each joint's heat draws. Copper is the metal of windings, "
         'wires, cables, busbars, contacts and heat pipes; the copper of the boards is in the electronics. Where '
-        'copper, the magnets, each steel and each aluminium alloy sit: one row per kind of part, its draws as a violin '
-        'on a logarithmic axis, the median a filled dot, the mean an open one, the line the 95 % interval.',
+        'copper, the magnets, each steel and each aluminium alloy sit: one row per kind of part, the draws in which it '
+        'holds the material as a violin on a logarithmic axis, the median a filled dot, the mean an open one, the line '
+        'the 95 % interval, all of those draws; at the right the median, the mean and in what share of the draws the '
+        'kind of part holds it.',
     ]
     return [note for note in notes if note]
 
@@ -2054,10 +2113,12 @@ FIGURE_TITLE_WIDTH = 30   # characters in a line of an element page's panel titl
 # median's, the mean's and in what share of the draws the kind of part holds the element (share of the panel's width
 # beyond its right edge), so that all three stay within the page and a number of eight characters (0.000022) clears
 # the next (2026-10-29, "Yes, do it": the third column, the panels 0.42 of the page before). The figures of where a
-# material sits keep their two columns, NUMBER_COLUMNS.
+# material sits likewise, the same three columns since 2026-11-01 ("If a value is 0 then it is NOT part of the
+# distribution"), their axes SOURCES_WIDTH of the page (0.6 before, with two).
 PANEL_WIDTH = 0.38
 OVERVIEW_COLUMNS = (1.01, 1.18, 1.35)
-NUMBER_COLUMNS = (1.02, 1.20)
+SOURCES_WIDTH = 0.52
+NUMBER_COLUMNS = (1.02, 1.21, 1.40)
 ELEMENT_PAGES = [FIGURE_ELEMENTS[:6], FIGURE_ELEMENTS[6:]]                                # three panels across
 OVERVIEW_PAGES = [FIGURE_ELEMENTS[k:k + 2] for k in range(0, len(FIGURE_ELEMENTS), 2)]    # two elements a page
 
@@ -2109,7 +2170,8 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
     with its number (Matthias, 2026-10-28: "Showing the mean is wrong. It is not a good measure. Use the median or show
     boths"; his answer "Both, median first"); the 2.5th and 97.5th percentile dashed; its own scale and unit. Where the
     element is 0 in some draws (a robot or a version without it), the draws that hold it, and in what share of all the
-    draws it is held, right of the title, as on the element pages (element_panel)."""
+    draws it is held, right above the title's line, as on the element pages (element_panel). Its axis ends at the
+    AXIS_END-th percentile of the draws; those beyond are not drawn and are said there too (beyond_words)."""
     axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     if not kinds:
         axes.text(0.5, 0.5, 'none in these robots', transform=axes.transAxes, ha='center', va='center',
@@ -2120,20 +2182,24 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
     total = sum(kinds.values())
     drawn = [k for k in kinds if held(kinds[k])]   # the kinds holding it in at least HELD_SHARE of all the draws
     inside = total > 0
-    if not inside.all():
-        axes.set_title(f'in {panel_number(100 * inside.mean())} % of the draws', loc='right', fontsize=APART_TEXT,
-                       color=APART_INK)
+    held_in = f'in {panel_number(100 * inside.mean())} % of the draws' if not inside.all() else ''
+    if held_in:
         kinds = {k: v[inside] for k, v in kinds.items()}
         total = total[inside]
     per, unit = panel_unit(total)
     values = total / per
-    edges = np.histogram_bin_edges(values, bins=APART_BINS)
-    index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)   # the bar each draw falls into
+    # Its 70 bars from the smallest draw to the axis's end (AXIS_END), each the share of all the panel's draws; the
+    # draws beyond the end (not on_axis) not drawn, said above the panel.
+    end = axis_end(values)
+    on_axis = values <= end
+    edges = (np.linspace(float(values.min()), end, APART_BINS + 1) if end > values.min()
+             else np.histogram_bin_edges(values, bins=APART_BINS))
+    index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)[on_axis]   # the bar each draw falls into
     share_of_draws = np.bincount(index, minlength=len(edges) - 1) / values.size
-    kg_all = np.bincount(index, weights=total, minlength=len(edges) - 1)
+    kg_all = np.bincount(index, weights=total[on_axis], minlength=len(edges) - 1)
     bottom = np.zeros(len(edges) - 1)
     for kind in sorted(drawn, key=lambda k: kinds[k].mean()):
-        kg = np.bincount(index, weights=kinds[kind], minlength=len(edges) - 1)
+        kg = np.bincount(index, weights=kinds[kind][on_axis], minlength=len(edges) - 1)
         height = share_of_draws * np.divide(kg, kg_all, out=np.zeros_like(kg), where=kg_all > 0)
         axes.bar(edges[:-1], height, width=np.diff(edges), align='edge', bottom=bottom, color=KINDS[kind][1],
                  edgecolor='none')
@@ -2147,6 +2213,14 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
         axes.text(x, y, f' {what} {panel_number(x)} {unit}', transform=axes.get_xaxis_transform(), ha='left',
                   va='top', fontsize=APART_TEXT, color=APART_INK,
                   bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1))
+    # The share held and the words on the axis's end, right, above the title's line, as element_panel places them, so
+    # that a long title never runs into them.
+    words = '\n'.join(line for line in (held_in, beyond_words(values, end, unit)) if line)
+    if words:
+        above = (plt.rcParams['axes.titlepad'] + (title.count('\n') + 1) * APART_TITLE * 1.2 + APART_TEXT * 0.3
+                 + PANEL_NUMBERS_GAP)
+        right = axes.set_title(words, loc='right', fontsize=APART_TEXT, color=APART_INK)
+        right.set_transform(axes.transAxes + ScaledTranslation(0, above / 72, axes.figure.dpi_scale_trans))
     axes.xaxis.set_major_locator(plt.MaxNLocator(4))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.yaxis.set_major_locator(plt.MaxNLocator(4))
@@ -2184,7 +2258,8 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     2.5th and 97.5th percentile dashed, all of the draws that hold it; at the right three columns: the median, the mean
     and in what share of the draws the kind of part holds the element (Matthias, 2026-10-29, "Yes, do it", to the
     overview's rows as the element panels: a kind of part holding it in only some draws showed a median of 0); one
-    scale and unit for the panel."""
+    scale and unit for the panel, its axis ending at the largest of the rows' AXIS_END-th percentiles, the draws beyond
+    not drawn and said on its label."""
     shown = [k for k in KINDS if k in kinds and held(kinds[k])]
     axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     if not shown:
@@ -2194,12 +2269,14 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         return
     per, unit = panel_unit(sum(kinds[k] for k in shown))
     holding = {k: kinds[k][kinds[k] > 0] for k in shown}   # the draws in which the kind of part holds the element
-    top = max(np.percentile(holding[k], 99.9) for k in shown) / per
+    # The axis ends at the largest of the rows' AXIS_END-th percentiles; the draws beyond are not drawn (until
+    # 2026-11-01 piled into the last bar) and are said on the axis's label (beyond_words).
+    top = max(axis_end(holding[k]) for k in shown) / per
     edges = np.linspace(0, top if top > 0 else 1, 51)
     right = blended_transform_factory(axes.transAxes, axes.transData)
     for row, kind in enumerate(reversed(shown)):
         values = holding[kind] / per
-        counts, _ = np.histogram(np.clip(values, 0, edges[-1]), bins=edges)
+        counts, _ = np.histogram(values[values <= edges[-1]], bins=edges)
         heights = 0.8 * counts / max(counts.max(), 1)
         hatched = float(estimated[kind].mean()) > 0.5 * float(kinds[kind].mean())
         axes.bar(edges[:-1], heights, width=np.diff(edges), align='edge', bottom=row + 0.05, color=KINDS[kind][1],
@@ -2226,7 +2303,10 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     axes.xaxis.set_major_locator(plt.MaxNLocator(6))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.tick_params(axis='x', labelsize=APART_TEXT)
-    axes.set_xlabel(f'mass ({unit})', fontsize=APART_LABEL)
+    # The draws beyond the axis's end, of all its rows, on its label: above the panel stand its title and the columns.
+    beyond = beyond_words(np.concatenate([holding[k] for k in shown]) / per, edges[-1], unit)
+    axes.set_xlabel(f'mass ({unit})' + (f'; {beyond} (of its rows’ draws)' if beyond else ''),
+                    fontsize=APART_LABEL)
     axes.grid(axis='x', alpha=0.3)
     for side in ('top', 'right'):
         axes.spines[side].set_visible(False)
@@ -2268,11 +2348,13 @@ def parts_notes(d: Draws) -> list:
         'height the share of the draws, each bar split into the weight its draws hold in each kind of part, the '
         'smaller lower. Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit. An element that is 0 in some draws: '
-        'its panel shows the draws that hold it and says in what share of all the draws it is held.',
+        'its panel shows the draws that hold it and says in what share of all the draws it is held. Each axis ends at '
+        'the 99.5th percentile of its draws: those beyond are not drawn, and the panel says how many and the largest.',
         "The overview pages: each row the element's weight in one kind of part over the draws that hold it, the "
         'height the share of those draws scaled to the row, the lines as on the element pages, of those draws; at the '
         "right their median and mean, and 'held in': in what share of all the draws the kind of part holds the "
-        'element. Hatched: more than half of the mean rests on parts whose mass is an estimate.',
+        'element. Hatched: more than half of the mean rests on parts whose mass is an estimate. Each axis ends at the '
+        "largest of its rows' 99.5th percentiles; the draws beyond are not drawn, and its label says how many.",
         'On both: a kind of part holding the element in fewer than 2.5 % of the draws is not drawn.',
         robots_note(d),
         "The joints with their driver boards and encoders; the magnets' grade class (with it their dysprosium) drawn "
@@ -2391,19 +2473,22 @@ def log_mass(log_kg: float, _pos=None) -> str:
 
 def sources_figure(title: str, kinds: dict, d: Draws):
     """Where one material sits in a robot type, as RAWCLICDataCenters' "where the copper comes from": one row per kind
-    of part holding it (in at least 2.5 % of the draws), the largest median on top; each the violin of its kg over the
-    draws above 0 on a logarithmic axis, the median a filled dot and the mean an open one, the 95 % interval a line
-    (from the left edge where it starts at 0), the median and the mean written at the right."""
-    shown = sorted((k for k in kinds if held(kinds[k])), key=lambda k: float(np.median(kinds[k])))
+    of part holding it (in at least 2.5 % of the draws), the largest median on top; each over the draws in which the
+    kind of part holds it, those not 0 (Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it
+    is NOT part of the distribution"; CLAUDE.md §7): the violin of its kg on a logarithmic axis, the median a filled
+    dot and the mean an open one, the 95 % interval a line, and at the right the median, the mean and in what share of
+    the draws the kind of part holds it, as the overview's rows (ridge_panel)."""
+    holding = {k: kinds[k][kinds[k] != 0] for k in kinds if held(kinds[k])}   # the draws that hold it
+    shown = sorted(holding, key=lambda k: float(np.median(holding[k])))
     figure = plt.figure(figsize=APART_PAGE)
-    axes = figure.add_axes((0.22, 0.12, 0.6, 0.76))
-    lows = [np.log10(kinds[k][kinds[k] > 0]).min() for k in shown]
-    highs = [np.log10(kinds[k][kinds[k] > 0]).max() for k in shown]
+    axes = figure.add_axes((0.22, 0.12, SOURCES_WIDTH, 0.76))
+    lows = [np.log10(holding[k]).min() for k in shown]
+    highs = [np.log10(holding[k]).max() for k in shown]
     left, right = np.floor(min(lows)), np.ceil(max(highs))
     numbers = blended_transform_factory(axes.transAxes, axes.transData)
     for row, kind in enumerate(shown):
-        values = kinds[kind]
-        logs = np.log10(values[values > 0])
+        values = holding[kind]
+        logs = np.log10(values)
         if logs.max() > logs.min():
             body = axes.violinplot([logs], positions=[row], orientation='horizontal', widths=0.8,
                                   showextrema=False)['bodies'][0]
@@ -2412,15 +2497,16 @@ def sources_figure(title: str, kinds: dict, d: Draws):
             body.set_alpha(0.6)
         low, high = np.percentile(values, [2.5, 97.5])
         median, mean = float(np.median(values)), float(values.mean())
-        axes.plot([np.log10(low) if low > 0 else left, np.log10(high)], [row, row], color=APART_INK, linewidth=1.6)
-        if median > 0:
-            axes.plot(np.log10(median), row, 'o', color=APART_INK, markersize=8)
+        axes.plot([np.log10(low), np.log10(high)], [row, row], color=APART_INK, linewidth=1.6)
+        axes.plot(np.log10(median), row, 'o', color=APART_INK, markersize=8)
         axes.plot(np.log10(mean), row, 'o', markerfacecolor='white', markeredgecolor=APART_INK, markersize=8)
         for column, x in zip(NUMBER_COLUMNS, (median, mean)):
             per, unit = panel_unit(np.array([x]))
             axes.text(column, row, f'{panel_number(x / per)} {unit}', transform=numbers, ha='left', va='center',
                       fontsize=APART_TEXT, color=APART_INK)
-    for column, what in zip(NUMBER_COLUMNS, ('median', 'mean')):
+        axes.text(NUMBER_COLUMNS[2], row, f'{panel_number(100 * values.size / kinds[kind].size)} %',
+                  transform=numbers, ha='left', va='center', fontsize=APART_TEXT, color=APART_INK)
+    for column, what in zip(NUMBER_COLUMNS, ('median', 'mean', 'held in')):
         axes.text(column, len(shown) - 0.4, what, transform=numbers, ha='left', va='bottom', fontsize=APART_TEXT,
                   color=APART_INK)
     axes.set_yticks(range(len(shown)))
@@ -2627,9 +2713,13 @@ def run(params: Params) -> int:
             for symbol, name in FIGURE_ELEMENTS:
                 total = sum(by_kind(d, symbol).values())
                 per, unit = panel_unit(total)
-                mean, median, low, high = statistics(total / per)
+                mean, median, low, high, held_in = statistics(total / per)   # over the draws that hold it
+                if mean is None:
+                    print(f'  {name} in one robot: in none of the draws')
+                    continue
                 print(f'  {name} in one robot: median {panel_number(median)} {unit}, mean {panel_number(mean)} {unit} '
-                      f'(95 %: {panel_number(low)} to {panel_number(high)})')
+                      f'(95 %: {panel_number(low)} to {panel_number(high)})'
+                      + (f', held in {panel_number(held_in)} % of the draws' if held_in < 100 else ''))
             print(f'  Its two figures and where each material sits drawn into {params.output.parts_figures_dir}/'
                   f'{folder}/.')
     print(f'Written into {params.output.composition_dir}/, one folder per robot type, and the pages into '
