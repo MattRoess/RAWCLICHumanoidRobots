@@ -940,6 +940,7 @@ class Draws:
     robot_type: int = 1            # the robot type drawn
     listed: int = 0                # the robots of its sheet Type n with a mass (drawn, or not yet taken apart)
     aluminium: str = ''            # its aluminium recipe in words, for the notes page
+    templates: str = ''            # how many of its robots rest on templates, in 01's words (E13 rules 2 and 4)
 
 
 class Shared:
@@ -1261,6 +1262,7 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
     d.on_estimates = on_estimates(apart, [v for r in robots for v in schemas.versions(r.taken_apart)])
     d.robot_type, d.listed = inputs.robot_type, inputs.listed or len(robots)
     d.aluminium = alloy_words(inputs.base.recipes, shared.recipe_name['Aluminium'])
+    d.templates = schemas.template_words(apart)   # E13 rules 2 and 4, for its notes page
     return d
 
 
@@ -1946,6 +1948,7 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
          f'robot type {d.robot_type} for stock-and-flow is drawn from the workbook, and these pages show the '
          f'{len(d.register)} taken apart.') if later else '',
         'The robots drawn: ' + '; '.join(d.register) + '. A robot of two robot types is drawn in full in each of them.',
+        d.templates,   # how many rest on templates, their parts estimated from their mass (E13 rules 2 and 4)
         ('Resting most on estimates: ' + '; '.join(estimates) + '.') if estimates else '',
         'Not drawn: ' + ('; '.join(f'{r.number} {r.name} (no mass stated)' for r in left_out) or 'none') + '.' +
         (f' A robot lighter than {params.composition.type_one_lowest_kg:g} kg is not of robot type 1.'

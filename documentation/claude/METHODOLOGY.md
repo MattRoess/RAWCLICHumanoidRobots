@@ -483,6 +483,34 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    kg of robot on legs, 5.4 / 10.84 / 16.3 on wheels (E11.6 point 1), under names of their own (check 18).
 4. **Their checks:** each parts file is checked as its own type's (01's checks 18 to 20, 02's `check_parts`, with that
    type's recipes); the register's sheets by check 22.
+5. **Batch 2** (2026-11-01: "Yes, agree E12.2", "A stated mass", "Yes, agree E13", "Yes, agree E12.5", "Yes, build it"
+   on E12.6): 26 robots, 30 blocks (the CASBOT 02, the CYBORG RO1, the DR02 and the FF Master in two versions); type 3
+   then drawn over 91 robots, type 4 over 47. A robot is in the evaluation when a source states its mass, the maker's
+   first, else the internet's (news, a database, the catalogue), never one its source calls unknown: the Clone Alpha
+   and the PrimeBOT Q1 are listed only (the register's `NO_MASS_STATED`). Where sources disagree on a mass, their
+   spread is its min and max, the best-sourced its mode (the Digit, the DexBot, the Centaur-G1).
+6. **Joints from a stated joint** (Matthias, 2026-11-01: "Also the joints can be well estimated, based on the other
+   joints"; E12.5 point 2): a robot whose maker states one joint's torque, or its largest, has every body joint from
+   it. The stated torque is its largest joint's (on legs the knee, the largest in six of the seven robots with every
+   joint; on wheels the waist); every other joint's torque its kind's ratio to it in the robots with every joint (the
+   seven on legs, the Vega 1 Pro and the RB-Y1 on wheels; computed by `from_stated_joint` from their blocks, the
+   median; on legs hip pitch and roll 1.00, hip yaw 0.25, ankle pitch 0.33, ankle roll 0.24, waist 0.36, shoulder
+   0.27, elbow 0.17, wrist and head 0.08; on wheels a second waist joint 0.77, shoulder 0.24, elbow 0.13, wrist 0.04,
+   head 0.06); each module half E6.8's fit at the least ratio, the fit at the median and 1.5 times the fit at the
+   most (E). A kind's ratio is its largest joint's, so its smaller joints come out heavier: the joints overstated, the
+   frame understated. Used for the CASBOT 02 (150 N·m), the CYBORG RO1 (400) and WO1 (562 at its waist), the FF
+   Futurist (270 at its knee) and the FF Master (120); a second-hand torque not (the Dora's).
+7. **A stated battery's energy by its chemistry** ("Batteries, where the energy is given, can be estimated compositon and
+   weight due to chemistry"): its cells' mass and elements by their chemistry's energy per kg (NMC unless stated), its
+   pack by the NMC packs' ratio, as before.
+8. **The robots on templates** (EVIDENCE.md E13, "Yes, agree E13"): a template, a robot's joints as a share of its mass
+   or its battery as an energy per kg of it, spans at least half to 1.5 times its mode (a test checks every parts
+   file), so that it is never narrower than a robot's own data; in each type at most half of its robots should rest on
+   each template. 01's `template_shares` counts them over a type's robots and versions, and `template_words` says it on
+   01's overview card and 02's notes page of each type taken apart, "Most of its robots rest on templates" where the
+   rule is broken: after batch 2 the joint template 16 of 31 in type 1, 80 of 102 in type 2, 80 of 96 in type 3, 40 of
+   50 in type 4; the battery template 13, 64, 69 and 31. Nothing is weighted or left out; a research pass over the
+   robots on the joint template comes before batch 3 (rule 3).
 
 ## Robot type 2 part by part, in 02 (since 2026-10-30)
 
@@ -560,7 +588,9 @@ robot is drawn part by part, with these changes:
    with every cell of its row there and what the run does with it ("In the run"; check 22): 31 robots on 2026-10-29,
    all drawn, each with its own parts. A robot in several versions (the Booster K1: 5 Ah, 2 Ah) is one of them in each
    of its draws, each as often (decision B; a discrete state, never blended). The TRON 2 is not assigned (no form with
-   legs and arms, E5.17); the PrimeBOT Q1's mass is an estimate (E5.17 point 6). Robots lighter than 15 kg are not of
+   legs and arms, E5.17); the PrimeBOT Q1, whose mass no source states, is listed only since 2026-11-01 (its estimate of
+   E5.17 point 6 taken out: "A stated mass", EVIDENCE.md E12.4, E12.6), so 30 robots are drawn. Robots lighter than
+   15 kg are not of
    type 1 (`composition.type_one_lowest_kg`, Matthias: "Below 15 kg not part of the type 1"; 01 checks the register).
 2. **Its mass:** a triangle on its own mass in the parts file (sheet Constants; E5.14 point 1, E5.17).
 3. **Its parts:** its own rows of the parts file, part by part (decision C: the drawing with the parts of the G1, X1 or

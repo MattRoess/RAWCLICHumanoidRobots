@@ -72,7 +72,9 @@ ABOUT = [
     'Mass: as the catalogue (or the source of an added robot) states it, second-hand; minimum, mode and maximum the '
     'stated mass +- 1 kg (as the X1\'s and N1\'s own masses, EVIDENCE.md E2.8e) or the stated range; empty where no '
     'mass is stated.',
-    'Mass of the PrimeBOT Q1: no source states one; the estimate (E) agreed on 2026-10-29 (EVIDENCE.md E5.17).',
+    'No mass stated: a robot no source gives a mass, or whose source calls its mass unknown, has none: it is listed '
+    'but not in the evaluation (2026-11-01, "A stated mass", EVIDENCE.md E12.4): the PrimeBOT Q1 (its estimate of '
+    'E5.17 taken out) and the Clone Alpha (its catalogue\'s text: "The weight of the robot is not specified").',
     'Taken apart as: the rows of its type\'s parts file (data/researched/<n>_<name>/parts_taken_apart.xlsx) that are '
     'this robot, for every robot of type 1 and the robots of types 2, 3 and 4 taken apart so far (a robot of types 3 '
     'and 4 in the file of its first type among them); a robot in several versions '
@@ -144,7 +146,7 @@ TAKEN_APART = {1: {
     38: 'Menlo Asimov 2', 54: 'Booster T1', 55: 'Booster T2', 57: 'Noetix Bumi', 85: 'Noetix E1', 102: 'Unitree G1',
     103: 'Unitree G1+', 143: 'JAKA π', 147: 'ROBOTIS K0', 148: 'Booster K1 5 Ah; Booster K1 2 Ah',
     168: 'Light Origins LightBot-0', 175: 'DOBOT LUMO', 212: 'Nori L3', 231: 'PHYBOT C1', 234: 'EngineAI PM01',
-    236: 'PrimeBOT Q1', 246: 'AgiBot QUESTER1', 260: 'Leju Roban2', 268: 'RoboParty Roboto Origin',
+    246: 'AgiBot QUESTER1', 260: 'Leju Roban2', 268: 'RoboParty Roboto Origin',
     269: 'RoboParty RP1', 279: 'Fauna Sprout', 281: 'StarBot Astra', 308: 'WL Robotics Totan O1', 311: 'Unitree R1',
     332: 'TOPSTAR Xiao Tuo', 343: 'YMBOT E3', 350: 'Fourier N1',
 }, 2: {
@@ -182,15 +184,28 @@ TAKEN_APART = {1: {
     22: 'AIDOL Lab AIDOL', 26: 'AeiROBOT ALICE M1', 28: 'TeknTrash ALPHA', 29: 'AI² Robotics AlphaBot 2', 31: 'Anigon',
     32: 'Apptronik Apollo', 33: 'Apptronik Apollo 2', 43: 'Boston Dynamics Atlas', 51: 'NEUBILITY Billi',
     56: 'Borg Robotics Borg 01', 58: 'Wandercraft CALVIN-40',
+    # Batch 2 (2026-11-01, "Yes, agree E12.5", "Yes, build it": EVIDENCE.md E12.6): 18 robots in type 3's file.
+    62: 'Elite Robots Centaur-G1', 63: 'Donut Cinnamon 1', 66: 'UBTECH Cruzr S2', 67: 'UBTECH Cruzr Y1',
+    71: 'CYBORG RO1 SE; CYBORG RO1 PRO', 72: 'CYBORG WO1',
+    73: 'Sharpa D01', 75: 'Richtech Robotics Dex', 76: 'BOSHIAC DexBot', 77: 'Agility Digit',
+    78: 'Agility Digit 5', 81: 'DEEP Robotics DR02; DEEP Robotics DR02 Pro', 83: 'Duatic Alpha',
+    84: 'Siasun DUCO', 88: 'Addverb Elixis', 89: 'Addverb Elixis-W', 90: 'Genesis AI Eno', 93: 'AVIC Fengxing-001',
 }, 4: {
     1: '1X NEO', 6: 'AgiBot A2', 8: 'AgiBot A3 Ultra', 9: 'Andromeda Abi', 14: 'AgiBot A3',
     17: 'AgiBot X2; AgiBot X2 Ultra', 45: 'DOBOT Atom 153 cm', 46: 'Vbot ATOM',
+    # Batch 2 (2026-11-01, "Yes, agree E12.5", "Yes, build it": EVIDENCE.md E12.6): 8 robots in type 4's file.
+    59: 'CASBOT 02; CASBOT 02 EDU', 61: 'CasiVision CASIVIBOT', 64: 'LG CLOiD', 74: 'XYZ DEUX', 79: 'Noetix Dora',
+    91: 'Realbotix F-Series', 94: 'FF Futurist',
+    95: 'FF Master Classic Edu; FF Master Classic Ultra',
 }}
 
-# A mass no source states, estimated (E) and agreed: number -> (min, mode, max) kg and the basis. The PrimeBOT Q1:
-# the Booster K1's 19.5 kg, the robot nearest in height (0.95 against 0.88 m) with a mass from its maker, half to 1.5
-# times (Matthias, 2026-10-29: "I agree with the proposal of E5.17 ...", point 6).
-MASS_ESTIMATES = {236: (9.75, 19.5, 29.25, "E: the Booster K1's 19.5 kg, half to 1.5 times (EVIDENCE.md E5.17)")}
+# A robot with no stated mass: number -> why. Its mass empty, so that it is listed but not in the evaluation (Matthias,
+# 2026-11-01: "A stated mass", EVIDENCE.md E12.4; "If there is no mass then it should not be taken into the evaluation",
+# 2026-10-30). The PrimeBOT Q1's estimate of E5.17 (agreed on 2026-10-29) taken out; the Clone Alpha's catalogue mass is
+# one its catalogue's own text calls unknown.
+NO_MASS_STATED = {
+    65: 'no mass stated: the catalogue\'s own text "The weight of the robot is not specified" (EVIDENCE.md E12.4)',
+    236: 'no mass stated in any source (EVIDENCE.md E5.17); its estimate taken out (E12.4)'}
 
 # The decisions, one per robot: (number, types, form, entry, decided in). Types: "4" or "3, 4", the leading one first,
 # empty where the entry says why there are none. Form: how the robot moves, as read (EVIDENCE.md E4.1 to E4.10).
@@ -604,8 +619,8 @@ def register_rows(catalogue: dict) -> list:
     for number, types, form, entry, decided in DECISIONS:
         robot, maker, country, status, height, mass, source = robots[number]
         low, mode, high, basis = mass_bounds(mass)
-        if number in MASS_ESTIMATES:      # no mass stated anywhere: the agreed estimate (E)
-            low, mode, high, basis = MASS_ESTIMATES[number]
+        if number in NO_MASS_STATED:      # no mass stated (E12.4): listed, not in the evaluation
+            low, mode, high, basis = None, None, None, NO_MASS_STATED[number]
         out.append([number, robot, maker, country, status, height, mass, low, mode, high, basis, types, form, entry,
                     taken_apart_as(number), decided, source])
     return out

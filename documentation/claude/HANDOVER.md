@@ -56,7 +56,82 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-10-30, afternoon: batch 1 of types 3 and 4 entered (start here)
+## 2026-11-01: batch 2 of types 3 and 4 entered (start here)
+
+**Done** on "Yes, build it" (EVIDENCE E12.6, open points A to C as recommended; where each point landed, E12.7; checks,
+V122). Nothing committed.
+- `tools/parts_types_3_and_4.py`: batch 2's 30 blocks (type 3's file 39 blocks for 37 robots, type 4's 19 for 16); the
+  joints of a robot from its one stated joint (`from_stated_joint`, the ratios computed from the robots with every
+  joint); 39 source codes. The two builders' texts.
+- `tools/make_humanoid_register.py`: batch 2 taken apart; `NO_MASS_STATED` (the Clone Alpha, the PrimeBOT Q1) in place of
+  `MASS_ESTIMATES`. `tools/1_compact_research_developer/make_parts_taken_apart.py`: the PrimeBOT Q1 out.
+- `01_schemas.py`: `template_shares`, `template_words` on every card of a type taken apart. `02_composition.py`: the same
+  words on each type's notes page.
+- Tests (rule 1 of E13, the 30 blocks, the ratios, the register's sheets, the shares), README, METHODOLOGY, EVIDENCE
+  E12.7, VERIFICATION V122.
+- After it: type 1 drawn over 30 robots, type 2 over 96, type 3 over 91, type 4 over 47; on the joint template 16 of 31,
+  80 of 102, 80 of 96, 40 of 50 (E13: still above half in every type).
+
+**For his word:** E12.7's five departures from the text (the computed ratios, the shorter names, the Centaur-G1's
+85 kg read only now, the sensors' counts, type 1's changed draws); then E13 rule 3's research pass before batch 3;
+the 1X NEO's frame (E11.8); commit and push.
+
+**His runs, in this order** (all in RAWCLICHumanoidRobots; batches 1 and 2 together; each says what it changes):
+1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (rewrites the register: batches 1
+   and 2 taken apart, the sheets Type 3 and Type 4 "drawn: its own parts" for 91 and 47, the PrimeBOT Q1 and the Clone
+   Alpha "not drawn: no mass stated"; needed);
+2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/1_compact_research_developer/make_parts_taken_apart.py`
+   (rewrites type 1's file without the PrimeBOT Q1; needed);
+3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+   (writes type 3's file, new: 37 robots; needed);
+4. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/4_service_healthcare_interaction/make_parts_taken_apart.py`
+   (writes type 4's file, new: 16 robots; needed);
+5. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (new pages: types 3 and 4's tables and where their
+   kinds sit; on `overview_2.png` every card of a type taken apart says how many rest on templates; type 1's table
+   without the PrimeBOT Q1);
+6. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws, his run: types 3 and 4 drawn part
+   by part, new folders about 2.7 and 1.8 GB (×100 the sandbox's 27 and 18 MB); type 1 drawn anew without the PrimeBOT Q1, **its draws for stock-and-flow
+   change**; type 2's and types 3 to 6's draws for stock-and-flow unchanged; every notes page gains the line on
+   templates).
+Not needed: type 2's builder (its file unchanged); `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+only rewrites the settings' register and can wait. After runs 1 to 4, the tests that compare with his files on disk
+pass, and 01's tests of type 1's file (they read his file on disk).
+
+## 2026-11-01: batch 2 of types 3 and 4, sources read
+
+Matthias, 2026-11-01, on this Mac: "I want to continue here", the goal "to have most of the humanoid robots being part of
+the dataset and than most of the data are based on data given in the internet", then "Yes, batch 2".
+- **Where it stands** (V115): 154 of the register's 311 robots with a type and a mass taken apart, 157 to do (leading
+  type 3 78, 4 70, 5 5, 6 4). The masses rest on internet sources for 99 % of the robots; the joints are the template's
+  share for 75 %, the battery the template's energy per kg for 60 %, the boards estimated for 84 %.
+- **Batch 2 read** (EVIDENCE E12, V116): numbers 59 to 95, 27 robots; the makers' figures robot by robot in E12.1;
+  five questions in E12.2 (the makers' masses, among them the Elixis-W's 210 kg against the register's 75; two
+  versions for four robots; the Clone Alpha without a stated mass; four robots their maker does not show; which
+  downloads), agreed ("Yes, agree E12.2"). The downloads (E12.3, V117): DEEP Robotics' DR02 sheet read (68 / 78 kg,
+  1,440 Wh); Agility's and Elite's sheets are behind forms for personal data, not obtained. Nothing proposed or
+  entered. Then, on "check the internet" (his rule: maker first, then the internet, else listed and not evaluated, no
+  robot on estimates only), E12.4 and V118: the internet for the 16 the makers leave empty; the DEUX's mass found on its
+  maker's page after all; of the robots already entered, 28 have nothing of their own but their mass and the PrimeBOT
+  Q1 has an estimated mass. Decided ("A stated mass"): a robot is in the evaluation when a source states its mass;
+  the Clone Alpha and the PrimeBOT Q1 listed only, entered with batch 2. Next, on his word: the proposal of batch 2's
+  numbers, as E11.6.
+- **Robots on templates** (EVIDENCE E13, V119): on "they should not be the majority of a given type", measured: the
+  joint template carries 53 % (type 1) to 85 % (type 4) of each type's robots, the battery template 44 to 71 %; the
+  templates' compositions are 1.3 to 9 times as uncertain as the robots' own data. Four rules agreed ("Yes, agree
+  E13"): a template never narrower than half to 1.5 times; at most half of a type on each template; a research pass over
+  the entered template robots before batch 3; a type still above half says so on its pages. Not built yet.
+- **Batch 2's proposal** (EVIDENCE E12.5, V120), on "Propose the numbers" and his two points (a stated battery's
+  energy drawn by its chemistry; joints from a robot's stated joint): 30 blocks; five robots' joints (eight blocks) from
+  their stated torque by the ratios of the seven with every joint; four questions. Agreed ("Yes, agree E12.5");
+  nothing entered. The spec of the entry written ("Spec the entry", EVIDENCE E12.6, V121): 10 points, three open
+  (A: the PrimeBOT Q1's leftovers removed; B: the joint ratios computed from the blocks; C: the pages count robots and
+  versions); E12.5 point 12's shares corrected (type 3 80 of 96, type 4 40 of 50 on the joint template). It waits for
+  his yes. Nothing built.
+- **His runs of batch 1's entry are still not done** (the register on disk of 2026-10-30 14:44, no files of types 3
+  and 4): the list below, under "His runs, in this order".
+- Still open: the 1X NEO's frame below zero in 13.5 % of its draws (E11.8); commit and push on his word.
+
+## 2026-10-30, afternoon: batch 1 of types 3 and 4 entered
 
 ### Monday, on the other Mac, first
 
@@ -101,7 +176,7 @@ V114). Nothing committed.
    battery 5 kg, shell 3.5 kg; frame 3.4 kg on average, 95 %: −1.9 to 8.3). Reported, not cut.
 3. Commit and push.
 
-**His runs, in this order** (all in RAWCLICHumanoidRobots; each says what it changes):
+**His runs, in this order** (all in RAWCLICHumanoidRobots; each says what it changes; replaced by the list of 2026-11-01, batch 2 entered, at the top):
 1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (rewrites the register: batch 1's
    27 "Taken apart as", the sheets Type 3 and Type 4 "drawn: its own parts" for 72 and 33; needed);
 2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`

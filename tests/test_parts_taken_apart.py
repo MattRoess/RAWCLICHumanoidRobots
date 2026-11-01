@@ -144,8 +144,9 @@ class TestDraws(unittest.TestCase):
 
     def test_each_robot_of_the_register_is_drawn_equally_often(self):
         inputs, d = self.drawn()
-        self.assertEqual(len(d.register), 31)
-        self.assertEqual(len(d.robots), 32)
+        # Since 2026-11-01 (E12.6 point 4) the PrimeBOT Q1 listed only, no mass stated: 30 robots, the K1 in two.
+        self.assertEqual(len(d.register), 30)
+        self.assertEqual(len(d.robots), 31)
         p = 1 / len(d.register)
         for share in np.bincount(d.register_robot, minlength=len(d.register)) / d.n:
             self.assertAlmostEqual(share, p, delta=4 * np.sqrt(p * (1 - p) / d.n))
@@ -212,7 +213,7 @@ class TestDraws(unittest.TestCase):
         columns, draws = d.parts
         low, _, high = inputs.apart.constants[schemas.ALL_ROBOTS][composition.JOINT_SHARE][1]
         shared = [r for r in d.robots if any(j.share is not None for j in inputs.apart.joints if j.robot == r)]
-        self.assertEqual(len(shared), 17)
+        self.assertEqual(len(shared), 16)   # the PrimeBOT Q1 out since 2026-11-01 (E12.6)
         for robot in shared:
             rows = d.robot == d.robots.index(robot)
             joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':')
@@ -1101,9 +1102,10 @@ class TestTypesThreeAndFour(unittest.TestCase):
         cls.params.composition.draws = 3000
 
     def test_type_3_over_its_72_and_type_4_over_its_33(self):
-        # Versions: type 3's 72 robots and the AgiBot X2, the Flexiv AICO 2 and the Rainbow RB-Y1 in two each; type 4's
-        # 33 and the AgiBot X2 in two.
-        for robot_type, count, versions in ((3, 72, 75), (4, 33, 34)):
+        # Versions: type 3's robots and the AgiBot X2, the Flexiv AICO 2, the Rainbow RB-Y1 and since batch 2 (E12.6)
+        # the CYBORG RO1 and the DR02 in two each; type 4's and the X2, the CASBOT 02 and the FF Master in two. Since
+        # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out).
+        for robot_type, count, versions in ((3, 91, 96), (4, 47, 50)):
             inputs = type_inputs_or_skip(self, self.params, robot_type)
             self.assertEqual(len(inputs.robots), count, msg=robot_type)
             self.assertGreater(len(inputs.files), 1)
@@ -1140,6 +1142,20 @@ class TestTypesThreeAndFour(unittest.TestCase):
         file_of = {id(f): t for t, f in inputs.files.items()}     # a file by the type it is the parts file of
         for name, apart in seen.items():
             self.assertEqual(file_of[id(apart)], file_of[id(inputs.apart.origin[name])], msg=name)
+
+    def test_its_notes_say_how_many_rest_on_templates(self):
+        # E13 rules 2 and 4 (E12.6 point 6): 02's notes page of a type says, in 01's words, how many of its robots rest
+        # on the templates, and "most" where above half.
+        params = Params()
+        params.composition.draws = 300
+        for robot_type in (3, 4):
+            inputs = type_inputs_or_skip(self, params, robot_type)
+            d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+            self.assertEqual(d.templates, schemas.template_words(inputs.apart))
+            category = next(c for c in inputs.base.book.categories if c.number == robot_type)
+            c = composition.compose_taken_apart(category, d, inputs.base.lists)
+            self.assertIn(d.templates, composition.taken_apart_notes(c, d, [], params, inputs.later))
+            self.assertTrue(d.templates.startswith('Most of its robots rest on templates'))
 
     def test_types_1_and_2_from_their_own_file_only(self):
         for robot_type in (1, 2):

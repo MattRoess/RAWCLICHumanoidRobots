@@ -85,7 +85,7 @@ class TestMakePartsTakenApart(unittest.TestCase):
         # Matthias, 2026-10-29: "Yes, build it" (the entry, point 2: every robot of the sheet Type 1 its own rows;
         # point 3: the K1 in its two versions).
         self.assertEqual(sorted(self.apart.robots), sorted(TYPE_ONE))
-        self.assertEqual(len(self.apart.robots), 32)
+        self.assertEqual(len(self.apart.robots), 31)   # 30 robots, the K1 in two; the PrimeBOT Q1 out (E12.6)
         self.assertIn('Booster K1 5 Ah', self.apart.robots)
         self.assertIn('Booster K1 2 Ah', self.apart.robots)
 
@@ -131,7 +131,7 @@ class TestMakePartsTakenApart(unittest.TestCase):
         # E5.17 point 1: the joint modules a share of the robot's mass, split as batch 1's are on average.
         shared = [r for r in self.apart.robots
                   if any(j.share is not None for j in self.apart.joints if j.robot == r)]
-        self.assertEqual(len(shared), 17)
+        self.assertEqual(len(shared), 16)   # the PrimeBOT Q1 listed only since 2026-11-01 (E12.6)
         for robot in shared:
             shares = [j.share for j in self.apart.joints if j.robot == robot]
             self.assertNotIn(None, shares, msg=robot)
@@ -1005,6 +1005,39 @@ TYPE_FOUR_BATCH_1 = {
     'Andromeda Abi': (49, 50, 51), 'AgiBot A3': (54, 55, 56), 'AgiBot X2': (34, 35, 36),
     'AgiBot X2 Ultra': (38, 39, 40), 'DOBOT Atom 153 cm': (57.91, 58.91, 61.81), 'Vbot ATOM': (49, 50, 51)}
 TYPES_34_ON_WHEELS = {'Andromeda Abi', 'AeiROBOT ALICE M1', 'AI² Robotics AlphaBot 2', 'Anigon', 'NEUBILITY Billi'}
+# Batch 2 (E12.5 agreed, "Yes, agree E12.5"; E12.6, "Yes, build it"): each robot in the file of its first type among 3
+# and 4, in the register's order; its mass as E12.5's table (the makers' ± 1 kg; the internet's; the sources' spread).
+TYPE_THREE_BATCH_2 = {
+    'Elite Robots Centaur-G1': (85, 260, 261), 'Donut Cinnamon 1': (69, 70, 71),
+    'UBTECH Cruzr S2': (149, 150, 151), 'UBTECH Cruzr Y1': (89, 90, 91),
+    'CYBORG RO1 SE': (74, 75, 76), 'CYBORG RO1 PRO': (79, 80, 81),
+    'CYBORG WO1': (169, 170, 171), 'Sharpa D01': (57.5, 75, 92.5),
+    'Richtech Robotics Dex': (59, 60, 61), 'BOSHIAC DexBot': (57, 58, 80), 'Agility Digit': (62.5, 63.5, 76),
+    'Agility Digit 5': (128, 129, 130), 'DEEP Robotics DR02': (67, 68, 69),
+    'DEEP Robotics DR02 Pro': (77, 78, 79), 'Duatic Alpha': (89, 90, 91), 'Siasun DUCO': (90, 100, 110),
+    'Addverb Elixis': (74, 75, 76), 'Addverb Elixis-W': (209, 210, 211), 'Genesis AI Eno': (119, 120, 121),
+    'AVIC Fengxing-001': (79, 80, 81)}
+TYPE_FOUR_BATCH_2 = {
+    'CASBOT 02': (49, 50, 51), 'CASBOT 02 EDU': (51, 52, 53), 'CasiVision CASIVIBOT': (54, 55, 56),
+    'LG CLOiD': (60, 65, 70), 'XYZ DEUX': (59, 60, 61), 'Noetix Dora': (19, 20, 21), 'Realbotix F-Series': (49, 50, 51),
+    'FF Futurist': (68, 69, 70), 'FF Master Classic Edu': (34, 35, 36),
+    'FF Master Classic Ultra': (38, 39, 40)}
+TYPES_34_ON_WHEELS_2 = {'Elite Robots Centaur-G1', 'UBTECH Cruzr S2', 'UBTECH Cruzr Y1', 'CYBORG WO1',
+                        'Sharpa D01', 'Richtech Robotics Dex', 'Duatic Alpha', 'Siasun DUCO', 'Addverb Elixis-W',
+                        'Genesis AI Eno', 'CasiVision CASIVIBOT', 'LG CLOiD', 'XYZ DEUX', 'Realbotix F-Series'}
+TYPES_34_LIFTS_2 = {'UBTECH Cruzr S2', 'UBTECH Cruzr Y1', 'Siasun DUCO', 'Genesis AI Eno', 'XYZ DEUX'}
+# Joints from a stated joint (E12.5 point 2): the block, its stated torque (N·m), and the joint it is (on legs the knee,
+# on wheels the waist).
+FROM_A_STATED_JOINT = {'CASBOT 02': (150, 'Knee'), 'CASBOT 02 EDU': (150, 'Knee'),
+                       'CYBORG RO1 SE': (400, 'Knee'), 'CYBORG RO1 PRO': (400, 'Knee'),
+                       'CYBORG WO1': (562, 'Waist'), 'FF Futurist': (270, 'Knee'),
+                       'FF Master Classic Edu': (120, 'Knee'),
+                       'FF Master Classic Ultra': (120, 'Knee')}
+# The ratios by program from the robots with every joint (E12.5 point 2, corrected in E12.7: on legs over the knee the
+# elbow 0.17; on wheels the second waist joint the median of the Vega's 0.54 and the RB-Y1's 1.00), to two decimals.
+LEG_RATIOS = {'Hip pitch': 1.00, 'Hip roll': 1.00, 'Hip yaw': 0.25, 'Knee': 1.00, 'Ankle pitch': 0.33,
+              'Ankle roll': 0.24, 'Waist': 0.36, 'Shoulder': 0.27, 'Elbow': 0.17, 'Wrist': 0.08, 'Head': 0.08}
+WHEEL_RATIOS = {'Waist': 1.00, 'Second waist': 0.77, 'Shoulder': 0.24, 'Elbow': 0.13, 'Wrist': 0.04, 'Head': 0.06}
 
 
 class TestTypesThreeAndFour(unittest.TestCase):
@@ -1016,8 +1049,8 @@ class TestTypesThreeAndFour(unittest.TestCase):
         cls.four, _ = written(builder_four)
 
     def test_each_robot_in_the_file_of_its_first_type_among_3_and_4(self):
-        self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1))
-        self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1))
+        self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1) + list(TYPE_THREE_BATCH_2))
+        self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1) + list(TYPE_FOUR_BATCH_2))
         self.assertEqual({r.type for r in self.three.robots.values()}, {3})
         self.assertEqual({r.type for r in self.four.robots.values()}, {4})
         self.assertFalse(set(self.three.robots) & set(self.four.robots))
@@ -1031,7 +1064,8 @@ class TestTypesThreeAndFour(unittest.TestCase):
             self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, Params())], [])
 
     def test_the_masses_as_decided(self):
-        for apart, masses in ((self.three, TYPE_THREE_BATCH_1), (self.four, TYPE_FOUR_BATCH_1)):
+        for apart, masses in ((self.three, {**TYPE_THREE_BATCH_1, **TYPE_THREE_BATCH_2}),
+                              (self.four, {**TYPE_FOUR_BATCH_1, **TYPE_FOUR_BATCH_2})):
             for robot, mass in masses.items():
                 self.assertEqual(apart.constants[robot]['Robot mass, with battery'][1], mass, msg=robot)
         self.assertEqual(self.three.constants['NEURA 4NE1 Gen 4']['Robot mass, with battery'][3], 'S, E')
@@ -1074,7 +1108,103 @@ class TestTypesThreeAndFour(unittest.TestCase):
     def test_on_wheels_and_the_magnesium_frames(self):
         both = {**{n: self.three for n in self.three.robots}, **{n: self.four for n in self.four.robots}}
         wheeled = {n for n, a in both.items() if schemas.on_wheels(a, n)}
-        self.assertEqual(wheeled, TYPES_34_ON_WHEELS)
+        self.assertEqual(wheeled, TYPES_34_ON_WHEELS | TYPES_34_ON_WHEELS_2)
         self.assertTrue(any(p.robot == 'Anigon' and p.kind == 'Lift column' for p in self.three.parts))
         frames = {p.robot: p.material for p in self.four.parts if p.name == 'Frame'}
         self.assertEqual((frames['AgiBot A3'], frames['AgiBot A3 Ultra']), ('Magnesium', 'Magnesium'))
+
+
+def template_spans(constants: dict) -> list:
+    """E13 rule 1: the shared quantities that are a share of a robot's mass or an energy per kg of it (the templates,
+    resting on its mass) whose min is above half their mode or whose max below 1.5 times it."""
+    narrow = []
+    for quantity, (_, (low, mode, high), *_) in constants.items():
+        if ('share of the robot mass' in quantity or 'per kg of robot' in quantity) and mode:
+            if low > 0.5 * mode + 1e-9 or high < 1.5 * mode - 1e-9:
+                narrow.append(quantity)
+    return narrow
+
+
+class TestTemplatesWiderThanData(unittest.TestCase):
+    """E13 rule 1 (Matthias, 2026-11-01, "Yes, agree E13"): a template, a robot's part estimated from its mass, spans at
+    least half to 1.5 times its mode in every parts file, so that it is never narrower than a robot's own data."""
+
+    def test_every_template_of_every_parts_file_spans_half_to_one_and_a_half(self):
+        for builder in (None, builder_two, builder_three, builder_four):
+            apart = written(builder)[0] if builder else written()[0]
+            self.assertEqual(template_spans(apart.constants['all']), [], msg=apart.source)
+
+    def test_a_narrowed_template_is_caught(self):
+        apart = written(builder_three)[0]
+        narrowed = dict(apart.constants['all'])
+        name = 'Battery energy per kg of robot, types 3 and 4'
+        row = narrowed[name]
+        narrowed[name] = (row[0], (10.0, 14.67, 20.0)) + tuple(row[2:])
+        self.assertEqual(template_spans(narrowed), [name])
+
+
+class TestTypesThreeAndFourBatchTwo(unittest.TestCase):
+    """Types 3 and 4's batch 2 entered (E12.5 agreed; E12.6, "Yes, build it"): joints from a stated joint, the stated
+    batteries by their chemistry, the robots on wheels and their lifts; the Clone Alpha and the PrimeBOT Q1 listed only
+    (E12.4, "A stated mass")."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.three, _ = written(builder_three)
+        cls.four, _ = written(builder_four)
+        cls.both = {**{n: cls.three for n in cls.three.robots}, **{n: cls.four for n in cls.four.robots}}
+        cls.module = sys.modules[builder_three.SHARED.__name__]
+
+    def test_the_ratios_from_the_robots_with_every_joint(self):
+        for ratios, expected in ((self.module.LEG_RATIOS, LEG_RATIOS), (self.module.WHEEL_RATIOS, WHEEL_RATIOS)):
+            self.assertEqual(set(ratios), set(expected))
+            for kind, value in expected.items():
+                low, mid, high = ratios[kind]
+                self.assertAlmostEqual(mid, value, delta=0.005, msg=kind)
+                self.assertLessEqual(low, mid, msg=kind)
+                self.assertLessEqual(mid, high, msg=kind)
+
+    def test_joints_from_a_stated_joint(self):
+        fit = lambda t: 0.0689 * t ** 0.566  # noqa: E731   (E6.8's fit, kg at a torque)
+        for robot, (torque, kind) in FROM_A_STATED_JOINT.items():
+            body = [j for j in self.both[robot].joints if j.robot == robot
+                    and not j.name.startswith(('Hand', 'Gripper', 'Wheel', 'Steering', 'Lift'))]
+            self.assertTrue(body, msg=robot)
+            self.assertTrue(all(j.share is None for j in body), msg=robot)             # not the template
+            self.assertEqual(max(j.torque for j in body), torque, msg=robot)
+            stated = next(j for j in body if j.name == kind)
+            self.assertAlmostEqual(stated.module_mass[1], fit(torque), places=3, msg=robot)
+            for j in body:   # each module half to 1.5 times the fit at its kind's least and most ratio, or wider
+                self.assertLessEqual(j.module_mass[0], 0.5 * fit(j.torque) + 1e-3, msg=(robot, j.name))
+                self.assertGreaterEqual(j.module_mass[2], 1.5 * fit(j.torque) - 1e-3, msg=(robot, j.name))
+        hip_yaw = next(j for j in self.four.joints if j.robot == 'CASBOT 02' and j.name == 'Hip yaw')
+        self.assertAlmostEqual(hip_yaw.torque, 150 * LEG_RATIOS['Hip yaw'], delta=1)
+        # The Dora's second-hand 120 N·m not used: the template (E12.5 point 2).
+        self.assertTrue(any(j.share is not None for j in self.four.joints if j.robot == 'Noetix Dora'))
+
+    def test_the_hands_and_the_batteries(self):
+        hand = next(j for j in self.three.joints
+                    if j.robot == 'CYBORG WO1' and j.name.startswith('Hand'))
+        self.assertEqual((hand.count, hand.module_mass), (2, (0.7125, 0.75, 0.7875)))      # "重量 750g", ± 5 % (S)
+
+        def wh(robot):
+            own = self.both[robot].constants[robot]
+            return own['Battery voltage'][1][1] * own['Battery capacity'][1][1]
+        for robot, energy in (('CASBOT 02', 480), ('Elite Robots Centaur-G1', 1920),
+                              ('CYBORG RO1 SE', 888), ('CYBORG RO1 PRO', 1608),
+                              ('XYZ DEUX', 1440), ('DEEP Robotics DR02', 1440), ('DEEP Robotics DR02 Pro', 1440),
+                              ('FF Futurist', 690)):
+            self.assertAlmostEqual(wh(robot), energy, delta=1, msg=robot)
+        self.assertNotIn('Battery voltage', self.three.constants['CYBORG WO1'])   # a runtime only
+
+    def test_on_wheels_and_their_lifts(self):
+        lifts = {p.robot for a in (self.three, self.four) for p in a.parts if p.kind == 'Lift column'}
+        self.assertEqual(lifts & set(TYPE_THREE_BATCH_2) | lifts & set(TYPE_FOUR_BATCH_2), TYPES_34_LIFTS_2)
+        steering = [j for j in self.four.joints if j.robot == 'XYZ DEUX' and j.name == 'Steering motor']
+        self.assertEqual(steering[0].count, 2)
+
+    def test_the_robots_listed_only_have_no_rows(self):
+        one, _ = written()
+        self.assertNotIn('PrimeBOT Q1', one.robots)
+        for apart in (one, written(builder_two)[0], self.three, self.four):
+            self.assertFalse([r for r in apart.robots if 'Clone Alpha' in r], msg=apart.source)

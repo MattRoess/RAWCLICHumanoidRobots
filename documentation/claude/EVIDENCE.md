@@ -8,6 +8,357 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E13. Robots whose composition rests on their mass: their uncertainty and their share of a type (2026-11-01). Nothing built
+
+Matthias, 2026-11-01: "If the composition is based on mass based estimates the composition has larger uncertainties,
+furthermore they should not be the majority of a given type. Otherwise additional rules have to be formulated."
+Checked in the code and by drawing (V119): a robot's composition rests on its mass where its joint modules are the
+template's share of its mass (no joint torques, module masses or teardown for it) and where its battery is the
+template's energy per kg of it (no stated energy, or voltage and capacity). Both templates span half to 1.5 times
+their mode (the standing rule for estimates): on legs, types 3 and 4's joints 22.4 / 44.7 / 67.1 % of the mass and
+battery 7.3 / 14.67 / 22.0 Wh per kg; type 1's and type 2's their own (E5.17, E7.4, E9.6).
+
+**1. Larger uncertainties: they hold.** Types 1 to 4 drawn by 02 at 20,000 draws, robot by robot, the 95 % interval
+over the median (the median over the robots):
+
+| Quantity, per kg of robot | Robots on their own data | Robots on the templates |
+|---|---|---|
+| Joint modules | 0.23 (55 robots) | 0.72 (188) |
+| Battery cells | 0.12 (92) | 0.79 (151) |
+| Copper | 0.42 | 0.57 |
+| Neodymium, dysprosium | 0.86 | 1.11, 1.12 |
+| Lithium, cobalt | 0.09 | 0.79 |
+
+(the magnets' element fractions held fixed, so the magnets' own spread is not in these; a robot of two types counted
+in each.)
+
+**2. Not the majority of a type: broken in every type for the joints.** The robots and versions of each type in the
+evaluation:
+
+| Type | Robots and versions | Joints a share of the mass | Battery an energy per kg | Both |
+|---|---|---|---|---|
+| 1 | 32 | 17 (53 %) | 14 (44 %) | 14 (44 %) |
+| 2 | 102 | 80 (78 %) | 64 (63 %) | 58 (57 %) |
+| 3 | 75 | 62 (83 %) | 53 (71 %) | 50 (67 %) |
+| 4 | 34 | 29 (85 %) | 20 (59 %) | 19 (56 %) |
+
+Batch 2 would add to it: its makers state no joint's torque for any of its 26 (E12.2), so nearly all would enter on
+the joint template.
+
+**Proposed rules, each with my recommendation:**
+
+| # | Rule | Recommended |
+|---|---|---|
+| 1 | **A template is wider than data**: a template's quantity spans at least half to 1.5 times its mode, never narrower | as now; a test, in the existing tests, that every template quantity of every parts file spans it, and the measure above repeated in every sandbox |
+| 2 | **Not the majority**: in each type, at most half of its robots in the evaluation rest on the joint template, and at most half on the battery template, each counted on its own | the rule as you wrote it; 01's overview and each type's notes page give both shares, so that a type above half is seen |
+| 3 | **Research before more robots on templates**: before batch 3, a pass over the robots already entered on the joint template (types 2 to 4 first), robot by robot: the maker's model files (URDF, MJCF), actuator datasheets of the maker or its actuator's maker, tables of joint torques, teardowns; then the battery (its Wh, or V and Ah), the maker first, else the internet | yes; batch 2 entered as agreed, its robots counted in the shares; how many template robots the pass turns into data robots cannot be known before (the makers' pages were read in their batches and gave none) |
+| 4 | **While a type stays above half after the pass**: nothing is weighted or left out (each robot as often, as decided on 2026-10-28); the type's pages say that most of its robots rest on templates, and how many | yes; the hatching of the kg resting on estimates stays as it is |
+
+**Decided** (Matthias, 2026-11-01: "Yes, agree E13"): rules 1 to 4 as recommended. Nothing built yet: rule 1's test and
+rule 2's and 4's words on the pages are built on his word for a spec (with batch 2's entry, recommended); rule 3's pass
+comes before batch 3.
+
+## E12. Robot types 3 and 4: research, batch 2 (2026-11-01). Nothing entered
+
+Matthias, 2026-11-01: "It is the goal to have most of the humanoid robots being part of the dataset and than most of the
+data are based on data given in the internet", then "Yes, batch 2" (the next 27 robots of types 3 and 4 in the
+register's order, sources first, as batch 1). Batch 2: numbers 59 to 95 of the register, its robots of type 3 or 4 with
+a mass not yet taken apart; four are also of type 5 (the CYBORG RO1 and WO1, the DR02, whose leading type is 5).
+Read on 2026-11-01: the makers' pages through seven web-fetch reads, and myself in the built-in browser where those got
+no text or were refused (CasiVision, UBTECH's two spec diagrams, Faraday Future's two spec tables, Addverb's Elixis-W
+tab, Elite, Sharpa, XYZ, Noetix, Addverb's GitHub folder); four searches for makers' pages the reads did not find (LG,
+Siasun, AVIC, Noetix), their results only leads. **No PDF and no download opened** (they wait for his word, E12.2
+point 5). Catalogue figures (humanoid.guide) are second-hand and only context. Nothing is entered.
+
+### E12.1 Robot by robot: what the makers state
+
+The register's height, mass and form in brackets; **bold** where the maker's differs, or where the maker names two
+versions.
+
+| # | Robot (the register) | What the maker states | Source | Kind |
+|---|---|---|---|---|
+| 59 | CASBOT 02, CASBOT (163 cm, 50 kg, legs) | "身高约163cm"; "整机重量 (带电池) 约50kg", **EDU "约52kg"**; legs 6 × 2, arms 5 × 2, waist 1, head 2 ("不含灵巧手 25DoF"; its core figures "≥37DoF", not reconciled); hand "11DoF (6支持)"; "最大关节扭矩150N.m"; battery "48V 10Ah", "三元锂电池" (NMC), "约1.5h"; "Orin AGX" + "RK3588", "275TOPS"; RGB-D 1 (EDU 3), binocular 1, fisheye 2, IMU, microphone array, LiDAR on the EDU only | casbot.tech/product/02 | Maker's spec table |
+| 61 | CASIVIBOT, CasiVision (140 cm, 55 kg) | **no humanoid on the maker's site**: CasiVision (en.zhongkehuiyuan.com) shows optical inspection equipment and machine vision only | en.zhongkehuiyuan.com, read in the browser | Maker's site |
+| 62 | Centaur-G1, Elite Robots (150 cm, 260 kg, wheels) | height and mass not stated; "全身自由度 20个", arms "7个" each; "全向移动底盘" (omnidirectional base); battery "48V 40Ah"; LiDAR, head RGB-D, wrist binocular cameras, six-axis force sensors at the ends; payload 5 kg per arm; computer not named; "下载完整参数表格" a download, not opened | elibot.com/product/wheeled; press release 2026-05-25 | Maker's page, press release |
+| 63 | Cinnamon 1, Donut Robotics (~160–180 cm, **~60–90 kg**, legs) | "Height approx. 170cm・Weight approx. 70kg"; "bipedal"; nothing else | donutrobotics.com/en/blank-2 | Maker's products page |
+| 64 | CLOiD, LG (~120–130 cm, ~60–70 kg, wheels) | arms "seven degrees of freedom each", "Five individually actuated fingers on each hand", "a chipset integrated into the head", "a display, speaker, camera and an array of sensors"; height, mass, base, battery not stated; the CES 2026 launch release not found on LG's sites | lg.com/us/press-release (2025-12-31) | Maker's press release |
+| 65 | Clone Alpha, Clone Robotics (170 cm, 60 kg, legs) | no figures: "bipedal android", artificial muscles "Myofiber", "Powered with only water. And electricity."; **the catalogue's own text: "The weight of the robot is not specified"**, its table 60 kg | clonerobotics.com, /android | Maker's marketing pages |
+| 66 | Cruzr S2, UBTECH (175 cm, 150 kg, wheels) | its "Product Specifications" a labelled picture: fisheye cameras 2, RGB cameras 2, RGB-D 2 (chest, base), LiDAR 2 (base, front and back), microphone 1, speakers 2, six-axis force sensors 2, dexterous hands 2; "0-40cm lifting range", 15 kg payload, 2 m/s; height and mass not stated | ubtrobot.com/en/humanoid/products/cruzr-s2, read in the browser | Maker's page |
+| 67 | Cruzr Y1, UBTECH (170 cm, 90 kg, wheels) | its picture: a lifting module (a lift column), arms 2, end effectors 2, head RGB-D, wrist RGB-D 2, LiDAR, time-of-flight arrays 2, binocular cameras 2, the battery in the base; height and mass not stated | ubtrobot.com/en/humanoid/products/cruzr-y1, read in the browser | Maker's page |
+| 71 | CYBORG RO1, Cyborg Robotics (180 cm, 75 kg, legs) | "1800*578*327mm"; **"体重 75kg（SE），80kg（PRO）"**; "总自由度 62": legs 6 × 2, waist 2, arms 7 × 2, hand "16"; "最大关节扭矩 >400N·m"; **battery "48V15000mAH（SE） 48V30000mAH（PRO）"**, hot-swappable, a backup "48V3500mAH"; "12核275TOPS"; fisheye and RGB-D cameras, IMU, LiDAR, six-axis force sensors, four microphones (counts not stated); its hand: "重量 750g", "16（主动6，欠驱动10）", tendon-driven | cyb-org.cn/index.php?id=6, id=5 | Maker's spec tables |
+| 72 | CYBORG WO1, Cyborg Robotics (160 cm, 170 kg, wheels) | "710*585*1600mm"; "体重 170kg"; "总自由度 53" (its text "50"): chassis 3, waist 2, arms 7, hands 16; "最大关节扭矩 562N.m"; "电池续航时间 5h", no energy; 275 TOPS; monocular and RGB-D cameras, IMU, LiDAR, infrared, ultrasonic, six-axis force sensors; the same hand as the RO1 | cyb-org.cn/index.php?id=4 | Maker's spec table |
+| 73 | D01, Sharpa (162 cm, 40 kg) | "1109-1624 mm (H)"; **"Weight (Without Chassis) ～40kg"**; "66 DoF" with its hands; 7-DoF arms, the Wave hand; "NVIDIA® Jetson Thor™"; 5 kg per arm; a tactile skin over the body; its chassis not described | sharpa.com/pages/d01, read in the browser | Maker's spec sheet |
+| 74 | DEUX, XYZ (155 cm, 60 kg, wheels) | its "Robot Spec" (loaded only at the foot of the page; first read as "mass not stated", corrected in E12.4): "900mm (min) – 1550mm (max)"; **"35kg (Base), 25kg (Robot), 60kg (Total)"**; "Total 32 DoF": "7 DoF Arm × 2, 7 DoF Dexterous Hand × 2, 1 DoF Lift × 1, 3 DoF Mobile Base with Swerve Drive × 1"; **"Battery 24V, 60Ah (1,440Wh)"**; "5.5kg (single) / 11kg (dual)"; three fingers a hand; "NVIDIA Thor sold separately (optional)"; a "Mobile DEUX" and a "DEUX" at two prices | xyzcorp.imweb.me/DEUX, read in the browser | Maker's spec table |
+| 75 | Dex, Richtech Robotics (137 cm, 60 kg, wheels) | "4'6\" (mobile)" (137 cm, arith.); mass not stated; wheels; "NVIDIA Jetson Thor"; cameras "4 (2 depth, 2 arm-mounted)", LiDAR, RGB and depth camera, IMU for navigation; "4 hours (mobile)"; modular end effectors | richtechrobotics.com/solutions/dex, press release 2025-10-28 | Maker's page |
+| 76 | DexBot, BOSHIAC (160–175 cm, 80 kg) | not read: the maker's site (en.boshi.cn) fails on its certificate; not bypassed | — | — |
+| 77 | Digit, Agility Robotics (180 cm, 76 kg, legs) | no figures on Agility's pages; its press release of 2026-10-26 names the robot in service "Digit 4"; the "Download Product Sheet" a download, not opened | agilityrobotics.com | Maker's pages |
+| 78 | Digit 5, Agility Robotics (180 cm, 129 kg) | its CTO: "Making a 129 kg dynamically stable robot", "over 120kgs"; "Payload* 23kg/50lbs" ("preliminary estimates"); "NVIDIA IGX Thor"; "proprietary cycloidal transmissions"; "Digit likely won't get wheels"; "in development" | agilityrobotics.com/solutions/digit-5; its Insight of 2026-10-23 | Maker's page and blog |
+| 79 | Dora, Noetix Robotics (100 cm, 20 kg, legs) | **not on the maker's site**: Noetix shows Bumi, N2, E1, W1 and two robotic heads (小月, 小诺); only resellers and wikis describe a Dora | noetixrobotics.com, read in the browser | Maker's site |
+| 81 | DR02, DEEP Robotics (175 cm, **65 kg**) | "约1800mm×558mm×400mm"; **"整机重量（含电池）约68kg"; DR02 Pro "约78kg"**; DR02: legs 6, arms 4 each, waist 1, 21 in all; Pro: arms 7, waist 3, head 2, 31; "约3h" unloaded; DR02 "八核64位工业级处理器"; Pro also "NVIDIA AGX Orin(275Tops)" (Thor optional); DR02 one wide-angle camera; Pro a LiDAR and three depth cameras; "IP66"; laboratory figures, "不构成交付承诺" | deeprobotics.cn/products/detail/5.html | Maker's spec table |
+| 83 | Duatic Alpha, Duatic (175 cm, 90 kg, wheels) | no Alpha page; its DXTR page (titled "Alpha Half-Humanoid Robot") gives payload 12 kg continuous, 30 kg for 10 s, "Hot swappable batteries", "Input Voltage 48V (DC)", "IP66", wheels; one DynaArm "Total Weight 9.2 kg"; "Total Weight TBD" for its torso and base | duatic.com/dxtr, /dynaarm, /duatorso, /duarover | Maker's pages |
+| 84 | DUCO, Siasun (~150–160 cm, ~90–110 kg, wheels) | no page of siasun.com names it; **DUCO is Siasun's brand** (ducorobots.cn, "中科新松"), whose humanoid series (E12.4) gives two models: "BR-MA73A轮式人形机器人" (wheeled) and "BR-DR73" (its table's columns "BR-MR73A" and "BR-DR73", not reconciled with the text); joints 17 and 24 (head 2, arms 7 each, waist 1 and 4, base 4); "Orin AGX 200/275 TOPS"; a head depth camera, chest cameras front and back, a microphone array; "单臂最大5kg，双臂8kg"; runtime "无电池" and "典型工况6H"; mass not stated | ducorobots.cn/prodetail/48.html | Maker's spec table |
+| 88 | Elixis, Addverb (175 cm, 75 kg, legs) | "1750 MM"; "GROSS WEIGHT 75 KG"; "41" DoF; "HIGH-SPEED PLANETARY BLDC ACTUATORS", "DUAL-ENCODERS"; "TARGETED BATTERY BACKUP 60 - 90 MIN"; "i7 PROCESSOR", "NVIDIA JETSON ORIN", "6 × STM32"; "4x STEREO DEPTH CAMERA", "1x 3D LIDAR", "2x 9-AXIS IMU"; five-finger hand or parallel gripper; its GitHub folder holds meshes, no model file | addverb.ai/humanoid-robot-elixis; github.com/HumanoidAddverb/elix_gym | Maker's spec table |
+| 89 | Elixis-W, Addverb (183 cm, **75 kg**, wheels) | "1800 MM"; **"GROSS WEIGHT 210 KG"**; "33" DoF; "STRAIN-WAVE BLDC ACTUATORS", wheels "PLANETARY SERVO DRIVE", "HIGH-QUALITY PU"; 5 kg per arm; "2 HOURS"; "6x STEREO CAMERA", "3x 3D LIDAR", "9-AXIS IMU"; "i7", "NVIDIA JETSON ORIN", "2 x STM32" | addverb.ai/humanoid-robot-elixis, its tab ELIXIS-W, read in the browser | Maker's spec table |
+| 90 | Eno, Genesis AI (170 cm, 120 kg, wheels) | no figures: a waitlist, "targeted customer deployments by the end of 2026" | genesis.ai | Maker's page |
+| 91 | F-Series, Realbotix (165 cm, 50 kg, wheels) | **"F-Series" on none of the maker's pages**; its full-body humanoid is the "Echo": "88 lb" (39.9 kg, arith.), "39 degrees of freedom", "72 in Female" (183 cm, arith.), on a base; "Dual cameras", "Four microphones", silicone skin; "Sizes and weights are approximate" | realbotix.com/echo | Maker's page |
+| 93 | Fengxing-001, AVIC (180 cm, 80 kg, legs) | **no AVIC page names it**; news of the World Robot Conference 2026 relays AVIC's figures (1.8 m, 80 kg, 20 kg carried) | avic.com; en.people.cn, globaltimes.cn (search results, not read) | News, second-hand |
+| 94 | FF Futurist, Faraday Future (169 cm, 69 kg) | "169 × 75 × 30 cm", "≈69 kg"; "28 DOF + 6-DOF Dexterous Hand" (neck 2, arms 7, legs 6; "Total 40 DoF"); "Peak Knee Torque 270 N·m" (its highlights "500 Nm Peak torque", not reconciled); **"Battery 0.69 kWh"**, 3 h standing, 1.5 h walking, hot-swappable; "16-core CPU + NVIDIA AGX Orin 64G"; "Interactive + 2 Fisheye + 2 RGB-D", LiDAR, tactile sensing | robotics.ff.com/us/ff-futurist, its spec table read in the browser | Maker's spec table |
+| 95 | FF Master, Faraday Future (131 cm, 39 kg) | **Classic Edu "Weight: 35 kg", "25 DOF"; Classic Ultra "39 kg", "30 DOF"**; "Height: 131 cm"; "Peak torque: 120 N·m"; 2 h; Ultra "NVIDIA Orin", 150 TOPS, LiDAR, RGB-D, stereo, interaction and rear cameras; Edu one RGB camera; the page: "Certain robotic products are built upon FCC-compliant robotic hardware platforms provided by our partners" | robotics.ff.com/us/ff-master | Maker's spec table |
+
+Not reached (refused or failing, each tried once or twice): BOSHIAC's site (its certificate); LG's CES launch release
+of CLOiD. Seen in passing: Noetix's own site has spec pages of its Bumi and E1 (type 1's robots, entered from the
+catalogue only, E5); not read for this batch.
+
+### E12.2 Batch 2 together, and the questions for Matthias
+
+What the makers give, over the 27 (counted from E12.1): a mass for 11 (59, 63, 71, 72, 73 without its chassis, 78,
+81, 88, 89, 94, 95), 12 if the Echo is the F-Series; joints by body part for 5 (59, 71, 72, 81, 94), a total only for 6
+more (62, 73, 88, 89, 91, 95) and the CLOiD's arms; a joint's torque only as the robot's maximum (59, 71, 72, 95) and the
+FF Futurist's knee, 270 N·m, never every joint's; a battery's voltage and capacity, or its energy, for 4 (59, 62, 71,
+94); the computer named for 10 (59, 73, 74, 75, 78, 81 Pro, 88, 89, 94, 95 Ultra); no model file. So in batch 2, as in
+batch 1, the joints will mostly be the template's share of the mass, and the battery mostly the template's energy per
+kg.
+
+| # | Question | Recommended |
+|---|---|---|
+| 1 | **Masses: the maker's where it states one** (as batch 1, "Yes, all four", point 1) | the maker's: CASBOT 02 50 kg, Cinnamon 1 70, CYBORG RO1 75 (SE), CYBORG WO1 170, Digit 5 129, DR02 68, Elixis 75, **Elixis-W 210 (the register 75)**, FF Futurist 69, FF Master 39 (Ultra); each ± 1 kg (S, E); the D01 its "～40kg without chassis" plus its chassis (E, from the template on wheels' share, to agree); the others the catalogue's (as batch 1, point 2) |
+| 2 | **Two versions where the maker's table gives two, each with its own mass** (as the X2 in batch 1, point 3) | two versions, each as often: CASBOT 02 and its EDU (50 / 52 kg), CYBORG RO1 SE and PRO (75 / 80 kg, 15 / 30 Ah), DR02 and DR02 Pro (68 / 78 kg), FF Master Classic Edu and Ultra (35 / 39 kg); the DEUX one (no masses for its two) |
+| 3 | **A mass the catalogue's own text calls unknown**: Clone Alpha (its text "The weight of the robot is not specified", its table 60 kg) | no mass stated, so not in the evaluation (2026-10-30, "If there is no mass then it should not be taken into the evaluation"): the register says so |
+| 4 | **Robots whose maker shows no such robot**: CASIVIBOT (CasiVision makes inspection machines), DUCO (Siasun), Dora (Noetix), F-Series (Realbotix's full-body robot is the Echo); and Fengxing-001 (only news) | kept with the catalogue's mass and the templates, the maker's absence written beside them; the F-Series as the full-body Echo (88 lb, 39 DoF) only on your word |
+| 5 | **Downloads**, each opened only on your word: Agility's Digit product sheet; Elite's Centaur-G1 parameter table; DEEP Robotics' DR02 product sheet and its offline documents (a ZIP); UBTECH's brochure; Cyborg's manuals (document centre) | open Agility's, Elite's and DEEP Robotics' sheets (the masses and batteries they may give); the ZIP, the brochure and the manuals not |
+
+**Decided** (Matthias, 2026-11-01: "Yes, agree E12.2"): points 1 to 5 as recommended. They are entered with batch 2's
+numbers (the masses, the versions, the Clone Alpha's "no mass stated" in the register), not before; point 5 is done
+in E12.3.
+
+Also found, for your judgement, not a question: FF Master's figures (131 cm, 35 kg, 120 N·m, 2 h) are close to the
+Unitree G1's, and its page says some FF robots are "built upon ... robotic hardware platforms provided by our partners";
+which platform is not said, and I did not look further.
+
+### E12.3 The downloads (on "Yes, agree E12.2", point 5), read myself
+
+| Download | What it is | What it gives |
+|---|---|---|
+| DEEP Robotics, DR02 "产品手册", `deeprobotics.cn/bocupload/2026/09/21/17899830514556fs00t.pdf`, PDF, 7.3 MB (the site: "PDF / 6.952 MB"), from its resource centre (服务支持 > 资源中心 > 人形机器人); the "中文产品单页" its product page names has no link of its own, and this is the one DR02 document there | the maker's two-page product sheet, "所有参数为官方测试数据" (the maker's test data) | DR02 and DR02 Pro: "站立高度 180cm"; "整机重量（含电池）" **68kg and 78kg**; arms "68cm（不含末端执行器）"; joints 21 and 31: legs 6 each, arms 4 and 7 each, waist 1 and 3, neck – and 2; hands – and "支持选配" (optional); both arms "10kg"; **"电池容量 20Ah（1440Wh）"** in both, quick-release ("电池快拆 支持"); "八核64位工业级处理器×1 (16GB+128GB)", the Pro also "AI处理器 ×1"; depth cameras – and ×3, LiDAR – and ×1, a wide-angle camera ×1 in both, microphone array and speaker ×1; "电源接口(72V)" |
+| Agility, Digit product sheet (`agilityrobotics.com/solutions/digit/product-sheet`) | **not obtained**: a page with a form (first and last name, job title, email, company) and a CAPTCHA before the sheet | — |
+| Elite, Centaur-G1 "下载完整参数表格" | **not obtained**: a form (name, company, phone, email, a message, a verification code, two consents) before the download; closed unsubmitted | — |
+
+What it changes: the DR02's battery is stated (1,440 Wh; 72 V arith., 1,440 / 20, the voltage of its power socket), so
+its battery is the maker's, not the template's; its masses and versions are as E12.1 and E12.2 points 1 and 2. The
+Digit's and the Centaur-G1's sheets would need a request in Matthias's name; without them the Digit keeps the
+catalogue's mass (point 1) and the Centaur-G1 the catalogue's 260 kg with its stated battery (48 V, 40 Ah).
+
+### E12.4 Where the maker gives no data: the internet (on "check the internet")
+
+Matthias, 2026-11-01: "If you are not able to find data from the company, check the internet. If you find nothing, then
+list the robot, but do not include it into the evalution. I do not want a robot in the data, where all data are soly
+based on estimates". Searched on 2026-11-01 for the 16 of batch 2 whose maker gives no mass or nothing (16 searches),
+then read first-hand: four web-fetch reads and the built-in browser (XYZ's page loaded to its foot, Duatic, the DexBot
+wiki, HIT). Refused: GlobalSpec's Digit datasheet (a security check, not bypassed), Gasgoo on the Cruzr Y1 (HTTP 468),
+Dezeen on the CLOiD (403), aigazine (no host), a reseller's Dora page (404). Search summaries are leads, never quoted.
+
+| # | Robot | What the internet adds (read) | Source, kind | Its mass then rests on |
+|---|---|---|---|---|
+| 61 | CASIVIBOT | the launch (2025-08-19): "工业具身质检机器人" (an industrial inspection robot), no figures | QbitAI, news | the catalogue only (55 kg, "Not Verified") |
+| 62 | Centaur-G1 | the maker's release republished (2026-05-21): "单臂负载5公斤，双臂协同负载10公斤", "7自由度冗余机械臂", the sensors; no mass. Origin of Bots "85 kg" (unsourced; read first-hand in the build, E12.7: "WEIGHT 85 kg", its values "compiled from public sources"; that the figure is also a Galbot's came from a search summary only and is withdrawn) | tech.china.com, maker's release; originofbots.com, database | the catalogue's 260 kg, against 85 kg elsewhere |
+| 64 | CLOiD | Engadget (2026-01-04): arms with shoulder, elbow and wrist joints, "hands with fingers that can move independently", a wheeled base like LG's robot vacuums, "more of a concept"; no mass | engadget.com, news | the catalogue's range (~60–70 kg) |
+| 65 | Clone Alpha | Interesting Engineering (2024-12-06): "4 depth cameras, 70 inertial sensors ... and 320 pressure sensors", "NVIDIA Jetson Thor", "a compact, 500-watt electric pump", "164 degrees of freedom in its upper torso"; no mass; "has yet to demonstrate a fully functional Alpha robot" | interestingengineering.com, news | **none** (E12.2 point 3: not in the evaluation) |
+| 66 | Cruzr S2 | Origin of Bots (2025-12-04): "176 centimeters", "44 degrees of freedom", no mass, no source named | originofbots.com, database editorial | the catalogue's 150 kg (comparison sites give 50–80 kg) |
+| 67 | Cruzr Y1 | Gasgoo's article (a search lead: 5.0 kWh, 15 kg an arm) refused the read; nothing read | — | the catalogue's 90 kg |
+| 75 | Dex | The Robot Report (2025-12-17): "operates continuously for 4+ hours", "NVIDIA Jetson Thor", "lidar-based SLAM" (the maker's president); Interesting Engineering: the maker's heights and "11 pounds per arm"; no mass | therobotreport.com, interestingengineering.com, news | the catalogue's 60 kg |
+| 76 | DexBot | the AI Wiki (read in the browser): "Earlier published specifications for the bipedal version list a height of 175 cm, a weight of 58 kg, and 28 active joints (excluding the dexterous hands), with each leg having 6 joints, the waist having 2 joints, and each arm having 7"; its references are HIT pages and papers; the HIT page it cites is the university's general introduction | aiwiki.ai, wiki, second-hand | the wiki's 58 kg against the catalogue's 80 kg |
+| 77 | Digit | Engadget (2023-03-20, the fourth generation at its launch): "The machine is 5'9" tall" (175 cm, arith.), "weighs around 140 lbs, including newly designed 'end effectors'" (63.5 kg, arith.); New Equipment Digest (2023-01-04, unattributed, an earlier generation): "Weight: 99.2 lb. (45 kg)", "Battery capacity: 1,000 W/hr", "two multi-core CPUs" | engadget.com, news; newequipment.com, directory | Engadget's ~63.5 kg (the catalogue's table 76 kg, its own text 65 kg) |
+| 79 | Dora | nothing read (the reseller's page 404); the wikis and resellers found give 100 cm, 20 kg, 120 N·m peak, 20 joints (4 an arm, 6 a leg) without a source | — | the catalogue's 20 kg |
+| 83 | Duatic Alpha | Origin of Bots (2026-01-26): "The 30kg base plus arms (around 90kg total)", unsourced; the maker's DXTR page (the "Alpha" title) and DynaArm page: each arm "Total Weight 9.2 kg" | originofbots.com, database; duatic.com, maker | ~90 kg second-hand; its two arms 18.4 kg from the maker |
+| 84 | DUCO | the maker's DUCO brand page (E12.1 corrected): joints, computer, cameras, runtime; no mass | ducorobots.cn, maker | the catalogue's range (~90–110 kg) |
+| 90 | Eno | Humanoid Robotics Technology and The Next Web (2026-06-16): "a wheeled robot with a foldable tower, dexterous hands"; no figures | news | the catalogue's 120 kg |
+| 91 | F-Series | the maker's FAQ and Echo page: "F-Series" on neither; humanoid.guide's post (2026-09-30): "At 165 cm tall and 50 kg", "44 total degrees of freedom include 13 in the hands", "17 electric servos in the face and neck", "a motorized wheeled base", "up to four hours per charge" | humanoid.guide, editorial, second-hand | the catalogue's 50 kg |
+| 93 | Fengxing-001 | Global Times (2026-08-20) and People's Daily Online (2026-08-21), at AVIC's stand: "Standing about 1.8 meters tall and weighing 80 kilograms", "walk while carrying 20 kilograms" (AVIC), "electro-hydraulic hybrid-drive architecture", "a self-developed high-performance computing platform" | globaltimes.cn, en.people.cn, news | the news' 80 kg |
+| 74 | DEUX | its maker's spec table, loaded at the foot of the page (E12.1 corrected) | xyzcorp.imweb.me, maker | the maker's 60 kg (25 kg robot, 35 kg base) |
+
+**Nothing found at all** (no mass from any source): the Clone Alpha only. **A mass, and nothing else of their own**
+(their parts would all be the templates): CASIVIBOT, Cinnamon 1 (the maker's 70 kg), Eno, and for the composition
+nearly so the Cruzr Y1, F-Series and Dora (second-hand joint counts).
+
+**The robots already entered, the same way** (V118, by program over the four parts files as their builders write
+them): of 162 robots and versions, 120 have a stated figure of their own composition (a joint torque or module mass,
+a battery, a stated part); 12 have only names of their own (a computer, a material, a sensor) besides their mass (11)
+or an estimated mass (1); **28 have
+nothing of their own but their mass** (26 the catalogue's or news', 2 the maker's: the MirrorMe Bolt and the PAL
+REEM-C): Deep Robotics DR01, HONOR D1, Simplexity I-Series, KAIST Humanoid, LimX CL, VinMotion Motion 2, Zhejiang
+NAVAI-I3, Digit Nezha P01, Tesla Optimus Gen 3, Gen 2 and V2.5, Cyan Robotics Orca, Sanctuary Phoenix, PHYBOT M1,
+Zeroth Sean, Siasun Songxing, Unitree Superman, X-Humanoid TianGong Ultra, Tlibot Tianzhen Z1 (type 2); AgiBot A2 Max,
+TeknTrash ALPHA, Apptronik Apollo and Apollo 2, Borg Robotics Borg 01, Wandercraft CALVIN-40 (type 3); Vbot ATOM
+(type 4); MirrorMe Bolt, PAL REEM-C (type 2). **One has no stated mass**: the PrimeBOT Q1 (type 1), its mass an
+estimate agreed on 2026-10-29 (E5.17), before "If there is no mass then it should not be taken into the evaluation"
+(2026-10-30).
+
+**The question, with my recommendation:** what must a robot have, besides estimates, to be in the evaluation?
+- **Recommended: a stated mass**, from the maker, or else from the internet (news, a database, the catalogue), never
+  one its source calls unknown or assumed; its parts may then come from the templates, as now. Then of batch 2, 26 are
+  in and the Clone Alpha is listed only; the 28 above stay; the PrimeBOT Q1 is listed only (type 1 then 30 robots).
+  The reason: the mass is the one figure every part of a robot is scaled by, and with it the robot is measured, not
+  only estimated; without it nothing of it is.
+- The stricter reading, a stated mass and a stated figure of its own composition, would leave out the 28 above and
+  the 12 with names only, 40 robots and versions (counted by program, V118): type 1 from 31 robots to 22, type 2 from
+  96 to 73, type 3 from 72 to 56, type 4 from 33 to 22; and of batch 2 at least CASIVIBOT, Cinnamon 1, Eno and the
+  F-Series.
+
+**Decided** (Matthias, 2026-11-01: "A stated mass"): a robot is in the evaluation when a source states its mass (the
+maker, or else the internet, never a mass its source calls unknown or assumed); its parts may come from the templates.
+So: of batch 2, 26 in, the Clone Alpha listed only; the 28 entered with nothing of their own but their mass stay; the
+PrimeBOT Q1, whose mass no source states, is listed only. Entered with batch 2's numbers (its spec lists what the
+PrimeBOT Q1's leaving leaves behind, for his word), not before.
+
+### E12.5 Proposal: batch 2 of types 3 and 4, robot by robot (2026-11-01). Nothing entered
+
+Matthias, 2026-11-01: "Propose the numbers", and while it was written: "Batteries, where the energy is given, can be
+estimated compositon and weight due to chemistry. Also the joints can be well estimated, based on the other joints."
+The method is batch 1's (E11.6, agreed), with the decisions of E12.2, E12.4 and E13; where batch 2 needs a choice
+batch 1 did not make, it is **bold** and a question below. Numbers at the modes are Claude's arithmetic
+(`batch2/batch2_modes.py`, `joint_ratios.py`, `wheeled_ratios.py`, V120; the small items rough); the run draws every
+one from its min / mode / max. 26 robots, 30 blocks (four in two versions); the Clone Alpha listed only.
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | **The robot's mass** | decided (E12.2 point 1, E12.4): the maker's the mode ± 1 kg; else the internet's, ± 1 kg, or its range (CLOiD 60 / 65 / 70, DUCO 90 / 100 / 110); **where sources disagree, their spread the min and max (question 2)** |
+| 2 | **Joints from a stated joint** ("the joints can be well estimated, based on the other joints") | **a maker's stated torque is its largest joint's: the knee on legs (the largest in six of the seven robots with every joint), the waist on wheels (the Vega 1 Pro's and RB-Y1's); every other joint's torque its kind's ratio to it in those robots (on legs over the knee: hip pitch and roll 1.00, hip yaw 0.25, ankle pitch 0.33, ankle roll 0.24, waist 0.36, shoulder 0.27, elbow 0.15, wrist 0.08, head 0.08; on wheels over the waist: a second waist joint 0.54, shoulder 0.235, elbow 0.13, wrist 0.04, head 0.06), the seven's least and most its min and max; each module E6.8's fit at its torque, half to 1.5 times (E)**. The joints per body part the makers': CASBOT 02 and EDU at 150 N·m ("最大关节扭矩150N.m"); CYBORG RO1 SE and PRO at 400 N·m (">400N·m", its least); CYBORG WO1 at its waist's 562 N·m; FF Futurist at its knee's 270 N·m (its "500 Nm Peak torque" not reconciled, not used); FF Master Edu and Ultra at 120 N·m, **their joints per body part as the Unitree G1's 23 and 29 with a head of 2 and 1 (E: the maker gives only "25 DOF", "30 DOF")**. **Not used: the Dora's 120 N·m (second-hand only), which would put 64 % of its 20 kg in its joints (the seven: 34 to 53 %); and the Duatic's arms (its DynaArm "Total Weight 9.2 kg" each, links and all), a check** |
+| 3 | **The template** | every other robot: types 3 and 4's on legs or on wheels by its form (E11.6 point 1) |
+| 4 | **Hands and grippers** | as Fourier's six-joint hand per joint (E7.5 point 4): CASBOT 02 two of six ("灵巧手 11DoF (6支持)", its active six), D01 two of 22 (its 66 joints less 22 of its body), DEUX two of seven ("7 DoF Dexterous Hand × 2"), FF Futurist two of six, CLOiD two of five ("Five individually actuated fingers"), Cruzr S2, Eno, F-Series two of six (named, no count); **CYBORG RO1 and WO1 its maker's hand "重量 750g" each (S)**; two grippers 0.5 kg (E) for Cruzr Y1 ("End Effectors × 2"), Digit 5 ("swappable gripper"), **Elixis and Elixis-W ("FIVE-FINGER DEXTROUS OR PARALLEL-JAW GRIPPER": the gripper, the hand the other option)**; none where no source names one |
+| 5 | **Battery** ("Batteries, where the energy is given, can be estimated compositon and weight due to chemistry") | a stated energy, or voltage and capacity: its cells' mass and elements by their chemistry's energy per kg (NMC, 00's triangle; the CASBOT 02's "三元锂电池" stated, NMC (E) where none is named), its pack by the NMC packs' ratio: CASBOT 02 48 V × 10 Ah (480 Wh); Centaur-G1 48 V × 40 Ah (1,920 Wh); **CYBORG RO1 SE 48 V × 15 Ah, PRO × 30 Ah, each with its "48V3500mAH" backup (720 + 168, 1,440 + 168 Wh)**; DEUX 24 V × 60 Ah (1,440 Wh); DR02 and Pro 20 Ah, 1,440 Wh (72 V arith.); FF Futurist 0.69 kWh (48 V, E). Every other robot the template's energy per kg (14.67 on legs, 10.84 on wheels); a runtime alone not used |
+| 6 | **Boards** | as the makers name them (E11.6 point 7): CASBOT 02 an AGX Orin and an RK3588; **CYBORG RO1 and WO1 an AGX Orin (E: "12核275TOPS" are its figures)**; D01, Dex a Jetson Thor; Digit 5 its IGX Thor as a Jetson Thor (E); DR02 Pro an AGX Orin beside its "八核64位" board; DUCO an AGX Orin; Elixis and Elixis-W an Intel i7 and **an AGX Orin (E: "NVIDIA JETSON ORIN", not which)**; FF Futurist an AGX Orin and a CPU board; **FF Master Ultra an Orin NX (E: its "157 TOPS")**; a carrier with each module; the others one computer board (E); a power board each. The DEUX's Thor an option, not in |
+| 7 | **Sensors** | each by its kind, as E12.1, E12.3 and E12.4 name them (CASBOT 02 RGB-D 1 / 3, binocular, two fisheye, IMU, microphones, EDU a LiDAR; Cruzr S2 two fisheye, two RGB, two RGB-D, two LiDAR, a microphone; Cruzr Y1 three RGB-D, two binocular, LiDAR, two time-of-flight; DR02 a wide-angle camera, Pro three depth cameras and a LiDAR; Elixis four stereo depth cameras, a LiDAR, two IMU; Elixis-W six stereo cameras, three LiDAR; FF Futurist two fisheye, two RGB-D, a LiDAR; FF Master Ultra five cameras and a LiDAR; Dex four cameras and a LiDAR; DUCO a depth camera, two chest cameras, microphones); the others one IMU (E). Force, torque, touch, tactile, ultrasonic and infrared sensors left out (E9.6 point 14) |
+| 8 | **On wheels** (E9.6 points 4 to 7) | two driven wheels and two casters unless more is known; **omnidirectional bases the maker names without wheels counted: Centaur-G1 and DUCO four driven wheels (E), CYBORG WO1 three ("底盘自由度 3"), DEUX two driven and two steered ("Swerve Drive")**; each hub motor by the robot's mass per driven wheel (E9.6 point 4); a lift column (19.9 % of the mass, E) for Cruzr S2 ("0-40cm lifting range"), Cruzr Y1 ("Lifting Module"), DEUX ("1 DoF Lift"), DUCO ("伸缩高度约600mm"), **Eno (its tower "can adjust the robot's height")** |
+| 9 | **Cables, shell, screws, frame** | E11.6 points 9 and 10: 8 m per metre of height, the shell 11.5 % of the mass, the screws, the frame the remainder, aluminium (E) |
+| 10 | **Versions** (decided, E12.2 point 2) | CASBOT 02 and EDU, CYBORG RO1 SE and PRO, DR02 and Pro, FF Master Edu and Ultra, each as often |
+| 11 | **Not in** | the Clone Alpha (listed only); every option (DEUX's Thor, DR02 Pro's hands, the Elixis's hand); force, torque, touch sensors; the PrimeBOT Q1 listed only (E12.4), entered with this batch |
+| 12 | **E13's shares after batch 2** | joints on the template: type 3 81 of 97 (84 %), type 4 41 of 51 (80 %); battery on the template: type 3 70 of 97 (72 %), type 4 32 of 51 (63 %). Still above half: rule 3's pass before batch 3 |
+
+**Robot by robot** (S stated, E estimated, C the catalogue's or the internet's; joints at the modes):
+
+| # Robot | Mass (kg) | Form | Joints | Hands | Battery (Wh) | Boards | Base, lift |
+|---|---|---|---|---|---|---|---|
+| 59 CASBOT 02 | 49 / 50 / 51 | legs | from 150 N·m (16.4 kg, 33 %) | 2 × 6 | 480 (S, NMC) | AGX Orin, RK3588 | — |
+| 59 CASBOT 02 EDU | 51 / 52 / 53 | legs | from 150 N·m (16.4 kg) | 2 × 6 | 480 (S) | AGX Orin, RK3588 | — |
+| 61 CASIVIBOT | 54 / 55 / 56 (C) | wheels | template (7.6 kg) | — | 596 (E) | one (E) | 2 × 1.4, 2 casters |
+| 62 Centaur-G1 | 85 / 260 / 261 (C; question 2) | wheels | template (36.1 kg) | — | 1,920 (S) | one (E) | 4 × 3.75 (E) |
+| 63 Cinnamon 1 | 69 / 70 / 71 | legs | template (31.3 kg) | — | 1,027 (E) | one (E) | — |
+| 64 CLOiD | 60 / 65 / 70 (C) | wheels | template (9.0 kg) | 2 × 5 | 705 (E) | one (E) | 2 × 1.4, 2 casters |
+| 66 Cruzr S2 | 149 / 150 / 151 (C) | wheels | template (20.9 kg) | 2 × 6 | 1,626 (E) | one (E) | 2 × 3.75, 2 casters; lift 29.9 kg |
+| 67 Cruzr Y1 | 89 / 90 / 91 (C) | wheels | template (12.5 kg) | 2 grippers | 976 (E) | one (E) | 2 × 3.75, 2 casters; lift 17.9 kg |
+| 71 CYBORG RO1 SE | 74 / 75 / 76 | legs | from 400 N·m (31.6 kg, 42 %) | 2 × 0.75 kg (S) | 888 (S) | AGX Orin (E) | — |
+| 71 CYBORG RO1 PRO | 79 / 80 / 81 | legs | from 400 N·m (31.6 kg) | 2 × 0.75 kg (S) | 1,608 (S) | AGX Orin (E) | — |
+| 72 CYBORG WO1 | 169 / 170 / 171 | wheels | from 562 N·m (15.8 kg, 9 %) | 2 × 0.75 kg (S) | 1,843 (E) | AGX Orin (E) | 3 × 3.75 (omni) |
+| 73 D01 | 57.5 / 75 / 92.5 (question 3) | wheels | template (10.4 kg) | 2 × 22 | 813 (E) | Jetson Thor | 2 × 3.75, 2 casters (E) |
+| 74 DEUX | 59 / 60 / 61 | wheels | template (8.3 kg) | 2 × 7 | 1,440 (S) | one (E) | 2 × 1.4, 2 steered; lift 11.9 kg |
+| 75 Dex | 59 / 60 / 61 (C) | wheels | template (8.3 kg) | — | 650 (E) | Jetson Thor | 2 × 1.4, 2 casters |
+| 76 DexBot | 57 / 58 / 80 (C; question 2) | legs | template (25.9 kg) | — | 851 (E) | one (E) | — |
+| 77 Digit | 62.5 / 63.5 / 76 (C; question 2) | legs | template (28.4 kg) | — | 932 (E) | one (E) | — |
+| 78 Digit 5 | 128 / 129 / 130 | legs | template (57.7 kg) | 2 grippers | 1,892 (E) | Jetson Thor (E) | — |
+| 79 Dora | 19 / 20 / 21 (C) | legs | template (8.9 kg) | — | 293 (E) | one (E) | — |
+| 81 DR02 | 67 / 68 / 69 | legs | template (30.4 kg) | — | 1,440 (S) | one (E) | — |
+| 81 DR02 Pro | 77 / 78 / 79 | legs | template (34.9 kg) | — | 1,440 (S) | one (E), AGX Orin | — |
+| 83 Duatic Alpha | 89 / 90 / 91 (C) | wheels | template (12.5 kg) | — | 976 (E) | one (E) | 2 × 3.75, 2 casters |
+| 84 DUCO | 90 / 100 / 110 (C; question 4) | wheels | template (13.9 kg) | — | 1,084 (E) | AGX Orin | 4 × 1.4 (E); lift 19.9 kg |
+| 88 Elixis | 74 / 75 / 76 | legs | template (33.5 kg) | 2 grippers | 1,100 (E) | Intel i7, AGX Orin (E) | — |
+| 89 Elixis-W | 209 / 210 / 211 | wheels | template (29.2 kg) | 2 grippers | 2,276 (E) | Intel i7, AGX Orin (E) | 2 × 8.5, 2 casters |
+| 90 Eno | 119 / 120 / 121 (C) | wheels | template (16.7 kg) | 2 × 6 | 1,301 (E) | one (E) | 2 × 3.75, 2 casters; lift 23.9 kg |
+| 91 F-Series | 49 / 50 / 51 (C) | wheels | template (7.0 kg) | 2 × 6 | 542 (E) | one (E) | 2 × 1.4, 2 casters |
+| 93 Fengxing-001 | 79 / 80 / 81 (C, news) | legs | template (35.8 kg) | — | 1,174 (E) | one (E) | — |
+| 94 FF Futurist | 68 / 69 / 70 | legs | from its knee's 270 N·m (23.5 kg, 34 %) | 2 × 6 | 690 (S) | AGX Orin, CPU board | — |
+| 95 FF Master Edu | 34 / 35 / 36 | legs | from 120 N·m (14.4 kg, 41 %) | — | 513 (E) | one (E) | — |
+| 95 FF Master Ultra | 38 / 39 / 40 | legs | from 120 N·m (16.3 kg, 42 %) | — | 572 (E) | Orin NX (E) | — |
+
+At the modes no frame falls below a quarter of its robot's mass; the least are the Dora's 5.1 kg of 20 (25 %), the
+DEUX's and DR02's (28 %). The joints from a stated joint come out at 33 to 42 % of the mass on legs, within the seven's
+34 to 53 % or near it; the CYBORG WO1's 9 % on wheels against the wheeled template's 13.9 %.
+
+**Questions, each with my recommendation:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | "based on the other joints": the robot's own stated joint, scaled to its others by the ratios of the robots with every joint (point 2) | yes, as point 2; the same then for the robots already entered with a stated maximum only (E9.6 point 2: H2-D's arms, R1's torso, R1-D's shoulder, Mantis; E11.6 point 2: X2's 120, A3's knee 320 N·m), in rule 3's pass |
+| 2 | Masses from sources that disagree: Digit (Engadget, 2023, "around 140 lbs": 63.5 kg; the catalogue 65 in its text, 76 in its table), DexBot (the wiki's 58 kg; the catalogue's 80, its fields "Assumed"), Centaur-G1 (the catalogue's 260; a database's 85, its figure also a Galbot's) | their spread the min and max, the best-sourced the mode (the rule of sources, point 2): Digit 62.5 / 63.5 / 76, DexBot 57 / 58 / 80, Centaur-G1 85 / 260 / 261 |
+| 3 | The D01's chassis, which Sharpa weighs not ("Weight (Without Chassis) ～40kg") | the DEUX's base, the one a maker weighs (35 kg), half to 1.5 times (E): 57.5 / 75 / 92.5 kg in all, its wheels and casters in it (E12.2 point 1) |
+| 4 | The DUCO: Siasun's page names a wheeled "BR-MA73A" and a "BR-DR73", its table's columns "BR-MR73A" (no battery, no base) and "BR-DR73" (its base, "伸缩高度约600mm", 6 h) | the wheeled one, by the table's column with the base: 24 joints (template), a lift column, four driven wheels (its base's four), an AGX Orin; its mass the catalogue's range |
+
+**Agreed** (Matthias, 2026-11-01: "Yes, agree E12.5"): points 1 to 12 and the four questions as recommended: joints from
+a stated joint by the ratios of the robots with every joint (and the same for the entered robots with a stated maximum,
+in rule 3's pass); the disagreeing masses as their sources' spread (Digit 62.5 / 63.5 / 76, DexBot 57 / 58 / 80,
+Centaur-G1 85 / 260 / 261 kg); the D01's chassis as the DEUX's base (57.5 / 75 / 92.5 kg in all); the DUCO the wheeled
+one with its base. Nothing entered: the entry is a step of its own, for his yes.
+
+### E12.6 Spec: the entry of batch 2 of types 3 and 4 (2026-11-01). Nothing built
+
+Matthias, 2026-11-01: "Spec the entry". It enters what was agreed: E12.2 ("Yes, agree E12.2"), E12.4 ("A stated
+mass"), E13 ("Yes, agree E13") and E12.5 ("Yes, agree E12.5"). Found in the code and data for it (V121): each robot of
+batch 2 goes to the file of its first type among 3 and 4: 18 robots to type 3's (20 blocks: the CYBORG RO1 and the
+DR02 in two versions), 8 to type 4's (10 blocks: the CASBOT 02 and the FF Master in two); the register takes a mass
+from the catalogue unless `MASS_ESTIMATES` holds an agreed estimate (only the PrimeBOT Q1's, number 236); the
+overview's masses of a type come from its parts files, so a robot listed only must have no rows there; type 1's
+template is the average of its batch 1 (`average_joints(BATCH_ONE)`), which the PrimeBOT Q1 is not in; the PrimeBOT Q1
+is of types 1 and 4, the Clone Alpha of type 4. **Corrected while counting: E12.5 point 12** gave type 3 97 robots and
+versions after batch 2 (it adds 21, not 22) and did not take the PrimeBOT Q1 out of type 4: after the entry, the joint
+template 80 of 96 in type 3 (83 %) and 40 of 50 in type 4 (80 %), the battery template 69 of 96 (72 %) and 31 of 50
+(62 %); type 1 16 of 31 (52 %) and 13 of 31 (42 %). Still above half; counted again by test in the entry.
+
+| # | What is built (his words: the agreed points) | Where |
+|---|---|---|
+| 1 | **The 30 blocks of E12.5**, robot by robot (its table and points 1 and 3 to 10, questions 2 to 4), each robot in the file of its first type among 3 and 4; every source's code in its file's sheet Sources; the names without brackets or commas (CASBOT 02 and CASBOT 02 EDU, CYBORG RO1 SE and PRO, DR02 and DR02 Pro, FF Master Classic Edu and Ultra) | `tools/parts_types_3_and_4.py` (`BLOCKS_3`, `BLOCKS_4`); the two builders unchanged but for their texts |
+| 2 | **Joints from a stated joint** (E12.5 point 2, "the joints can be well estimated, based on the other joints"): one function writing every body joint of a robot from its stated torque, its joints per body part and the ratios; **the ratios computed by program from the blocks of the seven robots on legs and the two on wheels, not typed (open point B)**; each module (0.5 × E6.8's fit at the least ratio, the fit at the median, 1.5 × the fit at the most), E | `tools/parts_types_3_and_4.py` |
+| 3 | **The register** (E12.2 point 3, E12.4 "A stated mass"): `TAKEN_APART[3]` the 18, `TAKEN_APART[4]` the 8; **the Clone Alpha "not drawn: no mass stated"** (its catalogue's own text: "The weight of the robot is not specified"); **the PrimeBOT Q1 the same**, its agreed estimate taken out; a robot's mass column the catalogue's, as in batch 1 (the drawn mass is its parts file's: the Elixis-W 75 kg in the register, 210 kg drawn) | `tools/make_humanoid_register.py`: `NO_MASS_STATED` (number → why) in place of `MASS_ESTIMATES` |
+| 4 | **The PrimeBOT Q1 out of the evaluation**: its rows out of type 1's file (open point A); type 1 then drawn over 30 robots (31 with the K1's two versions), type 4 over 47; **type 1's draws for stock-and-flow change** (they come from its robots, E7.5), and so do its pages | `tools/1_compact_research_developer/make_parts_taken_apart.py` |
+| 5 | **E13 rule 1** ("a template is wider than data"): a test that every template quantity of every parts file spans at least half to 1.5 times its mode | `tests/test_make_parts_taken_apart.py` |
+| 6 | **E13 rules 2 and 4** (the shares, and "most of its robots rest on templates"): one function in 01 counting, over a type's robots and versions drawn, those on the joint template and those on the battery template (open point C); its words on 01's overview card of each type taken apart and on 02's notes page of the type, "most of them" where above half | `01_schemas.py` (`type_card_text`), `02_composition.py` (the notes page) |
+| 7 | **Tests first** (each failing before its code): the 30 blocks against E12.5; the ratios against E12.5 point 2; rule 1 on a narrowed copy; the register's sheets (type 1 30 drawn, 1 without a mass; type 3 91 drawn; type 4 47 drawn, 6 without a mass); the shares above | `tests/` |
+| 8 | **Sandbox** before his runs (the register, the four builders, 01, 02 at 2,000 draws, Claude's scratch folder): types 2's draws unchanged (by program), type 1's changed only by the PrimeBOT Q1; no new remainder below zero; V119's measure repeated (E13 rule 1); the pages looked at | scratch |
+| 9 | **Documents**: README, METHODOLOGY (joints from a stated joint; robots listed only; E13's rules), EVIDENCE E12.7 (where each point landed), VERIFICATION, HANDOVER with his runs by full path, each saying what it changes | `documentation/claude/`, `README.md` |
+| 10 | **Not in**: E13 rule 3's research pass (next, before batch 3); the same method for the robots already entered with a stated maximum (in that pass); type 5's own parts file (the CYBORG RO1, WO1 and DR02 are drawn in type 3) | — |
+
+**Open points, each with my recommendation:**
+- **A. What the PrimeBOT Q1's leaving leaves behind**: its block `PRIMEBOT_Q1` and its `rows_of(PRIMEBOT_Q1)` in type 1's
+  builder; `TAKEN_APART[1][236]`; `MASS_ESTIMATES` (then empty) and its branch in `register_rows`; the register's About
+  line "Mass of the PrimeBOT Q1: ..."; the tests that assert its estimated mass (two in `test_make_humanoid_register.py`,
+  two in `test_schemas.py`); METHODOLOGY's "the PrimeBOT Q1's mass is an estimate". Recommended: removed in the entry,
+  by exact name, the proof that nothing else reads them in VERIFICATION; EVIDENCE E5.17 kept as the record.
+- **B. Where the joint ratios come from**: recommended computed by the builder from the seven robots' and the two
+  wheeled robots' blocks (one copy, so that a change to their joints moves the ratios), and a test that they equal
+  E12.5 point 2's.
+- **C. What the pages count**: recommended robots and versions, as E13's tables, e.g. "Its joints rest on the template
+  in 80 of its 96 robots and versions, its battery in 69: most of them".
+
+### E12.7 Built: the entry of batch 2 of types 3 and 4 (2026-11-01). Nothing committed
+
+Matthias, 2026-11-01: "Yes, build it" (E12.6, open points A to C as recommended). Checks: VERIFICATION.md V122. Not run on
+his data: the register, the four parts files and the pages are written by his runs (HANDOVER.md).
+
+| Point | Where it landed |
+|---|---|
+| 1 | `tools/parts_types_3_and_4.py`: the 30 blocks (`casbot_02()`, `cyborg_ro1()`, `deep_dr02()`, `ff_master()` for the robots in two versions), `BLOCKS_3` 39 blocks (37 robots), `BLOCKS_4` 19 (16); 39 new source codes in `OWN_SOURCES`; the two builders' texts |
+| 2, B | `from_stated_joint()`, `joint_ratios()`, `LEG_RATIOS` and `WHEEL_RATIOS` computed from the seven robots' and the Vega's and RB-Y1's blocks; 8 blocks so |
+| 3 | the register: `TAKEN_APART[3]` and `[4]` the 18 and 8; `NO_MASS_STATED` (65, 236) in place of `MASS_ESTIMATES`; its About line |
+| 4, A | type 1's builder without `PRIMEBOT_Q1` and its rows; `TAKEN_APART[1][236]`, `MASS_ESTIMATES` and its branch, the register's line on its estimate, the four tests of its estimated mass and METHODOLOGY's line removed, by exact name (V122: nothing reads them) |
+| 5 | `TestTemplatesWiderThanData` in `tests/test_make_parts_taken_apart.py` |
+| 6, C | 01's `template_shares()` and `template_words()`, at the end of `type_card_text()`; 02's `Draws.templates` and its line on the notes page |
+| 7 | the tests of V122 |
+| 8 | the sandbox (V122) |
+| 9 | README, METHODOLOGY ("Robot types 3 and 4 part by part": points 5 to 8), this section, V122, HANDOVER |
+
+**Where the build departs from the text, for his word:**
+1. **The ratios, computed, differ from E12.5 point 2's figures in two places** (the method as agreed): on legs over the
+   knee the elbow 0.17 (E12.5's 0.15 was over the robot's largest joint, the Atom's hip roll); on wheels a second waist
+   joint 0.77, the median of the Vega's 0.54 and the RB-Y1's 1.00 (E12.5 gave the Vega's alone). The others as E12.5.
+2. **Names shortened** so that they fit 01's table (the page test found "Cyborg Robotics CYBORG RO1 SE" over the height
+   column): CYBORG RO1 SE and PRO, CYBORG WO1, FF Futurist, FF Master Classic Edu and Ultra, Donut Cinnamon 1, Agility
+   Digit and Digit 5.
+3. **The Centaur-G1's 85 kg** (its min, E12.5 question 2) read first-hand only in the build (Origin of Bots, last
+   updated 2026-10-18); E12.4's remark that it is also a Galbot's figure came from a search summary and is withdrawn.
+4. **Sensors** whose count the maker does not give: one each (E); the Cruzr S2's "Radar*1" front and back as two
+   LiDARs, the Cruzr Y1's "Array TOF × 2" as depth cameras in the base (E); the DUCO's chest cameras of the kind Head,
+   where the cameras are (the kind "Torso" is none of the figures': 02 stopped on it in the sandbox, V122).
+5. **Type 1's draws for stock-and-flow change** as point 4 says: its mean 33.7 kg before, 34.2 kg after (the sandbox's
+   2,000 draws), the PrimeBOT Q1's 19.5 kg out.
+
 ## E11. Robot types 3 and 4: research, batch 1 (2026-10-30). Nothing entered
 
 Matthias, 2026-10-30: "Yes, together", then "Yes, start sources" (the sources of types 3 and 4's 178 robots with a mass

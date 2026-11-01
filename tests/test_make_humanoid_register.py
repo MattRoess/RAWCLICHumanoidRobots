@@ -100,12 +100,15 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         on_wheels = {13, 15, 20, 21, 34, 35, 40, 41, 42, 49, 60, 68, 82, 86, 92, 104, 105, 122, 179, 184, 200, 230, 247,
                      248, 251, 252, 253, 254, 255, 295, 307, 312, 313, 314, 315, 318, 335, 336, 337, 340, 341, 342, 349}
         # Since 2026-10-30 ("Yes, build it", EVIDENCE.md E11.7) batch 1 of types 3 and 4: 19 in type 3's file, 8 in
-        # type 4's.
+        # type 4's; since 2026-11-01 (E12.6) batch 2: 18 and 8. The PrimeBOT Q1 (236) out: no mass stated (E12.4).
         types_34_batch_one = {3, 4, 5, 7, 10, 11, 12, 18, 22, 26, 28, 29, 31, 32, 33, 43, 51, 56, 58} | {
             1, 6, 8, 9, 14, 17, 45, 46}
-        self.assertEqual(set(apart), {r.number for r in self.register if 1 in r.types} | {116, 117, 119, 120, 121}
-                         | batch_two | batch_two_b | on_wheels         # since 2026-10-30 the 43 on wheels (E9.6)
-                         | types_34_batch_one)
+        types_34_batch_two = {62, 63, 66, 67, 71, 72, 73, 75, 76, 77, 78, 81, 83, 84, 88, 89, 90, 93} | {
+            59, 61, 64, 74, 79, 91, 94, 95}
+        self.assertEqual(set(apart), ({r.number for r in self.register if 1 in r.types} - {236})
+                         | {116, 117, 119, 120, 121} | batch_two | batch_two_b
+                         | on_wheels                                    # since 2026-10-30 the 43 on wheels (E9.6)
+                         | types_34_batch_one | types_34_batch_two)
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
         self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
         self.assertEqual(apart[123], 'Unitree H2-X Core i7; Unitree H2-X Orin NX')
@@ -121,7 +124,12 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(by_number[102].mass, (34, 35, 36))          # G1: "35", +- 1 kg
         self.assertEqual(by_number[246].mass, (20, 25, 30))          # QUESTER1: "~20–30", the range
         self.assertEqual(by_number[325].mass, (72, 73, 74))          # Walker S2: "43, 73", the larger
-        self.assertEqual(by_number[236].mass, (9.75, 19.5, 29.25))   # PrimeBOT Q1: none stated, E5.17 point 6
+        # No mass stated anywhere, so not in the evaluation (2026-11-01, "A stated mass", EVIDENCE.md E12.4): the
+        # PrimeBOT Q1 (its estimate of E5.17 taken out) and the Clone Alpha (its catalogue's text: "not specified").
+        for number in (236, 65):
+            self.assertIn(None, by_number[number].mass, msg=number)
+        self.assertEqual(set(builder.NO_MASS_STATED), {65, 236})
+        self.assertFalse(hasattr(builder, 'MASS_ESTIMATES'))
 
     def test_the_sheet_type_1_lists_every_robot_of_type_1_as_in_the_sheet_robots(self):
         # Matthias, 2026-10-29: "There has to be an excel sheet where all the robots of the different types are fully
@@ -131,7 +139,9 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual([r.number for r in listed], [r.number for r in self.register if 1 in r.types])
         self.assertEqual(len(listed), 31)
         self.assertIn(54, [r.number for r in listed])    # the Booster T1, 1.18 m: kept in type 1 (2026-10-29)
-        self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, its mass an estimate (E5.17)
+        self.assertIn(236, [r.number for r in listed])   # the PrimeBOT Q1, listed only: no mass stated (E12.4)
+        runs = Counter(r.in_run for r in listed)
+        self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT]), (30, 1))
         self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, 1, Params(),
                                                                    set(APART[1]))], [])
 
@@ -167,7 +177,8 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # point 5): every robot whose types include 3 or 4, as in the sheet Robots; drawn with its own parts where they
         # are in a parts file of one of its types (types 1 to 4), not drawn where it has no mass ("If there is no mass
         # then it should not be taken into the evaluation"), else not yet taken apart; 01 finds nothing.
-        for robot_type, count, own, without in ((3, 181, 72, 12), (4, 135, 33, 4)):
+        # Since batch 2 (E12.6): type 3 91 drawn, type 4 47; the Clone Alpha and the PrimeBOT Q1 without a mass.
+        for robot_type, count, own, without in ((3, 181, 91, 12), (4, 135, 47, 6)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
@@ -202,7 +213,9 @@ class TestMakeHumanoidRegister(unittest.TestCase):
 
     def test_the_sheet_type_1_says_what_the_run_does_with_each_robot(self):
         listed = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, 1)}
-        self.assertEqual(set(listed.values()), {'drawn: its own parts'})
+        # Every robot drawn with its own parts but the PrimeBOT Q1, no mass stated since 2026-11-01 (E12.4, E12.6).
+        self.assertEqual({n: v for n, v in listed.items() if v != 'drawn: its own parts'},
+                         {236: 'not drawn: no mass stated'})
 
     def test_it_writes_where_00_says(self):
         self.assertEqual(builder.output_path(Params()), absolute(Params().data.register))

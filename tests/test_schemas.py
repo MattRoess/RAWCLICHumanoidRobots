@@ -467,7 +467,7 @@ class TestScreenPages(unittest.TestCase):
         g1 = by_name['Unitree G1']
         self.assertEqual((g1.height, g1.mass, g1.joints, round(g1.battery_wh)), (1.32, (34, 35, 36), 23, 421))
         self.assertEqual(round(by_name['Noetix E1'].battery_wh), 480)   # 12 Wh per kg of its 40 kg
-        self.assertEqual(by_name['PrimeBOT Q1'].mass, (9.75, 19.5, 29.25))
+        self.assertNotIn('PrimeBOT Q1', by_name)   # listed only since 2026-11-01: no mass stated (E12.4)
 
     def test_the_table_groups_the_robots_by_what_their_joints_rest_on_lightest_first(self):
         rows = schemas.robots_table_rows(self.apart)
@@ -483,7 +483,7 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual({r.name for r in groups['torques']},
                          {'Fourier N1', 'Menlo Asimov 1', 'Menlo Asimov 2', 'Booster T1', 'Booster K1 5 Ah',
                           'Booster K1 2 Ah', 'Unitree R1'})
-        self.assertEqual(len(groups['shares']), 17)
+        self.assertEqual(len(groups['shares']), 16)   # the PrimeBOT Q1 out since 2026-11-01 (E12.6 point 4)
         for members in groups.values():
             self.assertEqual([r.mass[1] for r in members], sorted(r.mass[1] for r in members))
         # The mark of joints drawn as a share of the robot's mass on the robots of that group and no other.
@@ -499,7 +499,8 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual(by_name['Booster T1'].bases['Boards'], ('maker', 'estimated'))
         self.assertEqual(by_name['Noetix E1'].bases['Battery'], ('estimated',))
         self.assertEqual(by_name['Noetix E1'].bases['Mass'], ('third party',))
-        self.assertEqual(by_name['PrimeBOT Q1'].bases['Mass'], ('estimated',))
+        # No robot with an estimated mass is drawn (2026-11-01, "A stated mass": the PrimeBOT Q1 listed only).
+        self.assertFalse([name for name, r in by_name.items() if r.bases['Mass'] == ('estimated',)])
 
     def test_a_rows_label_and_its_first_source_decide_where_it_comes_from(self):
         base = lambda label, sources: schemas.row_base(self.apart, label, sources)  # noqa: E731
@@ -620,12 +621,13 @@ class TestTypeTwoPages(unittest.TestCase):
         # from the workbook; a type without a sheet keeps its card as before (None here).
         self.assertEqual(schemas.type_card_text(2, 'Anchor', self.apart, self.register, True),
                          'Its 96 robots of the register with a mass, each drawn from its own parts; their masses 29 to '
-                         '396 kg. The Xialan S0, with no mass, is not in the evaluation.')
+                         '396 kg. The Xialan S0, with no mass, is not in the evaluation. Most of its robots rest on '
+                         'templates: the joints of 80 of its 102 robots and versions, the battery of 64.')
         self.assertEqual(schemas.type_card_text(3, 'Anchor', None, self.register, True),
                          'Its 181 robots of the register listed, 169 with a mass; drawn from the workbook until they '
                          'are taken apart.')
-        self.assertEqual(schemas.type_card_text(4, 'Anchor', None, self.register, True),
-                         'Its 135 robots of the register listed, 131 with a mass; drawn from the workbook until they '
+        self.assertEqual(schemas.type_card_text(4, 'Anchor', None, self.register, True),   # 129 since E12.6
+                         'Its 135 robots of the register listed, 129 with a mass; drawn from the workbook until they '
                          'are taken apart.')
         self.assertIsNone(schemas.type_card_text(5, 'Anchor', None, self.register, False))
         self.assertEqual(schemas.taken_words(2, self.register, self.apart), 'all its 96 robots with a mass')
@@ -733,6 +735,17 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
     def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
         for n, view in self.views.items():
             readable_pages(self, schemas.taken_apart_type_pages(f'categories/{n}_type', view, n, self.register))
+
+    def test_how_many_rest_on_templates_and_its_words(self):
+        # E13 rules 2 and 4 (Matthias, 2026-11-01, "Yes, agree E13"; E12.6 point 6): over a type's robots and versions
+        # drawn, those whose joints are the template's share of their mass and those whose battery is the template's
+        # energy per kg; "most of its robots" where either is above half.
+        self.assertEqual(schemas.template_shares(self.views[3]), (80, 69, 96))
+        self.assertEqual(schemas.template_shares(self.views[4]), (40, 31, 50))
+        self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
+                                                                '80 of its 96 robots and versions, the battery of 69.')
+        self.assertIn(schemas.template_words(self.views[4]),
+                      schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 
 
 class TestMaterialFaults(Small):

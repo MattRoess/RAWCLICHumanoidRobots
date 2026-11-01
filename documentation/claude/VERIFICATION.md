@@ -3,6 +3,179 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-01
+
+### V122. The entry of batch 2 of types 3 and 4 (EVIDENCE E12.6, E12.7), built and run in the sandbox
+
+- **His words:** "Yes, build it" (E12.6, open points A to C as recommended).
+- **Tests first:** written before the code and run: 15 failed or erred (the 30 blocks' names and masses, the ratios, the
+  joints from a stated joint, the hands and batteries, the lifts, the robots listed only, the register's sheets and
+  masses, the shares and their words, type 2's card). E13 rule 1's test passed before the code, as the templates of
+  types 1 to 4 already span half to 1.5 times; its narrowed copy (a battery template 10 / 14.67 / 20 Wh/kg) is caught.
+- **Found by the tests and the sandbox while building, and fixed:** the DUCO's chest cameras of the kind "Torso", none of
+  the figures' kinds: 02 stopped on it before drawing ("1 fault(s) in the inputs; nothing is drawn"), set to Head; four
+  names too long for 01's table ("Cyborg Robotics CYBORG RO1 SE" over the height column), shortened (E12.7 point 2);
+  older tests that counted the PrimeBOT Q1 (type 1's 17 robots on the template, 32 versions, type 4's 131 with a mass),
+  changed to the new counts with the reason beside each.
+- **Read first-hand in the build:** Origin of Bots' Centaur G1 page ("WEIGHT 85 kg"), the min agreed in E12.5 question 2,
+  which E12.4 had from a search summary only.
+- **The ratios, by program** (the builder's `joint_ratios`): on legs over the knee hip pitch 1.00 (0.47 to 1.00), hip
+  roll 1.00 (0.45 to 1.13), hip yaw 0.25, knee 1.00, ankle pitch 0.33, ankle roll 0.24, waist 0.36, shoulder 0.27, elbow
+  0.17, wrist 0.08, head 0.08; on wheels a second waist joint 0.77 (0.54 to 1.00), shoulder 0.24, elbow 0.13, wrist
+  0.04, head 0.06 (E12.7 point 1: two differ from E12.5's figures).
+- **Sandbox** (`sandbox_e126/run.py`, Claude's scratch folder): the register, the four builders, 01 and 02 at 2,000
+  draws, from the commit c6d5570 (a scratch worktree, removed after) and from the working tree, every output into the
+  scratch folder, his files only read. Working tree: 01 no fault; 02 no fault, type 1 over 30 robots (31 versions),
+  type 2 over 96 (102), type 3 over 91 (96), type 4 over 47 (50); one remainder below zero, the 1X NEO's frame (11.1 %
+  of its draws, known, E11.8). **Type 2 unchanged:** its 13 part-by-part draw files identical to the commit's; the
+  draws for stock-and-flow of types 2 to 6 identical (50 of 50 files); type 1's differ (the PrimeBOT Q1 out): its mean
+  33.7 kg before, 34.2 kg after (95 %: 17.0 to 42.7, then 17.4 to 42.6).
+- **E13 rule 1's measure repeated** (`goal/uncertainty.py` on the new files): the robots on templates still wider than
+  those on their own data (joints per kg 0.71 against 0.24; cells 0.79 against 0.12; Cu 0.56 against 0.42; Nd 1.09
+  against 0.86); the shares: type 1 16 and 13 of 31, type 2 80 and 64 of 102, type 3 80 and 69 of 96, type 4 40 and 31
+  of 50, as E12.6 counted.
+- **Looked at:** 01's `overview_2.png` (each card of types 1 to 4 ends "Most of its robots rest on templates: …", inside
+  its box); 02's notes page of type 3 (its 91 robots, the 78 not yet taken apart, the line on templates).
+- **What the PrimeBOT Q1's leaving left behind** (open point A): a search of the stages, `src`, `tools` and `tests` finds
+  no reader of `PRIMEBOT_Q1` or `MASS_ESTIMATES`; the PrimeBOT Q1 named only in comments and in tests that it is
+  listed only; METHODOLOGY's line rewritten; EVIDENCE E5.17 kept as the record.
+- **Size at 200,000 draws** (×100 the sandbox's): type 3's part-by-part draws about 2.7 GB, type 4's 1.8 GB.
+- **The whole suite:** 421 tests; 5 failures, each waiting for his runs: the register's builder and type 1's builder against his files on disk (they hold the PrimeBOT Q1 and batch 1 only), and three tests of 01's table of type 1, which read his type 1 file on disk (`TestScreenPages`); 1 skipped, the check of his real register and files (types 3 and 4's are not on disk).
+- **Not covered:** his runs at 200,000 draws; the tests that compare with his files on disk wait for his runs 1 to 4.
+
+### V121. What the spec of batch 2's entry (EVIDENCE E12.6) rests on, checked in the code and data
+
+- **His words:** "Spec the entry".
+- **In the code (read only):** the register's `register_rows` takes a robot's mass from the catalogue, and from
+  `MASS_ESTIMATES` where an estimate is agreed (only 236, the PrimeBOT Q1); 01's `type_card_text` takes a type's masses
+  from its parts files (`apart.constants`), so a robot listed only must have no rows there; type 1's template is
+  `average_joints(BATCH_ONE)`, without the PrimeBOT Q1 (a `catalogue_block`); the PrimeBOT Q1's other readers: its
+  block and `rows_of` in type 1's builder, `TAKEN_APART[1][236]`, the register's About line, two tests in
+  `test_make_humanoid_register.py` and two in `test_schemas.py`, METHODOLOGY's line on it.
+- **In the data, by program** (the register as its builder writes it, Claude's scratch folder): batch 2 by its first
+  type among 3 and 4: type 3's file 62, 63, 66, 67, 71, 72, 73, 75, 76, 77, 78, 81, 83, 84, 88, 89, 90, 93 (18), type
+  4's 59, 61, 64, 74, 79, 91, 94, 95 (8). After the entry, with the Clone Alpha (65) and the PrimeBOT Q1 (236) without a
+  mass: type 1 31 listed, 30 with a mass, all drawn; type 3 181, 169, 91 drawn, 78 not yet; type 4 135, 129, 47 drawn,
+  82 not yet, 6 without a mass.
+- **Corrected while counting:** E12.5 point 12's shares (97 and 51 robots and versions after batch 2) are 96 and 50
+  (type 3 gains 21, the PrimeBOT Q1 leaves type 4): the joint template 80 of 96 and 40 of 50, the battery template 69
+  of 96 and 31 of 50; written in E12.6.
+- **Not covered:** nothing built or run.
+
+### V120. Batch 2's proposal (EVIDENCE E12.5) at its modes
+
+- **His words:** "Propose the numbers"; "Batteries, where the energy is given, can be estimated compositon and weight due
+  to chemistry. Also the joints can be well estimated, based on the other joints."
+- **The joint ratios, by program** (`batch2/joint_ratios.py`, `wheeled_ratios.py`, Claude's scratch folder, reading the
+  builders' blocks): over the seven robots on legs with every joint (H2, Kuavo 5, Luna, MagicBot Gen1, Adam Lite, Adam
+  SP, Atom), each joint kind's largest torque over the robot's largest: the knee the largest in six (the Atom's hip roll
+  241.4 over its knee's 213.8 N·m); the medians and ranges in E12.5 point 2. On wheels, the Vega 1 Pro's and RB-Y1's
+  waists the largest (700, 270 N·m); the AI Worker has no waist (its shoulders the largest), so its ratios not used for
+  the waist.
+- **At the modes** (`batch2/batch2_modes.py`): every block's joints (the template, or from its stated joint by the
+  ratios and E6.8's fit), hands, pack (its Wh at 164 Wh per kg), base (E9.6's hub motor classes, casters 0.27, steering
+  0.79 kg), lift (19.9 %), shell (11.5 %), and the small items roughly (screws 0.5, boards 0.8, sensors 0.3 kg, cables
+  0.036 kg per metre); the frame the remainder. First run: the Dora from its second-hand 120 N·m at 64 % joints, a
+  frame of 1.2 kg (6 %); proposed on the template instead (5.1 kg, 25 %). The Cruzr S2 and Y1 first with four wheels;
+  set to the template's two and two casters, as no source counts them.
+- **E13's shares after batch 2** counted from the register's types and V119's counts: type 3 joints 81 of 97, battery
+  70 of 97; type 4 joints 41 of 51, battery 32 of 51.
+- **Not covered:** the model's own draws (the sandbox comes with the entry); the small items are rough, so a frame
+  near a quarter of the mass is not proven safe in every draw.
+
+### V119. How uncertain the robots on templates are, and how many of each type they are (EVIDENCE E13)
+
+- **His words:** "If the composition is based on mass based estimates the composition has larger uncertainties,
+  furthermore they should not be the majority of a given type. Otherwise additional rules have to be formulated."
+- **How:** `goal/uncertainty.py` in Claude's scratch folder: types 1 to 4 drawn by 02's own `draw_taken_apart` at
+  20,000 draws over the tests' inputs (the four parts files as their builders write them, the register as its builder
+  writes it), the magnets' fractions fixed (the tests' `fixed_magnets`); writes nothing. A robot's joints count as the
+  template where any of its body joints is a share of its joint modules (sheet Joints, "Share"); its battery where it
+  has no voltage and capacity of its own (sheet Constants). Per robot (at least 50 draws), the 95 % interval over the
+  median of its joint modules, battery cells, Cu, Nd, Dy, Li and Co per kg of its mass; then the median over robots.
+- **First run corrected:** robots with fewer than 200 draws were left out, which dropped every robot in two versions;
+  the threshold set to 50, every robot and version counted (type 2: 102, type 3: 75).
+- **Result:** E13's two tables. The templates' widths come from the standing rule (half to 1.5 times the mode); the
+  robots' own data narrow them (a stated battery ± 5 %, each joint fitted from its own torque).
+- **Not covered:** the magnets' own spread (fixed here); a robot of two types is counted in each; nothing changed.
+
+### V118. The internet for the robots the makers leave empty, and which robots rest on estimates only (EVIDENCE E12.4)
+
+- **His words:** "If you are not able to find data from the company, check the internet. If you find nothing, then list
+  the robot, but do not include it into the evalution. I do not want a robot in the data, where all data are soly based
+  on estimates".
+- **The internet, batch 2:** 16 searches (standard), their results used only to find pages; the pages read first-hand
+  (four web-fetch reads, the built-in browser); refused pages listed in E12.4, nothing bypassed (GlobalSpec's security
+  check). Found in passing: the DEUX's mass and battery on its maker's page, which the first read had missed because the
+  table loads only at the page's foot; E12.1 corrected.
+- **Which robots rest on estimates only, by program** (`goal/estimates_only.py`, Claude's scratch folder; the four parts
+  files as their builders write them, read with 01's `read_parts_taken_apart` and `row_base`): a robot's own sources
+  are the codes its row of the sheet Robots names; a row counts as its own when its sources name one of them. Result
+  (162 robots and versions): mass from the maker 95, a third party 66, estimated 1; with a stated figure of their own
+  composition 120 (a row of their own labelled S or W, a joint torque, stated module masses); names of their own only
+  12; nothing of their own but the mass 28 (listed in E12.4). Per register type, those with a stated figure of their
+  own: type 1 22 of 31, type 2 73 of 96, type 3 56 of 72, type 4 22 of 33, type 5 2 of 2.
+- **Checked by hand:** the Apollo and the Borg 01 (counted "nothing of their own"): every row of theirs read; their
+  mass is the catalogue's, every other row "E" or a template (E11.6 points 6, 7, 10). The Noetix Bumi (counted "names
+  only"): its computer and shell material from the catalogue, all its figures estimates.
+- **Corrected while writing:** E12.4 first gave the stricter reading's counts as "about 68" and "about 64"; counted by
+  program instead (73, 56).
+- **Not covered:** a row whose sources name the robot's own source under a code its row of Robots does not list would
+  be missed (the two read by hand had none); nothing changed in the register or the files.
+
+### V117. Batch 2's downloads (EVIDENCE E12.3)
+
+- **His words:** "Yes, agree E12.2" (point 5: open Agility's, Elite's and DEEP Robotics' sheets; not the ZIP, the
+  brochure or the manuals).
+- **DEEP Robotics:** its DR02 page links no sheet; its resource centre lists one DR02 document, "产品手册 PDF / 6.952
+  MB"; downloaded with `curl` into a folder of its own in Claude's scratch folder (7,289,406 bytes, "PDF document,
+  version 1.4"), its text taken out with macOS's PDFKit (`tools_e12/pdftext.swift`, scratch): two pages, the table of
+  E12.3. The 1,440 Wh over 20 Ah gives 72 V, the voltage of its power socket on the same sheet (arith., not stated as
+  the battery's).
+- **Agility and Elite:** each sheet behind a form asking for personal data and a CAPTCHA; nothing entered, nothing
+  submitted (his data is not entered into a form without his word).
+- **Not covered:** the DR02 sheet's figures are the maker's laboratory data, as it says; the Digit's and the
+  Centaur-G1's sheets.
+
+### V116. Batch 2 of types 3 and 4: what was read (EVIDENCE E12)
+
+- **His words:** "Yes, batch 2".
+- **Which robots, by program:** the register as its builder writes it (into Claude's scratch folder), its robots of
+  type 3 or 4 with a mass and no rows of their own, in the register's order: 151; the first 27, numbers 59 to 95.
+- **How read:** seven web-fetch reads of the makers' pages (each asked for verbatim figures, "not stated" where a page
+  gives none, no file opened); then myself in the built-in browser for the pages that gave no text or refused
+  (CasiVision; UBTECH's two spec diagrams, as pictures on their pages; Faraday Future's spec tables, which the fetch
+  did not see; Addverb's Elixis-W tab; Elite; Sharpa; XYZ; Noetix; Addverb's GitHub folder); four searches for the
+  makers' pages of LG, Siasun, AVIC and Noetix, used as leads only.
+- **Refused or failing:** Sharpa's page answered "429 Too Many Requests" to the fetch (read in the browser); XYZ's
+  "403" (read in the browser); BOSHIAC's site fails on its certificate (not bypassed, not read); Noetix's English host
+  does not resolve (its Chinese site read in the browser); DEEP Robotics' English page "404" (its Chinese page read);
+  LG's CES launch release not found on its sites.
+- **Not opened** (downloads, his word first): Agility's product sheet, Elite's parameter table, DEEP Robotics' product
+  sheet and offline documents (ZIP), UBTECH's brochure and downloads, Cyborg's manuals, a Siasun PDF (not of the DUCO).
+- **Checked in the writing:** E12.2's counts recounted from E12.1 (a mass for 11, not 15 as first written; voltage and
+  capacity or energy for 4, not 5; a named computer for 10, not 14).
+- **Not covered:** the robots' parts (nothing proposed or entered); the catalogue's figures not checked beyond being
+  named second-hand.
+
+### V115. Where the dataset stands against his goal (2026-11-01)
+
+- **His words:** "It is the goal to have most of the humanoid robots being part of the dataset and than most of the data
+  are based on data given in the internet".
+- **How:** `goal/coverage.py` and `goal/joints.py` in Claude's scratch folder: the register and the four parts files
+  written by their builders into the scratch folder (his files only read), counted with 01's own functions
+  (`read_register`, `cell_rows`, `row_base`: weighed, the maker, a third party, estimated).
+- **Coverage:** 354 entries; 324 with a robot type; 311 with a type and a mass; 154 taken apart (type 1 31, type 2 96,
+  type 3 72, type 4 33, type 5 2, type 6 0, a robot of two types counted in each); 157 to do (by leading type: 3 78, 4
+  70, 5 5, 6 4); 13 with a type and no mass, not in the evaluation.
+- **Where the numbers come from**, over the 162 robots and versions of the four files, cell by cell as 01's table
+  colours them: mass from the internet 99 %; joints estimated 91 % (by kind: the template's share of the mass 75 %, from
+  stated torques by the fit 23 %, weighed 1 %, stated module masses 1 %); battery estimated 60 %, stated 40 %; boards
+  estimated 84 %; frame and shell estimated 99 % (the frame is the remainder).
+- **Before his runs:** the register on disk is of 2026-10-30 14:44 and the files of types 3 and 4 are not on disk
+  (`stat`), so these counts are of what the builders write, not yet of his files.
+- **Not covered:** the share of each robot's mass that rests on stated numbers (the cells count robots, not kg).
+
 ## 2026-10-30
 
 ### V114. The entry of batch 1 of types 3 and 4 (EVIDENCE E11.7, E11.8), built and run in the sandbox

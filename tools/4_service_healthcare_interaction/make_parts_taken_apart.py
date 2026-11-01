@@ -7,13 +7,15 @@ Builder of data/researched/4_service_healthcare_interaction/parts_taken_apart.xl
 at the root of the repository.
 
 Matthias, 2026-10-30: "Can we move to type 3 and 4 together?", "Yes, together", "Yes, all four" (EVIDENCE.md E11.2),
-"Yes, 64 kg" (E11.5), "Yes, agree E11.6", "Yes, build it" (E11.7, its open points A to C as recommended).
+"Yes, 64 kg" (E11.5), "Yes, agree E11.6", "Yes, build it" (E11.7, its open points A to C as recommended); for batch 2
+2026-11-01, "Yes, agree E12.2", "A stated mass" (E12.4), "Yes, agree E12.5", "Yes, build it" (E12.6).
 
 WHAT IT DOES
 ------------
 It writes the data file of type 4's robots taken apart so far, each part by part, as type 2's builder writes type 2's
 (the same sheets, the same machinery in tools/parts_taken_apart.py): batch 1 of types 3 and 4, its robots whose first
-type among 3 and 4 is 4, 8 (9 blocks, the X2 in two versions) (E11.7 point 1). Their blocks, and types 3 and 4's
+type among 3 and 4 is 4, 8 (9 blocks, the X2 in two versions; E11.7 point 1), and batch 2's, 8 (10
+blocks, the CASBOT 02 and the FF Master in two; E12.6 point 1). Their blocks, and types 3 and 4's
 templates (on legs and on wheels, under names of their own), are held in tools/parts_types_3_and_4.py, one copy for both
 builders (E11.7 open point A). A robot of type 4 whose rows stand in another type's file (types 1 and 2, or the other of
 3 and 4) is drawn by 02 from there (E11.7 point 4), not written here.
@@ -48,11 +50,12 @@ FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 # --- About ----------------------------------------------------------------------------------------------------------
 # The file's own description, one line per row of its first column (None leaves the row empty).
 ABOUT = [
-    'Robot type 4 part by part: its robots of batch 1 of types 3 and 4 taken apart (each in the file of its first type '
-    'among 3 and 4), for where their critical materials sit',
+    'Robot type 4 part by part: its robots of batches 1 and 2 of types 3 and 4 taken apart (each in the file of its '
+    'first type among 3 and 4), for where their critical materials sit',
     None,
     'Agreed by Matthias on 2026-10-30 (documentation/claude/EVIDENCE.md E11.2, E11.5, E11.6: "Yes, all four", "Yes, 64 '
-    'kg", "Yes, agree E11.6"; entered on "Yes, build it", E11.7), written as type 2\'s robots are '
+    'kg", "Yes, agree E11.6"; entered on "Yes, build it", E11.7); batch 2 on 2026-11-01 (E12.2, E12.4, E12.5; '
+    'entered on "Yes, build it", E12.6), written as type 2\'s robots are '
     '(tools/parts_taken_apart.py), their blocks in tools/parts_types_3_and_4.py. Written by Claude.',
     "Sheet Robots: each robot, its maker, its type, the maker's height and stated mass. Every sheet with a column "
     "Robot holds each robot's own rows; JointParts, Shares and SensorElements are one set for all (the G1's joint "

@@ -3705,6 +3705,27 @@ def taken_words(n: int, register: list | None, apart) -> str:
             f'{taken} of its {len(with_mass)} robots{tail}')
 
 
+def template_shares(apart) -> tuple:
+    """How many of a type's robots and versions (`apart`: its parts file, or its view over several files) rest on
+    templates, robots' parts estimated from their mass (EVIDENCE.md E13, rules 2 and 4; Matthias, 2026-11-01, "Yes,
+    agree E13"): (on the joint template, a body joint of theirs a share of their joint modules; on the battery template,
+    no voltage and capacity of their own; all of them)."""
+    names = list(apart.robots)
+    joints = sum(any(j.robot == name and j.share is not None for j in apart.joints) for name in names)
+    battery = sum(not any(q in apart.constants.get(name, {}) for q in BATTERY_CONSTANTS) for name in names)
+    return joints, battery, len(names)
+
+
+def template_words(apart) -> str:
+    """template_shares() in words, for 01's overview card and 02's notes page of a type (E13 rules 2 and 4): "Most of
+    its robots rest on templates: ..." where either share is above half (the rule, at most half, broken), else "Its
+    robots on templates: ..."."""
+    joints, battery, total = template_shares(apart)
+    counts = f'the joints of {joints} of its {total} robots and versions, the battery of {battery}'
+    return (f'Most of its robots rest on templates: {counts}.' if max(joints, battery) > total / 2 else
+            f'Its robots on templates: {counts}.')
+
+
 def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bool) -> str | None:
     """The words of robot type `n`'s card on the overview's second page. A type taken apart (`apart`, its parts file):
     its robots drawn from their own parts and their masses, counted over those with a mass, those without named as not
@@ -3723,16 +3744,18 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
                         for r in with_mass)
         else:
             total = taken = len(apart.robots)
+        # Each card of a type taken apart ends with how many of its robots rest on templates (E13 rules 2 and 4).
+        on_templates = template_words(apart)
         if taken < total:
             return (f'{taken} of its {total} robots of the register with a mass taken apart so far, each drawn part by '
-                    f'part; {span}. Its draws for stock-and-flow from the workbook until all are.')
+                    f'part; {span}. Its draws for stock-and-flow from the workbook until all are. {on_templates}')
         if not without:
             return (f'Its {total} robots of the register, each drawn from its own parts; {span}. The workbook\'s '
-                    f'anchor robot, {anchor}, is one of them.')
+                    f'anchor robot, {anchor}, is one of them. {on_templates}')
         names = (without[0] if len(without) == 1 else ', '.join(without[:-1]) + ' and ' + without[-1]
                  if len(without) <= 3 else f'{len(without)} robots')
         return (f'Its {total} robots of the register with a mass, each drawn from its own parts; {span}. The {names}, '
-                f"with no mass, {'is' if len(without) == 1 else 'are'} not in the evaluation.")
+                f"with no mass, {'is' if len(without) == 1 else 'are'} not in the evaluation. {on_templates}")
     if listed:
         return (f'Its {len(of_type)} robots of the register listed, {len(with_mass)} with a mass; drawn from the '
                 'workbook until they are taken apart.')

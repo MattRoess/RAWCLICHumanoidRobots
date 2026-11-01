@@ -18,7 +18,8 @@ just to get a deeper look into the robot, so that there is information on where 
 recycling can be optimized"). First the Unitree G1, the AgiBot X1 and the Fourier N1, taken apart first (agreed on
 2026-10-27, documentation/claude/EVIDENCE.md E2.8 to E2.8e); then every other robot of the register's sheet Type 1, one
 block each (Matthias, 2026-10-29: "Yes, build it", the entry of type 1's research: E5.1 to E5.19, each agreed that
-day), 32 robots in all, the Booster K1 in its two versions. Each row of the file names its own sources.
+day), the Booster K1 in its two versions; since 2026-11-01 without the PrimeBOT Q1, whose mass no source states (listed
+only, EVIDENCE.md E12.4, E12.6): 31 blocks for 30 robots. Each row of the file names its own sources.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -53,8 +54,8 @@ FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 # --- About ----------------------------------------------------------------------------------------------------------
 # The file's own description, one line per row of its first column (None leaves the row empty).
 ABOUT = [
-    'Robot type 1 part by part: its 31 robots of the register (the Booster K1 in two versions), for where their '
-    'critical materials sit',
+    'Robot type 1 part by part: its 30 robots of the register with a mass (the Booster K1 in two versions; the '
+    'PrimeBOT Q1, no mass stated, listed only since 2026-11-01, E12.4), for where their critical materials sit',
     None,
     'The Unitree G1, the AgiBot X1 and the Fourier N1 agreed by Matthias on 2026-10-27 (documentation/claude/'
     'EVIDENCE.md E2.8 to E2.8e); every other robot of type 1 agreed on 2026-10-29 (E5.1 to E5.19: the actuators E5.12, '
@@ -1082,12 +1083,6 @@ PHYBOT_C1 = catalogue_block(
               "HG; its elements as the Intel RealSense D435's, its mass not stated", DEPTH_CAMERA)],
     shell=('Shell: composite polymer', 'HG "Composite polymer + aluminum frame"; 11.5 % of the robot'),
     frame=('Frame', 'Aluminium', 'HG "aluminum frame"'))
-PRIMEBOT_Q1 = catalogue_block(
-    'PrimeBOT Q1', 'PrimeBOT', 0.88, None, ((9.75, 19.5, 29.25), 'E',
-                                             'no mass in any source: the Booster K1\'s 19.5 kg (0.95 m, the robot '
-                                             'nearest in height with a mass from its maker), half to 1.5 times (E5.17 '
-                                             'point 6)'),
-    22, 'Computer board (not named)')
 QUESTER1 = catalogue_block(
     'AgiBot QUESTER1', 'AgiBot', 0.79, 25, ((20, 25, 30), 'S', 'HG "~20–30 kg" ("Not Verified")'),
     28, 'Computer board (not named)',
@@ -1257,7 +1252,7 @@ GENERATED = [rows_of(AI_SAPIENS_K1), rows_of(AKINCI_5), ASIMOV_ONE_ROWS, asimov_
              rows_of(BOOSTER_T1), rows_of(BOOSTER_T2), rows_of(NOETIX_BUMI), rows_of(NOETIX_E1),
              g1_plus_rows(), rows_of(JAKA_PI), rows_of(ROBOTIS_K0), rows_of(BOOSTER_K1_5AH),
              rows_of(BOOSTER_K1_2AH), rows_of(LIGHTBOT_0), rows_of(DOBOT_LUMO), rows_of(NORI_L3),
-             rows_of(PHYBOT_C1), rows_of(PM01), rows_of(PRIMEBOT_Q1), rows_of(QUESTER1),
+             rows_of(PHYBOT_C1), rows_of(PM01), rows_of(QUESTER1),
              rows_of(LEJU_ROBAN2), rows_of(ROBOTO_ORIGIN), rows_of(RP1), rows_of(FAUNA_SPROUT),
              rows_of(STARBOT_ASTRA), rows_of(TOTAN_O1), rows_of(UNITREE_R1), rows_of(XIAO_TUO),
              rows_of(YMBOT_E3)]
