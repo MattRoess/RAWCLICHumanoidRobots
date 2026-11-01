@@ -105,10 +105,10 @@ draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01
 - **A correction of mine to report:** E15 question 6 said "aluminium as for every robot so far". It is not so: the
   AgiBot A3 and A3 Ultra have magnesium frames (E11.6 question 4). The Kaleido 9 follows that precedent (its maker's
   magnesium skeleton).
-- **The first-hand records sit in Claude's scratch folder on this Mac only, and are gone tomorrow** (memory note
-  "Scratch folder is not durable"): `batch3/firsthand.md`, `types56_firsthand.md`, the agents' reports, the downloaded
-  PDFs, `batch3_plan.py`. E15, E16, V134 to V136 hold every decision, number, quote and address; the PDFs can be
-  downloaded again from the addresses there.
+- **The first-hand records are saved** (Matthias: "Yes, save them") in `documentation/claude/research_2026-11-01/`: `firsthand_batch3.md`,
+  `firsthand_types56.md`, `agent_reports.md` (the eight agents' reports as received), `arithmetic.md` (E15's modes and the
+  reading scripts, as text). The downloaded PDFs are not in git (up to 30 MB, data): download them again from the
+  addresses there.
 - **The RAWCLICDataCenters session** on the zero rule still waits for his answer there.
 
 **Standing rules met today:**

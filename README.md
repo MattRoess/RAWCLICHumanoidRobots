@@ -58,6 +58,7 @@ The tests run from a terminal in the project folder:
 | `params.xlsx` | The register of the settings. An output: editing it changes nothing. |
 | `documentation/sources/` | Matthias's sources: the research reports, the earlier workbooks, the component diagram. |
 | `documentation/claude/` | Written by Claude: how the model works, where the work stands, every check made. |
+| `documentation/claude/research_2026-11-01/` | Written by Claude: the research of 2026-11-01 as read (batch 3 of types 3 and 4, types 5 and 6): each figure with its quote and address (`firsthand_*.md`), the research agents' reports as received, the arithmetic of E15's modes. The record behind EVIDENCE.md E15 and E16. |
 | `HumanoidRobotsMC/`, `data/02_HumanoidlRobots.xlsx` | The earlier Monte Carlo model of four robot classes, copied from the Empa folder on 2026-10-26. Not part of the stages; see the handover. |
 
 ## Setup

@@ -65,7 +65,7 @@ by Claude, newest first.
     NeodraDynamics), each fetched into the scratch folder and read as text. The outlets: IEEE Spectrum, the IEEE Robots
     Guide, Fluid Power World, Global Times via 163.com, Interesting Engineering, aiwiki, The Business Standard, Pulse
     2.0, Mynavi, PC Watch, The Financial News and Battery-Tech Network.
-  - The quotes are in the scratch file `batch3/types56_firsthand.md`.
+  - The quotes are in `documentation/claude/research_2026-11-01/firsthand_types56.md` (saved from the scratch folder).
 - **Result:** the agents' figures agree with their sources. Corrections, each now in E15 or E16:
   - Moby's mass is its maker's 72 kg, not the catalogue's 45; E15's row is changed.
   - The Phantom MK1 has no battery; E15's row is changed.
@@ -110,7 +110,7 @@ by Claude, newest first.
   - The Walker C1 carries a Jetson Thor, which the agent missed.
   - Matrix-1's "Actuator: 55" and O-ID's "Specs indicative" are not in the pages' text.
   - The UBTECH Walker C1's address "WalkerC1" gives "can't be found"; its page is `walker-c1`.
-  - Each figure is recorded with its quote in the scratch file `batch3/firsthand.md`.
+  - Each figure is recorded with its quote in `documentation/claude/research_2026-11-01/firsthand_batch3.md` (saved from the scratch folder).
 - **Not covered:**
   - The internet's figures (news, databases) are as the agents read them. I reread only humanoid.guide's GoMate (45 kg)
     and the pages of the robots of no stated form.
@@ -118,7 +118,7 @@ by Claude, newest first.
     pane, even at 1440 px.
   - JS-only maker sites not read: jaka.com, lejurobot.com, keenon.com, gigaai.cc, zeroth0.com, galaxea-dynamics.com,
     sharpa.com, switch-bot.com, kawasakirobotics.com.
-  - The modes in E15 are Claude's arithmetic (`batch3/batch3_plan.py`), not a run.
+  - The modes in E15 are Claude's arithmetic (`batch3_plan.py`, in `documentation/claude/research_2026-11-01/arithmetic.md`), not a run.
   - Nothing was entered or run on his data.
 
 ### V133. The Booster T2 by type 2's fit

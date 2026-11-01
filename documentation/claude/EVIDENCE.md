@@ -129,8 +129,8 @@ then the internet; every maker figure they relied on was then read again by me, 
 releases (text, or their images by OCR), five PDFs downloaded (RNoid's spec sheet, ROBOTERA's Q5 brochure, Oversonic's
 three RoBee brochures), seven model files added up by script (GENE.01, GR-3, NIX ×4, Star1), the forms of five robots from their
 makers' photos (V134). The method is batch 2's (E12.5, agreed) with E13 and E14; where batch 3 needs a choice they did
-not make, it is **bold** and a question in E15.6. Numbers at the modes are Claude's arithmetic (`batch3/batch3_plan.py`,
-rough for the small items); the run draws every one from its min / mode / max. **E13's shares get worse, not better**
+not make, it is **bold** and a question in E15.6. Numbers at the modes are Claude's arithmetic (`batch3_plan.py`, kept in
+`documentation/claude/research_2026-11-01/arithmetic.md`; rough for the small items); the run draws every one from its min / mode / max. **E13's shares get worse, not better**
 (E15.5): most makers publish no joint data.
 
 ### E15.1 What the research found
@@ -303,7 +303,7 @@ modes.
 | 316 Vesoma 1 | its maker: "design visualisation. Under development." |
 | 345 Yogi | humanoid.press: height and weight "Not published"; the catalogue's 47 kg and aiwiki's 8 kg (76 cm) disagree six-fold, neither sourced |
 
-### E15.5 E13's shares after batch 3 (`batch3_plan.py`, robots and versions, a robot counted in each of its types)
+### E15.5 E13's shares after batch 3 (`batch3_plan.py` in `research_2026-11-01/arithmetic.md`, robots and versions, a robot counted in each of its types)
 
 | Type | Now (E14 as built) | Batch 3 adds | Joint template after | Battery template after |
 |---|---|---|---|---|
