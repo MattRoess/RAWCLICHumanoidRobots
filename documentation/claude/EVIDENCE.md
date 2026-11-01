@@ -8,6 +8,203 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E14. E13 rule 3's research pass: the makers' own data for the robots on the templates (2026-11-01). Nothing entered
+
+Matthias, 2026-11-01: "Yes, start research" (E13 rule 3: before batch 3, a research pass over the robots entered on the
+joint template, types 2 to 4 first; model files, actuator datasheets, joint-torque tables, then batteries; the maker
+first). Of the 142 robots and versions on the joint template, the makers most likely to publish were searched in two
+rounds: their GitHub model files first, then their product pages. Reading agents did the first reading. Every number of
+every model file was then read again in the browser pane, parsed on the page, and the key figures of the makers' pages
+were read there too (V123, V130). Nothing was downloaded. A model file's `effort` is the limit of the maker's own
+simulation model: a design value, first-hand, with peak or rated not stated. It is used as the H2's and the GR-2's are
+(E6.8 point 1): each joint at its torque, its module the fit 0.0689 kg × torque^0.566, half to 1.5 times (E). Type 1's
+robots keep type 1's own rule, the torque over 87.3 N·m/kg, half to 1.5 times, as its Booster T1 from its model
+(E5.12 point 4). The mass
+of each robot stays its maker's stated mass; a model's link masses are a check only.
+
+### E14.1 The sources
+
+| Code (new) | Source, read first-hand | What it is | Robots |
+|---|---|---|---|
+| BT2u | Booster, `booster_assets` T2_31dof.urdf (and .xml, the same) | maker's model, 31 joints, 41.99 kg; its page "Max Peak Torque: 140 N·m", the file's largest 144 | Booster T2 |
+| AGX2u | AgiBot, `agibot_x2_urdf` X2_URDF-v1.4.0: X2-Ultra.urdf (31 joints, 44.80 kg), X2-EDU.urdf (29, 41.20 kg) | maker's models; its page: X2 25 DoF (arms 5), X2 Ultra 30 (arms 7, neck 1), "Peak Joint Torque 120N·m" for both | X2, X2 Ultra |
+| AGA3u | AgiBot, `A3-A3U-robot-model`: a3_t3d0 and a3_t2d5 (31 joints, 56.80 and 57.98 kg, the same limits), a3_ultra_t3d0 (63: the same 31 and two hands of 16, 0.59 to 3.39 N·m; 60.01 kg) | maker's models; knee 320 N·m, as stated | A3, A3 Ultra |
+| AGA2U | AgiBot, A2 Ultra and A2 Lite pages: "Peak Knee Torque 270N·m", "14.4Ah", "54.6V 8A" charger | maker's page (its 700 Wh already entered, AGA2p) | A2 |
+| UNu2 | Unitree, `unitree_ros`: h2x.urdf (31, 67.60 kg), h2d.urdf (24 moving, one lift joint, 133.94 kg), g1_d.urdf (34, 71.00 kg), r1d.urdf (the R1-A7-D, 38.54 kg), r1_a5.urdf (the R1-A5 on a fixed base, 13 joints, 14.79 kg) | maker's models, from the repository of the H2's file (E6.8) | H2-X ×2, H2-D, G1-D, R1-A7-D, R1-A5-D |
+| UNH2Dp, UNR1Dp | Unitree, H2-D and R1-D pages: "Maximum Arm Joint Torque 120N.M"; "Maximum torque of the shoulder 60N·m"; H2-D Flagship "Column DOF 1", "Approx. 120Kg" | maker's pages | H2-D, R1-A5-D, R1-A7-D |
+| GALu | Galaxea, `URDF` R1Pro: urdf_r1pro_2025.urdf (93.27 kg), r1pro_2026.urdf (92.83 kg), the same joints | maker's models | R1 Pro |
+| TK3u | X-Humanoid, `TienKung_URDF` tiangong3.urdf ("tiangong3_0_V2", 31, 65.82 kg) | maker's model | Tien Kung 3.0 |
+| OLu | LimX, `humanoid-description` HU_D04_01.urdf (31, 52.55 kg; its README "≈ 52.5 kg") | maker's model | Oli |
+| RCu | PAL, `reemc_robot` xacro (legs v0, the default, and v1; arms; wrists, joint 5 "TODO: Check effort value!"; torso; head v0) | maker's model | REEM-C |
+| TPu | PAL, `pal_sea_arm` (tiago-pro limits: 43, 43, 26 × 5) and `tiago_pro_head_robot` (5.197, 2.77) | maker's model | TIAGo Pro |
+| ARIu | PAL, `ari_robot` xacro (arms 10, 10, 5, 5; head 3.4, 3.26) | maker's model | ARI |
+| RMu | RealMan, `rm_models` RM65-B-V.urdf (60, 60, 30, 10, 10, 10; 7.27 kg) | maker's model of the arm its page names ("RM65-B-V") | Dual-Arm Lift |
+| NOEb, NOEe | Noetix, Bumi and E1 pages: "关节模组最大扭矩 70N.m" (the joint modules' largest torque 70 N·m), "48V 5.1Ah", "17kg"; "膝关节最大扭矩150Nm" (the knee's largest torque 150 N·m), "整机重量40kg", "10.6Ah" | maker's pages (both were from the catalogue only) | Bumi, E1 |
+
+Read and **not used**: AgiBot G2's body and head joints (eight, every one 50 N·m, a model's default by their look;
+its arms 108, 108, 35, 35, 35, 18, 18 are used); THEMIS TH02-A7 (every effort 0); the Kangaroo's knee (a linear
+actuator, 1,100 N, not a torque) and its arms (no limit set of its own found); the RealBot-01, L2, S2 (their arms not
+named); EngineAI SE01's "1000 mAh" (1 Ah for an 80 kg robot, not plausible); the X2-EDU file's arms for the X2 (seven
+joints an arm, the X2 has five).
+
+### E14.2 Proposal, robot by robot
+
+Each "from its file" joint its file's torque, its module the fit (E). Everything not named stays as entered (hands,
+lift, base, battery, boards).
+
+| # Robot (types) | Now | Proposed | Model's mass / stated |
+|---|---|---|---|
+| 55 Booster T2 (1) | joint template | every joint from BT2u | 42.0 / 42 |
+| 57 Noetix Bumi (1, 4) | both templates | joints from its stated 70 N·m (E12.5 point 2); battery 48 V × 5.1 Ah, 245 Wh (S) | — / 17 |
+| 85 Noetix E1 (1, 4) | both templates | joints from its knee's 150 N·m; battery stays on the template (no voltage) | — / 40 |
+| 17 AgiBot X2 Ultra (4, 3) | joint template | every joint from AGX2u (its head 2, the page's neck 1: the file's) | 44.8 / 39 |
+| 17 AgiBot X2 (4, 3) | joint template | legs and waist from AGX2u (the same in both files); **arms the first five of the file's seven (60, 60, 36, 36, 36), E: question 1** | 41.2 / 35 (EDU) |
+| 14 AgiBot A3 (4) | joint template | every joint from AGA3u | 56.8 / 55 |
+| 8 AgiBot A3 Ultra (4) | joint template | its body's 31 from AGA3u; its hands as entered | 60.0 / 60 |
+| 6 AgiBot A2 (4) | joint template | joints from its knee's 270 N·m | — / 69 |
+| 123 Unitree H2-X ×2 (2) | joint template | every joint from UNu2 | 67.6 / 66 |
+| 122 Unitree H2-D Flagship (2) | joint template | arms, waist pitch, head from UNu2 (its one lift joint: the Flagship's); shoulder pitch 130 (the file's, as the H2's; the page "120N.M") | 133.9 / 120 |
+| 104 Unitree G1-D Ultimate (2) | joint template | waist (80, 30) and arms (25 × 5, 5 × 2 an arm) from UNu2 | 71.0 / 90 |
+| 248 Unitree R1-A7-D (2) | both templates | every joint from UNu2 (shoulder 60, as the page) | 38.5 / 32 |
+| 248 Unitree R1-A5-D (2) | both templates | **its upper body from the R1-A5's file (waist 60, arms 60, 60, 33, 33, 33, head 33, 0.86), E: question 2** | 14.8 (A5) / 30 |
+| 247 Galaxea R1 Pro (2, 3) | joint template | torso (4 × 100) and arms (55, 55, 25, 25, 18, 18, 18) from GALu | 93.3 / 126 |
+| 300 Tien Kung 3.0 (2) | joint template | every joint from TK3u | 65.8 / 64.5 |
+| 171 LimX Oli (2) | joint template | every joint from OLu | 52.5 / 55 |
+| 256 PAL REEM-C (2) | both templates | every joint from RCu, its legs v0 (the files' default; v1's 1.5 to 19 % higher, within the fit's half to 1.5 times) | 65.9 in part / 80 |
+| 295 PAL TIAGo Pro (2, 3) | joint template | arms and head from TPu | — / 80 |
+| 34 PAL ARI (4, 2) | joint template | arms and head from ARIu | 54.2 in part / 60 |
+| 82 RealMan Dual-Arm Lift (2, 3) | both templates | arms from RMu | 7.27 an arm / 157 |
+| 105 AgiBot G2 (3, 2) | joint template | its arms from its model; its body and head stay on the template | — / 185 |
+
+Not found (the maker publishes no joint data, or its page could not be read): Kepler K1 and K2, Robotera L7, Lumos
+LUS2, MagicLab D1, DOBOT LUMO, Leju Roban2, JAKA π, LimX CL, X-Humanoid TianGong Ultra and Omni, EngineAI SE01, AgiBot
+G1, A2-W, A2 Max, QUESTER1, Apptronik Apollo, Agility Digit, Figure 03, Boston Dynamics Atlas, Sanctuary Phoenix, Tesla
+Optimus (403), NEURA 4NE1; not yet searched: Blue Worm Mantis, type 1's robots from the catalogue (AKINCI-5, LightBot-0,
+Nori L3, PHYBOT C1, Totan O1, Xiao Tuo, YMBOT E3, Sprout, Astra), and type 2's others (Hexagon AEON to Lanxin VB2).
+**PDFs found, not read** (a download needs his word): Westwood's THEMIS 2.5 brochure, RealMan's specs V1.6, PAL's
+datasheets (TIAGo Pro, its arm, Kangaroo, ARI), Boston Dynamics' Atlas spec sheet, NEURA's 4NE1 datasheet, LimX's Oli
+brochure.
+
+### E14.3 What it changes in E13's shares (computed over his files, `pass/shares_after.py`, V130)
+
+| Type | Joint template now → after | Battery template now → after |
+|---|---|---|
+| 1 | 16 → 13 of 31 (42 %) | 13 → 12 (39 %) |
+| 2 | 80 → 67 of 102 (66 %) | 64 → 64 (63 %) |
+| 3 | 80 → 75 of 96 (78 %) | 69 → 69 (72 %) |
+| 4 | 40 → 32 of 50 (64 %) | 31 → 30 (60 %) |
+
+Type 1 comes below half. Types 2 to 4 stay above it, since most of their makers publish no joint data; E13 rule 4
+holds for them (their pages say most of their robots rest on templates, and how many). Then batch 3 of types 3 and 4.
+
+### E14.4 Questions
+
+1. The AgiBot X2 (25 DoF, arms of five): its arms as the first five joints of the X2 files' arm (shoulder pitch, roll,
+   yaw, elbow, wrist yaw: 60, 60, 36, 36, 36 N·m), E? Recommended: yes; its legs and waist are the same in both files.
+2. The Unitree R1-A5-D: its upper body from the R1-A5's file (the same arms of five on a fixed base; Unitree's page gives
+   the same "Maximum torque of the shoulder 60N·m" for all four R1-D versions), E? Recommended: yes.
+
+Agreed: "Yes, agree E14" (2026-11-01), both questions as recommended.
+
+### E14.5 The downloads (on "download what ever is possibel"), read myself
+
+Matthias, 2026-11-01: "download what ever is possibel". All nine PDFs that E14.1 names were downloaded into Claude's
+scratch folder (`downloads_e14/`, 0.4 to 18 MB, each a PDF). Seven were read as text (macOS's PDFKit). LimX's Oli
+brochure and RealMan's specs are images, so their pages were rendered and read by macOS's text recognition, the Oli's
+also by eye (V131).
+
+| PDF | What it adds | Lands in |
+|---|---|---|
+| Westwood, THEMIS TH02 Gen2.5 brochure | "36.5kg" (standard, with its two hands); "42 Total DoF" (legs 6 × 2, arms 7 × 2, hands 7 × 2, head 2); "Dual 259.2 Wh Li-Ion packs"; "AMD Ryzen 7840HS", "Jetson Orin NX 16GB" for the head and for the body; ZED 2i and ZED X Mini stereo cameras; BEAR actuators, no torque | the THEMIS: its mass, battery, boards, cameras (point B) |
+| RealMan, specs V1.6 (62 pages) | its joint modules: WHJ60 "1040" g at 60 N·m, WHJ30 750 g at 30, WHJ10-B 455 g, WHJ10-N 425 g at 10 (rated); RM65 7.2 kg, RM75 7.8 kg, "Mechanical Brakes on Joints 1-3" (RM65), "1-4" (RM75); the RealBot-S2, L2 and 01 with arms of 7 DoF, "Humanoid Arm", "Force-Torque Sensor Range 200N / 7N • m" (the RM75's force-torque version's); the Dual-Arm Lift "Arm Model RM65-B-V" | the RealMan robots' arm modules (point A) |
+| PAL, TIAGo Pro, its arm, Kangaroo, ARI | "Weight 80 kg", 23 DoF (TIAGo Pro); its arm "Weight 9.5 kg"; Kangaroo "Highly Efficient Linear Actuators", "976 Ah" (its page: 976 Wh); ARI "24V / 40VAh" | already entered; the arm's 9.5 kg a check |
+| Boston Dynamics, Atlas spec sheet | 90 kg, 56 DoF, battery life 4 h, no capacity | already entered |
+| NEURA, 4NE1 datasheet | 80 kg, hands 12 DoF, no torque, no battery | already entered |
+| LimX, Oli brochure | two Intel RealSense D435i (head, chest), "自研 6 轴 IMU" (its own six-axis IMU), 31 DoF; no torque, no battery | the Oli's sensors (point C) |
+
+Proposals from them (each for his word, as E14):
+- **A. The RealMan robots' arms by RealMan's own modules (S), instead of the fit.** The Dual-Arm Lift's RM65-B-V: joints
+  1 and 2 WHJ60 (1.04 kg), joint 3 WHJ30 (0.75 kg), joints 4 to 6 WHJ10-N (0.425 kg; "Soft Brakes 4-6"). The RealBot-01,
+  L2 and S2: the RM75 (7 DoF and the force-torque sensor its pages name, E): joints 1 and 2 WHJ60, 3 and 4 WHJ30, 5 to 7
+  WHJ10-N. Which module at which joint is matched by the model file's torque limits (60, 60, 30, 10 …), which are
+  the modules' rated torques, and by the brakes (E). Each ± 5 %, as a mass stated once. Their other joints stay as they
+  are (the RealBots' waist, legs and head on the template).
+- **B. THEMIS:** its mass 35.5 / 36.5 / 37.92 kg (the brochure's the mode, the model's 37.92 the max, 1 kg below the
+  min, as the PNDbotics Adam's, E11.6 point 2); its battery 2 × 259.2 = 518.4 Wh (S, NMC E); its boards an x86
+  computer (Ryzen 7840HS) and two Orin NX 16 GB; its two stereo cameras. Its joints stay on the template (no torque).
+- **C. LimX Oli:** two depth cameras (RealSense D435i, S) beside its IMU.
+
+### E14.6 Spec: the entry of E14 (2026-11-01). Nothing built
+
+His words: "Yes, start research", "Yes, agree E14" (its proposal, questions 1 and 2 as recommended), "download what
+ever is possibel". Points A to C of E14.5 are new: **for his word with this spec**.
+
+1. **Type 1's builder** (`tools/1_compact_research_developer/make_parts_taken_apart.py`):
+   - the Booster T2 every joint from BT2u, each module by type 1's rule;
+   - the Noetix Bumi and E1 joints from a stated joint, 70 N·m and its knee's 150 N·m. Each joint's torque is its
+     kind's ratio to the knee in the seven (E12.5 point 2), each module by type 1's rule;
+   - the Bumi's battery 48 V × 5.1 Ah (S);
+   - the source codes BT2u, NOEb, NOEe.
+2. **Type 2's builder** (`tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`), each by its file:
+   - the H2-X (both versions), H2-D, G1-D, R1-A7-D, R1-A5-D (E), R1 Pro, Tien Kung 3.0, Oli, REEM-C (legs v0),
+     TIAGo Pro, ARI and G2 (arms);
+   - each module by type 2's fit;
+   - the Dual-Arm Lift and the RealBot-01, L2, S2 arms by RealMan's modules (A);
+   - THEMIS (B) and the Oli's cameras (C);
+   - the source codes of E14.1 and E14.5.
+3. **Types 3 and 4** (`tools/parts_types_3_and_4.py`), type 2's fit, as batch 2:
+   - the X2 Ultra, A3 and A3 Ultra by their files;
+   - the X2 by its file with arms of five (E);
+   - the A2 from its knee's 270 N·m.
+4. **Not touched:** the register (no robot's name or entry changes), 01, 02, 03.
+5. **Tests first:**
+   - each robot's joints as its file's (names, counts, torques) and its modules by its rule;
+   - the WHJ masses and their joints;
+   - the Bumi's and THEMIS's batteries, THEMIS's mass;
+   - E13's shares after (joint template 13 of 31, 67 of 102, 75 of 96, 32 of 50; battery template 12, 63, 68, 30);
+   - every robot not named here, its rows unchanged.
+6. **Sandbox** (2,000 draws, Claude's scratch folder, his files only read):
+   - the four builders, 01 and 02;
+   - each changed robot's joint modules' mass before and after;
+   - the other robots' rows identical;
+   - 01's cards with the new shares.
+7. **Documents:** E14.7 (where each point landed), METHODOLOGY, README, VERIFICATION, HANDOVER.
+8. **His runs afterwards**, in RAWCLICHumanoidRobots, each saying what it changes:
+   - the builders of types 1, 2, 3 and 4;
+   - 01;
+   - 02.
+
+### E14.7 Built: the entry of E14 (2026-11-01). Nothing committed
+
+On "Yes, build it" (E14.6 with points A to C). Checks in V132.
+- **Shared** (`tools/parts_taken_apart.py`): `with_own_joints()` (a block of the template, its body joints now its
+  maker's, its hands, wheels, steering and lift as entered, its count of joints for the encoders as before) and
+  `model_joints()` (a model file's rows at their places, each module by its type's rule).
+- **Type 1:** the Booster T2 from BT2u; the Noetix Bumi from its 70 N·m and the E1 from its knee's 150 N·m, each module
+  by type 1's rule (`from_stated_joint()` with its `fit` parameter, one copy, types 3 and 4's); the Bumi's battery
+  48 V × 5.1 Ah. **Beyond the text:** the Bumi's and E1's masses now cite their makers' pages ("17kg", "整机重量40kg";
+  before, the catalogue's, the same numbers), and the E1's height its page's "身高140cm" (1.40 m; the catalogue's 1.36
+  before).
+- **Type 2:** the H2-X (both), H2-D, G1-D, R1-A7-D, R1-A5-D, R1 Pro, Tien Kung 3.0, Oli, REEM-C, TIAGo Pro and ARI by
+  their files; the G2's arms; the Dual-Arm Lift's arms and the RealBot-01, L2 and S2's arms by RealMan's WHJ modules
+  (A); THEMIS from its brochure (B), with 48 V only to split its 518.4 Wh into volts and amp-hours (E, as E8.3 point 6).
+- **Types 3 and 4:** the X2 Ultra, X2 (arms of five, E), A3 and A3 Ultra by AgiBot's files; the A2 from its knee's
+  270 N·m, its joints per body part its page's (neck 2, arms 7, legs 6).
+- **Departures, for his word:**
+  1. **Point C was already in:** the Oli's two depth cameras were entered from LimX's page ("Head Depth Camera",
+     "Chest Depth Camera", OLp) before E14; nothing was added.
+  2. **The E1's 26 joints per body part** (its maker gives no split): legs 12, waist 2, arms 5 × 2, head 2, as the G1's 23
+     with a head of 2 and a second waist joint (E; E12.5 point 2's rule for the FF Master).
+  3. **The ARI's fifth arm joint:** its datasheet's wrist, not in its model (four joints an arm), at its elbow's 5 N·m (E).
+  4. **The REEM-C's leg joints** named by PAL's order (leg 1 to 6: hip yaw, roll, pitch, knee, ankle pitch, roll), my
+     reading of PAL's convention; the torques are the file's whichever way they are named.
+  5. **"Every robot not named, its rows unchanged"** (E14.6 point 5) is checked by the sandbox's comparison of the four
+     files before and after (V132), not by a unit test.
+  6. **The Booster T2's modules by type 2's refit**, not type 1's rule. Type 1's rule put 71 % of its 42 kg in its joints
+     at its model's high limits, and its frame fell below zero in 4.1 % of its draws (V132). The refit puts 59 % there:
+     its frame 8.3 kg at the mean, 4.7 to 11.7 kg over 95 % of its draws, never below zero (V133).
+- **Agreed:** "Yes, agree" (2026-11-01), E14 as built with point 6.
+
 ## E13. Robots whose composition rests on their mass: their uncertainty and their share of a type (2026-11-01). Nothing built
 
 Matthias, 2026-11-01: "If the composition is based on mass based estimates the composition has larger uncertainties,

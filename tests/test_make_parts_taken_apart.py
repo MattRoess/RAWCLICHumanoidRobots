@@ -131,7 +131,9 @@ class TestMakePartsTakenApart(unittest.TestCase):
         # E5.17 point 1: the joint modules a share of the robot's mass, split as batch 1's are on average.
         shared = [r for r in self.apart.robots
                   if any(j.share is not None for j in self.apart.joints if j.robot == r)]
-        self.assertEqual(len(shared), 16)   # the PrimeBOT Q1 listed only since 2026-11-01 (E12.6)
+        # 13: the PrimeBOT Q1 listed only since 2026-11-01 (E12.6); the Booster T2, Noetix Bumi and E1 their makers'
+        # joints since E14 (E14.6 point 1).
+        self.assertEqual(len(shared), 13)
         for robot in shared:
             shares = [j.share for j in self.apart.joints if j.robot == robot]
             self.assertNotIn(None, shares, msg=robot)
@@ -558,9 +560,11 @@ class TestTypeTwoBatchTwo(unittest.TestCase):
             self.assertTrue(j.name.endswith(f'({self.LABEL})'), j.name)
 
     def test_which_robots_rest_on_the_template(self):
+        # Since E14 (E14.6 point 2) the H2-X and the Oli take their joints from their makers' models.
+        template = [r for r in self.TEMPLATE if r not in E14_OWN]
         shared = {j.robot for j in self.apart.joints if j.share is not None and j.robot in self.BATCH_TWO}
-        self.assertEqual(shared, set(self.TEMPLATE))
-        for robot in self.TEMPLATE:
+        self.assertEqual(shared, set(template))
+        for robot in template:
             self.assertIn('joint shares', schemas.estimate_kinds(self.apart, robot), msg=robot)
 
     def test_the_jingchus_knees_stated_its_other_joints_the_template(self):
@@ -724,6 +728,8 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
         self.assertEqual(shared[schemas.JOINT_SHARE][1], (0.202, 0.404, 0.606))
         rows = {(j.name, j.share) for j in self.joints('LimX CL')}
         for robot in self.TEMPLATE:
+            if robot in E14_OWN:   # its maker's joints since E14 (E14.6 point 2)
+                continue
             self.assertEqual({(j.name, j.share) for j in self.joints(robot) if j.share is not None}, rows, msg=robot)
 
     def test_the_robots_with_every_joints_torque(self):
@@ -749,7 +755,7 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
                   'Sanctuary Phoenix': (69, 70, 71), 'PHYBOT M1': (59, 60, 61), 'OpenLoong Qinglong': (85.14, 86.14, 87.14),
                   'PAL REEM-C': (79, 80, 81), 'Robotera L7': (66.2, 67.2, 68.2), 'EngineAI SE01': (79, 80, 81),
                   'Zeroth Sean': (44, 45, 46), 'Siasun Songxing': (84, 85, 86), 'Unitree Superman': (44, 45, 46),
-                  'PAL TALOS': (93.34, 95, 96), 'Westwood THEMIS': (36.92, 37.92, 38.92),
+                  'PAL TALOS': (93.34, 95, 96), 'Westwood THEMIS': (35.5, 36.5, 37.92),
                   'X-Humanoid TianGong Ultra': (54, 55, 56), 'Tlibot Tianzhen Z1': (44, 45, 46),
                   'X-Humanoid Tien Kung 2.0': (66.96, 67.96, 68.96), 'X-Humanoid Tien Kung 3.0': (63.5, 64.5, 65.5),
                   'Tlibot T1': (42, 43, 44), 'DroidUp Walker II': (31, 32, 33), 'Walker Tienkung Vision': (60, 61, 62),
@@ -759,7 +765,8 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
 
     def test_the_batteries(self):
         stated = {'Unitree H1': 864, 'Robotera L7': 900, 'Walker Tienkung Vision': 1584, 'Walker Tienkung Embodied': 1584,
-                  'Tlibot T1': 1110, 'X-Humanoid Tien Kung 3.0': 864}
+                  'Tlibot T1': 1110, 'X-Humanoid Tien Kung 3.0': 864,
+                  'Westwood THEMIS': 518.4}   # its brochure's "Dual 259.2 Wh" since E14 (E14.5 point B)
         for robot in self.TEMPLATE + list(self.TORQUES):
             own = self.apart.constants[robot]
             with self.subTest(robot=robot):
@@ -801,7 +808,7 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
 
     def test_one_motion_sensor_where_the_maker_names_none(self):
         for robot in ('Tesla Optimus Gen 3', 'Cyan Robotics Orca', 'Sanctuary Phoenix', 'PHYBOT M1', 'PAL REEM-C',
-                      'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman', 'Westwood THEMIS',
+                      'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman',   # THEMIS: its brochure's, since E14
                       'X-Humanoid TianGong Ultra', 'Tlibot Tianzhen Z1', 'Tlibot T1', 'OpenLoong Qinglong',
                       'X-Humanoid Tien Kung 2.0'):
             sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
@@ -920,7 +927,9 @@ class TestTypeTwoOnWheels(unittest.TestCase):
         shared = self.apart.constants['all']
         self.assertEqual(shared['Joint modules, share of the robot mass, on wheels'][1], (0.078, 0.156, 0.234))
         self.assertEqual(shared['Battery energy per kg of robot, on wheels'][1], (4.62, 10.28, 22.86))
-        template = [r for r in ON_WHEELS if r not in OWN_ON_WHEELS]
+        # Since E14 (E14.6 point 2) seven of them take every joint from their makers, the G2 and the RealBots their arms.
+        template = [r for r in ON_WHEELS if r not in OWN_ON_WHEELS and r not in E14_OWN and r not in E14_ARMS_ONLY
+                    and r != 'RealMan Dual-Arm Lift']
         first = {(j.name, j.share) for j in self.joints(template[0]) if j.share is not None}
         groups: dict = {}
         for name, share in first:
@@ -1208,3 +1217,163 @@ class TestTypesThreeAndFourBatchTwo(unittest.TestCase):
         self.assertNotIn('PrimeBOT Q1', one.robots)
         for apart in (one, written(builder_two)[0], self.three, self.four):
             self.assertFalse([r for r in apart.robots if 'Clone Alpha' in r], msg=apart.source)
+
+
+def type_one_rule(torque: float) -> tuple:
+    """Type 1's module at a torque: the torque over 87.3 N·m/kg, half to 1.5 times (EVIDENCE.md E5.12 point 4)."""
+    return tuple(round(f * torque / 87.3, 4) for f in (0.5, 1, 1.5))
+
+
+# E14.6 (Matthias, 2026-11-01: "Yes, agree E14", "Yes, build it"): each robot's body joints as its maker's model file
+# gives them (EVIDENCE.md E14.1, read first-hand: V123, V130), in order, (name, count, torque N·m); its modules by its
+# type's rule (type 1's, else type 2's fit). The X2's arms the first five of the X2 files' seven, the R1-A5-D's upper
+# body the R1-A5's, the REEM-C's legs v0, the ARI's fifth arm joint (its datasheet's wrist, not in the model) at its
+# elbow's 5 N·m (E). Its hands, grippers, wheels, steering and lift as entered before.
+X2_LEGS_WAIST = [('Hip pitch', 2, 120), ('Hip roll', 2, 120), ('Hip yaw', 2, 120), ('Knee', 2, 120),
+                 ('Ankle pitch', 2, 60), ('Ankle roll', 2, 36), ('Waist yaw', 1, 120), ('Waist pitch', 1, 36),
+                 ('Waist roll', 1, 36)]
+A3_BODY = [('Waist yaw', 1, 220), ('Waist roll', 1, 46), ('Waist pitch', 1, 118), ('Head yaw', 1, 6),
+           ('Head pitch', 1, 6), ('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 24),
+           ('Elbow', 2, 24), ('Wrist roll', 2, 24), ('Wrist pitch', 2, 6), ('Wrist yaw', 2, 6), ('Hip pitch', 2, 220),
+           ('Hip roll', 2, 220), ('Hip yaw', 2, 220), ('Knee', 2, 320), ('Ankle pitch', 2, 118.2),
+           ('Ankle roll', 2, 54.75)]
+H2X_BODY = [('Hip pitch', 2, 220), ('Hip roll', 2, 248.18), ('Hip yaw', 2, 248.18), ('Knee', 2, 248.18),
+            ('Ankle pitch', 2, 100), ('Ankle roll', 2, 100), ('Waist yaw', 1, 111), ('Waist roll', 1, 180),
+            ('Waist pitch', 1, 180), ('Head pitch', 1, 24.8), ('Head yaw', 1, 24.8), ('Shoulder pitch', 2, 111),
+            ('Shoulder roll', 2, 53.7), ('Shoulder yaw', 2, 53.7), ('Elbow', 2, 53.7), ('Wrist roll', 2, 53.7),
+            ('Wrist pitch', 2, 24.8), ('Wrist yaw', 2, 24.8)]
+R1_UPPER = [('Waist yaw', 1, 60), ('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 33),
+            ('Elbow', 2, 33), ('Wrist roll', 2, 33)]
+E14_OWN = {
+    # The Booster T2 by type 2's fit (Matthias, 2026-11-01, "Yes, agree": type 1's rule put 71 % of its mass in its
+    # joints and its frame below zero in 4.1 % of its draws; E14.7 point 6).
+    'Booster T2': (2, [('Head yaw', 1, 22), ('Head pitch', 1, 22), ('Shoulder pitch', 2, 74), ('Shoulder roll', 2, 60),
+                       ('Elbow pitch', 2, 60), ('Elbow yaw', 2, 60), ('Wrist pitch', 2, 22), ('Wrist yaw', 2, 22),
+                       ('Wrist roll', 2, 22), ('Waist pitch', 1, 138), ('Waist roll', 1, 144), ('Waist yaw', 1, 135),
+                       ('Hip pitch', 2, 135), ('Hip roll', 2, 135), ('Hip yaw', 2, 135), ('Knee', 2, 135),
+                       ('Ankle pitch', 2, 132), ('Ankle roll', 2, 72)]),
+    'Unitree H2-X Core i7': (2, H2X_BODY), 'Unitree H2-X Orin NX': (2, H2X_BODY),
+    'Unitree H2-D Flagship': (2, [('Waist pitch', 1, 200), ('Shoulder pitch', 2, 130), ('Shoulder roll', 2, 60),
+                                  ('Shoulder yaw', 2, 60), ('Elbow', 2, 60), ('Wrist roll', 2, 60),
+                                  ('Wrist pitch', 2, 10), ('Wrist yaw', 2, 10), ('Head pitch', 1, 50),
+                                  ('Head yaw', 1, 50)]),
+    'Unitree G1-D Ultimate': (2, [('Waist yaw', 1, 80), ('Waist pitch', 1, 30), ('Shoulder pitch', 2, 25),
+                                  ('Shoulder roll', 2, 25), ('Shoulder yaw', 2, 25), ('Elbow', 2, 25),
+                                  ('Wrist roll', 2, 25), ('Wrist pitch', 2, 5), ('Wrist yaw', 2, 5)]),
+    'Unitree R1-A7-D': (2, R1_UPPER + [('Wrist pitch', 2, 10), ('Wrist yaw', 2, 10), ('Head pitch', 1, 33),
+                                       ('Head yaw', 1, 0.86)]),
+    'Unitree R1-A5-D': (2, R1_UPPER + [('Head pitch', 1, 33), ('Head yaw', 1, 0.86)]),
+    'Galaxea R1 Pro': (2, [('Waist 1', 1, 100), ('Waist 2', 1, 100), ('Waist 3', 1, 100), ('Waist 4', 1, 100),
+                           ('Shoulder 1', 2, 55), ('Shoulder 2', 2, 55), ('Shoulder 3', 2, 25), ('Elbow', 2, 25),
+                           ('Wrist 1', 2, 18), ('Wrist 2', 2, 18), ('Wrist 3', 2, 18)]),
+    'X-Humanoid Tien Kung 3.0': (2, [('Hip pitch', 2, 235), ('Hip roll', 2, 235), ('Hip yaw', 2, 150),
+                                     ('Knee', 2, 400), ('Ankle pitch', 2, 55), ('Ankle roll', 2, 55),
+                                     ('Waist yaw', 1, 200), ('Waist roll', 1, 150), ('Waist pitch', 1, 150),
+                                     ('Head yaw', 1, 6.3), ('Head pitch', 1, 6.3), ('Shoulder pitch', 2, 90),
+                                     ('Shoulder roll', 2, 90), ('Shoulder yaw', 2, 50), ('Elbow pitch', 2, 50),
+                                     ('Elbow yaw', 2, 40), ('Wrist pitch', 2, 40), ('Wrist roll', 2, 40)]),
+    'LimX Oli': (2, [('Hip pitch', 2, 140), ('Hip roll', 2, 140), ('Hip yaw', 2, 140), ('Knee', 2, 140),
+                     ('Ankle pitch', 2, 42), ('Ankle roll', 2, 42), ('Waist yaw', 1, 42), ('Waist roll', 1, 42),
+                     ('Waist pitch', 1, 42), ('Shoulder pitch', 2, 42), ('Shoulder roll', 2, 42),
+                     ('Shoulder yaw', 2, 42), ('Elbow', 2, 42), ('Wrist yaw', 2, 19), ('Wrist pitch', 2, 19),
+                     ('Wrist roll', 2, 19), ('Head yaw', 1, 19), ('Head pitch', 1, 19)]),
+    'PAL REEM-C': (2, [('Hip yaw', 2, 42.7), ('Hip roll', 2, 64), ('Hip pitch', 2, 55.7), ('Knee', 2, 138.3),
+                       ('Ankle pitch', 2, 80.9), ('Ankle roll', 2, 64), ('Waist 1', 1, 78), ('Waist 2', 1, 78),
+                       ('Shoulder 1', 2, 44.64), ('Shoulder 2', 2, 22.32), ('Shoulder 3', 2, 17.86),
+                       ('Elbow', 2, 17.86), ('Wrist 1', 2, 3), ('Wrist 2', 2, 6.6), ('Wrist 3', 2, 6.6),
+                       ('Head 1', 1, 3.4), ('Head 2', 1, 3.26)]),
+    'PAL TIAGo Pro': (2, [('Shoulder 1', 2, 43), ('Shoulder 2', 2, 43), ('Shoulder 3', 2, 26), ('Elbow', 2, 26),
+                          ('Wrist 1', 2, 26), ('Wrist 2', 2, 26), ('Wrist 3', 2, 26), ('Head 1', 1, 5.197),
+                          ('Head 2', 1, 2.77)]),
+    'PAL ARI': (2, [('Shoulder 1', 2, 10), ('Shoulder 2', 2, 10), ('Shoulder 3', 2, 5), ('Elbow', 2, 5),
+                    ('Wrist', 2, 5), ('Head 1', 1, 3.4), ('Head 2', 1, 3.26)]),
+    'AgiBot X2 Ultra': (2, X2_LEGS_WAIST + [('Head yaw', 1, 3.13), ('Head pitch', 1, 2), ('Shoulder pitch', 2, 60),
+                                            ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 36), ('Elbow', 2, 36),
+                                            ('Wrist yaw', 2, 36), ('Wrist pitch', 2, 6), ('Wrist roll', 2, 6)]),
+    'AgiBot X2': (2, X2_LEGS_WAIST + [('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 36),
+                                      ('Elbow', 2, 36), ('Wrist yaw', 2, 36)]),
+    'AgiBot A3': (2, A3_BODY), 'AgiBot A3 Ultra': (2, A3_BODY),
+}
+# RealMan's own modules (E14.5 point A; RMs page 5: "1040", "750", "425" g at 60, 30, 10 N·m), ± 5 % (S).
+WHJ60, WHJ30, WHJ10_N = (tuple(round(f * kg, 4) for f in (0.95, 1, 1.05)) for kg in (1.04, 0.75, 0.425))
+RM65_ARM = [('Shoulder 1', 2, 60, WHJ60), ('Shoulder 2', 2, 60, WHJ60), ('Elbow', 2, 30, WHJ30),
+            ('Wrist 1', 2, 10, WHJ10_N), ('Wrist 2', 2, 10, WHJ10_N), ('Wrist 3', 2, 10, WHJ10_N)]
+RM75_ARM = [('Shoulder 1', 2, 60, WHJ60), ('Shoulder 2', 2, 60, WHJ60), ('Shoulder 3', 2, 30, WHJ30),
+            ('Elbow', 2, 30, WHJ30), ('Wrist 1', 2, 10, WHJ10_N), ('Wrist 2', 2, 10, WHJ10_N),
+            ('Wrist 3', 2, 10, WHJ10_N)]
+# Robots whose arms only are now their maker's; their other body joints stay on the template (E14.2, E14.5 point A).
+E14_ARMS_ONLY = {'AgiBot G2': [(n, c, t, fitted(t)) for n, c, t in
+                               (('Shoulder 1', 2, 108), ('Shoulder 2', 2, 108), ('Shoulder 3', 2, 35), ('Elbow', 2, 35),
+                                ('Wrist 1', 2, 35), ('Wrist 2', 2, 18), ('Wrist 3', 2, 18))],
+                 'RealMan RealBot-01': RM75_ARM, 'RealMan RealBot-L2': RM75_ARM, 'RealMan RealBot-S2': RM75_ARM}
+
+
+class TestE14Entry(unittest.TestCase):
+    """E14's entry (Matthias, 2026-11-01: "Yes, start research", "Yes, agree E14", "download what ever is possibel",
+    "Yes, build it"): the robots on the joint template whose makers publish their joints, each joint as its maker's
+    model or page; RealMan's arms by RealMan's own modules; THEMIS's mass and battery from its brochure."""
+
+    NOT_BODY = ('Hand', 'Gripper', 'Wheel', 'Steering', 'Lift')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {1: written(builder)[0], 2: written(builder_two)[0], 3: written(builder_three)[0],
+                     4: written(builder_four)[0]}
+
+    def joints(self, robot: str) -> list:
+        apart = next(a for a in self.files.values() if robot in a.robots)
+        return [j for j in apart.joints if j.robot == robot]
+
+    def constants(self, robot: str) -> dict:
+        return next(a for a in self.files.values() if robot in a.robots).constants[robot]
+
+    def test_every_joint_from_its_makers_file(self):
+        for robot, (rule, expected) in E14_OWN.items():
+            body = [j for j in self.joints(robot) if not j.name.startswith(self.NOT_BODY)]
+            self.assertEqual([(j.name, j.count, j.torque) for j in body], expected, msg=robot)
+            self.assertTrue(all(j.share is None for j in self.joints(robot)), msg=robot)   # off the template
+            for j in body:
+                self.assertEqual(j.module_mass, type_one_rule(j.torque) if rule == 1 else fitted(j.torque),
+                                 msg=(robot, j.name))
+
+    def test_realmans_arms_by_its_own_modules(self):
+        body = [j for j in self.joints('RealMan Dual-Arm Lift') if not j.name.startswith(self.NOT_BODY)]
+        self.assertEqual([(j.name, j.count, j.torque, j.module_mass) for j in body], RM65_ARM)
+        self.assertTrue(all(j.share is None for j in self.joints('RealMan Dual-Arm Lift')))
+
+    def test_the_arms_alone_and_the_rest_on_the_template(self):
+        for robot, arms in E14_ARMS_ONLY.items():
+            rows = self.joints(robot)
+            stated = [(j.name, j.count, j.torque, j.module_mass) for j in rows if j.share is None
+                      and not j.name.startswith(self.NOT_BODY)]
+            self.assertEqual(stated, arms, msg=robot)
+            self.assertTrue(any(j.share is not None for j in rows), msg=robot)                # its other joints
+            self.assertFalse(any(j.share is not None and j.name.startswith(('Shoulder', 'Elbow and wrist'))
+                                 for j in rows), msg=robot)
+
+    def test_joints_from_a_stated_joint_by_type_1s_rule(self):
+        for robot, torque, joints in (('Noetix Bumi', 70, 21), ('Noetix E1', 150, 26)):
+            body = [j for j in self.joints(robot) if not j.name.startswith(self.NOT_BODY)]
+            self.assertEqual(sum(j.count for j in body), joints, msg=robot)
+            self.assertTrue(all(j.share is None for j in body), msg=robot)
+            self.assertEqual(max(j.torque for j in body), torque, msg=robot)
+            knee = next(j for j in body if j.name == 'Knee')
+            self.assertEqual(knee.module_mass[1], round(torque / 87.3, 4), msg=robot)
+        own = self.constants('Noetix Bumi')
+        self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], 48 * 5.1, places=6)
+
+    def test_the_agibot_a2_from_its_knee(self):
+        body = [j for j in self.joints('AgiBot A2') if not j.name.startswith(self.NOT_BODY)]
+        self.assertEqual(sum(j.count for j in body), 28)
+        self.assertEqual(max(j.torque for j in body), 270)
+        self.assertTrue(all(j.share is None for j in self.joints('AgiBot A2')))
+
+    def test_themis_from_its_brochure(self):
+        own = self.constants('Westwood THEMIS')
+        self.assertEqual(own['Robot mass, with battery'][1], (35.5, 36.5, 37.92))
+        self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], 518.4, places=6)
+        boards = [b.name for b in self.files[2].boards if b.robot == 'Westwood THEMIS']
+        self.assertTrue(any('Ryzen' in b for b in boards), boards)
+        self.assertEqual(sum(1 for b in boards if b.startswith('Compute module, NVIDIA Jetson Orin NX')), 1)
+        self.assertEqual(next(b.count for b in self.files[2].boards if b.robot == 'Westwood THEMIS'
+                              and b.name.startswith('Compute module, NVIDIA Jetson Orin NX')), 2)

@@ -22,8 +22,10 @@ wheels. Their shared values carry names of their own ("…, types 3 and 4"), so 
 under one name (E11.7 point 2). Then every robot of batch 1 (E11.6, 28 blocks with the X2 in two versions), each a block
 of tools/parts_taken_apart.py's machinery, its numbers from its own sources (E11.1 to E11.5) and E11.6's method; the
 joints of a robot from its one stated joint (from_stated_joint(), by the ratios between the joints of the robots with
-every joint, E12.5 point 2); and every robot of batch 2 (E12.5, 30 blocks: the CASBOT 02, the CYBORG RO1, the DR02 and
-the FF Master in two versions), from its sources (E12.1 to E12.4).
+every joint, E12.5 point 2; its module by type 2's fit or, for type 1's robots, type 1's rule); and every robot of
+batch 2 (E12.5, 30 blocks: the CASBOT 02, the CYBORG RO1, the DR02 and the FF Master in two versions), from its sources
+(E12.1 to E12.4). Since E14 (2026-11-01, "Yes, build it", E14.6 point 3) AgiBot's X2, X2 Ultra, A3 and A3 Ultra take
+their joints from AgiBot's model files and the A2 from its page's knee.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -478,12 +480,14 @@ WHEEL_RATIOS = joint_ratios([T2.DEXMATE_VEGA, T2.RAINBOW_RBY1_A], on_wheels=True
 JOINT_NAME = {'Second waist': 'Waist 2'}   # a second waist joint's name (02 knows a joint by its first word)
 
 
-def from_stated_joint(torque: float, counts: dict, on_wheels: bool = False) -> list:
+def from_stated_joint(torque: float, counts: dict, on_wheels: bool = False, fit=None) -> list:
     """Every body joint of a robot from its one stated joint (`torque`, N·m, its largest; E12.5 point 2), `counts`
     its joints per kind as its maker gives them: each kind's torque its median ratio times the stated one, its module
-    half E6.8's fit at the least ratio, the fit at the median and 1.5 times the fit at the most (E)."""
+    half the fit at the least ratio, the fit at the median and 1.5 times the fit at the most (E). The fit E6.8's
+    unless `fit` (one module's kg at a torque) gives its type's own: type 1's, the torque over 87.3 N·m/kg (E5.12
+    point 4; E14.6 point 1)."""
     ratios, kinds = (WHEEL_RATIOS, WHEEL_KINDS) if on_wheels else (LEG_RATIOS, LEG_KINDS)
-    fit = lambda t: FIT_KG * t ** FIT_POWER  # noqa: E731   (E6.8: one module's kg at its torque)
+    fit = fit or (lambda t: FIT_KG * t ** FIT_POWER)   # E6.8: one module's kg at its torque
     rows = []
     for kind, count in counts.items():
         low, mid, high = ratios[kind]
@@ -494,11 +498,12 @@ def from_stated_joint(torque: float, counts: dict, on_wheels: bool = False) -> l
     return rows
 
 
-def stated_joint_sources(code: str, words: str, torque: float, joint_name: str) -> str:
-    """The sources of a robot's joints from its one stated joint (E12.5 point 2)."""
+def stated_joint_sources(code: str, words: str, torque: float, joint_name: str,
+                         fit_words: str = 'the fit 0.0689 kg × torque^0.566') -> str:
+    """The sources of a robot's joints from its one stated joint (E12.5 point 2); `fit_words` its type's fit."""
     return (f'{code} {words}: its {joint_name} {torque:g} N·m, every other joint by its kind\'s ratio in the robots '
-            'with every joint (E12.5 point 2), each module the fit 0.0689 kg × torque^0.566 at the least, median and '
-            'most ratio, half to 1.5 times (E)')
+            f'with every joint (E12.5 point 2), each module {fit_words} at the least, median and most ratio, half to '
+            '1.5 times (E)')
 
 
 LEGS_12 = {'Hip pitch': 2, 'Hip roll': 2, 'Hip yaw': 2, 'Knee': 2, 'Ankle pitch': 2, 'Ankle roll': 2}
@@ -774,6 +779,40 @@ def ff_master(ultra: bool) -> dict:
 
 FF_MASTER_EDU, FF_MASTER_ULTRA = ff_master(False), ff_master(True)
 
+# --- E14.6 (2026-11-01, "Yes, build it"): AgiBot's robots of the template, their joints their maker's -----------------
+# Each block above as entered; its body joints now AgiBot's model files (AGX2u, AGA3u, read first-hand: V123, V130),
+# each module type 2's refit at its torque, half to 1.5 times (E6.8 point 1), or, for the A2, from its page's knee
+# (E12.5 point 2). The X2 (25 DoF, arms of five): its legs and waist the X2 files' (the same in both), its arms the
+# first five of their seven (E14.4 question 1, agreed; E). The A3 Ultra its body the A3's 31 (the same limits in its
+# own file), its hands as entered.
+AGIBOT_MODEL_SOURCES = "{code}: its joints' torque limits; mass the refit at its torque, 0.0689 kg × torque^0.566, " \
+                       'half to 1.5 times (E6.8 point 1; E14.6 point 3)'
+X2_LEGS_WAIST = [('Hip pitch', 2, 120), ('Hip roll', 2, 120), ('Hip yaw', 2, 120), ('Knee', 2, 120),
+                 ('Ankle pitch', 2, 60), ('Ankle roll', 2, 36), ('Waist yaw', 1, 120), ('Waist pitch', 1, 36),
+                 ('Waist roll', 1, 36)]
+X2_ARM_FIVE = [('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 36), ('Elbow', 2, 36),
+               ('Wrist yaw', 2, 36)]
+AGIBOT_X2_ULTRA = with_own_joints(AGIBOT_X2_ULTRA, model_joints(
+    X2_LEGS_WAIST + [('Head yaw', 1, 3.13), ('Head pitch', 1, 2)] + X2_ARM_FIVE +
+    [('Wrist pitch', 2, 6), ('Wrist roll', 2, 6)], T2.from_torque),
+    AGIBOT_MODEL_SOURCES.format(code='AGX2u (X2-Ultra.urdf, v1.4.0; its head 2, the page\'s neck 1)'))
+AGIBOT_X2 = with_own_joints(AGIBOT_X2, model_joints(X2_LEGS_WAIST + X2_ARM_FIVE, T2.from_torque),
+                            AGIBOT_MODEL_SOURCES.format(code="AGX2u (its legs and waist; its arms of five the first "
+                                                             "five of the files' seven, E)"))
+A3_BODY = model_joints(
+    [('Waist yaw', 1, 220), ('Waist roll', 1, 46), ('Waist pitch', 1, 118), ('Head yaw', 1, 6), ('Head pitch', 1, 6),
+     ('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 24), ('Elbow', 2, 24),
+     ('Wrist roll', 2, 24), ('Wrist pitch', 2, 6), ('Wrist yaw', 2, 6), ('Hip pitch', 2, 220), ('Hip roll', 2, 220),
+     ('Hip yaw', 2, 220), ('Knee', 2, 320), ('Ankle pitch', 2, 118.2), ('Ankle roll', 2, 54.75)], T2.from_torque)
+AGIBOT_A3 = with_own_joints(AGIBOT_A3, A3_BODY, AGIBOT_MODEL_SOURCES.format(code='AGA3u (a3_t3d0, a3_t2d5)'))
+AGIBOT_A3_ULTRA = with_own_joints(AGIBOT_A3_ULTRA, A3_BODY,
+                                  AGIBOT_MODEL_SOURCES.format(code='AGA3u (a3_ultra_t3d0: its body)') +
+                                  '; its hands as entered')
+AGIBOT_A2 = with_own_joints(AGIBOT_A2, from_stated_joint(
+    270, {**LEGS_12, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6, 'Head': 2}),
+    stated_joint_sources('AGA2U', '"Peak Knee Torque 270N·m"', 270, 'knee') +
+    '; its joints per body part its page\'s (neck 2, arms 7, legs 6)')
+
 # Each robot in the file of its first type among 3 and 4 (E11.7 point 1), in the register's order of numbers.
 BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX, PNDBOTICS_ADAM_LITE,
             PNDBOTICS_ADAM_SP, HEXAGON_AEON, AGILE_ONE, AIDOL, AEI_ALICE_M1, TEKNTRASH_ALPHA, AI2_ALPHABOT_2, ANIGON,
@@ -803,8 +842,12 @@ OWN_SOURCES = [
      'https://neurarobotics.px.media/plk/Qc/4NE1Gen3.5Datasheet.pdf', "Manufacturer's datasheet"),
     ('AGA2p', 'AgiBot, A2 page ("Weight 69 kg", "Height 169 cm", "Battery 700 wh")', 'https://www.agibot.com/products/A2',
      "Manufacturer's specification"),
-    ('AGA2U', 'AgiBot, A2 Ultra and A2 Lite page', 'https://www.agibot.com/products/A2_Ultra',
-     "Manufacturer's specification"),
+    ('AGA2U', 'AgiBot, A2 Ultra and A2 Lite page ("Peak Knee Torque 270N·m", "14.4Ah")',
+     'https://www.agibot.com/products/A2_Ultra', "Manufacturer's specification"),
+    ('AGX2u', 'AgiBot, agibot_x2_urdf X2_URDF-v1.4.0: X2-Ultra.urdf, X2-EDU.urdf (their joints\' torque limits)',
+     'https://github.com/AgibotTech/agibot_x2_urdf', "Manufacturer's model file"),
+    ('AGA3u', 'AgiBot, A3-A3U-robot-model: a3_t3d0, a3_t2d5, a3_ultra_t3d0 (their joints\' torque limits)',
+     'https://github.com/AgibotTech/A3-A3U-robot-model', "Manufacturer's model file"),
     ('AGA3Up', 'AgiBot, A3 Ultra store page', 'https://store.agibot.com/products/a3u', "Manufacturer's specification"),
     ('AGA3Um', 'AgiBot, A3 Ultra user manual, 2.5 Robot Specifications', 'https://www.agibot.com/filepage/319.html',
      "Manufacturer's documentation"),

@@ -622,7 +622,8 @@ class TestTypeTwoPages(unittest.TestCase):
         self.assertEqual(schemas.type_card_text(2, 'Anchor', self.apart, self.register, True),
                          'Its 96 robots of the register with a mass, each drawn from its own parts; their masses 29 to '
                          '396 kg. The Xialan S0, with no mass, is not in the evaluation. Most of its robots rest on '
-                         'templates: the joints of 80 of its 102 robots and versions, the battery of 64.')
+                         'templates: the joints of 67 of its 102 robots and versions, the battery of 63.')
+        # 67 and 63 since E14 (2026-11-01): 13 robots' joints from their makers' models, THEMIS's battery its own.
         # 168 since 2026-11-01: the Reflex's catalogue "0.0" is not a mass (CLAUDE.md §7, VERIFICATION V126).
         self.assertEqual(schemas.type_card_text(3, 'Anchor', None, self.register, True),
                          'Its 181 robots of the register listed, 168 with a mass; drawn from the workbook until they '
@@ -741,10 +742,11 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         # E13 rules 2 and 4 (Matthias, 2026-11-01, "Yes, agree E13"; E12.6 point 6): over a type's robots and versions
         # drawn, those whose joints are the template's share of their mass and those whose battery is the template's
         # energy per kg; "most of its robots" where either is above half.
-        self.assertEqual(schemas.template_shares(self.views[3]), (80, 69, 96))
-        self.assertEqual(schemas.template_shares(self.views[4]), (40, 31, 50))
+        # Since E14 (2026-11-01, "Yes, build it", E14.6): its robots with their makers' joint data off the template.
+        self.assertEqual(schemas.template_shares(self.views[3]), (75, 68, 96))
+        self.assertEqual(schemas.template_shares(self.views[4]), (32, 30, 50))
         self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
-                                                                '80 of its 96 robots and versions, the battery of 69.')
+                                                                '75 of its 96 robots and versions, the battery of 68.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 

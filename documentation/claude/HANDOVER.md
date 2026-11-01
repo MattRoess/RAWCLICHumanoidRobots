@@ -58,6 +58,14 @@ draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01
 
 ## 2026-11-01, afternoon: the zero rule and the axis built; the research pass paused (start here)
 
+**03 waits until all of robot types 1 to 6 are done.** He said it before ("I am currently not interested in 03",
+2026-10-29, the section below on 04 removed), and Claude still named 03 among his runs today; he ran it (12:14) and
+found its pages bad: "why why 03 the figure are full of shit!! I want to finish first all of types 1 to 6!!!", "I told
+you before that 03 is is doine after 1 to 6 is done!!!". So: 03 is named in no list of runs and proposed for nothing
+until every robot of types 1 to 6 with a mass is taken apart; then it gets a new specification first (its pages are
+bars of the mean, over types 3 to 6 still drawn from the workbook). Its four pages of 12:14 in `figures/comparison/`
+are his outputs and stay as they are; they show nothing valid now.
+
 Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it is NOT part of the distribution", "Check
 for all with 0 values. There needs to be a rule, if it is generally 0 then, it is not part of the distribution", then
 "Yes, build it". Nothing committed.
@@ -75,9 +83,33 @@ for all with 0 values. There needs to be a rule, if it is generally 0 then, it i
   aluminium in 72 of 200,000) on a logarithmic axis. Fixed on "Yes, fix it": those pages over the draws above 0, said
   on the notes.
 - **His runs of 11:49 to 11:58 done and read back** (V129): the register, type 1's builder, 01 and 02, every output
-  after its code, no median of 0 left, all 437 tests pass. **Open:** 03 not run; commit and push of V128's fix, the
-  test count and these documents; E14 of the research pass.
-- **Paused:** E13 rule 3's research pass. The makers' model files read and every number read again (V123: Booster T2,
+  after its code, no median of 0 left, all 437 tests pass; committed and pushed (33e192f). **Next:** finishing types 1
+  to 6: E14 of the research pass, batch 3 of types 3 and 4, then types 5 and 6.
+- **E14 built** on "Yes, build it" (E14.7, V132), nothing committed:
+  - 21 robots and versions take their joints from their makers, and four more their arms;
+  - RealMan's arms are by its WHJ modules, THEMIS by its brochure;
+  - type 1 is now below half on the joint template (13 of 31), types 2 to 4 are at 67, 75 and 32;
+  - the five departures of E14.7 are for his word;
+  - the Booster T2's frame was below zero in 4.1 % of its draws (type 1's rule put 71 % of its mass in its joints).
+    Agreed ("Yes, agree", E14 as built): its joints are now by type 2's fit, 59 %, and its frame no longer falls below
+    zero (V133).
+
+  His runs:
+  1. the builders of types 1, 2, 3 and 4;
+  2. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`;
+  3. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`.
+
+  Next: the 123 robots of types 3 and 4 not yet taken apart (batch 3 on, the internet and every PDF), then types 5
+  and 6. **Batch 3's research begun** ("move forward to get all the data. Search in the internet. Use all information
+  avaibalbe read .pdf"): the 123 robots of 93 makers (43 on wheels) in five groups, each read by an agent, maker first,
+  then the internet; their findings to be read again first-hand before E15.
+- **E14 agreed** ("Yes, agree E14", both questions as recommended); its downloads read ("download what ever is
+  possibel", V131: THEMIS's mass and battery, RealMan's own joint modules, the Oli's cameras: E14.5 points A to C);
+  **E14.6, the spec of the entry, for his word.** Before:
+- **E14 written** (the research pass, V130), for his word: 21 robots and versions with joint data of their makers'
+  own (model files, pages), two questions (the X2's arms, the R1-A5-D's upper body). After it: type 1 13 of 31 on the
+  joint template, type 2 67 of 102, type 3 75 of 96, type 4 32 of 50. Then batch 3 of types 3 and 4, then types 5 and 6.
+- **Before E14:** E13 rule 3's research pass. The makers' model files read and every number read again (V123: Booster T2,
   AgiBot X2, A3, G2, Unitree H2-D, H2-X, G1-D, R1-A7-D, R1-A5, Galaxea R1 Pro, RealMan RM65-B and RM75-B, Tien Kung 3.0,
   LimX Oli, PAL REEM-C, ARI, Kangaroo; Noetix's Bumi and E1 pages); E14, the findings robot by robot with their
   questions, not yet written. Not found so far: AgiBot A2 and G1, TianGong Ultra, Omni, SE01, Robotera L7, LimX CL,
@@ -85,16 +117,14 @@ for all with 0 values. There needs to be a rule, if it is generally 0 then, it i
 - **RAWCLICDataCenters:** the same fault (its IT materials summary 607 rows, its board-area statistics 264), in a session
   of its own ("Apply the zero rule in RAWCLICDataCenters").
 
-**His runs, in this order**, the six of batch 2 below, which now carry this change too, and 03:
+**His runs, in this order** (done 11:49 to 11:58, V129), the six of batch 2 below, which now carry this change too:
 1. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py` (as below; and the Reflex "not
    drawn: no mass stated", no height or mass of 0);
 2. to 4. the builders of types 1, 3 and 4, as below;
 5. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (as below; type 3's card "168 with a mass");
 6. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (as below; every `summary.csv` and `.xlsx`
    rewritten with "Held in", every page of where a material sits rewritten, every distribution panel's axis to its
-   99.5th percentile; the draws as below, these two changes move none);
-7. `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py` (new pages in `figures/comparison/`, never run on
-   his machine; it reads the draws 02 wrote, not timed at 200,000 draws).
+   99.5th percentile; the draws as below, these two changes move none).
 
 ## 2026-11-01: batch 2 of types 3 and 4 entered
 

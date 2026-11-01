@@ -548,6 +548,33 @@ def template_block(name: str, maker: str, height: float, stated: float | None, m
     return block(name, maker, height, stated, defaults.pop('sources', default_sources), mass, AVERAGE, **defaults)
 
 
+def with_own_joints(b: dict, joints: list, joint_sources: str, joint_label: dict | None = None) -> dict:
+    """A block of the template (template_block(), its joints AVERAGE) whose every body joint its maker's model or page
+    now gives (EVIDENCE.md E14.6; Matthias, 2026-11-01, "Yes, build it"): the same block, its joints `joints` followed
+    by those the template added (its hands or grippers, wheels, steering and lift motors), so that no joint of it is a
+    share of its mass any more. Everything else stays as it was entered, its count of joints for the encoders and
+    connectors (`joints_stated`, its maker's) too."""
+    out = dict(b)
+    out.update(joints=list(joints) + list(b['added_joints']), added_joints=[], stated_joints=[], averaged=None,
+               joint_sources=joint_sources)
+    if joint_label:
+        out['joint_label'] = joint_label
+    return out
+
+
+# Where a joint of a maker's model sits, by the first word of its name: its heat group and body region (E14.6).
+JOINT_PLACES = {'Hip': ('Hips', 'Legs'), 'Knee': ('Knees', 'Legs'), 'Ankle': ('Ankles', 'Legs'),
+                'Waist': ('Waist', 'Torso'), 'Shoulder': ('Shoulders', 'Arms'), 'Elbow': ('Elbows and wrists', 'Arms'),
+                'Wrist': ('Elbows and wrists', 'Arms'), 'Head': ('Elbows and wrists', 'Head')}
+
+
+def model_joints(rows: list, module) -> list:
+    """The body joints of a maker's model file (EVIDENCE.md E14.1): each row (name, count, torque N·m) a joint() at its
+    place (JOINT_PLACES, by its name's first word), its module `module` at its torque (its type's rule: type 1's the
+    torque over 87.3 N·m/kg, E5.12 point 4; else E6.8's fit), half to 1.5 times (E)."""
+    return [joint(name, count, torque, module(torque), *JOINT_PLACES[name.split()[0]]) for name, count, torque in rows]
+
+
 def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) -> dict:
     """Every row of one robot's block on the sheets Robots, Joints, Parts, Boards, Sensors and Constants, and the car
     sensor elements of its sensors (sheet SensorElements, by the sensor's name). `robot_type` is the type of its file;

@@ -215,7 +215,9 @@ class TestDraws(unittest.TestCase):
         columns, draws = d.parts
         low, _, high = inputs.apart.constants[schemas.ALL_ROBOTS][composition.JOINT_SHARE][1]
         shared = [r for r in d.robots if any(j.share is not None for j in inputs.apart.joints if j.robot == r)]
-        self.assertEqual(len(shared), 16)   # the PrimeBOT Q1 out since 2026-11-01 (E12.6)
+        # 13: the PrimeBOT Q1 out since 2026-11-01 (E12.6); the Booster T2, Noetix Bumi and E1 their makers' joints
+        # since E14 (E14.6 point 1).
+        self.assertEqual(len(shared), 13)
         for robot in shared:
             rows = d.robot == d.robots.index(robot)
             joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith(robot + ':')
@@ -361,17 +363,18 @@ class TestHandCalculations(unittest.TestCase):
             np.testing.assert_allclose(d.mass[d.robot == k], mass, rtol=1e-12, err_msg=robot)
 
     def test_a_robot_without_joint_torques_and_battery_data_at_its_modes(self):
-        # The Noetix E1, 40 kg (E5.17): its joint modules 49 % of it, 19.6 kg; its shell 11.5 %, 4.6 kg; its battery
-        # 12 Wh per kg of robot, 480 Wh: cells 480 / 241.5 = 1.987578 kg, the pack 480 / 164 = 2.926829 kg, its housing
-        # the pack less the cells and its management board (60 cm2 × 0.56 g/cm2 = 33.6 g): 0.905651 kg.
+        # The Nori L3, 40 kg (E5.17; the Noetix E1 before, its joints its maker's since E14): its joint modules 49 % of
+        # it, 19.6 kg; its shell 11.5 %, 4.6 kg; its battery 12 Wh per kg of robot, 480 Wh: cells 480 / 241.5 = 1.987578
+        # kg, the pack 480 / 164 = 2.926829 kg, its housing the pack less the cells and its management board (60 cm2 ×
+        # 0.56 g/cm2 = 33.6 g): 0.905651 kg.
         d = self.at()
         columns, draws = d.parts
-        rows = d.robot == d.robots.index('Noetix E1')
-        joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith('Noetix E1:') and 'joints)' in c)
+        rows = d.robot == d.robots.index('Nori L3')
+        joints = sum(draws[rows, i] for i, c in enumerate(columns) if c.startswith('Nori L3:') and 'joints)' in c)
         np.testing.assert_allclose(joints, 19.6, rtol=1e-9)
-        np.testing.assert_allclose(self.part(d, 'Noetix E1: Shell: plastics'), 4.6, rtol=1e-9)
-        np.testing.assert_allclose(self.part(d, 'Noetix E1: Battery cells'), 480 / 241.5, rtol=1e-9)
-        np.testing.assert_allclose(self.part(d, 'Noetix E1: Battery housing, busbars and wires'),
+        np.testing.assert_allclose(self.part(d, 'Nori L3: Shell: engineering plastics'), 4.6, rtol=1e-9)
+        np.testing.assert_allclose(self.part(d, 'Nori L3: Battery cells'), 480 / 241.5, rtol=1e-9)
+        np.testing.assert_allclose(self.part(d, 'Nori L3: Battery housing, busbars and wires'),
                                    480 / 164 - 480 / 241.5 - 0.0336, rtol=1e-9)
 
 

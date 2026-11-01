@@ -5,6 +5,114 @@ by Claude, newest first.
 
 ## 2026-11-01
 
+### V133. The Booster T2 by type 2's fit
+
+- **His words:** "Yes, agree" (E14 as built, the Booster T2's joints by type 2's fit).
+- **Test first:** `TestE14Entry.test_every_joint_from_its_makers_file` changed to the fit for the T2, run, failed; then
+  the builder changed (`T2.from_torque`, the one copy of the refit): all 6 of `TestE14Entry` pass.
+- **Its frame** (`sandbox_e14/t2_frame.py`, Claude's scratch folder: type 1 alone at 20,000 draws, from its builder's
+  file as written now, his files only read): 676 of the T2's draws. Its joints come to 24.9 kg at the mean, 59 % of its
+  42.3 kg. Its frame is 8.31 kg at the mean, 4.70 to 11.68 kg over 95 % of its draws, never below zero (4.1 % before,
+  V132).
+- **The whole suite:** 443 tests, the same 2 failing as in V132 (the comparisons of types 1's and 2's builders with his
+  files on disk).
+- **Not covered:** his runs at 200,000 draws.
+
+### V132. E14's entry built (E14.6, E14.7)
+
+- **His words:** "Yes, build it" (E14.6 with E14.5's points A to C).
+- **Tests first** (`TestE14Entry`, 6 tests): written before the code, all 6 failed. After the code they pass:
+  - every robot's body joints as its maker's file (names, counts, torques; 18 robots and versions), off the template,
+    each module by its type's rule;
+  - the Dual-Arm Lift's arms by RealMan's modules;
+  - the G2's and the RealBots' arms beside their other joints on the template;
+  - the Bumi's and the E1's joints from their stated joint by type 1's rule, and the Bumi's 48 V × 5.1 Ah;
+  - the A2's 28 joints from its knee's 270 N·m;
+  - THEMIS's mass (35.5, 36.5, 37.92 kg), its 518.4 Wh, its Ryzen board and its two Orin NX.
+- **Older tests changed** with the reason beside each, nine in all:
+  - the counts of template robots (type 1's file 16 → 13, twice; E13's shares, type 2's card: 67 and 63; types 3 and 4:
+    75 / 68 and 32 / 30);
+  - type 2's lists of template robots (without the H2-X, Oli, Tien Kung 3.0 and those on wheels now their makers');
+  - THEMIS's mass, battery and sensors;
+  - one test at the modes that took the Noetix E1 as its template robot of 40 kg, now the Nori L3 (the same 40 kg,
+    the same numbers).
+- **The whole suite:** 443 tests, 2 failing: the comparisons of types 1's and 2's builders with his files on disk, which
+  pass after his builder runs.
+- **Sandbox** (`sandbox_e14/run.py`, Claude's scratch folder, 2,000 draws, his files only read), the code of 33e192f (a
+  scratch worktree, removed after) against the working tree:
+  - The register, the four builders, 01 and 02 ran to the end (01 no fault; 02 0).
+  - **Robots changed** (`compare.py`, every sheet, row by row): type 1's file 3 of 32 (the Booster T2, Bumi, E1); type
+    2's 18 of 103 (the 13 of E14.6 point 2, the G2, the three RealBots, THEMIS); type 4's 5 of 20 (the A2, A3, A3 Ultra,
+    X2, X2 Ultra); type 3's none. **Every other robot's rows identical**; the Sources and About sheets gain their new
+    lines.
+  - **The joint modules at their modes, now, and their share of the robot's mass:**
+
+    | Robots | Joint modules | Share of the robot's mass |
+    |---|---|---|
+    | Unitree H2-X | 29.4 kg | 45 % |
+    | Tien Kung 3.0 | 28.7 kg | 44 % |
+    | LimX Oli | 21.4 kg | 39 % |
+    | AgiBot A3, A3 Ultra | 25.3 and 26.7 kg | 46 and 45 % |
+    | AgiBot X2, X2 Ultra | 18.8 and 19.7 kg | 54 and 51 % |
+    | AgiBot A2 | 24.4 kg | 35 % |
+    | Unitree R1-A5-D, R1-A7-D | | 45 and 46 % |
+    | PAL REEM-C | | 20 % |
+    | Robots on wheels | | 9 to 20 % |
+    | Noetix Bumi, E1 | | 46 % |
+    | **Booster T2** | **29.7 kg** | **71 %** |
+
+  - **E13's shares on the new files:** type 1 13 of 31 on the joint template, 12 on the battery template ("Its robots
+    on templates", below half); type 2 67 and 63 of 102; type 3 75 and 68 of 96; type 4 32 and 30 of 50, as forecast.
+- **Found: the Booster T2's frame below zero in 4.1 % of its draws**, new. Its model's limits are high (its legs 135,
+  its waist 135 to 144 N·m), and type 1's rule, the torque over 87.3 N·m/kg, puts 29.7 kg of its 42 kg in its joints.
+  Type 2's fit would put 24.9 kg there (59 %). The Booster T1 by the same rule puts 50 % there. The 1X NEO's frame is
+  still below zero, as before (13.9 % of its draws at 2,000; 11.1 % before: other draws). **For his word.**
+- **Not covered:** his runs at 200,000 draws.
+
+### V131. E14's downloads read
+
+- **His words:** "download what ever is possibel".
+- **How:** the nine PDFs E14.1 names, by `curl` into `downloads_e14/` (Claude's scratch folder): every one HTTP 200 and
+  `application/pdf`, 0.43 to 17.96 MB, each opened as a PDF (`file`).
+  - Seven were read as text with macOS's PDFKit (`tools_e12/pdftext.swift`).
+  - Two have no text, so their pages were rendered by PDFKit (`tools_e12/pdfpages.swift`) and read by macOS's text
+    recognition (`tools_e12/ocr.swift`): LimX's Oli brochure (4 pages, its pages 2 and 3 also by eye) and RealMan's
+    specs V1.6 (32 spreads, 62 pages).
+- **Result:** as E14.5's table: THEMIS Gen2.5 "36.5kg", "Dual 259.2 Wh Li-Ion packs", its computers and cameras;
+  RealMan's WHJ modules (WHJ60 1040 g at 60 N·m, WHJ30 750 g at 30, WHJ10-B 455 g, WHJ10-N 425 g at 10), the RealBots'
+  7-DoF arms with the RM75's force-torque sensor, the Dual-Arm Lift's "RM65-B-V"; the Oli's two D435i and its IMU. The
+  PAL, Boston Dynamics and NEURA sheets hold nothing new for the model.
+- **By eye:** RealMan's page 5 (printed 08/62), its WHJ table: every mass, rated torque and brake as recognized (WHJ03
+  170 g, 3 N·m, soft; WHJ10-B 455 g, 10, pin; WHJ10-N 425 g, 10, soft; WHJ30 750 g, 30, pin; WHJ60 1040 g, 60, pin).
+  The pin brakes of WHJ60 and WHJ30 and the soft brake of WHJ10-N fit the RM65's "Mechanical Brakes on Joints 1-3,
+  Soft Brakes 4-6" and the RM75's "1-4", "5-7".
+- **Not covered:** RealMan's other pages were searched in their recognized text, not read by eye (the RealBots' pages
+  15 to 18 were read in it in full).
+
+### V130. The research pass's second round read again; E14's shares computed
+
+- **What:** the figures of round 2 that E14 uses, first read by two reading agents, and E14's effect on E13's shares.
+- **How, the pages:** opened in the browser pane, their text searched on the page.
+  - AgiBot's A2 Ultra and A2 Lite table: "≈69kg", "≈64kg", "Peak Knee Torque" "270N·m", "Battery Capacity" "14.4Ah",
+    "Charger Output 54.6V 8A";
+  - AgiBot's X2 table: "Approx.35kg", "Approx.39kg", 25 and 30 DoF, arms 5 and 7, "Peak Joint Torque 120N·m",
+    "Approx.500Wh";
+  - Unitree's H2-D page: "33.5Kg / Approx. 148Kg / Approx. 120Kg", "Maximum Arm Joint Torque 120N.M" ×3, "Column DOF"
+    2 and 1, the three batteries 972, 864 and 1,440 Wh;
+  - Unitree's R1-D page: "Maximum torque of the shoulder 60N·m" ×4, 11 / 13 / 30 / 32 kg;
+  - Unitree's G1-D page: "Approx. 90kg", "Upper Body Battery(Quick-release): 9Ah", "Chassis Battery (Built-in): 30Ah";
+  - PAL's Kangaroo page: "Weight 50-65 kg", "Battery 15Ah, 63V. 976Wh" (already entered);
+  - Noetix's Bumi and E1 pages (V123).
+  - The 1X NEO's page showed no specifications in the pane. Its "842 Wh" is already entered from 1X's page (1XN).
+- **How, the model files:** parsed on the page, as V123. AgiBot's a3_ultra_t3d0 (63 joints, 60.01 kg; the A3's 31
+  limits and two hands of 16); RealMan's RM65-B-V (60, 60, 30, 10, 10, 10; 7.27 kg); PAL's `pal_sea_arm` tiago-pro
+  limits (arm 43, 43, 26, 26; wrist 26, 26, 26). Every value is as the agents reported.
+- **The shares:** `pass/shares_after.py` (Claude's scratch folder) over his files of 11:49 (only read): each type's
+  robots and versions drawn, by the register's sheets; on the joint template now and after E14's 21 robots and versions
+  come off, the G2 staying. Type 1 16 → 13 of 31, type 2 80 → 67 of 102, type 3 80 → 75 of 96, type 4 40 → 32 of 50.
+  Battery template: type 1 13 → 12, type 4 31 → 30.
+- **Not covered:** nothing is entered; the robots listed in E14 as not yet searched; the PDFs (not downloaded).
+
 ### V129. His runs of 11:49 to 11:58 read back
 
 - **His runs:** the register at 11:49:31, type 1's builder at 11:49:50, 01 at 11:50:04, 02 at 200,000 draws from 11:50

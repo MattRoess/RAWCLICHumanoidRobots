@@ -510,7 +510,9 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    head 0.06); each module half E6.8's fit at the least ratio, the fit at the median and 1.5 times the fit at the
    most (E). A kind's ratio is its largest joint's, so its smaller joints come out heavier: the joints overstated, the
    frame understated. Used for the CASBOT 02 (150 N·m), the CYBORG RO1 (400) and WO1 (562 at its waist), the FF
-   Futurist (270 at its knee) and the FF Master (120); a second-hand torque not (the Dora's).
+   Futurist (270 at its knee) and the FF Master (120); a second-hand torque not (the Dora's). Since E14 also the AgiBot
+   A2 (270 at its knee) and, in type 1's file, the Noetix Bumi (70) and E1 (150 at its knee), whose modules take type
+   1's rule (the torque over 87.3 N·m/kg; `from_stated_joint`'s `fit`).
 7. **A stated battery's energy by its chemistry** ("Batteries, where the energy is given, can be estimated compositon and
    weight due to chemistry"): its cells' mass and elements by their chemistry's energy per kg (NMC unless stated), its
    pack by the NMC packs' ratio, as before.
@@ -522,6 +524,15 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    rule is broken: after batch 2 the joint template 16 of 31 in type 1, 80 of 102 in type 2, 80 of 96 in type 3, 40 of
    50 in type 4; the battery template 13, 64, 69 and 31. Nothing is weighted or left out; a research pass over the
    robots on the joint template comes before batch 3 (rule 3).
+9. **The research pass** (EVIDENCE.md E14, agreed and built on 2026-11-01): 21 robots and versions of the templates
+   take their joints from their makers' own model files or pages (and four more their arms: the G2, the RealBots),
+   each joint at its file's torque limit, each module
+   by its type's rule (E6.8's fit; type 1's own for the Noetix Bumi and E1, the fit for the Booster T2, whose high
+   limits type 1's straight line overstated), by the shared `model_joints` and `with_own_joints`
+   (`tools/parts_taken_apart.py`); the RealMan robots' arms by RealMan's own WHJ modules (their stated masses, ± 5 %);
+   THEMIS's mass and battery from its brochure. After it the joint template 13 of 31 in type 1, 67 of 102 in type 2,
+   75 of 96 in type 3, 32 of 50 in type 4; the battery template 12, 63, 68 and 30. Type 1 comes below half; types 2
+   to 4 stay above it (rule 4).
 
 ## Robot type 2 part by part, in 02 (since 2026-10-30)
 

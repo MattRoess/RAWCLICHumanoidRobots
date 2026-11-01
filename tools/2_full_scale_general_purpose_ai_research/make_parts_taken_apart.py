@@ -68,7 +68,8 @@ FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
 ABOUT = [
     'Robot type 2 part by part: 96 of its 97 robots taken apart so far (batches 1, 2 and 2b and the robots on wheels; '
     'the GR-1, the H2-X, the Walker Tienkung, the AICO 2, the RB-Y1 and the R1-D in two versions each), for where their '
-    'critical materials sit',
+    'critical materials sit; since 2026-11-01 (EVIDENCE.md E14.6 point 2) the joints of 13 robots of its template from '
+    'their makers\' model files, RealMan\'s arms by RealMan\'s own modules, THEMIS from its brochure',
     None,
     'The Unitree H2, H2 Plus and H1-2 and the Fourier GR-2 and GR-1, the robots of type 2 whose makers publish a model '
     'file, agreed by Matthias on 2026-10-30 (documentation/claude/EVIDENCE.md E6.1 to E6.8: "Yes, all three", "Yes, '
@@ -227,6 +228,29 @@ SOURCES_ROWS = [
      "Manufacturer's specification"),
     ('TLu', "LAAS-CNRS, talos_full_v2.urdf (a model of PAL's TALOS, 93.34 kg)",
      'https://github.com/stack-of-tasks/talos-data', 'Second-hand: a user\'s model'),
+    ('THb', 'Westwood Robotics, THEMIS TH02 Gen2.5 brochure ("36.5kg", "Dual 259.2 Wh Li-Ion packs", "42 Total DoF")',
+     'https://www.westwoodrobotics.io/wp-content/uploads/2026/05/THEMIS-2.5-Brochure.pdf', "Manufacturer's brochure"),
+    ('UNu2', "Unitree, unitree_ros: h2x.urdf, h2d.urdf, g1_d.urdf, r1d.urdf, r1_a5.urdf (their joints' torque limits)",
+     'https://github.com/unitreerobotics/unitree_ros/tree/master/robots', "Manufacturer's model file"),
+    ('GALu', "Galaxea, URDF R1Pro: urdf_r1pro_2025.urdf, r1pro_2026.urdf (their joints' torque limits)",
+     'https://github.com/userguide-galaxea/URDF', "Manufacturer's model file"),
+    ('TK3u', "X-Humanoid, TienKung_URDF tiangong3.urdf (tiangong3_0_V2: its joints' torque limits, 65.82 kg)",
+     'https://github.com/Open-X-Humanoid/TienKung_URDF', "Manufacturer's model file"),
+    ('OLu', "LimX Dynamics, humanoid-description HU_D04_01.urdf (the Oli: its joints' torque limits, 52.55 kg)",
+     'https://github.com/limxdynamics/humanoid-description', "Manufacturer's model file"),
+    ('RCu', "PAL Robotics, reemc_robot reemc_description xacro (legs v0 and v1, arms, wrists, torso, head)",
+     'https://github.com/pal-robotics/reemc_robot', "Manufacturer's model file"),
+    ('TPu', 'PAL Robotics, pal_sea_arm (its tiago-pro limits: 43, 43, 26 × 5) and tiago_pro_head_robot (5.197, 2.77)',
+     'https://github.com/pal-robotics/pal_sea_arm', "Manufacturer's model file"),
+    ('ARIu', 'PAL Robotics, ari_robot ari_description xacro (arms 10, 10, 5, 5; head 3.4, 3.26)',
+     'https://github.com/pal-robotics/ari_robot', "Manufacturer's model file"),
+    ('RMu', 'RealMan, rm_models RM65-B-V.urdf (60, 60, 30, 10, 10, 10; 7.27 kg) and RM75-B.urdf (60, 60, 30, 30, 10, '
+            '10, 10)', 'https://github.com/RealManRobot/rm_models', "Manufacturer's model file"),
+    ('RMs', 'RealMan, Product Specs V1.6 (its WHJ joint modules, page 08/62; the RealBot-S2, L2, 01 and the Dual-Arm '
+            'Lift, pages 28 to 34)', 'https://www.realman-robotics.com/prop/realman-robotics-specs-en_V1.6.pdf',
+     "Manufacturer's specification"),
+    ('AGG2u', 'AgiBot, genie_sim_robot_model G2 xacro (its arms 108, 108, 35, 35, 35, 18, 18)',
+     'https://github.com/AgibotTech/genie_sim_robot_model', "Manufacturer's model file"),
     ('THu', 'Westwood Robotics, TH02-A7-FULL.urdf (THEMIS, 37.92 kg, no torque limits)',
      'https://github.com/Westwood-Robotics/THEMIS-Simulation-Model', "Manufacturer's model file"),
     ('XHN', 'X-Humanoid, its list of robots (天工3.0, 天轶2.0, 天工Omni)', 'https://www.x-humanoid.com/',
@@ -1249,13 +1273,27 @@ ZEROTH_SEAN = from_the_register('Zeroth Sean', 'Zeroth Robotics', 1.55, 45, 16, 
 SIASUN_SONGXING = from_the_register('Siasun Songxing', 'Siasun', 1.65, 85, 38, "SIA: no humanoid on its maker's sites")
 UNITREE_SUPERMAN = from_the_register('Unitree Superman', 'Unitree', 1.70, 45, 20, "UNI: no robot of that name at "
                                                                                  'Unitree')
+# THEMIS (E14.5 point B): its brochure's "36.5kg" (TH02 Gen2.5, its hands in) the mode, its model's 37.92 kg the max,
+# 1 kg below the min, as the PNDbotics Adam's (E11.6 point 2); its "Dual 259.2 Wh Li-Ion packs", its computers and its
+# stereo cameras. Its joints stay on the template (BEAR actuators, no torque stated; its model's limits all 0).
 WESTWOOD_THEMIS = template(
-    'Westwood THEMIS', 'Westwood Robotics', 1.60, None, ((36.92, 37.92, 38.92), 'S, E',
-                                                         "THu its model's 37.92 kg with its hands, ± 1 kg (its maker's "
-                                                         "site down); the register's 32 kg reported"),
-    32, sources='THu (Westwood\'s model TH02-A7: 30 body joints, two EN02 hands, no torque limits); E8.1',
+    'Westwood THEMIS', 'Westwood Robotics', 1.60, 36.5, ((35.5, 36.5, 37.92), 'S, E',
+                                                         'THb "36.5kg" (TH02 Gen2.5) the mode; THu its model\'s 37.92 kg '
+                                                         'the max; 1 kg below the min (E14.5 point B)'),
+    32, sources='THb (Westwood: THEMIS TH02 Gen2.5, "42 Total DoF", "36.5kg"), THu (its model TH02-A7: 30 body '
+                'joints, two EN02 hands, no torque limits); E8.1, E14.5',
     added_joints=[joint('Hand (EN02, three fingers)', 2, None, estimate(0.463), 'Elbows and wrists', 'Arms',
-                        size='small')])
+                        size='small')],
+    **voltage_capacity(48, 'THb "Dual 259.2 Wh Li-Ion packs", no voltage: 48 V only splits it into volts and '
+                           'amp-hours (E, as E8.3 point 6)', 2 * 259.2 / 48, 'THb "Dual 259.2 Wh" at 48 V',
+                       label='S, E'),
+    boards=[('Computer board, AMD Ryzen 7 7840HS', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+             'THb "AMD Ryzen 7840HS" (its main control); as the X1\'s and N1\'s computer boards (E9.6 point 9)')] +
+           [(row[0], 2) + row[2:] for row in orin_nx_boards('THb "Jetson Orin NX 16GB" ×2 (its head\'s and its '
+                                                            'body\'s vision)')] + [POWER_BOARD],
+    cooler=[fans(3, 'its Ryzen computer and its two Orin NX'), x86_sinks(1), arm_sinks(2)],
+    sensors=[binocular('THb "ZED 2i Stereo Camera" (head)'), binocular('THb "ZED X Mini Stereo Camera" (body)'),
+             imu('THb "Main IMU Tactical Grade 9DoF"')])
 X_HUMANOID_TIANGONG_ULTRA = from_the_register('X-Humanoid TianGong Ultra', 'X-Humanoid', 1.80, 55, JOINTS_MEDIAN,
                                               'XHN: no page of it')
 TLIBOT_TIANZHEN_Z1 = from_the_register('Tlibot Tianzhen Z1', 'Tlibot', 1.67, 45, JOINTS_MEDIAN,
@@ -1810,6 +1848,112 @@ PSIBOT_SYNROBOT = from_the_register_on_wheels(
     boards=thor('PSI "算力平台：Thor"') + [POWER_BOARD],
     sensors=[depth_camera('PSI "4个RGBD相机"', 4), camera('Camera, fisheye', 3, 'Head', 'PSI "3个鱼眼相机"'),
              IMU_NOT_NAMED])
+
+# --- E14.6 (2026-11-01, "Yes, build it"): the robots of the template whose makers publish their joints ---------------
+# Each block above as entered (its mass, battery, boards, sensors, hands, wheels, lift); its body joints now its maker's
+# model file (EVIDENCE.md E14.1, read first-hand: V123, V130), each module the refit at its torque, half to 1.5 times
+# (E6.8 point 1), as the H2's. The joints in each file's order, named by their body part; the R1-A5-D's upper body the
+# R1-A5's file (E14.4 question 2, agreed), the REEM-C's legs v0 (the files' default), the ARI's fifth arm joint (its
+# datasheet's wrist, not in its model) at its elbow's 5 N·m (E).
+def wheels_part(b: dict) -> str:
+    """What a wheeled block's sources say of its wheels, steering and lift (wheeled(): after the template's words)."""
+    assert b['joint_sources'].startswith(WHEELED_TEMPLATE_SOURCES), b['name']
+    return b['joint_sources'][len(WHEELED_TEMPLATE_SOURCES):]
+
+
+MODEL_SOURCES = "{code}: its joints' torque limits; mass the refit at its torque, 0.0689 kg × torque^0.566, half to 1.5 " \
+                'times (E6.8 point 1; E14.6 point 2)'
+H2X_JOINTS = model_joints(
+    [('Hip pitch', 2, 220), ('Hip roll', 2, 248.18), ('Hip yaw', 2, 248.18), ('Knee', 2, 248.18),
+     ('Ankle pitch', 2, 100), ('Ankle roll', 2, 100), ('Waist yaw', 1, 111), ('Waist roll', 1, 180),
+     ('Waist pitch', 1, 180), ('Head pitch', 1, 24.8), ('Head yaw', 1, 24.8), ('Shoulder pitch', 2, 111),
+     ('Shoulder roll', 2, 53.7), ('Shoulder yaw', 2, 53.7), ('Elbow', 2, 53.7), ('Wrist roll', 2, 53.7),
+     ('Wrist pitch', 2, 24.8), ('Wrist yaw', 2, 24.8)], from_torque)
+UNITREE_H2X_INTEL, UNITREE_H2X_ORIN = (with_own_joints(b, H2X_JOINTS, MODEL_SOURCES.format(code='UNu2 (h2x.urdf)'))
+                                       for b in (UNITREE_H2X_INTEL, UNITREE_H2X_ORIN))
+UNITREE_H2_D = with_own_joints(UNITREE_H2_D, model_joints(
+    [('Waist pitch', 1, 200), ('Shoulder pitch', 2, 130), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 60),
+     ('Elbow', 2, 60), ('Wrist roll', 2, 60), ('Wrist pitch', 2, 10), ('Wrist yaw', 2, 10), ('Head pitch', 1, 50),
+     ('Head yaw', 1, 50)], from_torque),
+    MODEL_SOURCES.format(code='UNu2 (h2d.urdf, its one lift joint the Flagship\'s; UNH2D "Maximum Arm Joint Torque '
+                              '120N.M", its file\'s 130 used, as the H2\'s)') + wheels_part(UNITREE_H2_D))
+UNITREE_G1_D = with_own_joints(UNITREE_G1_D, model_joints(
+    [('Waist yaw', 1, 80), ('Waist pitch', 1, 30), ('Shoulder pitch', 2, 25), ('Shoulder roll', 2, 25),
+     ('Shoulder yaw', 2, 25), ('Elbow', 2, 25), ('Wrist roll', 2, 25), ('Wrist pitch', 2, 5), ('Wrist yaw', 2, 5)],
+    from_torque),
+    MODEL_SOURCES.format(code='UNu2 (g1_d.urdf)') + wheels_part(UNITREE_G1_D))
+R1_UPPER = [('Waist yaw', 1, 60), ('Shoulder pitch', 2, 60), ('Shoulder roll', 2, 60), ('Shoulder yaw', 2, 33),
+            ('Elbow', 2, 33), ('Wrist roll', 2, 33)]
+UNITREE_R1_A7_D = with_own_joints(UNITREE_R1_A7_D, model_joints(
+    R1_UPPER + [('Wrist pitch', 2, 10), ('Wrist yaw', 2, 10), ('Head pitch', 1, 33), ('Head yaw', 1, 0.86)],
+    from_torque),
+    MODEL_SOURCES.format(code='UNu2 (r1d.urdf, the R1-A7-D)') + wheels_part(UNITREE_R1_A7_D))
+UNITREE_R1_A5_D = with_own_joints(UNITREE_R1_A5_D, model_joints(
+    R1_UPPER + [('Head pitch', 1, 33), ('Head yaw', 1, 0.86)], from_torque),
+    MODEL_SOURCES.format(code="UNu2 (r1_a5.urdf: the R1-A5's upper body, the same arms of five on a fixed base, E; "
+                              'E14.4 question 2)') + wheels_part(UNITREE_R1_A5_D))
+GALAXEA_R1_PRO = with_own_joints(GALAXEA_R1_PRO, model_joints(
+    [('Waist 1', 1, 100), ('Waist 2', 1, 100), ('Waist 3', 1, 100), ('Waist 4', 1, 100), ('Shoulder 1', 2, 55),
+     ('Shoulder 2', 2, 55), ('Shoulder 3', 2, 25), ('Elbow', 2, 25), ('Wrist 1', 2, 18), ('Wrist 2', 2, 18),
+     ('Wrist 3', 2, 18)], from_torque),
+    MODEL_SOURCES.format(code='GALu (r1pro 2025 and 2026, the same joints)') + wheels_part(GALAXEA_R1_PRO))
+X_HUMANOID_TIEN_KUNG_3 = with_own_joints(X_HUMANOID_TIEN_KUNG_3, model_joints(
+    [('Hip pitch', 2, 235), ('Hip roll', 2, 235), ('Hip yaw', 2, 150), ('Knee', 2, 400), ('Ankle pitch', 2, 55),
+     ('Ankle roll', 2, 55), ('Waist yaw', 1, 200), ('Waist roll', 1, 150), ('Waist pitch', 1, 150),
+     ('Head yaw', 1, 6.3), ('Head pitch', 1, 6.3), ('Shoulder pitch', 2, 90), ('Shoulder roll', 2, 90),
+     ('Shoulder yaw', 2, 50), ('Elbow pitch', 2, 50), ('Elbow yaw', 2, 40), ('Wrist pitch', 2, 40),
+     ('Wrist roll', 2, 40)], from_torque), MODEL_SOURCES.format(code='TK3u (tiangong3.urdf)'))
+LIMX_OLI = with_own_joints(LIMX_OLI, model_joints(
+    [('Hip pitch', 2, 140), ('Hip roll', 2, 140), ('Hip yaw', 2, 140), ('Knee', 2, 140), ('Ankle pitch', 2, 42),
+     ('Ankle roll', 2, 42), ('Waist yaw', 1, 42), ('Waist roll', 1, 42), ('Waist pitch', 1, 42),
+     ('Shoulder pitch', 2, 42), ('Shoulder roll', 2, 42), ('Shoulder yaw', 2, 42), ('Elbow', 2, 42),
+     ('Wrist yaw', 2, 19), ('Wrist pitch', 2, 19), ('Wrist roll', 2, 19), ('Head yaw', 1, 19), ('Head pitch', 1, 19)],
+    from_torque), MODEL_SOURCES.format(code='OLu (HU_D04_01.urdf)') + "; its grippers its page's (OLp)")
+PAL_REEM_C = with_own_joints(PAL_REEM_C, model_joints(
+    [('Hip yaw', 2, 42.7), ('Hip roll', 2, 64), ('Hip pitch', 2, 55.7), ('Knee', 2, 138.3), ('Ankle pitch', 2, 80.9),
+     ('Ankle roll', 2, 64), ('Waist 1', 1, 78), ('Waist 2', 1, 78), ('Shoulder 1', 2, 44.64), ('Shoulder 2', 2, 22.32),
+     ('Shoulder 3', 2, 17.86), ('Elbow', 2, 17.86), ('Wrist 1', 2, 3), ('Wrist 2', 2, 6.6), ('Wrist 3', 2, 6.6),
+     ('Head 1', 1, 3.4), ('Head 2', 1, 3.26)], from_torque),
+    MODEL_SOURCES.format(code="RCu (reemc_description: its legs v0, the files' default; v1's 1.5 to 19 % higher)"))
+PAL_TIAGO_PRO = with_own_joints(PAL_TIAGO_PRO, model_joints(
+    [('Shoulder 1', 2, 43), ('Shoulder 2', 2, 43), ('Shoulder 3', 2, 26), ('Elbow', 2, 26), ('Wrist 1', 2, 26),
+     ('Wrist 2', 2, 26), ('Wrist 3', 2, 26), ('Head 1', 1, 5.197), ('Head 2', 1, 2.77)], from_torque),
+    MODEL_SOURCES.format(code='TPu (pal_sea_arm, its tiago-pro limits; tiago_pro_head)') + wheels_part(PAL_TIAGO_PRO))
+PAL_ARI = with_own_joints(PAL_ARI, model_joints(
+    [('Shoulder 1', 2, 10), ('Shoulder 2', 2, 10), ('Shoulder 3', 2, 5), ('Elbow', 2, 5), ('Wrist', 2, 5),
+     ('Head 1', 1, 3.4), ('Head 2', 1, 3.26)], from_torque),
+    MODEL_SOURCES.format(code="ARIu (ari_description; its fifth arm joint, ARId's wrist, at its elbow's 5 N·m, E)") +
+    wheels_part(PAL_ARI))
+# The RealMan robots' arms by RealMan's own joint modules (E14.5 point A, RMs page 08/62: WHJ60 "1040" g at 60 N·m,
+# WHJ30 750 g at 30, WHJ10-N 425 g at 10, rated), ± 5 % (S); which module at which joint by the arm's model file's
+# torque limits and its brakes ("Mechanical Brakes on Joints 1-3" of the RM65, "1-4" of the RM75; E). The Dual-Arm
+# Lift's arm its "RM65-B-V"; the RealBots' its RM75 (their 7-DoF "Humanoid Arm" with its force-torque sensor, E).
+WHJ60, WHJ30, WHJ10_N = spread(1.04), spread(0.75), spread(0.425)
+RM65_ARM = [joint('Shoulder 1', 2, 60, WHJ60, 'Shoulders', 'Arms'), joint('Shoulder 2', 2, 60, WHJ60, 'Shoulders', 'Arms'),
+            joint('Elbow', 2, 30, WHJ30, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 1', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 2', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 3', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms')]
+RM75_ARM = [joint('Shoulder 1', 2, 60, WHJ60, 'Shoulders', 'Arms'), joint('Shoulder 2', 2, 60, WHJ60, 'Shoulders', 'Arms'),
+            joint('Shoulder 3', 2, 30, WHJ30, 'Shoulders', 'Arms'), joint('Elbow', 2, 30, WHJ30, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 1', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 2', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms'),
+            joint('Wrist 3', 2, 10, WHJ10_N, 'Elbows and wrists', 'Arms')]
+WHJ_SOURCES = ('RMs: RealMan\'s WHJ modules, "1040", "750", "425" g at 60, 30, 10 N·m, ± 5 % (S); RMu: which at which '
+               'joint, by its {arm}\'s torque limits and brakes (E; E14.5 point A)')
+REALMAN_DUAL_ARM_LIFT = with_own_joints(
+    REALMAN_DUAL_ARM_LIFT, RM65_ARM, WHJ_SOURCES.format(arm='RM65-B-V') + wheels_part(REALMAN_DUAL_ARM_LIFT),
+    joint_label={'small': 'S, E', 'large': 'S, E'})
+REALMAN_REALBOT_01, REALMAN_REALBOT_L2, REALMAN_REALBOT_S2 = (
+    {**b, 'stated_joints': RM75_ARM, 'joint_label': {'small': 'S, E', 'large': 'S, E'},
+     'joint_sources': WHJ_SOURCES.format(arm='RM75 (its 7-DoF arm, E)') + '; its other joints: ' + b['joint_sources']}
+    for b in (REALMAN_REALBOT_01, REALMAN_REALBOT_L2, REALMAN_REALBOT_S2))
+# The G2's arms from its model (AGG2u: 108, 108, 35, 35, 35, 18, 18 N·m); its body and head joints stay on the
+# template (its model's eight all 50 N·m, a model's default by their look, not used: E14.1).
+AGIBOT_G2 = {**AGIBOT_G2, 'stated_joints': model_joints(
+    [('Shoulder 1', 2, 108), ('Shoulder 2', 2, 108), ('Shoulder 3', 2, 35), ('Elbow', 2, 35), ('Wrist 1', 2, 35),
+     ('Wrist 2', 2, 18), ('Wrist 3', 2, 18)], from_torque),
+    'joint_sources': MODEL_SOURCES.format(code='AGG2u (its arms)') + '; its other joints: ' + AGIBOT_G2['joint_sources']}
 
 # Every robot of type 2 taken apart, in the register's order of numbers (13 A2-W to 352 H1; batch 1: 116 GR-1, 117
 # GR-2, 119 H1-2, 120 H2, 121 H2 Plus; batch 2b from 216 Omni; the robots on wheels among them), the robots of the

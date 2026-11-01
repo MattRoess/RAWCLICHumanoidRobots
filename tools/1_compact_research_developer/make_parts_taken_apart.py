@@ -19,11 +19,16 @@ recycling can be optimized"). First the Unitree G1, the AgiBot X1 and the Fourie
 2026-10-27, documentation/claude/EVIDENCE.md E2.8 to E2.8e); then every other robot of the register's sheet Type 1, one
 block each (Matthias, 2026-10-29: "Yes, build it", the entry of type 1's research: E5.1 to E5.19, each agreed that
 day), the Booster K1 in its two versions; since 2026-11-01 without the PrimeBOT Q1, whose mass no source states (listed
-only, EVIDENCE.md E12.4, E12.6): 31 blocks for 30 robots. Each row of the file names its own sources.
+only, EVIDENCE.md E12.4, E12.6): 31 blocks for 30 robots. Since E14 (2026-11-01, "Yes, build it", E14.6 point 1)
+the Booster T2's joints from its model, each module by type 2's refit (E14.7 point 6), and the Noetix Bumi's and E1's
+from their pages' stated joint, each module by type 1's rule (its joints from a stated joint by types 3 and 4's one
+copy, tools/parts_types_3_and_4.py). Each row of
+the file names its own sources.
 
 WHAT IT READS AND WRITES
 ------------------------
-It reads nothing but 00's settings (src/params_schema.py, for where the file goes). It writes one file, the path of
+It reads nothing but 00's settings (src/params_schema.py, for where the file goes); it imports the shared machinery
+and, for the joints from a stated joint, tools/parts_types_3_and_4.py (and with it type 2's builder). It writes one file, the path of
 `data.parts_taken_apart` with its folder (data/researched/1_compact_research_developer/parts_taken_apart.xlsx,
 git-ignored; the folder is the one this file sits in), and replaces the file there. The values are held here and in
 tools/parts_taken_apart.py: a change to them is made there, not in the .xlsx, where it would be lost at the next run.
@@ -46,6 +51,9 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from parts_taken_apart import *  # noqa: E402,F401,F403  (every shared name: the sheets, the template, the functions)
 from parts_taken_apart import robot_rows, sensor_elements, sheets, type_output_path, write_file  # noqa: E402
+# The joints of a robot from its one stated joint, by the ratios of type 2's seven robots with every joint (E12.5 point
+# 2): one copy, types 3 and 4's (EVIDENCE.md E14.6 point 1), each module here by type 1's own rule.
+from parts_types_3_and_4 import LEGS_12, T2, from_stated_joint, stated_joint_sources  # noqa: E402
 
 # The robot type of this file, and its folder (the one this builder sits in, named as data/consolidated/'s).
 ROBOT_TYPE = 1
@@ -59,8 +67,8 @@ ABOUT = [
     None,
     'The Unitree G1, the AgiBot X1 and the Fourier N1 agreed by Matthias on 2026-10-27 (documentation/claude/'
     'EVIDENCE.md E2.8 to E2.8e); every other robot of type 1 agreed on 2026-10-29 (E5.1 to E5.19: the actuators E5.12, '
-    'the rest E5.14, batches 2 to 4 E5.17, the steels E5.18, the battery\'s rest E5.19), "Yes, build it". Written by '
-    'Claude.',
+    'the rest E5.14, batches 2 to 4 E5.17, the steels E5.18, the battery\'s rest E5.19), "Yes, build it"; since '
+    '2026-11-01 the Booster T2, the Noetix Bumi and E1 by their makers\' joints (E14.6 point 1). Written by Claude.',
     "Sheet Robots: each robot, its maker, its type, the maker's height and stated mass. Every sheet with a column "
     "Robot holds each robot's own rows; JointParts, Shares and SensorElements are one set for all (the G1's joint "
     'insides, scaled to each joint\'s module mass: "We can assume, they are similar within given ranges").',
@@ -573,6 +581,12 @@ SOURCES_ROWS = [
      "Manufacturer's model file"),
     ('BT2', 'Booster Robotics, T2 specifications and overview; booster.tech/booster-t2', 'https://docs.booster.tech',
      "Manufacturer's documentation"),
+    ('BT2u', "Booster Robotics, booster_assets T2_31dof.urdf (its 31 joints' torque limits, 41.99 kg)",
+     'https://github.com/BoosterRobotics/booster_assets', "Manufacturer's model file"),
+    ('NOEb', 'Noetix Robotics, Bumi page ("关节模组最大扭矩 70N.m", "48V 5.1Ah", "17kg", "98cm", "21DOF")',
+     'http://www.noetixrobotics.com/mobile/detail/Bumi', "Manufacturer's specification"),
+    ('NOEe', 'Noetix Robotics, E1 page ("膝关节最大扭矩150Nm", "整机重量40kg", "身高140cm", "10.6Ah", "67 TOPS")',
+     'http://www.noetixrobotics.com/mobile/detail/E1', "Manufacturer's specification"),
     ('PM1', 'EngineAI, PM01 development guide (joint system, peripheral devices, hardware, sensors)',
      'https://en.engineai.com.cn/open/docs/pm01/01/joint-system', "Manufacturer's documentation"),
     ('PM1m', 'EngineAI, PM01 user manual V1.0', 'https://en.engineai.com.cn/product-support-pm01.html',
@@ -987,32 +1001,63 @@ AI_SAPIENS_K1 = block(
     frame=('Frame', 'Aluminium', 'HG "Aluminium alloy frame" (third party)'))
 
 # --- Batches 2 to 4: the other robots of type 1 (E5.15 to E5.17) ------------------------------------------------------
-BOOSTER_T2 = catalogue_block(
+# Type 1's rule for a module at a torque, for a robot whose joints come from one stated joint (E14.6 point 1): the
+# torque over TORQUE_DENSITY (E5.12 point 4), half to 1.5 times by from_stated_joint().
+TYPE_ONE_FIT = lambda torque: torque / TORQUE_DENSITY  # noqa: E731
+TYPE_ONE_FIT_WORDS = 'the torque over 87.3 N·m/kg (type 1\'s rule, E5.12 point 4)'
+# The Booster T2 (E14.6 point 1): every joint from its model, T2_31dof.urdf (BT2u), its torque limits; each module by
+# type 2's refit at its torque (E6.8 point 1; T2.from_torque, one copy), not type 1's rule: at its high limits (its legs
+# 135, its waist 135 to 144 N·m) type 1's straight line put 71 % of its 42 kg in its joints and its frame below zero in
+# 4.1 % of its draws; the refit, a curve through 12 makers' actuators, 59 % (V132; Matthias, 2026-11-01, "Yes, agree",
+# E14.7 point 6).
+BOOSTER_T2_JOINTS = model_joints(
+    [('Head yaw', 1, 22), ('Head pitch', 1, 22), ('Shoulder pitch', 2, 74), ('Shoulder roll', 2, 60),
+     ('Elbow pitch', 2, 60), ('Elbow yaw', 2, 60), ('Wrist pitch', 2, 22), ('Wrist yaw', 2, 22), ('Wrist roll', 2, 22),
+     ('Waist pitch', 1, 138), ('Waist roll', 1, 144), ('Waist yaw', 1, 135), ('Hip pitch', 2, 135),
+     ('Hip roll', 2, 135), ('Hip yaw', 2, 135), ('Knee', 2, 135), ('Ankle pitch', 2, 132), ('Ankle roll', 2, 72)],
+    T2.from_torque)
+BOOSTER_T2 = with_own_joints(catalogue_block(
     'Booster T2', 'Booster Robotics', 1.4, 42,
     ((41, 42, 44), 'S, E', 'BT2 "~42 kg" (Education, Pro), "~43 kg" (with grippers or hands); ± 1 kg (E5.14 point 1)'),
     31, 'Computer board (Education: an ARM board; Pro: NVIDIA Jetson Thor T5000)',
-    sources='BT2 (Booster); E5.15',
+    sources='BT2 (Booster), BT2u (its model, 41.99 kg); E5.15, E14.6',
     voltage=((48, 48, 48), 'S', 'BT2 "48V"'), capacity=(spread(10), 'S', 'BT2 "10Ah"; ± 5 %'),
     sensors=[('Depth camera (not named)', 2, 'Head', 'Head', None, 'S',
               "BT2: RGB-D cameras in the head and the waist; elements as the Intel RealSense D435's, mass not stated",
               DEPTH_CAMERA),
              ('Camera in the wrist (not named)', 2, 'Arms', 'Arms', None, 'S', 'BT2; its mass not stated: its elements '
-                                                                            'only', CAMERA)])
+                                                                            'only', CAMERA)]),
+    BOOSTER_T2_JOINTS, "BT2u: its 31 joints' torque limits; mass type 2's refit at its torque, 0.0689 kg × "
+                       'torque^0.566, half to 1.5 times (E6.8 point 1; E14.7 point 6: type 1\'s rule overstated its '
+                       'high torques)')
 
 MENLO_ASIMOV_2 = 'Menlo Asimov 2'      # written from the Asimov 1's rows, scaled to its mass (asimov_two_rows())
 ASIMOV_TWO_MASS = ((37, 38, 39), 'S, E', 'HG: 38 kg, the catalogue\'s "educated estimate" (Menlo: "In progress"); ± '
                                          '1 kg (E5.17 point 7)')
 
-NOETIX_E1 = catalogue_block(
-    'Noetix E1', 'Noetix Robotics', 1.36, 40, ((39, 40, 41), 'S', 'HG "40 kg" ("Not Verified"); ± 1 kg'),
+# The Noetix E1 and Bumi (E14.6 point 1): their joints from their makers' one stated joint, the E1's knee "膝关节最大扭矩
+# 150Nm" (NOEe), the Bumi's "关节模组最大扭矩 70N.m" (its largest module, NOEb), each module by type 1's rule. The
+# E1's 26 joints (HG: 23 to 28, the middle) per body part as the G1's 23 with a head of 2 and a second waist joint (E:
+# its maker gives no split; E12.5 point 2's rule); the Bumi's its maker's: legs 12, "肩关节2*2个自由度，肘关节2*2个自由度；
+# 腰部1个自由度" (shoulders 2 × 2, elbows 2 × 2, waist 1).
+NOETIX_E1 = with_own_joints(catalogue_block(
+    'Noetix E1', 'Noetix Robotics', 1.40, 40, ((39, 40, 41), 'S', 'NOEe "整机重量40kg"; ± 1 kg'),
     26, 'Computer board, NVIDIA Jetson Orin Nano Super (development)',
-    joint_sources=("HG: 23 to 28 joints, 26 for the encoders and connectors (E, the middle); no joint torques: its "
-                   "joint modules 24.5 / 49 / 73.5 % of its mass, split as batch 1's on average (E5.17 point 1)"))
-NOETIX_BUMI = catalogue_block(
-    'Noetix Bumi', 'Noetix Robotics', 0.98, 17, ((16, 17, 18), 'S', 'HG "17 kg" ("Not Verified"); ± 1 kg'),
+    sources='NOEe (Noetix: "身高140cm", "整机重量40kg", "10.6Ah", "67 TOPS"), HG; E5.15, E14.6'),
+    from_stated_joint(150, {**LEGS_12, 'Waist': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 2, 'Head': 2},
+                      fit=TYPE_ONE_FIT),
+    stated_joint_sources('NOEe', '"膝关节最大扭矩150Nm"', 150, 'knee', TYPE_ONE_FIT_WORDS) +
+    "; its 26 joints per body part as the G1's 23 with a head of 2 and a second waist joint (E)")
+NOETIX_BUMI = with_own_joints(catalogue_block(
+    'Noetix Bumi', 'Noetix Robotics', 0.98, 17, ((16, 17, 18), 'S', 'NOEb "17kg"; ± 1 kg'),
     21, 'Computer board, Rockchip RK3576',
+    sources='NOEb (Noetix: "98cm", "17kg", "21DOF", "48V 5.1Ah"), HG; E5.15, E14.6',
+    voltage=((48, 48, 48), 'S', 'NOEb "48V 5.1Ah"'), capacity=(spread(5.1), 'S', 'NOEb "5.1Ah"; ± 5 %'),
     shell=('Shell: composite materials', 'HG "Composite materials", its kind not named: plastics as type 1; 11.5 % of '
-                                         'the robot (E5.14 point 6)'))
+                                         'the robot (E5.14 point 6)')),
+    from_stated_joint(70, {**LEGS_12, 'Waist': 1, 'Shoulder': 4, 'Elbow': 4}, fit=TYPE_ONE_FIT),
+    stated_joint_sources('NOEb', '"关节模组最大扭矩 70N.m"', 70, 'largest joint, taken as its knee',
+                         TYPE_ONE_FIT_WORDS) + '; its joints per body part its maker\'s')
 AKINCI_5 = catalogue_block(
     'AKINROBOTICS AKINCI-5', 'AKINROBOTICS', 1.29, 42, ((41, 42, 43), 'S', 'HG "42 kg" ("Not Verified"); ± 1 kg'),
     19, 'Computer board, AMD Ryzen 9 PRO 6950H', cooler=X86_COOLER,
