@@ -414,9 +414,15 @@ APPTRONIK_APOLLO_2 = template(
     sources='APT2 (Apptronik: "A bipedal configuration … while a wheeled base", "Swappable batteries"), HG; on legs '
             '(E11.6 question 2)')
 BOSTON_DYNAMICS_ATLAS = template(
-    'Boston Dynamics Atlas', 'Boston Dynamics', 1.90, 90, makers(90, 'BDA, BDAs "Weight 90 kg"'), 56,
+    'Boston Dynamics Atlas', 'Boston Dynamics', 1.90, 90, makers(90, 'BDA, BDAs "Weight 90 kg"'), 30 + 2,
+    'Compute module, NVIDIA Jetson Thor',
     sources='BDA, BDAs (Boston Dynamics: "Height 1.9 m", "Degrees of Freedom 56", "Tactile fingers and palm", "Battery '
-            'Life 4 hrs"); E11.3', added_joints=[SIX_HANDS])
+            'Life 4 hrs"), BDh (its hands: "13 degrees of freedom (DOF), directly actuated"; its body 56 less 2 × 13, '
+            'arith.), BDn ("NVIDIA Jetson Thor"); E11.3, E16.2',
+    # Since types 5 and 6's entry (E16.2, agreed 2026-11-01, "Yes, agree both"): its hands the GR3's 13 joints each,
+    # its computer its maker's Jetson Thor, its cells NMC as an outlet names them (BTN, second-hand).
+    added_joints=[hands(13)], boards=thor('BDn "NVIDIA Jetson Thor computing platform"') + [POWER_BOARD],
+    cells=('S, E', 'NMC cylindrical: BTN "46-series ternary cells" (industry sources, second-hand)'))
 VBOT_ATOM = template(
     'Vbot ATOM', 'Vbot', 1.60, None, catalogue(50, 'Vbot states none; Xinhua 1.6 m, 31 body DoF (E11.4)'), 31,
     sources='XHA (Xinhua at its launch: "160cm 身高", "31 个本体自由度"), VBOT (its site: a robot dog only), HG; E11.4')
@@ -813,6 +819,65 @@ AGIBOT_A2 = with_own_joints(AGIBOT_A2, from_stated_joint(
     stated_joint_sources('AGA2U', '"Peak Knee Torque 270N·m"', 270, 'knee') +
     '; its joints per body part its page\'s (neck 2, arms 7, legs 6)')
 
+# Since types 5 and 6's entry (E16.2, E16.5 question 3, agreed 2026-11-01, "Yes, agree both"): every body joint from
+# DEEP Robotics' model files (DPRu: DR02-std.urdf 67.575 kg, 21 joints; DR02-pro.urdf 78.085 kg, 31; read and added up
+# by script, V135), y the pitch, x the roll, z the yaw; each module type 2's refit at its torque (E6.8 point 1).
+DR02_MODEL_LEGS = [('Hip pitch', 2, 363), ('Hip roll', 2, 363), ('Hip yaw', 2, 137), ('Knee', 2, 363),
+                   ('Ankle pitch', 2, 137), ('Ankle roll', 2, 50)]
+DEEP_DR02 = with_own_joints(DEEP_DR02, model_joints(
+    DR02_MODEL_LEGS + [('Waist yaw', 1, 137), ('Shoulder pitch', 2, 137), ('Shoulder roll', 2, 137),
+                       ('Shoulder yaw', 2, 137), ('Elbow', 2, 137)], T2.from_torque),
+    AGIBOT_MODEL_SOURCES.format(code='DPRu (DR02-std.urdf, its joints\' efforts)'))
+DEEP_DR02_PRO = with_own_joints(DEEP_DR02_PRO, model_joints(
+    DR02_MODEL_LEGS + [('Waist pitch', 1, 363), ('Waist yaw', 1, 137), ('Waist roll', 1, 137),
+                       ('Shoulder pitch', 2, 137), ('Shoulder roll', 2, 137), ('Shoulder yaw', 2, 137), ('Elbow', 2, 137),
+                       ('Wrist yaw', 2, 50), ('Wrist pitch', 2, 50), ('Wrist roll', 2, 50), ('Head yaw', 1, 50),
+                       ('Head pitch', 1, 50)], T2.from_torque),
+    AGIBOT_MODEL_SOURCES.format(code='DPRu (DR02-pro.urdf, its joints\' efforts)'))
+
+# --- Types 5 and 6's entry (E16.6; Matthias, 2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill
+# in the data in the respective sheets"): batch 3's three robots of types 5 and 6 whose first type among 3 and 4 is 3,
+# as E15.3 and E16.2 give them (read first-hand: V134, V135) ------------------------------------------------------------
+KAWASAKI_KALEIDO_9 = template(
+    'Kawasaki Kaleido 9', 'Kawasaki Robotics', 1.90, None,
+    ((98, 99, 100), 'S', 'MYN "体重は99kg" (Mynavi at its showing; Kawasaki\'s pages state none); ± 1 kg (E15.2 point 1)'),
+    30, sources='MYN (Mynavi, 2025-12-05: "身長は190cm", "全身に30軸(ハンドは別)の自由度", "頭部にステレオカメラ", "胸にはLIDAR'
+                'センサー"), KAWb (Kawasaki: "maintaining torque", LiDAR), KAWj (Kawasaki on its 2019 Kaleido); E15, E16',
+    sensors=[binocular('MYN "頭部にステレオカメラ"'), lidar('MYN "胸にはLIDARセンサー"'), IMU_NOT_NAMED],
+    frame=('Frame', 'Magnesium', 'KAWj "骨格部品に、アルミより軽量なマグネシウム合金を採用" (its 2019 Kaleido): magnesium '
+                                 'alloy; the remainder (E16.2; as the A3\'s, E11.6 question 4)'))
+NOBLE_MACHINES_MOBY = template(
+    'Noble Machines Moby', 'Noble Machines', 1.70, 72, makers(72, 'NMb "Moby\'s 72 Kg body"'), 34 + 2,
+    'Compute module, NVIDIA Jetson Thor',
+    sources='NMb (its blog, 2025-03-18: "72 Kg", "200W", "five to six-hour shifts"), NMp (its page: "Payload 23KG/50LB", '
+            '"Battery life 5 hours", "Modular end-effectors"), NVm (NVIDIA: "NVIDIA Jetson Thor"), ORBm (Orbbec: '
+            '"Gemini 336L stereo 3D cameras"), MKm (170 cm, "a reported 34 degrees of freedom"); E15, E16',
+    added_joints=[grippers()], boards=thor('NVm "NVIDIA Jetson Thor processes sensor data"') + [POWER_BOARD],
+    sensors=[depth_camera('ORBm "Orbbec Gemini 336L stereo 3D cameras" (their count not stated: two, E)', 2),
+             IMU_NOT_NAMED])
+
+
+def phantom_mk1_joints() -> list:
+    """The Phantom MK1's body joints (E15.3): from its "MAX PEAK TORQUE, 160Nm" at its knee by the seven robots' ratios
+    (E12.5 point 2), its joints per body part as the Unitree G1's 29 (E: its "29º" not split), its shoulders' "119 Nm"
+    and wrists' "20 Nm" as stated, each module type 2's refit at its torque."""
+    rows = from_stated_joint(160, {**LEGS_12, 'Waist': 3, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6})
+    stated = {'Shoulder': joint('Shoulder', 6, 119, T2.from_torque(119), 'Shoulders', 'Arms'),
+              'Wrist': joint('Wrist', 6, 20, T2.from_torque(20), 'Elbows and wrists', 'Arms')}
+    return [stated.get(r[0], r) for r in rows]
+
+
+FOUNDATION_PHANTOM_MK1 = block(
+    'Foundation Phantom MK1', 'Foundation', 1.80, 80,
+    'FDp (Foundation: "5\'-11", (1.8m)", "176lbs, (80kg)", "29º", "MAX PEAK TORQUE, 160Nm", "LEGS TORQUE, >160", '
+    '"SHOULDER TORQUE, 119", "WRIST TORQUE, 20", "9 RAD/S @ 48V"), TBS (the BBC via UNB: "lacks a battery"); E15, E16',
+    makers(80, 'FDp "176lbs, (80kg)"'), phantom_mk1_joints(),
+    joint_sources=stated_joint_sources('FDp', '"MAX PEAK TORQUE, 160Nm"', 160, 'knee') +
+    '; its shoulders "119 Nm" and wrists "20 Nm" as stated, each the refit at its torque; its joints per body part as '
+    "the Unitree G1's 29 (E)",
+    # TBS: "Phantom MK-1 … lacks a battery" (E16.2): no battery rows; it draws its power by cable.
+    battery=False, **with_defaults(1.80, 80, {}))
+
 # Each robot in the file of its first type among 3 and 4 (E11.7 point 1), in the register's order of numbers.
 BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX, PNDBOTICS_ADAM_LITE,
             PNDBOTICS_ADAM_SP, HEXAGON_AEON, AGILE_ONE, AIDOL, AEI_ALICE_M1, TEKNTRASH_ALPHA, AI2_ALPHABOT_2, ANIGON,
@@ -821,7 +886,9 @@ BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX
             # Batch 2 (E12.5, E12.6): 18 robots, the CYBORG RO1 and the DR02 in two versions.
             ELITE_CENTAUR_G1, DONUT_CINNAMON_1, UBTECH_CRUZR_S2, UBTECH_CRUZR_Y1, CYBORG_RO1_SE, CYBORG_RO1_PRO,
             CYBORG_WO1, SHARPA_D01, RICHTECH_DEX, BOSHIAC_DEXBOT, AGILITY_DIGIT, AGILITY_DIGIT_5, DEEP_DR02,
-            DEEP_DR02_PRO, DUATIC_ALPHA, SIASUN_DUCO, ADDVERB_ELIXIS, ADDVERB_ELIXIS_W, GENESIS_ENO, AVIC_FENGXING_001]
+            DEEP_DR02_PRO, DUATIC_ALPHA, SIASUN_DUCO, ADDVERB_ELIXIS, ADDVERB_ELIXIS_W, GENESIS_ENO, AVIC_FENGXING_001,
+            # Types 5 and 6's entry (E16.6): batch 3's robots of types 5 and 6 in type 3's file (E15.3).
+            KAWASAKI_KALEIDO_9, NOBLE_MACHINES_MOBY, FOUNDATION_PHANTOM_MK1]
 BLOCKS_4 = [ONE_X_NEO, AGIBOT_A2, AGIBOT_A3_ULTRA, ANDROMEDA_ABI, AGIBOT_A3, AGIBOT_X2, AGIBOT_X2_ULTRA, DOBOT_ATOM,
             VBOT_ATOM,
             # Batch 2 (E12.5, E12.6): 8 robots, the CASBOT 02 and the FF Master in two versions.
@@ -978,6 +1045,35 @@ OWN_SOURCES = [
      "Manufacturer's specification"),
     ('FFM', 'Faraday Future, FF Master page and its specs', 'https://robotics.ff.com/us/ff-master/',
      "Manufacturer's specification"),
+    # Types 5 and 6's entry (E16.6), read first-hand on 2026-11-01 (V134, V135).
+    ('BDh', 'Boston Dynamics, robot hands for modern AI and real work ("13 degrees of freedom (DOF), directly actuated")',
+     'https://bostondynamics.com/blog/robot-hands-for-modern-ai-and-real-work/', "Manufacturer's article"),
+    ('BDn', 'Boston Dynamics, collaboration with NVIDIA ("NVIDIA Jetson Thor computing platform")',
+     'https://bostondynamics.com/news/boston-dynamics-expands-collaboration-with-nvidia/', "Manufacturer's press release"),
+    ('BTN', 'Battery-Tech Network, LG Energy Solution and Atlas, 2026-02-12 ("46-series ternary cells")',
+     'https://battery-tech.net/battery-markets-news/lg-energy-solutions-batteries-power-atlas-humanoid-robot/',
+     'Second-hand: a trade report citing industry sources'),
+    ('DPRu', 'DEEP Robotics, deep_robotics_model: DR02-std.urdf (67.575 kg), DR02-pro.urdf (78.085 kg)',
+     'https://github.com/DeepRoboticsLab/deep_robotics_model', "Manufacturer's model file"),
+    ('MYN', 'Mynavi TECH+, Kawasaki Kaleido 9, 2025-12-05 ("身長は190cm", "体重は99kg")',
+     'https://news.mynavi.jp/techplus/article/20251205-3764371/', 'Second-hand: a press report at its showing'),
+    ('KAWb', 'Kawasaki Robotics, blog on Kaleido 9, 2026-03 ("maintaining torque", LiDAR, the Kaleido Station)',
+     'https://kawasakirobotics.com/in/blog/20260316_kaleido9/', "Manufacturer's article"),
+    ('KAWj', 'Kawasaki Robotics, Japanese blog on the Kaleido (its 2019 one: "マグネシウム合金")',
+     'https://kawasakirobotics.com/jp/blog/202511_kaleido/', "Manufacturer's article"),
+    ('NMb', "Noble Machines (Under Control Robotics), blog, 2025-03-18 (\"Moby's 72 Kg body\")",
+     'https://undercontrolrobotics.substack.com/p/real-world-world-building-ucr-develops', "Manufacturer's article"),
+    ('NMp', 'Noble Machines, its page ("Payload 23KG/50LB", "Battery life 5 hours")', 'https://www.noblemachines.ai/',
+     "Manufacturer's specification"),
+    ('NVm', 'NVIDIA, case study on Noble Machines ("NVIDIA Jetson Thor")',
+     'https://www.nvidia.com/en-us/case-studies/noble-machines/', 'Second-hand: a supplier\'s case study'),
+    ('ORBm', 'Orbbec, case study on Moby ("Orbbec Gemini 336L stereo 3D cameras")', 'https://www.orbbec.com/?p=45035',
+     "Second-hand: a supplier's case study"),
+    ('MKm', 'Mike Kalil, on Moby ("Standing 170 cm", "a reported 34 degrees of freedom")',
+     'https://mikekalil.com/blog/noble-machines-moby/', 'Second-hand: a blog'),
+    ('FDp', 'Foundation, Phantom page', 'https://www.foundation.bot/phantom', "Manufacturer's specification"),
+    ('TBS', 'The Business Standard (UNB, after the BBC), 2026-06-09 ("Phantom MK-1 … lacks a battery")',
+     'https://www.tbsnews.net/node/1457841', 'Second-hand: a press report'),
 ]
 
 

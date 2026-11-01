@@ -692,9 +692,24 @@ RECIPE_FAMILY = {1: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering po
                  2: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering plastics'},
                  # Types 3 and 4 since 2026-10-30 (EVIDENCE.md E11.7 point 7): the workbook's, and type 4's magnesium
                  # (the AgiBot A3's and A3 Ultra's frames, both of type 4 only).
-                 3: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering plastics'},
+                 3: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Engineering plastics',
+                     # Since types 5 and 6's entry (E16.6): the Kaleido 9's magnesium-alloy frame, its type's AZ91D.
+                     'Magnesium': 'Magnesium alloys'},
                  4: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Polymers & elastomers',
-                     'Magnesium': 'Magnesium alloys'}}
+                     'Magnesium': 'Magnesium alloys'},
+                 # Types 5 and 6 since 2026-11-01 (E16.6, "Find all the data for 5 and 6 and then fill in the data in
+                 # the respective sheets"): the workbook's, its first plastics of each (the shell: type 5's "Composites &
+                 # polymers", type 6's "Reinforced polymers"); type 5 has no magnesium recipe, so the Kaleido 9's frame,
+                 # drawn in type 5, takes its own file's, type 3's AZ91D (E): a (type, family) pair names another type's.
+                 5: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Composites & polymers',
+                     'Magnesium': (3, 'Magnesium alloys')},
+                 6: {'Aluminium': 'Aluminum alloys', 'Plastics': 'Reinforced polymers'}}
+
+
+def recipe_key(robot_type: int, shared: str, family) -> tuple:
+    """The key of a recipe in the sheet Rows of the element recipes, (robot type, family, shared material): `family`
+    the drawing type's own, or a (type, family) pair naming another type's (RECIPE_FAMILY)."""
+    return (*family, shared) if isinstance(family, tuple) else (robot_type, family, shared)
 CELL_RECIPE = 'NMC cylindrical'
 COPPER, MAGNETS, CELL_MATERIAL, ELECTRONICS = 'Copper', 'Magnets (NdFeB)', 'Battery materials', 'Electronics'
 # The steel of the sibling's element workbook whose modes are a producer's typical values, the compound of the element
@@ -882,7 +897,7 @@ def check_parts(inputs: ApartInputs) -> list:
         faults.append(Fault('element_recipes.xlsx: Rows', 0, f"02 names no recipes of type {robot_type}'s aluminium "
                                                              'and plastics (RECIPE_FAMILY).'))
     for shared, family in RECIPE_FAMILY.get(robot_type, {}).items():
-        if (robot_type, family, shared) not in rows:
+        if recipe_key(robot_type, shared, family) not in rows:
             faults.append(Fault('element_recipes.xlsx: Rows', 0, f"no recipe for type {robot_type}'s {shared} "
                                                                  f"('{family}')."))
     if None in inputs.tantalum:
@@ -1011,7 +1026,7 @@ class Shared:
                                   settings.nmc_wh_per_kg_max, n)
         self.recipes = RecipeDraws(inputs.base.recipes, rng, n)
         rows = {(r.robot, r.family, r.shared): r.recipe for r in inputs.base.recipes.rows or []}
-        self.recipe_name = {shared: rows[(inputs.robot_type, family, shared)]
+        self.recipe_name = {shared: rows[recipe_key(inputs.robot_type, shared, family)]
                             for shared, family in RECIPE_FAMILY[inputs.robot_type].items()}
         self.recipe = {shared: self.recipes.elements(name) for shared, name in self.recipe_name.items()}
         self.recipe[COPPER] = {'Cu': np.ones(n)}

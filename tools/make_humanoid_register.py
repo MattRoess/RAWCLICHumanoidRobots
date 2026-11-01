@@ -90,15 +90,20 @@ ABOUT = [
     'evaluation").',
     'Sheets Type 3 and Type 4 (2026-10-30, "Yes, together", EVIDENCE.md E10.1; batch 1 entered on "Yes, build it", '
     'E11.7): every robot whose types include 3, or 4, as the sheet Type 1. "drawn: its own parts" where its rows stand '
-    "in the parts file of one of its types (types 1 to 4); \"not drawn: not yet taken apart\" of the others with a "
+    "in the parts file of one of its types (types 1 to 6); \"not drawn: not yet taken apart\" of the others with a "
     'mass, their types drawn for stock-and-flow from the workbook until all are; "not drawn: no mass stated".',
+    'Sheets Type 5 and Type 6 (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data '
+    'in the respective sheets", EVIDENCE.md E16.6): every robot whose types include 5, or 6, as the sheet Type 3; the '
+    'hydraulic Atlas (old), Nadia and Neo1 not yet taken apart (their research step, E16.5 question 4); TITAN without a '
+    'stated mass.',
 ]
 
 # --- The sheets of robot types --------------------------------------------------------------------------------------
 # The robot types whose robots are listed in a sheet of their own, "Type n". Matthias, 2026-10-29: "For now it has to
 # be just all for type 1"; then for type 2, "Yes, as proposed" (type 2 as type 1, step 5); 2026-10-30 types 3 and 4,
-# "Yes, together", "Yes, build it" (EVIDENCE.md E10.1 point 1).
-TYPES_LISTED = (1, 2, 3, 4)
+# "Yes, together", "Yes, build it" (EVIDENCE.md E10.1 point 1); 2026-11-01 types 5 and 6, "Yes, agree both", "Find all
+# the data for 5 and 6 and then fill in the data in the respective sheets" (E16.6).
+TYPES_LISTED = (1, 2, 3, 4, 5, 6)
 TYPE_SHEET = 'Type {}'
 # What a sheet Type n says of a robot in 02's run, by what 02 does with it (01_schemas.py checks the same four).
 IN_RUN_OWN = 'drawn: its own parts'
@@ -190,6 +195,9 @@ TAKEN_APART = {1: {
     73: 'Sharpa D01', 75: 'Richtech Robotics Dex', 76: 'BOSHIAC DexBot', 77: 'Agility Digit',
     78: 'Agility Digit 5', 81: 'DEEP Robotics DR02; DEEP Robotics DR02 Pro', 83: 'Duatic Alpha',
     84: 'Siasun DUCO', 88: 'Addverb Elixis', 89: 'Addverb Elixis-W', 90: 'Genesis AI Eno', 93: 'AVIC Fengxing-001',
+    # Types 5 and 6's entry (2026-11-01, "Yes, agree both", E16.6): batch 3's robots of types 5 and 6 whose first type
+    # among 3 and 4 is 3, in type 3's file as E15.3 gives them.
+    152: 'Kawasaki Kaleido 9', 195: 'Noble Machines Moby', 228: 'Foundation Phantom MK1',
 }, 4: {
     1: '1X NEO', 6: 'AgiBot A2', 8: 'AgiBot A3 Ultra', 9: 'Andromeda Abi', 14: 'AgiBot A3',
     17: 'AgiBot X2; AgiBot X2 Ultra', 45: 'DOBOT Atom 153 cm', 46: 'Vbot ATOM',
@@ -197,6 +205,13 @@ TAKEN_APART = {1: {
     59: 'CASBOT 02; CASBOT 02 EDU', 61: 'CasiVision CASIVIBOT', 64: 'LG CLOiD', 74: 'XYZ DEUX', 79: 'Noetix Dora',
     91: 'Realbotix F-Series', 94: 'FF Futurist',
     95: 'FF Master Classic Edu; FF Master Classic Ultra',
+}, 5: {
+    # Types 5 and 6's entry (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data in
+    # the respective sheets": EVIDENCE.md E16.6): type 5's own robots in its file, the T800 in two versions.
+    191: 'Mirsee MH3', 288: 'EngineAI T800 Dev; EngineAI T800 PRO',
+}, 6: {
+    # Type 6's own robots in its file, the Fuxi on legs and on wheels, each as often (E16.2, E15.6 question 2).
+    24: 'IHMC Alex', 351: 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels',
 }}
 
 # A robot with no stated mass: number -> why. Its mass empty, so that it is listed but not in the evaluation (Matthias,
@@ -647,7 +662,7 @@ def types_of(row: list) -> list:
 
 
 def taken_apart(row: list) -> bool:
-    """Whether a robot has its own rows in the parts file of one of its types (types 1 to 4): 02 draws it with them in
+    """Whether a robot has its own rows in the parts file of one of its types (types 1 to 6): 02 draws it with them in
     each of its types (E11.7 point 4)."""
     return any(row[0] in TAKEN_APART.get(t, {}) for t in types_of(row))
 

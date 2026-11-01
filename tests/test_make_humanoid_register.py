@@ -44,6 +44,10 @@ BUILDERS = {1: load('make_parts_taken_apart_1', os.path.join('tools', '1_compact
             3: load('make_parts_taken_apart_3', os.path.join('tools', '3_industrial_logistics_warehousing',
                                                             'make_parts_taken_apart.py')),
             4: load('make_parts_taken_apart_4', os.path.join('tools', '4_service_healthcare_interaction',
+                                                            'make_parts_taken_apart.py')),
+            5: load('make_parts_taken_apart_5', os.path.join('tools', '5_heavy_duty_high_performance_hazardous_'
+                                                            'environment', 'make_parts_taken_apart.py')),
+            6: load('make_parts_taken_apart_6', os.path.join('tools', '6_defense_public_safety',
                                                             'make_parts_taken_apart.py'))}
 APART = {n: [row[0] for row in b.ROBOTS_ROWS] for n, b in BUILDERS.items()}
 from src.params_schema import Params, absolute  # noqa: E402
@@ -108,7 +112,12 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(set(apart), ({r.number for r in self.register if 1 in r.types} - {236})
                          | {116, 117, 119, 120, 121} | batch_two | batch_two_b
                          | on_wheels                                    # since 2026-10-30 the 43 on wheels (E9.6)
-                         | types_34_batch_one | types_34_batch_two)
+                         | types_34_batch_one | types_34_batch_two
+                         # since types 5 and 6's entry (2026-11-01, E16.6): the Kaleido 9, the Moby and the Phantom MK1
+                         # in type 3's file, the MH3 and the T800 in type 5's, the Alex and the Fuxi in type 6's
+                         | {152, 195, 228} | {191, 288} | {24, 351})
+        self.assertEqual(apart[288], 'EngineAI T800 Dev; EngineAI T800 PRO')
+        self.assertEqual(apart[351], 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels')
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
         self.assertEqual(apart[116], 'Fourier GR-1 one camera; Fourier GR-1 two cameras')
         self.assertEqual(apart[123], 'Unitree H2-X Core i7; Unitree H2-X Orin NX')
@@ -199,7 +208,8 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # then it should not be taken into the evaluation"), else not yet taken apart; 01 finds nothing.
         # Since batch 2 (E12.6): type 3 91 drawn, type 4 47; the Clone Alpha and the PrimeBOT Q1 without a mass. Since
         # 2026-11-01 the Reflex of type 3 too, its catalogue's "0.0" not a mass (test_a_zero_in_the_catalogue_...).
-        for robot_type, count, own, without in ((3, 181, 91, 13), (4, 135, 47, 6)):
+        # Since types 5 and 6's entry (E16.6): type 3 also the Kaleido 9, the Moby and the Phantom MK1 (E15's rows).
+        for robot_type, count, own, without in ((3, 181, 94, 13), (4, 135, 47, 6)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
@@ -209,8 +219,27 @@ class TestMakeHumanoidRegister(unittest.TestCase):
             named = set().union(*APART.values())
             self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, robot_type, Params(),
                                                                        named)], [])
-        self.assertEqual(schemas.type_sheet_numbers(self.path), [1, 2, 3, 4])
-        self.assertEqual(schemas.types_taken_apart(self.path), [1, 2, 3, 4])
+        self.assertEqual(schemas.type_sheet_numbers(self.path), [1, 2, 3, 4, 5, 6])
+        self.assertEqual(schemas.types_taken_apart(self.path), [1, 2, 3, 4, 5, 6])
+
+    def test_the_sheets_type_5_and_type_6(self):
+        # Matthias, 2026-11-01: "Yes, agree both" (E16), "Find all the data for 5 and 6 and then fill in the data in the
+        # respective sheets" (E16.6): every robot whose types include 5 or 6; drawn with its own parts where it has them
+        # in the file of one of its types (types 1 to 6), TITAN without a mass, the hydraulic Atlas (old), Nadia and
+        # Neo1 not yet taken apart (E16.5 question 4).
+        for robot_type, count, own, without in ((5, 12, 9, 1), (6, 5, 4, 0)):
+            listed = schemas.read_type_sheet(self.path, robot_type)
+            self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
+            self.assertEqual(len(listed), count)
+            runs = Counter(r.in_run for r in listed)
+            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_LATER]),
+                             (own, without, count - own - without))
+            named = set().union(*APART.values())
+            self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, robot_type, Params(),
+                                                                       named)], [])
+        later = {r.number for t in (5, 6) for r in schemas.read_type_sheet(self.path, t)
+                 if r.in_run == schemas.IN_RUN_LATER}
+        self.assertEqual(later, {44, 202, 208})
 
     def test_the_wheeled_robots_of_batch_2_on_wheels(self):
         # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E7.3, question 1): the Astribot S1 and the Moz1 stand on

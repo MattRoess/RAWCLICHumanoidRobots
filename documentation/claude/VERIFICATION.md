@@ -5,6 +5,122 @@ by Claude, newest first.
 
 ## 2026-11-01
 
+### V136. Types 5 and 6 entered (E16.6)
+
+- **His words:** "Yes, agree both" (E15 and E16), then "move move. Find all the data for 5 and 6 and then fill in the
+  data in the respective sheets. So I can then have all dat for the run of 01 and 02. Move Move".
+- **His run read back first:**
+  - The four builders 15:57 to 15:58, 01 15:58, 02 16:10 to 16:12, all after E14's commit (14:28).
+  - Every summary has no median of 0 and no 2.5 % below zero.
+  - The suite showed 2 failures: type 1's table tests, written before E14 and not updated with it. Both are now
+    corrected to E14's state (the Booster T2, the Bumi and the E1 from torques; the E1's mass its maker's).
+- **Tests first** (each failed before its code):
+  - `TestTypesFiveAndSix`: 10 tests on the files, the T800's motors and battery, the DR02's model joints, the Alex's
+    arms, the MH3 and Fuxi, the Atlas's hands and Thor, E15's three robots, the template names, a robot without a
+    battery in 01's table, and the makers' masses.
+  - The register's sheets Type 5 and Type 6.
+  - The recipe families.
+  - The counts of type 3: 94 robots, 99 with versions; its templates 75 and 70 of 99.
+- **Sandbox** in Claude's scratch folder (`sandbox_e16/`): the register, the six builders, 01 and 02 at 2,000 draws,
+  every output patched to scratch.
+  - First run: 01 stopped in type 5's table on a template name of type 2's. Fixed by `TEMPLATE_OF_TYPE` 5 and 6 and
+    its test.
+  - Second run: 02 found no recipes of types 5 and 6. Fixed by `RECIPE_FAMILY` with type 5's magnesium type 3's,
+    and its test.
+  - Third and fourth runs: 01 "No fault found", 02 done. Type 5 drawn over 9 robots, type 6 over 4. Their summaries
+    hold no median of 0 and no 2.5 % below zero.
+  - The pages looked at: the robot tables of types 5 and 6. After the fourth run they show the Phantom MK1 "no battery"
+    with an empty battery cell (the third gave it a template's 1,174 Wh: fixed in 01, `has_battery`), and the Alex's mass
+    from the maker (its sources' kind fixed to "Manufacturer's").
+- **Against his files** (`compare.py`): types 1, 2 and 4's parts files row for row the same as his of 15:57. Type 3's
+  changes only the six robots of the entry: the Atlas, the DR02 (27.4 kg of joints, 40 %), the DR02 Pro (35.5 kg,
+  45 %), the Kaleido 9, the Moby and the Phantom MK1 (22.2 kg, 28 %).
+- **The whole suite:** 455 tests. On the last code only the register-equals-the-file-on-disk test fails, until his run
+  of the register.
+- **Not covered:**
+  - His runs at 200,000 draws.
+  - Type 1's F, Na, Ca and Br in the head have a 2.5 % bound of about −2e-07 kg at 2,000 draws. They had it before
+    this entry too (E14's sandbox); his 200,000-draw summary has none.
+  - The hydraulic robots and E15's other 112 robots, not entered.
+
+### V135. Types 5 and 6's research read again first-hand (E16)
+
+- **His words:** "do now all the rest for type 5 and 6 research all data use the internet as much as possible and read
+  also .pdf".
+- **What:** every figure E16 uses for the 16 robots of types 5 and 6, against its source; three reading agents found
+  them, the maker first.
+- **How:**
+  - Eight PDFs downloaded (`downloads_e16/`) and read by PDFKit: IHMC's arXiv 2411.03532 (Nadia's hardware), 2409.04639
+    (Nadia's arm actuators, Fig. 4) and 2609.01518 (Alex); Barasuol et al. 2018 (the ISA, Table 2); Cyborg's product
+    manual 2026, its brochure and its two brand manuals.
+  - Moog's two ISA datasheet addresses return Moog's 404 page.
+  - Four model files added up by script (`urdf_e15_sum.py`):
+    - DR02-std.urdf: 67.575 kg, 21 joints.
+    - DR02-pro.urdf: 78.085 kg, 31 joints.
+    - serial_t800.urdf: 84.988 kg, 25 joints.
+    - serial_t800pro.urdf: 85.227 kg, 43 joints.
+    - Their effort limits listed.
+  - EngineAI's six T800 developer documents (battery, specification, motors, computers, sensors, hand) and the other
+    makers' pages, blogs and releases (IHMC, PSYONIC, SAKE, Boston Dynamics, Noble Machines, Kawasaki, Mirsee, RoboForce,
+    NeodraDynamics), each fetched into the scratch folder and read as text. The outlets: IEEE Spectrum, the IEEE Robots
+    Guide, Fluid Power World, Global Times via 163.com, Interesting Engineering, aiwiki, The Business Standard, Pulse
+    2.0, Mynavi, PC Watch, The Financial News and Battery-Tech Network.
+  - The quotes are in the scratch file `batch3/types56_firsthand.md`.
+- **Result:** the agents' figures agree with their sources. Corrections, each now in E15 or E16:
+  - Moby's mass is its maker's 72 kg, not the catalogue's 45; E15's row is changed.
+  - The Phantom MK1 has no battery; E15's row is changed.
+  - The CYBORG RO1's torque is 400 N·m in its 2026 manual (">400" on its site), and its computing is "8 核 200TOPS".
+  - The T800's battery is NMC (its developer documents), not the product page's "solid-state".
+  - Kaleido's magnesium skeleton is its maker's, not only the catalogue's.
+- **Not covered:**
+  - The figures are research. Nothing is entered or run on his data.
+  - The Moog ISA's own datasheet (404); Nadia's ISAs are sized from the IIT paper's two versions.
+  - The hydraulic robots' power units: no source states their masses.
+  - The Cyborg WO1's battery capacity.
+  - The electric Atlas's joint torques and battery capacity, which no source gives.
+  - Downloads not read: the MIT DRC Atlas paper (Kuindersma 2014, too large for the reading agent), the H1 user manual
+    (H1 entered by its model), DEEP Robotics' offline document ZIP.
+  - The modes are Claude's arithmetic.
+
+### V134. Batch 3's research read again first-hand (E15)
+
+- **His words:** "move forward to get all the data. Search in the internet. Use all information avaibalbe read .pdf",
+  "download what ever is possibel", "continue research", "I want 1 to 4 finally done".
+- **What:** every maker figure the five reading agents relied on for batch 3's 123 robots (and the seven new robots of
+  types 5 and 6), against the source itself.
+- **How:**
+  - 68 makers' pages and releases fetched into Claude's scratch folder (`pages_e15/`) and read as text by a parser
+    (`tools_e15/htmltext.py`), or in the browser pane where a site needs its scripts (Galbot, Noetix, UBTECH, Persona,
+    MenteeBot, KinetixAI, Pink, PsiBot).
+  - Figures held in images: UBTECH's Walker C1, S1 and S2, PaXini's Tora DoubleOne, Digit's XiaQi, ROBOTERA's Q5
+    brochure, each read by Vision OCR (`tools_e12/ocr.swift`).
+  - Five PDFs downloaded (`downloads_e15/`) and read by PDFKit: RNoid's spec sheet (rev. 003), ROBOTERA's Q5 brochure,
+    and Oversonic's RoBee R, M and F brochures.
+  - Nine model files added up by script (`urdf_e15_sum.py`: the link masses, the joints, their effort limits):
+    - GENE.01: 79.668 kg; 73 joints, every effort 1e+09.
+    - GR-3: 69.692 kg; 31 joints, the efforts its page's table.
+    - NIX ×4: 23.320, 23.136, 23.136 and 24.642 kg.
+    - Star1: 64.001 kg; 55 joints.
+    - T800: 84.988 and 85.227 kg.
+  - The form of five robots from their makers' photos: P0, Persona's robot, MenteeBot V3 and XiaQi on legs, Psi V1 on
+    wheels.
+- **Result:** the agents' figures agree with their sources, with these exceptions:
+  - The W1 Pro's LiFePO4 option is the W1 Core's.
+  - MenteeBot's page is the V3's (its image's name).
+  - The Walker C1 carries a Jetson Thor, which the agent missed.
+  - Matrix-1's "Actuator: 55" and O-ID's "Specs indicative" are not in the pages' text.
+  - The UBTECH Walker C1's address "WalkerC1" gives "can't be found"; its page is `walker-c1`.
+  - Each figure is recorded with its quote in the scratch file `batch3/firsthand.md`.
+- **Not covered:**
+  - The internet's figures (news, databases) are as the agents read them. I reread only humanoid.guide's GoMate (45 kg)
+    and the pages of the robots of no stated form.
+  - Hobbs W1's mass and battery are aiwiki's citing Noetix: Noetix's specification table is not shown in the browser
+    pane, even at 1440 px.
+  - JS-only maker sites not read: jaka.com, lejurobot.com, keenon.com, gigaai.cc, zeroth0.com, galaxea-dynamics.com,
+    sharpa.com, switch-bot.com, kawasakirobotics.com.
+  - The modes in E15 are Claude's arithmetic (`batch3/batch3_plan.py`), not a run.
+  - Nothing was entered or run on his data.
+
 ### V133. The Booster T2 by type 2's fit
 
 - **His words:** "Yes, agree" (E14 as built, the Booster T2's joints by type 2's fit).

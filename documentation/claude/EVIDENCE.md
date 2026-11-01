@@ -8,6 +8,331 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E16. Robot types 5 and 6: research and proposal (2026-11-01). Nothing entered
+
+Matthias, 2026-11-01: "do now all the rest for type 5 and 6 research all data use the internet as much as possible and
+read also .pdf". Type 5 is "Heavy-Duty / High-Performance / Hazardous-Environment", type 6 "Defense / Public Safety" (the
+workbook's); the register holds 16 robots of them. Three reading agents read them, the maker first, then the internet.
+Every figure used here was read again by me first-hand (V135):
+- eight PDFs downloaded: IHMC's two papers on Nadia, its paper on Alex, the IIT and Moog paper on the hydraulic ISA,
+  Cyborg's product manual, brochure and brand manuals;
+- EngineAI's six developer documents of the T800;
+- four model files added up by script (DR02 and DR02 Pro, T800 and T800 PRO);
+- the makers' pages, blogs and releases, and the outlets named.
+
+Numbers at the modes are Claude's arithmetic.
+
+### E16.1 The 16 robots: where they stand, what the research adds
+
+| # Robot (types) | Where it stands | What the research adds (S the maker's, C the internet's) |
+|---|---|---|
+| 24 Alex, IHMC (6) | not entered | S: "179 cm", "85 kg", 29 joints, "2+ hrs", "PSYONIC Ability Hands … 6 degrees of freedom each" (PSYONIC: "490 grams"), a ZED X Mini; "These designs are an iteration of the actuators made for Nadia's arms" |
+| 43 Atlas, Boston Dynamics (5, 3) | type 3's file, both templates | S: "NVIDIA Jetson Thor"; hands "13 degrees of freedom (DOF), directly actuated" (the GR3); "four hour battery life", two batteries; C: "Each Atlas unit contains 31 body actuators" (LS Securities), "46-series ternary cells" (industry sources). No torque, no battery capacity |
+| 44 Atlas (old), hydraulic (5) | not entered | S: "180 lbs" (2016), "190-pound" (later); C (BD's Aaron Saunders in Fluid Power World): "about 1.5 meters tall and weighs 80 kg", 28 DoF, 30 to 60 min, a printed hydraulic power unit "approaching a Kilowatt per kg", 18 valves for the upper body, the legs' "actuator cylinders all into one structure"; three computers, LiDAR, stereo, a time-of-flight camera; no battery capacity (the 2015 DRC Atlas, a different robot of 156.5 kg: 3.7 kWh) |
+| 71 CYBORG RO1 SE and PRO (3, 5) | type 3's file, from 400 N·m | S (its 2026 manual): "最大关节扭矩 400N.m", 75 / 80 kg, 62 DoF, 48 V × 15 / 30 Ah and a 48 V × 3.5 Ah backup, "8 核 200TOPS", a "10000N" linear module, the H02 hand "750g": all as entered |
+| 72 CYBORG WO1 (3, 5) | type 3's file, from 562 N·m | S: "170kg", 53 DoF (chassis 3, waist 2, arm 7, hand 16), "562 N.m" (no joint named; entered at the waist, E12.5's rule), "5h", no battery capacity: as entered |
+| 81 DEEP Robotics DR02 and Pro (5, 3) | type 3's file, joint template, battery stated | **S: its maker's model files: DR02-std.urdf 67.575 kg, 21 joints; DR02-pro.urdf 78.085 kg, 31 joints; efforts 363 (hips y and x, knees, waist y), 137, 50 N·m** |
+| 152 Kaleido 9, Kawasaki (3, 5) | E15 | S: "maintaining torque", LiDAR, the Kaleido Station (wheels, charging); its skeleton "マグネシウム合金" (a magnesium alloy; Kawasaki on its 2019 Kaleido), its exterior 3D-printed resin; C: 30 min on the robot alone (Mynavi) |
+| 191 MH3, Mirsee (5) | not entered | S: 31 DoF, "10 Hour Runtime", wireless charging; C: "Weight (with battery) 125 kg" (aiwiki, citing Mirsee's site and Aparobot; the catalogue the same), mecanum wheels, NVIDIA Jetson, a stereo camera, 6-DoF hands, aluminium 6061 |
+| 195 Moby, Noble Machines (3, 5) | E15 | **S: "Moby's 72 Kg body"** (its maker's blog, 2025; E15 had the catalogue's 45), 200 W on average, 5 to 6 h, legs; C: Jetson Thor (NVIDIA's case study), Schaeffler actuators |
+| 202 Nadia, IHMC (6) | not entered | S: 6-DoF legs, a 3-DoF spine, 7-DoF arms, 1-DoF grippers; ankle, knee, hip pitch and roll, spine pitch and roll on Moog ISAs (hydraulic), hip and spine yaw electric, arms cycloidal (peak 158, 158, 79, 79, 19, 19, 19 N·m); "tethered to a hydraulic pump"; SAKE EZGrippers ("365g + 35g (mount)"); a carbon-fibre exoskeleton; a ZED 2i, an IMU; "about 100 kilograms" |
+| 208 Neo1, NeodraDynamics (5, 3) | E15 question 5 | S: "4-Meter & 1.2-Ton", "41 full-body active degrees of freedom", 39 "miniature digital hydraulic linear actuators" of "1kg" (its September release: "1.1 kg"), "two forearm rotational joints adopting electric drive"; no power unit stated |
+| 228 Phantom MK1, Foundation (6, 3) | E15 | **C: "Phantom MK-1 … lacks a battery"** (the BBC via UNB; E15 had the template's); C: AMD Kria and Ryzen AI X100 for its production robots, hands of 23 DoF |
+| 288 T800, EngineAI (5, 6) | not entered | S (its developer documents): Dev "约84.5kg", 25 DoF; PRO "约85.3kg", 43 DoF (hands 7 + 7); every motor with its mass (Q25H 0.5, Q50H 0.95, Q200H 1.65, Q300H 2.1, Q300H-L 2.6 kg), matched to the joints by its model files' efforts (52, 160, 222, 370, 415 N·m); NMC "61.2V", "20Ah", "1.22kWh", its pack "≈7.2KG" in aluminium; Nezha (Intel N97) and AGX Orin 64GB; a binocular camera, a LiDAR, an IMU, 4 microphones, 2 speakers; the PRO's hands "740g" |
+| 301 TITAN, RoboForce (3, 5) | the register: no mass | no mass in its page, releases or press; only originofbots' unsourced 120 kg |
+| 351 Fuxi, NORINCO (6) | not entered | C (Global Times' reporter at NORINCO's institute): "180厘米", "85公斤", "6自由度灵巧手"; its form not stated |
+| 352 Unitree H1 (2, 5) | type 2's file, its model | S: knee 360, hip 220 N·m on its page (its model file 300 and 200, entered), "15Ah(0.864KWh)": as entered |
+
+### E16.2 Proposal: the electric robots (E12.5's method, E15's questions as recommended)
+
+| # Robot (file) | Mass (kg) | Form | Joints | Hands | Battery (Wh) | Boards | Sensors, base |
+|---|---|---|---|---|---|---|---|
+| 24 Alex (type 6's file) | 84 / 85 / 86 (S) | legs | **its arms as Nadia's cycloidal arms** (158, 158, 79, 79, 19, 19, 19 N·m, E6.8's fit; 10.3 kg, E: "an iteration"), the rest the template | 2 × 0.49 kg (S) | template | one (E) | stereo 1 (ZED X Mini), IMU (E) |
+| 288 T800 Dev (type 5's) | 83.5 / 84.5 / 85.5 (S) | legs | **every joint its stated motor ± 5 % (S; 33.0 kg, 39 %)** | — | 1,220 (S, NMC), its pack 7.2 kg (S), aluminium housing (S) | Nezha (N97) CPU board, AGX Orin | binocular 1, LiDAR 1, IMU 1, microphones 4, speakers 2 |
+| 288 T800 PRO (type 5's) | 84.3 / 85.3 / 86.3 (S) | legs | the same, its four wrist joints (5 N·m, its "L05" linear joints) by E6.8's fit (0.7 kg, E) | 2 × 0.74 kg (S) | the same | the same | the same |
+| 191 MH3 (type 5's) | 124 / 125 / 126 (C) | wheels | template (17.4 kg) | 2 × 6 (C) | template | AGX Orin (E: "NVIDIA Jetson") | stereo 1; 4 driven (mecanum, C) |
+| 351 Fuxi (type 6's) | 84 / 85 / 86 (C) | legs / wheels, two versions (E15 question 2) | template | 2 × 6 (C) | template | one (E) | IMU (E) |
+| 81 DR02 (type 3's, entered) | as entered (67 / 68 / 69) | as entered | **every joint from its model file (S; 27.4 kg, 40 %, in place of the template's 30.4)** | as entered | as entered | as entered | as entered |
+| 81 DR02 Pro (type 3's, entered) | as entered (77 / 78 / 79) | as entered | **every joint from its model file (S; 35.5 kg, 45 %, in place of 34.9)** | as entered | as entered | as entered | as entered |
+| 43 Atlas (type 3's, entered) | as entered | as entered | as entered (template) | **2 × 13 (S, the GR3), in place of 2 × 6** | template (cells NMC, C: "46-series ternary") | **Jetson Thor (S)** | as entered |
+| 301 TITAN | listed only (no stated mass) | | | | | | |
+
+Corrections to E15's proposal (its rows changed in E15.3): **Moby** 71 / 72 / 73 kg (S) in place of the catalogue's 45;
+**Phantom MK1** no battery (C) in place of the template's. E15 question 6's magnesium for Kaleido 9 is now its maker's.
+
+### E16.3 The hydraulic robots: Atlas (old), Nadia, Neo1
+
+The model has no hydraulic part: its joints are electric motors (copper, NdFeB, steel, aluminium), and its templates are
+electric robots'. What the research gives for these three:
+
+| | Atlas (old) | Nadia | Neo1 |
+|---|---|---|---|
+| Mass | 80 (BD's VP 2018), 81.6 (BD 2016), 86.2 (BD blog) | "about 100" (IHMC) | 1,200 ("1.2-Ton", the maker) |
+| Hydraulic actuators | 28 joints, the cylinders printed into the legs' structure (titanium and aluminium), no masses | 12 Moog ISAs: a titanium body with its valve; the ISA v2 920 g at 4,000 N, the v5 1,600 g at 7,500 N (Barasuol et al. 2018) | 39 cylinders of 1 to 1.1 kg (the maker) |
+| Electric joints | none | hip and spine yaw 3 (planetary, no torque); arms 14 (S table) | 2 (forearms, no torque) |
+| Power | a printed power unit in the torso and a battery; no masses, no capacity | none on board (tethered) | not stated |
+| Oil, hoses | 3,000 psi hoses, a reservoir | none stated | none stated |
+
+### E16.4 Types 5 and 6 on the templates (E13 rule 2), if E16.2 is entered and the hydraulic ones wait
+
+| Type | Robots and versions | Joint template | Battery template |
+|---|---|---|---|
+| 5 | 12 (Atlas, CYBORG RO1 SE and PRO, WO1, DR02 and Pro, Kaleido 9, MH3, Moby, T800 Dev and PRO, H1) | 4 (33 %) | 5 (42 %) |
+| 6 | 6 (Alex, Phantom MK1, T800 Dev and PRO, Fuxi on legs and on wheels) | 3 (50 %) | 3 (50 %; the Phantom has none) |
+
+Both are at half or below. With the two DR02 off the template, type 3's joint template after E15 falls from 139 to 137
+of 172.
+
+### E16.5 Questions, each with my recommendation
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | Alex's joints | its arms as Nadia's arm actuators (IHMC: "an iteration of the actuators made for Nadia's arms", E), its legs, spine and neck on the template (no torque stated) |
+| 2 | The T800's two versions | Dev and PRO each as often, each with its own stated mass; every joint by EngineAI's stated motor masses (as the PNDbotics Adam's actuators, E11.6) |
+| 3 | The DR02's joints, entered on the template | from its maker's model files, as E14's robots (both versions) |
+| 4 | The hydraulic Atlas (old), Nadia and Neo1 | listed in types 5 and 6, not taken apart yet. A research step of their own, named for your word: the hydraulic actuator's materials (the ISA's titanium body, valve, rod, seals), a hydraulic power unit's mass and parts from sources of the same kind (IIT's HyQ, Boston Dynamics' statements), the oil. Then proposed |
+| 5 | Types 5 and 6 in the model | the register's sheets Type 5 and Type 6; each robot drawn from its one block, wherever it stands (a type 3 robot of type 5 too, as the CYBORG RO1 is drawn in type 3 today); the steps of E12.6's spec, for your word |
+| 6 | TITAN | listed only (the register: "Not specified") |
+
+Nothing is entered: the entry is a step of its own, for his yes.
+
+**Agreed** (Matthias, 2026-11-01: "Yes, agree both", E15 and E16): E16.2's proposal and questions 1 to 6 as recommended.
+Nothing entered: the spec of the entry next (E16.6), for his word.
+
+### E16.6 Built: the entry of types 5 and 6 (2026-11-01). Nothing committed
+
+Matthias, 2026-11-01, while the spec was being prepared: "move move. Find all the data for 5 and 6 and then fill in the
+data in the respective sheets. So I can then have all dat for the run of 01 and 02. Move Move". Built as E16.2 and
+E16.5 were agreed (checks: VERIFICATION.md V136):
+
+| # | What | Where |
+|---|---|---|
+| 1 | The register's sheets Type 5 and Type 6: type 5's 12 robots (9 drawn, TITAN without a mass, the Atlas (old) and Neo1 not yet taken apart), type 6's 5 (4 drawn, Nadia not yet) | `tools/make_humanoid_register.py`: `TYPES_LISTED`, `TAKEN_APART[5]` and `[6]` |
+| 2 | Type 5's file: the MH3, the T800 Dev and PRO | `tools/5_heavy_duty_high_performance_hazardous_environment/make_parts_taken_apart.py` (new) |
+| 3 | Type 6's file: the Alex, the Fuxi on legs and on wheels | `tools/6_defense_public_safety/make_parts_taken_apart.py` (new) |
+| 4 | In type 3's file: the DR02 and Pro from their model files; the Atlas's 13-joint hands, its Jetson Thor and its cells' NMC; the Kaleido 9, the Moby and the Phantom MK1 (E15.3, E16.2: batch 3's robots of types 5 and 6), `TAKEN_APART[3]` | `tools/parts_types_3_and_4.py` |
+| 5 | A block without a battery (`battery=False`), for the Phantom MK1 | `tools/parts_taken_apart.py` |
+| 6 | Types 5 and 6's files take types 3 and 4's templates; a robot without a battery: "no battery" in 01's table, on no battery template | `01_schemas.py`: `TEMPLATE_OF_TYPE`, `has_battery()`, `template_shares()` |
+| 7 | Types 5 and 6's recipes of aluminium and plastics, type 3's and type 5's magnesium (**type 5's plastics its "Composites & polymers", type 6's its "Reinforced polymers", the first plastics of each in the workbook; type 5's magnesium type 3's AZ91D, E**) | `02_composition.py`: `RECIPE_FAMILY`, `recipe_key()` |
+| 8 | The pages of types 5 and 6 in 01 and 02 | `src/params_schema.py`: `output.robot_types_with_pages` (1 to 6) |
+| 9 | Tests first (each failing before its code): the two files' robots, the T800's motors and battery, the DR02's model joints, the Alex's arms, the MH3's and Fuxi's, the Atlas's hands and Thor, the Kaleido 9's, Moby's and Phantom's rows, the template names, the recipe families, the register's sheets; and type 1's two tests of 01's table brought to E14's state | `tests/` |
+
+**Not in:** the hydraulic Atlas (old), Nadia and Neo1 (E16.5 question 4); E15's other 112 robots of batch 3, whose entry
+is a step of its own.
+
+## E15. Robot types 3 and 4: research and proposal, batch 3 (2026-11-01). Nothing entered
+
+Matthias, 2026-11-01: "I want 1 to 4 finally done", "move forward to get all the data. Search in the internet. Use all
+information avaibalbe read .pdf", "download what ever is possibel", "continue research". Batch 3 is the 123 robots of
+types 3 and 4 not yet taken apart (the register's numbers 97 to 354). Five reading agents read the makers' pages first,
+then the internet; every maker figure they relied on was then read again by me, first-hand: 68 makers' pages and
+releases (text, or their images by OCR), five PDFs downloaded (RNoid's spec sheet, ROBOTERA's Q5 brochure, Oversonic's
+three RoBee brochures), seven model files added up by script (GENE.01, GR-3, NIX ×4, Star1), the forms of five robots from their
+makers' photos (V134). The method is batch 2's (E12.5, agreed) with E13 and E14; where batch 3 needs a choice they did
+not make, it is **bold** and a question in E15.6. Numbers at the modes are Claude's arithmetic (`batch3/batch3_plan.py`,
+rough for the small items); the run draws every one from its min / mode / max. **E13's shares get worse, not better**
+(E15.5): most makers publish no joint data.
+
+### E15.1 What the research found
+
+| | Robots |
+|---|---|
+| A mass from the maker (S) | 44 (Moby's found in E16; GENE.01's from its maker's model); against the register's: Galbot G1 92.5 (88), Galbot ET1 32 (65, and legs), ProWhite 400 (50, and legs: it is on four wheels), RNoid 90 (50), Pudu D9 65 (55), Robin 105 (80), MagicBot X1 70 (65), Martian 40 (50), Walker C1 55 (50), Walker S2 70 (73), Spaceo M1 45 (65), Spaceo Pro 60 (65), Nova 100 (90), NIX 25.41 (20), MenteeBot V3 70 (65), StarBot Nova 31.8 (32), Synthia 9.8–12 (30) (reported, never corrected: the register's mass column is the catalogue's; the drawn mass is the parts file's) |
+| A mass from the internet only (C) | 71 (news, a seller's listing, a wiki citing the maker, a database; RoBee's max its brochure's) |
+| No stated mass (listed only, E15.4) | 7 |
+| Hydraulic, with types 5 and 6 (question 5) | Neo1 |
+| Every joint's torque from the maker's model file | GR-3 (its table the same), Star1; NIX's model would put 69 % of its mass in its joints (the seven's 34 to 53 %): **not used, as the Dora's in E12.5**; GENE.01's every effort a placeholder (1e+09) |
+| One stated torque (S) | Laborer C1 150, Laborer M1 430, Lumen H1 512, MagicBot Gen1 and X1 350, MagicBot Z1 100, Martian 150, Phantom MK1 160 (and shoulder 119, wrist 20), Pudu D9 352, RAISE A1 350, Spaceo M1 15.7 (its arm), Spaceo Pro 90 (waist) and 66 (arm), Tora DoubleOne 207, Walker S1 250 |
+| One torque second-hand (C, question 1) | Kengo ">130" (IT之家), N2 150 (RBTX), Zerith Z1 150 (36Kr Japan, rbtx); not used: Mornine 512 (would be 54 %), KUAVO 5-W 500, NE01 180, X-Bot "~340" (a database's alone) |
+| A stated battery | 27 robots, 28 with the Tora DoubleOne's two versions (23 the maker's; the internet's for Hobbs W1, KAI, Mornine, Walker S2, Zeus 1) |
+| Corrected against the agents (V134) | the W1 Pro's battery "40 Ah" (no chemistry; the LiFePO4 is the W1 Core's option); MenteeBot's page is the V3's (its image "MenteeBot humanoid robot V3"); the Walker C1 carries a Jetson Thor (its image); O-ID's "Specs indicative" not found in its text |
+
+### E15.2 Proposal: the method (E12.5's points, batch 3's choices bold)
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | Mass | E12.5 point 1: the maker's ± 1 kg, else the internet's ± 1 kg or its range, sources that disagree their spread with the best-sourced the mode (E12.5 question 2): **Kengo 39 / 40 / 65 (its 1.4 m in two outlets fits the 40 kg), North 59 / 60 / 90 (a seller's "Net weight 60 kg"), Onero H1 35 / 68 / 69 (humanoid.press's "prototype spec"; the catalogue's "~35"), GENE.01 60 / 79.7 / 80.7 (its maker's model; the internet's "approximately 60")** |
+| 2 | Joints | E12.5 point 2 (a stated torque its largest joint's, the others by the seven's ratios, E6.8's fit) and E14 (a model file's every joint); **the joints per body part each maker's where it gives them, else as the nearest robot with every joint (E)**; the rest the templates |
+| 3 | Hands | E12.5 point 4: Fourier's six-joint hand per joint where the maker counts them; a stated hand's mass ± 5 % (Pudu D9's DH11 "500 g"; Friday's, Navigator 2's, PX5's the internet's); two grippers 0.5 kg (E) where the maker names grippers or end effectors only; none where no source names one |
+| 4 | Battery | E12.5 point 5: a stated energy, or voltage × capacity, its cells by their chemistry (**LFP for Gento Luna, Nova, Spaceo M1 and Pro: "LiFePO"**), else NMC (E); **a capacity without voltage on the template (G2 Max, Gino 1, Laborer C1 and M1, W1 Pro, MagicBot X1, Sherpa Mecha, as the E1's in E14)**; arithmetic voltages E: Hobbs W1 25.9 V (7 cells, "21V to 29.4V"), MagicBot Z1 55.5 V ("15-cell", "62V") |
+| 5 | Boards, sensors | E12.5 points 6 and 7: as the makers name them (computing figures to modules: 275 TOPS an AGX Orin, 100 to 157 TOPS an Orin NX, 2070 an AGX Thor, E); force, torque, touch, ultrasonic left out |
+| 6 | Wheels, lift | E12.5 point 8: two driven and two casters unless more is known; omnidirectional bases four driven (E), three where the base has three DoF (HSR-ER-HR705, Isaac 1, REX G1, Mirokaï's ball drive, Syntro's "3 All-directional Omni Wheels"); a lift column (19.9 %, E) where the maker names a lift, a lifting torso or a gantry |
+| 7 | Versions | E12.2 point 2, each as often: Pudu D7 2024 (45 kg) and 2026 (140 kg), Tora DoubleOne P and X, U1 Pro male and female; **the seven robots of no stated form two versions each (question 2)** |
+| 8 | Cables, shell, screws, frame | E11.6 points 9 and 10, the frame aluminium, the remainder (question 6) |
+| 9 | Not in | the seven of E15.4; Neo1 (question 5); every option (wrist cameras, LiDARs "optional", hands "optional") |
+
+At the modes the frames of 9 fall below a quarter of their mass (E12.5: none did): Figure 02 18 %, Matrix-1 15 %, Walker
+S2 18 % (their 2.25, 2.28 and 2.3 kWh), Star1 21 % (its model's joints, 52 %), KAI 24 %, RAISE A1 24 %, Tora DoubleOne P
+23 %, PrimeBOT T1 14 % (8.5 kg on two hub motors), Synthia 16 % (10.9 kg); none below zero at the modes.
+
+### E15.3 Robot by robot
+
+S stated by the maker, C by the internet, E estimated; the file is the robot's first type among 3 and 4; joints at the
+modes.
+
+| # Robot (file) | Mass (kg) | Form | Joints | Hands | Battery (Wh) | Boards | Base, lift |
+|---|---|---|---|---|---|---|---|
+| 97 Figure 02 (3) | 69 / 70 / 71 (C) | legs | template (31.3 kg) | 2 × 16 | 2,250 (S) | one (E) | — |
+| 99 FlashBot Arm (4) | 69 / 70 / 71 (C) | wheels | template (9.7 kg) | 2 × 6 | template | one (E) | 2 driven, 2 casters |
+| 100 Friday (3) | 114 / 115 / 116 (C) | wheels | template (16.0 kg) | 2 × 0.5 kg (C: 20 joints, 500 g) | template | AGX Orin (C, E: "Jetson Orin") | 2 driven, 2 casters |
+| 101 Futuring 2 (4) | 69 / 70 / 71 (C) | legs / wheels (Q2) | template (31.3 kg) | 2 grippers (E) | template | one (E) | — |
+| 106 G2 Max; the catalogue's 185 is the base G2's (AGG2m "重量 185 kg") (3) | 184 / 185 / 186 (C) | wheels | template (25.7 kg) | — | template | one (E) | 4 driven, steered |
+| 107 Galbot G1 (3) | 91.5 / 92.5 / 93.5 (S) | wheels | template (12.9 kg) | 2 grippers (E) | 1,440 (S) | AGX Orin | 4 driven |
+| 108 Galbot ET1 (3) | 31 / 32 / 33 (S) | legs | template (14.3 kg) | — | template | RK3588, RDK X5 | — |
+| 109 Galbot S1 (3) | 319 / 320 / 321 (S) | wheels | template (44.5 kg) | 2 grippers (E) | 2,880 (S) | AGX Orin | 4 driven, steered; lift |
+| 110 Gen 1 (Persona) (3) | 69 / 70 / 85 (C) | legs | template (31.3 kg) | 2 × 10 | template | one (E) | — |
+| 111 GENE.01 (3) | 60 / 79.7 / 80.7 (S model, C) | legs | template (35.6 kg) | 2 × 21 | template | one (E) | — |
+| 112 Gento Luna (3) | 89 / 90 / 91 (C) | wheels | template (12.5 kg) | 2 grippers (E) | 1,651 (S, LFP) | AGX Orin | 4 driven |
+| 113 Gino 1 (3) | 62 / 63 / 64 (C) | wheels | template (8.8 kg) | 2 × 7 | template | Jetson Thor (C) | 4 driven |
+| 114 GoMate (3) | 44 / 45 / 46 (C) | wheels | template (6.3 kg) | 2 × 5 | template | one (E) | 4 driven |
+| 115 GoMate Mini (3) | 59 / 60 / 61 (C) | wheels | template (8.3 kg) | — | template | one (E) | 4 driven |
+| 118 GR-3 (4) | 70 / 71 / 72 (S) | legs | every joint from its model (S; 26.9 kg, 38 %) | 2 × 6 | 936 (S) | Ryzen 7 8845HS CPU board | — |
+| 125 HIVA Haiwa (4) | 69 / 70 / 71 (C) | wheels | template (9.7 kg) | 2 × 6 | template | one (E) | 2 driven, 2 casters |
+| 127 HMND 01 Alpha Bipedal (3) | 89 / 90 / 91 (S) | legs | template (40.2 kg) | 2 grippers (E) | template | AGX Orin, Intel i9 CPU board | — |
+| 129 Hobbs W1 (4) | 74 / 75 / 76 (C) | wheels | template (10.4 kg) | 2 × 6 | 829 (C, E) | RK3588, J1900 CPU board | 2 driven, 2 casters |
+| 130 HONOR (4) | 79 / 80 / 81 (C) | legs | template (35.8 kg) | — | template | one (E) | — |
+| 131 HONOR A1 (4) | 39 / 40 / 41 (C) | legs | template (17.9 kg) | — | template | one (E) | — |
+| 133 HSR-ER-HR705 (3) | 199 / 200 / 201 (S) | wheels | template (27.8 kg) | 2 grippers (E) | template | one (E) | 3 driven |
+| 136 IRON (2024) (4) | 69 / 70 / 71 (C) | legs | template (31.3 kg) | 2 × 15 | template | Turing chip as one board (E) | — |
+| 137 IRON (2025) (3) | 69 / 70 / 90 (C) | legs | template (31.3 kg) | 2 × 22 | template | 3 Turing chips as 3 boards (E) | — |
+| 139 Isaac 1 (4) | 39 / 40 / 45 (C) | wheels | template (5.6 kg) | 2 grippers (E) | template | one (E) | 3 driven; lift |
+| 141 Jaka K1 (3) | 39 / 40 / 41 (C) | legs | template (17.9 kg) | — | template | one (E) | — |
+| 142 JAKA Kargo (3) | 179 / 180 / 200 (C) | wheels | template (25.0 kg) | — | template | Intel i5 CPU board (C) | 2 driven, 2 casters; lift |
+| 145 Jingchu Elf (4) | 69 / 70 / 80 (S) | wheels | template (9.7 kg) | — | template | Orin NX (E: its 1024-core Ampere GPU) | 2 driven, 2 casters |
+| 146 Jupiter (3) | 57 / 58 / 60 (C) | legs | template (25.9 kg) | 2 × 10 | template | one (E) | — |
+| 150 KAI (4) | 69 / 70 / 71 (C) | legs / wheels (Q2) | template (31.3 kg) | 2 × 0.75 kg (E: the KaiHand's 750 g) | 1,700 (C) | one (E) | — |
+| 152 Kaleido 9 (3) | 98 / 99 / 100 (C) | legs | template (44.3 kg) | — | template | one (E) | — |
+| 154 KAPEX (3) | 60 / 65 / 70 (C) | legs | template (29.1 kg) | — | template | one (E) | — |
+| 155 Keenon XMAN-R1 (4) | 109 / 110 / 111 (C) | wheels | template (15.3 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 156 Kengo (3) | 39 / 40 / 65 (C) | legs | from 130 N·m at its knee (C; 16.1 kg, 40 %) | 2 × 12 | template | one (E) | — |
+| 160 Kinisi KR1 (3) | 99 / 100 / 101 (C) | wheels | template (13.9 kg) | 2 grippers (E) | template | AGX Orin (C, E) | 4 driven |
+| 161 Knowin-X1 (4) | 49 / 50 / 51 (C) | wheels | template (7.0 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 162 KUAVO 5-W (4) | 155 / 156 / 157 (C) | wheels | template (21.7 kg) | 2 × 6 | template | one (E) | 4 driven |
+| 164 Kuavo-my (4) | 44 / 45 / 46 (C) | legs | template (20.1 kg) | — | template | one (E) | — |
+| 165 L1 (Moon Dynamics) (3) | 59 / 60 / 61 (C) | wheels | template (8.3 kg) | 2 grippers (E) | template | one (E) | 2 driven |
+| 166 Laborer C1 (4) | 37 / 38 / 39 (S) | legs | from 150 N·m at its knee (S; 15.2 kg, 40 %) | — | template | Orin NX | — |
+| 167 Laborer M1 (3) | 85 / 86 / 87 (S) | legs | from 430 N·m at its knee (S; 30.0 kg, 35 %) | — | template | one (E) | — |
+| 173 Lumen H1 (4) | 68 / 69 / 70 (S) | legs | from 512 N·m at its knee (S; 33.7 kg, 49 %) | 2 × 6 | 700 (S) | one (E) | — |
+| 174 Lumen S1 (4) | 34 / 35 / 36 (C) | legs / wheels (Q2) | template (15.6 kg) | — | template | Orin NX (C) | — |
+| 178 MagicBot (Gen1) (4) | 54 / 70 / 71 (S, C) | legs | from 350 N·m at its knee (S; 29.3 kg, 42 %) | 2 × 6 | 1,350 (S) | CPU board, Orin NX (E: its 100 TOPS) | — |
+| 181 MagicBot X1 (3) | 69 / 70 / 71 (S) | legs | from 350 N·m at its knee (S; 30.4 kg, 43 %) | — | template | CPU board, Orin NX | — |
+| 182 MagicBot Z1 (4) | 39 / 40 / 41 (S) | legs | from 100 N·m at its knee (S; 12.8 kg, 32 %) | — | 555 (S, E) | CPU board | — |
+| 183 Maker H01 (4) | 63 / 64 / 65 (C) | wheels | template (8.9 kg) | 2 × 7 | template | one (E) | 2 driven, 2 casters |
+| 185 Martian (4) | 39 / 40 / 41 (S) | legs | from 150 N·m at its knee (S; 18.8 kg, 47 %) | 2 × 11 | 432 (S) | Orin NX (E: its 40 TOPS, 32 GB) | — |
+| 186 Matrix-1 (3) | 66 / 67 / 68 (S) | legs | template (29.9 kg) | 2 × 22 | 2,280 (S) | one (E) | — |
+| 188 MEMO (4) | 76.1 / 77.1 / 78.1 (S) | wheels | template (10.7 kg) | 2 × 4 | template | one (E) | 2 driven, 2 casters; lift |
+| 189 MenteeBot (2024) (3) | 69 / 70 / 71 (C) | legs | template (31.3 kg) | — | template | one (E) | — |
+| 190 MenteeBot V3 (3) | 65 / 70 / 71 (S, C) | legs | template (31.3 kg) | — | template | 2 AGX Orin (C) | — |
+| 194 Mirokaï (4) | 26 / 29 / 30 (C) | wheels | template (4.0 kg) | 2 × 2 | template | 2 Orin NX (C, E: "Jetson NX") | 3 driven |
+| 195 Moby (3) | 71 / 72 / 73 (S: its maker's blog, "Moby's 72 Kg body"; corrected in E16, was the catalogue's 45) | legs | template (32.2 kg) | 2 grippers (E) | template | Jetson Thor (C) | — |
+| 197 Modular (O-ID) (3) | 69 / 70 / 71 (S) | wheels | template (9.7 kg) | 2 grippers (E) | template | one (E) | 4 driven |
+| 198 Mornine (4) | 65 / 70 / 71 (C) | legs | template (31.3 kg) | 2 × 12 | 700 (C) | one (E) | — |
+| 201 N2 (4) | 29 / 30 / 31 (C) | legs | from 150 N·m at its knee (C; 13.5 kg, 45 %) | — | template | RK3588, Orin NX (C) | — |
+| 204 Navigator 2 (3) | 59 / 60 / 61 (C) | legs | template (26.8 kg) | 2 × 0.6 kg (C: "单手重量 600g") | template | AGX Orin (E: its 275 TOPS) | — |
+| 205 NE01 (4) | 39 / 40 / 41 (C) | legs | template (17.9 kg) | — | template | one (E) | — |
+| 206 NEO Beta (4) | 29 / 30 / 31 (C) | legs | template (13.4 kg) | — | template | one (E) | — |
+| 207 NEO Gamma (4) | 34 / 35 / 36 (C) | legs | template (15.6 kg) | — | template | one (E) | — |
+| 209 NEXO (3) | 78 / 85 / 86 (C) | wheels | template (11.8 kg) | — | template | AGX Orin (C) | 4 driven |
+| 211 NIX (4) | 18 / 25.41 / 26.41 (S) | legs | template (11.4 kg) | — | 282 (S) | RK3588 | — |
+| 213 North (3) | 59 / 60 / 90 (C) | wheels | template (8.3 kg) | 2 × 22 | template | Jetson Thor (C) | 2 driven, 2 casters |
+| 215 Nova (ugo) (3) | 99 / 100 / 101 (S) | wheels | template (13.9 kg) | 2 grippers (E) | 1,113 (S, LFP) | Jetson Thor | 4 driven |
+| 217 Onero H1 (4) | 35 / 68 / 69 (C) | wheels | template (9.5 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 226 P0 (3) | 81 / 82 / 83 (S) | legs | template (36.7 kg) | 2 grippers (E) | template | one (E) | — |
+| 228 Phantom MK1 (3) | 79 / 80 / 81 (S) | legs | from 160 N·m at its knee (S; 18.9 kg, 24 %); shoulder 119 and wrist 20 as stated | — | none (C: "lacks a battery", the BBC via UNB; corrected in E16, was the template's) | one (E) | — |
+| 237 PrimeBOT T1 (4) | 8 / 8.5 / 9 (C) | wheels | template (1.2 kg) | — | template | one (E) | 2 driven |
+| 238 ProWhite (4) | 399 / 400 / 401 (S) | wheels | template (55.6 kg) | 2 grippers (E) | 4,000 (S) | one (E) | 4 driven; lift |
+| 239 Psi V1 (3) | 149 / 150 / 151 (C) | wheels | template (20.9 kg) | — | template | Jetson Thor (S) | 2 driven, 2 casters |
+| 240 Pudu D7 (2024) (4) | 44 / 45 / 46 (S) | wheels | template (6.3 kg) | — | 1,000 (S (its least)) | one (E) | 4 driven |
+| 240 Pudu D7 (2026) (4) | 139 / 140 / 141 (S) | wheels | template (19.5 kg) | — | template | AGX Orin, RK3588 | 4 driven |
+| 241 Pudu D9 (3) | 64 / 65 / 66 (S) | legs | from 352 N·m at its knee (S; 29.4 kg, 45 %) | 2 × 0.5 kg (S: DH11 "500 g") | 720 (S) | AGX Orin (E: its 275 TOPS) | — |
+| 242 PX5 (3) | 108 / 109 / 110 (C) | legs | template (48.7 kg) | 2 × 0.43 kg (C: "430g") | template | one (E) | — |
+| 245 QUANTA X2 (3) | 94 / 95 / 96 (C) | wheels | template (13.2 kg) | 2 × 20 | template | one (E) | 2 driven, 2 casters |
+| 249 RAISE A1 (3) | 54 / 55 / 56 (S) | legs | from 350 N·m at its knee (S; 26.4 kg, 48 %) | 2 × 12 | template | AGX Orin (E: its 200 TOPS) | — |
+| 250 RayNex G3 (3) | 59 / 60 / 61 (S) | legs | template (26.8 kg) | 2 × 6 | template | one (E) | — |
+| 258 REX G1 (3) | 79 / 80 / 81 (C) | wheels | template (11.1 kg) | — | template | Jetson Thor (E: its 2070 TFLOPS) | 3 driven; lift |
+| 259 RNoid (4) | 89 / 90 / 91 (S) | wheels | template (12.5 kg) | 2 grippers (E) | template | Ryzen 5 CPU board, AGX Orin | 4 driven |
+| 261 Robbyant R1; its joint modules by Ti5, its chassis by Galaxea (Bloomberg via Oninvest) (4) | 109 / 110 / 111 (C) | wheels | template (15.3 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 262 RoBee (Series R) (3) | 179 / 180 / 293 (C, S) | wheels | template (25.0 kg) | 2 grippers (E) | template | one (E) | 4 driven; lift |
+| 263 Robin (3) | 104 / 105 / 106 (S) | wheels | template (14.6 kg) | 2 grippers (E) | template | one (E) | 4 driven; lift |
+| 264 ROBO-T1 (3) | 45 / 50 / 60 (C) | wheels | template (7.0 kg) | 2 grippers (E) | template | one (E) | 2 driven, 2 casters |
+| 267 ROBOTERA Q5 (4) | 69 / 70 / 71 (S) | wheels | template (9.7 kg) | 2 × 11 | template | one (E) | 2 driven, 4 casters |
+| 270 SA02 (4) | 24 / 25 / 26 (C) | legs / wheels (Q2) | template (11.2 kg) | — | template | one (E) | — |
+| 273 Sherpa Mecha (3) | 179 / 180 / 181 (C) | wheels | template (25.0 kg) | — | template | one (E) | 2 driven, 2 casters; lift |
+| 275 SkyWalker 2 (3) | 54 / 55 / 56 (C) | legs / wheels (Q2) | template (24.6 kg) | 2 × 6 | template | one (E) | — |
+| 277 Spaceo M1 (4) | 44 / 45 / 46 (S) | wheels | from 15.7 N·m at its shoulder (S; 2.7 kg, 6 %) | 2 grippers (E) | 1,152 (S, LFP) | Ryzen 7 CPU board, AGX Orin | 2 driven, 2 casters |
+| 278 Spaceo Pro (3) | 59 / 60 / 61 (S) | wheels | from 90 N·m at its waist (S; 4.7 kg, 8 %); shoulder 66 as stated | 2 grippers (E) | 1,152 (S, LFP) | Ryzen 7 CPU board, AGX Orin | 2 driven, 2 casters; lift |
+| 280 Star1 (3) | 62 / 63 / 64 (C) | legs | every joint from its model (S; 32.9 kg, 52 %) | 2 × 12 | template | one (E) | — |
+| 283 StarBot Nova (4) | 30.8 / 31.8 / 32.8 (S) | wheels | template (4.4 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 284 Steve (4) | 99 / 100 / 140 (C) | legs / wheels (Q2) | template (44.7 kg) | — | template | one (E) | — |
+| 286 Synthia (4) | 9.8 / 10.9 / 12 (S) | legs | template (4.9 kg) | — | template | BCM2712 board | — |
+| 287 Syntro (3) | 107 / 108 / 109 (S) | wheels | template (15.0 kg) | 2 × 12 | 1,200 (S) | Intel i5 CPU board | 3 driven |
+| 291 TARA GEN1 (4) | 74 / 75 / 76 (C) | wheels | template (10.4 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 293 Tau Humanoid; a modified Unitree G1 (MarketWatch via the catalogue) (4) | 34 / 35 / 36 (C) | legs | the Unitree G1's (type 1's), E | 2 grippers (E) | the G1's (type 1's), E | one (E) | — |
+| 305 Tora DoubleOne P (3) | 69 / 70 / 71 (C) | wheels | from 207 N·m at its waist (S; 11.4 kg, 16 %) | 2 × 18 | 1,214 (S) | AGX Orin | 4 driven, steered; lift |
+| 305 Tora DoubleOne X (3) | 72 / 73 / 74 (C) | wheels | from 207 N·m at its waist (S; 11.4 kg, 16 %) | 2 × 18 | 1,214 (S) | AGX Orin | 4 driven; lift |
+| 310 U1 Pro male (4) | 41 / 42 / 43 (C) | legs | template (18.8 kg) | — | template | one (E) | — |
+| 310 U1 Pro female (4) | 34.2 / 35.2 / 36.2 (C) | legs | template (15.7 kg) | — | template | one (E) | — |
+| 317 Voxel (4) | 44 / 45 / 46 (C) | legs | template (20.1 kg) | 2 grippers (E) | template | one (E) | — |
+| 319 W1 Pro (3) | 109 / 110 / 111 (S) | wheels | template (15.3 kg) | 2 × 6 | template | 2 boards (E: "Dual-PC") | 2 driven, 2 casters |
+| 320 Walden (3) | 89 / 90 / 91 (C) | wheels | template (12.5 kg) | 2 grippers (E) | template | one (E) | 2 driven, 2 casters |
+| 321 Walker C (4) | 42 / 43 / 44 (S) | legs | template (19.2 kg) | — | 720 (S) | one (E) | — |
+| 322 Walker C1 (4) | 54 / 55 / 56 (S) | legs | template (24.6 kg) | — | template | Jetson Thor (S) | — |
+| 324 Walker S1 (4) | 75 / 76 / 77 (S) | legs | from 250 N·m at its knee (S; 25.1 kg, 33 %) | 2 × 6 | template | one (E) | — |
+| 325 Walker S2 (3) | 69 / 70 / 71 (S) | legs | template (31.3 kg) | 2 × 11 | 2,300 (C) | one (E) | — |
+| 328 X-Bot (4) | 59 / 60 / 61 (C) | legs | template (26.8 kg) | — | template | Orin NX, Intel NUC CPU board (C) | — |
+| 330 Xiao Di (4) | 57.5 / 58.5 / 59.5 (C) | legs | template (26.1 kg) | — | template | one (E) | — |
+| 331 Xiao Liu (4) | 55 / 70 / 71 (C) | legs / wheels (Q2) | template (31.3 kg) | — | template | one (E) | — |
+| 333 XiaQi (4) | 68 / 69 / 69 (S) | legs | template (30.8 kg) | — | 700 (S) | one (E) | — |
+| 334 XTRON KUAVO-MY (4) | 50 / 55 / 56 (C) | legs | template (24.6 kg) | — | template | one (E) | — |
+| 339 YMBot C (4) | 74 / 75 / 76 (C) | legs | template (33.5 kg) | — | template | one (E) | — |
+| 344 YMBot H (4) | 74 / 75 / 76 (C) | wheels | template (10.4 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 346 Zerith H1 (4) | 54 / 55 / 56 (C) | wheels | template (7.6 kg) | — | template | one (E) | 2 driven, 2 casters |
+| 347 Zerith Z1 (4) | 32 / 33 / 34 (C) | legs | from 150 N·m at its knee (C; 15.2 kg, 46 %) | — | template | one (E) | — |
+| 348 Zeus 1 (3) | 299 / 300 / 301 (C) | wheels | template (41.7 kg) | — | 1,920 (C) | one (E) | 4 driven; lift |
+| 354 PR-OMNI (3) | 119 / 120 / 121 (S) | wheels | template (16.7 kg) | 2 grippers (E) | 3,000 (S) | AGX Orin, Intel NUC CPU board | 4 driven; lift |
+
+### E15.4 Listed only: no stated mass (the rule of 2026-11-01, "A stated mass": never a mass its source calls unknown, assumed, a target or a design)
+
+| # Robot | Why |
+|---|---|
+| 124 HELIOS | the maker discloses nothing (heise: "does not disclose further information"); the catalogue's "~60–80" a range of its own, no source |
+| 214 Northstar | its 40 kg a target ("目標是將機器人重量控制在約 40 公斤", TechOrange; Bloomberg on its plans); no robot weighed |
+| 282 StarBot Flex | its maker: "Availability and final specifications to be announced"; the catalogue's 50 kg not its |
+| 292 TARS | the catalogue's page links a rover team's site, its DoF "Assumed 30–40+"; no source of its own |
+| 304 Tobi | the catalogue itself: TwoLabs "has not yet published hardware specifications" |
+| 316 Vesoma 1 | its maker: "design visualisation. Under development." |
+| 345 Yogi | humanoid.press: height and weight "Not published"; the catalogue's 47 kg and aiwiki's 8 kg (76 cm) disagree six-fold, neither sourced |
+
+### E15.5 E13's shares after batch 3 (`batch3_plan.py`, robots and versions, a robot counted in each of its types)
+
+| Type | Now (E14 as built) | Batch 3 adds | Joint template after | Battery template after |
+|---|---|---|---|---|
+| 3 | 75 and 68 of 96 | 76, of them 64 and 56 on the templates (the Phantom MK1 has no battery, E16) | 139 of 172 (81 %) | 124 of 172 (72 %) |
+| 4 | 32 and 30 of 50 | 87, of them 71 and 69 | 103 of 137 (75 %) | 99 of 137 (72 %) |
+
+Both types move further above half (E13 rule 2): of batch 3's 115 robots, 19 have joint data (16 their makers', 3 a named
+outlet's) and the Tau Humanoid the G1's, 27 a stated battery; the rest publish none, here and in E14's search. E13 rule 4
+applies: nothing weighted or left out, each type's pages say how many rest on the templates.
+
+### E15.6 Questions, each with my recommendation
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | A torque or a battery from the internet | used (C) where a named outlet or a seller's listing states it (Kengo, N2, Zerith Z1; KAI, Mornine, Walker S2, Hobbs W1, Zeus 1); a database alone (humanoid.guide, chipsilicon, originofbots) only for a mass, as decided, not for a torque or a battery (KUAVO 5-W, NE01, X-Bot, N2's "7 Ah", XTRON); Mornine's 512 N·m not used (54 %, the Dora's rule) |
+| 2 | Seven robots whose form no source states (Futuring 2, its sources contradict; KAI, Lumen S1, SA02, SkyWalker 2, Steve; Xiao Liu, its sources contradict) | two versions each, on legs and on wheels, each as often (E: a discrete state drawn, never blended) |
+| 3 | The seven of E15.4 | listed only |
+| 4 | Which robot a register entry is, where its name fits more than one | MagicBot the maker's MagicBot Gen1 (the same 42 DoF; the catalogue's 54 kg its min); RoBee the Series R (industrial, type 3; the catalogue's 180 the mode, the brochure's "Up to 293 kg" the max); MenteeBot V3 the maker's page, the 2024 MenteeBot the catalogue's with the V3's form; IRON 136 the 2024 IRON, 137 the 2025 IRON (70 kg in both reports; the catalogue's 90 its max); the Pudu D7's 2024 and 2026 robots two versions; G2 Max the catalogue's 185 (the base G2's, the only mass of it) |
+| 5 | Neo1 (4 m, 1.2 t, 39 hydraulic cylinders, types 5 and 3) | with types 5 and 6 and their hydraulic Atlas and Nadia, one way for hydraulic robots; not in batch 3 |
+| 6 | Frame materials the makers name (MagicBot X1 "Titanium Alloy" and magnesium-aluminium; Syntro steel, brass, acetal, carbon fibre; Sherpa Mecha's carbon-fibre arms; Walker S2's composites and 3D-printed frame; Kaleido's magnesium-alloy skeleton, its maker's (E16); the catalogue's mild steel for TARA GEN1) | aluminium as for every robot so far (E), each named material written in its sources: no source gives their shares, and a split would be invented; a step of its own if you want them in |
+
+Nothing is entered: the entry is a step of its own, for his yes, then its spec (E12.6's way), tests first, a sandbox, his
+runs.
+
+**Agreed** (Matthias, 2026-11-01: "Yes, agree both", E15 and E16): E15.2's method and questions 1 to 6 as recommended,
+with E16's corrections (Moby 71 / 72 / 73 kg, the Phantom MK1 without a battery). Nothing entered: the spec of the entry
+next (E15.7), for his word.
+
+
 ## E14. E13 rule 3's research pass: the makers' own data for the robots on the templates (2026-11-01). Nothing entered
 
 Matthias, 2026-11-01: "Yes, start research" (E13 rule 3: before batch 3, a research pass over the robots entered on the

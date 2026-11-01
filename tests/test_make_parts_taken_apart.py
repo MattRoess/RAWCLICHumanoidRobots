@@ -1058,7 +1058,9 @@ class TestTypesThreeAndFour(unittest.TestCase):
         cls.four, _ = written(builder_four)
 
     def test_each_robot_in_the_file_of_its_first_type_among_3_and_4(self):
-        self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1) + list(TYPE_THREE_BATCH_2))
+        # Since types 5 and 6's entry (E16.6): batch 3's robots of types 5 and 6 whose first type among 3 and 4 is 3.
+        self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1) + list(TYPE_THREE_BATCH_2)
+                         + ['Kawasaki Kaleido 9', 'Noble Machines Moby', 'Foundation Phantom MK1'])
         self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1) + list(TYPE_FOUR_BATCH_2))
         self.assertEqual({r.type for r in self.three.robots.values()}, {3})
         self.assertEqual({r.type for r in self.four.robots.values()}, {4})
@@ -1377,3 +1379,152 @@ class TestE14Entry(unittest.TestCase):
         self.assertEqual(sum(1 for b in boards if b.startswith('Compute module, NVIDIA Jetson Orin NX')), 1)
         self.assertEqual(next(b.count for b in self.files[2].boards if b.robot == 'Westwood THEMIS'
                               and b.name.startswith('Compute module, NVIDIA Jetson Orin NX')), 2)
+
+
+# --- Types 5 and 6 (EVIDENCE.md E16.6; Matthias, 2026-11-01: "Yes, agree both", "Find all the data for 5 and 6 and
+# then fill in the data in the respective sheets") ---------------------------------------------------------------------
+builder_five = load('make_parts_taken_apart_5', os.path.join('tools', '5_heavy_duty_high_performance_hazardous_'
+                                                            'environment', 'make_parts_taken_apart.py'))
+builder_six = load('make_parts_taken_apart_6', os.path.join('tools', '6_defense_public_safety',
+                                                           'make_parts_taken_apart.py'))
+
+
+def stated(mode: float) -> tuple:
+    """A mass stated once, ± 5 %, to four decimals."""
+    return tuple(round(f * mode, 4) for f in (0.95, 1, 1.05))
+
+
+# EngineAI's T800 (its developer documents 05/05, 05/02; its model files' efforts): each joint its stated motor.
+T800_BODY = [('Hip pitch', 2, 415, stated(2.6)), ('Hip roll', 2, 370, stated(2.1)), ('Hip yaw', 2, 222, stated(1.65)),
+             ('Knee', 2, 415, stated(2.6)), ('Ankle pitch', 2, 160, stated(0.95)), ('Ankle roll', 2, 160, stated(0.95)),
+             ('Waist yaw', 1, 222, stated(1.65)), ('Shoulder pitch', 2, 160, stated(0.95)),
+             ('Shoulder roll', 2, 160, stated(0.95)), ('Shoulder yaw', 2, 160, stated(0.95)),
+             ('Elbow pitch', 2, 160, stated(0.95)), ('Elbow yaw', 2, 52, stated(0.5)), ('Head pitch', 1, 52, stated(0.5)),
+             ('Head yaw', 1, 52, stated(0.5))]
+T800_PRO_WRISTS = [('Wrist pitch', 2, 5, fitted(5)), ('Wrist roll', 2, 5, fitted(5))]
+# DEEP Robotics' model files (DR02-pro.urdf, DR02-std.urdf): every joint's effort, its module the fit.
+DR02_LEGS = [('Hip pitch', 2, 363), ('Hip roll', 2, 363), ('Hip yaw', 2, 137), ('Knee', 2, 363), ('Ankle pitch', 2, 137),
+             ('Ankle roll', 2, 50)]
+DR02_PRO_BODY = DR02_LEGS + [('Waist pitch', 1, 363), ('Waist yaw', 1, 137), ('Waist roll', 1, 137),
+                             ('Shoulder pitch', 2, 137), ('Shoulder roll', 2, 137), ('Shoulder yaw', 2, 137),
+                             ('Elbow', 2, 137), ('Wrist yaw', 2, 50), ('Wrist pitch', 2, 50), ('Wrist roll', 2, 50),
+                             ('Head yaw', 1, 50), ('Head pitch', 1, 50)]
+DR02_BODY = DR02_LEGS + [('Waist yaw', 1, 137), ('Shoulder pitch', 2, 137), ('Shoulder roll', 2, 137),
+                         ('Shoulder yaw', 2, 137), ('Elbow', 2, 137)]
+# Alex's arms as Nadia's cycloidal arm actuators (IHMC, arXiv 2409.04639 Fig. 4; E16.5 question 1), the fit.
+ALEX_ARMS = [('Shoulder pitch', 2, 158, fitted(158)), ('Shoulder roll', 2, 158, fitted(158)),
+             ('Shoulder yaw', 2, 79, fitted(79)), ('Elbow', 2, 79, fitted(79)), ('Wrist yaw', 2, 19, fitted(19)),
+             ('Wrist pitch', 2, 19, fitted(19)), ('Wrist roll', 2, 19, fitted(19))]
+
+
+class TestTypesFiveAndSix(unittest.TestCase):
+    """Types 5 and 6's entry (E16.6): their own robots in their own files, the DR02 from its model files, the Atlas with
+    its 13-DoF hands and its Jetson Thor, and the Kaleido 9, the Moby and the Phantom MK1 in type 3's file (E15)."""
+
+    NOT_BODY = ('Hand', 'Gripper', 'Wheel', 'Steering', 'Lift')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {3: written(builder_three)[0], 5: written(builder_five)[0], 6: written(builder_six)[0]}
+
+    def apart(self, robot: str):
+        return next(a for a in self.files.values() if robot in a.robots)
+
+    def joints(self, robot: str) -> list:
+        return [j for j in self.apart(robot).joints if j.robot == robot]
+
+    def body(self, robot: str) -> list:
+        return [j for j in self.joints(robot) if not j.name.startswith(self.NOT_BODY)]
+
+    def parts(self, robot: str) -> dict:
+        return {p.name: p for p in self.apart(robot).parts if p.robot == robot}
+
+    def mass(self, robot: str) -> tuple:
+        return self.apart(robot).constants[robot]['Robot mass, with battery'][1]
+
+    def test_each_file_holds_its_own_robots(self):
+        self.assertEqual(set(self.files[5].robots), {'EngineAI T800 Dev', 'EngineAI T800 PRO', 'Mirsee MH3'})
+        self.assertEqual(set(self.files[6].robots), {'IHMC Alex', 'NORINCO Fuxi on legs', 'NORINCO Fuxi on wheels'})
+        for name in ('Kawasaki Kaleido 9', 'Noble Machines Moby', 'Foundation Phantom MK1'):
+            self.assertIn(name, self.files[3].robots)
+        names = {n for t in (3, 5, 6) for n in REGISTER.TAKEN_APART[t].values() for n in schemas.versions(n)}
+        self.assertTrue(set(self.files[5].robots) | set(self.files[6].robots) <= names)
+
+    def test_the_t800_every_joint_its_stated_motor(self):
+        self.assertEqual([(j.name, j.count, j.torque, j.module_mass) for j in self.body('EngineAI T800 Dev')],
+                         T800_BODY)
+        self.assertEqual([(j.name, j.count, j.torque, j.module_mass) for j in self.body('EngineAI T800 PRO')],
+                         T800_BODY + T800_PRO_WRISTS)
+        self.assertTrue(all(j.share is None for name in ('EngineAI T800 Dev', 'EngineAI T800 PRO')
+                            for j in self.joints(name)))
+        hands = [j for j in self.joints('EngineAI T800 PRO') if j.name.startswith('Hand')]
+        self.assertEqual([(j.count, j.module_mass) for j in hands], [(2, stated(0.74))])
+        self.assertFalse([j for j in self.joints('EngineAI T800 Dev') if j.name.startswith('Hand')])
+        self.assertEqual(self.mass('EngineAI T800 Dev'), (83.5, 84.5, 85.5))
+        self.assertEqual(self.mass('EngineAI T800 PRO'), (84.3, 85.3, 86.3))
+        for name in ('EngineAI T800 Dev', 'EngineAI T800 PRO'):
+            own = self.apart(name).constants[name]
+            self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], 61.2 * 20, places=6)
+            self.assertEqual(self.parts(name)['Battery pack'].bounds, stated(7.2))
+
+    def test_the_dr02_from_its_model_files(self):
+        for name, expected in (('DEEP Robotics DR02', DR02_BODY), ('DEEP Robotics DR02 Pro', DR02_PRO_BODY)):
+            self.assertEqual([(j.name, j.count, j.torque) for j in self.body(name)], expected, msg=name)
+            self.assertTrue(all(j.share is None for j in self.joints(name)), msg=name)
+            self.assertTrue(all(j.module_mass == fitted(j.torque) for j in self.body(name)), msg=name)
+
+    def test_alex_its_arms_as_nadias_the_rest_on_the_template(self):
+        rows = self.joints('IHMC Alex')
+        arms = [(j.name, j.count, j.torque, j.module_mass) for j in rows if j.share is None
+                and not j.name.startswith(self.NOT_BODY)]
+        self.assertEqual(arms, ALEX_ARMS)
+        self.assertTrue(any(j.share is not None for j in rows))
+        hands = [j for j in rows if j.name.startswith('Hand')]
+        self.assertEqual([(j.count, j.module_mass) for j in hands], [(2, stated(0.49))])
+        self.assertEqual(self.mass('IHMC Alex'), (84, 85, 86))
+
+    def test_mh3_and_fuxi(self):
+        self.assertEqual(self.mass('Mirsee MH3'), (124, 125, 126))
+        wheels = [j for j in self.joints('Mirsee MH3') if j.name.startswith('Wheel')]
+        self.assertEqual([j.count for j in wheels], [4])
+        for name in ('NORINCO Fuxi on legs', 'NORINCO Fuxi on wheels'):
+            self.assertEqual(self.mass(name), (84, 85, 86), msg=name)
+        self.assertFalse([j for j in self.joints('NORINCO Fuxi on legs') if j.name.startswith('Wheel')])
+        self.assertTrue([j for j in self.joints('NORINCO Fuxi on wheels') if j.name.startswith('Wheel')])
+
+    def test_the_atlas_its_hands_and_its_thor(self):
+        hands = [j for j in self.joints('Boston Dynamics Atlas') if j.name.startswith('Hand')]
+        self.assertEqual([(j.name, j.count) for j in hands], [('Hand (13 joints)', 2)])
+        boards = {b.name for b in self.apart('Boston Dynamics Atlas').boards if b.robot == 'Boston Dynamics Atlas'}
+        self.assertIn('Compute module, NVIDIA Jetson AGX Thor', boards)
+
+    def test_e15s_three_robots_of_types_5_and_6(self):
+        self.assertEqual(self.mass('Noble Machines Moby'), (71, 72, 73))
+        self.assertEqual(self.mass('Kawasaki Kaleido 9'), (98, 99, 100))
+        self.assertEqual(self.parts('Kawasaki Kaleido 9')['Frame'].material, 'Magnesium')
+        phantom = self.parts('Foundation Phantom MK1')
+        self.assertFalse([p for p in phantom if p.startswith('Battery')])     # "lacks a battery"
+        body = {j.name: j.torque for j in self.body('Foundation Phantom MK1')}
+        self.assertEqual((body['Knee'], body['Shoulder'], body['Wrist']), (160, 119, 20))
+
+    def test_types_5_and_6_take_types_3_and_4s_templates(self):
+        # Types 5 and 6 have no template of their own (E16.6): their files' robots take types 3 and 4's shared numbers.
+        for name, quantity in (('NORINCO Fuxi on wheels', 'Battery energy per kg of robot, types 3 and 4, on wheels'),
+                               ('NORINCO Fuxi on legs', 'Joint modules, share of the robot mass, types 3 and 4')):
+            apart = self.apart(name)
+            asked = quantity.split(', types')[0]
+            self.assertEqual(schemas.template_quantity(apart, name, asked), quantity, msg=name)
+            self.assertIn(quantity, apart.constants[schemas.ALL_ROBOTS])
+
+    def test_01s_table_gives_a_robot_without_a_battery_none(self):
+        # The Phantom MK1 "lacks a battery" (E16.2): 01's table of its type draws no battery bar and no battery cell.
+        rows = {r.name: r for r in schemas.robots_table_rows(self.files[3])}
+        self.assertIsNone(rows['Foundation Phantom MK1'].battery_wh)
+        self.assertEqual(rows['Foundation Phantom MK1'].bases['Battery'], ())
+        self.assertGreater(rows['Noble Machines Moby'].battery_wh, 0)
+
+    def test_the_makers_own_numbers_count_as_the_makers(self):
+        # IHMC's page gives the Alex's mass, EngineAI's documents the T800's: from the maker in 01's table.
+        for t, name in ((6, 'IHMC Alex'), (5, 'EngineAI T800 Dev')):
+            table = {r.name: r for r in schemas.robots_table_rows(self.files[t])}
+            self.assertEqual(table[name].bases['Mass'], ('maker',), msg=name)

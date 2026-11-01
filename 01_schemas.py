@@ -1784,13 +1784,14 @@ def on_wheels(apart: PartsTakenApart, robot: str) -> bool:
 
 # The templates of types 3 and 4 carry names of their own (EVIDENCE.md E11.7 point 2): a robot of a file of type 3 or 4
 # takes "<quantity>, types 3 and 4" (and on wheels "…, on wheels"), so that no shared value has two numbers under one
-# name when a type is drawn over several files.
-TEMPLATE_OF_TYPE = {3: ', types 3 and 4', 4: ', types 3 and 4'}
+# name when a type is drawn over several files. Types 5 and 6 have no template of their own: their files' robots take
+# types 3 and 4's (EVIDENCE.md E16.6; Matthias, 2026-11-01, "Yes, agree both").
+TEMPLATE_OF_TYPE = {3: ', types 3 and 4', 4: ', types 3 and 4', 5: ', types 3 and 4', 6: ', types 3 and 4'}
 
 
 def template_quantity(apart: PartsTakenApart, robot: str, quantity: str) -> str:
     """The shared number of the template a robot takes: JOINT_SHARE or ENERGY_PER_KG, or for a robot on wheels the
-    same on wheels (E9.6 point 3); for a robot of a file of type 3 or 4, types 3 and 4's (TEMPLATE_OF_TYPE)."""
+    same on wheels (E9.6 point 3); for a robot of a file of types 3 to 6, types 3 and 4's (TEMPLATE_OF_TYPE)."""
     own = apart.robots.get(robot)
     return (quantity + TEMPLATE_OF_TYPE.get(own.type if own else None, '')
             + (ON_WHEELS if on_wheels(apart, robot) else ''))
@@ -3709,10 +3710,11 @@ def template_shares(apart) -> tuple:
     """How many of a type's robots and versions (`apart`: its parts file, or its view over several files) rest on
     templates, robots' parts estimated from their mass (EVIDENCE.md E13, rules 2 and 4; Matthias, 2026-11-01, "Yes,
     agree E13"): (on the joint template, a body joint of theirs a share of their joint modules; on the battery template,
-    no voltage and capacity of their own; all of them)."""
+    a battery but no voltage and capacity of their own, a robot without a battery on neither (E16.2); all of them)."""
     names = list(apart.robots)
     joints = sum(any(j.robot == name and j.share is not None for j in apart.joints) for name in names)
-    battery = sum(not any(q in apart.constants.get(name, {}) for q in BATTERY_CONSTANTS) for name in names)
+    battery = sum(has_battery(apart, name) and not any(q in apart.constants.get(name, {}) for q in BATTERY_CONSTANTS)
+                  for name in names)
     return joints, battery, len(names)
 
 
@@ -3991,22 +3993,30 @@ class RobotRow:
     mass: tuple           # kg: min, mode, max
     joints: int           # its encoders halved: two to a joint
     shares: bool          # its joints a share of its mass
-    battery_wh: float     # its battery's energy at the modes
+    battery_wh: float | None  # its battery's energy at the modes; None for a robot that carries none (E16.2)
     bases: dict           # cell of TABLE_CELLS -> the keys of BASES its rows rest on, in the order of BASES
     base: str = ''        # its wheeled base in words ('' for a robot on legs)
     lift: bool = False    # a lift column
 
 
+def has_battery(apart: PartsTakenApart, robot: str) -> bool:
+    """Whether a robot carries a battery: its parts hold a battery pack (a robot that carries none has no battery rows,
+    EVIDENCE.md E16.2)."""
+    return any(p.robot == robot and p.name == 'Battery pack' for p in apart.parts)
+
+
 def cell_rows(apart: PartsTakenApart, robot: str) -> dict:
     """Each cell of TABLE_CELLS -> the (label, sources) of the rows of the parts file it rests on: the robot's mass
     (sheet Constants), its joint modules (Parts), its battery's voltage and capacity (Constants; where it has none, the
-    energy per kg of robot, for all robots), its boards (Boards), its frame and shell (Parts)."""
+    energy per kg of robot, for all robots; nothing for a robot that carries no battery, the Phantom MK1, E16.2), its
+    boards (Boards), its frame and shell (Parts)."""
     own = apart.constants.get(robot, {})
     shared = shared_of(apart, robot)   # its own file's (E11.7 point 4)
     constant = lambda given, quantity: (given[quantity][3], given[quantity][4])  # noqa: E731
-    battery = ([constant(own, q) for q in BATTERY_CONSTANTS if q in own]
-               or [constant(shared, template_quantity(apart, robot, ENERGY_PER_KG))])
     parts = [p for p in apart.parts if p.robot == robot]
+    battery = ([] if not has_battery(apart, robot) else
+               [constant(own, q) for q in BATTERY_CONSTANTS if q in own]
+               or [constant(shared, template_quantity(apart, robot, ENERGY_PER_KG))])
     return {'Mass': [constant(own, APART_ROBOT_CONSTANTS[0])],
             'Joints': [(p.label, p.sources) for p in parts if p.name.startswith('Joint module')],
             'Battery': battery,
@@ -4073,7 +4083,9 @@ def robots_table_rows(apart: PartsTakenApart) -> list:
         if on_wheels(apart, name):
             group = 'wheels shares' if group == 'shares' else 'wheels own'
         encoders = next((p.count for p in apart.parts if p.robot == name and p.name.startswith('Encoders')), 0)
-        if BATTERY_CONSTANTS[0] in own:
+        if not has_battery(apart, name):
+            wh = None
+        elif BATTERY_CONSTANTS[0] in own:
             wh = own[BATTERY_CONSTANTS[0]][1][1] * own[BATTERY_CONSTANTS[1]][1][1]
         else:
             wh = shared_of(apart, name)[template_quantity(apart, name, ENERGY_PER_KG)][1][1] * mass[1]
@@ -4128,7 +4140,7 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
     # label beside it then clear of the cells (2026-10-30, batch 2b's entry: "1584 Wh" ran into them; type 1's axis the
     # same as before, 0 to 800 Wh).
     # Two steps of the battery's axis; on a table with robots on wheels its column is narrower, so only its two ends.
-    wh_ticks = axis_ticks(max(r.battery_wh for r in rows) / WH_ROOM, 2)
+    wh_ticks = axis_ticks(max(r.battery_wh for r in rows if r.battery_wh is not None) / WH_ROOM, 2)
     wh_ticks = [wh_ticks[0], wh_ticks[-1]] if wheels else wh_ticks
     mass_x = lambda kg_: mass_axis[0] + kg_ / mass_ticks[-1] * (mass_axis[1] - mass_axis[0])          # noqa: E731
     wh_x = lambda wh: battery_axis[0] + wh / wh_ticks[-1] * (battery_axis[1] - battery_axis[0])       # noqa: E731
@@ -4198,9 +4210,13 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
                 axes.text(joints_at + 0.05, middle, marks, ha='left', va='center', **words)
             if r.base:
                 axes.text(T_WHEELS['base'], middle, r.base, ha='left', va='center', **words)
-            axes.add_patch(Rectangle((battery_axis[0], middle - 0.09), wh_x(r.battery_wh) - battery_axis[0], 0.18,
-                                     facecolor=TABLE_BAR, edgecolor='none', zorder=2))
-            axes.text(wh_x(r.battery_wh) + 0.08, middle, f'{r.battery_wh:.0f} Wh', ha='left', va='center', **words)
+            if r.battery_wh is None:   # a robot that carries no battery (E16.2): words, no bar
+                axes.text(battery_axis[0], middle, 'no battery', ha='left', va='center', **words)
+            else:
+                axes.add_patch(Rectangle((battery_axis[0], middle - 0.09), wh_x(r.battery_wh) - battery_axis[0], 0.18,
+                                         facecolor=TABLE_BAR, edgecolor='none', zorder=2))
+                axes.text(wh_x(r.battery_wh) + 0.08, middle, f'{r.battery_wh:.0f} Wh', ha='left', va='center',
+                          **words)
             width, height = T_CELL
             for cell, x in cells.items():   # a cell in as many stripes as its rows have bases
                 bases = r.bases[cell]

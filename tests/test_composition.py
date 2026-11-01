@@ -443,3 +443,22 @@ class TestZeroNotInDistribution(unittest.TestCase):
         self.assertEqual(texts.count('40 %'), 1)                       # nothing written for the row held in all
         self.assertIn('–', texts)
         self.assertNotIn(composition.mass(0.8), texts)
+
+
+class TestRecipeFamiliesOfEveryType(unittest.TestCase):
+    """Every robot type drawn part by part names the recipes of its aluminium, plastics and magnesium in the project's
+    element recipes (RECIPE_FAMILY; types 5 and 6 since 2026-11-01, EVIDENCE.md E16.6, type 5's magnesium type 3's)."""
+
+    def test_each_family_has_its_row(self):
+        params = Params()
+        path = os.path.join(ROOT, params.data.element_recipes)
+        if not os.path.exists(path):
+            raise unittest.SkipTest('the element recipes are not on disk')
+        recipes = small.schemas.read_element_recipes(path)
+        rows = {(r.robot, r.family, r.shared) for r in recipes.rows}
+        self.assertEqual(sorted(composition.RECIPE_FAMILY), [1, 2, 3, 4, 5, 6])
+        for robot_type, families in composition.RECIPE_FAMILY.items():
+            for shared, family in families.items():
+                self.assertIn(composition.recipe_key(robot_type, shared, family), rows, msg=(robot_type, shared))
+        self.assertEqual(composition.recipe_key(5, 'Magnesium', (3, 'Magnesium alloys')),
+                         (3, 'Magnesium alloys', 'Magnesium'))

@@ -56,7 +56,96 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-01, afternoon: the zero rule and the axis built; the research pass paused (start here)
+## 2026-11-01, evening: types 5 and 6 entered; where to start tomorrow (start here)
+
+**First thing tomorrow:**
+1. Read back his 02 run of this evening. It started about 17:47 and had written nothing yet by then. Compare every
+   output's time with the code's commit (`git log --date=iso`). Then check:
+   - the summaries of types 3, 5 and 6: no median of 0, no 2.5 % below zero;
+   - the pages of types 5 and 6;
+   - the whole suite: 455 tests, all of which should pass once his register is on disk.
+2. Then ask him which comes next: E15's entry, or the hydraulic robots' research step. Never 03: it waits until types 1
+   to 6 are done (top rule below).
+
+**Done today, in order:**
+- **E14 built and agreed:** 21 robots and versions take their makers' joints; the Booster T2 by type 2's fit.
+- **His runs of E14:** the builders 15:57, 01 15:58, 02 16:10 to 16:12. Read back: no median of 0, nothing below zero.
+  Two stale type 1 tests were corrected to E14's state.
+- **E15 written and agreed** ("Yes, agree both"): batch 3 of types 3 and 4, 123 robots, research read first-hand
+  (V134).
+  - 115 robots to enter, 7 listed only, Neo1 with types 5 and 6.
+  - **Its entry is not built**, except its three robots of types 5 and 6 (Kaleido 9, Moby, Phantom MK1).
+  - The other 112 wait for his word. Their rows are E15.3's table, with E16's corrections (Moby 72 kg; the Phantom
+    without a battery).
+- **E16 written and agreed:** types 5 and 6's 16 robots researched (V135); eight PDFs read: IHMC's three papers, the
+  IIT and Moog ISA paper, Cyborg's manuals.
+- **E16.6 built** on "move move. Find all the data for 5 and 6 and then fill in the data in the respective sheets"
+  (V136):
+  - The register's sheets Type 5 (12 robots, 9 drawn) and Type 6 (5, 4 drawn).
+  - Type 5's file: the MH3 and the T800 Dev and PRO. Type 6's file: the Alex and the Fuxi on legs and on wheels.
+  - In type 3's file: the DR02 from its model files, the Atlas's 13-DoF hands and Thor, the Kaleido 9, the Moby and
+    the Phantom MK1.
+  - A block without a battery; types 5 and 6 on types 3 and 4's templates.
+  - Their recipes. Type 5's magnesium is type 3's AZ91D (E). The plastics are type 5's "Composites & polymers" and
+    type 6's "Reinforced polymers" (E).
+- **His runs of E16.6** (17:45 to 17:46, all after the code's last change at 17:40):
+  - the register 17:45:53;
+  - type 3's builder 17:46:04, type 5's 17:46:16, type 6's 17:46:22;
+  - 01, its pages 17:46:38 to 17:46:49;
+  - 02 started about 17:47.
+  - Types 1, 2 and 4's files were not rerun, and need not be: the sandbox shows them unchanged.
+
+**Open, for his word:**
+- **E15's entry:** the 112 other robots of batch 3, with E15.2's method (its spec E12.6's way, tests first, a
+  sandbox).
+- **The hydraulic Atlas (old), Nadia and Neo1** (E16.5 question 4): a research step of their own. The hydraulic
+  actuator's materials, a power unit's mass from sources of the same kind (IIT's HyQ, Boston Dynamics), the oil. Known
+  so far: the ISA 920 g at 4,000 N and 1,600 g at 7,500 N, titanium (Barasuol et al. 2018); Nadia tethered; Neo1's
+  cylinders 1 to 1.1 kg.
+- **A correction of mine to report:** E15 question 6 said "aluminium as for every robot so far". It is not so: the
+  AgiBot A3 and A3 Ultra have magnesium frames (E11.6 question 4). The Kaleido 9 follows that precedent (its maker's
+  magnesium skeleton).
+- **The first-hand records sit in Claude's scratch folder on this Mac only, and are gone tomorrow** (memory note
+  "Scratch folder is not durable"): `batch3/firsthand.md`, `types56_firsthand.md`, the agents' reports, the downloaded
+  PDFs, `batch3_plan.py`. E15, E16, V134 to V136 hold every decision, number, quote and address; the PDFs can be
+  downloaded again from the addresses there.
+- **The RAWCLICDataCenters session** on the zero rule still waits for his answer there.
+
+**Standing rules met today:**
+- Never name or propose 03 until types 1 to 6 are done.
+- A 0 is not part of a distribution.
+- A robot with no stated mass is listed, not drawn.
+- Templates are wider than data and at most half of a type (types 3 and 4 above half: their pages say so).
+- Commit and push only on his word.
+
+## 2026-11-01, late afternoon: batch 3's research read first-hand, E15 written
+
+- **E15 written for his word** (V134), nothing entered.
+  - Batch 3's 123 robots: 115 to be entered (44 with the maker's mass, 71 with the internet's, after E16's Moby), 7 listed only, Neo1
+    with types 5 and 6.
+  - 19 robots have joint data, 27 a stated battery.
+  - E13's shares get worse: the joint template would hold 81 % of type 3 and 75 % of type 4.
+  - Six questions, each with a recommendation (E15.6).
+- **E16 written for his word** (V135, on "do now all the rest for type 5 and 6 research all data use the internet as
+  much as possible and read also .pdf"; asked "why was this not done before?": the order was types 1 to 4 first, and the
+  first agent's search ran out with its PDFs unread), nothing entered:
+  - All 16 robots of types 5 and 6 researched, eight PDFs read.
+  - The electric ones proposed: Alex, T800 Dev and PRO (every motor's mass stated by EngineAI), MH3, Fuxi.
+  - The DR02 from its maker's model files.
+  - The Atlas with its 13-DoF hands and a Jetson Thor.
+  - TITAN listed only.
+  - E15's Moby (72 kg) and Phantom MK1 (no battery) corrected.
+  - The hydraulic Atlas (old), Nadia and Neo1 wait for a research step of their own: no hydraulic part in the model,
+    no source for their power units.
+  - Six questions (E16.5).
+- **His runs are not yet on E14** (read at 15:08):
+  - The four parts files were last written at 11:49 (type 1), 10:38 (types 3 and 4) and on 30 October (type 2), all
+    before E14's commit at 14:28.
+  - His 02 of 14:29 to 14:48 therefore drew the old parts files.
+  - Before 01 and 02, the four builders have to run.
+- **03:** still waits for all of types 1 to 6.
+
+## 2026-11-01, afternoon: the zero rule and the axis built; the research pass paused
 
 **03 waits until all of robot types 1 to 6 are done.** He said it before ("I am currently not interested in 03",
 2026-10-29, the section below on 04 removed), and Claude still named 03 among his runs today; he ran it (12:14) and

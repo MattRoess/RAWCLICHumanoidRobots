@@ -444,17 +444,18 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
           **more) -> dict:
     """One robot's block: what its sheet Robots row says (`maker`, `height` m, `stated` mass kg, `sources`), its mass
     for the sheet Constants (`mass`: (min, mode, max), label, source), its joints (joint() each, or AVERAGE), and in
-    `more` what differs from the template (E5.14): voltage and capacity ((min, mode, max), label, source; none: the
-    energy per kg of robot), pack ((min, mode, max), label, source; None: from its energy; PACK_CELLS_ONLY), housing,
-    boards, sensors, cables (and cable_quantity, CABLE_FOUR or CABLE_ETHERNET), screws, parts, cooler (ARM_COOLER
+    `more` what differs from the template (E5.14): battery (False for a robot that carries none, the Phantom MK1's
+    "lacks a battery", EVIDENCE.md E16.2: no pack, cells, housing or management board), voltage and capacity ((min,
+    mode, max), label, source; none: the energy per kg of robot), pack ((min, mode, max), label, source; None: from its
+    energy; PACK_CELLS_ONLY), housing, boards, sensors, cables (and cable_quantity, CABLE_FOUR or CABLE_ETHERNET), screws, parts, cooler (ARM_COOLER
     unless its computer is an Intel or AMD processor's), shell, frame, and the labels and sources of its joints,
     connectors, encoders and cells. A block whose joints are AVERAGE may also have `stated_joints` (joint() each), which
     take the place of their groups' rows of the template, and `added_joints` (its hands or grippers), which the
     template leaves out (it counts body joints only: EVIDENCE.md E7.4, E7.5 points 2 and 4)."""
     b = dict(name=name, maker=maker, height=height, stated=stated, sources=sources, mass=mass, joints=joints,
              stated_joints=[], added_joints=[],
-             joints_stated=None, joint_label={'small': 'E', 'large': 'E'}, joint_sources='', voltage=None,
-             capacity=None, pack=None, pack_source='', housing=HOUSING_MIXED,
+             joints_stated=None, joint_label={'small': 'E', 'large': 'E'}, joint_sources='', battery=True,
+             voltage=None, capacity=None, pack=None, pack_source='', housing=HOUSING_MIXED,
              cells=('E', 'NMC cylindrical, E (E5.14 point 2)'),
              boards=[], sensors=[], cables=(CABLES_M, 'E', 'as the N1 (E5.14 point 5)'), cable_quantity=CABLE_FOUR,
              connectors=('S, E', 'two per joint, as type 1 (E5.14 point 5); the mass of a mated pair, Amass '
@@ -612,9 +613,12 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         out['SensorElements'].append(('Encoder', car_type, per_sensor))
 
     # Its battery: the pack, its cells from their energy, its housing the pack's remainder, its management board; in
-    # its torso, or for a robot on wheels in its base; its cells NMC unless its block names their recipe.
+    # its torso, or for a robot on wheels in its base; its cells NMC unless its block names their recipe. A robot that
+    # carries no battery has none of these rows (02 then draws no battery for it, EVIDENCE.md E16.2).
     region = b['battery_region']
-    if b['pack'] == PACK_CELLS_ONLY:
+    if not b['battery']:
+        pass
+    elif b['pack'] == PACK_CELLS_ONLY:
         out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, None, None, None, None, None,
                              PACK_CELLS_ONLY, 'S', b['pack_source']))
     elif b['pack'] is None:
@@ -626,15 +630,16 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         (low, mode, high), label, source = b['pack']
         out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, low, mode, high, None, None,
                              PACK_STATED, label, source))
-    label, source = b['cells']
-    out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', region, None, None, None, 'Battery materials',
-                         b['cell_recipe'], (CELLS_FROM_CHARGE if b['voltage'] else CELLS_FROM_MASS).format(
-                             CELL_OF_RECIPE if b['cell_recipe'] else NMC_CELL), label, source))
-    if b['housing']:
-        out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None, HOUSING,
-                             'E', 'E5.19 point 1'))
-    out['Boards'].append((name, 'Battery management board', 1, 'Battery pack', region, *BATTERY_BOARD,
-                          'area times Constants board mass per cm2', 'BMS', 'E', 'as the G1 (E5.14 point 4)'))
+    if b['battery']:
+        label, source = b['cells']
+        out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', region, None, None, None, 'Battery materials',
+                             b['cell_recipe'], (CELLS_FROM_CHARGE if b['voltage'] else CELLS_FROM_MASS).format(
+                                 CELL_OF_RECIPE if b['cell_recipe'] else NMC_CELL), label, source))
+        if b['housing']:
+            out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None, HOUSING,
+                                 'E', 'E5.19 point 1'))
+        out['Boards'].append((name, 'Battery management board', 1, 'Battery pack', region, *BATTERY_BOARD,
+                              'area times Constants board mass per cm2', 'BMS', 'E', 'as the G1 (E5.14 point 4)'))
 
     # Its other boards and its sensors, as its sources name them.
     for board, count, kind, region, area, category, label, source in b['boards']:

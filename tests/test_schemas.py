@@ -480,10 +480,12 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual({r.name for r in groups['stated']},
                          {'AgiBot X1', 'ROBOTIS AI Sapiens K1', 'ROBOTIS K0', 'EngineAI PM01',
                           'RoboParty Roboto Origin', 'RoboParty RP1'})
+        # Since E14 (2026-11-01, "Yes, build it"): the Booster T2 from its model file, the Bumi and the E1 from their
+        # pages' torques, off the template.
         self.assertEqual({r.name for r in groups['torques']},
                          {'Fourier N1', 'Menlo Asimov 1', 'Menlo Asimov 2', 'Booster T1', 'Booster K1 5 Ah',
-                          'Booster K1 2 Ah', 'Unitree R1'})
-        self.assertEqual(len(groups['shares']), 16)   # the PrimeBOT Q1 out since 2026-11-01 (E12.6 point 4)
+                          'Booster K1 2 Ah', 'Unitree R1', 'Booster T2', 'Noetix Bumi', 'Noetix E1'})
+        self.assertEqual(len(groups['shares']), 13)   # the PrimeBOT Q1 out (E12.6 point 4); three off by E14
         for members in groups.values():
             self.assertEqual([r.mass[1] for r in members], sorted(r.mass[1] for r in members))
         # The mark of joints drawn as a share of the robot's mass on the robots of that group and no other.
@@ -498,7 +500,7 @@ class TestScreenPages(unittest.TestCase):
         self.assertEqual(by_name['Booster T1'].bases['Battery'], ('third party', 'estimated'))
         self.assertEqual(by_name['Booster T1'].bases['Boards'], ('maker', 'estimated'))
         self.assertEqual(by_name['Noetix E1'].bases['Battery'], ('estimated',))
-        self.assertEqual(by_name['Noetix E1'].bases['Mass'], ('third party',))
+        self.assertEqual(by_name['Noetix E1'].bases['Mass'], ('maker',))   # NOEe "整机重量40kg" since E14
         # No robot with an estimated mass is drawn (2026-11-01, "A stated mass": the PrimeBOT Q1 listed only).
         self.assertFalse([name for name, r in by_name.items() if r.bases['Mass'] == ('estimated',)])
 
@@ -743,10 +745,12 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         # drawn, those whose joints are the template's share of their mass and those whose battery is the template's
         # energy per kg; "most of its robots" where either is above half.
         # Since E14 (2026-11-01, "Yes, build it", E14.6): its robots with their makers' joint data off the template.
-        self.assertEqual(schemas.template_shares(self.views[3]), (75, 68, 96))
+        # Since types 5 and 6's entry (E16.6): the DR02 and Pro off the joint template, the Kaleido 9 and the Moby on
+        # both, the Phantom MK1 on neither (its joints from its torques; it carries no battery).
+        self.assertEqual(schemas.template_shares(self.views[3]), (75, 70, 99))
         self.assertEqual(schemas.template_shares(self.views[4]), (32, 30, 50))
         self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
-                                                                '75 of its 96 robots and versions, the battery of 68.')
+                                                                '75 of its 99 robots and versions, the battery of 70.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 

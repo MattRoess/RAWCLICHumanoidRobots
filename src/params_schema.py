@@ -321,11 +321,12 @@ class OutputParams:
     # The robot types whose pages 01 and 02 draw (Matthias, 2026-10-29: "Why the hell are ther all thes figure for robot
     # types 2 to 6?", then "Type 1 only"; "I will only focus on 1", 2026-10-28). The same code draws every robot type's
     # pages; a type comes back here when its steps begin: type 2 on 2026-10-30 ("Yes, build C", point 6), types 3 and 4
-    # the same day ("Yes, build it", EVIDENCE.md E11.7 open point B). 02 writes the draws of all six types whatever is
-    # set here.
+    # the same day ("Yes, build it", EVIDENCE.md E11.7 open point B), types 5 and 6 on 2026-11-01 ("Find all the data
+    # for 5 and 6 and then fill in the data in the respective sheets. So I can then have all dat for the run of 01 and
+    # 02", E16.6). 02 writes the draws of all six types whatever is set here.
     # SAFE TO CHANGE: yes, any of the robot types 1 to 6, each once.
     robot_types_with_pages: tuple = field(
-        default=(1, 2, 3, 4),
+        default=(1, 2, 3, 4, 5, 6),
         metadata={'doc': 'The robot types whose pages 01 and 02 draw; 02 writes the draws of all six.'})
 
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen

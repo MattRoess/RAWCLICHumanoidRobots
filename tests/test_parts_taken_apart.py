@@ -1109,8 +1109,9 @@ class TestTypesThreeAndFour(unittest.TestCase):
     def test_type_3_over_its_72_and_type_4_over_its_33(self):
         # Versions: type 3's robots and the AgiBot X2, the Flexiv AICO 2, the Rainbow RB-Y1 and since batch 2 (E12.6)
         # the CYBORG RO1 and the DR02 in two each; type 4's and the X2, the CASBOT 02 and the FF Master in two. Since
-        # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out).
-        for robot_type, count, versions in ((3, 91, 96), (4, 47, 50)):
+        # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out); since types 5 and 6's entry (E16.6) type 3 94: the
+        # Kaleido 9, the Moby and the Phantom MK1.
+        for robot_type, count, versions in ((3, 94, 99), (4, 47, 50)):
             inputs = type_inputs_or_skip(self, self.params, robot_type)
             self.assertEqual(len(inputs.robots), count, msg=robot_type)
             self.assertGreater(len(inputs.files), 1)
