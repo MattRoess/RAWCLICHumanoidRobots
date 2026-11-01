@@ -779,7 +779,8 @@ datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
   2026-10-29: "If it is just a bit and a large 0 then show me the distribution").
 - `figures/parts_taken_apart/<n>_<name>/sources/<material>.png`, "where its copper sits" (as the data centres' "where the copper
   comes from"): for copper, brass, the nickel strip, the magnets, each steel and each aluminium alloy, one row per kind
-  of part holding it, the largest median on top; each over the draws in which the kind of part holds it (those not 0):
+  of part holding it, the largest median on top; each over the draws in which the kind of part holds it (those above
+  0: a logarithmic axis has no place for a draw below zero, such as type 1's frame aluminium in 72 of 200,000 draws):
   a violin on a logarithmic axis, the median a filled dot and the mean an open one, the 95 % interval a line, and at
   the right three columns, the median, the mean and "held in", in what share of the draws it holds it, as the
   overview's rows. Until 2026-11-01 the dots, the lines, the numbers and the order were of all the draws, zeros

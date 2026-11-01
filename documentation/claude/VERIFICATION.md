@@ -5,6 +5,55 @@ by Claude, newest first.
 
 ## 2026-11-01
 
+### V129. His runs of 11:49 to 11:58 read back
+
+- **His runs:** the register at 11:49:31, type 1's builder at 11:49:50, 01 at 11:50:04, 02 at 200,000 draws from 11:50
+  to 11:58:25, ended without fault. His type 3 and 4 files are of 10:38, built after their builders' code (10:23 to
+  10:28); type 2's file is of 2026-10-30 13:50, after its code. 03 has not been run (`figures/comparison/` is empty).
+- **Times** (each output against the code that makes it; `02_composition.py` of 11:45:25):
+  - all 72 files of `data/consolidated/`, 56 of `data/parts_taken_apart/`, 39 pages of `figures/composition/` and 92 of
+    `figures/parts_taken_apart/` written between 11:56 and 11:58;
+  - none is older.
+- **The summaries:** none of the ten (consolidated, types 1 to 6; part by part, types 1 to 4) has a median or 2.5 %
+  of 0 for anything held. Held in some draws only: 5, 6, 2, 1, 1, 1 rows (consolidated) and 110, 246, 277, 262 (part
+  by part), the same counts as in V126's sandbox.
+- **Looked at:**
+  - type 1's "where its aluminium 6061 sits", the page his run of 11:42 stopped on: drawn, the frame and shell 4.9 kg
+    held in 100 % (its 72 draws below zero left out);
+  - type 3's notes page: "Not yet taken apart: 77 of its 168 robots of the register with a mass"; the sentence on the
+    axis's end.
+- **Tests:** one test out of date. `test_schemas.TestPartsTakenApart.test_the_real_file_holds_together` counted 32
+  robots in his type 1 file, which since batch 2 holds 31 (the PrimeBOT Q1 out). It was changed with the reason beside
+  it. After that the 86 tests that compare with his files pass (the register, the parts files, 01's tests of type 1's
+  file), and **the whole suite: 437 tests, all pass**.
+- **Not covered:** 03 (not run); iCloud's copies of the pages (Documents synced by iCloud: their times to be checked
+  again if a page looks older).
+
+### V128. His 02 run stopped on a draw below zero; the logarithmic pages over the draws above 0
+
+- **Found by his run** of `02_composition.py` at 200,000 draws (after f838731). It stopped in `sources_figure` on type
+  1's pages of where a material sits: "ValueError: Axis limits cannot be NaN or Inf". Before stopping it had written
+  every type's consolidated draws and summaries and type 1's part-by-part draws (11:42). Type 1's pages and all of
+  types 2 to 4 were still those of 10:57 and 10:58.
+- **Cause, read from his draws** (`data/parts_taken_apart/1_compact_research_developer/materials.npy`, only read):
+  remainders below zero in a few draws, reported by 02 and not cut. Type 1's frame aluminium was below zero in 72 of
+  200,000 draws (as low as −1.8 kg), its battery pack's aluminium in 33, its copper and plastics in 69. V126 had made
+  these pages take the draws that are not 0, and the logarithm of a negative mass is NaN. The tests and the sandboxes
+  ran at 2,000 to 3,000 draws and met none: 72 in 200,000 is fewer than one in 2,000.
+- **His words:** "Yes, fix it" (the pages over the draws above 0, said on the notes, test first).
+- **Test first** (`TestDrawsBelowZero`): a kind with 400 of 20,000 draws below zero, sorted as the page's first row. It
+  reproduced his error ("Axis limits cannot be NaN or Inf"). After the fix:
+  - its median and its share held are those of the draws above 0;
+  - the element, critical and overview panels draw with such draws, their limits finite.
+  - A first version passed by chance, with the negative kind second, where `min` passed over its NaN; it was sharpened
+    before the code was changed.
+- **Fixed:** `sources_figure` takes the draws above 0, and its notes sentence says that a draw below zero has no
+  place on a logarithmic axis. Every other `log10` of 02 already had only draws above 0, and the linear panels already
+  left out the draws not above 0 (searched: every `log10`, `set_xlim` and `set_ylim` of 02 and 03). The summaries keep
+  the negative draws in their statistics. The rule, `CLAUDE.md` §7, has a clause for logarithmic axes.
+- **Not covered:** his run again (it rewrites everything). A rare draw of another kind is not foreseen by a test at
+  2,000 draws. A test with synthetic draws, as here, is the way to catch it.
+
 ### V127. The axis of the distribution panels at the 99.5th percentile, built
 
 - **His words:** "Yes, build it", his answer to the next-step box's question, which asked about the axis of V124. The

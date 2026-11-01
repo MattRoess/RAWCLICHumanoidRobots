@@ -27,6 +27,7 @@ import importlib.util
 import os
 import sys
 import tempfile
+import types
 import unittest
 from unittest import mock
 
@@ -1337,3 +1338,51 @@ class TestAxisEnd(unittest.TestCase):
         self.assertIn('% of the draws', text)
         self.assertIn('beyond the axis', text)
         self.assertFalse(overlap)
+
+
+class TestDrawsBelowZero(unittest.TestCase):
+    """2026-11-01: his 02 run at 200,000 draws stopped on type 1's pages of where a material sits ("Axis limits cannot
+    be NaN or Inf"): its frame's aluminium below zero in 72 of 200,000 draws (a remainder, reported, not cut), and since
+    V126 those pages took the draws that are not 0, so a logarithm of a negative mass. At 2,000 draws there were none.
+    Here every page that draws a distribution is drawn with such draws in it: a logarithmic axis shows the draws above
+    0 only (its numbers of those draws), the linear panels as before."""
+
+    def setUp(self):
+        rng = np.random.default_rng(3)
+        self.first, self.second = list(composition.KINDS)[:2]
+        # The kind with the draws below zero has the smaller median, so it is the page's first row (its lowest draw
+        # then first in the axis's limits), and 2 % of its draws are below zero, so that its share held shows them.
+        frame = rng.triangular(0.05, 0.1, 0.2, 20_000)
+        frame[:400] = -np.linspace(0.01, 1.8, 400)                 # a remainder below zero in 400 draws
+        self.kinds = {self.first: frame, self.second: rng.triangular(0.5, 2.0, 4.0, 20_000)}
+        self.d = types.SimpleNamespace(robot_type=1, register=['1 Robot'], listed=1)
+
+    def test_where_a_material_sits_over_the_draws_above_0(self):
+        figure = composition.sources_figure('Aluminium', self.kinds, self.d)
+        axes = figure.axes[0]
+        labels = [t.get_text() for t in axes.get_yticklabels()]
+        at = {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text() for t in axes.texts}
+        limits = axes.get_xlim()
+        composition.plt.close(figure)
+        self.assertTrue(np.isfinite(limits).all())
+        row = labels.index(composition.KINDS[self.first][0])
+        self.assertEqual(row, 0)
+        frame = self.kinds[self.first]
+        above = frame[frame > 0]
+        per, unit = composition.panel_unit(np.array([np.median(above)]))
+        self.assertEqual(at[(round(composition.NUMBER_COLUMNS[0], 3), row)],
+                         f'{composition.panel_number(np.median(above) / per)} {unit}')
+        self.assertEqual(at[(round(composition.NUMBER_COLUMNS[2], 3), row)],
+                         f'{composition.panel_number(100 * above.size / frame.size)} %')
+
+    def test_the_linear_panels_draw_with_them(self):
+        for draw_panel in (lambda a: composition.element_panel(a, self.kinds[self.first], 'Aluminium', True),
+                           lambda a: composition.stacked_panel(a, self.kinds, 'Aluminium (Al)', True),
+                           lambda a: composition.ridge_panel(a, self.kinds, {k: np.zeros_like(v)
+                                                                             for k, v in self.kinds.items()},
+                                                             'Aluminium (Al)')):
+            figure, axes = composition.plt.subplots()
+            draw_panel(axes)
+            figure.canvas.draw()
+            self.assertTrue(np.isfinite(axes.get_xlim()).all())
+            composition.plt.close(figure)

@@ -2024,7 +2024,8 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'copper, the magnets, each steel and each aluminium alloy sit: one row per kind of part, the draws in which it '
         'holds the material as a violin on a logarithmic axis, the median a filled dot, the mean an open one, the line '
         'the 95 % interval, all of those draws; at the right the median, the mean and in what share of the draws the '
-        'kind of part holds it.',
+        'kind of part holds it. A logarithmic axis has no place for a draw below zero: a remainder that falls below '
+        'zero in some draws (a fault, reported in the run log and the summary) is drawn there over its draws above 0.',
     ]
     return [note for note in notes if note]
 
@@ -2474,11 +2475,14 @@ def log_mass(log_kg: float, _pos=None) -> str:
 def sources_figure(title: str, kinds: dict, d: Draws):
     """Where one material sits in a robot type, as RAWCLICDataCenters' "where the copper comes from": one row per kind
     of part holding it (in at least 2.5 % of the draws), the largest median on top; each over the draws in which the
-    kind of part holds it, those not 0 (Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it
-    is NOT part of the distribution"; CLAUDE.md §7): the violin of its kg on a logarithmic axis, the median a filled
+    kind of part holds it, those above 0 (Matthias, 2026-11-01: "It can not be that median is 0. If a value is 0 then it
+    is NOT part of the distribution"; CLAUDE.md §7; a draw below zero has no place on a logarithmic axis): the violin of its kg on a logarithmic axis, the median a filled
     dot and the mean an open one, the 95 % interval a line, and at the right the median, the mean and in what share of
     the draws the kind of part holds it, as the overview's rows (ridge_panel)."""
-    holding = {k: kinds[k][kinds[k] != 0] for k in kinds if held(kinds[k])}   # the draws that hold it
+    # The draws that hold it, those above 0: a logarithmic axis has no place for a draw below zero (a remainder below
+    # zero, a fault the run log and the summary report: type 1's frame aluminium in 72 of 200,000 draws stopped his run
+    # of 2026-11-01 when these pages took the draws not 0); the notes page says so.
+    holding = {k: kinds[k][kinds[k] > 0] for k in kinds if held(kinds[k])}
     shown = sorted(holding, key=lambda k: float(np.median(holding[k])))
     figure = plt.figure(figsize=APART_PAGE)
     axes = figure.add_axes((0.22, 0.12, SOURCES_WIDTH, 0.76))

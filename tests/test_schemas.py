@@ -1819,7 +1819,8 @@ class TestPartsTakenApart(unittest.TestCase):
         apart = schemas.read_parts_taken_apart(paths[0])
         lists = schemas.read_shared_lists(paths[1])
         self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, params)], [])
-        # Every robot of type 1 with rows of its own since 2026-10-29 ("Yes, build it"): 32, the K1 in two versions.
+        # Every robot of type 1 with rows of its own since 2026-10-29 ("Yes, build it"): 32, the K1 in two versions;
+        # 31 since batch 2 (E12.6, 2026-11-01): the PrimeBOT Q1's rows out, its mass not stated (E12.4).
         # EVIDENCE.md E2.8 and E2.8e, as agreed by Matthias on 2026-10-27, for the three taken apart first. The G1: 23
         # joints in 12 kinds, 9 large;
         # the small joint's weighed parts add up to 525 g (China Post Securities, slide 43), the large joint's at the
@@ -1829,7 +1830,7 @@ class TestPartsTakenApart(unittest.TestCase):
         # grippers as small joints of 0.43 kg since 2026-10-29 (E5.19 point 2): 31 joints, 21.13 kg. The N1: 23
         # joints (90 N·m x 4, 54 N·m x 7, 30 N·m x 12), 11 large, their modes from the fit as E2.8e rounds them
         # (0.88, 0.70, 0.54 kg) adding up to 4 x 0.88 + 7 x 0.70 + 12 x 0.54 = 14.90 kg.
-        self.assertEqual(len(apart.robots), 32)
+        self.assertEqual(len(apart.robots), 31)
         self.assertTrue({'AgiBot X1', 'Fourier N1', 'Unitree G1'} <= set(apart.robots))
         joints = lambda robot: [j for j in apart.joints if j.robot == robot]  # noqa: E731
         self.assertEqual((len(joints('Unitree G1')), sum(j.count for j in joints('Unitree G1'))), (12, 23))

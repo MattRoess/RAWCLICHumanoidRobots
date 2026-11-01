@@ -71,6 +71,12 @@ for all with 0 values. There needs to be a rule, if it is generally 0 then, it i
 - **Built since** on "Yes, build it" (V127): every distribution panel's axis ends at its 99.5th percentile
   (`AXIS_END`), its draws beyond not drawn and said ("0.5 % beyond the axis, up to 12 kg"); the overview's at its
   largest row's, nothing piled into the last bar.
+- **His 02 run of 11:42 stopped** on type 1's pages of where a material sits (V128): a few draws below zero (its frame
+  aluminium in 72 of 200,000) on a logarithmic axis. Fixed on "Yes, fix it": those pages over the draws above 0, said
+  on the notes.
+- **His runs of 11:49 to 11:58 done and read back** (V129): the register, type 1's builder, 01 and 02, every output
+  after its code, no median of 0 left, all 437 tests pass. **Open:** 03 not run; commit and push of V128's fix, the
+  test count and these documents; E14 of the research pass.
 - **Paused:** E13 rule 3's research pass. The makers' model files read and every number read again (V123: Booster T2,
   AgiBot X2, A3, G2, Unitree H2-D, H2-X, G1-D, R1-A7-D, R1-A5, Galaxea R1 Pro, RealMan RM65-B and RM75-B, Tien Kung 3.0,
   LimX Oli, PAL REEM-C, ARI, Kangaroo; Noetix's Bumi and E1 pages); E14, the findings robot by robot with their
