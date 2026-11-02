@@ -3,6 +3,11 @@
 **Status:**
 - Decided by Matthias on 2026-10-26, point by point (see "Decided" below), including the estimate of point 9.
 - The placements are in `data/researched/shared_lists.xlsx`, which `01_schemas.py` reads and checks.
+- Since 2026-11-02 the materials are one fixed list of 17, each name what it is (EVIDENCE.md E19 point 2 and question
+  5, "Yes, agree E19"): Magnets (NdFeB) is NdFeB magnets, Battery materials is Battery cells, Electronics is Boards and
+  components, Aluminium, Magnesium and Titanium are the aluminium and magnesium alloys and the titanium alloy, Mixed is
+  Other; the steels split into steel, stainless steel and electrical steel, copper into copper, brass and nickel.
+  The decisions below keep the words they were written with.
 
 Written by Claude on Matthias's
 words "draft the shared lists of parts and materials, with where each of the 68 parts and 35 material names goes, for

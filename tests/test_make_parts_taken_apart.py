@@ -147,13 +147,13 @@ class TestMakePartsTakenApart(unittest.TestCase):
                                   'Gear stage 1, ring gear': '20CrMnTi', 'Gear stage 2, ring gear': '20CrMnTi',
                                   'Two small bearings': 'GCr15', 'Output flange': '42CrMo4'})
         for p in self.apart.parts:
-            if p.material in ('Steel', 'Titanium'):
+            if p.material in ('Steel', 'Stainless steel', 'Electrical steel', 'Titanium alloy', 'Brass', 'Nickel'):
                 self.assertTrue(p.grade, msg=f'{p.robot}, {p.name}')
         for s in self.apart.shares:
-            if s.material in ('Steel', 'Titanium'):
+            if s.material in ('Steel', 'Stainless steel', 'Electrical steel', 'Titanium alloy', 'Brass', 'Nickel'):
                 self.assertTrue(s.grade, msg=s.item)
         stator = {s.material: s.grade for s in self.apart.shares if s.item == 'Motor stator'}
-        self.assertEqual(stator['Steel'], 'M19 or M27')
+        self.assertEqual(stator['Electrical steel'], 'M19 or M27')
 
     def test_what_it_writes_equals_the_data_file_on_disk(self):
         on_disk = builder.output_path()
@@ -186,8 +186,6 @@ class TestMakePartsTakenApart(unittest.TestCase):
                 self.assertGreaterEqual(pack.bounds[0], cells + board * g_per_cm2 / 1000 - 1e-9)
         packs = {p.robot: p.bounds for p in self.apart.parts if p.name == 'Battery pack'}
         self.assertEqual((packs['AgiBot X1'], packs['Fourier N1']), ((1.75, 2.2, 3.3), (2.26, 2.9, 3.2)))
-        pack_wh_per_kg = self.apart.constants[schemas.ALL_ROBOTS]['Battery pack, Wh per kg (packs not weighed)'][1]
-        self.assertLessEqual(pack_wh_per_kg[2], params.composition.nmc_wh_per_kg_min)
 
     def test_the_g1s_hips_are_cooled_passively_with_air_from_the_hip_area(self):
         """Matthias, 2026-10-28: "Joints have no fans, just passive cooling"; Munro (T3): "The hip area uses two
@@ -293,24 +291,24 @@ class TestPartsNotEntered(unittest.TestCase):
                     self.assertNotIn(sink, parts)
                 elif robot == 'Booster T1':   # a Jetson AGX Orin and an Express-i7: both coolers, two fans
                     self.assertEqual(parts['Main board fan'].count, 2)
-                    self.assertEqual(parts[sink].material, 'Aluminium')
+                    self.assertEqual(parts[sink].material, 'Aluminium alloys')
                     self.assertEqual(parts[pipes].material, 'Copper')
                 else:
                     self.assertEqual((parts[sink].bounds, parts[sink].material),
-                                     (tuple(round(kg * factor, 4) for kg in (0.05, 0.1, 0.2)), 'Aluminium'))
+                                     (tuple(round(kg * factor, 4) for kg in (0.05, 0.1, 0.2)), 'Aluminium alloys'))
                     self.assertNotIn(pipes, parts)
 
     def test_the_rp1s_fans_its_auxiliary_battery_bearings_and_cover_magnets(self):
         parts = self.parts('RoboParty RP1')
         self.assertEqual(parts['Waist fan'].count, 2)            # its BOM: two waist fans and a main-board fan
         battery = parts['Auxiliary battery cells (30 V)']
-        self.assertEqual((battery.bounds, battery.material, battery.kind), ((0.12, 0.25, 0.5), 'Battery materials',
+        self.assertEqual((battery.bounds, battery.material, battery.kind), ((0.12, 0.25, 0.5), 'Battery cells',
                                                                             'Battery pack'))
         bearings = parts['Bearings outside the actuators (9)']
         self.assertEqual((bearings.count, bearings.material, bearings.grade), (9, 'Steel', 'GCr15'))
         self.assertAlmostEqual(9 * bearings.bounds[1], 0.8 / 21 * 9, places=3)   # each as the X1's average
         magnets = parts['Magnets in the covers, N52 (80)']
-        self.assertEqual((magnets.count, magnets.material, magnets.grade), (80, 'Magnets (NdFeB)', 'N'))
+        self.assertEqual((magnets.count, magnets.material, magnets.grade), (80, 'NdFeB magnets', 'N'))
         # 4 × 2 mm and 4 × 4 mm discs of NdFeB, 7.5 g/cm3: 0.188 g and 0.377 g each.
         self.assertEqual(magnets.bounds, (0.000188, 0.000283, 0.000377))
 
@@ -344,17 +342,17 @@ class TestTheLastOpenParts(unittest.TestCase):
         self.assertEqual((stainless.bounds, stainless.grade), ((0.0459, 0.0918, 0.1377), 'Type 304'))
         self.assertAlmostEqual(carbon.bounds[1] + stainless.bounds[1], 0.6 * 827 / 980, places=3)   # by number
         pins = parts['Pins, SUS440C (90)']
-        self.assertEqual((pins.bounds, pins.material, pins.grade, pins.label), ((0.105, 0.1086, 0.112), 'Steel', '440C',
+        self.assertEqual((pins.bounds, pins.material, pins.grade, pins.label), ((0.105, 0.1086, 0.112), 'Stainless steel', '440C',
                                                                                'S'))
         shafts = parts['Stainless 17-4PH shafts and crosses']
-        self.assertEqual((shafts.bounds, shafts.material, shafts.grade), ((0.075, 0.15, 0.225), 'Steel', '17-4PH'))
+        self.assertEqual((shafts.bounds, shafts.material, shafts.grade), ((0.075, 0.15, 0.225), 'Stainless steel', '17-4PH'))
         self.assertFalse([s for s in self.apart.shares if s.item.startswith('Stainless 17-4PH shafts and crosses;')])
 
     def test_the_x1s_parts_found_in_its_lists(self):
         parts = self.parts('AgiBot X1')
         inserts = parts['Brass threaded inserts, M3 (12) and M4 (4)']
         self.assertEqual((inserts.bounds, inserts.material, inserts.grade),
-                         ((0.0065, 0.013, 0.0195), 'Copper', 'Brass'))
+                         ((0.0065, 0.013, 0.0195), 'Brass', 'Brass'))
         shield = parts['Sensor shield, stainless 304']
         self.assertEqual((shield.bounds, shield.grade), ((0.01, 0.02, 0.03), 'Type 304'))
         dampers = parts['Silicone dampers (4)']
@@ -369,7 +367,7 @@ class TestTheLastOpenParts(unittest.TestCase):
 
     def test_every_connectors_contacts_are_brass(self):
         for item in ('XT30 (2+2) connectors (two per joint)', 'XT60 connector, mated pair'):
-            contacts = [s for s in self.apart.shares if s.item == item and s.material == 'Copper']
+            contacts = [s for s in self.apart.shares if s.item == item and s.material == 'Brass']   # E19: brass its own
             self.assertEqual([(s.grade, s.share) for s in contacts], [('Brass', (0.175, 0.35, 0.525))], msg=item)
 
 
@@ -471,7 +469,7 @@ class TestTypeTwo(unittest.TestCase):
         self.assertEqual(self.parts('Fourier GR-2')['Screws'].bounds, (0.36, 0.9, 1.8))
         titanium = self.parts('Unitree H2')['Titanium alloy parts']
         self.assertEqual((titanium.bounds, titanium.material, titanium.grade),
-                         ((0.42, 0.84, 1.26), 'Titanium', 'Ti-6Al-4V'))
+                         ((0.42, 0.84, 1.26), 'Titanium alloy', 'Ti-6Al-4V'))
         self.assertNotIn('Titanium alloy parts', self.parts('Fourier GR-2'))
 
     def test_the_small_joints_driver_board_area_as_type_1s(self):
@@ -975,13 +973,14 @@ class TestTypeTwoOnWheels(unittest.TestCase):
         self.assertEqual({r for r, g in cells.items() if g}, {'CASBOT W1'})
         self.assertEqual(cells['CASBOT W1'], 'LFP cylindrical')
         # Its rows say how 02 draws them (Matthias, 2026-10-30, "Ratio, as recommended", E9.8): its cells over a cell of
-        # their recipe, its pack its cells times the NMC packs' ratio; every other robot's as before.
+        # their recipe; its housing, as an NMC pack's in proportion to its cells, since 2026-11-02 a share of its cells
+        # as every pack no source weighs ("A, as recommended", E20); every other robot's cells over the NMC cell's.
         rows = {(p.robot, p.name): p.computed for p in self.apart.parts}
         self.assertIn('a cell of its recipe', rows[('CASBOT W1', 'Battery cells')])
-        self.assertIn("the NMC packs' pack-to-cell ratio", rows[('CASBOT W1', 'Battery pack')])
+        self.assertTrue(rows[('CASBOT W1', 'Battery housing, busbars and wires')].startswith(schemas.CELLS_SHARE))
         others = {(robot, name): text for (robot, name), text in rows.items() if robot != 'CASBOT W1'}
         self.assertTrue(all("NMC cell's Wh/kg" in text for (_, name), text in others.items() if name == 'Battery cells'))
-        self.assertFalse(any('pack-to-cell' in text for text in others.values()))
+        self.assertFalse(any('pack-to-cell' in text for text in rows.values()))
 
     def test_no_kind_torso_boards_left(self):
         for which in (builder, builder_two):
@@ -1058,10 +1057,12 @@ class TestTypesThreeAndFour(unittest.TestCase):
         cls.four, _ = written(builder_four)
 
     def test_each_robot_in_the_file_of_its_first_type_among_3_and_4(self):
-        # Since types 5 and 6's entry (E16.6): batch 3's robots of types 5 and 6 whose first type among 3 and 4 is 3.
+        # Since types 5 and 6's entry (E16.6): batch 3's robots of types 5 and 6 whose first type among 3 and 4 is 3;
+        # since batch 3 (E15.7) every robot of it, E16.6's three in their places of the register's order.
         self.assertEqual(list(self.three.robots), list(TYPE_THREE_BATCH_1) + list(TYPE_THREE_BATCH_2)
-                         + ['Kawasaki Kaleido 9', 'Noble Machines Moby', 'Foundation Phantom MK1'])
-        self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1) + list(TYPE_FOUR_BATCH_2))
+                         + TYPE_THREE_ORDER_3)
+        self.assertEqual(list(self.four.robots), list(TYPE_FOUR_BATCH_1) + list(TYPE_FOUR_BATCH_2)
+                         + list(TYPE_FOUR_BATCH_3))
         self.assertEqual({r.type for r in self.three.robots.values()}, {3})
         self.assertEqual({r.type for r in self.four.robots.values()}, {4})
         self.assertFalse(set(self.three.robots) & set(self.four.robots))
@@ -1119,10 +1120,10 @@ class TestTypesThreeAndFour(unittest.TestCase):
     def test_on_wheels_and_the_magnesium_frames(self):
         both = {**{n: self.three for n in self.three.robots}, **{n: self.four for n in self.four.robots}}
         wheeled = {n for n, a in both.items() if schemas.on_wheels(a, n)}
-        self.assertEqual(wheeled, TYPES_34_ON_WHEELS | TYPES_34_ON_WHEELS_2)
+        self.assertEqual(wheeled, TYPES_34_ON_WHEELS | TYPES_34_ON_WHEELS_2 | TYPES_34_ON_WHEELS_3)   # batch 3: E15.7
         self.assertTrue(any(p.robot == 'Anigon' and p.kind == 'Lift column' for p in self.three.parts))
         frames = {p.robot: p.material for p in self.four.parts if p.name == 'Frame'}
-        self.assertEqual((frames['AgiBot A3'], frames['AgiBot A3 Ultra']), ('Magnesium', 'Magnesium'))
+        self.assertEqual((frames['AgiBot A3'], frames['AgiBot A3 Ultra']), ('Magnesium alloys', 'Magnesium alloys'))
 
 
 def template_spans(constants: dict) -> list:
@@ -1501,7 +1502,7 @@ class TestTypesFiveAndSix(unittest.TestCase):
     def test_e15s_three_robots_of_types_5_and_6(self):
         self.assertEqual(self.mass('Noble Machines Moby'), (71, 72, 73))
         self.assertEqual(self.mass('Kawasaki Kaleido 9'), (98, 99, 100))
-        self.assertEqual(self.parts('Kawasaki Kaleido 9')['Frame'].material, 'Magnesium')
+        self.assertEqual(self.parts('Kawasaki Kaleido 9')['Frame'].material, 'Magnesium alloys')
         phantom = self.parts('Foundation Phantom MK1')
         self.assertFalse([p for p in phantom if p.startswith('Battery')])     # "lacks a battery"
         body = {j.name: j.torque for j in self.body('Foundation Phantom MK1')}
@@ -1528,3 +1529,298 @@ class TestTypesFiveAndSix(unittest.TestCase):
         for t, name in ((6, 'IHMC Alex'), (5, 'EngineAI T800 Dev')):
             table = {r.name: r for r in schemas.robots_table_rows(self.files[t])}
             self.assertEqual(table[name].bases['Mass'], ('maker',), msg=name)
+
+
+# --- Batch 3 of types 3 and 4 (EVIDENCE.md E15.7; Matthias, 2026-11-02: "E15's entry", "Yes, build it") ---------------
+# Each block as E15.3's row: (mass (min, mode, max) kg, on wheels, hands, battery Wh). Hands: 0 none, 'G' two grippers,
+# an int the joints of each of its two hands (Fourier's six-joint hand per joint), a float a stated hand's kg (each of
+# two). Battery: its energy, voltage × capacity at the modes, or None for the template's (no voltage of its own). The
+# seven robots of no stated form on legs and on wheels (E15.6 question 2), each the same row. In the register's order.
+BOTH_FORMS = ('on legs', 'on wheels')
+TYPE_THREE_BATCH_3 = {
+    'Figure AI Figure 02': ((69, 70, 71), False, 16, 2250), 'Holiday Robotics Friday': ((114, 115, 116), True, 0.5, None),
+    'AgiBot G2 Max': ((184, 185, 186), True, 0, None), 'Galbot G1': ((91.5, 92.5, 93.5), True, 'G', 1440),
+    'Galbot ET1': ((31, 32, 33), False, 0, None), 'Galbot S1': ((319, 320, 321), True, 'G', 2880),
+    'Persona AI Gen 1': ((69, 70, 85), False, 10, None), 'Generative Bionics GENE.01': ((60, 79.7, 80.7), False, 21, None),
+    'Gento Luna': ((89, 90, 91), True, 'G', 1651.2), 'Geek+ Gino 1': ((62, 63, 64), True, 7, None),
+    'GAC GoMate': ((44, 45, 46), True, 5, None), 'GAC GoMate Mini': ((59, 60, 61), True, 0, None),
+    'Humanoid HMND 01 Bipedal': ((89, 90, 91), False, 'G', None),
+    'Huashu HSR-ER-HR705': ((199, 200, 201), True, 'G', None), 'XPENG IRON 2025': ((69, 70, 90), False, 22, None),
+    'JAKA K1': ((39, 40, 41), False, 0, None), 'JAKA Kargo': ((179, 180, 200), True, 0, None),
+    'Zeroth Jupiter': ((57, 58, 60), False, 10, None), 'LG KAPEX': ((60, 65, 70), False, 0, None),
+    'Galaxea Kengo': ((39, 40, 65), False, 6, None), 'Kinisi KR1': ((99, 100, 101), True, 'G', None),
+    'Moon Dynamics L1': ((59, 60, 61), True, 'G', None), 'Glroad Laborer M1': ((85, 86, 87), False, 0, None),
+    'MagicLab MagicBot X1': ((69, 70, 71), False, 0, None),
+    'Matrix Robotics Matrix-1': ((66, 67, 68), False, 22, 2280), 'Mentee MenteeBot 2024': ((69, 70, 71), False, 0, None),
+    'Mentee MenteeBot V3': ((65, 70, 71), False, 0, None), 'O-ID Modular': ((69, 70, 71), True, 'G', None),
+    'Zhejiang Navigator 2': ((59, 60, 61), False, 0.6, None), 'Galaxea NEXO': ((78, 85, 86), True, 0, None),
+    'Sharpa North': ((59, 60, 90), True, 22, None), 'ugo Nova': ((99, 100, 101), True, 'G', 1113.2),
+    'Pink Robotics P0': ((81, 82, 83), False, 'G', None), 'PsiBot Psi V1': ((149, 150, 151), True, 0, None),
+    'Pudu D9': ((64, 65, 66), False, 0.5, 720), 'XPENG PX5': ((108, 109, 110), False, 0.43, None),
+    'X Square QUANTA X2': ((94, 95, 96), True, 20, None), 'AgiBot RAISE A1': ((54, 55, 56), False, 12, None),
+    'NineRay RayNex G3': ((59, 60, 61), False, 6, None), 'RoboScience REX G1': ((79, 80, 81), True, 0, None),
+    'Oversonic RoBee': ((179, 180, 293), True, 'G', None), 'Roboligent Robin': ((104, 105, 106), True, 'G', None),
+    'Robo Robotics ROBO-T1': ((45, 50, 60), True, 'G', None), 'Ati Sherpa Mecha': ((179, 180, 181), True, 0, None),
+    'EIR SkyWalker 2 on legs': ((54, 55, 56), False, 6, None), 'EIR SkyWalker 2 on wheels': ((54, 55, 56), True, 6, None),
+    'Muks Spaceo Pro': ((59, 60, 61), True, 'G', 1152), 'Robotera Star1': ((62, 63, 64), False, 12, None),
+    'WorkFar Syntro': ((107, 108, 109), True, 12, 1200),
+    'PaXini Tora DoubleOne P': ((69, 70, 71), True, 18, 1214.01),
+    'PaXini Tora DoubleOne X': ((72, 73, 74), True, 18, 1214.01), 'DexForce W1 Pro': ((109, 110, 111), True, 6, None),
+    'Walden Robotics Walden': ((89, 90, 91), True, 'G', None), 'UBTECH Walker S2': ((69, 70, 71), False, 11, 2300),
+    'PL-Universe Zeus 1': ((299, 300, 301), True, 0, 1920), 'Perceptyne PR-OMNI': ((119, 120, 121), True, 'G', 3000)}
+TYPE_FOUR_BATCH_3 = {
+    'Pudu FlashBot Arm': ((69, 70, 71), True, 6, None), 'Futuring 2 on legs': ((69, 70, 71), False, 'G', None),
+    'Futuring 2 on wheels': ((69, 70, 71), True, 'G', None), 'Fourier GR-3': ((70, 71, 72), False, 6, 936),
+    'Haier HIVA Haiwa': ((69, 70, 71), True, 6, None), 'Noetix Hobbs W1': ((74, 75, 76), True, 6, 828.8),
+    'HONOR': ((79, 80, 81), False, 0, None), 'HONOR A1': ((39, 40, 41), False, 0, None),
+    'XPENG IRON 2024': ((69, 70, 71), False, 15, None), 'Weave Isaac 1': ((39, 40, 45), True, 'G', None),
+    'Jingchu Elf': ((69, 70, 80), True, 0, None), 'KinetixAI KAI on legs': ((69, 70, 71), False, 0.75, 1700),
+    'KinetixAI KAI on wheels': ((69, 70, 71), True, 0.75, 1700), 'Keenon XMAN-R1': ((109, 110, 111), True, 0, None),
+    'Knowin-X1': ((49, 50, 51), True, 0, None), 'Leju KUAVO 5-W': ((155, 156, 157), True, 6, None),
+    'Leju Kuavo-my': ((44, 45, 46), False, 0, None), 'Glroad Laborer C1': ((37, 38, 39), False, 0, None),
+    'HECbot Lumen H1': ((68, 69, 70), False, 6, 700), 'HECbot Lumen S1 on legs': ((34, 35, 36), False, 0, None),
+    'HECbot Lumen S1 on wheels': ((34, 35, 36), True, 0, None), 'MagicLab MagicBot': ((54, 70, 71), False, 6, 1350),
+    'MagicLab MagicBot Z1': ((39, 40, 41), False, 0, 555), 'GigaAI Maker H01': ((63, 64, 65), True, 7, None),
+    'UniX Martian': ((39, 40, 41), False, 11, 432), 'Sunday MEMO': ((76.1, 77.1, 78.1), True, 4, None),
+    'Enchanted Tools Mirokaï': ((26, 29, 30), True, 2, None), 'AiMOGA Mornine': ((65, 70, 71), False, 12, 700),
+    'Noetix N2': ((29, 30, 31), False, 0, None), 'GENISOM NE01': ((39, 40, 41), False, 0, None),
+    '1X NEO Beta': ((29, 30, 31), False, 0, None), '1X NEO Gamma': ((34, 35, 36), False, 0, None),
+    'Lumos NIX': ((18, 25.41, 26.41), False, 0, 282), 'SwitchBot Onero H1': ((35, 68, 69), True, 0, None),
+    'PrimeBOT T1': ((8, 8.5, 9), True, 0, None), 'PL-Universe ProWhite': ((399, 400, 401), True, 'G', 4000),
+    'Pudu D7 2024': ((44, 45, 46), True, 0, 1000), 'Pudu D7 2026': ((139, 140, 141), True, 0, None),
+    'Robot.com RNoid': ((89, 90, 91), True, 'G', None), 'Robbyant R1': ((109, 110, 111), True, 0, None),
+    'ROBOTERA Q5': ((69, 70, 71), True, 11, None), 'EngineAI SA02 on legs': ((24, 25, 26), False, 0, None),
+    'EngineAI SA02 on wheels': ((24, 25, 26), True, 0, None), 'Muks Spaceo M1': ((44, 45, 46), True, 'G', 1152),
+    'StarBot Nova': ((30.8, 31.8, 32.8), True, 0, None), 'Sulu.be Steve on legs': ((99, 100, 140), False, 0, None),
+    'Sulu.be Steve on wheels': ((99, 100, 140), True, 0, None), 'Syntheva Synthia': ((9.8, 10.9, 12.0), False, 0, None),
+    'iHub TARA GEN1': ((74, 75, 76), True, 0, None), 'Tau Robotics Tau Humanoid': ((34, 35, 36), False, 'G', 421.2),
+    'UBTECH U1 Pro male': ((41, 42, 43), False, 0, None), 'UBTECH U1 Pro female': ((34.2, 35.2, 36.2), False, 0, None),
+    'Tuesday Labs Voxel': ((44, 45, 46), False, 'G', None), 'UBTECH Walker C': ((42, 43, 44), False, 0, 720),
+    'UBTECH Walker C1': ((54, 55, 56), False, 0, None), 'UBTECH Walker S1': ((75, 76, 77), False, 6, None),
+    'Yue Quan X-Bot': ((59, 60, 61), False, 0, None), 'BYD Xiao Di': ((57.5, 58.5, 59.5), False, 0, None),
+    'Tencent Xiao Liu on legs': ((55, 70, 71), False, 0, None), 'Tencent Xiao Liu on wheels': ((55, 70, 71), True, 0, None),
+    'Digit XiaQi': ((68, 69, 69), False, 0, 700), 'Leju XTRON KUAVO-MY': ((50, 55, 56), False, 0, None),
+    'Yunmu YMBot C': ((74, 75, 76), False, 0, None), 'Yunmu YMBot H': ((74, 75, 76), True, 0, None),
+    'Zerith H1': ((54, 55, 56), True, 0, None), 'Zerith Z1': ((32, 33, 34), False, 0, None)}
+# Type 3's file in the register's order: batch 3 with E16.6's three in their places (E11.7 point 1).
+TYPE_THREE_ORDER_3 = (list(TYPE_THREE_BATCH_3)[:18] + ['Kawasaki Kaleido 9'] + list(TYPE_THREE_BATCH_3)[18:27]
+                      + ['Noble Machines Moby'] + list(TYPE_THREE_BATCH_3)[27:33] + ['Foundation Phantom MK1']
+                      + list(TYPE_THREE_BATCH_3)[33:])
+TYPES_34_ON_WHEELS_3 = {n for d in (TYPE_THREE_BATCH_3, TYPE_FOUR_BATCH_3) for n, row in d.items() if row[1]}
+# The 17 blocks with joints from a stated joint (E15.7 point 2): its torque (N·m), the joint it is, and E15.3's body
+# joint modules at the modes (kg), batch3_plan.py's arithmetic (its ratios before E12.7's elbow 0.17 and second waist
+# 0.77: within 5 %). The Spaceo Pro its shoulders' "66 Nm" as stated beside its waist's 90 (E15.3's 4.7 kg left them out).
+FROM_A_STATED_JOINT_3 = {
+    'Galaxea Kengo': (130, 'Knee', 16.1), 'Glroad Laborer C1': (150, 'Knee', 15.2),
+    'Glroad Laborer M1': (430, 'Knee', 30.0), 'HECbot Lumen H1': (512, 'Knee', 33.7),
+    'MagicLab MagicBot': (350, 'Knee', 29.3), 'MagicLab MagicBot X1': (350, 'Knee', 30.4),
+    'MagicLab MagicBot Z1': (100, 'Knee', 12.8), 'UniX Martian': (150, 'Knee', 18.8), 'Noetix N2': (150, 'Knee', 13.5),
+    'Pudu D9': (352, 'Knee', 29.4), 'AgiBot RAISE A1': (350, 'Knee', 26.4), 'Muks Spaceo M1': (15.7, 'Shoulder', 2.7),
+    'Muks Spaceo Pro': (90, 'Waist', None), 'PaXini Tora DoubleOne P': (207, 'Waist', 11.4),
+    'PaXini Tora DoubleOne X': (207, 'Waist', 11.4), 'UBTECH Walker S1': (250, 'Knee', 25.1),
+    'Zerith Z1': (150, 'Knee', 15.2)}
+# Every body joint from its maker's model file (E15.7 point 2, E14's way): (name, count, torque N·m), as read (V134).
+GR3_BODY = [('Hip pitch', 2, 366), ('Hip roll', 2, 140.4), ('Hip yaw', 2, 140.4), ('Knee', 2, 366),
+            ('Ankle pitch', 2, 59.4), ('Ankle roll', 2, 59.4), ('Waist yaw', 1, 140.4), ('Waist roll', 1, 108.6),
+            ('Waist pitch', 1, 108.6), ('Head yaw', 1, 17.4), ('Head pitch', 1, 17.4), ('Shoulder pitch', 2, 74.4),
+            ('Shoulder roll', 2, 74.4), ('Shoulder yaw', 2, 42.9), ('Elbow', 2, 42.9), ('Wrist yaw', 2, 42.9),
+            ('Wrist pitch', 2, 17.4), ('Wrist roll', 2, 17.4)]
+STAR1_BODY = [('Head yaw', 1, 35), ('Head pitch', 1, 35), ('Shoulder pitch', 2, 110), ('Shoulder roll', 2, 110),
+              ('Shoulder yaw', 2, 110), ('Elbow pitch', 2, 110), ('Elbow yaw', 2, 35), ('Wrist pitch', 2, 35),
+              ('Wrist roll', 2, 35), ('Waist pitch', 1, 220), ('Waist roll', 1, 220), ('Waist yaw', 1, 110),
+              ('Hip roll', 2, 255), ('Hip yaw', 2, 100), ('Hip pitch', 2, 400), ('Knee', 2, 400),
+              ('Ankle pitch', 2, 100), ('Ankle roll', 2, 100)]
+# The seven of E15.4: no stated mass, listed only (E15.7 point 5).
+LISTED_ONLY_3 = {124: 'HELIOS', 214: 'Northstar', 282: 'StarBot Flex', 292: 'TARS', 304: 'Tobi', 316: 'Vesoma 1',
+                 345: 'Yogi'}
+
+
+class TestTypesThreeAndFourBatchThree(unittest.TestCase):
+    """Batch 3 of types 3 and 4 entered (E15.7; Matthias, 2026-11-02, "Yes, build it"): every block as E15.3's row, the
+    17 from a stated joint, the GR-3 and the Star1 from their models, the Tau Humanoid with the Unitree G1's joints and
+    battery, the stated batteries and computers, the seven of E15.4 listed only."""
+
+    NOT_BODY = ('Hand', 'Gripper', 'Wheel', 'Steering', 'Lift')
+
+    @classmethod
+    def setUpClass(cls):
+        cls.three, _ = written(builder_three)
+        cls.four, _ = written(builder_four)
+        cls.both = {**{n: cls.three for n in cls.three.robots}, **{n: cls.four for n in cls.four.robots}}
+
+    def joints(self, robot: str) -> list:
+        return [j for j in self.both[robot].joints if j.robot == robot]
+
+    def body(self, robot: str) -> list:
+        return [j for j in self.joints(robot) if not j.name.startswith(self.NOT_BODY)]
+
+    def test_each_block_in_the_file_of_its_first_type(self):
+        self.assertTrue(set(TYPE_THREE_BATCH_3) <= set(self.three.robots))
+        self.assertTrue(set(TYPE_FOUR_BATCH_3) <= set(self.four.robots))
+        self.assertEqual((len(TYPE_THREE_BATCH_3), len(TYPE_FOUR_BATCH_3)), (56, 66))
+
+    def test_every_block_as_e15_3(self):
+        for rows in (TYPE_THREE_BATCH_3, TYPE_FOUR_BATCH_3):
+            for robot, (mass, wheels, hands, energy) in rows.items():
+                apart, own = self.both[robot], self.both[robot].constants[robot]
+                self.assertEqual(own['Robot mass, with battery'][1], mass, msg=robot)
+                self.assertEqual(schemas.on_wheels(apart, robot), wheels, msg=robot)
+                hand = [j for j in self.joints(robot) if j.name.startswith(('Hand', 'Gripper'))]
+                if hands == 0:
+                    self.assertEqual(hand, [], msg=robot)
+                elif hands == 'G':
+                    self.assertEqual([(j.name, j.count) for j in hand], [('Gripper', 2)], msg=robot)
+                elif isinstance(hands, int):
+                    self.assertEqual([(j.name, j.count, j.module_mass) for j in hand],
+                                     [(f'Hand ({hands} joints)', 2, half_to_one_and_a_half(0.443 * hands / 6))],
+                                     msg=robot)
+                else:
+                    self.assertEqual([(j.count, j.module_mass[1]) for j in hand], [(2, hands)], msg=robot)
+                if energy is None:
+                    self.assertNotIn('Battery voltage', own, msg=robot)
+                else:
+                    self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], energy,
+                                           delta=0.5, msg=robot)
+
+    def test_what_they_write_passes_every_check_of_01(self):
+        lists = schemas.read_shared_lists(absolute(Params().data.shared_lists))
+        for apart in (self.three, self.four):
+            self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, Params())], [])
+
+    def test_the_seventeen_from_a_stated_joint(self):
+        for robot, (torque, kind, kg) in FROM_A_STATED_JOINT_3.items():
+            body = self.body(robot)
+            self.assertTrue(all(j.share is None for j in self.joints(robot)), msg=robot)   # off the template
+            stated = next(j for j in body if j.name == kind)
+            self.assertAlmostEqual(stated.torque, torque, places=2, msg=robot)
+            self.assertAlmostEqual(stated.module_mass[1], fitted(torque)[1], places=3, msg=robot)
+            total = sum(j.count * j.module_mass[1] for j in body)
+            if kg is not None:
+                self.assertAlmostEqual(total, kg, delta=0.05 * kg, msg=robot)
+        pro = {j.name: j for j in self.body('Muks Spaceo Pro')}
+        self.assertEqual((pro['Shoulder'].torque, pro['Shoulder'].module_mass), (66, fitted(66)))
+        self.assertEqual(max(j.torque for j in self.body('Muks Spaceo M1')), 15.7)
+        tora = {j.name: j.count for j in self.body('PaXini Tora DoubleOne P')}
+        self.assertEqual(tora, {'Waist': 2, 'Waist 2': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6, 'Head': 2})
+
+    def test_the_gr3_and_the_star1_from_their_models(self):
+        for robot, rows, kg in (('Fourier GR-3', GR3_BODY, 26.9), ('Robotera Star1', STAR1_BODY, 32.9)):
+            body = self.body(robot)
+            self.assertEqual([(j.name, j.count, j.torque) for j in body], rows, msg=robot)
+            self.assertTrue(all(j.module_mass == fitted(j.torque) for j in body), msg=robot)
+            self.assertAlmostEqual(sum(j.count * j.module_mass[1] for j in body), kg, delta=0.1, msg=robot)
+            self.assertTrue(all(j.share is None for j in self.joints(robot)), msg=robot)
+
+    def test_the_tau_humanoid_takes_the_unitree_g1s_joints_and_battery(self):
+        one, _ = written()
+        g1 = [(j.name, j.count, j.module, j.torque) for j in one.joints if j.robot == 'Unitree G1']
+        tau = self.body('Tau Robotics Tau Humanoid')
+        self.assertEqual([(j.name, j.count, j.module, j.torque) for j in tau], g1)
+        self.assertTrue(all(None in j.module_mass for j in tau))                    # inside as the G1's, unscaled
+        own = self.four.constants['Tau Robotics Tau Humanoid']
+        self.assertEqual((own['Battery voltage'][1], own['Battery capacity'][1]),
+                         ((46.8, 46.8, 46.8), (8.55, 9, 9.45)))
+        pack = next(p for p in self.four.parts if p.robot == 'Tau Robotics Tau Humanoid' and p.name == 'Battery pack')
+        self.assertEqual(pack.bounds, (2.25, 2.5, 2.75))
+
+    def test_the_named_computers(self):
+        boards = lambda robot: {b.name for b in self.both[robot].boards if b.robot == robot}  # noqa: E731
+        for robot, names in (('Galbot G1', {'Compute module, NVIDIA Jetson AGX Orin'}),
+                             ('Geek+ Gino 1', {'Compute module, NVIDIA Jetson AGX Thor'}),
+                             ('Fourier GR-3', {'Computer board, AMD Ryzen 7 8845HS'}),
+                             ('Humanoid HMND 01 Bipedal', {'Compute module, NVIDIA Jetson AGX Orin',
+                                                                 'Computer board, Intel i9'}),
+                             ('Noetix Hobbs W1', {'Compute module, Rockchip RK3588', 'Computer board, Intel J1900'}),
+                             ('Glroad Laborer C1', {'Compute module, NVIDIA Jetson Orin NX'}),
+                             ('Robot.com RNoid', {'Computer board, AMD Ryzen 5 7640HS',
+                                                  'Compute module, NVIDIA Jetson AGX Orin'}),
+                             ('UBTECH Walker C1', {'Compute module, NVIDIA Jetson AGX Thor'}),
+                             ('Syntheva Synthia', {'Computer board, BCM2712'})):
+            self.assertTrue(names <= boards(robot), msg=(robot, boards(robot)))
+        mentee = [b for b in self.three.boards if b.robot == 'Mentee MenteeBot V3'
+                  and b.name == 'Compute module, NVIDIA Jetson AGX Orin']
+        self.assertEqual([b.count for b in mentee], [2])
+
+    def test_lfp_cells_where_their_makers_say_so(self):
+        for robot in ('Gento Luna', 'ugo Nova', 'Muks Spaceo M1', 'Muks Spaceo Pro'):
+            cells = next(p for p in self.both[robot].parts if p.robot == robot and p.name == 'Battery cells')
+            self.assertEqual(cells.grade, 'LFP cylindrical', msg=robot)
+
+    def test_steered_wheels_and_lifts(self):
+        steering = {j.robot: j.count for a in (self.three, self.four) for j in a.joints if j.name == 'Steering motor'}
+        self.assertTrue({'AgiBot G2 Max': 4, 'Galbot S1': 4, 'PaXini Tora DoubleOne P': 4}.items() <= steering.items())
+        lifts = {p.robot for a in (self.three, self.four) for p in a.parts if p.kind == 'Lift column'}
+        self.assertTrue({'Galbot S1', 'JAKA Kargo', 'Weave Isaac 1', 'Sunday MEMO', 'PL-Universe ProWhite',
+                         'RoboScience REX G1', 'Oversonic RoBee', 'Roboligent Robin', 'Ati Sherpa Mecha',
+                         'Muks Spaceo Pro', 'PaXini Tora DoubleOne P', 'PaXini Tora DoubleOne X', 'PL-Universe Zeus 1',
+                         'Perceptyne PR-OMNI'} <= lifts)
+
+    def test_the_seven_listed_only_have_no_rows(self):
+        for name in LISTED_ONLY_3.values():
+            self.assertFalse([r for r in self.both if name in r], msg=name)
+        self.assertTrue(set(LISTED_ONLY_3) <= set(REGISTER.NO_MASS_STATED))
+
+    def test_no_source_row_from_a_robots_name(self):
+        # A robot's name holding a source code ("Moon Dynamics L1", "Robo Robotics ROBO-T1") brings no row of that
+        # code into the sheet Sources: only the codes its rows' texts cite.
+        self.assertNotIn('L1', self.three.sources)
+        self.assertNotIn('T1', self.three.sources)
+
+
+# --- E19 (Matthias, 2026-11-02, "Yes, agree E19"): the one fixed list of materials, each name what it is --------------
+E19_MATERIALS = ['Copper', 'Brass', 'Nickel', 'Aluminium alloys', 'Magnesium alloys', 'Titanium alloy', 'Steel',
+                 'Stainless steel', 'Electrical steel', 'NdFeB magnets', 'Battery cells', 'Boards and components',
+                 'Plastics', 'Fibre composites', 'Ceramics', 'Other', 'Not allocated']
+# The grades that name a material of their own (E19 point 2): a stainless or electrical steel, brass, the nickel strip.
+E19_GRADE_MATERIAL = {'17-4PH': 'Stainless steel', '440C': 'Stainless steel', 'Type 304': 'Stainless steel',
+                      'M19': 'Electrical steel', 'M27': 'Electrical steel', 'M19 or M27': 'Electrical steel',
+                      'Brass': 'Brass', 'Nickel strip': 'Nickel'}
+
+
+class TestE19Materials(unittest.TestCase):
+    """Every parts file names its materials from E19's one list, a stainless or electrical steel, brass and the nickel
+    strip each under a material of its own (EVIDENCE.md E19 point 2)."""
+
+    def test_every_file_names_its_materials_from_the_list(self):
+        five = load('make_parts_taken_apart_5', os.path.join('tools', '5_heavy_duty_high_performance_hazardous_'
+                                                            'environment', 'make_parts_taken_apart.py'))
+        six = load('make_parts_taken_apart_6', os.path.join('tools', '6_defense_public_safety',
+                                                           'make_parts_taken_apart.py'))
+        for which in (None, builder_two, builder_three, builder_four, five, six):
+            apart = written(which)[0] if which else written()[0]
+            rows = ([(c.material, c.grade) for c in apart.joint_parts] + [(p.material, p.grade) for p in apart.parts]
+                    + [(s.material, s.grade) for s in apart.shares])
+            for material, grade in rows:
+                if not material:
+                    continue
+                for one in schemas.alternatives(material):
+                    self.assertIn(one, E19_MATERIALS, msg=(apart.source, material, grade))
+                for g in schemas.alternatives(grade):
+                    if g in E19_GRADE_MATERIAL:
+                        self.assertEqual(material, E19_GRADE_MATERIAL[g], msg=(apart.source, grade))
+
+
+class TestHousingShareOfCells(unittest.TestCase):
+    """Matthias, 2026-11-02: "A, as recommended" (EVIDENCE.md E20): in every parts file a battery pack no source weighs
+    is its cells, its management board and its housing, the housing a share of its cells by one shared row (0.207 /
+    0.414 / 0.859: the median of the packs their makers weigh, the G1's, the PM01's and the T800's; half of it; the
+    Reachy 2's), so that it never falls below zero; a weighed pack's housing stays the pack's remainder."""
+
+    def test_every_file_holds_the_share_and_every_pack_not_weighed_takes_it(self):
+        for which in (None, builder_two, builder_three, builder_four, builder_five, builder_six):
+            apart = written(which)[0]
+            with self.subTest(file=apart.source):
+                self.assertEqual(apart.constants[schemas.ALL_ROBOTS][schemas.HOUSING_SHARE][1], (0.207, 0.414, 0.859))
+                for pack in (p for p in apart.parts if p.name == 'Battery pack'):
+                    housings = [p.computed for p in apart.parts if p.robot == pack.robot
+                                and p.computed.startswith((schemas.PACK_REMAINDER, schemas.CELLS_SHARE))]
+                    want = (f"{schemas.CELLS_SHARE}: Constants' {schemas.HOUSING_SHARE}" if None in pack.bounds
+                            else schemas.PACK_REMAINDER)
+                    for computed in housings:
+                        self.assertTrue(computed.startswith(want), msg=(pack.robot, computed))
+
+    def test_type_one_has_both(self):
+        apart = written()[0]
+        housing = {p.robot: p.computed for p in apart.parts if p.name == 'Battery housing, busbars and wires'}
+        self.assertTrue(housing['Unitree G1'].startswith(schemas.PACK_REMAINDER))
+        self.assertTrue(housing['Booster K1 2 Ah'].startswith(schemas.CELLS_SHARE))

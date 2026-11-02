@@ -28,7 +28,7 @@ six categories, each with one anchor robot whose parts list stands for the categ
 
   02_composition.py    draws what each robot type is made of, `composition.draws` times (Monte Carlo): its
                        materials, elements, part groups and body regions, into `data/consolidated/`, one
-                       folder per robot type, for stock-and-flow; and a page per robot type.
+                       folder per robot type, the draws of each robot type; and a page per robot type.
 
   03_comparison.py     draws the robot types side by side, by material, element, part group and body
                        region, from the draws of 02, into `figures/comparison/`.
@@ -264,17 +264,6 @@ class CompositionParams:
         default=15.0,
         metadata={'doc': "Robot type 1's lowest mass, kg (Matthias, 2026-10-28); lighter robots are not type 1."})
 
-    # The elements left off the element pages of 02 and 03, by their symbols (Matthias, 2026-10-29: "Hydrogene and
-    # Oxygen have to go you should know this. Same for F, and N"; as in RAWCLICStockAndFlow, whose figures leave out
-    # nitrogen, fluorine and oxygen, and RAWCLICDataCenters, whose leave out oxygen; then "S and P can go also Na").
-    # The draws keep them, so that the elements still add up to the materials in every draw and stock-and-flow can read
-    # any of them. 02 stops when a symbol is not an element.
-    # SAFE TO CHANGE: only on Matthias's word.
-    elements_not_shown: tuple = field(
-        default=('H', 'N', 'O', 'F', 'Na', 'P', 'S'),
-        metadata={'doc': 'The elements left off the element pages of 02 and 03 (Matthias, 2026-10-29); the draws '
-                         'keep them.'})
-
 
 @dataclass
 class OutputParams:
@@ -286,7 +275,7 @@ class OutputParams:
         metadata={'doc': 'Where 01_schemas.py draws the overview, one page per category and the '
                          'faults.'})
 
-    # What 02_composition.py writes for stock-and-flow, one folder per robot type (<n>_<name>/): the draws and their
+    # The draws of each robot type, as 02_composition.py writes them, one folder per robot type (<n>_<name>/): the draws and their
     # summary. data/consolidated/ is the one folder another repository reads (the house layout of the RAWCLIC
     # projects). Outputs: not in git.
     composition_dir: str = field(
@@ -306,8 +295,8 @@ class OutputParams:
 
     # What 02_composition.py writes of each robot type taken apart: its draws of every material and element in every
     # kind of part, into a folder of its own below this one (<n>_<name>/, as data/consolidated/'s; 2026-10-30, "Yes,
-    # build C"). The project's own outputs (data/), until Matthias decides whether stock-and-flow reads them (open
-    # point F of its plan), which would move them to data/consolidated/. Outputs: not in git.
+    # build C"). The project's own outputs (data/), until Matthias decides whether a later stage reads them
+    # (open point F of its plan), which would move them to data/consolidated/. Outputs: not in git.
     parts_dir: str = field(
         default=os.path.join('data', 'parts_taken_apart'),
         metadata={'doc': 'Where the draws of each robot type taken apart are written, a folder per type.'})
@@ -382,12 +371,6 @@ def validate(params: Params) -> None:
         raise ParameterError('composition.nmc_wh_per_kg_min, _mode and _max must be above 0 and in order, not '
                              f'{composition.nmc_wh_per_kg_min}, {composition.nmc_wh_per_kg_mode}, '
                              f'{composition.nmc_wh_per_kg_max}.')
-    # A tuple of element symbols, each once and none empty (whether each is an element, 02 checks against 01's list).
-    hidden = composition.elements_not_shown
-    if (not isinstance(hidden, tuple) or not all(isinstance(e, str) and e.strip() for e in hidden)
-            or len(set(hidden)) < len(hidden)):
-        raise ParameterError('composition.elements_not_shown must be a tuple of element symbols, each once, such as '
-                             f"('H', 'N', 'O', 'F'), not {hidden!r}.")
 
     # The sibling projects' files: absolute, .xlsx where a file is named.
     for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',

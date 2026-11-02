@@ -8,6 +8,298 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E21. The 1X NEO's frame below zero: research and proposal (2026-11-02). A agreed and built (E21.4)
+
+Matthias, 2026-11-02: "Research the NEO first", on 02 stopping on type 4 at 200,000 draws ("Frame is below zero in 2
+draws", V146). The NEO (robot 1 of the register, type 4, batch 1): 29.9 kg, its joints on the template (E11.6), its
+battery its maker's 842 Wh. Its frame, the remainder, is below zero in 16 % of its draws (13.5 % in V114). The 2
+draws of type 4 are most likely its own: of type 4's robots only its frame, shell and screws come near zero (0.45 kg
+at the least of 180 draws; V146).
+
+### E21.1 What 1X states, read first-hand on 2026-11-02
+
+| Source | What it states | What it does not |
+|---|---|---|
+| 1X, order page, tab Product, https://www.1x.tech/order | Weight "66 lbs", Lift "154 lbs", Carry "55 lbs", Arm Payload "18 lbs"; DoF Hands "22x2", Arms "7x2", Neck "3", Spine "2", Legs "6x2"; Battery "842 Wh", "4h"; Body "Soft body with custom lattice polymer structure"; Actuation "Low inertia tendon drives"; Tendon Drive: torque accuracy "2%", backdrivability "95%", nominal load cycles "2.000.000" | any torque, any part's mass, the frame's material |
+| 1X, "NEO's Hands" (9 Jul 2026), https://www.1x.tech/discover/neos-hands | "25 degrees of freedom (22 fully actuated DoF in the fingers and palm, plus 3 at the wrist)"; "low gear ratios of approximately 5:1 to 15:1"; "Peak torques reach 3.5 Nm at the thumb CMC and 2.6 Nm at the finger MCP joints"; "The wrist delivers 17.75 Nm of torque"; "The motors live in the forearm" | a hand's mass |
+| 1X, "NEO Factory" (30 Apr 2026), https://www.1x.tech/discover/neo-factory | "the Revo2 motor– the heart of NEO's tendon-driven actuation system"; motors from "copper coils" and "stators from electric steel"; "The 1X Battery Pack is manufactured with aerospace-grade cells"; its own BMS | the Revo2's torque or mass; the cells' chemistry |
+| 1X, About, https://www.1x.tech/about | 2018: "Revo1 ... the world's highest torque to weight drive servo motor ... Tailored explicitly for low gear-ratio robotics" | which robot uses which motor |
+| Motion Control Products, the Revo1's distributor, archived 26 Sep 2021, https://web.archive.org/web/20210926103101/https://www.motioncontrolproducts.com/electric-motors/specialised-motors/halodi-direct-drive-motors/ | REV01-5 / -15 / -30: peak torque 6.7 / 20 / 40 N·m, nominal 1.7 / 5 / 10, mass 256 / 565 / 1023 g (a distributor's table of 1X's earlier motor, first-hand on the archived page) | the Revo2 (NEO's) |
+
+Searched without a result: a model file of the NEO (GitHub, MuJoCo Menagerie), a teardown or bill of materials
+(English and Chinese), any figure of the Revo2. The secondary pages found (humanoid.guide, webuildhumanoids.com,
+heise) repeat 1X's figures; webuildhumanoids.com writes "Max joint torque: Not published".
+
+### E21.2 What the research settles
+
+Nothing of 1X's sets the NEO's joint masses. The two ways to estimate them from what 1X states both give more than
+the template, not less (my arithmetic):
+- **From its one stated joint**, the wrist's 17.75 N·m, by `from_stated_joint` (E12.5 point 2; the wrist 0.08 of the
+  largest joint): a knee of 222 N·m, and by E6.8's fit 23.1 kg of body joints, three quarters of a 29.9 kg robot.
+  Not usable: the template's ratios and fit are of geared joint modules, the NEO's are tendon drives.
+- **From 1X's only published motor**, one Revo1 per body joint (the large at the hips, knees and waist, the small at
+  the wrists and neck): 18.4 kg of motors alone. Not usable either: the NEO runs on the Revo2, of which nothing is
+  published.
+
+The template gives 13.4 kg (6.7 to 20.1). With the maker's 842 Wh battery (28 Wh per kg of robot, twice the
+template's 14.67) the NEO's stated parts nearly fill its stated mass, so its frame, the remainder, falls below zero
+in some draws. That is a tension in what is known, not a number to correct.
+
+### E21.3 The options
+
+| | What | For | Against |
+|---|---|---|---|
+| **A** (recommended) | 02 reports, instead of stopping, a part group or a material below zero in a draw where a remainder of the robot drawn (its frame, a weighed pack's housing, a joint's structure) is below zero; the draws kept as they are, each such case and its share of the draws written on the type's notes page. Below zero elsewhere still stops 02 | No invented number. CLAUDE.md §7: "a remainder below zero keeps its negative draws, which show a fault"; a remainder is "reported, never cut" (METHODOLOGY.md) | Type 4's part group Frame keeps about 2 draws below zero in 200,000 (its 2.5 % bound far above zero) |
+| B | The NEO's body joints an estimate of its own, below the template (E) | Its frame stays above zero | No source: every route from 1X's data gives more, not less |
+| C | The NEO out of type 4's draws until 1X publishes more | Nothing below zero | A robot with a stated mass left out ("nothing left behind") |
+
+**What A would build, on his yes:** tests first (a draw whose remainder is below zero is reported, not stopped; a
+material below zero with no remainder below zero still stops); 02's `draw_faults` and the notes page; METHODOLOGY,
+VERIFICATION, HANDOVER; his run of 02.
+
+### E21.4 Built: A (2026-11-02)
+
+Matthias, 2026-11-02: "A, as recommended". VERIFICATION V147.
+
+| What A builds | Where it landed |
+|---|---|
+| Tests first | `tests/test_composition.py` (below zero where a remainder is: reported, not a fault; below zero elsewhere still a fault; a type of the workbook has nothing to excuse); `tests/test_parts_taken_apart.py` `TestRemainderBelowZeroReported` (the draws whose remainder is below zero marked, frames, weighed housings and joints' structures; the notes page names what falls below zero with them). Each failed before the code |
+| 02's check | `02_composition.py`: `Composition.remainder_below`, set by `remainders_below()` for a type drawn part by part; `draw_faults` leaves those draws out of its "below zero" check (and out of "the elements of interest of X are more than it" where X itself is below zero there); `remainder_reports()` says each quantity, its draws and their share |
+| The run and the notes page | 02 prints each report after its check ("reported, not cut"); `taken_apart_notes` writes them on the type's notes page |
+| Documents | 02's header, METHODOLOGY (the checks; point 7), README (02's row), this record, VERIFICATION V147, HANDOVER |
+
+## E20. Battery packs no source weighs: their housing below zero (2026-11-02). A agreed and built (E20.3)
+
+Matthias, 2026-11-02: "Fix the robot's rows", on 02 stopping on type 4 ("Nickel is below zero in 1 draw", the PrimeBOT
+T1's battery housing; E15.8). Investigated first: the fault is not in the PrimeBOT T1's rows but in the rule for every
+pack no source weighs. So this asks again before anything is built.
+
+### E20.1 What was found (VERIFICATION V145)
+
+1. **The rule** (E5.14 point 3): a pack no source weighs is its energy over 'Battery pack, Wh per kg (packs not
+   weighed)', 109.3 / 164 / 232.5 Wh/kg; its cells are its energy over the NMC cell's 232.5 / 241.5 / 256 Wh/kg; its
+   housing is the pack less its cells and its management board (30 / 60 / 96 cm², 8 / 34 / 81 g). The pack's most,
+   232.5, is the cells' least: there the pack is its cells alone, and the board puts the housing below zero. The rule
+   of 2026-10-28 ("Cut at the cells": a pack weighs at least its cells and its management board) went into the weighed
+   packs' lower cuts; this figure leaves room for the cells only.
+2. **How often** (`scratchpad/housing/housing_below_zero.py`, 400,000 draws per robot, drawn as 02 draws): in 208 of
+   the 304 robots whose pack is not weighed, in five of the six files; in none of the 10 weighed packs and none of the
+   5 drawn by the ratio (E9.8). Most often in the small packs, as the board does not shrink with the pack: PrimeBOT T1
+   2.0 % of its draws (92 Wh), Booster K1 2 Ah 1.4 % (96 Wh), Syntheva Synthia 0.38 %, Unitree R1 0.12 %, every other
+   robot below 0.06 %.
+3. **Matthias's run of 1 November had them too** (type 1's draws in
+   `data/parts_taken_apart/1_compact_research_developer/parts.npy`, read only): the Booster K1 2 Ah's housing below
+   zero in 44 of its 3,306 draws, the Unitree R1's in 13 of 6,768, the Noetix Bumi's in 4, the Booster K1 5 Ah's in 1
+   (the scratch count expects 47, 8, 3 and 2). Nothing stopped then: the housing's nickel strip was entered as
+   Copper, which the robot's other parts also hold.
+4. **Since E19 it stops 02:** the nickel strip is the material Nickel, and nothing else in these robots holds nickel,
+   so each such draw puts its type's Nickel below zero. At 200,000 draws 02 would stop on type 1 already (about 60
+   draws), with batch 3 or without it. My sandbox for E19 (2,000 draws) did not catch it: there type 1 expected 0.6 such
+   draws. That check was too small, and the fault went into E19 unseen.
+
+### E20.2 The options
+
+| | What | For | Against |
+|---|---|---|---|
+| **A** (recommended) | Every pack no source weighs: its housing a share of its cells (E: mode 0.41, the median of the three packs their makers weigh with their energy, the G1's 0.41, the PM01's 0.50, the T800's 0.41; least 0.21, half the mode; most 0.86, the Reachy 2's pack, above 1.5 times); the pack its cells, its housing and its board. As the CASBOT W1's already is in effect (E9.8: "its housing is an NMC pack's in proportion to its cells"), which becomes the same rule | Never below zero; one rule for all 309 packs not weighed; from weighed packs. At the modes a 421 Wh pack's housing 0.72 kg against 0.79 kg now | Every robot with a pack not weighed changes its housing (types 1 to 6), and its frame by as much the other way; 'Battery pack, Wh per kg (packs not weighed)' and the ratio rule are then read by nothing (to be listed with proof and asked once) |
+| B | The cut of 2026-10-28 carried over: the figure's most lowered until the pack holds its heaviest cells and its largest board at its smallest energy | Keeps the figure | For the PrimeBOT T1 (43 Wh at its least) the most would be 162 Wh/kg, below the mode of 164: no shared figure can; one cut per robot (208) narrows their bands |
+| C | The PrimeBOT T1's rows alone | What was asked | Type 1 still stops (Booster K1, Unitree R1, Noetix Bumi), and 205 others can |
+| D | 02 reports such draws instead of stopping | No data changed | The fault stays in the draws |
+
+**Open in A:** its most. The Reachy 2's pack is the 2021 base's (E, POL21): with it the most is 0.86, without it 0.62
+(1.5 times the mode). Recommended: with it, as an estimate is wider than what is known.
+
+**What A builds, on his yes:** tests first (no housing below zero in any robot, counted over 400,000 draws per robot
+as V145; the share's row in every file); the share's row in `tools/parts_taken_apart.py`, which the six builders
+share; 02's battery step; 01's check (a pack with no mass needs the share); METHODOLOGY, README, VERIFICATION; his
+runs: the six builders, 00, 01 and 02.
+
+**Not in:** the frames below zero in some draws (the 1X NEO's, the Matrix-1's; V144). I wrote here that they do not
+stop 02; that held at 2,000 draws only. At 200,000 draws, after A, type 4 stops on them (V146): its part group Frame
+below zero in 2 draws, from the 1X NEO (its frame, the remainder, below zero in 16 % of its draws; its frame, shell and
+screws together 0.45 kg at the least of 180 draws, 6.9 kg at the median). Reported, not acted on: his decision.
+
+### E20.3 Built: A (2026-11-02)
+
+Matthias, 2026-11-02: "A, as recommended" (its open point too: the most 0.86, with the Reachy 2's pack). VERIFICATION
+V146.
+
+| What A builds | Where it landed |
+|---|---|
+| Tests first | `tests/test_make_parts_taken_apart.py` `TestHousingShareOfCells` (every file holds the share's row, 0.207 / 0.414 / 0.859; every pack no source weighs has its housing by it, every weighed pack by its remainder); `tests/test_parts_taken_apart.py` `TestHousingShareOfCells` (in type 1's draws every such housing between 0.207 and 0.859 of its cells, the Booster K1 2 Ah and the Unitree R1 among them; only a weighed pack's housing a remainder), the Nori L3 at its modes (0.414 of its cells) and the CASBOT W1's (the same share, above zero in every draw); `tests/test_schemas.py` (01's fault for a pack with no mass whose housing is a remainder, and for a missing share). Each failed before the code. |
+| The share's row | `tools/parts_taken_apart.py` `SHARED_CONSTANTS_LAST`: 'Battery housing, share of its cells (packs not weighed)', 0.207 / 0.414 / 0.859, share, S, E, in all six files; the housing of a pack no source weighs "a share of its cells: Constants' …" (`HOUSING_OF_CELLS`), its pack "its cells, its management board and its housing, their sum" (`PACK_FROM_ENERGY`), the CASBOT W1's and the other LFP packs the same |
+| 02's battery step | `02_composition.py`: a housing by share is its cells times the share its row names, in each draw; a weighed pack's housing its remainder as before; only the latter is a remainder (`HOUSING_OF_CELLS` in `COMPUTED`) |
+| 01's check | `01_schemas.py` (`CELLS_SHARE`, `HOUSING_SHARE`): a pack with no mass whose housing is a remainder is a fault; a housing by share needs the shared row |
+| Documents | METHODOLOGY (the checks, type 2's CASBOT W1, type 1's battery, the parts' battery), this record, VERIFICATION V146, HANDOVER |
+
+**Left behind, read by nothing; removed on his word ("Yes, remove them", 2026-11-02; VERIFICATION V148):** the row
+'Battery pack, Wh per kg (packs not weighed)' (`tools/parts_taken_apart.py` line 276, written into all six files); `PACK_WH_PER_KG` (`01_schemas.py` line
+1570, and its name in `02_composition.py` line 825); `PACK_BY_RATIO` and its comment (`tools/parts_taken_apart.py`
+lines 399 to 403); the two lines of `tests/test_make_parts_taken_apart.py` (189 and 190) that check that row.
+
+## E19. Spec: parts, materials and elements labelled as in RAWCLICDataCenters (2026-11-02). Agreed and built
+
+Matthias, 2026-11-02: "Currently it is my impression, that there is quite a mess with labling items, elements and
+material. I am not hpaay about it. Check with datacenters, how it is there. Can we have something similar". It takes the
+place of E18 (written, not agreed) and, if agreed, of E17's split as metal and bound (question 5).
+
+**How RAWCLICDataCenters does it** (read first-hand: its `METHODOLOGY.md` §§ 4, 5 and 10, its `EVIDENCE.md` § 19, its
+`05_data_center_elements.py`). Three levels, each with one word, used the same way everywhere:
+- **items**: what is counted (units, parts within them, cables, the UPS, the CDUs …), each with its lifetime;
+- **materials**: one fixed list of 14, each name what it is: copper, aluminium, steel, stainless steel, cast iron, lead,
+  polymer, glass, boards and components, concrete, insulation, refrigerant, coolant, other; every name of the workbooks
+  stands for one of them;
+- **elements**: only those of interest (Cu, Al, Ag, Au, Pd, Ni, Sn, Ta, Pb, Nd, Pr, Dy, Tb, Co, Nb, Ga, B, Sr, Li, Mn),
+  and only from what is recovered as elements: copper, aluminium and lead whole; the boards and components, the
+  magnets and the battery cells by what one kg of each holds. Steel, stainless steel, concrete and polymer stay
+  materials ("Stainless steel stays as sainless steel not down to the elements. Exclude it"): no Fe, Cr or O.
+- **Figures:** a panel per element or material, its distribution with the mean and the 95 % interval, the unit by the
+  mean; where one comes from, split by contributor; plain titles.
+
+**How it is here now, and where it is a mess:**
+- **Materials:** 13 shared names (Aluminium, Magnesium, Titanium, Steel, Copper, Magnets (NdFeB), Battery materials,
+  Plastics, Fibre composites, Electronics, Ceramics, Mixed, Not allocated). Under "Copper" sit brass and the battery's
+  nickel strips; under "Steel" the gear and alloy steels, the stainless steels (17-4PH, 440C, 304) and the electrical
+  steels (M19, M27). The material pages mix materials, grades and magnet classes in one row of titles ("Copper",
+  "Brass", "Nickel strips, battery", "Permanent magnets", "Magnets, grade class H").
+- **Elements:** every element of every material: the alloys taken down to their elements (Fe, Cr, Mn, Mo, V from
+  steel; Si, Zn, Mg, Cu from aluminium), the plastics to C, H and O. That is why Cu shows above Copper (V137) and V and
+  Cr show as elements without saying where they sit (V138).
+- **Parts:** two vocabularies for the same thing: the 12 kinds of part of the parts files (Hip joints … Lift column) and
+  the workbook's 12 part groups and 7 body regions; and one thing under three names (the battery: "Battery pack" the
+  kind, "Battery materials" the material, "Battery cells" the page).
+
+**Proposal, point by point:**
+
+| # | What | Proposal |
+|---|---|---|
+| 1 | The three words | **part** (what the robot is built of: a joint, the battery pack, a board, a sensor, a cable, the frame, the shell), **material**, **element**; each used only so in the code, the pages, the files and the documents |
+| 2 | The materials | **one fixed list**, each name what it is: copper (the metal), brass, nickel (the battery's strips), aluminium alloys, magnesium alloys, titanium alloy, steel (carbon and alloy steels), stainless steel, electrical steel, NdFeB magnets, battery cells, boards and components, plastics, fibre composites, ceramics, other; each grade or alloy named under its material on the material pages ("Steel: gear steel 20CrMnTi") |
+| 3 | The elements | **only those of interest, only from what is recovered as elements:** copper → Cu; nickel → Ni; the aluminium, magnesium and titanium alloys → Al, Mg, Ti whole (as RAWCLICDataCenters' aluminium); the magnets → Nd, Pr, Dy, Tb, Co, B, Nb, Ga; the battery cells → Li, Ni, Co, Mn, and their foils' Cu and Al; the boards and components and the sensors → Cu, Sn, Ni, Ag, Au, Pd, Ta, Pb, Ga, In and the rest of their metals. Steel, stainless steel, electrical steel, brass, plastics, composites and ceramics **stay materials**: no Fe, Cr, Mn, Mo, V, Zn, C, H, O |
+| 4 | "if elements are in alloys, then one has to know it" | **a table on the material pages:** each alloy and grade with what it holds by its recipe (42CrMo4: Cr 0.9 to 1.2 %, Mo 0.15 to 0.30 %; Ti-6Al-4V: V 3.5 to 4.5 %; 7075: Cu 1.2 to 2.0 %, Zn 5.1 to 6.1 %), and its kg in the robot type |
+| 5 | E17's split, as metal and bound | **replaced by point 3:** the element pages show what is recovered as elements; what is bound in an alloy stays with its alloy (point 4). E17's built part (the column "As metal", the two columns and rows per element) is then taken out, listed with proof that nothing else reads it, on your word |
+| 6 | The parts | **one vocabulary on the pages:** the 12 kinds of part, renamed where unclear ("Boards and heat sinks" → "Boards and computers"); the workbook's part groups and body regions only in the draws of the workbook's types, as now; the battery called "battery pack" (the part) and "battery cells" (the material) |
+| 7 | The pages | the element pages: a panel per element, its distribution split by the material it comes from, stacked to the total, each part's mean written (as RAWCLICDataCenters' 05); the material pages: a panel per material of point 2, then its grades; a scratch preview of type 5 first |
+
+**Questions:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | The list of materials of point 2 | as written; "other" in place of "Mixed"; "Not allocated" stays for the workbook's types (the parts less the materials) |
+| 2 | The aluminium, magnesium and titanium alloys: to Al, Mg and Ti whole (point 3), or kept as materials like steel | **to their base metal**, as RAWCLICDataCenters counts aluminium; their alloying elements in the table of point 4 |
+| 3 | Brass | **stays a material** ("Copper from alloys or brass most likely will not be extracted as poor copper"); its copper in the table |
+| 4 | The elements of interest | RAWCLICDataCenters' list and those this project's materials add (Mg, Ti, In, Ga, Ag, Au, Pd, Ta, Nb); iron, chromium and the like only in the table of point 4 |
+| 5 | The workbook's materials (types 3, 5 and 6 until all their robots are taken apart) | each of its names stands for one material of point 2, as in RAWCLICDataCenters; written in the shared lists, copied first |
+
+**Agreed** (Matthias, 2026-11-02: "Yes, agree E19"): points 1 to 7, questions 1 to 5 as recommended.
+
+**Built** (2026-11-02; VERIFICATION V139 to V142 and V143):
+1. The one list of materials (point 2, questions 1 and 5): in the shared lists and the recipes' sheet Rows (each copied
+   first to Claude's scratch folder), 01, 02, 03 and the six builders; a stainless steel, an electrical steel, brass
+   and the nickel strip each under its own material by its grade. Proved by drawing before and after: every new
+   material equals the old one or ones it came from, draw by draw (V139).
+2. The elements of interest (point 3, questions 2 to 4): 02 writes only Li, B, Mg, Al, Ti, Mn, Co, Ni, Cu, Ga, Sr, Nb, Pd,
+   Ag, In, Sn, Ta, Au, Pb, Nd, Pr, Dy, Tb, from what is recovered as elements; every element of the recipes still drawn
+   and checked, not written (V140).
+3. One parts vocabulary (point 6): "Boards and heat sinks" now "Boards and computers" (V141).
+4. The pages (point 7) after the preview of type 5 ("Yes, build them"): the element pages six a page, each element split
+   by the material it comes from; the material pages each material then its grades; the alloys table (point 4); the
+   magnesium alloys by their alloys as the aluminium (V141, V142).
+5. E17's split removed with what E19 left unread, listed with proof that nothing else reads it (point 5; "Yes, remove
+   them"): the two columns per element and their table, checks and tests; the setting that left hydrogen, nitrogen,
+   oxygen and the like off the pages (no longer elements); 02's `MATERIAL_TITLES`, 01's empty `MAY_HAVE_GRADE` (V143).
+   The column "As metal" stays: it selects the battery cells' foils and tabs.
+
+## E18. Spec: each element declared by what holds it, the materials in plain words (2026-11-02). Not agreed: replaced by E19
+
+Matthias, 2026-11-02, while E17 was being built: "What is permanent magnets and the Magnets of the different grades. The
+grade are all NdBFe or not?", "We need a much better declaration of the materials and elements. Check with the
+datacenters, how it was done there. I assume Vanadium and Cr are part of steel", "So if elements are in alloys, then
+one has to know it".
+
+**What was found (V138):** every magnet grade class is sintered NdFeB, rated N 80 to AH 230 °C; "Permanent magnets" on
+the material pages is all of them, each grade class panel the same kilograms of one class. Vanadium sits only in the
+titanium alloy Ti-6Al-4V (0.4 to 1.3 g a robot), in no steel. Chromium sits about half in the gear and alloy steels, a
+fifth in the battery cells' stainless steel can and a quarter in the aluminium alloys. RAWCLICDataCenters splits each
+element's distribution by where it comes from, as stacked bars that add up to the total with each part's mean written,
+and left stainless steel as steel.
+
+**Where E17 stands:** its data part is built and tested: the column "As metal" and the recipe Copper metal in the element
+recipes, read and checked by 01; 02 drawing each element's metal beside its total; the summary and the draws of each
+robot type with each element as metal and bound. Its pages (question 5) are not built: E18 changes them.
+
+| # | His words | Proposal |
+|---|---|---|
+| 1 | "if elements are in alloys, then one has to know it" | **each element declared by what holds it:** as metal (E17), then bound in each material: steel, aluminium alloys, magnesium alloys, the titanium alloy, brass, the magnets (NdFeB), the battery cells, the boards and sensors, the plastics and composites; each by its grade in the table (question 3) |
+| 2 | "a much better declaration", "Check with the datacenters" | **the element pages as DataCenters' 05:** one panel per element, the histogram of its total over the draws, each bar split by what holds it, stacked so that the parts add up to the total, the mean of each part written in the panel ("in steel 0.18 kg"); as metal one of the parts, in its own colour (in place of E17's two panels side by side) |
+| 3 | the same | **a table "Elements by what holds them"** in each type's summary: per element, each material and grade that holds it, its mean, median and 95 % interval, held in x % of the draws |
+| 4 | "What is permanent magnets and the Magnets of the different grades" | **the material pages in plain words:** "Magnets NdFeB, all grade classes" for "Permanent magnets"; "Magnets NdFeB, grade class H (to 120 °C)" and so on; "Copper metal" for "Copper"; and the notes page says what a grade class is and that its temperatures are the traction-motor project's ratings |
+
+**Questions, each with my recommendation:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | The holders on the pages: the ten of point 1, or each grade (up to 20 colours in a panel) | **the ten**, each with its own colour in every panel, Paul Tol's published palette; a holder below 1 % of the element joined into "other", named in the notes; the grades in the table (point 3) |
+| 2 | The battery cells' parts: one holder "battery cells", or split, their can (steel, its nickel plating) apart from the cathode, the anode, the foils and the electrolyte | **split:** the can's chromium, iron and nickel declared as steel, the cathode's nickel, cobalt, manganese and lithium as "the cells' cathode", the foils as metal. This needs a holder for each top part of the cell recipes, written in the recipes (as E17's "As metal") |
+| 3 | The draws of each robot type (`data/consolidated/<type>/elements.npy`): E17's two columns per element, or one per element and holder | **one per element and holder**, the distribution kept on every level; as metal and bound are their sums |
+| 4 | Iron and the other elements of steel (Fe, Cr, Mn, Mo, V): on the element pages, declared as in steel; or left out, steel kept as steel, as in DataCenters | **on the pages, declared:** chromium, molybdenum and vanadium are wanted for recycling, and the declaration says where they sit |
+| 5 | The pages before they change | a scratch preview of type 5's copper, chromium, cobalt and nickel panels, shown to you first |
+
+**What it would change (after your yes):** 02 (each element drawn with its holder; the pages, the summary and the
+files), the element recipes (a holder for each top part of the cells, question 2, copied first), 01 (its check), the
+tests, and the documents. E15.7 waits behind it, its tests written, not run.
+
+## E17. Spec: each element as its own metal and bound in alloys and compounds (2026-11-02). Agreed; replaced by E19, its split removed (2026-11-02)
+
+Matthias, 2026-11-02, on V137 (the element Cu above the material Copper in every type): "Yes you can count them
+different, but first lable them correctly. Copper from alloys or brass most likely will not be extracted as poor copper.
+I only want to know how much pure copper on one side and how much fixeed copper on the other side. This is also for other
+elements, such as cobalt, which could be in alloys", then "Cooper as Cooper and Cu bound in alloys, have these
+differences and show them accordingly. Also have also all other similar elements".
+
+**Now (V137):** each element is one number. Type 5's Cu, 4.56 kg a robot on average: 3.09 kg in the material Copper (of
+it about 0.03 kg in its brass), 0.68 in the aluminium alloys, 0.45 in the battery cells (all of it their copper foil:
+the NMC and LFP cathodes hold no copper), 0.32 in the boards and sensors, 0.02 in the steels and magnets. The pages, the
+summary and the draws of each robot type show only that one number.
+
+| # | His words | What it would mean in the model |
+|---|---|---|
+| 1 | "Cooper as Cooper", "pure copper" | an element where it sits as its own metal, a part of it not alloyed: **as metal**. Today that is the material Copper less its brass and nickel strips (windings, cable conductors, the knee's copper strip and vapour chamber); the battery's nickel strips (Ni); inside the battery cells their copper foil (Cu), aluminium foil and tabs (Al) and nickel tabs (Ni) |
+| 2 | "Cu bound in alloys", "fixeed copper", "Copper from alloys or brass most likely will not be extracted as poor copper" | every element of an alloy, its base metal too: the aluminium alloys (6061, 7075, A380, ADC12), the magnesium alloys, the steels (gear steels, 17-4PH, 440C, the cells' nickel-plated steel and 304 can), Ti-6Al-4V, brass and the NdFeB magnets: **bound** |
+| 3 | "such as cobalt, which could be in alloys", "all other similar elements" | every element on the pages, each split the same way: cobalt, for one, is bound only (in the cells' cathode and the magnets) |
+| 4 | "show them accordingly" | the pages, the summary and the draws of each robot type (questions 5 to 7) |
+
+**Questions, each with my recommendation (nothing is built past them):**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | Elements in compounds that are not alloys: the cells' cathode (Ni, Co, Mn, Li as oxides), the electrolyte, the glass, the plastics, the ceramics | **bound**, together with the alloys: one class "bound in alloys and compounds", so that there are two sides as asked |
+| 2 | The metal foils and tabs inside the battery cells (copper foil, aluminium foil, nickel and aluminium tabs) | **as metal**: they are unalloyed metal and come out of a cell as foil; but inside a cell, so your call |
+| 3 | The boards' copper layers and their platings (gold, silver, palladium, tin, nickel by the car board categories), and the sensors' elements | **bound**: laminated with glass fibre and epoxy, they come back only when the board is smelted as a whole |
+| 4 | The nickel plating on the cells' steel can | **bound**: a coating on steel |
+| 5 | The pages: (a) each element as two panels side by side, "Copper (Cu), as metal" and "Copper (Cu), bound in alloys and compounds", each with its median, mean and 95 % interval, and "held in x % of the draws" where not in all (CLAUDE.md §7: an element never as metal in a type, cobalt, gets no "as metal" panel, its page saying so once); or (b) one panel each, the two as one histogram stacked to the total | **(a)**, "on one side … on the other side"; shown to you first as a scratch preview of type 5's copper, nickel and aluminium, before any page changes |
+| 6 | The summary table (`summary.csv`, `summary.xlsx`) | each element in two rows, "as metal" and "bound", in place of its one row; the materials' rows as they are |
+| 7 | The draws of each robot type (`data/consolidated/<type>/elements.npy` and `.txt`) | each element in two columns, "as metal" and "bound", every draw kept (§7: the distribution on every level). No other repository reads them yet (RAWCLICStockAndFlow's code names no file of this project, checked 2026-11-02) |
+| 8 | Types whose draws come from the workbook (3, 5, 6 until all their robots are taken apart): their Copper turns into no Cu now (V137) | its "Copper" as copper metal, one row of the element recipes; this also closes V137's gap. Its other materials as now, bound |
+| 9 | Where the label is kept | a column "As metal" in the element recipes' items (`data/researched/element_recipes.xlsx`, copied first): yes on the copper, the foils, the tabs and the nickel strip; 02 tags each element it draws by it, so the rule sits in one place, beside the recipe, not in a list in the code |
+
+**What it would change (after your yes and the answers):** 01's check of the recipes (the new column), 02 (each element
+drawn tagged as metal or bound; the pages, the summary and the files), the tests (as metal plus bound equals the element
+in every draw; cobalt never as metal; copper as metal equals the Copper less its brass and strips plus the cells'
+copper foil), README, METHODOLOGY, VERIFICATION and HANDOVER. E15.7 (batch 3's entry) waits until this is done, its tests
+written and not yet run.
+
+At the modes, as recommended, type 5's Cu would be about 3.5 kg as metal and 1.0 kg bound (Claude's arithmetic from
+V137's means; with the boards as metal, question 3, about 3.8 and 0.7).
+
+**Agreed** (Matthias, 2026-11-02: "Yes, agree E17", then on question 2 "The foils are recycled to the elements": the
+foils as metal). Built so far: the column "As metal" (Yes on the NMC cells' copper and aluminium foils and nickel and
+aluminium tabs, the LFP cells' two foils, their recipe having no tabs, and the nickel strip), the recipe Copper metal
+(the recipe "Copper" could not be: the name is a compound's), and a row of it for the workbook's copper of every type
+and for type 1's battery copper (01's check of the sheet Rows asked for it), the recipes copied first to Claude's
+scratch folder; 01 reads and checks the column; 02 draws each element's metal (V138: Cu as metal 3.52 of 4.56 kg in
+type 5, at 2,000 draws in scratch). Not built: the pages (question 5), now E18.
+
 ## E16. Robot types 5 and 6: research and proposal (2026-11-01). Nothing entered
 
 Matthias, 2026-11-01: "do now all the rest for type 5 and 6 research all data use the internet as much as possible and
@@ -331,6 +623,64 @@ runs.
 **Agreed** (Matthias, 2026-11-01: "Yes, agree both", E15 and E16): E15.2's method and questions 1 to 6 as recommended,
 with E16's corrections (Moby 71 / 72 / 73 kg, the Phantom MK1 without a battery). Nothing entered: the spec of the entry
 next (E15.7), for his word.
+
+### E15.8 Built: the entry of batch 3 (2026-11-02). Nothing committed
+
+Matthias, 2026-11-02: "Move on" (after E19). E15.7's points as written, its open points A to E as recommended; VERIFICATION V144.
+
+| # | Where it landed |
+|---|---|
+| 1 | 122 blocks in `tools/parts_types_3_and_4.py` (A: the same module), 56 in type 3's file and 66 in type 4's, each robot in the file of its first type among 3 and 4, in the register's order with E16.6's three in their places; 106 sources of its own in the sheet Sources, each with its address. The HMND 01's name shortened to "Humanoid HMND 01 Bipedal" for 01's table (its maker's page keeps its full name). |
+| 2 | The templates; 17 from one stated joint, within 5 % of E15.3's joint masses (Kengo 16.2 against 16.1 kg, Tora DoubleOne 11.8 against 11.4); the GR-3 26.9 and the Star1 32.9 kg from their models; the Tau Humanoid the G1's joints as weighed. |
+| 3 | Hands, batteries (the four LFP ones; the seven capacities without a voltage on the template; Hobbs W1 25.9 V and MagicBot Z1 55.5 V by arithmetic), boards, sensors, wheels, lifts, frames as E15.2. The Tau's battery is the G1's stated numbers carried over, labelled S, E (an E alone must span half to 1.5 times, which a carried-over 46.8 V is not). |
+| 4 | Each entry's identity written in its sources (the MagicBot the Gen1, the RoBee its Series R, the MenteeBot V3 the maker's page). |
+| 5 | The register: 54 and 58 robots taken apart; the seven of E15.4 with no stated mass; Neo1 not taken apart. Type 3 163 drawn, 17 without a mass, Neo1 left; type 4 124 drawn, 11 without a mass, none left. |
+| 6 | E13's shares: type 3 137 and 124 of 172, type 4 103 and 98 of 137. E15.5's arithmetic said 139 and 99: its count missed two robots of type 3 off the template (11 from a stated joint or a model) and the Tau's battery, which E15.3's row gives the G1's. |
+| 7 | The tests (TestTypesThreeAndFourBatchThree, the register's) written first; the tests that counted batch 2's robots updated to batch 3's; one of mine corrected (its order put the Moby after the O-ID). |
+| 8 | The sandbox: see V144. **02 stops on type 4** (below). |
+| 9 | README, METHODOLOGY, this record, VERIFICATION V144, HANDOVER. |
+| E | The test of the real register reads all six parts files. |
+
+Corrected on the way: `sources()` reads robot names as citations no more ("Moon Dynamics L1", "ROBO-T1" put L1 and T1 into type 3's Sources), and the battery helper names type 2's robot as its file does ("Tlibot T1"); a notes paragraph longer than a page goes on over the next pages (types 3 and 4's robots resting on estimates).
+
+**Found, for Matthias:** type 4 is now drawn from its robots (B), and 02's check "nothing below zero but Not allocated" stops the run: type 4's Nickel is below zero in 1 of 2,000 draws, because the PrimeBOT T1's battery housing (its pack less its cells and its management board; an 8.5 kg robot on the template's battery) is below zero in 5.6 % of its draws. Not stopping the run, but below zero in some draws: the 1X NEO's frame in 22 % (batch 1), the Matrix-1's in 7.7 %. At the modes none is below zero. Also reported: the Kengo's hands are 2 × 6 joints (the catalogue's "hands 12"), not E15.3's 2 × 12; batches 1 and 2 of types 3 and 4 keep the ARM cooler with Intel or AMD computers (the block's rule says X86).
+
+### E15.7 Spec: the entry of batch 3 of types 3 and 4 (2026-11-02). Agreed and built (E15.8)
+
+Matthias, 2026-11-02: "E15's entry" (chosen over the hydraulic robots' research step). It enters what was agreed: E15.2's
+method, E15.3's rows, E15.6's questions 1 to 6 as recommended and E16's corrections ("Yes, agree both"). E16.6 entered
+three of E15.3's robots already (Kaleido 9, Moby, Phantom MK1); **the entry is the other 112 robots, 122 blocks**: 54
+robots (56 blocks) in type 3's file, 58 robots (66 blocks) in type 4's, each robot in the file of its first type among 3
+and 4 (counted from E15.3's table by script; the versions: Pudu D7 2024 and 2026, Tora DoubleOne P and X, U1 Pro male
+and female, and the seven robots of no stated form on legs and on wheels, E15.6 question 2).
+
+| # | What is built (the agreed points) | Where |
+|---|---|---|
+| 1 | **The 122 blocks**, robot by robot: mass (E15.2 point 1, with Kengo 39 / 40 / 65, North 59 / 60 / 90, Onero H1 35 / 68 / 69, GENE.01 60 / 79.7 / 80.7), form, joints, hands, battery, boards, sensors, wheels and lift as E15.3's table and the batch 3 plan's line of each robot (`research_2026-11-01/arithmetic.md`, saved on "Yes, save them"), typed into the blocks, never read from the document at run time; every source's code in its file's sheet Sources; the names short enough for 01's table | `tools/parts_types_3_and_4.py` (`BLOCKS_3`, `BLOCKS_4`; open point A) |
+| 2 | **Joints:** the templates (E13); from a stated joint for 17 blocks (`from_stated_joint()`, E12.6 point 2: Kengo, Laborer C1 and M1, Lumen H1, MagicBot Gen1, X1 and Z1, Martian, N2, Pudu D9, RAISE A1, Spaceo M1 at its shoulder, Spaceo Pro at its waist with its shoulder's 66 N·m as stated, Tora DoubleOne P and X at the waist, Walker S1, Zerith Z1); every joint from its maker's model for the GR-3 and the Star1 (E14's way); the Unitree G1's joints and battery for the Tau Humanoid (type 1's block, E) | `tools/parts_types_3_and_4.py` |
+| 3 | **Hands, battery, boards, sensors, wheels, lift, frame** as E15.2 points 3 to 8: the LFP cells of Gento Luna, Nova, Spaceo M1 and Pro; a capacity without its voltage on the template (G2 Max, Gino 1, Laborer C1 and M1, W1 Pro, MagicBot X1, Sherpa Mecha); the arithmetic voltages of Hobbs W1 (25.9 V) and MagicBot Z1 (55.5 V), E; computing figures to modules (E); the frame aluminium, the remainder, every material a maker names written in the block's sources (question 6) | the same |
+| 4 | **Which robot an entry is** (question 4): MagicBot the Gen1; RoBee the Series R (its max the brochure's 293 kg); MenteeBot V3 the maker's page, the MenteeBot of 2024 the catalogue's with the V3's form; IRON 136 the 2024 robot, 137 the 2025 robot; G2 Max the catalogue's 185 kg; written in each block's sources | the same |
+| 5 | **The register:** `TAKEN_APART[3]` and `[4]` the 54 and 58; the seven of E15.4 in `NO_MASS_STATED` with why (HELIOS, Northstar, StarBot Flex, TARS, Tobi, Vesoma 1, Yogi); Neo1 not taken apart (question 5) | `tools/make_humanoid_register.py` |
+| 6 | **E13's shares** on 01's cards and 02's notes pages, counted by the existing functions; expected (E15.5): type 3 the joint template 139 of 172 (81 %), the battery template 124 of 172 (72 %); type 4 103 of 137 (75 %) and 99 of 137 (72 %): "most of them" | `01_schemas.py`, `02_composition.py` (no change expected) |
+| 7 | **Tests first** (each failing before its code): every block's mass, form, hands, battery and boards against E15.3; the 17 stated-joint robots' joint masses against E15.3's (16.1 kg the Kengo's, ...); the GR-3's and Star1's joints from their models (26.9 and 32.9 kg); the Tau's from the G1; the register's sheets Type 3 and Type 4 (robots drawn, robots without a mass); the shares of point 6; E13 rule 1 on every new template quantity; and the stale test of the real register extended to types 5 and 6's files (open point E) | `tests/` |
+| 8 | **Sandbox** before his runs (the register, the builders of types 3 and 4, 01, 02 at 2,000 draws, Claude's scratch folder): types 1, 2, 5 and 6's draws unchanged (by program); no remainder below zero at the modes (E15.2: nine frames below a quarter, none below zero); no median of 0 and no 2.5 % below zero in any summary; the pages of types 3 and 4 looked at | scratch |
+| 9 | **Documents:** README, METHODOLOGY (batch 3; the robots' versions of no stated form), EVIDENCE E15.8 (where each point landed), VERIFICATION, HANDOVER with his runs by full path | `documentation/claude/`, `README.md` |
+| 10 | **Not in:** the hydraulic Atlas (old), Nadia and Neo1 (their own research step, E16.5 question 4); the seven of E15.4 and TITAN, listed only; 03 (waits for types 1 to 6) | — |
+
+**Open points, each with my recommendation:**
+- **A. Where the 122 blocks go.** `tools/parts_types_3_and_4.py` holds batches 1 and 2 and E16's (1,087 lines); 122 blocks
+  roughly triple it. Recommended: the same file, one copy for both builders (E11.7 open point A), each block as compact
+  as batch 2's (the plan's line is most of a block).
+- **B. Types 3 and 4 for stock-and-flow.** The rule built so far: until every robot of a type with a mass is taken apart,
+  its draws for stock-and-flow stay the workbook's. After this entry, every robot of type 4 with a mass is taken apart, so
+  **type 4's draws for stock-and-flow switch to its robots** (its mean and band change); type 3 keeps the workbook's
+  until Neo1 (types 5 and 3, hydraulic) is taken apart. Recommended: as the rule says, counted by test in the sandbox and
+  said in the handover.
+- **C. Sensors where a maker names a kind but no count:** one each (E), as E12.7 point 4. Recommended.
+- **D. This Mac's git** is 19 commits behind GitHub while its files equal GitHub's: aligned first (`git reset
+  origin/main`, which keeps the files), then built; commit and push on his word.
+- **E. The stale test** (`test_the_real_register_holds_together` reads types 1 to 4's files only and fails on types 5 and
+  6's robots, which hold together against all six files): extended to types 5 and 6 in this step. Recommended.
 
 
 ## E14. E13 rule 3's research pass: the makers' own data for the robots on the templates (2026-11-01). Nothing entered

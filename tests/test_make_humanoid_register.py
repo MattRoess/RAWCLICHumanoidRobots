@@ -109,13 +109,23 @@ class TestMakeHumanoidRegister(unittest.TestCase):
             1, 6, 8, 9, 14, 17, 45, 46}
         types_34_batch_two = {62, 63, 66, 67, 71, 72, 73, 75, 76, 77, 78, 81, 83, 84, 88, 89, 90, 93} | {
             59, 61, 64, 74, 79, 91, 94, 95}
+        # Since 2026-11-02 (E15.7) batch 3: 54 robots in type 3's file, 58 in type 4's.
+        types_34_batch_three = {
+            97, 100, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 127, 133, 137, 141, 142, 146, 154, 156, 160, 165,
+            167, 181, 186, 189, 190, 197, 204, 209, 213, 215, 226, 239, 241, 242, 245, 249, 250, 258, 262, 263, 264, 273,
+            275, 278, 280, 287, 305, 319, 320, 325, 348, 354} | {
+            99, 101, 118, 125, 129, 130, 131, 136, 139, 145, 150, 155, 161, 162, 164, 166, 173, 174, 178, 182, 183, 185,
+            188, 194, 198, 201, 205, 206, 207, 211, 217, 237, 238, 240, 259, 261, 267, 270, 277, 283, 284, 286, 291, 293,
+            310, 317, 321, 322, 324, 328, 330, 331, 333, 334, 339, 344, 346, 347}
+        self.assertEqual((len(types_34_batch_three), len({97, 100, 106} | types_34_batch_three)), (112, 112))
         self.assertEqual(set(apart), ({r.number for r in self.register if 1 in r.types} - {236})
                          | {116, 117, 119, 120, 121} | batch_two | batch_two_b
                          | on_wheels                                    # since 2026-10-30 the 43 on wheels (E9.6)
                          | types_34_batch_one | types_34_batch_two
                          # since types 5 and 6's entry (2026-11-01, E16.6): the Kaleido 9, the Moby and the Phantom MK1
                          # in type 3's file, the MH3 and the T800 in type 5's, the Alex and the Fuxi in type 6's
-                         | {152, 195, 228} | {191, 288} | {24, 351})
+                         | {152, 195, 228} | {191, 288} | {24, 351}
+                         | types_34_batch_three)                         # since 2026-11-02 (E15.7)
         self.assertEqual(apart[288], 'EngineAI T800 Dev; EngineAI T800 PRO')
         self.assertEqual(apart[351], 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels')
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
@@ -135,9 +145,10 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         self.assertEqual(by_number[325].mass, (72, 73, 74))          # Walker S2: "43, 73", the larger
         # No mass stated anywhere, so not in the evaluation (2026-11-01, "A stated mass", EVIDENCE.md E12.4): the
         # PrimeBOT Q1 (its estimate of E5.17 taken out) and the Clone Alpha (its catalogue's text: "not specified").
-        for number in (236, 65):
+        # Since batch 3 (E15.7 point 5) also the seven of E15.4, whose sources call the mass unknown, a target or a design.
+        for number in (236, 65, 124, 214, 282, 292, 304, 316, 345):
             self.assertIn(None, by_number[number].mass, msg=number)
-        self.assertEqual(set(builder.NO_MASS_STATED), {65, 236})
+        self.assertEqual(set(builder.NO_MASS_STATED), {65, 236, 124, 214, 282, 292, 304, 316, 345})
         self.assertFalse(hasattr(builder, 'MASS_ESTIMATES'))
 
     def test_a_zero_in_the_catalogue_is_not_stated(self):
@@ -177,7 +188,7 @@ class TestMakeHumanoidRegister(unittest.TestCase):
     def test_the_sheet_type_2_lists_every_robot_of_type_2_batches_1_and_2_taken_apart(self):
         # Matthias, 2026-10-29, "Yes, as proposed" (type 2 as type 1, step 5: its robots all listed): every robot whose
         # types include 2, leading or second. Since 2026-10-30 ("Yes, build C"): its batch 1 taken apart, the others not
-        # yet (Q4), the Xialan S0 without a mass; 02 draws type 2 for stock-and-flow from the workbook until all are.
+        # yet (Q4), the Xialan S0 without a mass; 02 draws type 2 from the workbook until all are.
         listed = schemas.read_type_sheet(self.path, 2)
         self.assertEqual([r.number for r in listed], [r.number for r in self.register if 2 in r.types])
         self.assertEqual(len(listed), 97)
@@ -209,7 +220,10 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # Since batch 2 (E12.6): type 3 91 drawn, type 4 47; the Clone Alpha and the PrimeBOT Q1 without a mass. Since
         # 2026-11-01 the Reflex of type 3 too, its catalogue's "0.0" not a mass (test_a_zero_in_the_catalogue_...).
         # Since types 5 and 6's entry (E16.6): type 3 also the Kaleido 9, the Moby and the Phantom MK1 (E15's rows).
-        for robot_type, count, own, without in ((3, 181, 94, 13), (4, 135, 47, 6)):
+        # Since batch 3 (E15.7): type 3 163 drawn, 17 without a mass (the four of E15.4 with type 3), Neo1 the one not
+        # yet taken apart; type 4 124 drawn, 11 without a mass (the five of E15.4 with type 4), none left (open point
+        # B: type 4's draws from its robots).
+        for robot_type, count, own, without in ((3, 181, 163, 17), (4, 135, 124, 11)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)

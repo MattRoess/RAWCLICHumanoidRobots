@@ -130,8 +130,8 @@ STAGES = [
     ('00_parameters.py', 'The settings: checks them and writes their register.'),
     ('01_schemas.py', 'Every input checked before anything is drawn at random: these pages.'),
     ('02_composition.py', 'What each robot type is made of, drawn at random (Monte Carlo): its materials, elements, '
-                          'part groups and body regions, written for stock-and-flow; robot type 1 from its robots, '
-                          'each part by part, with its element and material pages and where they sit.'),
+                          'part groups and body regions, written as the draws of each robot type; robot type 1 from '
+                          'its robots, each part by part, with its element and material pages and where they sit.'),
     ('03_comparison.py', 'The robot types side by side, by material, element, part group and body region, from the '
                          'draws of 02; after robot type 6.'),
 ]
@@ -259,6 +259,7 @@ PART_HEADINGS = ['Robot type', 'Row', 'Part', 'Part group', 'Body region', 'Spli
 MATERIAL_HEADINGS = ['Material name in the workbook', 'Shared material', 'Why']
 PART_GROUP, BODY_REGION, MATERIAL = 'Part group', 'Body region', 'Material'
 NOT_ALLOCATED = 'Not allocated'   # the shared material that holds the kilograms the materials leave out
+OTHER = 'Other'   # the shared material of a workbook name that holds several materials in one (E19: was 'Mixed')
 # A material name the workbook gives for several materials together can be split by an estimate (point 9 of
 # SHARED_LISTS.md): its row in 'Materials' says 'Split', and the sheet 'Splits' gives one row per piece, each a share
 # of the name's kilograms (minimum, mode, maximum), one of them the remainder.
@@ -275,7 +276,7 @@ BATTERY_SHEET, KEPT, BUILD, REST = 'Battery cells', 'Kept', 'Build', 'Rest'
 BATTERY_HEADINGS = ['Robot type', 'Battery row in the workbook', 'Kind', 'Cell or material', 'Cells in series',
                     'Cells in parallel', 'Packs', 'Pack voltage (V)', 'Pack capacity (Ah)', 'Pack energy (kWh)',
                     'Pack mass (kg)', 'Share min', 'Share mode', 'Share max', 'Remainder', 'Label', 'Basis', 'Decided']
-BATTERY = 'Battery materials'   # the shared material of the workbook's battery rows
+BATTERY = 'Battery cells'   # the shared material of the workbook's battery rows (E19: was 'Battery materials')
 # A build's whole cells in parallel must reach the pack's stated capacity within this share (E1.7j: an estimate, E).
 CAPACITY_TOLERANCE = 0.12
 # A build's cells may weigh at most this share of the packs' mass, so that the BMS, wiring and enclosure still fit
@@ -290,13 +291,15 @@ CELL_SHARE_OF_PACK = 0.85
 # group of items. The items of a group are either shares (minimum, mode, maximum of the group's mass, exactly one of
 # them the remainder) or alternatives (each with its probability, adding up to 1), of which one is drawn. 'Rows' says
 # which recipe each row of the workbook follows, for every shared material that has recipes (the battery's cells
-# follow the sheet Battery cells instead).
+# follow the sheet Battery cells instead). 'As metal' (EVIDENCE.md E17; Matthias, 2026-11-02, "Yes, agree E17"): Yes on
+# an item that is a part of its element's own metal (a copper part, a foil, a nickel strip), whose element 02 counts as
+# metal; every other item's elements are bound in alloys and compounds.
 CELLS_SHEET, COMPOUNDS_SHEET, RECIPE_SHEET, ROWS_SHEET = 'Cells', 'Compounds', 'Recipe', 'Rows'
 CELL_HEADINGS = ['Cell', 'Chemistry', 'Format', 'Voltage (V)', 'Capacity (Ah)', 'Mass (g)', 'Energy (Wh)', 'Recipe',
                  'Source', 'Kind']
 COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
 RECIPE_HEADINGS = ['Recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
-                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
+                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis', 'As metal']
 ROW_HEADINGS = ['Robot type', 'Material name in the workbook', 'Shared material', 'Recipe', 'Basis']
 RECIPE_LABELS = {'S': 'from a source read', 'E': 'an estimate'}
 # The standard atomic weight of every element the recipes name, g/mol: IUPAC, Commission on Isotopic Abundances and
@@ -524,6 +527,7 @@ class RecipeItem:
     follows_energy: bool      # its share rises and falls with the cell's energy per kg (E1.7i)
     label: str                # 'S' from a source read, 'E' an estimate
     basis: str
+    as_metal: bool = False    # its element a part of its own metal, not bound in an alloy or compound (E17)
 
 
 @dataclass
@@ -862,12 +866,16 @@ def read_element_recipes(path: str) -> ElementRecipes:
             continue
         compounds[name] = (written, r)
     for r, values in sheets[RECIPE_SHEET]:
-        recipe, within, item, low, mode, high, remainder, probability, compound, follows, label, basis = values[:12]
+        (recipe, within, item, low, mode, high, remainder, probability, compound, follows, label, basis,
+         metal) = values[:13]
+        if text(metal).lower() not in ('', 'yes'):
+            faults.append(Fault(where + RECIPE_SHEET, r, f"{text(recipe)}, {text(item)}: 'As metal' must be 'Yes' or "
+                                                         f"empty, not '{text(metal)}'."))
         items.append(RecipeItem(row=r, recipe=text(recipe), within=text(within), item=text(item),
                                 share=(number(low), number(mode), number(high)),
                                 remainder=text(remainder).lower() == 'yes', probability=number(probability),
                                 compound=text(compound), follows_energy=text(follows).lower() == 'yes',
-                                label=text(label), basis=text(basis)))
+                                label=text(label), basis=text(basis), as_metal=text(metal).lower() == 'yes'))
 
     # Which recipe each row of the workbook follows, when the sheet is there.
     rows = None
@@ -1151,9 +1159,9 @@ def check_shared_lists(book: Workbook, lists: SharedLists, params: Params) -> li
             if p.robot != robot_of.get(name, p.robot):
                 faults.append(Fault(on, p.row, f'{name}: robot type {p.robot}, but the workbook has it in '
                                                f'{robot_of[name]}.'))
-            if p.shared not in lists.names[MATERIAL] or p.shared in (NOT_ALLOCATED, 'Mixed'):
+            if p.shared not in lists.names[MATERIAL] or p.shared in (NOT_ALLOCATED, OTHER):
                 faults.append(Fault(on, p.row, f"{name}: the piece '{p.shared}' is not a material of the sheet Lists "
-                                               f"(other than 'Mixed' and '{NOT_ALLOCATED}')."))
+                                               f"(other than '{OTHER}' and '{NOT_ALLOCATED}')."))
             if p.label != 'E':
                 faults.append(Fault(on, p.row, f"{name}: a split is an estimate and is labelled 'E', not "
                                                f"'{p.label}'."))
@@ -1244,6 +1252,9 @@ def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault
         if i.label not in RECIPE_LABELS:
             faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: the label must be one of "
                                            f"{', '.join(RECIPE_LABELS)}, not '{i.label}'."))
+        if i.as_metal and len(one_element(recipes, i.compound)) != 1:
+            faults.append(Fault(on, i.row, f"{i.recipe}, {i.item}: 'As metal' is for a part of one element's metal "
+                                           f"(a compound of one element), not '{i.compound or 'a group of items'}'."))
     for i in recipes.items:
         has_items = (i.recipe, i.item) in groups
         if bool(i.compound) == has_items:
@@ -1269,6 +1280,15 @@ def check_element_recipes(recipes: ElementRecipes, params: Params) -> list[Fault
             faults.append(Fault(where + CELLS_SHEET, cell.row, f'{cell.name}: give its mass and its voltage and '
                                                                'capacity, or its energy.'))
     return faults
+
+
+def one_element(recipes: ElementRecipes, compound: str) -> dict:
+    """The elements of a compound of the sheet Compounds, as composition() reads them; {} for no compound (a group of
+    items or another recipe) or one that cannot be read (reported elsewhere)."""
+    try:
+        return composition(recipes.compounds[compound][0]) if compound in recipes.compounds else {}
+    except ValueError:
+        return {}
 
 
 def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = None) -> dict:
@@ -1304,7 +1324,7 @@ def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = N
 
 
 def battery_row_of(materials: MaterialsList, lists: SharedLists) -> Material | None:
-    """The row of a robot type's materials that the shared lists place in 'Battery materials', or None."""
+    """The row of a robot type's materials that the shared lists place in the battery cells (BATTERY), or None."""
     return next((m for m in materials.materials if lists.materials.get(m.family, ('',))[0] == BATTERY), None)
 
 
@@ -1407,9 +1427,9 @@ def check_battery_cells(book: Workbook, lists: SharedLists, recipes: ElementReci
         what = f"robot type {n}, the rest of '{battery.family}'"
         faults += shares_faults(rest, on, what)
         for b in rest:
-            if b.name not in lists.names[MATERIAL] or b.name in ('Mixed', BATTERY):
+            if b.name not in lists.names[MATERIAL] or b.name in (OTHER, BATTERY):
                 faults.append(Fault(on, b.row, f"{what}: '{b.name}' is not a material of the sheet Lists (other than "
-                                               f"'Mixed' and '{BATTERY}')."))
+                                               f"'{OTHER}' and '{BATTERY}')."))
         cells = battery_cells(materials, lists, recipes)
         if (cells and any(b.name != NOT_ALLOCATED for b in rest) and battery.kg[0] is not None
                 and battery.kg[0] < cells[2] - params.checks.tolerance_kg):
@@ -1547,7 +1567,6 @@ ON_WHEELS = ', on wheels'
 JOINT_SHARE_ON_WHEELS = JOINT_SHARE + ON_WHEELS
 ENERGY_PER_KG_ON_WHEELS = ENERGY_PER_KG + ON_WHEELS
 LIFT_SHARE = 'Lift column, share of the robot mass' + ON_WHEELS
-PACK_WH_PER_KG = 'Battery pack, Wh per kg (packs not weighed)'
 SHELL_SHARE = 'Shell, share of the robot mass'
 APART_SHARED_CONSTANTS = ('Board mass per cm2 (boards not weighed)', "Copper share of a board's mass",
                           'Power conductor cross-section (2 conductors)',
@@ -1564,9 +1583,14 @@ ALL_ROBOTS = 'all'
 ROBOT_REMAINDER = 'the robot'
 AS_THEIR_JOINTS = 'as their joints'
 # The start of what a part is computed from where it is a share of the robot's mass (the shell, SHELL_SHARE), and of
-# the battery housing, the pack's remainder (its pack then needs a mass, or PACK_WH_PER_KG).
+# the battery housing, the pack's remainder (its pack then needs a mass).
 ROBOT_SHARE = "a share of the robot's mass"
 PACK_REMAINDER = 'the battery pack, less'
+# The housing of a battery pack no source weighs (Matthias, 2026-11-02, "A, as recommended", EVIDENCE.md E20): a share
+# of its cells, "a share of its cells: Constants' <HOUSING_SHARE>", so that it never falls below zero; the pack is then
+# its cells, its management board and its housing.
+CELLS_SHARE = 'a share of its cells'
+HOUSING_SHARE = 'Battery housing, share of its cells (packs not weighed)'
 # A part that is a share of the robot's mass names the shared number it is: "a share of the robot's mass: Constants'
 # <quantity>" (the shell, SHELL_SHARE; a lift column, LIFT_SHARE), and a lift column ends "; less its motor" (its
 # structure the share less its motor, a joint of the sheet Joints).
@@ -2118,9 +2142,14 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
                                        f"'{template_quantity(apart, robot, ENERGY_PER_KG)}' (for {ALL_ROBOTS})."))
         parts = [p for p in apart.parts if p.robot == robot]
         pack = [p for p in parts if p.name == 'Battery pack' and None in p.bounds]
-        if pack and any(p.computed.startswith(PACK_REMAINDER) for p in parts) and PACK_WH_PER_KG not in shared:
-            faults.append(Fault(on, 0, f"{robot}: its battery pack has no mass and a housing; '{PACK_WH_PER_KG}' (for "
-                                       f'{ALL_ROBOTS}) is missing.'))
+        if pack and any(p.computed.startswith(PACK_REMAINDER) for p in parts):
+            faults.append(Fault(on, 0, f"{robot}: its battery pack has no mass, so its housing is {CELLS_SHARE} "
+                                       "(EVIDENCE.md E20), not the pack's remainder."))
+        for p in parts:
+            named = share_quantity(p.computed)
+            if p.computed.startswith(CELLS_SHARE) and named not in shared:
+                faults.append(Fault(on, 0, f"{robot}: {p.name} is {CELLS_SHARE}, but '{named or HOUSING_SHARE}' (for "
+                                           f'{ALL_ROBOTS}) is missing.'))
         for p in parts:
             named = share_quantity(p.computed) or SHELL_SHARE
             if p.computed.startswith(ROBOT_SHARE) and named not in shared:
@@ -2245,15 +2274,15 @@ def check_sibling_data(apart: PartsTakenApart, params: Params) -> list[Fault]:
 # and a row of maxima, mass shares, the element written BALANCE its remainder (iron).
 STEEL_SHEETS = ('ElectricalSteel', 'CastFeSteel')
 BALANCE = 'balance'
-# The materials whose parts follow a grade's recipe and need one, and those that may name one (a copper alloy, the
-# nickel strip counted with the copper); every other material has none (EVIDENCE.md E5.18, E5.19).
-GRADED = ('Steel', 'Titanium')
-MAY_HAVE_GRADE = ('Copper',)
+# The materials whose parts follow a grade's recipe and need one (EVIDENCE.md E5.18, E5.19): since E19 (Matthias,
+# 2026-11-02, "Yes, agree E19") the steels, the titanium alloy, brass and the battery's nickel, each a material of its
+# own; every other material has none.
+GRADED = ('Steel', 'Stainless steel', 'Electrical steel', 'Titanium alloy', 'Brass', 'Nickel')
 # A part of magnets on the sheet Parts (outside the joints) may name its grade class (MAGNET_CLASSES) where its source
 # states its grade, as the RP1's N52 magnets in its covers (Matthias, 2026-10-29, "Yes, build them", point 4); a joint's
 # magnets take the class their heat group draws (sheet MagnetGrades).
-MAGNET_MATERIAL = 'Magnets (NdFeB)'
-CELL_MATERIAL = 'Battery materials'   # the material of battery cells, which may name their cells' recipe
+MAGNET_MATERIAL = 'NdFeB magnets'
+CELL_MATERIAL = BATTERY   # the material of battery cells, which may name their cells' recipe
 
 
 def stated_magnet_classes(apart: PartsTakenApart) -> set:
@@ -2316,9 +2345,9 @@ def check_grades(apart: PartsTakenApart, recipes: ElementRecipes, params: Params
         if any(m in GRADED for m in materials) and not grade:
             faults.append(Fault(sheet, row, f"{what}: give its grade, whose element recipe its {material.lower()} "
                                             'follows (EVIDENCE.md E5.18).'))
-        elif grade and not any(m in GRADED + MAY_HAVE_GRADE for m in materials):
-            faults.append(Fault(sheet, row, f"{what}: the grade '{grade}' is for steel, titanium or copper, not for "
-                                            f"'{material or 'its shares'}'."))
+        elif grade and not any(m in GRADED for m in materials):
+            faults.append(Fault(sheet, row, f"{what}: the grade '{grade}' is for {', '.join(GRADED).lower()}, not "
+                                            f"for '{material or 'its shares'}'."))
         for g in alternatives(grade):
             used.add(g)
             if g not in known and g not in steels:
@@ -2945,7 +2974,7 @@ TABLE_RIGHT = 12.75
 CHART_X, CHART_WIDTH = 14.75, 3.6
 BAR_STEP = 0.24        # the height of one bar's row, inches
 BAR = '#5B7DB1'        # the bars
-GREY = '#A6A6A6'       # 'Mixed' and 'Not allocated', which are not one part group or material
+GREY = '#A6A6A6'       # the part group 'Mixed', the material 'Other' and 'Not allocated', each not one thing
 PLAIN_WHY = 'The name says the material.'   # the reason of an obvious placement, not repeated on the page
 
 
@@ -2959,7 +2988,7 @@ def bars(figure, page, page_height: float, x: float, y: float, title: str, names
     shown = [values.get(name, 0) for name in names]
     top = max(shown + [1])
     axes.barh(range(len(names)), shown, height=0.65,
-              color=[GREY if name in ('Mixed', NOT_ALLOCATED) else BAR for name in names])
+              color=[GREY if name in ('Mixed', OTHER, NOT_ALLOCATED) else BAR for name in names])
     axes.set_ylim(len(names) - 0.5, -0.5)
     axes.set_yticks(range(len(names)), names, fontsize=8.5)
     axes.set_xlim(0, top * 1.3)
@@ -3150,11 +3179,12 @@ REGION_SPOTS = {'Head': (0.065, 0.925), 'Arms': (0.18, 0.70), 'Hands': (0.22, 0.
 SHELL, SKELETON, MOTOR = '#E9ECEF', '#495057', '#3B5BA5'
 PART_COLOUR = {'Battery': '#E8B84A', 'Computer': '#2E8B57', 'Sensors': '#212529', 'Cables': '#C8742B',
                'Cooling': '#4FA3D1', 'Mixed': '#BDBDBD', 'Hands': '#9AA5B1'}
-# The colour of every shared material, the same on all six pages, chosen to look like the material.
-MATERIAL_COLOUR = {'Aluminium': '#B8C4CE', 'Magnesium': '#D6E2BE', 'Titanium': '#9A93B8', 'Steel': '#5F6B73',
-                   'Copper': '#C8742B', 'Magnets (NdFeB)': '#8E3B46', 'Battery materials': '#E8B84A',
-                   'Plastics': '#EFE3C8', 'Fibre composites': '#2F2F2F', 'Electronics': '#2E8B57',
-                   'Ceramics': '#F7F7F2', 'Mixed': '#BDBDBD', NOT_ALLOCATED: '#FFFFFF'}
+# The colour of every shared material (E19's list), the same on all six pages, chosen to look like the material.
+MATERIAL_COLOUR = {'Copper': '#C8742B', 'Brass': '#C9A44C', 'Nickel': '#A7A9AC', 'Aluminium alloys': '#B8C4CE',
+                   'Magnesium alloys': '#D6E2BE', 'Titanium alloy': '#9A93B8', 'Steel': '#5F6B73',
+                   'Stainless steel': '#8C969E', 'Electrical steel': '#3E464C', 'NdFeB magnets': '#8E3B46',
+                   'Battery cells': '#E8B84A', 'Boards and components': '#2E8B57', 'Plastics': '#EFE3C8',
+                   'Fibre composites': '#2F2F2F', 'Ceramics': '#F7F7F2', 'Other': '#BDBDBD', NOT_ALLOCATED: '#FFFFFF'}
 
 
 def robot_height(category: Category) -> tuple[float, str]:
@@ -3242,7 +3272,9 @@ def body_shapes(axes, cx: float, ground: float, size: float, **style) -> list:
 # (the robots on wheels, EVIDENCE.md E9.4 points 1 and 2, E9.7 open point C): "Torso boards and heat sink" renamed
 # "Boards and heat sinks" (a robot's computer may sit in its base), and the two kinds of a robot on wheels last, in two
 # colours of the same discrete rainbow not used before, so that no two neighbours in the legend look alike; the ten
-# colours unchanged.
+# colours unchanged. Since 2026-11-02 "Boards and computers" (EVIDENCE.md E19 point 6, "Yes, agree E19": one parts
+# vocabulary, each name what the part is; the battery is the part "Battery pack", its cells the material "Battery
+# cells").
 KINDS = {
     'hips': ('Hip joints', '#882E72'),
     'knees': ('Knee joints', '#1965B0'),
@@ -3250,7 +3282,7 @@ KINDS = {
     'waist': ('Waist joints', '#4EB265'),
     'arms': ('Arm joints and hands', '#CAE0AB'),
     'battery': ('Battery pack', '#72190E'),
-    'boards': ('Boards and heat sinks', '#F4A736'),
+    'boards': ('Boards and computers', '#F4A736'),
     'head': ('Head', '#E8601C'),
     'cables': ('Cables', '#DC050C'),
     'frame': ('Frame and shell', '#F7F056'),
@@ -3750,7 +3782,7 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
         on_templates = template_words(apart)
         if taken < total:
             return (f'{taken} of its {total} robots of the register with a mass taken apart so far, each drawn part by '
-                    f'part; {span}. Its draws for stock-and-flow from the workbook until all are. {on_templates}')
+                    f'part; {span}. Its draws from the workbook until all are. {on_templates}')
         if not without:
             return (f'Its {total} robots of the register, each drawn from its own parts; {span}. The workbook\'s '
                     f'anchor robot, {anchor}, is one of them. {on_templates}')
@@ -3787,7 +3819,8 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
               ('01 Checks', '01_schemas.py: every input checked, these pages'),
               ('02 Monte Carlo', f'02_composition.py: {params.composition.draws:,} draws, each robot taken apart '
                                  'from its own parts')]
-    outputs = [('Draws for stock-and-flow', 'the materials and elements of every robot type, draw by draw', 'output'),
+    outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw',
+                'output'),
                ('The pages of the robot types taken apart', 'their elements and materials in one robot; where '
                                                             'their critical elements and each material sit', 'output'),
                ('03 Comparison', '03_comparison.py: the robot types side by side; after robot type 6', 'later')]

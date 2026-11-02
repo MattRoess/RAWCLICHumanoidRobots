@@ -2,6 +2,10 @@
 
 Where the work stands, newest first: what was decided, by whom, and what is open. Written by Claude.
 
+Renamed 2026-11-02 (Matthias: "There should be no stock and flow, this comes later", "Yes, rename it"): what 02 writes into
+`data/consolidated/` is "the draws of each robot type", no longer "draws for stock-and-flow"; the dated entries below keep
+the words they were written with.
+
 ## What a robot type needs: the steps robot type 1 went through (for types 2 to 6)
 
 Matthias, 2026-10-29: "Also notice, what all had to be done for type 1 robots, so you remeber, what has to be done for
@@ -56,7 +60,96 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-01, evening: types 5 and 6 entered; where to start tomorrow (start here)
+## 2026-11-02, afternoon: batch 3 of types 3 and 4 (E15.8) and the battery housings (E20) built; where to start (start here)
+
+What changed, on Matthias's word ("Move on", after E19; E15.7 as agreed, open points A to E as recommended): the other
+112 robots of E15.3, 122 blocks, in `tools/parts_types_3_and_4.py` (type 3's file 94 robots in 98 blocks, type 4's 74
+in 85); the register (163 of type 3's robots drawn, the Neo1 left, 17 without a mass; type 4's 124 drawn, 11 without a
+mass). Type 4 is now drawn from its robots (open point B); type 3 stays the workbook's until the Neo1. EVIDENCE.md
+E15.8, VERIFICATION V144, METHODOLOGY.md ("Robot types 3 and 4 part by part", point 10).
+
+**The battery housings (E20, built):** every battery pack no source weighs could have its housing below zero (208
+robots), which since E19 puts the type's Nickel below zero and stops 02 (his run of 1 November had 62 such draws in
+type 1, unseen then; V145). Matthias, "A, as recommended": such a housing is now a share of its cells, 0.207 / 0.414 /
+0.859, never below zero (EVIDENCE.md E20.3, VERIFICATION V146).
+
+**The 1X NEO's frame (E21, built):** at 200,000 draws 02 stopped on type 4's part group Frame below zero in 2 draws,
+from the NEO (its frame, the remainder, below zero in about 16 % of its draws). Researched ("Research the NEO first"):
+1X states nothing that sets its joints. Matthias, "A, as recommended": below zero in a draw where a remainder of the
+robot drawn is below zero is reported in the run and on the type's notes page, not stopped (EVIDENCE.md E21.4,
+VERIFICATION V147).
+
+**His runs on disk:** the register, 00 and 01 of 11:47 to 11:49; his 02 run of about 12:10, stopped ("02 stopped after
+1 min 33 s: nothing is written"); then the six parts files (12:45), 01 (12:46) and **02, run to the end** (12:48 to
+12:50, 200,000 draws; only type 4's part group Frame below zero in 2 draws, reported under E21; V148). The six parts
+files on disk were built a minute before E20's leftovers were removed, so they still hold the old row 'Battery pack,
+Wh per kg (packs not weighed)', read by nothing: rebuilding them drops it (then 01 and 02 again, whose draws will
+differ by their random sequence only, since every shared row is drawn in turn). Since A
+changes the parts files, **his runs, in this order** (each by pressing Run):
+1. The six parts files again (they write into `data/researched/`; the register is unchanged by A):
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/1_compact_research_developer/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/4_service_healthcare_interaction/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/5_heavy_duty_high_performance_hazardous_environment/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/6_defense_public_safety/make_parts_taken_apart.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (00 is unchanged by A).
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws). 03 waits until types 1 to 6 are done.
+Until step 1 is run, three tests fail that compare the builders with the parts files on disk; after it they should
+pass.
+
+**Open:**
+- Found with batch 3, reported, not acted on: the Kengo's hands are 2 × 6 joints (the catalogue's "hands 12"), not
+  E15.3's 2 × 12, built as 2 × 6; batches 1 and 2 of types 3 and 4 keep the ARM cooler with Intel or AMD computers;
+  E15.5's expected shares (139 and 99) came out 137 and 98 (E15.8 point 6); the GoMate's height is 1.74 m as heise
+  reports it ("174 cm", source HSG), not the plan's 1.40; 02's `triangles()` and 01's `element_shares()` are called only by tests.
+- Not in batch 3, as agreed: the hydraulic Atlas (old), Nadia and Neo1 (their own research step); the seven robots
+  without a mass and TITAN, listed only.
+- Nothing committed or pushed today: on his word only.
+
+## 2026-11-02: parts, materials and elements as in RAWCLICDataCenters (E19)
+
+What changed, each on Matthias's word:
+- **E17** ("Yes, agree E17"; "The foils are recycled to the elements"): the copper of the workbook's copper rows by a
+  recipe of copper metal; the recipes' column "As metal". Its split of each element into "as metal" and "bound" was
+  replaced by E19 and removed ("Yes, remove them").
+- **The rename** ("Yes, rename it"): what 02 writes is "the draws of each robot type", not "for stock-and-flow".
+- **E19** ("Yes, agree E19"; the preview of type 5, "Yes, build them"; the leftovers, "Yes, remove them"): one fixed
+  list of 17 materials, each name what it is; only the elements of interest written, from what is recovered as
+  elements (copper, nickel and the light alloys whole; the magnets', battery cells' and boards' metals of interest;
+  steel, brass, plastics and the rest stay materials); "Boards and computers"; the element pages split by material,
+  six a page; the material pages each material then its grades; the alloys table; the magnesium by its alloys.
+  EVIDENCE.md E19, VERIFICATION V137 to V143, METHODOLOGY.md ("The elements", "What 02 writes").
+
+**Matthias's runs, in this order** (each by pressing Run; nothing has been run into `data/` or `figures/`):
+1. The register and the six parts files, which hold the new material names (they write into `data/researched/`):
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/1_compact_research_developer/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/4_service_healthcare_interaction/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/5_heavy_duty_high_performance_hazardous_environment/make_parts_taken_apart.py`
+   - `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/6_defense_public_safety/make_parts_taken_apart.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` (the
+   setting `composition.elements_not_shown` is gone).
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   (200,000 draws). 03 waits until types 1 to 6 are done, as decided.
+Until step 1 is run, six tests fail that compare the builders with the files on disk (the old names, e.g. "the
+material 'Electronics' is not in the shared lists"); after it they should pass.
+
+**Open:**
+- E15.7, batch 3 of types 3 and 4 (agreed, open points A to E as recommended): its tests are written and fail (nine),
+  its blocks not built; next after his runs. Findings to report with it: the Kengo's hands are 2 × 6 degrees of freedom,
+  not E15.3's 2 × 12; robot 178, the MagicBot, is the Gen1 whose model file type 2 reads; batches 1 and 2 of types 3 and
+  4 keep the ARM cooler with Intel or AMD computers; robot names that hold a source code (L1, T1) put that code's row
+  in the sheet Sources (`sources()` to skip names).
+- Found, not acted on: type 4 part by part has its frame below zero in 1 of 2,000 draws (a robot's remainder); while
+  type 4 is drawn from the workbook nothing stops, but once batch 3 makes it drawn part by part, 02's check "nothing
+  below zero" would stop the run on it (V140). The sensors' tungsten (1 to 3 mg a robot) is not an element of interest.
+- Nothing committed or pushed today: on his word only.
+
+## 2026-11-01, evening: types 5 and 6 entered; where to start tomorrow
 
 **First thing tomorrow:**
 1. Read back his 02 run of this evening. It started about 17:47 and had written nothing yet by then. Compare every

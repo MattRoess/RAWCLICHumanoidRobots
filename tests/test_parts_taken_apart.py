@@ -261,6 +261,10 @@ class TestHandCalculations(unittest.TestCase):
     def element(self, d, robot: str, kind: str, element: str) -> np.ndarray:
         return d.elements.get((kind, element), np.zeros(d.n))[d.robot == d.robots.index(robot)]
 
+    def recipe_element(self, d, robot: str, kind: str, element: str) -> np.ndarray:
+        """An element by the recipes, fractions and sibling files, those not of interest too (E19 point 3)."""
+        return d.recipe_elements.get((kind, element), np.zeros(d.n))[d.robot == d.robots.index(robot)]
+
     def part(self, d, column: str) -> np.ndarray:
         columns, draws = d.parts
         robot = column.split(': ')[0]
@@ -270,8 +274,11 @@ class TestHandCalculations(unittest.TestCase):
         d = self.at()
         # Cables: 6 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 g/cm3 = 102.144 g; 46 mated XT30 (2+2) × 2.12 g × 0.35 of
         # contacts × 0.62 copper of their brass = 21.16184 g (2026-10-29, "Yes, enter all", EVIDENCE.md E5.22: the pair
-        # 1.1224 g + 1 g, its contacts brass); 4 capacitor buffer boards × 5 cm2 × 0.56 g/cm2 × 0.20 = 2.24 g.
-        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'cables', 'Cu'), 0.12554584, rtol=1e-9)
+        # 1.1224 g + 1 g, its contacts brass); 4 capacitor buffer boards × 5 cm2 × 0.56 g/cm2 × 0.20 = 2.24 g. The
+        # element copper is the copper and the boards' copper, 104.384 g; the brass stays a material, its copper bound
+        # in it (EVIDENCE.md E19 point 3, question 3), so it is in the recipes' copper only.
+        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'cables', 'Cu'), 0.104384, rtol=1e-9)
+        np.testing.assert_allclose(self.recipe_element(d, 'Unitree G1', 'cables', 'Cu'), 0.12554584, rtol=1e-9)
 
     def test_the_g1s_gold_in_its_hips(self):
         d = self.at()
@@ -316,7 +323,7 @@ class TestHandCalculations(unittest.TestCase):
         # mass: aluminium 50 % of it at the mode, plastics the remainder.
         d = self.at()
         aluminium, plastics, electronics = (self.material(d, 'Unitree G1', 'head', m)
-                                            for m in ('Aluminium', 'Plastics', composition.ELECTRONICS))
+                                            for m in (composition.ALUMINIUM, 'Plastics', composition.ELECTRONICS))
         np.testing.assert_allclose(aluminium, plastics, rtol=1e-9)
         np.testing.assert_allclose(aluminium + plastics + electronics, 0.385 + 0.0084, rtol=1e-9)
         self.assertTrue((electronics > 0.0084).all() and (aluminium < 0.385 / 2).all())   # the elements in electronics
@@ -329,17 +336,23 @@ class TestHandCalculations(unittest.TestCase):
         d = self.at()
         metals = 15 * sum(inputs.pcb['VCC'][m][1] for m in schemas.BOARD_METALS) / 1e6
         rest = 0.0084 * (1 - 0.2 - inputs.tantalum[1]) - metals
-        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'head', 'Br'), 0.088 * rest, rtol=1e-9)
+        np.testing.assert_allclose(self.recipe_element(d, 'Unitree G1', 'head', 'Br'), 0.088 * rest, rtol=1e-9)
+        self.assertNotIn(('head', 'Br'), d.elements)   # the laminate's: no element of interest (E19 point 3)
 
-    def test_type_1s_electronics_wholly_in_its_elements(self):
+    def test_type_1s_electronics_wholly_drawn_and_their_metals_of_interest_declared(self):
         # Point 3b: the boards' rest in the elements, the sensors' housings their own materials (point 3c), a joint's
-        # encoders inside its driver board: every robot's electronics are in the elements, to the compounds' rounding.
+        # encoders inside its driver board: every robot's electronics are drawn as elements whole, to the compounds'
+        # rounding. Of them, the metals of interest are its elements (E19 point 3), not the laminate's glass, epoxy and
+        # bromine, nor zinc and iron: in part.
         inputs = inputs_or_skip(self, self.params)
         d = self.at()
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        at = c.tables['materials'][0].index(composition.ELECTRONICS)
+        np.testing.assert_allclose(c.in_recipes[:, at], c.tables['materials'][1][:, at],
+                                   rtol=composition.COMPOUND_TOLERANCE)
         rows = {r['Name']: r for r in composition.summary(c) if r['Kind'] == 'Material'}
-        self.assertEqual(rows[composition.ELECTRONICS]['In the elements'], 'Yes')
+        self.assertEqual(rows[composition.ELECTRONICS]['In the elements'], 'Partly')
 
     def test_the_g1s_neodymium_in_its_hips(self):
         d = self.at()
@@ -353,7 +366,8 @@ class TestHandCalculations(unittest.TestCase):
         # half of it GCr15: 64.6575 g, 0.0323288 g. Six hip joints: 1.8396537 g. No other material of the hips holds
         # Mo.
         d = self.at()
-        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'hips', 'Mo'), 1.8396537e-3, rtol=1e-6)
+        np.testing.assert_allclose(self.recipe_element(d, 'Unitree G1', 'hips', 'Mo'), 1.8396537e-3, rtol=1e-6)
+        self.assertNotIn(('hips', 'Mo'), d.elements)   # it stays in its steel (E19 point 3)
 
     def test_each_robot_at_its_modes_weighs_its_own_mass(self):
         inputs = inputs_or_skip(self, self.params)
@@ -365,8 +379,7 @@ class TestHandCalculations(unittest.TestCase):
     def test_a_robot_without_joint_torques_and_battery_data_at_its_modes(self):
         # The Nori L3, 40 kg (E5.17; the Noetix E1 before, its joints its maker's since E14): its joint modules 49 % of
         # it, 19.6 kg; its shell 11.5 %, 4.6 kg; its battery 12 Wh per kg of robot, 480 Wh: cells 480 / 241.5 = 1.987578
-        # kg, the pack 480 / 164 = 2.926829 kg, its housing the pack less the cells and its management board (60 cm2 ×
-        # 0.56 g/cm2 = 33.6 g): 0.905651 kg.
+        # kg, its pack weighed by no source, so its housing 0.414 of its cells (EVIDENCE.md E20): 0.822857 kg.
         d = self.at()
         columns, draws = d.parts
         rows = d.robot == d.robots.index('Nori L3')
@@ -375,7 +388,7 @@ class TestHandCalculations(unittest.TestCase):
         np.testing.assert_allclose(self.part(d, 'Nori L3: Shell: engineering plastics'), 4.6, rtol=1e-9)
         np.testing.assert_allclose(self.part(d, 'Nori L3: Battery cells'), 480 / 241.5, rtol=1e-9)
         np.testing.assert_allclose(self.part(d, 'Nori L3: Battery housing, busbars and wires'),
-                                   480 / 164 - 480 / 241.5 - 0.0336, rtol=1e-9)
+                                   480 / 241.5 * 0.414, rtol=1e-9)
 
 
 class TestGradesByHeat(unittest.TestCase):
@@ -422,7 +435,7 @@ class TestGradesByHeat(unittest.TestCase):
             d = draw(inputs, params, self.graded_magnets(inputs, params.composition.draws))
         g1 = d.robot == d.robots.index('Unitree G1')
         columns, materials = d.materials
-        magnets = materials[g1, columns.index(('knees', 'Magnets (NdFeB)'))]
+        magnets = materials[g1, columns.index(('knees', composition.MAGNETS))]
         expected = magnets * np.array([self.DY[k] for k in d.grades['Knees'][g1]]) + 4 * 0.5e-6
         np.testing.assert_allclose(d.elements[('knees', 'Dy')][g1], expected, rtol=1e-9)
         self.assertGreater(len(set(d.grades['Knees'][g1])), 1)
@@ -455,7 +468,8 @@ class TestReadable(unittest.TestCase):
     def test_every_page_is_readable_fit_to_a_screen(self):
         # Type 1's pages, and since 2026-10-30 ("Yes, build it", EVIDENCE.md E11.7 open point B) types 3 and 4's, each
         # over its robots of every parts file (type 2's in TestTypeTwo).
-        for robot_type in (1, 3, 4):
+        # Type 5's since its pages were previewed (E19, 2026-11-02): its name the longest of the six.
+        for robot_type in (1, 3, 4, 5):
             with self.subTest(robot_type=robot_type):
                 self.readable(robot_type)
 
@@ -520,32 +534,6 @@ class TestReadable(unittest.TestCase):
                 composition.plt.close(figure)
 
 
-class TestElementsNotShown(unittest.TestCase):
-    """Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you should know this. Same for F, and N", then "S and P
-    can go also Na": type 1's element pages leave them out, its draws keep them."""
-
-    def test_type_1s_pages_leave_out_hydrogen_nitrogen_oxygen_and_fluorine(self):
-        params = Params()
-        params.composition.draws = 300
-        inputs = inputs_or_skip(self, params)
-        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
-        category = next(c for c in inputs.base.book.categories if c.number == 1)
-        c = composition.compose_taken_apart(category, d, inputs.base.lists)
-        for symbol in ('H', 'N', 'O', 'F', 'Na', 'P', 'S'):
-            self.assertTrue(c.column('elements', symbol).any(), msg=symbol)   # in the draws
-        pages = composition.taken_apart_pages(c, d, [], params)
-        titles = [axes.get_title(loc='left') for _, figure in pages for axes in figure.axes]
-        notes = ' '.join(t.get_text() for name, figure in pages if '_notes_' in name for t in figure.texts)
-        for _, figure in pages:
-            composition.plt.close(figure)
-        for name in ('Hydrogen (H)', 'Nitrogen (N)', 'Oxygen (O)', 'Fluorine (F)', 'Sodium (Na)', 'Phosphorus (P)',
-                     'Sulfur (S)'):
-            self.assertNotIn(name, titles)
-        self.assertIn('Copper (Cu)', titles)
-        self.assertIn('hydrogen, nitrogen, oxygen, fluorine, sodium, phosphorus and sulfur are not shown',
-                      ' '.join(notes.split()).lower())
-
-
 class TestProjectWords(unittest.TestCase):
     """Matthias's figure rule: no code names and no project jargon on a page; 2026-10-29, "Yes, build them", point 7:
     every page of 02 in plain words (01's PROJECT_WORDS)."""
@@ -600,7 +588,7 @@ class TestElementTitles(unittest.TestCase):
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_taken_apart(category, d, inputs.base.lists)
-        for symbol in composition.shown_elements(c.tables['elements'][0], params):
+        for symbol in c.tables['elements'][0]:
             self.assertIn(symbol, composition.ELEMENT_NAMES, msg=symbol)
             self.assertEqual(composition.element_label(symbol), f'{composition.ELEMENT_NAMES[symbol]} ({symbol})')
 
@@ -654,7 +642,7 @@ class TestElementPages(unittest.TestCase):
         for _, figure in pages:
             composition.plt.close(figure)
         partly = []
-        for symbol in composition.shown_elements(c.tables['elements'][0], self.params):
+        for symbol in c.tables['elements'][0]:
             kg = c.column('elements', symbol)
             held = kg > 0
             label = composition.element_label(symbol)
@@ -670,7 +658,7 @@ class TestElementPages(unittest.TestCase):
             per, unit = composition.panel_unit(kg[held])
             self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
             self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
-        self.assertIn('V', partly)
+        self.assertIn('Ti', partly)      # the titanium alloy, in some robots only (E19 point 3: Ti whole)
         self.assertNotIn('Pb', partly)   # since point 3a in every robot's boards, so in every draw
 
     def test_a_critical_element_held_in_some_draws_shows_the_draws_that_hold_it(self):
@@ -792,20 +780,31 @@ class TestMaterialPages(unittest.TestCase):
             parts = sum(kg for (x, m, _), kg in d.details.items() if x == kind and m == material)
             np.testing.assert_allclose(parts, draws[:, k], rtol=1e-9, atol=1e-15, err_msg=f'{kind}, {material}')
 
-    def test_the_pages_show_copper_the_magnets_each_steel_and_each_aluminium_alloy(self):
+    def test_the_pages_show_each_material_then_its_grades(self):
+        # EVIDENCE.md E19 point 7 and his yes to the preview of type 5 ("Yes, build them", 2026-11-02): each material of
+        # the one list, in its order, then its grades, alloys or magnet classes, each under its material; a material of
+        # one grade that grade in its title.
         _, d = self.drawn()
         titles = [title for title, *_ in composition.material_panels(d)]
-        for wanted in ('Copper', 'Permanent magnets', 'Magnets, grade class SH',
-                       'Gear steel 20CrMnTi', 'Bearing steel GCr15', 'Alloy steel 42CrMo4', 'Electrical steel M19',
-                       'Electrical steel M27', 'Aluminium 6061', 'Aluminium 7075', 'Plastics',
-                       'Battery cells, NMC (cylindrical)', 'Nickel strips, battery'):
-            self.assertIn(wanted, titles)
-        self.assertNotIn('Steel', titles)        # steel only by its grades
-        self.assertNotIn('Aluminium', titles)    # aluminium only by its alloys
+        wanted = ['Copper', 'Nickel: strips of the battery', 'Aluminium alloys', 'Aluminium alloys: 6061 (wrought)',
+                  'Aluminium alloys: 7075 (wrought)', 'Steel', 'Steel: gear steel 20CrMnTi', 'Steel: alloy steel 42CrMo4',
+                  'Steel: bearing steel GCr15', 'Electrical steel', 'Electrical steel: M19', 'Electrical steel: M27',
+                  'NdFeB magnets', 'NdFeB magnets: grade class SH', 'Battery cells: NMC (cylindrical)', 'Plastics']
+        for title in wanted:
+            self.assertIn(title, titles)
+        self.assertEqual([t for t in titles if t in wanted], wanted)   # in the order of the one list
+        self.assertNotIn('Permanent magnets', titles)
+        # Where copper, the magnets in all, each steel and each aluminium alloy sit, named as before but the magnets.
         sources = [name for name, _ in composition.sources_pages(d)]
-        for name in ('Copper', 'Permanent_magnets', 'Gear_steel_20CrMnTi', 'Aluminium_7075'):
+        # Each steel also since the stainless and electrical steels are materials of their own (E19 step 1).
+        for name in ('Copper', 'NdFeB_magnets', 'Gear_steel_20CrMnTi', 'Aluminium_7075', 'Stainless_steel_440C',
+                     'Electrical_steel_M19'):
             self.assertIn(os.path.join(composition.SOURCES_FOLDER, f'{name}.png'), sources)
         self.assertFalse(any('grade_class' in name for name in sources))   # the classes on the pages only
+        self.assertNotIn(os.path.join(composition.SOURCES_FOLDER, 'Steel.png'), sources)   # the steels by grade
+        figure = dict(composition.sources_pages(d))[os.path.join(composition.SOURCES_FOLDER, 'NdFeB_magnets.png')]
+        self.assertTrue(figure.get_suptitle().endswith('where its NdFeB magnets sit'), msg=figure.get_suptitle())
+        composition.plt.close('all')
 
     def test_a_material_held_in_some_draws_shows_the_draws_that_hold_it(self):
         # Matthias, 2026-10-29: "If there is nothing then show nothing. If it is just a bit and a large 0 then show me
@@ -813,7 +812,7 @@ class TestMaterialPages(unittest.TestCase):
         # enter all", every robot holds brass, the contacts of its connectors).
         import matplotlib.pyplot as plt
         _, d = self.drawn()
-        title, _, _, kinds = next(p for p in composition.material_panels(d) if p[0] == 'Stainless steel 440C')
+        title, _, _, kinds = next(p for p in composition.material_panels(d) if p[0] == 'Stainless steel: 440C')
         kg = sum(kinds.values())
         figure, axes = plt.subplots()
         composition.material_panel(axes, kg, title, True)
@@ -830,8 +829,8 @@ class TestMaterialPages(unittest.TestCase):
         inputs = inputs_or_skip(self, self.params)
         with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
-        aluminium = sum(kg for (_, m, _), kg in d.details.items() if m == 'Aluminium')
-        alloy = lambda name: sum(kg for (_, m, x), kg in d.details.items() if m == 'Aluminium' and x == name)  # noqa
+        aluminium = sum(kg for (_, m, _), kg in d.details.items() if m == composition.ALUMINIUM)
+        alloy = lambda name: sum(kg for (_, m, x), kg in d.details.items() if m == composition.ALUMINIUM and x == name)  # noqa
         np.testing.assert_allclose(alloy('Aluminium 7075'), 0.256 * aluminium, rtol=1e-9)
         np.testing.assert_allclose(alloy('Aluminium 6061'), 0.544 * aluminium, rtol=1e-9)
 
@@ -844,8 +843,102 @@ class TestMaterialPages(unittest.TestCase):
             draws = np.load(os.path.join(folder, 'grades.npy'))
         self.assertEqual(draws.shape, (d.n, len(columns)))
         self.assertIn('Hip joints: Steel: 20CrMnTi', columns)
-        self.assertIn('Frame and shell: Aluminium: Aluminium 6061', columns)
-        self.assertIn('Knee joints: Magnets (NdFeB): UH', columns)
+        self.assertIn('Frame and shell: Aluminium alloys: Aluminium 6061', columns)
+        self.assertIn('Knee joints: NdFeB magnets: UH', columns)
+
+
+class TestPagesByMaterial(unittest.TestCase):
+    """EVIDENCE.md E19 point 7, the preview of type 5 approved ("Yes, build them", 2026-11-02): each element's panel
+    split by the material it comes from, stacked to the total, as RAWCLICDataCenters 05, six panels a page, each
+    material's mean written in the panel, one legend of the page's materials; the material pages each material then its
+    grades; then the table of the alloys and grades, what each holds by its recipe and its kg in one robot (point 4)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self, robot_type: int = 1):
+        inputs = (inputs_or_skip(self, self.params) if robot_type == 1
+                  else type_inputs_or_skip(self, self.params, robot_type))
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == robot_type)
+        return d, composition.compose_taken_apart(category, d, inputs.base.lists)
+
+    def test_each_element_by_the_material_it_comes_from_adds_up_in_every_draw(self):
+        d, _ = self.drawn()
+        self.assertTrue({m for m, _ in d.by_material} <= set(composition.MATERIAL_COLOURS))
+        for element in {e for _, e in d.elements}:
+            by_kind = sum(kg for (_, e), kg in d.elements.items() if e == element)
+            by_material = sum(kg for (_, e), kg in d.by_material.items() if e == element)
+            np.testing.assert_allclose(by_material, by_kind, rtol=1e-12, atol=1e-18, err_msg=element)
+        copper = {m for m, e in d.by_material if e == 'Cu'}
+        self.assertEqual(copper, {'Copper', 'Battery cells', 'Boards and components'})
+
+    def test_six_panels_a_page_with_the_legend_and_the_means_of_its_materials(self):
+        d, c = self.drawn()
+        pages = composition.taken_apart_pages(c, d, [], self.params)
+        names = [name for name, _ in pages]
+        kinds = [name.rsplit('_', 2)[-2] for name in names]
+        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'materials', 'alloys'].index))
+        seen = False
+        for name, figure in pages:
+            if '_elements_' in name:
+                panels = [axes for axes in figure.axes if axes.get_title(loc='left')]
+                self.assertLessEqual(len(panels), 6, msg=name)
+                legend = [t.get_text() for t in figure.legends[0].get_texts()]
+                self.assertEqual(legend, [m for m in composition.MATERIAL_COLOURS if m in legend], msg=name)
+                for axes in panels:
+                    if axes.get_title(loc='left') == 'Copper (Cu)':
+                        seen = True
+                        words = ' '.join(t.get_text() for t in axes.texts)
+                        for material in ('Copper', 'Battery cells', 'Boards and components'):
+                            self.assertIn(f'{material}: ', words)
+                            self.assertIn(material, legend)
+            composition.plt.close(figure)
+        self.assertTrue(seen)
+
+    def test_each_alloy_and_grade_with_what_it_holds_and_its_kg(self):
+        d, _ = self.drawn()
+        rows = {(label, material): (holds, kg) for label, material, holds, kg in composition.alloy_rows(d)}
+        holds, kg = rows[('Gear steel 20CrMnTi', 'Steel')]
+        self.assertTrue(holds.startswith('Cr 1\u20131.3, Mn 0.8\u20131.1'), msg=holds)
+        self.assertTrue(holds.endswith('; Fe the rest'), msg=holds)
+        self.assertTrue(rows[('7075 (wrought)', 'Aluminium alloys')][0].startswith(
+            'Zn 5.1\u20136.1, Mg 2.1\u20132.9, Cu 1.2\u20132'))
+        self.assertEqual(rows[('Brass', 'Brass')][0], 'Cu 58\u201365; Zn the rest')
+        self.assertEqual(rows[('Strips of the battery', 'Nickel')][0], 'Ni 100')
+        magnets = [h for (label, m), (h, _) in rows.items() if m == 'NdFeB magnets']
+        self.assertTrue(magnets and all(h.startswith('Nd ') and h.endswith('; Fe the rest') for h in magnets))
+        self.assertFalse({m for _, m in rows} & {'Copper', 'Battery cells', 'Boards and components', 'Plastics'})
+        steel = sum(v for (_, m, x), v in d.details.items() if m == 'Steel' and x == '20CrMnTi')
+        stats = composition.statistics_of(steel)
+        per, unit = composition.panel_unit(steel[steel != 0])
+        self.assertTrue(kg.startswith(f"{composition.panel_number(stats['Median (kg)'] / per)} {unit} ("), msg=kg)
+
+    def test_magnesium_by_its_alloys_as_the_aluminium(self):
+        # Type 4's magnesium recipe is AM magnesium (AM50A or AM60B) and AZ91D: each its own row, also an alloy held
+        # in fewer than 2.5 % of the draws (no panel for it; the table lists every alloy the type holds, with its
+        # share of the draws). An element below the table's precision, 0.005 %, is left out (AZ91D's nickel, 0.002 %).
+        d, _ = self.drawn(4)
+        rows = {label: holds for label, material, holds, _ in composition.alloy_rows(d) if material == 'Magnesium alloys'}
+        self.assertEqual(set(rows), {'AM50A', 'AM60B', 'AZ91D'})
+        self.assertEqual(rows['AZ91D'], 'Al 8.3\u20139.7, Zn 0.35\u20131, Mn 0.15\u20130.5, Si 0\u20130.1, '
+                                        'Cu 0\u20130.03, Fe 0\u20130.005; Mg the rest')
+        titles = [title for title, *_ in composition.every_material_panel(d)]   # in fewer than 2.5 % of the draws
+        self.assertTrue(any(t.startswith('Magnesium alloys: ') for t in titles), msg=titles)
+
+    def test_the_notes_say_how_to_read_them(self):
+        d, c = self.drawn()
+        pages = composition.taken_apart_pages(c, d, [], self.params)
+        notes = ' '.join(' '.join(t.get_text() for name, figure in pages if '_notes_' in name
+                                  for t in figure.texts).split()).lower()
+        for _, figure in pages:
+            composition.plt.close(figure)
+        for words in ('split into the kg its draws hold from each material', 'elements of interest',
+                      'what each holds by its recipe', 'stay materials'):
+            self.assertIn(words, notes)
+        self.assertNotIn('not yet in the elements', notes)
 
 
 class TestRun(unittest.TestCase):
@@ -904,8 +997,8 @@ def type_two_inputs_or_skip(test: unittest.TestCase, params: Params):
 class TestTypeTwo(unittest.TestCase):
     """Robot type 2 drawn by 02 part by part (Matthias, 2026-10-30, "Yes, build C"): over its robots taken apart (batch
     1's five, the GR-1 in two versions; since "Yes, build it" batch 2's 24, the H2-X in two versions), by type 2's own
-    recipes, the Fourier robots' Ethernet line by hand; the robots not yet taken apart counted, so that its draws for
-    stock-and-flow come from the workbook until all are (Q2, Q4)."""
+    recipes, the Fourier robots' Ethernet line by hand; the robots not yet taken apart counted, so that its draws come
+    from the workbook until all are (Q2, Q4)."""
     BATCHES = [25, 47, 53, 69, 80, 98, 116, 117, 119, 120, 121, 123, 132, 134, 135, 144, 151, 153, 157, 158, 163, 170,
                171, 176, 177, 180, 199, 203, 210, 216, 221, 222, 223, 224, 229, 232, 244, 256, 265, 271, 272, 276, 285, 290,
                294, 297, 298, 299, 300, 302, 323, 326, 352]
@@ -922,7 +1015,7 @@ class TestTypeTwo(unittest.TestCase):
         inputs = type_two_inputs_or_skip(self, self.params)
         self.assertEqual([r.number for r in inputs.robots], sorted(self.BATCHES + self.ON_WHEELS))
         self.assertEqual([r.number for r in inputs.left_out], [329])       # the Xialan S0, no mass stated
-        # None with a mass left: type 2's draws for stock-and-flow from its parts now (Q2). Its robots with a mass, 96:
+        # None with a mass left: type 2's draws from its parts now (Q2). Its robots with a mass, 96:
         # one without is not in the evaluation and not counted (2026-10-30, E10.1 point 4).
         self.assertEqual((len(inputs.later), inputs.listed, inputs.robot_type), (0, 96, 2))
 
@@ -970,11 +1063,12 @@ class TestTypeTwo(unittest.TestCase):
         self.assertLess(left, 1)
 
     def test_its_own_recipes_of_aluminium_and_plastics(self):
-        # Q3: type 2's own rows of the element recipes.
+        # Q3: type 2's own rows of the element recipes; since E17 (2026-11-02) its copper by the recipe Copper metal.
         inputs = type_two_inputs_or_skip(self, self.params)
         shared = composition.Shared(inputs, self.params, fixed_magnets(inputs, 10), np.random.default_rng(5), 10)
-        self.assertEqual(shared.recipe_name, {'Aluminium': 'Aluminium, robot type 2, Aluminum alloys',
-                                              'Plastics': 'Plastics, robot type 2, Engineering plastics'})
+        self.assertEqual(shared.recipe_name, {'Aluminium alloys': 'Aluminium, robot type 2, Aluminum alloys',
+                                              'Plastics': 'Plastics, robot type 2, Engineering plastics',
+                                              'Copper': 'Copper metal'})
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         self.assertEqual(d.aluminium, 'die-cast 0 to 40 %, of the wrought rest 7075 39 to 97 % and 6061')
 
@@ -983,14 +1077,17 @@ class TestTypeTwo(unittest.TestCase):
         with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
-        def copper(robot):
-            return d.elements[('cables', 'Cu')][d.robot == d.robots.index(robot)]
+        def copper(robot, table='elements'):
+            return getattr(d, table)[('cables', 'Cu')][d.robot == d.robots.index(robot)]
 
         # The GR-2: 14 m × (2 × 0.82 + 8 × 0.205) mm2 × 8.96 g/cm3 = 411.4432 g, two power conductors and an Ethernet
         # line of eight (E6.8 point 9); 62 mated XT30 × 2.12 g × 0.35 of contacts × 0.62 copper of their brass =
-        # 28.52248 g. The H2: 14 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 = 238.336 g, and the same 28.52248 g.
-        np.testing.assert_allclose(copper('Fourier GR-2'), 0.43996568, rtol=1e-9)
-        np.testing.assert_allclose(copper('Unitree H2'), 0.26685848, rtol=1e-9)
+        # 28.52248 g. The H2: 14 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 = 238.336 g, and the same 28.52248 g. The element
+        # copper is the conductors' alone; the brass's copper stays bound in it (E19 point 3, question 3).
+        np.testing.assert_allclose(copper('Fourier GR-2'), 0.4114432, rtol=1e-9)
+        np.testing.assert_allclose(copper('Unitree H2'), 0.238336, rtol=1e-9)
+        np.testing.assert_allclose(copper('Fourier GR-2', 'recipe_elements'), 0.43996568, rtol=1e-9)
+        np.testing.assert_allclose(copper('Unitree H2', 'recipe_elements'), 0.26685848, rtol=1e-9)
 
 
 class TestTypeTwoOnWheels(unittest.TestCase):
@@ -1040,10 +1137,11 @@ class TestTypeTwoOnWheels(unittest.TestCase):
         nmc = d.details[('battery', composition.CELL_MATERIAL, 'NMC cylindrical')]
         self.assertTrue(np.all(nmc[casbot] == 0))
 
-    def test_the_casbot_w1s_pack_by_the_nmc_packs_ratio(self):
+    def test_the_casbot_w1s_housing_a_share_of_its_cells(self):
         # Matthias, 2026-10-30, "Ratio, as recommended" (EVIDENCE.md E9.8): its pack has no mass from its maker and its
-        # cells are LFP, so the pack is its cells times the NMC packs' pack-to-cell ratio in each draw: at the modes
-        # 241.5 / 164; and its housing, the pack's remainder, above zero in every draw.
+        # cells are LFP, so its housing is an NMC pack's in proportion to its cells; since 2026-11-02 ("A, as
+        # recommended", E20) every pack no source weighs is so: its housing 0.414 of its cells at the modes, above zero
+        # in every draw.
         inputs = type_two_inputs_or_skip(self, self.params)
         with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
@@ -1054,8 +1152,7 @@ class TestTypeTwoOnWheels(unittest.TestCase):
             return draws[rows, columns.index(f'CASBOT W1: {name}')]
 
         cells, housing = part('Battery cells'), part('Battery housing, busbars and wires')
-        np.testing.assert_allclose((cells + part('Battery management board') + housing) / cells, 241.5 / 164,
-                                   rtol=1e-9)
+        np.testing.assert_allclose(housing / cells, 0.414, rtol=1e-9)
         _, d = self.drawn()
         columns, draws = d.parts
         rows = d.robot == d.robots.index('CASBOT W1')
@@ -1110,8 +1207,9 @@ class TestTypesThreeAndFour(unittest.TestCase):
         # Versions: type 3's robots and the AgiBot X2, the Flexiv AICO 2, the Rainbow RB-Y1 and since batch 2 (E12.6)
         # the CYBORG RO1 and the DR02 in two each; type 4's and the X2, the CASBOT 02 and the FF Master in two. Since
         # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out); since types 5 and 6's entry (E16.6) type 3 94: the
-        # Kaleido 9, the Moby and the Phantom MK1.
-        for robot_type, count, versions in ((3, 94, 99), (4, 47, 50)):
+        # Kaleido 9, the Moby and the Phantom MK1; since batch 3 (E15.7) type 3 163 robots in 172 versions (Neo1 the
+        # one not taken apart), type 4 124 in 137 (each of its robots with a mass).
+        for robot_type, count, versions in ((3, 163, 172), (4, 124, 137)):
             inputs = type_inputs_or_skip(self, self.params, robot_type)
             self.assertEqual(len(inputs.robots), count, msg=robot_type)
             self.assertGreater(len(inputs.files), 1)
@@ -1201,9 +1299,7 @@ class TestZeroNotInDistribution(unittest.TestCase):
             at = {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text() for t in axes.texts}
             labels = [t.get_text() for t in axes.get_yticklabels()]
             composition.plt.close(figure)
-            title = next(p for p in composition.material_panels(d)
-                         if os.path.join(composition.SOURCES_FOLDER, '_'.join(
-                             ''.join(ch if ch.isalnum() else ' ' for ch in p[0]).split()) + '.png') == name)
+            title = next(p for p in composition.material_panels(d) if composition.source_file(p[1], p[2]) == name)
             kinds = title[3]
             by_label = {composition.KINDS[k][0]: k for k in kinds}
             medians = []
@@ -1362,7 +1458,7 @@ class TestDrawsBelowZero(unittest.TestCase):
         self.d = types.SimpleNamespace(robot_type=1, register=['1 Robot'], listed=1)
 
     def test_where_a_material_sits_over_the_draws_above_0(self):
-        figure = composition.sources_figure('Aluminium', self.kinds, self.d)
+        figure = composition.sources_figure(composition.ALUMINIUM, self.kinds, self.d)
         axes = figure.axes[0]
         labels = [t.get_text() for t in axes.get_yticklabels()]
         at = {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text() for t in axes.texts}
@@ -1390,3 +1486,104 @@ class TestDrawsBelowZero(unittest.TestCase):
             figure.canvas.draw()
             self.assertTrue(np.isfinite(axes.get_xlim()).all())
             composition.plt.close(figure)
+
+
+class TestElementsOfInterest(unittest.TestCase):
+    """EVIDENCE.md E19 point 3 (Matthias, 2026-11-02, "Yes, agree E19"), robot type 2 part by part: only the elements of
+    interest; copper, nickel and the light alloys each their element whole, kind of part by kind of part; no iron,
+    chromium, molybdenum, vanadium, zinc, carbon, oxygen or silicon (they stay in their steel, alloy or plastics)."""
+
+    INTEREST = ('Li', 'B', 'Mg', 'Al', 'Ti', 'Mn', 'Co', 'Ni', 'Cu', 'Ga', 'Sr', 'Nb', 'Pd', 'Ag', 'In', 'Sn', 'Ta', 'Au',
+                'Pb', 'Nd', 'Pr', 'Dy', 'Tb')
+
+    def test_kind_by_kind(self):
+        params = Params()
+        params.composition.draws = 2000
+        inputs = type_two_inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        self.assertTrue({e for _, e in d.elements} <= set(self.INTEREST), {e for _, e in d.elements})
+        columns, draws = d.materials
+        kg = lambda kind, m: (draws[:, columns.index((kind, m))] if (kind, m) in columns  # noqa: E731
+                              else np.zeros(d.n))
+        for kind in composition.KINDS:
+            for material, element in (('Copper', 'Cu'), ('Nickel', 'Ni'), ('Aluminium alloys', 'Al'),
+                                      ('Magnesium alloys', 'Mg'), ('Titanium alloy', 'Ti')):
+                own = d.elements.get((kind, element), np.zeros(d.n))
+                self.assertTrue((own >= kg(kind, material) - 1e-12).all(), msg=(kind, material))
+        self.assertTrue(d.elements[('battery', 'Li')].any())
+        self.assertTrue(d.elements[('knees', 'Nd')].any())
+
+
+class TestHousingShareOfCells(unittest.TestCase):
+    """Matthias, 2026-11-02: "A, as recommended" (EVIDENCE.md E20): a battery pack no source weighs is its cells, its
+    management board and its housing, the housing a share of its cells (0.207 / 0.414 / 0.859), so that it never falls
+    below zero; a weighed pack's housing stays its remainder. His run of 1 November had the Booster K1 2 Ah's housing
+    below zero in 44 of its draws, the Unitree R1's in 13 (VERIFICATION.md V145)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def test_every_housing_of_a_pack_not_weighed_a_share_of_its_cells_in_every_draw(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        columns, draws = d.parts
+        not_weighed = {p.robot for p in inputs.apart.parts if p.name == 'Battery pack' and None in p.bounds}
+        checked = []
+        for robot in d.robots:
+            housing = f'{robot}: Battery housing, busbars and wires'
+            if robot not in not_weighed or housing not in columns:
+                continue
+            rows = d.robot == d.robots.index(robot)
+            share = draws[rows, columns.index(housing)] / draws[rows, columns.index(f'{robot}: Battery cells')]
+            self.assertTrue(np.all((share >= 0.207 - 1e-12) & (share <= 0.859 + 1e-12)), msg=robot)
+            checked.append(robot)
+        self.assertIn('Booster K1 2 Ah', checked)
+        self.assertIn('Unitree R1', checked)
+
+    def test_only_a_weighed_packs_housing_is_a_remainder(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        self.assertIn('Unitree G1: Battery housing, busbars and wires', d.remainders)
+        self.assertNotIn('Booster K1 2 Ah: Battery housing, busbars and wires', d.remainders)
+
+
+class TestRemainderBelowZeroReported(unittest.TestCase):
+    """Matthias, 2026-11-02: "A, as recommended" (EVIDENCE.md E21): a robot type drawn part by part marks the draws in
+    which a remainder of the robot drawn (its frame, a weighed pack's housing, a joint's structure) is below zero; 02
+    reports what falls below zero with it, on the type's notes page, instead of stopping."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def composed(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        return d, composition.compose_taken_apart(category, d, inputs.base.lists)
+
+    def test_the_draws_whose_remainder_is_below_zero_are_marked(self):
+        d, c = self.composed()
+        columns, draws = d.parts
+        expected = np.zeros(d.n, dtype=bool)
+        for column in d.remainders:
+            expected |= draws[:, columns.index(column)] < 0
+        for values in d.structures.values():
+            expected |= values < 0
+        np.testing.assert_array_equal(c.remainder_below, expected)
+
+    def test_the_notes_page_names_what_is_below_zero_with_a_remainder(self):
+        d, c = self.composed()
+        self.assertFalse(any('where a remainder of the robot drawn is below zero' in note
+                             for note in composition.taken_apart_notes(c, d, [], self.params)
+                             if not c.remainder_below.any()))
+        groups = c.tables['part_groups'][1]
+        frame = c.tables['part_groups'][0].index('Frame')
+        groups[7, frame] = -0.1
+        c.remainder_below[7] = True
+        notes = ' '.join(composition.taken_apart_notes(c, d, [], self.params))
+        self.assertIn('the part group Frame is below zero in', notes)
+        self.assertIn('reported, not cut', notes)

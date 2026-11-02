@@ -25,7 +25,11 @@ joints of a robot from its one stated joint (from_stated_joint(), by the ratios 
 every joint, E12.5 point 2; its module by type 2's fit or, for type 1's robots, type 1's rule); and every robot of
 batch 2 (E12.5, 30 blocks: the CASBOT 02, the CYBORG RO1, the DR02 and the FF Master in two versions), from its sources
 (E12.1 to E12.4). Since E14 (2026-11-01, "Yes, build it", E14.6 point 3) AgiBot's X2, X2 Ultra, A3 and A3 Ultra take
-their joints from AgiBot's model files and the A2 from its page's knee.
+their joints from AgiBot's model files and the A2 from its page's knee. Since 2026-11-02 ("E15's entry", "Move on",
+EVIDENCE.md E15.7) every robot of batch 3 (E15.3, 112 robots in 122 blocks: a robot of no stated form on legs and on
+wheels, each as often), its numbers typed in from the record read first-hand (research_2026-11-01/), the 17 of one
+stated joint by from_stated_joint(), the GR-3 and the Star1 by their makers' models, the Tau Humanoid by the Unitree
+G1's rows of type 1's file.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -94,8 +98,8 @@ IMU_NOT_NAMED = ('Motion sensor (IMU)', 1, 'Boards', 'Torso', IMU_G, 'E',
                  "its maker names none: one, as every robot that walks or carries arms balances by one; as the G1's "
                  '(E11.6 point 8)', [('IMU', 1)])
 SHELL_NOT_STATED = ('Shell: plastics', 'not stated; plastics, 11.5 % of the robot (E11.6 point 10)')
-FRAME_NOT_STATED = ('Frame', 'Aluminium', 'not stated; aluminium, the remainder (E11.6 point 10)')
-# A robot whose maker gives energy but no voltage: 48 V (E), as type 2's TLIBOT T1 and Tien Kung 3.0 (E8.3 point 6).
+FRAME_NOT_STATED = ('Frame', 'Aluminium alloys', 'not stated; aluminium, the remainder (E11.6 point 10)')
+# A robot whose maker gives energy but no voltage: 48 V (E), as type 2's Tlibot T1 and Tien Kung 3.0 (E8.3 point 6).
 VOLTS_NOT_STATED = 48
 # The share of its mass and the energy per kg of robot of a robot of a template, by these names (01 and 02 read them so:
 # 01's template_quantity, "…, types 3 and 4").
@@ -261,17 +265,17 @@ def makers(kg: float, source: str) -> tuple:
 
 def energy(wh: float, source: str) -> dict:
     """A battery whose maker states its energy but not its voltage: 48 V (E), its capacity the energy over it (S, E)."""
-    return voltage_capacity(VOLTS_NOT_STATED, f'{source.split()[0]} states no voltage: 48 V, as type 2\'s TLIBOT T1 '
+    return voltage_capacity(VOLTS_NOT_STATED, f'{source.split()[0]} states no voltage: 48 V, as type 2\'s Tlibot T1 '
                                               '(E11.6 point 6)', wh / VOLTS_NOT_STATED,
                             f'{source}: {wh:g} / 48 V', label='S, E')
 
 
 SIX_HANDS = SIX_JOINT_HAND
 AGILE_HAND = joint('Hand (Agile Hand)', 2, None, estimate(1.5), 'Elbows and wrists', 'Arms', size='small')
-MAGNESIUM_FRAME_A3 = ('Frame', 'Magnesium', 'AGA3p "magnesium alloy, titanium alloy, and TPU flexible materials": '
+MAGNESIUM_FRAME_A3 = ('Frame', 'Magnesium alloys', 'AGA3p "magnesium alloy, titanium alloy, and TPU flexible materials": '
                                             'magnesium alloy; its titanium and TPU not drawn (no share stated); the '
                                             'remainder (E11.6 point 10, question 4)')
-MAGNESIUM_FRAME_A3U = ('Frame', 'Magnesium', 'AGA3Up "Magnesium alloy + carbon-fiber nylon": magnesium alloy; the '
+MAGNESIUM_FRAME_A3U = ('Frame', 'Magnesium alloys', 'AGA3Up "Magnesium alloy + carbon-fiber nylon": magnesium alloy; the '
                                              'remainder (E11.6 point 10)')
 
 # --- Batch 1, robot by robot (E11.6), in the register's order --------------------------------------------------------
@@ -844,7 +848,7 @@ KAWASAKI_KALEIDO_9 = template(
     30, sources='MYN (Mynavi, 2025-12-05: "身長は190cm", "全身に30軸(ハンドは別)の自由度", "頭部にステレオカメラ", "胸にはLIDAR'
                 'センサー"), KAWb (Kawasaki: "maintaining torque", LiDAR), KAWj (Kawasaki on its 2019 Kaleido); E15, E16',
     sensors=[binocular('MYN "頭部にステレオカメラ"'), lidar('MYN "胸にはLIDARセンサー"'), IMU_NOT_NAMED],
-    frame=('Frame', 'Magnesium', 'KAWj "骨格部品に、アルミより軽量なマグネシウム合金を採用" (its 2019 Kaleido): magnesium '
+    frame=('Frame', 'Magnesium alloys', 'KAWj "骨格部品に、アルミより軽量なマグネシウム合金を採用" (its 2019 Kaleido): magnesium '
                                  'alloy; the remainder (E16.2; as the A3\'s, E11.6 question 4)'))
 NOBLE_MACHINES_MOBY = template(
     'Noble Machines Moby', 'Noble Machines', 1.70, 72, makers(72, 'NMb "Moby\'s 72 Kg body"'), 34 + 2,
@@ -878,6 +882,943 @@ FOUNDATION_PHANTOM_MK1 = block(
     # TBS: "Phantom MK-1 … lacks a battery" (E16.2): no battery rows; it draws its power by cable.
     battery=False, **with_defaults(1.80, 80, {}))
 
+# --- Batch 3, robot by robot (EVIDENCE.md E15.3 and E15.6, agreed 2026-11-01, "Yes, agree both"; entered on "E15's
+# entry" and "Move on", 2026-11-02, E15.7), in the register's order. Each figure as read first-hand (V134; the record in
+# documentation/claude/research_2026-11-01/firsthand_batch3.md), typed in here, never read from a document at run time.
+def internet(kg: float, source: str) -> tuple:
+    """A mass from the internet (C), ± 1 kg (E15.2 point 1), its source named."""
+    return (kg - 1, kg, kg + 1), 'S', f"{source} (the internet's); ± 1 kg (E15.2 point 1)"
+
+
+def stated_hands(what: str, kg: float, label: str, source: str) -> tuple:
+    """Two hands of a stated mass each (E15.2 point 3): ± 5 % where a source states it (S), half to 1.5 times where
+    it is another hand's (E). `source` is said in the block's joint sources."""
+    return joint(f'Hand ({what})', 2, None, (spread if label == 'S' else estimate)(kg), 'Elbows and wrists', 'Arms',
+                 size='small')
+
+
+def lfp(source: str) -> dict:
+    """Cells of LiFePO4 where the maker says so (E15.2 point 4): the LFP cylindrical recipe, their format E."""
+    return dict(cell_recipe='LFP cylindrical', cells=('S', f'LFP cylindrical: {source}; the cell format E (E9.6 point 8)'))
+
+
+def orin_nx_read(source: str) -> list:
+    """A Jetson Orin NX read from a computing figure (E15.2 point 5): its size half to 1.5 times (E), and its carrier."""
+    module, carrier = orin_nx_boards(source)
+    return [module[:4] + (estimate(T2.ORIN_NX[1]), module[5], 'E',
+                          f'{source}; 69.6 × 45 mm (E5.13), half to 1.5 times (E)'), carrier]
+
+
+def x86_and_arm(why: str) -> list:
+    """The cooler of a robot with an Intel or AMD computer and an ARM module: two fans, a heat sink of each (as type 2's
+    robots with both, E9.6 point 9)."""
+    return [T2.fans(2, why), T2.x86_sinks(1), ARM_SINK]
+
+
+def on_legs_and_wheels(name: str, maker: str, height: float, mass: tuple, body_joints: int, *, sources: str,
+                       added: tuple = (), **more) -> tuple:
+    """A robot of no stated form, on legs and on wheels, each as often (E15.6 question 2): the template on legs, and
+    the template on wheels with two drive wheels and two casters."""
+    legs = template(f'{name} on legs', maker, height, None, mass,
+                    JOINTS_MEDIAN + sum(h[1] for h in added), sources=sources, added_joints=list(added), **more)
+    wheels = wheeled(f'{name} on wheels', maker, height, None, mass, WHEELED_JOINTS_MEDIAN, sources=sources,
+                     added=added, **more)
+    return legs, wheels
+
+
+NO_FORM = 'its form not stated: on legs and on wheels, each as often (E15.6 question 2)'
+FIGURE_AI_FIGURE_02 = template(
+    'Figure AI Figure 02', 'Figure AI', 1.68, None, catalogue(70, 'Figure states none (E15.1)'), JOINTS_MEDIAN + 2,
+    sources='FIGr (New Atlas on its launch: "six RGB cameras", "16 degrees of freedom" in its hands, "a new 2.25-kWh", '
+            '"onboard microphones and speakers"), HG; E15', added_joints=[hands(16)],
+    **energy(2250, 'FIGr "a new 2.25-kWh"'),
+    sensors=[camera('Camera, RGB', 6, 'Head', 'FIGr "six RGB cameras"'), microphones('FIGr "onboard microphones"'),
+             speaker('FIGr "speakers"'), IMU_NOT_NAMED])
+PUDU_FLASHBOT_ARM = wheeled(
+    'Pudu FlashBot Arm', 'Pudu Robotics', 1.44, None, catalogue(70, 'Pudu states none (E15.1)'), 14,
+    sources='PUDf (Pudu: "539*515*1440mm", "Arm: 7", "Hand: 6 Active + 5 Passive", "PUDU DH11 dexterous hands", '
+            '"Independent Suspended Chassis", "RGBD cameras, LiDAR, panoramic cameras" with no counts), HG; E15',
+    added=(hands(6),),
+    sensors=[depth_camera('PUDf "RGBD cameras" (their count not stated: one, E)'), base_lidar('PUDf "LiDAR"'),
+             camera('Camera, panoramic', 1, 'Head', 'PUDf "panoramic cameras" (one, E)'), IMU_NOT_NAMED])
+HOLIDAY_ROBOTICS_FRIDAY = wheeled(
+    'Holiday Robotics Friday', 'Holiday Robotics', 1.76, None,
+    internet(115, 'HDF "176cm tall, weighing 115kg (with a heavy 66kg mobile base"'), WHEELED_JOINTS_MEDIAN,
+    sources='HDF (Humanoids Daily, from the specifications Holiday Robotics released: "176cm tall, weighing 115kg", "A '
+            '20-DoF ... hand that weighs only 500g", "differential drive wheeled base"), HG; E15',
+    added=(stated_hands('Friday, 20 joints', 0.5, 'S', 'HDF "500g"'),),
+    boards=agx_orin('HG "NVIDIA Jetson Orin" (the catalogue\'s; E: an AGX Orin)', label='E') + [POWER_BOARD])
+FUTURING_2_ON_LEGS, FUTURING_2_ON_WHEELS = on_legs_and_wheels(
+    'Futuring 2', 'Futuring Robot', 1.68, catalogue(70, 'Futuring states none (E15.1)'), 0,
+    sources=f'HG (the catalogue: 70 kg, "2-finger gripping claws"; {NO_FORM}); E15', added=(grippers(),))
+AGIBOT_G2_MAX = wheeled(
+    'AgiBot G2 Max', 'AgiBot', 1.79, None,
+    ((184, 185, 186), 'S', 'HG "185" (the register, the catalogue\'s), which is the base G2\'s (AGG2s "Weight 185kg"); ± 1 '
+                           'kg (E15.3)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG; AGG2s (the base G2\'s specification as a seller carries it: "Weight 185kg"); E15', driven=4,
+    caster_count=0, added=(T2.steering(4),))
+GALBOT_G1 = wheeled(
+    'Galbot G1', 'Galbot', 1.73, 92.5, makers(92.5, 'GALg1 "92.5 kg"'), 21,
+    sources='GALg1 (Galbot: "92.5 kg", "1730 mm", "合计 21 颈部 2 · 手臂 7×2 · 腰部 3 · 腿部 2", "48 V 30 Ah", "NVIDIA AGX Orin '
+            '64GB", "4 轮全向移动底盘"); E15', driven=4, caster_count=0, added=(grippers(),),
+    **voltage_capacity(48, 'GALg1 "48 V 30 Ah"', 30, 'GALg1 "48 V 30 Ah"'),
+    boards=agx_orin('GALg1 "NVIDIA AGX Orin 64GB"') + [POWER_BOARD],
+    sensors=[binocular('GALg1 "头部 双目相机 ×1"'), camera('Camera, RGB', 4, 'Head', 'GALg1 "躯干 RGB 相机 ×4"'),
+             depth_camera('GALg1 "腕部 深度相机 ×2"', 2), base_lidar('GALg1 "底盘 3D 激光雷达 ×1"'),
+             counted(imu('GALg1 "IMU ×1" in its torso and in its chassis'), 2),
+             counted(microphones('GALg1 "线性四麦克风阵列 ×2"'), 2), counted(speaker('GALg1 "喇叭 5 W ×2"'), 2)])
+GALBOT_ET1 = template(
+    'Galbot ET1', 'Galbot', 1.25, 32, makers(32, 'GALet1 "带电池重量 32 kg"'), 26,
+    sources='GALet1 (Galbot: "1250 mm", "带电池重量 32 kg", "标准版：26", "RK3588 + RDK X5", "双目摄像头"); E15',
+    boards=RK3588_BOARDS + [named_board('RDK X5', 'GALet1 "RK3588 + RDK X5"'), POWER_BOARD],
+    sensors=[binocular('GALet1 "双目摄像头"'), IMU_NOT_NAMED])
+GALBOT_S1 = wheeled(
+    'Galbot S1', 'Galbot', 1.79, 320, makers(320, 'GALs1 "整机重量 320 kg"'), 16,
+    sources='GALs1 (Galbot: "320 kg", "1793 mm", "升降行程 750 mm", "颈部 2 · 双臂 7×2 · 升降 1", "四轮转向全向底盘", "48 V 30 Ah × 2", '
+            '"NVIDIA AGX Orin 64GB"); E15', driven=4, caster_count=0, added=(grippers(), T2.steering(4)), lift=True,
+    **voltage_capacity(48, 'GALs1 "48 V 30 Ah × 2"', 60, 'GALs1 "30 Ah × 2" (arith.)'),
+    boards=agx_orin('GALs1 "NVIDIA AGX Orin 64GB"') + [POWER_BOARD],
+    sensors=[binocular('GALs1 "头部 双目相机 ×1"'), lidar('GALs1 "头部 3D 激光雷达 ×1"'),
+             depth_camera('GALs1 "胸部 深度相机 ×2"', 2), base_lidar('GALs1 "底盘 3D 激光雷达 ×2"', 2),
+             counted(speaker('GALs1 "喇叭 5 W × 2"'), 2), IMU_NOT_NAMED])
+PERSONA_AI_GEN_1 = template(
+    'Persona AI Gen 1', 'Persona AI', 1.75, None,
+    ((69, 70, 85), 'S', 'HG "70" (the catalogue\'s) the mode, 1 kg below; OBP "WEIGHT 85 kg" (a database) the max (E15.2 '
+                        'point 1)'), JOINTS_MEDIAN + 2,
+    sources='PRSn (Persona: its page gives no figures), OBP, HG (hands 20); E15', added_joints=[hands(10)])
+GENERATIVE_BIONICS_GENE_01 = template(
+    'Generative Bionics GENE.01', 'Generative Bionics', 1.70, None,
+    ((60, 79.7, 80.7), 'S', 'GBm its model\'s links 79.668 kg (added by script, V134) the mode, 1 kg above; the '
+                            'internet\'s "approximately 60 kilograms" (Origin of Bots, not reread) the min (E15.2 '
+                            'point 1)'), 31 + 2,
+    sources='GBm (its model file gene01_0/model.urdf: 79.668 kg, 31 body joints, 42 hand joints, every effort "1e+09", '
+            'six camera frames, "chest_imu"), HG; E15', added_joints=[hands(21)],
+    sensors=[camera('Camera', 6, 'Head', 'GBm six camera frames'), imu('GBm "chest_imu"')])
+GENTO_LUNA = wheeled(
+    'Gento Luna', 'Gento Robotics', 1.70, None, catalogue(90, 'Gento states none (E15.1)'), 26,
+    sources='GENl (Gento: "26 DoF (excluding dexterous hands)", "48 V 34.4 Ah LiFePO battery pack", "NVIDIA Jetson Orin '
+            'AGX 64GB", "3D LiDAR and ultrasonic radar", "omnidirectional mobile chassis"), HG; E15', driven=4,
+    caster_count=0, added=(grippers(),),
+    **voltage_capacity(48, 'GENl "48 V 34.4 Ah"', 34.4, 'GENl "34.4 Ah"'), **lfp('GENl "LiFePO battery pack"'),
+    boards=agx_orin('GENl "NVIDIA Jetson Orin AGX 64GB"') + [POWER_BOARD],
+    sensors=[base_lidar('GENl "3D LiDAR"'), IMU_NOT_NAMED])
+GEEK_PLUS_GINO_1 = wheeled(
+    'Geek+ Gino 1', 'Geek+', 1.68, None, catalogue(63, 'Geek+ states none (E15.1)'), 14,
+    sources='CLSg (财联社 on its launch: "机器人双臂14个自由度", "7主动自由度三指灵巧手", "50Ah的大容量电池" without its voltage: on '
+            'the template, E15.2 point 4, "Nvidia Thor", "三目主视觉和前后鱼眼相机", "前后半球形3D激光雷达", "手心双目相机"), HG; E15',
+    driven=4, caster_count=0, added=(hands(7),),
+    boards=thor('CLSg "Nvidia Thor机器人计算机"') + [POWER_BOARD],
+    sensors=[camera('Camera, trinocular', 1, 'Head', 'CLSg "三目主视觉"'),
+             camera('Camera, fisheye', 2, 'Head', 'CLSg "前后鱼眼相机"'),
+             base_lidar('CLSg "前后半球形3D激光雷达"', 2), binocular('CLSg "手心双目相机", one in each palm', 2),
+             IMU_NOT_NAMED])
+GAC_GOMATE = wheeled(
+    'GAC GoMate', 'GAC', 1.74, None, catalogue(45, 'GAC states none (E15.1)'), 28,
+    sources='HSG (heise: "174 cm", "38 degrees of freedom", "hands with five movable fingers"; its wheel-legs four '
+            'driven, E15.3), HG; E15', driven=4, caster_count=0, added=(hands(5),))
+GAC_GOMATE_MINI = wheeled(
+    'GAC GoMate Mini', 'GAC', 1.70, None, catalogue(60, 'GAC states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 60 kg, wheel-legs); E15', driven=4, caster_count=0)
+GR3_JOINTS = [('Hip pitch', 2, 366), ('Hip roll', 2, 140.4), ('Hip yaw', 2, 140.4), ('Knee', 2, 366),
+              ('Ankle pitch', 2, 59.4), ('Ankle roll', 2, 59.4), ('Waist yaw', 1, 140.4), ('Waist roll', 1, 108.6),
+              ('Waist pitch', 1, 108.6), ('Head yaw', 1, 17.4), ('Head pitch', 1, 17.4), ('Shoulder pitch', 2, 74.4),
+              ('Shoulder roll', 2, 74.4), ('Shoulder yaw', 2, 42.9), ('Elbow', 2, 42.9), ('Wrist yaw', 2, 42.9),
+              ('Wrist pitch', 2, 17.4), ('Wrist roll', 2, 17.4)]
+FOURIER_GR_3 = block(
+    'Fourier GR-3', 'Fourier', 1.65, 71,
+    'FFgr3 (Fourier: "Net Weight ≈71 kg", 1642 × 552 × 292 mm, its joint table, head 2, leg 6, waist 3, arm 7, hand 6, '
+    '"702Wh + 234Wh", "46.8V", "AMD Ryzen 7 8845HS", "Aluminum Alloy + Engineering Plastic + Soft Cover Material"), '
+    'FFgr3u (its model file gr3v2_1_1.urdf: the same torques); E15', makers(71, 'FFgr3 "Net Weight ≈71 kg"'),
+    model_joints(GR3_JOINTS, T2.from_torque) + [hands(6)],
+    joint_sources="FFgr3 its joint table's \"Torque Upper Limit (Nm)\", the same as its model file's (FFgr3u); each "
+                  'module the refit at its torque, 0.0689 kg × torque^0.566, half to 1.5 times (E14.1); its hands '
+                  "Fourier's six-joint hand per joint (E7.5 point 4)",
+    **voltage_capacity(46.8, 'FFgr3 "46.8V"', 20, 'FFgr3 "702Wh + 234Wh" over 46.8 V (arith.)'),
+    **with_defaults(1.65, 71, dict(
+        boards=[intel('AMD Ryzen 7 8845HS', 'FFgr3 "AMD Ryzen 7 8845HS"'), POWER_BOARD], cooler=X86_COOLER,
+        sensors=[camera('Camera, monocular', 1, 'Head', 'FFgr3 "Monocular camera"'), imu('FFgr3 IMU "6-axis"'),
+                 microphones('FFgr3 microphone "360-degree"'), speaker('FFgr3 speaker 15 W')],
+        frame=('Frame', 'Aluminium alloys', 'FFgr3 "Aluminum Alloy + Engineering Plastic + Soft Cover Material": '
+                                            'aluminium; the remainder (E15.6 question 6)'))))
+HAIER_HIVA_HAIWA = wheeled(
+    'Haier HIVA Haiwa', 'Haier', 1.65, None, catalogue(70, 'Haier states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 70 kg, hands 12, on a base); E15', added=(hands(6),))
+HUMANOID_HMND_01_ALPHA_BIPEDAL = template(
+    'Humanoid HMND 01 Bipedal', 'Humanoid', 1.79, 90, makers(90, 'HMNp "WEIGHT 90 kg"'), 29 + 2,
+    sources='HMNp (Humanoid: "WEIGHT 90 kg", "HEIGHT 179 cm", "DEGREES OF FREEDOM 29", "12-DOF 5-finger hand or 1-DOF '
+            'parallel gripper", "Wrist RGB cameras", "6-mic array, speakers"), HMNr (its release: "six RGB cameras, two '
+            'depth sensors, and a six-microphone array", "Nvidia Jetson Orin AGX and Intel i9 processors", "1-degree-of-'
+            'freedom parallel grippers"); E15', added_joints=[grippers()],
+    boards=agx_orin('HMNr "Nvidia Jetson Orin AGX"') + [intel('Intel i9', 'HMNr "Intel i9 processors"'), POWER_BOARD],
+    cooler=x86_and_arm('its Intel computer and its AGX Orin'),
+    sensors=[camera('Camera, RGB', 6, 'Head', 'HMNr "six RGB cameras"'), depth_camera('HMNr "two depth sensors"', 2),
+             camera('Camera, wrist', 2, 'Arms', 'HMNp "Wrist RGB cameras"'),
+             microphones('HMNr "a six-microphone array"'), speaker('HMNp "speakers"'), IMU_NOT_NAMED])
+NOETIX_HOBBS_W1 = wheeled(
+    'Noetix Hobbs W1', 'Noetix', 1.70, None, internet(75, 'AIWh "75 kg" (aiwiki, citing Noetix\'s page)'),
+    WHEELED_JOINTS_MEDIAN,
+    sources='NTXh (Noetix: "Wheeled Full-Body Form", "54 Active DoF", "LiDAR, ultrasonic sensors, and depth cameras"), '
+            'AIWh (aiwiki, citing Noetix\'s page: "75 kg", "32 Ah (21V to 29.4V)", "Rockchip RK3588", "Intel J1900", '
+            '"3 ToF sensors on chassis", "2x RGB cameras", "1x RGB camera", "Linear four-microphone array"); E15',
+    added=(hands(6),),
+    **voltage_capacity(25.9, 'AIWh "21V to 29.4V": seven cells in series, 3.7 V each nominal (arith., E)', 32,
+                       'AIWh "32 Ah"', label='S, E'),
+    boards=RK3588_BOARDS + [intel('Intel J1900', 'AIWh "Intel J1900"'), POWER_BOARD],
+    cooler=x86_and_arm('its Intel computer and its RK3588'),
+    sensors=[base_depth_camera('AIWh "3 ToF sensors on chassis"', 3),
+             camera('Camera, RGB', 3, 'Head', 'AIWh "2x RGB cameras" (its eyes), "1x RGB camera" (its chest)'),
+             microphones('AIWh "Linear four-microphone array"'), base_lidar('NTXh "LiDAR"'), IMU_NOT_NAMED])
+HONOR = template(
+    'HONOR', 'HONOR', 1.60, None, catalogue(80, 'HONOR states none; which of its robots this is is not said (E15.1)'),
+    JOINTS_MEDIAN, sources='HONr (HONOR: its robots named, no figures), HG ("forehead-mounted camera"); E15',
+    sensors=[camera('Camera', 1, 'Head', 'HG "forehead-mounted camera"'), IMU_NOT_NAMED])
+HONOR_A1 = template(
+    'HONOR A1', 'HONOR', 1.37, None, catalogue(40, 'HONOR states none (E15.1)'), JOINTS_MEDIAN,
+    sources='HONr (HONOR: "HONOR Robotics A1", no figures), HG; E15')
+HUASHU_HSR_ER_HR705 = wheeled(
+    'Huashu HSR-ER-HR705', 'Huashu Robotics', 1.70, 200, makers(200, 'HSRp "机器人重量 200kg"'), 20,
+    sources='HSRp (Huashu: "机器人重量 200kg", "机器人高度 1700mm", "23（机械臂7×2+头部2+腰部1+腿部3+底盘3）", "深度相机×2、鱼眼相机×1", '
+            '"SLAM激光导航", "全向移动"; three driven wheels, E15.2 point 6); E15', driven=3, caster_count=0,
+    added=(grippers(),),
+    sensors=[depth_camera('HSRp "深度相机×2"', 2), camera('Camera, fisheye', 1, 'Head', 'HSRp "鱼眼相机×1"'),
+             base_lidar('HSRp "SLAM激光导航" (one, E)'), IMU_NOT_NAMED])
+XPENG_IRON_2024 = template(
+    'XPENG IRON 2024', 'XPENG', 1.78, None, catalogue(70, 'XPENG states none (E15.1)'), JOINTS_MEDIAN + 2,
+    sources='QVI (Qviro on its launch: "Each hand features 15 degrees of freedom"), HG; E15', added_joints=[hands(15)],
+    boards=[named_board('XPENG Turing', 'its Turing chip (the internet\'s, E15.3) as one board'), POWER_BOARD])
+XPENG_IRON_2025 = template(
+    'XPENG IRON 2025', 'XPENG', 1.78, None,
+    ((69, 70, 90), 'S', 'K36i "体重达到 70kg" the mode, 1 kg below; HG "90" (the register\'s, no source) the max (E15.2 '
+                        'point 1)'), JOINTS_MEDIAN + 2,
+    sources='K36i (36Kr on its launch: "IRON 身高约 1.78 米 ... 体重达到 70kg", "双手 ... 22 个自由度", "三颗图灵 AI 芯片"), HG; E15',
+    added_joints=[hands(22)],
+    boards=[counted(named_board('XPENG Turing', 'K36i "三颗图灵 AI 芯片": three boards (E)'), 3), POWER_BOARD])
+
+WEAVE_ISAAC_1 = wheeled(
+    'Weave Isaac 1', 'Weave Robotics', 1.75, None,
+    ((39, 40, 45), 'S', 'HG "40" (the catalogue\'s) the mode, 1 kg below; OBI "WEIGHT 45 kg" (a database) the max (E15.2 '
+                        'point 1)'), 16,
+    sources='WVi (Weave: "3\' – 5\'9"", Neck "2", Arms "2 × 6", Hands "2 × 1", Torso "2", Base "3", "collapsible torso"; '
+            'three driven wheels, E15.2 point 6), OBI, HG; E15', driven=3, caster_count=0, added=(grippers(),),
+    lift=True)
+JAKA_K1 = template('JAKA K1', 'JAKA', 1.80, None, catalogue(40, 'JAKA states none (E15.1)'), JOINTS_MEDIAN,
+                   sources='HG; E15')
+JAKA_KARGO = wheeled(
+    'JAKA Kargo', 'JAKA', 1.57, None,
+    ((179, 180, 200), 'S', 'HG "180" (the catalogue\'s table) the mode, 1 kg below; its text "about 200 kilograms with '
+                           'everything" the max (E15.2 point 1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 180 kg, "about 200 kilograms with everything", a lift, an Intel i5); E15', lift=True,
+    boards=[intel('Intel i5', 'HG "Intel i5" (the catalogue\'s)'), POWER_BOARD], cooler=X86_COOLER)
+JINGCHU_ELF = wheeled(
+    'Jingchu Elf', 'Hubei Jingchu', 1.65, None,
+    ((69, 70, 80), 'S', 'JNGe "体重约70kg" the mode, 1 kg below; the same page\'s wheeled block "体重：80kg" the max (E15.2 '
+                        'point 1)'), 16,
+    sources='JNGe (Jingchu: "荆楚精灵身高165cm，体重约70kg。具备16个自由度（不含手），拥有高精度智能移动底盘", "轮式机器人 ... 体重：80kg 2轮驱动", '
+            '"1024核NVIDIA Ampere架构GPU，约117TOPS", "激光雷达和深度相机"); E15',
+    boards=orin_nx_read('JNGe "1024核NVIDIA Ampere架构GPU，约117TOPS" (E: an Orin NX)') + [POWER_BOARD],
+    sensors=[base_lidar('JNGe "激光雷达"'), depth_camera('JNGe "深度相机" (one, E)'), IMU_NOT_NAMED])
+ZEROTH_JUPITER = template(
+    'Zeroth Jupiter', 'Zeroth', 1.65, None,
+    ((57, 58, 60), 'S', 'IFAz "Weight: 58 kg" (its IFA exhibitor listing) the mode, 1 kg below; HG "60" the max (E15.2 '
+                        'point 1)'), 25 + 2,
+    sources='IFAz (IFA, Zeroth\'s exhibitor listing: Jupiter "Height: 165 cm Weight: 58 kg", "25 joints", "Hands: 22 '
+            'points of articulation (10 per hand)"), HG; E15', added_joints=[hands(10)])
+KAI_HAND = stated_hands('KaiHand, 20 active joints', 0.75, 'E', 'KXh "750 g"')
+KINETIXAI_KAI_ON_LEGS, KINETIXAI_KAI_ON_WHEELS = on_legs_and_wheels(
+    'KinetixAI KAI', 'KinetixAI', 1.73, internet(70, 'IEK "70 kilograms"'), 0,
+    sources=f'IEK (Interesting Engineering: "173 centimeters", "70 kilograms", "1.7-kilowatt-hour (kWh) semi-solid-state '
+            f'battery", "72 DoF in its hands"), KXh (its KaiHand: "750 g", "20 active"; which robot it belongs to not '
+            f'said: E), HG; {NO_FORM}; E15', added=(KAI_HAND,),
+    **energy(1700, 'IEK "1.7-kilowatt-hour (kWh) semi-solid-state battery"'))
+LG_KAPEX = template(
+    'LG KAPEX', 'LG Electronics', 1.70, None,
+    ((60, 65, 70), 'S', 'HKK "체중 60㎏대" (Hankyung: in the sixties) its range, 65 the middle (E15.2 point 1)'),
+    JOINTS_MEDIAN, sources='HKK (Hankyung, 2025-11-13: "키 170㎝, 체중 60㎏대"), HG; E15')
+KEENON_XMAN_R1 = wheeled(
+    'Keenon XMAN-R1', 'Keenon Robotics', 1.72, None, catalogue(110, 'Keenon states none (E15.1)'),
+    WHEELED_JOINTS_MEDIAN, sources='HG; E15')
+GALAXEA_KENGO = block(
+    'Galaxea Kengo', 'Galaxea Dynamics', 1.40, None,
+    'OBK (Origin of Bots: "The reported 140 x 44 x 22.5 cm footprint and 40 kg weight"), ITHk (IT之家: "单关节扭矩超 '
+    '130N·m", "星海图官方暂未公布 Kengo 机器人的具体参数"), HG ("Degrees of freedom, hands 12": six a hand); E15',
+    ((39, 40, 65), 'S', 'OBK "40 kg weight" the mode, 1 kg below (its 1.4 m in two outlets fits it); HG "65" the max '
+                        '(E15.2 point 1)'),
+    from_stated_joint(130, {**LEGS_12, 'Waist': 1, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6, 'Head': 2}) + [hands(6)],
+    joint_sources=stated_joint_sources('ITHk', '"单关节扭矩超 130N·m" (the internet\'s, E15.6 question 1)', 130, 'knee') +
+    '; its hands HG "hands 12", six joints each, as Fourier\'s six-joint hand (E7.5 point 4)',
+    **with_defaults(1.40, 40, {}))
+KINISI_KR1 = wheeled(
+    'Kinisi KR1', 'Kinisi', 1.62, None, catalogue(100, 'Kinisi states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='KNS (Bear Robotics: "Wheeled humanoid mobile manipulator"), IEKR (Interesting Engineering: "stereo depth '
+            'cameras, a 180° LiDAR array", "an onboard NVIDIA Jetson module", "hot-swappable 48 V lith[ium]" without its '
+            'capacity), HG; E15', driven=4, caster_count=0, added=(grippers(),),
+    boards=agx_orin('IEKR "an onboard NVIDIA Jetson module" (E: an AGX Orin)', label='E') + [POWER_BOARD],
+    sensors=[depth_camera('IEKR "stereo depth cameras" (two, E)', 2), base_lidar('IEKR "a 180° LiDAR array"'),
+             IMU_NOT_NAMED])
+KNOWIN_X1 = wheeled(
+    'Knowin-X1', 'Knowin', 1.30, None, catalogue(50, 'Knowin states none (E15.1)'), 23,
+    sources='KNWx (Knowin: "130 cm" extended, "7 DoF" an arm, "Total Degrees of Freedom 23 DoF", "Wheeled chassis", '
+            '"Vision · Depth · LiDAR"), HG; E15',
+    sensors=[depth_camera('KNWx "Depth" (one, E)'), base_lidar('KNWx "LiDAR"'), IMU_NOT_NAMED])
+LEJU_KUAVO_5_W = wheeled(
+    'Leju KUAVO 5-W', 'Leju Robotics', 2.00, None, catalogue(156, 'Leju states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 156 kg, "Degrees of freedom, hands 12", "(4 depth cameras)", "depth cameras and '
+            'LiDAR"); E15', driven=4, caster_count=0, added=(hands(6),),
+    sensors=[depth_camera('HG "(4 depth cameras)"', 4), base_lidar('HG "LiDAR"'), IMU_NOT_NAMED])
+LEJU_KUAVO_MY = template('Leju Kuavo-my', 'Leju Robotics', 1.45, None, catalogue(45, 'Leju states none (E15.1)'),
+                         JOINTS_MEDIAN, sources='HG; E15')
+MOON_DYNAMICS_L1 = wheeled(
+    'Moon Dynamics L1', 'Moon Dynamics', 1.65, None, catalogue(60, 'Moon Dynamics has no site (E15.1)'),
+    WHEELED_JOINTS_MEDIAN, sources='HG (the catalogue: 60 kg, on two wheels); E15', caster_count=0,
+    added=(grippers(),))
+GLROAD_LABORER_C1 = block(
+    'Glroad Laborer C1', 'Glroad', 1.37, 38,
+    'GLc1 (Glroad: 身高 "137.1CM", 重量 "38KG", 电池容量 "10AH" without its voltage: on the template, E15.2 point 4, 全身自由度 '
+    '"21", 单腿 "6", 腰部 "1", 单臂 "4(可扩展)", 最大峰值扭矩 "150N.M", "Nvidia Orin NX 100T/157T", "6轴IMU", "深度相机 激光雷达", '
+    '"阵列麦克风+5W扬声器"); E15', makers(38, 'GLc1 "重量 38KG"'),
+    from_stated_joint(150, {**LEGS_12, 'Waist': 1, 'Shoulder': 6, 'Elbow': 2}),
+    joint_sources=stated_joint_sources('GLc1', '最大峰值扭矩 "150N.M"', 150, 'knee'),
+    **with_defaults(1.37, 38, dict(
+        boards=orin_nx_boards('GLc1 "Nvidia Orin NX 100T/157T"') + [POWER_BOARD],
+        sensors=[depth_camera('GLc1 "深度相机"'), lidar('GLc1 "激光雷达"'), imu('GLc1 "6轴IMU"'),
+                 microphones('GLc1 "阵列麦克风"'), speaker('GLc1 "5W扬声器"')])))
+GLROAD_LABORER_M1 = block(
+    'Glroad Laborer M1', 'Glroad', 1.87, 86,
+    'GLm1 (Glroad: 身高 "187CM", 重量 "86KG", 电池容量 "22AH" without its voltage: on the template, 全身自由度 "27", 单腿 "6", 头部 '
+    '"1", 最大峰值扭矩 "430N.M"; its arms seven joints each by arithmetic, E); E15', makers(86, 'GLm1 "重量 86KG"'),
+    from_stated_joint(430, {**LEGS_12, 'Head': 1, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6}),
+    joint_sources=stated_joint_sources('GLm1', '最大峰值扭矩 "430N.M"', 430, 'knee'), **with_defaults(1.87, 86, {}))
+HECBOT_LUMEN_H1 = block(
+    'HECbot Lumen H1', 'HECbot', 1.69, 69,
+    'HECh (HECbot: "身高169cm，净重≈69kg", 电池 "700 Wh", "40个（双臂7x2、双腿6x2、头部2、灵巧手6x2）", "自研一体化关节峰值扭矩512Nm", "激光雷达 + '
+    'RGBD相机"); E15', makers(69, 'HECh "净重≈69kg"'),
+    from_stated_joint(512, {**LEGS_12, 'Head': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6}) + [hands(6)],
+    joint_sources=stated_joint_sources('HECh', '"峰值扭矩512Nm"', 512, 'knee') + "; its hands Fourier's six-joint "
+                                                                                'hand per joint (E7.5 point 4)',
+    **energy(700, 'HECh "电池 700 Wh"'),
+    **with_defaults(1.69, 69, dict(sensors=[lidar('HECh "激光雷达"'), depth_camera('HECh "RGBD相机"'),
+                                            IMU_NOT_NAMED])))
+HECBOT_LUMEN_S1_ON_LEGS, HECBOT_LUMEN_S1_ON_WHEELS = on_legs_and_wheels(
+    'HECbot Lumen S1', 'HECbot', 1.30, catalogue(35, 'HECbot states none (E15.1)'), 0,
+    sources=f'HG (the catalogue: 35 kg, "Orin NX", an RGB-D, a stereo and two RGB cameras, a LiDAR; {NO_FORM}); E15',
+    boards=orin_nx_boards('HG "Orin NX" (the catalogue\'s)') + [POWER_BOARD],
+    sensors=[depth_camera('HG "RGB-D"'), binocular('HG "stereo"'), camera('Camera, RGB', 2, 'Head', 'HG "RGB" two'),
+             lidar('HG "LiDAR"'), IMU_NOT_NAMED])
+MAGICLAB_MAGICBOT = block(
+    'MagicLab MagicBot', 'MagicLab', 1.74, 70,
+    'MLg1 (MagicLab, its Gen1: "1740*580*280 mm", "Approcimately 70kg", "Main Structure: Aluminum Alloy", "≥ 350 N·m", '
+    '"42 (Active Degrees of Freedom)": neck 2, arm 7, hand "11 (6 Active DOF, 5 Passive DOF)", waist 2, leg 6, "8-Core '
+    'CPU + 100 TOPS AI Processor", "3D LiDAR + Depth Cameras ×2 + Fisheye Cameras ×3", "25 Ah (1.35 kWh)"; the '
+    'register\'s MagicBot is its Gen1, E15.6 question 4), HG; E15',
+    ((54, 70, 71), 'S', 'MLg1 "Approcimately 70kg" the mode, 1 kg above; HG "54" (the catalogue\'s prototype) the min '
+                        '(E15.2 point 1)'),
+    from_stated_joint(350, {**LEGS_12, 'Head': 2, 'Waist': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6}) + [hands(6)],
+    joint_sources=stated_joint_sources('MLg1', 'Maximum Joint Torque "≥ 350 N·m"', 350, 'knee') +
+    "; its hands Fourier's six-joint hand per joint (E7.5 point 4)",
+    **voltage_capacity(54, 'MLg1 "25 Ah (1.35 kWh)": 54 V (arith.)', 25, 'MLg1 "25 Ah"', label='S, E'),
+    **with_defaults(1.74, 70, dict(
+        boards=[named_board('8-core CPU', 'MLg1 "8-Core CPU"')]
+        + orin_nx_read('MLg1 "100 TOPS AI Processor" (E: an Orin NX)') + [POWER_BOARD],
+        sensors=[lidar('MLg1 "3D LiDAR"'), depth_camera('MLg1 "Depth Cameras ×2"', 2),
+                 camera('Camera, fisheye', 3, 'Head', 'MLg1 "Fisheye Cameras ×3"'),
+                 microphones('MLg1 "Omnidirectional Microphone Array"'), speaker('MLg1 "Speakers"'), IMU_NOT_NAMED],
+        frame=('Frame', 'Aluminium alloys', 'MLg1 "Main Structure: Aluminum Alloy": aluminium; the remainder (E15.6 '
+                                            'question 6)'))))
+MAGICLAB_MAGICBOT_X1 = block(
+    'MagicLab MagicBot X1', 'MagicLab', 1.80, 70,
+    'MLx1 (MagicLab: "180×55.4×28" cm, "Total Weight 70kg", "Total Active DoF 31": head 2, arm 7, waist 3, leg 6, "a peak '
+    'knee torque of ≥350N·m", "Aerospace-grade Lightweight Aluminum Alloy", "Titanium Alloy", "18Ah" without its '
+    'voltage: on the template, "8-Core High-Performance CPU", "Orin NX", "Stereo Camera Module", "Head RGB-D Camera", '
+    '"Waist RGB-D Camera"); E15', makers(70, 'MLx1 "Total Weight 70kg"'),
+    from_stated_joint(350, {**LEGS_12, 'Head': 2, 'Waist': 3, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6}),
+    joint_sources=stated_joint_sources('MLx1', '"a peak knee torque of ≥350N·m"', 350, 'knee'),
+    **with_defaults(1.80, 70, dict(
+        boards=[named_board('8-core CPU', 'MLx1 "8-Core High-Performance CPU"')]
+        + orin_nx_boards('MLx1 "Orin NX"') + [POWER_BOARD],
+        sensors=[binocular('MLx1 "Stereo Camera Module"'),
+                 depth_camera('MLx1 "Head RGB-D Camera", "Waist RGB-D Camera"', 2), IMU_NOT_NAMED],
+        frame=('Frame', 'Aluminium alloys', 'MLx1 "Aerospace-grade Lightweight Aluminum Alloy" (and "Titanium Alloy"): '
+                                            'aluminium; the remainder (E15.6 question 6)'))))
+MAGICLAB_MAGICBOT_Z1 = block(
+    'MagicLab MagicBot Z1', 'MagicLab', 1.37, 40,
+    'MLz1 (MagicLab: "1369*422*200mm", "Weight with Battery Approximately 40kg", "24" joints: leg 6, head 1, waist 1, '
+    'arm 5, "Maximum Knee Torque* 100N.m", "15-cell battery", "Smart Battery (Quick Release) 10000mAh", charger "62V 5A", '
+    '"8-core high-performance CPU", "3D LiDAR + Depth Camera + Binocular Fisheye Camera", microphone array, "5W '
+    'Speaker"); E15', makers(40, 'MLz1 "Weight with Battery Approximately 40kg"'),
+    from_stated_joint(100, {**LEGS_12, 'Head': 1, 'Waist': 1, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 2}),
+    joint_sources=stated_joint_sources('MLz1', '"Maximum Knee Torque* 100N.m"', 100, 'knee'),
+    **voltage_capacity(55.5, 'MLz1 "15-cell battery": 15 cells at 3.7 V nominal (arith., E)', 10,
+                       'MLz1 "10000mAh"', label='S, E'),
+    **with_defaults(1.37, 40, dict(
+        boards=[named_board('8-core CPU', 'MLz1 "8-core high-performance CPU"'), POWER_BOARD],
+        sensors=[lidar('MLz1 "3D LiDAR"'), depth_camera('MLz1 "Depth Camera"'),
+                 binocular('MLz1 "Binocular Fisheye Camera"'), microphones('MLz1 microphone array'),
+                 speaker('MLz1 "5W Speaker"'), IMU_NOT_NAMED])))
+GIGAAI_MAKER_H01 = wheeled(
+    'GigaAI Maker H01', 'GigaAI', 1.60, None, catalogue(64, 'GigaAI states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 64 kg, hands 14, "dual 7-DOF arms", a LiDAR); E15', added=(hands(7),),
+    sensors=[base_lidar('HG "LiDAR"'), IMU_NOT_NAMED])
+UNIX_MARTIAN = block(
+    'UniX Martian', 'UniX AI', 1.48, 40,
+    'UNXm (UniX: "148 cm Height", "40 kg Weight", "150 N.m Motor Max Torque", "9 Ah Battery Capacity", "48 V Rated '
+    'Voltage", "6 DoF per leg", "7 DoF per arm", "3 DoF at the waist", "2 DoF at the head", "A 11-DoF industrial-grade '
+    'dexterous hand", "40T Computing Power Platform 32GB Ram", "Depth Camera + RGB*2 + IMU"); E15',
+    makers(40, 'UNXm "40 kg Weight"'),
+    from_stated_joint(150, {**LEGS_12, 'Head': 2, 'Waist': 3, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6}) + [hands(11)],
+    joint_sources=stated_joint_sources('UNXm', '"150 N.m Motor Max Torque"', 150, 'knee') +
+    "; its hands Fourier's six-joint hand per joint (E7.5 point 4)",
+    **voltage_capacity(48, 'UNXm "48 V Rated Voltage"', 9, 'UNXm "9 Ah Battery Capacity"'),
+    **with_defaults(1.48, 40, dict(
+        boards=orin_nx_read('UNXm "40T Computing Power Platform 32GB Ram" (E: an Orin NX)') + [POWER_BOARD],
+        sensors=[depth_camera('UNXm "Depth Camera"'), camera('Camera, RGB', 2, 'Head', 'UNXm "RGB*2"'),
+                 imu('UNXm "IMU"')])))
+MATRIX_ROBOTICS_MATRIX_1 = template(
+    'Matrix Robotics Matrix-1', 'Matrix Robotics', 1.80, 67, makers(67, 'MTXr "67 kg"'), JOINTS_MEDIAN + 2,
+    sources='MTXr (Matrix Robotics: "180 cm", "67 kg", "2.28 KWh custom battery pack", "8 onboard RGB cameras", '
+            'microphones and speakers, hand "22 degrees of freedom"); E15', added_joints=[hands(22)],
+    **energy(2280, 'MTXr "2.28 KWh custom battery pack"'),
+    sensors=[camera('Camera, RGB', 8, 'Head', 'MTXr "8 onboard RGB cameras"'), microphones('MTXr "microphones"'),
+             speaker('MTXr "speakers"'), IMU_NOT_NAMED])
+
+SUNDAY_MEMO = wheeled(
+    'Sunday MEMO', 'Sunday Robotics', 1.70, 77.1, makers(77.1, 'SUNm "170 pounds" (77.1 kg)'), 19,
+    sources='SUNm (Sunday: Height "1.7 meters", Weight "170 pounds", Arms "2×7", Hands "2×4", Torso "1", Lower Body "4", '
+            'Materials "A blend of rigid and elastic polymers"); E15', added=(hands(4),), lift=True)
+MENTEE_MENTEEBOT_2024 = template(
+    'Mentee MenteeBot 2024', 'Mentee Robotics', 1.75, None, catalogue(70, 'Mentee states none for its 2024 robot; its '
+                                                                          "form the V3's (E15.6 question 4)"),
+    JOINTS_MEDIAN, sources='HG; E15')
+MENTEE_MENTEEBOT_V3 = template(
+    'Mentee MenteeBot V3', 'Mentee Robotics', 1.75, 70,
+    ((65, 70, 71), 'S', 'MNTb "70kg" (its page, the V3\'s) the mode, 1 kg above; HG "65" the min (E15.2 point 1)'), 40,
+    sources='MNTb (Mentee: "175cm", "70kg", DoF "40"; the page the V3\'s, E15.6 question 4), TRMB (Trend Hunter: '
+            '"powered by two Jetson Orin AGX computing units"), HG; E15',
+    boards=agx_orin('TRMB "two Jetson Orin AGX computing units"', count=2) + [POWER_BOARD])
+MIROKAI_NX = [counted(row, 2) for row in orin_nx_read('RGM "2 NVIDIA Jetson NX" (E: two Orin NX)')]
+ENCHANTED_TOOLS_MIROKAI = wheeled(
+    'Enchanted Tools Mirokaï', 'Enchanted Tools', 1.23, None,
+    ((26, 29, 30), 'S', 'RGM "WEIGHT 29 kg" (Robots Guide) the mode, 1 kg above; OBM "WEIGHT 26 kg" (a database) the '
+                        'min (E15.2 point 1)'), WHEELED_JOINTS_MEDIAN,
+    sources='RGM (Robots Guide: "WEIGHT 29 kg", "2 RGBD cameras, 2 infrared cameras, and 9 time-of-flight cameras", "4 '
+            'microphones", "3 inertial measurement units", "2 NVIDIA Jetson NX", "Hand: 2 DoF x 2", "Ball mobile base: 3 '
+            'DoF"; three driven, E15.2 point 6), OBM; E15', driven=3, caster_count=0, added=(hands(2),),
+    boards=MIROKAI_NX + [POWER_BOARD],
+    sensors=[depth_camera('RGM "2 RGBD cameras"', 2), camera('Camera, infrared', 2, 'Head', 'RGM "2 infrared cameras"'),
+             camera('Camera, time-of-flight', 9, 'Head', 'RGM "9 time-of-flight cameras"'),
+             microphones('RGM "4 microphones"'), counted(imu('RGM "3 inertial measurement units"'), 3)])
+O_ID_MODULAR = wheeled(
+    'O-ID Modular', 'O-ID', 1.72, 70, makers(70, 'OIDm "70 kg" WEIGHT'), 30,
+    sources='OIDm (O-ID: "172 cm" HEIGHT, "70 kg" WEIGHT, "30 DoF" AXES, "9" MODULES; four driven, E15.3); E15', driven=4,
+    caster_count=0, added=(grippers(),))
+AIMOGA_MORNINE = template(
+    'AiMOGA Mornine', 'AiMOGA', 1.67, None,
+    ((65, 70, 71), 'S', 'CNCm "weighs 70kg" (CarNewsChina) the mode, 1 kg above; ITHm "65kg" (IT之家) the min (E15.2 '
+                        'point 1)'), JOINTS_MEDIAN + 2,
+    sources='ITHm (IT之家: "167cm、65kg，拥有 41 个自由度，单手 12 自由度", "电池容量为 0.7kwh", "3D 激光雷达、2 个深度相机、1 个全景相机、4 颗超声雷达、1 颗 6 '
+            '麦克风阵列"), CNCm (CarNewsChina: "weighs 70kg", "0.7 kWh battery"); E15', added_joints=[hands(12)],
+    **energy(700, 'CNCm "0.7 kWh battery"'),
+    sensors=[camera('Camera, panoramic', 1, 'Head', 'ITHm "1 个全景相机"'), depth_camera('ITHm "2 个深度相机"', 2),
+             lidar('ITHm "3D 激光雷达"'), microphones('ITHm "1 颗 6 麦克风阵列"'), IMU_NOT_NAMED])
+NOETIX_N2 = block(
+    'Noetix N2', 'Noetix', 1.18, None,
+    'RBTXn (RBTX, a seller: "118 cm tall and weighing 30 kg", "peak torque of 150 Nm", "48V quick-swap lithium battery" '
+    'without its capacity), HG (RK3588, Orin NX, a depth camera); E15', internet(30, 'RBTXn "weighing 30 kg"'),
+    from_stated_joint(150, {'Hip pitch': 2, 'Hip roll': 2, 'Hip yaw': 2, 'Knee': 2, 'Ankle pitch': 2, 'Shoulder': 6,
+                            'Elbow': 2}),
+    joint_sources=stated_joint_sources('RBTXn', '"peak torque of 150 Nm" (the internet\'s, E15.6 question 1)', 150,
+                                       'knee'),
+    **with_defaults(1.18, 30, dict(
+        boards=RK3588_BOARDS + orin_nx_boards('HG "Orin NX" (the catalogue\'s)') + [POWER_BOARD],
+        sensors=[depth_camera('HG "depth camera"'), IMU_NOT_NAMED])))
+ZHEJIANG_NAVIGATOR_2 = template(
+    'Zhejiang Navigator 2', 'Zhejiang Humanoid Robot Innovation Center', 1.65, None, internet(60, 'AIWn "60 kg"'),
+    JOINTS_MEDIAN + 2,
+    sources='AIWn (aiwiki: "60 kg", "Single hand weight | 600 g", "275 TOPS", "15 per hand" joints, "6 per hand" '
+            'active); E15', added_joints=[stated_hands('Navigator 2, 600 g', 0.6, 'S', 'AIWn "600 g"')],
+    boards=agx_orin('AIWn "275 TOPS" (E: an AGX Orin)', label='E') + [POWER_BOARD])
+GENISOM_NE01 = template('GENISOM NE01', 'GENISOM', 1.45, None, catalogue(40, 'GENISOM states none (E15.1)'),
+                        JOINTS_MEDIAN, sources='GNSn (GENISOM: its page gives no figures), HG; E15')
+ONE_X_NEO_BETA = template('1X NEO Beta', '1X Technologies', 1.65, None, catalogue(30, '1X states none (E15.1)'),
+                          JOINTS_MEDIAN, sources='HG; E15')
+ONE_X_NEO_GAMMA = template(
+    '1X NEO Gamma', '1X Technologies', 1.65, None, catalogue(35, '1X states none (E15.1)'), JOINTS_MEDIAN,
+    sources='1XNg (1X: "four microphones (front, back, left, and right)", a "three-speaker system", the suit "3D printed '
+            'from durable and soft nylon"), HG; E15',
+    sensors=[microphones('1XNg "four microphones"'), counted(speaker('1XNg "three-speaker system"'), 3), IMU_NOT_NAMED])
+GALAXEA_NEXO = wheeled(
+    'Galaxea NEXO', 'Galaxea Dynamics', 1.68, None,
+    ((78, 85, 86), 'S', 'HG "85" (the catalogue\'s) the mode, 1 kg above; OBN "WEIGHT 78 kg" (a database) the min (E15.2 '
+                        'point 1)'), 30,
+    sources='GXNx (Galaxea\'s release: "wheeled dual‑arm robot with 30 degrees of freedom"), OBN, HG (an AGX Orin); E15',
+    driven=4, caster_count=0, boards=agx_orin('HG "AGX Orin" (the catalogue\'s)') + [POWER_BOARD])
+LUMOS_NIX = template(
+    'Lumos NIX', 'Lumos Robotics', 0.89, None,
+    ((18, 25.41, 26.41), 'S', 'LMSn "25.41 kg (total, incl. battery)" the mode, 1 kg above; NIXd "Weight: 18 kg" (its '
+                              'Nix1) the min (E15.2 point 1)'), 21,
+    sources='LMSn (Lumos: "25.41 kg (total, incl. battery)", "89 cm", "21 DOF", "RGB camera", "4-mic array / speaker", '
+            '"282 Wh", "RK3588"; its model files\' joints not used, E15.1), NIXd (Lumos: "Nix1 ... Weight: 18 kg"); E15',
+    **energy(282, 'LMSn "282 Wh"'),
+    boards=RK3588_BOARDS + [POWER_BOARD],
+    sensors=[camera('Camera, RGB', 1, 'Head', 'LMSn "RGB camera"'), microphones('LMSn "4-mic array"'),
+             speaker('LMSn "speaker"'), IMU_NOT_NAMED])
+SHARPA_NORTH = wheeled(
+    'Sharpa North', 'Sharpa', 1.60, None,
+    ((59, 60, 90), 'S', 'RCN "60 kg Net weight" (a seller) the mode, 1 kg below; HG "90" the max (E15.2 point 1)'),
+    WHEELED_JOINTS_MEDIAN, sources='RCN (Robotics Center, a seller: "60 kg Net weight"), HG (hands 22 a hand, a Jetson '
+                                   'Thor); E15', added=(hands(22),),
+    boards=thor('HG "Jetson Thor" (the catalogue\'s)') + [POWER_BOARD])
+UGO_NOVA = wheeled(
+    'ugo Nova', 'ugo', 1.62, 100, makers(100, 'UGOn "約 100 kg"'), 20,
+    sources='UGOn (ugo: "(h)126〜162cm", "約 100 kg", 頭部 "2軸", 腕部 "7軸＋ハンド1軸2指（双腕）", 腰部 "4軸", 車体部 "4軸（メカナム4輪）", カメラ '
+            '"ヘッド x1（ステレオカメラ）", "ハンド x2（RGBカメラ）", "NVIDIA Jetson Thor", "LiFePO4 | 50.6V | 22Ah"); E15', driven=4,
+    caster_count=0, added=(grippers(),),
+    **voltage_capacity(50.6, 'UGOn "50.6V"', 22, 'UGOn "22Ah"'), **lfp('UGOn "LiFePO4"'),
+    boards=thor('UGOn "NVIDIA Jetson Thor"') + [POWER_BOARD],
+    sensors=[binocular('UGOn "ヘッド x1（ステレオカメラ）"'), camera('Camera, RGB', 2, 'Arms', 'UGOn "ハンド x2（RGBカメラ）"'),
+             IMU_NOT_NAMED])
+SWITCHBOT_ONERO_H1 = wheeled(
+    'SwitchBot Onero H1', 'SwitchBot', 1.74, None,
+    ((35, 68, 69), 'S', 'HPO "Weight: 68 kg" (humanoid.press, its "prototype spec") the mode, 1 kg above; HG "~35" the '
+                        'min (E15.2 point 1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HPO (humanoid.press: "Height: 174 cm (prototype spec) - Weight: 68 kg", "Wheeled humanoid base"), HG (four '
+            'RealSense cameras); E15',
+    sensors=[depth_camera('HG "RealSense" in its head, arms, hands and abdomen (four, E)', 4), IMU_NOT_NAMED])
+PINK_ROBOTICS_P0 = template(
+    'Pink Robotics P0', 'Pink Robotics', 1.75, 82, makers(82, 'PNKp "Weight 82kg"'), 32 + 2,
+    sources='PNKp (Pink Robotics: Height "1,75m", Weight "82kg", "Motion System 32 DoF", Payload "8kg"); E15',
+    added_joints=[grippers()])
+PRIMEBOT_T1 = wheeled(
+    'PrimeBOT T1', 'PrimeBOT', 0.60, None,
+    ((8, 8.5, 9), 'S', 'HG "8.5" (the register, the catalogue\'s); ± 0.5 kg (E15.3)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG; E15', caster_count=0)
+PL_UNIVERSE_PROWHITE = wheeled(
+    'PL-Universe ProWhite', 'PL-Universe', 2.04, 400, makers(400, 'PLpw "Weight 400 kg"'), 12,
+    sources='PLpw (PL-Universe: "1051mm(L)*800(W)*2035mm(H)", Weight "400 kg", arm DoF "6", "Four-wheel '
+            'omnidirectional", "Liftable torso", "modular end effectors", Battery Capacity "40 v 100 Ah"); E15', driven=4,
+    caster_count=0, added=(grippers(),), lift=True,
+    **voltage_capacity(40, 'PLpw "40 v 100 Ah"', 100, 'PLpw "100 Ah"'))
+PSIBOT_PSI_V1 = wheeled(
+    'PsiBot Psi V1', 'PsiBot', 1.80, None, catalogue(150, 'PsiBot states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='PSIv (PsiBot: "Standing Height ：<180cm", "Sensor：RGBD*4；Fisheye Camera*3", "Computing Platform：Thor", '
+            '"Waist：2-DOF", "Neck：2-DOF"), HG; E15',
+    boards=thor('PSIv "Computing Platform：Thor"') + [POWER_BOARD],
+    sensors=[depth_camera('PSIv "RGBD*4"', 4), camera('Camera, fisheye', 3, 'Head', 'PSIv "Fisheye Camera*3"'),
+             IMU_NOT_NAMED])
+
+PUDU_D7_2024 = wheeled(
+    'Pudu D7 2024', 'Pudu Robotics', 1.65, 45, makers(45, 'PD7r "weighs 45 kilograms"'), WHEELED_JOINTS_MEDIAN,
+    sources='PD7r (Pudu\'s release of 2024-09-19: "stands 165 cm tall and weighs 45 kilograms", "a battery exceeding 1 '
+            'kWh", "360-degree omnidirectional movement"; each version as often, E15.2 point 7); E15', driven=4,
+    caster_count=0, **energy(1000, 'PD7r "a battery exceeding 1 kWh" (its least)'))
+PUDU_D7_2026 = wheeled(
+    'Pudu D7 2026', 'Pudu Robotics', 1.75, 140, makers(140, 'PUDd7 "308.6 lbs（140 kg）"'), 23,
+    sources='PUDd7 (Pudu: Height "68.9 in（175 cm）", Weight "308.6 lbs（140 kg）", DoF "*excluding end effectors 23", "NVIDIA '
+            'Jetson Orin + RK 3588 dual-chip platform", "275 TOPS (Optional Chip Upgrade)", "Dual-LiDAR Omni Chassis", '
+            '"Front and rear LiDAR"); E15', driven=4, caster_count=0,
+    boards=agx_orin('PUDd7 "NVIDIA Jetson Orin", "275 TOPS" (E: an AGX Orin)', label='E') + RK3588_BOARDS
+    + [POWER_BOARD],
+    sensors=[base_lidar('PUDd7 "Front and rear LiDAR"', 2), IMU_NOT_NAMED])
+PUDU_D9 = block(
+    'Pudu D9', 'Pudu Robotics', 1.70, 65,
+    'PUDd9 (Pudu: "170 cm", "65 kg", "Total DOF 42", "Single-leg DOF 6", "Single-arm DOF 7", DH11 "Active DOF 6" and '
+    '"500 g", "Maximum Joint Torque 352 N·m", "275 TOPS", RGB, RGBD, IMU, Battery "15 Ah (0.72 kWh)", speaker '
+    '"Stereo"); E15', makers(65, 'PUDd9 "65 kg"'),
+    from_stated_joint(352, {**LEGS_12, 'Waist': 2, 'Head': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6})
+    + [stated_hands('DH11', 0.5, 'S', 'PUDd9 "500 g"')],
+    joint_sources=stated_joint_sources('PUDd9', '"Maximum Joint Torque 352 N·m"', 352, 'knee') +
+    '; its hands PUDd9 DH11 "500 g", ± 5 % (E15.2 point 3)',
+    **voltage_capacity(48, 'PUDd9 "15 Ah (0.72 kWh)": 48 V (arith.)', 15, 'PUDd9 "15 Ah"', label='S, E'),
+    **with_defaults(1.70, 65, dict(
+        boards=agx_orin('PUDd9 "275 TOPS" (E: an AGX Orin)', label='E') + [POWER_BOARD],
+        sensors=[camera('Camera, RGB', 1, 'Head', 'PUDd9 "RGB"'), depth_camera('PUDd9 "RGBD"'), imu('PUDd9 "IMU"'),
+                 speaker('PUDd9 speaker "Stereo"')])))
+XPENG_PX5 = template(
+    'XPENG PX5', 'XPENG', 1.50, None, catalogue(109, 'XPENG states none (E15.1)'), JOINTS_MEDIAN + 2,
+    sources='HG (the catalogue: 109 kg, 150 cm, hands 11 DoF, "hand unit … weighs only 430g"); E15',
+    added_joints=[stated_hands('PX5, 430 g', 0.43, 'S', 'HG "430g"')])
+X_SQUARE_QUANTA_X2 = wheeled(
+    'X Square QUANTA X2', 'X Square Robot', 1.64, None, catalogue(95, 'X Square states none (E15.1)'),
+    WHEELED_JOINTS_MEDIAN,
+    sources='X2Rq (X Square: "62 （Dexterous Hand）", "164cm", torso "6", dexterous hand "20", chassis "2", 2D LiDAR "1", '
+            'RGB-D "3", BEV camera "3"), HG; E15', added=(hands(20),),
+    sensors=[base_lidar('X2Rq 2D LiDAR "1"'), depth_camera('X2Rq RGB-D "3"', 3),
+             camera('Camera, BEV', 3, 'Head', 'X2Rq BEV camera "3"'), IMU_NOT_NAMED])
+AGIBOT_RAISE_A1 = block(
+    'AgiBot RAISE A1', 'AgiBot', 1.75, 55,
+    'AGA1 (AgiBot: Height "175 cm", Weight "55 kg", "200 TOPS", microphone array, Lidar, RGB-D camera, Skill-hand "Active '
+    'DoF 12", PowerFlow "Peak Torque 350N·m"); E15', makers(55, 'AGA1 "Weight 55 kg"'),
+    from_stated_joint(350, {**LEGS_12, 'Waist': 1, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 2, 'Head': 2}) + [hands(12)],
+    joint_sources=stated_joint_sources('AGA1', 'PowerFlow "Peak Torque 350N·m"', 350, 'knee') +
+    "; its hands Fourier's six-joint hand per joint (E7.5 point 4)",
+    **with_defaults(1.75, 55, dict(
+        boards=agx_orin('AGA1 "200 TOPS" (E: an AGX Orin)', label='E') + [POWER_BOARD],
+        sensors=[microphones('AGA1 "microphone array"'), lidar('AGA1 "Lidar"'), depth_camera('AGA1 "RGB-D camera"'),
+                 IMU_NOT_NAMED])))
+NINERAY_RAYNEX_G3 = template(
+    'NineRay RayNex G3', 'NineRay', 1.73, 60, makers(60, 'NRY "60 kg"'), 32 + 2,
+    sources='NRY (NineRay: "173 cm", "60 kg", "32 DoF (Body)", "Linear & Harmonic Rotary Joints"), HG (hands 12); E15',
+    added_joints=[hands(6)])
+ROBOSCIENCE_REX_G1 = wheeled(
+    'RoboScience REX G1', 'RoboScience', 1.70, None, catalogue(80, 'RoboScience states none (E15.1)'), 18,
+    sources='RSCx (RoboScience: "22个自由度（2头颈、7×2臂、2腰部、1升降以及3底盘）", "高度覆盖1100–1700mm", "2070 TFLOPS 端侧算力"; three driven, '
+            'E15.2 point 6), HG; E15', driven=3, caster_count=0, lift=True,
+    boards=thor('RSCx "2070 TFLOPS 端侧算力" (E: an AGX Thor)') + [POWER_BOARD])
+ROBOT_COM_RNOID = wheeled(
+    'Robot.com RNoid', 'Robot.com', 1.70, 90, makers(90, 'RNDs "90 kg Total weight"'), 20,
+    sources='RNDs (Robot.com\'s specification sheet: "1.7 m Height", "90 kg Total weight", "Dual 7-DOF Arm DOF", "4-DOF '
+            'Torso", "2-DOF Neck", "Modular End effector", "AMD Ryzen 5 7640HS Base computing", "NVIDIA Jetson AGX Orin '
+            'AI module", "RGB-D camera … Head and chest", "2x RGB-D camera Wrists cameras", "360° front + rear mapping '
+            'LiDAR", "Mic and speaker", "smooth omnidirectional movement"); E15', driven=4, caster_count=0,
+    added=(grippers(),),
+    boards=[intel('AMD Ryzen 5 7640HS', 'RNDs "AMD Ryzen 5 7640HS Base computing"')]
+    + agx_orin('RNDs "NVIDIA Jetson AGX Orin AI module"') + [POWER_BOARD],
+    cooler=x86_and_arm('its AMD computer and its AGX Orin'),
+    sensors=[depth_camera('RNDs "RGB-D camera … Head and chest" (two) and "2x RGB-D camera Wrists cameras"', 4),
+             base_lidar('RNDs "360° front + rear mapping LiDAR"', 2), microphones('RNDs "Mic"'),
+             speaker('RNDs "speaker"'), IMU_NOT_NAMED])
+ROBBYANT_R1 = wheeled(
+    'Robbyant R1', 'Robbyant', 1.60, None, catalogue(110, 'Robbyant states none (E15.1)'), WHEELED_JOINTS_MEDIAN,
+    sources='HG (the catalogue: 110 kg; its joint modules by Ti5, its chassis by Galaxea, as Bloomberg reports, not '
+            'reread); E15')
+OVERSONIC_ROBEE = wheeled(
+    'Oversonic RoBee', 'Oversonic Robotics', 1.99, None,
+    ((179, 180, 293), 'S', 'HG "180" (the catalogue\'s) the mode, 1 kg below; OVRr "Up to 293 kg" (its brochure, Series R) '
+                           'the max (E15.2 point 1; the register\'s RoBee its Series R, E15.6 question 4)'),
+    WHEELED_JOINTS_MEDIAN,
+    sources='OVRr (Oversonic, RoBee Series R brochure 10/2026: "165 — 199 cm", "Up to 293 kg", depth cameras in its head, '
+            'chest, waist and base, "Laser 3D", "Laser scanner safety", a thermal camera, "Omnidirectional drive", '
+            '"Batteries included 2", "Mechanical gripper"), HG; E15', driven=4, caster_count=0, added=(grippers(),),
+    lift=True,
+    sensors=[depth_camera('OVRr depth cameras in its head, chest and waist', 3),
+             base_depth_camera('OVRr a depth camera in its base'), lidar('OVRr "Laser 3D"'),
+             base_lidar('OVRr "Laser scanner safety"'), camera('Camera, thermal', 1, 'Head', 'OVRr a thermal camera'),
+             IMU_NOT_NAMED])
+ROBOLIGENT_ROBIN = wheeled(
+    'Roboligent Robin', 'Roboligent', 1.80, 105, makers(105, 'RBLr "105 kg Total weight"'), 14,
+    sources='RBLr (Roboligent: "Two 7-DOF arms on an omni-directional base, with a motorized lifting column", "105 kg '
+            'Total weight", "Parallel gripper, 120 mm stroke"); E15', driven=4, caster_count=0, added=(grippers(),),
+    lift=True)
+ROBO_ROBOTICS_ROBO_T1 = wheeled(
+    'Robo Robotics ROBO-T1', 'Robo Robotics', 1.30, None,
+    ((45, 50, 60), 'S', 'OBR "WEIGHT Approx. 45–60 kg" (a database) its range, HG "50" the mode (E15.2 point 1)'), 12,
+    sources='RBOi (Robo: "two 6-DOF robot arms with grippers"), OBR, HG; E15', added=(grippers(),))
+ROBOTERA_Q5 = wheeled(
+    'ROBOTERA Q5', 'ROBOTERA', 1.65, 70, makers(70, 'RTq5 Weight "70 Kg"'), 20,
+    sources='RTq5 (ROBOTERA\'s Q5 brochure: "582*519*1650 mm", Weight "70 Kg", "Neck: 2 DoF", "Waist: 1 DoF", "Arms: 7 DoF '
+            'X 2", "Hands: 11 DoF X 2", "Legs: 3 DoF", "Drive Wheels X2", "Omni Wheels X4", "3D LIDAR", "Binocular '
+            'Camera", Supply Voltage "60 V" without its capacity: on the template); E15', caster_count=4,
+    added=(hands(11),),
+    sensors=[lidar('RTq5 "3D LIDAR"'), binocular('RTq5 "Binocular Camera"'), IMU_NOT_NAMED])
+ENGINEAI_SA02_ON_LEGS, ENGINEAI_SA02_ON_WHEELS = on_legs_and_wheels(
+    'EngineAI SA02', 'EngineAI', 1.25, catalogue(25, 'EngineAI states none (E15.1)'), 0,
+    sources=f'TNS (TechNode: "1.25-meter-tall, 25-kilogram", "dual high-definition cameras"), HG; {NO_FORM}; E15',
+    sensors=[camera('Camera', 2, 'Head', 'TNS "dual high-definition cameras"'), IMU_NOT_NAMED])
+ATI_SHERPA_MECHA = wheeled(
+    'Ati Sherpa Mecha', 'Ati Motors', 2.00, None, catalogue(180, 'Ati states none (E15.1)'), 19,
+    sources='ATIs (Ati: "Dual-arm mobile manipulator on autonomous wheeled base", "Dual arms with 19 degrees of freedom", '
+            '"1,100 mm – 2,000 mm — extending torso", "Carbon-fibre" arms, "3D LiDAR and Camera", Battery "55 Ah × 2" '
+            'without its voltage: on the template), HG; E15', lift=True,
+    sensors=[lidar('ATIs "3D LiDAR"'), camera('Camera', 1, 'Head', 'ATIs "Camera"'), IMU_NOT_NAMED])
+EIR_SKYWALKER_2_ON_LEGS, EIR_SKYWALKER_2_ON_WHEELS = on_legs_and_wheels(
+    'EIR SkyWalker 2', 'EIR', 1.65, catalogue(55, 'EIR states none (E15.1)'), 0,
+    sources=f'HG (the catalogue: 55 kg, hands 12; {NO_FORM}); E15', added=(hands(6),))
+
+
+def shoulder_stated(torque: float, counts: dict) -> list:
+    """Every body joint of a robot on wheels whose maker states its arm's torque only (the Spaceo M1's "160 kg cm"): its
+    waist's torque the stated one over the shoulder's median ratio, so that its shoulder is the stated torque, every
+    other joint by its kind's ratio (E12.5 point 2)."""
+    return from_stated_joint(torque / WHEEL_RATIOS['Shoulder'][1], counts, on_wheels=True)
+
+
+MUKS_SPACEO_M1 = block(
+    'Muks Spaceo M1', 'Muks Robotics', 1.63, 45,
+    'MUKm1 (Muks: "1625x420x390 mm", "Weight (With Battery) ~45 kg", "12 dof": arm 5, base 2, "Maximum Torque of Arm Joint '
+    'About 160 kg cm", "Aluminium body with polymer covers", microphone array, RGB camera, "2D LiDAR", "Intel RealSense '
+    'Depth Camera", "RYZEN 7, 16GB RAM", "Orin AGX (~275 TOPS)", "25.6V, 45Ah LiFePO4 Battery"); E15',
+    makers(45, 'MUKm1 "~45 kg"'),
+    shoulder_stated(15.7, {'Shoulder': 6, 'Elbow': 2, 'Wrist': 2}) + [grippers(), T2.hub_motors(2, 45)[0]],
+    joint_sources=stated_joint_sources('MUKm1', '"Maximum Torque of Arm Joint About 160 kg cm" (15.7 N·m)', 15.7,
+                                       'shoulder') +
+    '; its two drive wheels hub motors by its mass per driven wheel (E9.6 point 4)',
+    battery_region='Base', **voltage_capacity(25.6, 'MUKm1 "25.6V, 45Ah"', 45, 'MUKm1 "45Ah"'),
+    **with_defaults(1.63, 45, dict(
+        **lfp('MUKm1 "LiFePO4 Battery"'), parts=[T2.casters(2)],
+        boards=[intel('AMD Ryzen 7', 'MUKm1 "RYZEN 7, 16GB RAM"')] + agx_orin('MUKm1 "Orin AGX (~275 TOPS)"')
+        + [POWER_BOARD], cooler=x86_and_arm('its AMD computer and its AGX Orin'),
+        sensors=[camera('Camera, RGB', 1, 'Head', 'MUKm1 "RGB camera"'),
+                 depth_camera('MUKm1 "Intel RealSense Depth Camera"'), base_lidar('MUKm1 "2D LiDAR"'),
+                 microphones('MUKm1 "microphone array"'), IMU_NOT_NAMED],
+        frame=('Frame', 'Aluminium alloys', 'MUKm1 "Aluminium body with polymer covers": aluminium; the remainder '
+                                            '(E15.6 question 6)'))))
+SPACEO_PRO_JOINTS = [joint('Shoulder', 6, 66, T2.from_torque(66), 'Shoulders', 'Arms') if j[0] == 'Shoulder' else j
+                     for j in from_stated_joint(90, {'Waist': 1, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 4, 'Head': 2},
+                                                on_wheels=True)]
+MUKS_SPACEO_PRO = block(
+    'Muks Spaceo Pro', 'Muks Robotics', 1.63, 60,
+    'MUKpr (Muks: "(1625-2100)x450x450 mm", "60 kg", "20 (Waist and Gripper (optional))": arm 6, base 2, waist 1, arm '
+    'joint "66 Nm", waist "90 Nm", "Aluminium body with polymer covers", RealSense, "RGB Camera*3", "RYZEN 7", "Jetson '
+    'Orin AGX (~275 TOPS)", "25.6V, 45Ah LiFePO4 Battery"); E15', makers(60, 'MUKpr "60 kg"'),
+    SPACEO_PRO_JOINTS + [grippers(), T2.hub_motors(2, 60)[0], T2.lift_motor()],
+    joint_sources=stated_joint_sources('MUKpr', 'waist "90 Nm"', 90, 'waist') + '; its shoulders "66 Nm" as stated, '
+    'the refit at it; its two drive wheels hub motors by its mass per driven wheel (E9.6 point 4); its lift motor as '
+    "ROBOTIS's (E)",
+    battery_region='Base', lift_column=T2.LIFT_BY_SHARE,
+    **voltage_capacity(25.6, 'MUKpr "25.6V, 45Ah"', 45, 'MUKpr "45Ah"'),
+    **with_defaults(1.63, 60, dict(
+        **lfp('MUKpr "LiFePO4 Battery"'), parts=[T2.casters(2)],
+        boards=[intel('AMD Ryzen 7', 'MUKpr "RYZEN 7"')] + agx_orin('MUKpr "Jetson Orin AGX (~275 TOPS)"')
+        + [POWER_BOARD], cooler=x86_and_arm('its AMD computer and its AGX Orin'),
+        sensors=[depth_camera('MUKpr "RealSense"'), camera('Camera, RGB', 3, 'Head', 'MUKpr "RGB Camera*3"'),
+                 microphones('MUKpr microphone array'), IMU_NOT_NAMED],
+        frame=('Frame', 'Aluminium alloys', 'MUKpr "Aluminium body with polymer covers": aluminium; the remainder '
+                                            '(E15.6 question 6)'))))
+STAR1_JOINTS = [('Head yaw', 1, 35), ('Head pitch', 1, 35), ('Shoulder pitch', 2, 110), ('Shoulder roll', 2, 110),
+                ('Shoulder yaw', 2, 110), ('Elbow pitch', 2, 110), ('Elbow yaw', 2, 35), ('Wrist pitch', 2, 35),
+                ('Wrist roll', 2, 35), ('Waist pitch', 1, 220), ('Waist roll', 1, 220), ('Waist yaw', 1, 110),
+                ('Hip roll', 2, 255), ('Hip yaw', 2, 100), ('Hip pitch', 2, 400), ('Knee', 2, 400),
+                ('Ankle pitch', 2, 100), ('Ankle roll', 2, 100)]
+ROBOTERA_STAR1 = block(
+    'Robotera Star1', 'ROBOTERA', 1.71, None,
+    'RTXm (ROBOTERA\'s model file star1/urdf/l3_with_hand_fixedpin_xml.urdf: 31 body joints and their effort limits, '
+    '24 hand joints, links 64.001 kg), HG; E15', catalogue(63, 'ROBOTERA states none (E15.1)'),
+    model_joints(STAR1_JOINTS, T2.from_torque) + [hands(12)],
+    joint_sources="RTXm its joints' effort limits; each module the refit at its torque, 0.0689 kg × torque^0.566, half "
+                  "to 1.5 times (E14.1); its hands Fourier's six-joint hand per joint (E7.5 point 4)",
+    **with_defaults(1.71, 63, {}))
+STARBOT_NOVA = wheeled(
+    'StarBot Nova', 'StarBot', 1.52, 31.8, makers(31.8, 'STBn "70 lb" (31.8 kg)'), 14,
+    sources='STBn (StarBot: Nova "5 ft", "70 lb", "two 7-DOF arms", "Wheeled base, differential drive", "Depth cameras '
+            '(Intel RealSense class), RGB camera, IMU"); E15',
+    sensors=[depth_camera('STBn "Depth cameras (Intel RealSense class)" (one, E)'),
+             camera('Camera, RGB', 1, 'Head', 'STBn "RGB camera"'), imu('STBn "IMU"')])
+SULU_BE_STEVE_ON_LEGS, SULU_BE_STEVE_ON_WHEELS = on_legs_and_wheels(
+    'Sulu.be Steve', 'Sulu.be', 2.00,
+    ((99, 100, 140), 'S', 'GEs "Steve, who weighs 100 kilograms" the mode, 1 kg below; HG "140" the max (E15.2 point 1)'),
+    0, sources=f'GEs (GE Reports, 2015: "Steve, who weighs 100 kilograms and stands two meters tall"), HG; {NO_FORM}; '
+               f'E15')
+SYNTHEVA_SYNTHIA = template(
+    'Syntheva Synthia', 'Syntheva', 1.75, None,
+    ((9.8, 10.9, 12.0), 'S', 'SYNt "9.8 - 12.0 kg" its range, the middle the mode (E15.2 point 1)'), 23,
+    sources='SYNt (Syntheva: "165 - 190 cm", "9.8 - 12.0 kg", "BCM2712 CPU (base model)", "dual cameras", "microphone", '
+            '"23 powerful and precise servos"); E15',
+    boards=[named_board('BCM2712', 'SYNt "BCM2712 CPU (base model)"'), POWER_BOARD],
+    sensors=[camera('Camera', 2, 'Head', 'SYNt "dual cameras"'), microphones('SYNt "microphone"'), IMU_NOT_NAMED])
+WORKFAR_SYNTRO = wheeled(
+    'WorkFar Syntro', 'WorkFar', 1.70, 108, makers(108, 'WKFs "240 lbs (108kg)"'), 18,
+    sources='WKFs (WorkFar: "5′ 8″ (1.7m)", "240 lbs (108kg)", "Head: 2 / Arms: 4 (x2) / Wrist: 3 (x2) / Hands: 12 (x2) / '
+            'Waist: 2 / Wheels: 3", "2D LiDAR / Camera(s) / Computer Vision / Microphone(s)", "Intel Multi Core I5", '
+            '"Swappable Batteries 1.2 kWh", "3 All-directional Omni Wheels", "Aluminum / Stainless Steel / Carbon Steel / '
+            'Brass / Acetal / Carbon-fiber Filament"); E15', driven=3, caster_count=0, added=(hands(12),),
+    **energy(1200, 'WKFs "Swappable Batteries 1.2 kWh"'),
+    boards=[intel('Intel i5', 'WKFs "Intel Multi Core I5"'), POWER_BOARD], cooler=X86_COOLER,
+    sensors=[base_lidar('WKFs "2D LiDAR"'), camera('Camera', 1, 'Head', 'WKFs "Camera(s)" (one, E)'),
+             microphones('WKFs "Microphone(s)"'), IMU_NOT_NAMED],
+    frame=('Frame', 'Aluminium alloys', 'WKFs "Aluminum / Stainless Steel / Carbon Steel / Brass / Acetal / Carbon-fiber '
+                                        'Filament": aluminium; the remainder (E15.6 question 6)'))
+IHUB_TARA_GEN1 = wheeled('iHub TARA GEN1', 'iHub', 1.63, None, catalogue(75, 'iHub states none (E15.1)'),
+                         WHEELED_JOINTS_MEDIAN, sources='HG; E15')
+
+def _type_one():
+    """Type 1's builder, imported once under its own name: the Unitree G1's rows, which the Tau Humanoid takes (one
+    copy of them)."""
+    name = 'make_parts_taken_apart_type_1'
+    if name not in sys.modules:
+        path = os.path.join(TOOLS, '1_compact_research_developer', 'make_parts_taken_apart.py')
+        spec = importlib.util.spec_from_file_location(name, path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    return sys.modules[name]
+
+
+# The Unitree G1's joints as type 1's file has them (its every joint's torque, its module as weighed by China Post
+# Securities, scaled by no factor: E2.8): for the Tau Humanoid, a modified G1 (E15.3).
+G1_JOINTS = [joint(r[2], r[3], r[5], (None, None, None), r[10], r[11], size=r[4])
+             for r in _type_one().JOINTS_G1_X1_N1 if r[0] == 'Unitree G1']
+TAU_ROBOTICS_TAU_HUMANOID = block(
+    'Tau Robotics Tau Humanoid', 'Tau Robotics', 1.32, None,
+    'HGT (humanoid.guide on MarketWatch: "modified Unitree G1 robots", "pincer hands"), TAUh (Tau: its page gives no '
+    'figures), HG; its joints and battery the Unitree G1\'s of type 1\'s file (E15.3), E; E15',
+    catalogue(35, 'Tau states none; a modified Unitree G1 (E15.3)'), G1_JOINTS + [grippers()],
+    joint_sources="the Unitree G1's joints (type 1's file: its torques, its modules as weighed, E2.8), as the Tau is a "
+                  'modified G1 (HGT), E; its grippers ("pincer hands") as the RH-P12-RN (E)',
+    # The G1's stated numbers carried over by an estimate (a modified G1): S, E, as an arithmetic voltage is.
+    voltage=((46.8, 46.8, 46.8), 'S, E', "the G1's (type 1's: T1 slide 25, 13 cells in series), the Tau a modified G1"),
+    capacity=((8.55, 9, 9.45), 'S, E', "the G1's (type 1's: T1 slide 25, U1, ± 5 %), the Tau a modified G1"),
+    pack=((2.25, 2.5, 2.75), 'S, E', "the G1's (type 1's: T1 slide 25, \"~2.5kg\", ± 10 %), the Tau a modified G1"),
+    **with_defaults(1.32, 35, {}))
+
+
+def tora_doubleone(x: bool) -> dict:
+    """The Tora DoubleOne, P and X, each as often (E15.2 point 7): joints from its "Peak Joint Torque (full body) 207
+    Nm" at its waist (E12.5 point 2, on wheels), its hands 18 joints each, 47 Ah (1214.01 Wh), an AGX Orin; the P on a
+    steered omnidirectional base, the X on a four-wheel drive one; each with its lift."""
+    name, mass = ('PaXini Tora DoubleOne X', internet(73, 'RBTXx "Weight 73 kg"')) if x else \
+        ('PaXini Tora DoubleOne P', catalogue(70, 'PaXini states none for the P (E15.1)'))
+    counts = {'Waist': 2, 'Second waist': 2, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6, 'Head': 2}
+    base = [T2.hub_motors(4, mass[0][1])[0]] + ([] if x else [T2.steering(4)]) + [T2.lift_motor()]
+    return block(
+        name, 'PaXini', 1.69 if x else 1.64, 73 if x else None,
+        'PXNt (PaXini\'s parameter image: P "671 mm × 548 mm × 1276~1638 mm", X "767 mm × 486 mm × 1330~1692 mm", "Total '
+        'Joint Motors (excluding dexterous hands & drive wheels)" P "20", X "22", P "4WD&4WS omnidirectional chassis", X '
+        '"4-wheel drive active obstacle-surmounting chassis", "Nvidia Jetson AGX Orin Dev. Kit 64G", "RGB Camera: 1 '
+        '(head). RGBD Camera: 2 (head, abdomen). 3D LIDAR: 1 (head)", "IMU: 2 (head, chassis)", "Front and rear '
+        '8-Microphone Array", "10 W Speaker", "47 Ah (1214.01 Wh)", "Peak Joint Torque (full body) 207 Nm"; no mass), '
+        + ('RBTXx (RBTX, a seller: "Weight 73 kg Height 1,687 mm", "18‑DOF hands")' if x else 'HG') + '; E15', mass,
+        from_stated_joint(207, counts, on_wheels=True) + [hands(18)] + base,
+        joint_sources=stated_joint_sources('PXNt', '"Peak Joint Torque (full body) 207 Nm"', 207, 'waist') +
+        "; its hands Fourier's six-joint hand per joint (E7.5 point 4); its four drive wheels hub motors by its mass "
+        'per driven wheel (E9.6 point 4)' + ('' if x else ", its steering motors as ROBOTIS's (E)") +
+        "; its lift motor as ROBOTIS's (E)",
+        battery_region='Base', lift_column=T2.LIFT_BY_SHARE,
+        **voltage_capacity(round(1214.01 / 47, 4), 'PXNt "47 Ah (1214.01 Wh)": 25.83 V (arith.)', 47, 'PXNt "47 Ah"',
+                           label='S, E'),
+        **with_defaults(1.69 if x else 1.64, mass[0][1], dict(
+            boards=agx_orin('PXNt "Nvidia Jetson AGX Orin Dev. Kit 64G"') + [POWER_BOARD],
+            sensors=[camera('Camera, RGB', 1, 'Head', 'PXNt "RGB Camera: 1 (head)"'),
+                     depth_camera('PXNt "RGBD Camera: 2 (head, abdomen)"', 2), lidar('PXNt "3D LIDAR: 1 (head)"'),
+                     counted(imu('PXNt "IMU: 2 (head, chassis)"'), 2),
+                     counted(microphones('PXNt "Front and rear 8-Microphone Array"'), 2),
+                     speaker('PXNt "10 W Speaker"')])))
+
+
+PAXINI_TORA_DOUBLEONE_P, PAXINI_TORA_DOUBLEONE_X = tora_doubleone(False), tora_doubleone(True)
+UBTECH_U1_PRO_MALE = template(
+    'UBTECH U1 Pro male', 'UBTECH Robotics', 1.83, None,
+    internet(42, 'AIWu "the male stands 183 cm and weighs 42 kg"'), JOINTS_MEDIAN,
+    sources='AIWu (aiwiki: "the male stands 183 cm and weighs 42 kg, and the female stands 168 cm and weighs 35.2 kg"; '
+            'each version as often, E15.2 point 7); E15')
+UBTECH_U1_PRO_FEMALE = template(
+    'UBTECH U1 Pro female', 'UBTECH Robotics', 1.68, None,
+    internet(35.2, 'AIWu "the female stands 168 cm and weighs 35.2 kg"'), JOINTS_MEDIAN,
+    sources='AIWu (aiwiki: "the female stands 168 cm and weighs 35.2 kg"); E15')
+TUESDAY_LABS_VOXEL = template(
+    'Tuesday Labs Voxel', 'Tuesday Labs', 1.50, None, catalogue(45, 'Tuesday Labs states none (E15.1)'),
+    JOINTS_MEDIAN + 2,
+    sources='TSDv (Tuesday Labs: "7-DOF Arms with Fully Actuated Wrists", "1-DOF Grippers", "Z-Shaped Legs with '
+            'Impact-Aware Feet", "Stereo RGB + Wide-Field Vision"), HG; E15', added_joints=[grippers()],
+    sensors=[binocular('TSDv "Stereo RGB"'), IMU_NOT_NAMED])
+DEXFORCE_W1_PRO = wheeled(
+    'DexForce W1 Pro', 'DexForce', 1.64, 110, makers(110, 'DXFw1 Weight "110kg"'), 20,
+    sources='DXFw1 (DexForce: Weight "110kg", "682mm*550mm*1636mm", "34 DOF … differential", Neck 2, Waist 2, Leg 2, arm "7 '
+            'DOF", "Dexterous Hand", "6 Active DOF", "6cm Baseline Humanoid Binocular Vision", navigation LiDAR "2 pcs", '
+            'navigation cameras "2 pcs", Battery Capacity "40 Ah" without its voltage or chemistry: on the template, '
+            '"Dual-PC Architecture (≥300 TOPS)"); E15', added=(hands(6),),
+    boards=[counted((COMPUTER_NOT_NAMED, 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
+                     'DXFw1 "Dual-PC Architecture (≥300 TOPS)": two computer boards, as the X1\'s and N1\'s (E)'), 2),
+            POWER_BOARD],
+    sensors=[binocular('DXFw1 "6cm Baseline Humanoid Binocular Vision"'),
+             base_lidar('DXFw1 navigation LiDAR "2 pcs"', 2),
+             camera('Camera, navigation', 2, 'Head', 'DXFw1 navigation cameras "2 pcs"'), IMU_NOT_NAMED])
+WALDEN_ROBOTICS_WALDEN = wheeled(
+    'Walden Robotics Walden', 'Walden Robotics', 1.65, None, catalogue(90, 'Walden states none (E15.1)'),
+    WHEELED_JOINTS_MEDIAN, sources='HG (the catalogue: 90 kg, a wheeled base, two-finger grippers); E15',
+    added=(grippers(),))
+UBTECH_WALKER_C = template(
+    'UBTECH Walker C', 'UBTECH Robotics', 1.63, 43, makers(43, 'UBwc Weight "43kg"'), 20,
+    sources='UBwc (UBTECH: Height "163cm", Battery "Lithium Battery 48V 15Ah", Weight "43kg", Degrees of Freedom "20", '
+            'Camera "RGBD*2, All-Scenario Binocular Structured Light3D Camera*2"); E15',
+    **voltage_capacity(48, 'UBwc "48V 15Ah"', 15, 'UBwc "15Ah"'),
+    sensors=[depth_camera('UBwc "RGBD*2"', 2), binocular('UBwc "Binocular Structured Light3D Camera*2"', 2),
+             IMU_NOT_NAMED])
+UBTECH_WALKER_C1 = template(
+    'UBTECH Walker C1', 'UBTECH Robotics', 1.64, 55, makers(55, 'UBwc1 "Weight 55kg"'), 53,
+    sources='UBwc1 (UBTECH, its images: "53 of DOF", "Height 164cm", "Weight 55kg", "NVIDIA® Jetson Thor™ 2070 TFLOPS '
+            '(FP4)", "Fish-eye Camera*2", "Binocular Camera*1", "Monocular Camera*1", "Speaker*2", "Automotive-grade '
+            'Battery" without its capacity); E15',
+    boards=thor('UBwc1 "NVIDIA® Jetson Thor™"') + [POWER_BOARD],
+    sensors=[camera('Camera, fisheye', 2, 'Head', 'UBwc1 "Fish-eye Camera*2"'), binocular('UBwc1 "Binocular Camera*1"'),
+             camera('Camera, monocular', 1, 'Head', 'UBwc1 "Monocular Camera*1"'),
+             counted(speaker('UBwc1 "Speaker*2"'), 2), IMU_NOT_NAMED])
+UBTECH_WALKER_S1 = block(
+    'UBTECH Walker S1', 'UBTECH Robotics', 1.72, 76,
+    'UBws1 (UBTECH, its images: "Height 172cm", "Weight 76kg", "Self-developed Integrated Joints … Peak Torques 250N.m", '
+    '"Dexterous Hands", "RGBD*1" in its head and in its torso, "Stereo RGB Camera*2", "Speaker*2", "IMU"; its joints per '
+    'body part as the CYBORG RO1\'s, E15.2 point 2); E15', makers(76, 'UBws1 "Weight 76kg"'),
+    from_stated_joint(250, {**LEGS_12, 'Waist': 3, 'Shoulder': 6, 'Elbow': 2, 'Wrist': 6, 'Head': 2}) + [hands(6)],
+    joint_sources=stated_joint_sources('UBws1', '"Peak Torques 250N.m"', 250, 'knee') +
+    "; its hands Fourier's six-joint hand per joint (E7.5 point 4)",
+    **with_defaults(1.72, 76, dict(
+        sensors=[depth_camera('UBws1 "RGBD*1" in its head and in its torso', 2),
+                 binocular('UBws1 "Stereo RGB Camera*2"', 2), counted(speaker('UBws1 "Speaker*2"'), 2),
+                 imu('UBws1 "IMU"')])))
+UBTECH_WALKER_S2 = template(
+    'UBTECH Walker S2', 'UBTECH Robotics', 1.76, 70, makers(70, 'UBws2 "Weight 70kg"'), 30 + 2,
+    sources='UBws2 (UBTECH, its images: "Height 176cm", "Weight 70kg", "52 of DOF", "Gen-4 Industrial Dexterous Hands 11 '
+            'of DOF", "4 Array Microphones", "2 Speakers", "Aerospace-grade Aluminum Alloy", "Fish-eye Camera*2", "RGB '
+            'Camera*2", "RGBD Camera*1" front and back), BDNw (Battery Design: "Total energy = 2.3 kWh Nominal voltage = '
+            '48 V"); E15', added_joints=[hands(11)],
+    **voltage_capacity(48, 'BDNw "Nominal voltage = 48 V"', round(2300 / 48, 4),
+                       'BDNw "Total energy = 2.3 kWh" over 48 V (arith.)'),
+    sensors=[camera('Camera, fisheye', 2, 'Head', 'UBws2 "Fish-eye Camera*2"'),
+             camera('Camera, RGB', 2, 'Head', 'UBws2 "RGB Camera*2"'),
+             depth_camera('UBws2 "RGBD Camera*1" front and back', 2), microphones('UBws2 "4 Array Microphones"'),
+             counted(speaker('UBws2 "2 Speakers"'), 2), IMU_NOT_NAMED],
+    frame=('Frame', 'Aluminium alloys', 'UBws2 "Aerospace-grade Aluminum Alloy": aluminium; the remainder (E15.6 '
+                                        'question 6)'))
+YUE_QUAN_X_BOT = template(
+    'Yue Quan X-Bot', 'Yue Quan Bionics', 1.67, None, catalogue(60, 'Yue Quan states none (E15.1)'), JOINTS_MEDIAN,
+    sources='HG (the catalogue: 60 kg, an Orin NX and an Intel NUC, a depth camera and a LiDAR); E15',
+    boards=orin_nx_boards('HG "Orin NX" (the catalogue\'s)') + [intel('Intel NUC', 'HG "Intel NUC" (the catalogue\'s)'),
+                                                                 POWER_BOARD],
+    cooler=x86_and_arm('its Intel computer and its Orin NX'),
+    sensors=[depth_camera('HG "depth camera"'), lidar('HG "LiDAR"'), IMU_NOT_NAMED])
+BYD_XIAO_DI = template('BYD Xiao Di', 'BYD', 1.61, None, catalogue(58.5, 'BYD states none (E15.1)'), JOINTS_MEDIAN,
+                       sources='HG; E15')
+TENCENT_XIAO_LIU_ON_LEGS, TENCENT_XIAO_LIU_ON_WHEELS = on_legs_and_wheels(
+    'Tencent Xiao Liu', 'Tencent Robotics X', 1.65,
+    ((55, 70, 71), 'S', 'HG "70" (the catalogue\'s) the mode, 1 kg above; HPX "Weight: ~55–60 kg" (humanoid.press) the '
+                        'min (E15.2 point 1)'), 0,
+    sources=f'HPX (humanoid.press: "Bipedal", "Weight: ~55–60 kg"), HG; {NO_FORM}; E15')
+DIGIT_XIAQI = template(
+    'Digit XiaQi', 'Digit', 1.69, 69,
+    ((68, 69, 69), 'S', 'DGTx "≤ 69kg" (its most) the mode and the max, 1 kg below (E15.2 point 1)'), JOINTS_MEDIAN,
+    sources='DGTx (Digit, its image: "169cm", "≤ 69kg", "700woh" (700 Wh), "≥2h"); E15',
+    **energy(700, 'DGTx "700woh" (700 Wh)'))
+LEJU_XTRON_KUAVO_MY = template(
+    'Leju XTRON KUAVO-MY', 'Leju Robotics', 1.66, None,
+    ((50, 55, 56), 'S', 'HG "55" (the catalogue\'s) the mode, 1 kg above; 50 the min (E15.3: the internet\'s 45 to 55 kg, '
+                        'not reread)'), JOINTS_MEDIAN,
+    sources='HG (the catalogue: 55 kg, 166 cm, a stereo depth camera, a 6-microphone array, a LiDAR); E15',
+    sensors=[depth_camera('HG "stereo depth"'), microphones('HG "6-microphone array"'), lidar('HG "LiDAR"'),
+             IMU_NOT_NAMED])
+YUNMU_YMBOT_C = template('Yunmu YMBot C', 'Jiangsu Yunmu', 1.74, None, catalogue(75, 'Yunmu states none (E15.1)'),
+                         JOINTS_MEDIAN, sources='HG; E15')
+YUNMU_YMBOT_H = wheeled('Yunmu YMBot H', 'Jiangsu Yunmu', 1.70, None, catalogue(75, 'Yunmu states none (E15.1)'),
+                        WHEELED_JOINTS_MEDIAN, sources='HG; E15')
+ZERITH_H1 = wheeled(
+    'Zerith H1', 'Zerith', 1.80, None, catalogue(55, 'Zerith states none (E15.1)'), 23,
+    sources='ZRTh (Zerith: "轮臂人形机器人", "7 轴" arms, "23总 自由度"), HG (a 3D LiDAR, a depth camera); E15',
+    sensors=[lidar('HG "3D LiDAR"'), depth_camera('HG "depth camera"'), IMU_NOT_NAMED])
+ZERITH_Z1 = block(
+    'Zerith Z1', 'Zerith', 1.45, None,
+    'RBTXz (RBTX, a seller: "21 degrees of freedom", "up to 150 Nm peak joint torque", "Weight 33 kg Height 1,450 mm"), '
+    'HG (an RGB and a depth camera, a LiDAR, an IMU); E15', internet(33, 'RBTXz "Weight 33 kg"'),
+    from_stated_joint(150, {**LEGS_12, 'Waist': 1, 'Shoulder': 6, 'Elbow': 2}),
+    joint_sources=stated_joint_sources('RBTXz', '"up to 150 Nm peak joint torque" (the internet\'s, E15.6 question 1)',
+                                       150, 'knee'),
+    **with_defaults(1.45, 33, dict(sensors=[camera('Camera, RGB', 1, 'Head', 'HG "RGB"'),
+                                            depth_camera('HG "depth camera"'), lidar('HG "LiDAR"'), imu('HG "IMU"')])))
+PL_UNIVERSE_ZEUS_1 = wheeled(
+    'PL-Universe Zeus 1', 'PL-Universe', 1.95, None, internet(300, 'CHZ "300Kg的整机重量"'), WHEELED_JOINTS_MEDIAN,
+    sources='CHZ (中华网: "300Kg的整机重量", "四轮全向行走", "48V、40Ah电池"), AIWz (aiwiki: "weighing about 300 kg", Zeus 1 the 大白 named); '
+            'E15', driven=4, caster_count=0, lift=True,
+    **voltage_capacity(48, 'CHZ "48V、40Ah电池"', 40, 'CHZ "40Ah"'))
+PERCEPTYNE_PR_OMNI = wheeled(
+    'Perceptyne PR-OMNI', 'Perceptyne', 1.57, 120, makers(120, 'PRCo Weight "120 kg"'), 16,
+    sources='PRCo (Perceptyne: Height "5\'2"", Weight "120 kg", Body Material "Aluminium", "Dual arms, 7 DOF each", Head "2 '
+            'DOF", "4 Wheel holonomic drive", "Indoor SLAM with dual LiDARs", "3 RGBD cameras (2 wrists + 1 head)", '
+            'Vertical Gantry Range "800 mm", "3 kWh (2 × 1.5 kWh, swappable)", "Nvidia Jetson Orin + Intel NUC 5th '
+            'Gen"); E15', driven=4, caster_count=0, added=(grippers(),), lift=True,
+    **energy(3000, 'PRCo "3 kWh (2 × 1.5 kWh, swappable)"'),
+    boards=agx_orin('PRCo "Nvidia Jetson Orin" (E: an AGX Orin)', label='E')
+    + [intel('Intel NUC', 'PRCo "Intel NUC 5th Gen"'), POWER_BOARD],
+    cooler=x86_and_arm('its Intel computer and its AGX Orin'),
+    sensors=[depth_camera('PRCo "3 RGBD cameras (2 wrists + 1 head)"', 3), base_lidar('PRCo "dual LiDARs"', 2),
+             IMU_NOT_NAMED],
+    frame=('Frame', 'Aluminium alloys', 'PRCo Body Material "Aluminium": aluminium; the remainder (E15.6 question 6)'))
+
 # Each robot in the file of its first type among 3 and 4 (E11.7 point 1), in the register's order of numbers.
 BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX, PNDBOTICS_ADAM_LITE,
             PNDBOTICS_ADAM_SP, HEXAGON_AEON, AGILE_ONE, AIDOL, AEI_ALICE_M1, TEKNTRASH_ALPHA, AI2_ALPHABOT_2, ANIGON,
@@ -887,13 +1828,39 @@ BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX
             ELITE_CENTAUR_G1, DONUT_CINNAMON_1, UBTECH_CRUZR_S2, UBTECH_CRUZR_Y1, CYBORG_RO1_SE, CYBORG_RO1_PRO,
             CYBORG_WO1, SHARPA_D01, RICHTECH_DEX, BOSHIAC_DEXBOT, AGILITY_DIGIT, AGILITY_DIGIT_5, DEEP_DR02,
             DEEP_DR02_PRO, DUATIC_ALPHA, SIASUN_DUCO, ADDVERB_ELIXIS, ADDVERB_ELIXIS_W, GENESIS_ENO, AVIC_FENGXING_001,
-            # Types 5 and 6's entry (E16.6): batch 3's robots of types 5 and 6 in type 3's file (E15.3).
-            KAWASAKI_KALEIDO_9, NOBLE_MACHINES_MOBY, FOUNDATION_PHANTOM_MK1]
+            # Batch 3 (E15.7), 56 blocks, with types 5 and 6's entry in their places (E16.6: the Kaleido 9, the Moby
+            # and the Phantom MK1), in the register's order; the SkyWalker 2 on legs and on wheels, the Tora DoubleOne
+            # P and X.
+            FIGURE_AI_FIGURE_02, HOLIDAY_ROBOTICS_FRIDAY, AGIBOT_G2_MAX, GALBOT_G1, GALBOT_ET1, GALBOT_S1,
+            PERSONA_AI_GEN_1, GENERATIVE_BIONICS_GENE_01, GENTO_LUNA, GEEK_PLUS_GINO_1, GAC_GOMATE, GAC_GOMATE_MINI,
+            HUMANOID_HMND_01_ALPHA_BIPEDAL, HUASHU_HSR_ER_HR705, XPENG_IRON_2025, JAKA_K1, JAKA_KARGO, ZEROTH_JUPITER,
+            KAWASAKI_KALEIDO_9, LG_KAPEX, GALAXEA_KENGO, KINISI_KR1, MOON_DYNAMICS_L1, GLROAD_LABORER_M1,
+            MAGICLAB_MAGICBOT_X1, MATRIX_ROBOTICS_MATRIX_1, MENTEE_MENTEEBOT_2024, MENTEE_MENTEEBOT_V3,
+            NOBLE_MACHINES_MOBY, O_ID_MODULAR, ZHEJIANG_NAVIGATOR_2, GALAXEA_NEXO, SHARPA_NORTH, UGO_NOVA,
+            PINK_ROBOTICS_P0, FOUNDATION_PHANTOM_MK1, PSIBOT_PSI_V1, PUDU_D9, XPENG_PX5, X_SQUARE_QUANTA_X2,
+            AGIBOT_RAISE_A1, NINERAY_RAYNEX_G3, ROBOSCIENCE_REX_G1, OVERSONIC_ROBEE, ROBOLIGENT_ROBIN,
+            ROBO_ROBOTICS_ROBO_T1, ATI_SHERPA_MECHA, EIR_SKYWALKER_2_ON_LEGS, EIR_SKYWALKER_2_ON_WHEELS,
+            MUKS_SPACEO_PRO, ROBOTERA_STAR1, WORKFAR_SYNTRO, PAXINI_TORA_DOUBLEONE_P, PAXINI_TORA_DOUBLEONE_X,
+            DEXFORCE_W1_PRO, WALDEN_ROBOTICS_WALDEN, UBTECH_WALKER_S2, PL_UNIVERSE_ZEUS_1, PERCEPTYNE_PR_OMNI]
 BLOCKS_4 = [ONE_X_NEO, AGIBOT_A2, AGIBOT_A3_ULTRA, ANDROMEDA_ABI, AGIBOT_A3, AGIBOT_X2, AGIBOT_X2_ULTRA, DOBOT_ATOM,
             VBOT_ATOM,
             # Batch 2 (E12.5, E12.6): 8 robots, the CASBOT 02 and the FF Master in two versions.
             CASBOT_02, CASBOT_02_EDU, CASIVISION_CASIVIBOT, LG_CLOID, XYZ_DEUX, NOETIX_DORA, REALBOTIX_F_SERIES,
-            FF_FUTURIST, FF_MASTER_EDU, FF_MASTER_ULTRA]
+            FF_FUTURIST, FF_MASTER_EDU, FF_MASTER_ULTRA,
+            # Batch 3 (E15.7), 66 blocks, in the register's order: the Futuring 2, the KAI, the Lumen S1, the SA02, the
+            # Steve and the Xiao Liu on legs and on wheels; the Pudu D7 2024 and 2026; the U1 Pro male and female.
+            PUDU_FLASHBOT_ARM, FUTURING_2_ON_LEGS, FUTURING_2_ON_WHEELS, FOURIER_GR_3, HAIER_HIVA_HAIWA, NOETIX_HOBBS_W1,
+            HONOR, HONOR_A1, XPENG_IRON_2024, WEAVE_ISAAC_1, JINGCHU_ELF, KINETIXAI_KAI_ON_LEGS, KINETIXAI_KAI_ON_WHEELS,
+            KEENON_XMAN_R1, KNOWIN_X1, LEJU_KUAVO_5_W, LEJU_KUAVO_MY, GLROAD_LABORER_C1, HECBOT_LUMEN_H1,
+            HECBOT_LUMEN_S1_ON_LEGS, HECBOT_LUMEN_S1_ON_WHEELS, MAGICLAB_MAGICBOT, MAGICLAB_MAGICBOT_Z1,
+            GIGAAI_MAKER_H01, UNIX_MARTIAN, SUNDAY_MEMO, ENCHANTED_TOOLS_MIROKAI, AIMOGA_MORNINE, NOETIX_N2, GENISOM_NE01,
+            ONE_X_NEO_BETA, ONE_X_NEO_GAMMA, LUMOS_NIX, SWITCHBOT_ONERO_H1, PRIMEBOT_T1, PL_UNIVERSE_PROWHITE,
+            PUDU_D7_2024, PUDU_D7_2026, ROBOT_COM_RNOID, ROBBYANT_R1, ROBOTERA_Q5, ENGINEAI_SA02_ON_LEGS,
+            ENGINEAI_SA02_ON_WHEELS, MUKS_SPACEO_M1, STARBOT_NOVA, SULU_BE_STEVE_ON_LEGS, SULU_BE_STEVE_ON_WHEELS,
+            SYNTHEVA_SYNTHIA, IHUB_TARA_GEN1, TAU_ROBOTICS_TAU_HUMANOID, UBTECH_U1_PRO_MALE, UBTECH_U1_PRO_FEMALE,
+            TUESDAY_LABS_VOXEL, UBTECH_WALKER_C, UBTECH_WALKER_C1, UBTECH_WALKER_S1, YUE_QUAN_X_BOT, BYD_XIAO_DI,
+            TENCENT_XIAO_LIU_ON_LEGS, TENCENT_XIAO_LIU_ON_WHEELS, DIGIT_XIAQI, LEJU_XTRON_KUAVO_MY, YUNMU_YMBOT_C,
+            YUNMU_YMBOT_H, ZERITH_H1, ZERITH_Z1]
 
 # --- Sources --------------------------------------------------------------------------------------------------------
 # Every source of batch 1 read first-hand on 2026-10-30 (E11.1 to E11.4), and those of type 2's file the shared rows
@@ -1074,13 +2041,243 @@ OWN_SOURCES = [
     ('FDp', 'Foundation, Phantom page', 'https://www.foundation.bot/phantom', "Manufacturer's specification"),
     ('TBS', 'The Business Standard (UNB, after the BBC), 2026-06-09 ("Phantom MK-1 … lacks a battery")',
      'https://www.tbsnews.net/node/1457841', 'Second-hand: a press report'),
+    # Batch 3 (E15.7): every source its blocks cite, read first-hand on 2026-11-01 and 2026-11-02 (V134; the records in
+    # documentation/claude/research_2026-11-01/), but where a row says it was not reread.
+    ('FIGr', 'New Atlas on the Figure 02\'s launch ("six RGB cameras", "16 degrees of freedom", "a new 2.25-kWh")',
+     'https://newatlas.com/robotics/figure-02-humanoid-robot-launch', 'Second-hand: a press report'),
+    ('PUDf', 'Pudu Robotics, FlashBot Arm page', 'https://pudurobotics.com/products/flashbot-arm',
+     "Manufacturer's specification"),
+    ('HDF', 'Humanoids Daily on Holiday Robotics\' Friday ("176cm tall, weighing 115kg", "500g" a hand)',
+     'https://www.humanoidsdaily.com/news/holiday-robotics-unveils-friday-a-wheeled-humanoid-that-prioritizes-hands-'
+     'over-legs', 'Second-hand: a press report of the maker\'s figures'),
+    ('AGG2s', 'AgiBot, G2 specification sheet as a seller carries it ("Weight 185kg", the base G2\'s; read by the '
+              'research agent, not reread)', 'https://cdn.robotshop.com/media/A/Agb/RB-Agb-09/pdf/AgiBot-G2-'
+                                              'Specification.pdf', "Manufacturer's specification, via a seller"),
+    ('GALg1', 'Galbot, G1 page ("92.5 kg", "48 V 30 Ah", "NVIDIA AGX Orin 64GB")', 'https://www.galbot.com/g1/',
+     "Manufacturer's specification"),
+    ('GALet1', 'Galbot, ET1 page ("带电池重量 32 kg", "RK3588 + RDK X5")', 'https://www.galbot.com/et1/',
+     "Manufacturer's specification"),
+    ('GALs1', 'Galbot, S1 page ("整机重量 320 kg", "48 V 30 Ah × 2")', 'https://www.galbot.com/s1/',
+     "Manufacturer's specification"),
+    ('PRSn', 'Persona AI, its humanoid page (no figures)', 'https://persona.ai/humanoid/', "Manufacturer's page"),
+    ('OBP', 'Origin of Bots, Persona humanoid ("WEIGHT 85 kg")',
+     'https://www.originofbots.com/robot/persona-humanoid-by-persona-ai-details-specifications-rating',
+     'Second-hand: a database'),
+    ('GBm', 'Generative Bionics, gb-robot-models gene01_0/model.urdf (its links 79.668 kg, added by script)',
+     'https://raw.githubusercontent.com/gbionics/gb-robot-models/main/share/gb_robot_models/robots/gene01_0/model.urdf',
+     "Manufacturer's model file"),
+    ('GENl', 'Gento Robotics, Gento Luna page ("48 V 34.4 Ah LiFePO battery pack")',
+     'https://www.gentorobotics.ai/products/gento-luna/', "Manufacturer's specification"),
+    ('CLSg', '财联社 on Geek+\'s Gino 1, 2026-02-10 ("双臂14个自由度", "50Ah", "Nvidia Thor")',
+     'https://www.cls.cn/detail/2285549', 'Second-hand: a press report'),
+    ('HSG', 'heise on GAC\'s GoMate ("174 cm", "38 degrees of freedom", "hands with five movable fingers")',
+     'https://www.heise.de/en/news/Humanoid-robot-GoMate-to-work-in-Chinese-automotive-company-10224291.html',
+     'Second-hand: a press report'),
+    ('FFgr3', 'Fourier, GR-3 introduction ("Net Weight ≈71 kg", its joint table, "702Wh + 234Wh", "46.8V")',
+     'https://support-old.fftai.com/en/docs/GR-X-Humanoid-Robot/GR3/GR-3_Introduction/', "Manufacturer's documentation"),
+    ('FFgr3u', 'Fourier, Wiki-GRx-Models gr3v2_1_1.urdf (its joints\' effort limits)',
+     'https://raw.githubusercontent.com/FFTAI/Wiki-GRx-Models/master/GRX/GR3/gr3v2_1_1/basic_urdf/gr3v2_1_1.urdf',
+     "Manufacturer's model file"),
+    ('HMNp', 'Humanoid, HMND 01 Alpha Bipedal page ("WEIGHT 90 kg", "DEGREES OF FREEDOM 29")',
+     'https://thehumanoid.ai/hmnd-01-alpha-bipedal/', "Manufacturer's specification"),
+    ('HMNr', 'Humanoid, release of 2025-12-02 ("six RGB cameras", "Nvidia Jetson Orin AGX and Intel i9")',
+     'https://thehumanoid.ai/humanoid-unveils-record-breaking-bipedal-robot-walking-48-hours-after-assembly/',
+     "Manufacturer's release"),
+    ('NTXh', 'Noetix, Hobbs W1 page ("Wheeled Full-Body Form", "54 Active DoF")',
+     'https://www.noetixrobotics.com/en/mobile/detail/W1', "Manufacturer's page"),
+    ('AIWh', 'AI Wiki, Noetix Hobbs W1 ("75 kg", "32 Ah (21V to 29.4V)"; citing Noetix\'s page)',
+     'https://aiwiki.ai/wiki/noetix_hobbs_w1', 'Second-hand: a wiki'),
+    ('HONr', 'HONOR, its robots\' page (HONOR Robotics D1 and A1, no figures)',
+     'https://www.honor.com/global/events/honor-robot/', "Manufacturer's page"),
+    ('HSRp', 'Huashu Robotics, HSR-ER-HR705 page ("机器人重量 200kg")', 'https://www.hsrobotics.cn/products_xq/119.html',
+     "Manufacturer's specification"),
+    ('QVI', 'Qviro on XPENG\'s IRON ("Each hand features 15 degrees of freedom")',
+     'https://qviro.com/blog/xpeng-launches-iron-advanced-humanoid-robot/', 'Second-hand: a blog'),
+    ('K36i', '36Kr on XPENG\'s new IRON ("体重达到 70kg", "三颗图灵 AI 芯片")', 'https://eu.36kr.com/zh/p/3541045140353153',
+     'Second-hand: a press report'),
+    ('WVi', 'Weave Robotics, Isaac 1 page (its degrees of freedom, "collapsible torso")',
+     'https://weaverobotics.com/isaac-1', "Manufacturer's specification"),
+    ('OBI', 'Origin of Bots, Isaac 1 ("WEIGHT 45 kg")',
+     'https://www.originofbots.com/robot/isssac-1-by-weave-robotics-details-specifications-rating',
+     'Second-hand: a database'),
+    ('JNGe', 'Hubei Jingchu, Jingchu Elf page ("体重约70kg", "体重：80kg")', 'https://www.jingchurobot.cn/product_detail/3.html',
+     "Manufacturer's specification"),
+    ('IFAz', 'IFA Berlin, Zeroth\'s exhibitor listing (Jupiter "Weight: 58 kg")',
+     'https://www.ifa-berlin.com/exhibitors/zeroth', "Second-hand: a trade fair's listing"),
+    ('IEK', 'Interesting Engineering on KinetixAI\'s KAI ("70 kilograms", "1.7-kilowatt-hour")',
+     'https://interestingengineering.com/ai-robotics/chinas-humanoid-robot-with-115-degrees-of-freedom',
+     'Second-hand: a press report'),
+    ('KXh', 'KinetixAI, KaiHand page ("750 g", "20 active")', 'https://kinetixai.tech/en/kaihand',
+     "Manufacturer's specification"),
+    ('HKK', 'Hankyung on LG\'s KAPEX, 2025-11-13 ("키 170㎝, 체중 60㎏대")', 'https://www.hankyung.com/article/2025111324581',
+     'Second-hand: a press report'),
+    ('OBK', 'Origin of Bots on Galaxea\'s Kengo ("40 kg weight")',
+     'https://www.originofbots.com/news/galaxea-dynamics-kengo-brings-bipedal-humanoid-teleoperation-into-sharper-focus',
+     'Second-hand: a news site'),
+    ('ITHk', 'IT之家 on Galaxea\'s Kengo, 2026-06-02 ("单关节扭矩超 130N·m")', 'https://www.ithome.com/0/958/651.htm',
+     'Second-hand: a press report'),
+    ('KNS', 'Bear Robotics, Kinisi page ("Wheeled humanoid mobile manipulator")', 'https://www.bearrobotics.ai/kinisi',
+     "Manufacturer's page"),
+    ('IEKR', 'Interesting Engineering on the Kinisi KR1 ("an onboard NVIDIA Jetson module")',
+     'https://interestingengineering.com/innovation/humanoid-robot-kr1-kinisi', 'Second-hand: a press report'),
+    ('KNWx', 'Knowin, its product page ("Total Degrees of Freedom 23 DoF")', 'https://knowinai.com/en/product.html',
+     "Manufacturer's specification"),
+    ('GLc1', 'Glroad, Laborer C1 page ("重量 38KG", "最大峰值扭矩 150N.M")',
+     'https://www.glroad.com/ListIntroduction/info.aspx?itemid=549', "Manufacturer's specification"),
+    ('GLm1', 'Glroad, Laborer M1 page ("重量 86KG", "最大峰值扭矩 430N.M")',
+     'https://www.glroad.com/ListIntroduction/info.aspx?itemid=548', "Manufacturer's specification"),
+    ('HECh', 'HECbot, Lumen H1 page ("净重≈69kg", "峰值扭矩512Nm", "700 Wh")', 'https://www.hecbot.cn/product.html?type=22',
+     "Manufacturer's specification"),
+    ('MLg1', 'MagicLab, MagicBot Gen1 page ("Approcimately 70kg", "≥ 350 N·m", "25 Ah (1.35 kWh)")',
+     'https://www.magiclab.top/en/human', "Manufacturer's specification"),
+    ('MLx1', 'MagicLab, MagicBot X1 page ("Total Weight 70kg", "≥350N·m")', 'https://www.magiclab.top/en/x1',
+     "Manufacturer's specification"),
+    ('MLz1', 'MagicLab, MagicBot Z1 page ("Approximately 40kg", "Maximum Knee Torque* 100N.m")',
+     'https://www.magiclab.top/en/z1', "Manufacturer's specification"),
+    ('UNXm', 'UniX AI, Martian page ("40 kg Weight", "150 N.m Motor Max Torque", "9 Ah", "48 V")',
+     'https://unix-group.ai/martian/', "Manufacturer's specification"),
+    ('MTXr', 'Matrix Robotics, Matrix-1 page ("67 kg", "2.28 KWh")', 'https://matrixrobotics.ai/matrix-1',
+     "Manufacturer's specification"),
+    ('SUNm', 'Sunday Robotics, technology page (MEMO: "170 pounds", its degrees of freedom)',
+     'https://www.sunday.ai/technology', "Manufacturer's specification"),
+    ('MNTb', 'Mentee Robotics, its bot page ("175cm", "70kg", "40"; the V3\'s)', 'https://www.menteebot.com/bot/',
+     "Manufacturer's specification"),
+    ('TRMB', 'Trend Hunter on the MenteeBot V3, 2025-02-25 ("powered by two Jetson Orin AGX computing units")',
+     'https://www.trendhunter.com/trends/menteebot-v30', 'Second-hand: a blog'),
+    ('RGM', 'Robots Guide (IEEE), Mirokaï ("WEIGHT 29 kg", its cameras, "2 NVIDIA Jetson NX")',
+     'https://robotsguide.com/robots/mirokai', 'Second-hand: a database'),
+    ('OBM', 'Origin of Bots, Mirokaï ("WEIGHT 26 kg")',
+     'https://www.originofbots.com/robot/miroka-by-enchanted-tools-details-specifications-rating',
+     'Second-hand: a database'),
+    ('OIDm', 'O-ID, its page (Modular: "172 cm", "70 kg", "30 DoF")', 'https://o-id.net/',
+     "Manufacturer's specification"),
+    ('ITHm', 'IT之家 on AiMOGA\'s Mornine, 2025-03-19 ("167cm、65kg", "0.7kwh")', 'https://www.ithome.com/0/838/943.htm',
+     'Second-hand: a press report'),
+    ('CNCm', 'CarNewsChina on the Mornine, 2026-04-13 ("weighs 70kg", "0.7 kWh battery")',
+     'https://carnewschina.com/2026/04/13/chery-begins-online-sales-of-humanoid-robot-with-a-0-7-kwh-battery-at-41400-usd/',
+     'Second-hand: a press report'),
+    ('RBTXn', 'RBTX, Noetix N2 ("weighing 30 kg", "peak torque of 150 Nm")',
+     'https://rbtx.de/en-GB/components/humanoid/noetix-robotics-n2', "Second-hand: a seller's listing"),
+    ('AIWn', 'AI Wiki, Zhejiang Navigator 2 ("60 kg", "Single hand weight | 600 g")',
+     'https://aiwiki.ai/wiki/zhejiang_humanoid_navigator_2', 'Second-hand: a wiki'),
+    ('GNSn', 'GENISOM, NE01 page (no figures)', 'https://www.genisomai.com/en/product-robot/ne01', "Manufacturer's page"),
+    ('1XNg', '1X Technologies, "Introducing NEO Gamma" ("four microphones", "a three-speaker system")',
+     'https://www.1x.tech/discover/introducing-neo-gamma', "Manufacturer's article"),
+    ('GXNx', 'Galaxea AI, release on NEXO ("30 degrees of freedom")', 'https://kyodonewsprwire.jp/release/202608244591',
+     "Manufacturer's release"),
+    ('OBN', 'Origin of Bots, NEXO ("WEIGHT 78 kg")',
+     'https://www.originofbots.com/robot/nexo-by-galaxea-dynamics-details-specifications-rating',
+     'Second-hand: a database'),
+    ('LMSn', 'Lumos Robotics, NIX page ("25.41 kg (total, incl. battery)", "282 Wh", "RK3588")',
+     'https://lumosbot.tech/products/luxiaoming', "Manufacturer's specification"),
+    ('NIXd', 'Lumos Robotics, its models page ("Nix1 ... Weight: 18 kg")',
+     'https://lumosrobot.github.io/lumosrobotics.github.io/contents/models.html', "Manufacturer's page"),
+    ('RCN', 'Robotics Center, Sharpa North ("60 kg Net weight")',
+     'https://www.roboticscenter.ai/store/product/sharpa-sharpa-north', "Second-hand: a seller's listing"),
+    ('UGOn', 'ugo, ugo Nova page ("約 100 kg", "LiFePO4 | 50.6V | 22Ah")', 'https://ugo.plus/ai/ugo-nova/',
+     "Manufacturer's specification"),
+    ('HPO', 'humanoid.press, Onero H1 ("Weight: 68 kg", "prototype spec")',
+     'https://humanoid.press/database/humanoid-press-database-onero-h1/', 'Second-hand: a database'),
+    ('PNKp', 'Pink Robotics, its page (P0: "82kg", "32 DoF")', 'https://www.pink-robotics.com/',
+     "Manufacturer's specification"),
+    ('PLpw', 'PL-Universe, ProWhite page ("Weight 400 kg", "40 v 100 Ah")',
+     'https://en.pl-universe.com/Products/ProWhiteRobot', "Manufacturer's specification"),
+    ('PSIv', 'PsiBot, Psi V1 page ("RGBD*4", "Computing Platform：Thor")',
+     'https://www.psibot.ai/en/products/product_psibot-v1/', "Manufacturer's specification"),
+    ('PD7r', 'Pudu Robotics, release of 2024-09-19 on its D7 ("weighs 45 kilograms", "a battery exceeding 1 kWh")',
+     'https://www.aap.com.au/aapreleases/cision20240919ae10581/', "Manufacturer's release"),
+    ('PUDd7', 'Pudu Robotics, D7 page (the 2026 one: "308.6 lbs（140 kg）")', 'https://www.pudurobotics.com/products/d7',
+     "Manufacturer's specification"),
+    ('PUDd9', 'Pudu Robotics, D9 page ("65 kg", "Maximum Joint Torque 352 N·m", "15 Ah (0.72 kWh)")',
+     'https://www.pudurobotics.com/products/d9', "Manufacturer's specification"),
+    ('X2Rq', 'X Square Robot, QUANTA X2 page (its degrees of freedom and sensors)',
+     'https://x2robot.com/en/product/quantum2', "Manufacturer's specification"),
+    ('AGA1', 'AgiBot, RAISE A1 page ("Weight 55 kg", "Peak Torque 350N·m")', 'https://www.agibot.com/products/A1',
+     "Manufacturer's specification"),
+    ('NRY', 'NineRay, humanoid page (RayNex G3: "60 kg", "32 DoF (Body)")', 'https://www.nineraygroup.com/en/humanoid.html',
+     "Manufacturer's specification"),
+    ('RSCx', 'RoboScience, REX G1 page ("22个自由度", "2070 TFLOPS")', 'https://www.robosci.com/rex-g1/',
+     "Manufacturer's specification"),
+    ('RNDs', 'Robot.com, RNoid specification sheet, revision 003, 2026-05-14 ("90 kg Total weight")',
+     'https://lp.robot.com/rnoid/specs.pdf', "Manufacturer's datasheet"),
+    ('OVRr', 'Oversonic Robotics, RoBee Series R brochure 10/2026, Oversonic_Robee-R-2026-eng.pdf ("Up to 293 kg")',
+     'https://oversonicrobotics.com/download/', "Manufacturer's brochure"),
+    ('RBLr', 'Roboligent, Robin page ("105 kg Total weight")', 'https://www.roboligent.com/robin/',
+     "Manufacturer's specification"),
+    ('RBOi', 'Robo, its page (ROBO-T1: "two 6-DOF robot arms with grippers")', 'https://robo.inc/',
+     "Manufacturer's page"),
+    ('OBR', 'Origin of Bots, ROBO-T1 ("WEIGHT Approx. 45–60 kg")',
+     'https://www.originofbots.com/robot/robo-t1-robo-robotics', 'Second-hand: a database'),
+    ('RTq5', 'ROBOTERA, Q5 brochure (Weight "70 Kg", its degrees of freedom; its digits read by OCR)',
+     'https://a.storyblok.com/f/298593/x/5695abe67b/q5-brochure-en-robotera.pdf', "Manufacturer's brochure"),
+    ('TNS', 'TechNode on EngineAI\'s SA02, 2025-08-11 ("1.25-meter-tall, 25-kilogram")',
+     'https://technode.com/2025/08/11/engineai-to-launch-sa02-a-5500-humanoid-robot-aimed-at-young-people/',
+     'Second-hand: a press report'),
+    ('ATIs', 'Ati Motors, Sherpa Mecha page ("Dual arms with 19 degrees of freedom", "55 Ah × 2")',
+     'https://www.atirobotics.ai/products/humanoid/sherpa-mecha/', "Manufacturer's specification"),
+    ('MUKm1', 'Muks Robotics, Spaceo M1 page ("~45 kg", "About 160 kg cm", "25.6V, 45Ah LiFePO4")',
+     'https://muksrobotics.com/spaceo-m1', "Manufacturer's specification"),
+    ('MUKpr', 'Muks Robotics, Spaceo Pro page ("60 kg", arm "66 Nm", waist "90 Nm", "25.6V, 45Ah LiFePO4")',
+     'https://muksrobotics.com/spaceo-pro', "Manufacturer's specification"),
+    ('RTXm', 'ROBOTERA, models: star1/urdf/l3_with_hand_fixedpin_xml.urdf (its joints\' effort limits)',
+     'https://github.com/roboterax/models', "Manufacturer's model file"),
+    ('STBn', 'StarBot, its page (Nova: "70 lb", "two 7-DOF arms")', 'https://www.starbotusa.com/',
+     "Manufacturer's specification"),
+    ('GEs', 'GE Reports, "The Robot Soul", 2015-01-26 ("Steve, who weighs 100 kilograms")',
+     'https://www.ge.com/news/reports/the-robot-soul', 'Second-hand: a press report'),
+    ('SYNt', 'Syntheva, Synthia page ("9.8 - 12.0 kg", "BCM2712 CPU (base model)")',
+     'https://robotics.syntheva.no/products/synthia', "Manufacturer's specification"),
+    ('WKFs', 'WorkFar, Syntro page ("240 lbs (108kg)", "Swappable Batteries 1.2 kWh")',
+     'https://www.workfar.com/product/syntro', "Manufacturer's specification"),
+    ('HGT', 'humanoid.guide on Tau Robotics (MarketWatch: "modified Unitree G1 robots", "pincer hands")',
+     'https://humanoid.guide/tau-robotics-humanoids-clean-homes-for-30-an-hour-with-help/', 'Second-hand: a news site'),
+    ('TAUh', 'Tau Robotics, its page (no figures)', 'https://www.tau-robotics.com/', "Manufacturer's page"),
+    ('PXNt', 'PaXini, Tora DoubleOne parameter image ("*Data from Paxini AI Lab"; read by OCR)',
+     'https://paxini.com/images/en/tora-double-parameter.png', "Manufacturer's specification"),
+    ('RBTXx', 'RBTX, PaXini Tora DoubleOne Model X ("Weight 73 kg")',
+     'https://rbtx.de/en-GB/components/humanoid/paxini-tora-double-one-model-x-humanoid-robot-56-dof',
+     "Second-hand: a seller's listing"),
+    ('AIWu', 'AI Wiki, UWorld U1 Pro ("weighs 42 kg", "weighs 35.2 kg")', 'https://aiwiki.ai/wiki/uworld_u1_pro',
+     'Second-hand: a wiki'),
+    ('TSDv', 'Tuesday Labs, its robot page (Voxel)', 'https://tuesdaylabs.com/robot', "Manufacturer's page"),
+    ('DXFw1', 'DexForce, W1 Pro page (Weight "110kg", "Dual-PC Architecture")', 'https://en.dexforce.com/w1pro.html',
+     "Manufacturer's specification"),
+    ('UBwc', 'UBTECH, Walker C page ("43kg", "48V 15Ah")', 'https://www.ubtrobot.com/en/humanoid/products/WalkerC',
+     "Manufacturer's specification"),
+    ('UBwc1', 'UBTECH, Walker C1 page and its images ("Weight 55kg", "NVIDIA® Jetson Thor™")',
+     'https://www.ubtrobot.com/en/humanoid/products/walker-c1', "Manufacturer's specification"),
+    ('UBws1', 'UBTECH, Walker S1 page and its images ("Weight 76kg", "Peak Torques 250N.m")',
+     'https://www.ubtrobot.com/en/humanoid/products/walker-s1', "Manufacturer's specification"),
+    ('UBws2', 'UBTECH, Walker S2 page and its images ("Weight 70kg", "52 of DOF")',
+     'https://www.ubtrobot.com/en/humanoid/products/walker-s2', "Manufacturer's specification"),
+    ('BDNw', 'Battery Design, "Robot battery swap", 2025-12-09 (the Walker S2: "Total energy = 2.3 kWh Nominal voltage '
+             '= 48 V")', 'https://www.batterydesign.net/robot-battery-swap/', 'Second-hand: a technical blog'),
+    ('HPX', 'humanoid.press, Xiao Liu ("Bipedal", "Weight: ~55–60 kg")', 'https://humanoid.press/database/database-xiao-liu/',
+     'Second-hand: a database'),
+    ('DGTx', 'Digit, XiaQi page and its image ("≤ 69kg", "700woh"; read by OCR)',
+     'https://www.digit.com.cn/ProductsDetail/93.html', "Manufacturer's specification"),
+    ('ZRTh', 'Zerith, H1 page ("轮臂人形机器人", "23总 自由度")', 'https://www.zerith.com/product/ZerithH1/',
+     "Manufacturer's specification"),
+    ('RBTXz', 'RBTX, Zerith Z1 ("up to 150 Nm peak joint torque", "Weight 33 kg")',
+     'https://rbtx.de/en-GB/components/humanoid/zerith-z1-humanoid-robot-21-dof', "Second-hand: a seller's listing"),
+    ('CHZ', '中华网 on PL-Universe\'s 大白, 2025-08-08 ("300Kg的整机重量", "48V、40Ah电池")',
+     'https://m.tech.china.com/redian/2025/0808/082025_1712259.html', 'Second-hand: a press report'),
+    ('AIWz', 'AI Wiki, PL-Universe Zeus 1 ("weighing about 300 kg"; Zeus 1 is the 大白)',
+     'https://aiwiki.ai/wiki/pl_universe_zeus_1', 'Second-hand: a wiki'),
+    ('PRCo', 'Perceptyne, PR-OMNI page ("120 kg", "3 kWh (2 × 1.5 kWh, swappable)")',
+     'https://www.perceptyne.com/product/omni', "Manufacturer's specification"),
 ]
 
 
 def sources(rows: dict) -> list:
     """The sheet Sources of a file: its own sources that its rows name, and type 2's file's sources its rows name (the
-    shared rows' and the helpers' codes), each once."""
+    shared rows' and the helpers' codes), each once. A robot's name is no citation: the names, some of which hold a
+    source's code ("Moon Dynamics L1", "Robo Robotics ROBO-T1"), are left out of the text searched (E15.7)."""
     text = ' '.join(str(cell) for sheet in rows.values() for row in sheet for cell in row)
+    # The robots' names of this file and of type 2's, whose helpers' texts name its robots ("type 2's Tlibot T1").
+    names = {str(row[0]) for row in rows.get('Robots', []) if row} | {str(row[0]) for row in T2.ROBOTS_ROWS if row}
+    for name in sorted(names, key=len, reverse=True):
+        text = text.replace(name, ' ')
     named = lambda code: re.search(r'(?<![\w])' + re.escape(code) + r'(?![\w])', text)  # noqa: E731
     own = [row for row in OWN_SOURCES if named(row[0])]
     mine = {row[0] for row in own}

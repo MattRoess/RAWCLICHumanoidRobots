@@ -123,7 +123,7 @@ def engineai_t800(pro: bool) -> dict:
             sensors=[SHARED.binocular('EAIn "视觉感知 RGB 头部 1（双目）"'), SHARED.lidar('EAIn "激光雷达 头部 1"'),
                      SHARED.imu('EAIn "IMU 躯干中心 1"'), SHARED.microphones('EAIn "麦克风阵列 环麦 ×4"'),
                      SHARED.counted(SHARED.speaker('EAIn "高保真扬声器 2个"'), 2)],
-            frame=('Frame', 'Aluminium', 'EAI "Aviation Aluminum + Titanium": aluminium, its titanium not drawn (no '
+            frame=('Frame', 'Aluminium alloys', 'EAI "Aviation Aluminum + Titanium": aluminium, its titanium not drawn (no '
                                          'share stated); the remainder (E15.6 question 6)'))))
 
 

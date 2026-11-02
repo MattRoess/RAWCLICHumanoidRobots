@@ -84,14 +84,14 @@ MATERIAL_COLUMN = {name: i + 1 for i, name in enumerate(MATERIAL_HEADER)}
 # The shared lists of the small workbook, in the layout of data/researched/shared_lists.xlsx.
 LISTS = [('Part group', 'Joint drives'), ('Part group', 'Frame'), ('Part group', 'Battery'),
          ('Part group', 'Mixed'), ('Body region', 'Legs'), ('Body region', 'Torso'), ('Body region', 'Whole body'),
-         ('Material', 'Aluminium'), ('Material', 'Copper'), ('Material', 'Battery materials'),
-         ('Material', 'Mixed'), ('Material', 'Not allocated')]
+         ('Material', 'Aluminium alloys'), ('Material', 'Copper'), ('Material', 'Battery cells'),
+         ('Material', 'Other'), ('Material', 'Not allocated')]
 PLACED_PARTS = [(1, 4, 'Knee actuator', 'Joint drives', 'Legs', '', 2, 'The location names one region.'),
                 (1, 5, 'Frame', 'Frame', 'Whole body', '', 0, 'Spread over the body.'),
                 (2, 9, 'Battery', 'Battery', 'Torso', '', 0, 'The location names one region.')]
-PLACED_MATERIALS = [('Aluminum alloys', 'Aluminium', 'The name says the material.'),
+PLACED_MATERIALS = [('Aluminum alloys', 'Aluminium alloys', 'The name says the material.'),
                     ('Copper conductors', 'Copper', 'The name says the material.'),
-                    ('Battery materials', 'Battery materials', 'The name says the material.')]
+                    ('Battery materials', 'Battery cells', 'The name says the material.')]
 
 
 BATTERY_HEADINGS = ['Robot type', 'Battery row in the workbook', 'Kind', 'Cell or material', 'Cells in series',
@@ -156,7 +156,7 @@ COMPOUND_HEADINGS = ['Compound', 'Composition', 'Basis']
 COMPOUNDS = [('Iron', 'Fe', ''), ('Nickel', 'Ni', ''), ('Carbon', 'C', ''), ('LiPF6', 'LiPF6', ''),
              ('Half and half', 'C 0.5; H 0.5', '')]
 RECIPE_HEADINGS = ['Recipe', 'Within', 'Item', 'Share min', 'Share mode', 'Share max', 'Remainder',
-                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis']
+                   'Probability', 'Compound', 'Follows the energy', 'Label', 'Basis', 'As metal']
 RECIPE = [('Test recipe', '', 'Can', 0.2, 0.2, 0.2, '', None, '', '', 'S', ''),
           ('Test recipe', 'Can', 'Iron can', None, None, None, '', 0.5, 'Iron', '', 'E', ''),
           ('Test recipe', 'Can', 'Plated can', None, None, None, '', 0.5, '', '', 'E', ''),
@@ -246,7 +246,8 @@ def build(path, changes=None, taxonomy=None, coverage=3, material_changes=None):
 
 # The folders of the robot types taken apart (data/researched/<n>_<name>/parts_taken_apart.xlsx, since 2026-10-30).
 TYPE_FOLDERS = {1: '1_compact_research_developer', 2: '2_full_scale_general_purpose_ai_research',
-                3: '3_industrial_logistics_warehousing', 4: '4_service_healthcare_interaction'}   # 3, 4: E11.7
+                3: '3_industrial_logistics_warehousing', 4: '4_service_healthcare_interaction',   # 3, 4: E11.7
+                5: '5_heavy_duty_high_performance_hazardous_environment', 6: '6_defense_public_safety'}   # E15.7 E
 
 
 def real_parts_file(robot_type: int = 1) -> str:
@@ -626,12 +627,13 @@ class TestTypeTwoPages(unittest.TestCase):
                          '396 kg. The Xialan S0, with no mass, is not in the evaluation. Most of its robots rest on '
                          'templates: the joints of 67 of its 102 robots and versions, the battery of 63.')
         # 67 and 63 since E14 (2026-11-01): 13 robots' joints from their makers' models, THEMIS's battery its own.
-        # 168 since 2026-11-01: the Reflex's catalogue "0.0" is not a mass (CLAUDE.md §7, VERIFICATION V126).
+        # 168 since 2026-11-01: the Reflex's catalogue "0.0" is not a mass (CLAUDE.md §7, VERIFICATION V126); 164 since
+        # batch 3 (E15.7 point 5), and type 4's 124: the seven of E15.4 have no stated mass.
         self.assertEqual(schemas.type_card_text(3, 'Anchor', None, self.register, True),
-                         'Its 181 robots of the register listed, 168 with a mass; drawn from the workbook until they '
+                         'Its 181 robots of the register listed, 164 with a mass; drawn from the workbook until they '
                          'are taken apart.')
         self.assertEqual(schemas.type_card_text(4, 'Anchor', None, self.register, True),   # 129 since E12.6
-                         'Its 135 robots of the register listed, 129 with a mass; drawn from the workbook until they '
+                         'Its 135 robots of the register listed, 124 with a mass; drawn from the workbook until they '
                          'are taken apart.')
         self.assertIsNone(schemas.type_card_text(5, 'Anchor', None, self.register, False))
         self.assertEqual(schemas.taken_words(2, self.register, self.apart), 'all its 96 robots with a mass')
@@ -655,10 +657,10 @@ class TestTypeTwoPages(unittest.TestCase):
 
     def test_where_its_kinds_sit_with_a_base_on_wheels(self):
         # E9.7 point 9, open points B and C: twelve kinds, the two of a robot on wheels drawn beside the feet for a type
-        # that has them; type 1's drawing unchanged.
+        # that has them; type 1's drawing unchanged. "Boards and computers" since E19 point 6 (one parts vocabulary).
         self.assertEqual([name for name, _ in schemas.KINDS.values()],
                          ['Hip joints', 'Knee joints', 'Ankle joints', 'Waist joints', 'Arm joints and hands',
-                          'Battery pack', 'Boards and heat sinks', 'Head', 'Cables', 'Frame and shell', 'Wheeled base',
+                          'Battery pack', 'Boards and computers', 'Head', 'Cables', 'Frame and shell', 'Wheeled base',
                           'Lift column'])
         self.assertEqual({schemas.JOINT_KIND[w] for w in ('wheel', 'steering', 'lift')}, {'base', 'lift'})
         self.assertTrue({'wheel', 'steering', 'lift', 'hand', 'gripper'} <= schemas.TEMPLATE_OUTSIDE)
@@ -747,10 +749,14 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         # Since E14 (2026-11-01, "Yes, build it", E14.6): its robots with their makers' joint data off the template.
         # Since types 5 and 6's entry (E16.6): the DR02 and Pro off the joint template, the Kaleido 9 and the Moby on
         # both, the Phantom MK1 on neither (its joints from its torques; it carries no battery).
-        self.assertEqual(schemas.template_shares(self.views[3]), (75, 70, 99))
-        self.assertEqual(schemas.template_shares(self.views[4]), (32, 30, 50))
+        # Since batch 3 (E15.7 point 6): type 3 137 of 172 (E15.5's arithmetic said 139: its 11 robots of type 3 from a
+        # stated joint or a model, as E15.3's rows give them), type 4 103 and 98 of 137 (E15.5 said 99: the Tau
+        # Humanoid has the G1's battery, as its row gives it).
+        self.assertEqual(schemas.template_shares(self.views[3]), (137, 124, 172))
+        self.assertEqual(schemas.template_shares(self.views[4]), (103, 98, 137))
         self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
-                                                                '75 of its 99 robots and versions, the battery of 70.')
+                                                                '137 of its 172 robots and versions, the battery of '
+                                                                '124.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 
@@ -818,9 +824,9 @@ class TestSharedLists(SmallLists):
         one, two = self.book.parts_lists[1], self.book.parts_lists[2]
         self.assertEqual(schemas.by_view(one, self.lists, 'group'), {'Joint drives': 4, 'Frame': 1})
         self.assertEqual(schemas.by_view(one, self.lists, 'region'), {'Legs': 4, 'Whole body': 1})
-        self.assertEqual(schemas.by_material(self.book.materials_lists[1], self.lists), {'Aluminium': 3, 'Copper': 2})
+        self.assertEqual(schemas.by_material(self.book.materials_lists[1], self.lists), {'Aluminium alloys': 3, 'Copper': 2})
         self.assertEqual(schemas.by_material(self.book.materials_lists[2], self.lists),
-                         {'Battery materials': 4, 'Not allocated': 2})
+                         {'Battery cells': 4, 'Not allocated': 2})
         self.assertEqual(schemas.motors_of(one, self.lists), 2)
         self.assertEqual(schemas.motors_of(two, self.lists), 0)
 
@@ -893,9 +899,9 @@ class TestSplits(SmallLists):
     """A material name split by an estimate (point 9 of SHARED_LISTS.md). In the small workbook, robot type 1's
     'Copper conductors' (1 / 2 / 3 kg) is split into electronics (10 / 20 / 30 %) and copper as the remainder."""
 
-    LISTS = LISTS + [('Material', 'Electronics')]
+    LISTS = LISTS + [('Material', 'Boards and components')]
     MATERIALS = [PLACED_MATERIALS[0], ('Copper conductors', 'Split', 'Point 9.'), PLACED_MATERIALS[2]]
-    SPLIT = [(1, 'Copper conductors', 'Electronics', 0.1, 0.2, 0.3, '', 'E', 'Basis.', 'Decided.'),
+    SPLIT = [(1, 'Copper conductors', 'Boards and components', 0.1, 0.2, 0.3, '', 'E', 'Basis.', 'Decided.'),
              (1, 'Copper conductors', 'Copper', None, None, None, 'Yes', 'E', 'The rest.', 'Decided.')]
 
     def split_faults(self, splits=None, materials=None):
@@ -906,12 +912,12 @@ class TestSplits(SmallLists):
         self.assertEqual(self.split_faults(), [])
         materials = self.book.materials_lists[1]
         totals = schemas.by_material(materials, self.lists)
-        self.assertEqual(set(totals), {'Aluminium', 'Copper', 'Electronics'})
-        self.assertAlmostEqual(totals['Electronics'], 0.4)
+        self.assertEqual(set(totals), {'Aluminium alloys', 'Copper', 'Boards and components'})
+        self.assertAlmostEqual(totals['Boards and components'], 0.4)
         self.assertAlmostEqual(totals['Copper'], 1.6)
         self.assertAlmostEqual(sum(totals.values()), 5)
         rows = schemas.material_rows(materials, self.lists)
-        for name, expected in (('Electronics', (0.1, 0.4, 0.9)), ('Copper', (0.7, 1.6, 2.7))):
+        for name, expected in (('Boards and components', (0.1, 0.4, 0.9)), ('Copper', (0.7, 1.6, 2.7))):
             for got, want in zip(rows[name][0], expected):
                 self.assertAlmostEqual(got, want, msg=name)
 
@@ -919,25 +925,25 @@ class TestSplits(SmallLists):
         self.assertFaultSays(self.split_faults(self.SPLIT[:1]), 'exactly one remainder, not 0')
 
     def test_a_split_with_two_remainders(self):
-        two = [self.SPLIT[1], (1, 'Copper conductors', 'Electronics', None, None, None, 'Yes', 'E', '', '')]
+        two = [self.SPLIT[1], (1, 'Copper conductors', 'Boards and components', None, None, None, 'Yes', 'E', '', '')]
         self.assertFaultSays(self.split_faults(two), 'exactly one remainder, not 2')
 
     def test_shares_out_of_order(self):
-        rows = [(1, 'Copper conductors', 'Electronics', 0.3, 0.2, 0.4, '', 'E', '', ''), self.SPLIT[1]]
+        rows = [(1, 'Copper conductors', 'Boards and components', 0.3, 0.2, 0.4, '', 'E', '', ''), self.SPLIT[1]]
         self.assertFaultSays(self.split_faults(rows), 'the shares must be in order between 0 and 1')
 
     def test_shares_that_leave_the_remainder_below_zero(self):
-        rows = [(1, 'Copper conductors', 'Electronics', 0.5, 0.8, 1.0, '', 'E', '', ''),
-                (1, 'Copper conductors', 'Aluminium', 0.1, 0.1, 0.2, '', 'E', '', ''), self.SPLIT[1]]
+        rows = [(1, 'Copper conductors', 'Boards and components', 0.5, 0.8, 1.0, '', 'E', '', ''),
+                (1, 'Copper conductors', 'Aluminium alloys', 0.1, 0.1, 0.2, '', 'E', '', ''), self.SPLIT[1]]
         self.assertFaultSays(self.split_faults(rows), 'the largest shares add up to 1.2')
 
     def test_a_split_not_labelled_as_an_estimate(self):
-        rows = [(1, 'Copper conductors', 'Electronics', 0.1, 0.2, 0.3, '', 'Direct', '', ''), self.SPLIT[1]]
+        rows = [(1, 'Copper conductors', 'Boards and components', 0.1, 0.2, 0.3, '', 'Direct', '', ''), self.SPLIT[1]]
         self.assertFaultSays(self.split_faults(rows), "labelled 'E', not 'Direct'")
 
     def test_a_piece_in_mixed(self):
-        rows = [(1, 'Copper conductors', 'Mixed', 0.1, 0.2, 0.3, '', 'E', '', ''), self.SPLIT[1]]
-        self.assertFaultSays(self.split_faults(rows), "the piece 'Mixed' is not a material")
+        rows = [(1, 'Copper conductors', 'Other', 0.1, 0.2, 0.3, '', 'E', '', ''), self.SPLIT[1]]
+        self.assertFaultSays(self.split_faults(rows), "the piece 'Other' is not a material")
 
     def test_a_split_whose_material_row_does_not_say_split(self):
         self.assertFaultSays(self.split_faults(materials=PLACED_MATERIALS), "does not say 'Split'")
@@ -988,6 +994,22 @@ class TestElementRecipes(unittest.TestCase):
         self.assertAlmostEqual(iron['Fe'], 0.2)
         self.assertAlmostEqual(plated['Ni'], 0.02)
         self.assertAlmostEqual(plated['Fe'], 0.18)
+
+    def test_an_item_as_metal_is_read_and_only_one_elements_metal(self):
+        # EVIDENCE.md E17 (Matthias, 2026-11-02, "Yes, agree E17"): an item marked 'As metal' is a part of its
+        # element's own metal (a copper part, a foil, a nickel strip); every other item's elements are bound in alloys
+        # and compounds. Only an item made of one element's compound can be so.
+        pure = [('Pure iron', '', 'Fe', None, None, None, 'Yes', None, 'Iron', '', 'S', '', 'Yes')]
+        self.assertEqual(self.recipe_faults(recipe=RECIPE + pure), [])
+        marked = {(i.recipe, i.item): i.as_metal for i in self.recipes.items}
+        self.assertTrue(marked[('Pure iron', 'Fe')])
+        self.assertFalse(marked[('Test recipe', 'Plating')])
+        mixed = [('Mixed', '', 'Mix', None, None, None, 'Yes', None, 'Half and half', '', 'E', '', 'Yes')]
+        self.assertFaultSays(self.recipe_faults(recipe=RECIPE + mixed), "one element's metal")
+        group = [(*RECIPE[0][:12], 'Yes')] + RECIPE[1:]
+        self.assertFaultSays(self.recipe_faults(recipe=group), "one element's metal")
+        wrong = [(*pure[0][:12], 'Maybe')]
+        self.assertFaultSays(self.recipe_faults(recipe=RECIPE + wrong), "'Yes' or empty")
 
     def test_a_composition_that_does_not_add_up(self):
         compounds = COMPOUNDS[:4] + [('Half and half', 'C 0.5; H 0.4', '')]
@@ -1081,18 +1103,18 @@ class TestBatteryCells(SmallLists):
         for got, want in zip(cells, (0.9, 0.95, 1.0)):
             self.assertAlmostEqual(got, want)
         totals = schemas.by_material(materials, self.lists, self.recipes)
-        self.assertAlmostEqual(totals['Battery materials'], 0.95)
+        self.assertAlmostEqual(totals['Battery cells'], 0.95)
         self.assertAlmostEqual(totals['Not allocated'], 2 + 4 - 0.95)
         self.assertAlmostEqual(sum(totals.values()), 6)
         # Without the recipes, the workbook's row as it is.
-        self.assertEqual(schemas.by_material(materials, self.lists), {'Battery materials': 4, 'Not allocated': 2})
+        self.assertEqual(schemas.by_material(materials, self.lists), {'Battery cells': 4, 'Not allocated': 2})
 
     def test_a_rest_split_among_materials_adds_back_to_the_row(self):
-        rest = [battery_row('Rest', 'Copper', share=(0.1, 0.2, 0.3)), battery_row('Rest', 'Aluminium', remainder='Yes')]
+        rest = [battery_row('Rest', 'Copper', share=(0.1, 0.2, 0.3)), battery_row('Rest', 'Aluminium alloys', remainder='Yes')]
         self.assertEqual(self.lists_faults(battery=BATTERY[:2] + rest), [])
         totals = schemas.by_material(self.book.materials_lists[2], self.lists, self.recipes)
         self.assertAlmostEqual(totals['Copper'], 0.2 * (4 - 0.95))
-        self.assertAlmostEqual(totals['Aluminium'], 0.8 * (4 - 0.95))
+        self.assertAlmostEqual(totals['Aluminium alloys'], 0.8 * (4 - 0.95))
         self.assertAlmostEqual(sum(totals.values()), 6)
         rows = schemas.material_rows(self.book.materials_lists[2], self.lists, self.recipes)
         for got, want in zip(rows['Copper'][0], (0.1 * (3 - 1.0), 0.2 * (4 - 0.95), 0.3 * (5 - 0.9))):
@@ -1242,8 +1264,25 @@ class TestTheWorkbook(unittest.TestCase):
         # Point 9: robot type 3's 'Electrical & magnetics group' (4.2 kg at the mode), split by the shares of robot
         # types 2, 4 and 5: magnets 30 %, electronics 20 %, copper the remaining 50 %.
         three = schemas.by_material(book.materials_lists[3], lists)
-        for name, mode in (('Magnets (NdFeB)', 1.26), ('Electronics', 0.84), ('Copper', 2.1), ('Mixed', 2.3)):
+        for name, mode in (('NdFeB magnets', 1.26), ('Boards and components', 0.84), ('Copper', 2.1), ('Other', 2.3)):
             self.assertAlmostEqual(three[name], mode, places=6, msg=name)
+
+    def test_the_materials_are_e19s_one_list(self):
+        # EVIDENCE.md E19 (Matthias, 2026-11-02, "Yes, agree E19"): one fixed list of materials, each name what it is,
+        # and every name of the workbook standing for one of them (question 5).
+        params = Params()
+        lists = schemas.read_shared_lists(absolute(params.data.shared_lists))
+        self.assertEqual(lists.names[schemas.MATERIAL],
+                         ['Copper', 'Brass', 'Nickel', 'Aluminium alloys', 'Magnesium alloys', 'Titanium alloy', 'Steel',
+                          'Stainless steel', 'Electrical steel', 'NdFeB magnets', 'Battery cells', 'Boards and components',
+                          'Plastics', 'Fibre composites', 'Ceramics', 'Other', 'Not allocated'])
+        stands = {family: shared[0] for family, shared in lists.materials.items()}
+        for family, material in (('Aluminum alloys', 'Aluminium alloys'), ('Titanium alloys', 'Titanium alloy'),
+                                 ('Electrical steel', 'Electrical steel'), ('Gear steel', 'Steel'),
+                                 ('Permanent magnets', 'NdFeB magnets'), ('Battery active materials', 'Battery cells'),
+                                 ('Control electronics', 'Boards and components'), ('Miscellaneous / solder', 'Other'),
+                                 ('Copper conductors', 'Copper')):
+            self.assertEqual(stands[family], material, msg=family)
 
     def test_the_element_recipes_reproduce_what_matthias_agreed(self):
         params = Params()
@@ -1266,6 +1305,27 @@ class TestTheWorkbook(unittest.TestCase):
             self.assertAlmostEqual(sum(shares.values()), 1, places=5)
             for element, percent in elements.items():
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.03, msg=f'{recipe}, {can}, {element}')
+
+    def test_the_elements_as_metal_as_agreed(self):
+        # EVIDENCE.md E17 (Matthias, 2026-11-02, "Yes, agree E17"; "The foils are recycled to the elements"): as metal
+        # the copper of the material Copper (its recipe 'Copper metal'), the battery's nickel strips, and in the cells their
+        # copper and aluminium foils and their nickel and aluminium tabs; everything else bound. The workbook's copper
+        # of every robot type follows the recipe 'Copper metal' (question 8).
+        params = Params()
+        if not os.path.exists(absolute(params.data.element_recipes)):
+            self.skipTest(f'{params.data.element_recipes} is not on disk')
+        recipes = schemas.read_element_recipes(absolute(params.data.element_recipes))
+        self.assertEqual(schemas.check_element_recipes(recipes, params), [])
+        cells = ({('NMC cylindrical', item) for item in ('Copper foil', 'Aluminium foil', 'Nickel tabs', 'Aluminium tabs')}
+                 | {('LFP cylindrical', item) for item in ('Copper foil', 'Aluminium foil')})   # its recipe: no tabs
+        self.assertEqual({(i.recipe, i.item) for i in recipes.items if i.as_metal},
+                         cells | {('Copper metal', 'Cu'), ('Nickel strip', 'Ni')})
+        self.assertEqual(schemas.element_shares(recipes, 'Copper metal'), {'Cu': 1.0})
+        rows = {(r.robot, r.family, r.shared): r.recipe for r in recipes.rows}
+        for robot_type, family in ((1, 'Copper conductors'), (2, 'Copper conductors'),
+                                   (3, 'Electrical & magnetics group'), (4, 'Electrical conductors'),
+                                   (5, 'Copper conductors'), (6, 'Copper conductors')):
+            self.assertEqual(rows[(robot_type, family, 'Copper')], 'Copper metal', msg=robot_type)
 
     def test_the_battery_cells_reproduce_what_matthias_agreed(self):
         params = Params()
@@ -1291,8 +1351,8 @@ class TestTheWorkbook(unittest.TestCase):
             self.assertAlmostEqual(sum(totals.values()), parts_list.sum_kg[1], places=6, msg=f'robot type {n}')
         one = schemas.by_material(book.materials_lists[1], lists, recipes)
         rest = 2.5 - 1.81
-        self.assertAlmostEqual(one['Battery materials'], 1.81, delta=0.006)
-        self.assertAlmostEqual(one['Electronics'], 0.5 + 0.165 * rest, delta=0.006)
+        self.assertAlmostEqual(one['Battery cells'], 1.81, delta=0.006)
+        self.assertAlmostEqual(one['Boards and components'], 0.5 + 0.165 * rest, delta=0.006)
 
     def test_the_plastics_recipes_reproduce_what_matthias_agreed(self):
         params = Params()
@@ -1360,7 +1420,7 @@ class TestTheWorkbook(unittest.TestCase):
         recipes = schemas.read_element_recipes(paths[2])
         self.assertEqual(schemas.check_element_recipes(recipes, params), [])
         self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
-        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Aluminium'}
+        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Aluminium alloys'}
         self.assertEqual(set(rows), {(n, 'Aluminum alloys') for n in range(1, 7)})
         # EVIDENCE.md E1.1e with ADC12 from its combined analyses (E1.1f), % of each robot type's aluminium at the modes,
         # with each die-cast alloy. Two decimals, so within 0.006.
@@ -1397,7 +1457,7 @@ class TestTheWorkbook(unittest.TestCase):
         recipes = schemas.read_element_recipes(paths[2])
         self.assertEqual(schemas.check_element_recipes(recipes, params), [])
         self.assertEqual(schemas.check_material_recipes(book, lists, recipes, params), [])
-        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Magnesium'}
+        rows = {(r.robot, r.family): r.recipe for r in recipes.rows if r.shared == 'Magnesium alloys'}
         self.assertEqual(set(rows), {(n, 'Magnesium alloys') for n in (2, 3, 4, 6)})
         self.assertEqual(rows[(3, 'Magnesium alloys')], 'Magnesium AZ91D')
         # EVIDENCE.md E1.2d with the university-only elements combined (E1.2e), % of each robot type's magnesium at the
@@ -1464,20 +1524,20 @@ SMALL_APART = {
                      ('Ankles', 'SH', 0.6, 'E', ''), ('Ankles', 'UH', 0.4, 'E', ''),
                      ('Elbows and wrists', 'H', 0.7, 'E', ''), ('Elbows and wrists', 'SH', 0.3, 'E', '')],
     'JointParts': [('Motor stator', 100, 0.5, 1, 1.5, '', '', 1.0, 1.78, 2.67, 'the area', 'W; E', 'T1'),
-                   ('Housing', 80, 0.5, 1, 1.5, 'Aluminium', '', 1.0, 1.39, 2.09, 'the surface', 'W; E', 'T1')],
+                   ('Housing', 80, 0.5, 1, 1.5, 'Aluminium alloys', '', 1.0, 1.39, 2.09, 'the surface', 'W; E', 'T1')],
     'Parts': [('Robot A', 'Joint module, small', 2, 'Ankles', 'Legs', None, None, None, '', '',
                'the sum of JointParts', 'W, E', 'T1'),
               ('Robot A', 'Joint module, large', 2, 'Hips', 'Legs', None, None, None, '', '', 'the sum of JointParts',
                'E', 'T1'),
               ('Robot A', 'Screws', 1, 'Frame and shell', 'Whole body', 0.2, 0.5, 1.0, 'Steel', '42CrMo4', '', 'E',
                'no source'),
-              ('Robot A', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium', '',
+              ('Robot A', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium alloys', '',
                'the robot (Constants), less every other part', 'E', 'T1'),
               ('Robot B', 'Joint module, small', 2, 'Arms', 'Arms', None, None, None, '', '',
                "the Joints' module masses", 'S', 'X1b'),
               ('Robot B', 'Joint module, large', 2, 'Hips', 'Legs', None, None, None, '', '',
                "the Joints' module masses", 'S', 'X1b'),
-              ('Robot B', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium', '',
+              ('Robot B', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium alloys', '',
                'the robot (Constants), less every other part', 'E', 'X1a')],
     'Shares': [('Motor stator', 'Copper', '', 0.23, 0.36, 0.45, '', 'S', 'For the tests.'),
                ('Motor stator', 'Steel', 'M19 or M27', None, None, None, 'Yes', 'E', 'For the tests.')],
@@ -1510,9 +1570,9 @@ SMALL_APART = {
 }
 APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),
                ('Body region', 'Whole body'), ('Body region', 'Base'), ('Part group', 'Joint drives'),
-               ('Material', 'Aluminium'),
-               ('Material', 'Copper'), ('Material', 'Steel'), ('Material', 'Plastics'), ('Material', 'Mixed'),
-               ('Material', 'Not allocated')]
+               ('Material', 'Aluminium alloys'),
+               ('Material', 'Copper'), ('Material', 'Brass'), ('Material', 'Steel'), ('Material', 'Plastics'),
+               ('Material', 'Other'), ('Material', 'Not allocated')]
 
 
 def build_apart(path, changes=None, drop=None, one_robot_layout=False):
@@ -1603,7 +1663,7 @@ class TestPartsTakenApart(unittest.TestCase):
         self.assertFaultSays(faults, 'below zero')
 
     def test_a_material_not_in_the_shared_lists(self):
-        self.assertFaultSays(self.faults({('Parts', 2, 8): 'Brass'}), "'Brass'")
+        self.assertFaultSays(self.faults({('Parts', 2, 8): 'Kevlar'}), "'Kevlar'")
 
     def test_shares_of_a_part_that_does_not_exist(self):
         faults = self.faults({('Shares', 2): ('Rotor', 'Steel', '', None, None, None, 'Yes', 'E', '')})
@@ -1739,7 +1799,7 @@ class TestPartsTakenApart(unittest.TestCase):
                                                  None, '', 'Hips', 'Base', 'U3', 'E9.6')}
     LIFT_MOTOR = {('Joints', 10): ('Robot A', 4, 'Lift column motor', 1, 'small', None, 0.445, 0.89, 1.335, None, '',
                                    'Elbows and wrists', 'Torso', 'U3', 'E9.6'), ('Parts', 0, 2): 3}
-    LIFT_COLUMN = {('Parts', 7): ('Robot A', 'Lift column', 1, 'Lift column', 'Torso', 2, 4, 6, 'Aluminium', '', '', 'E',
+    LIFT_COLUMN = {('Parts', 7): ('Robot A', 'Lift column', 1, 'Lift column', 'Torso', 2, 4, 6, 'Aluminium alloys', '', '', 'E',
                                   'E9.6')}
 
     def test_a_robot_on_wheels_with_no_drive_wheel(self):
@@ -1783,14 +1843,22 @@ class TestPartsTakenApart(unittest.TestCase):
         given = {**neither, ('Constants', 14): ('all', 'Battery energy per kg of robot', 6, 12, 18, 'Wh/kg', 'E', '')}
         self.assertEqual([f.text for f in self.faults(given)], [])
 
-    def test_a_pack_with_no_mass_and_a_housing_needs_the_pack_energy_per_kg(self):
-        pack = {('Parts', 7): ('Robot B', 'Battery pack', 1, 'Battery pack', 'Torso', None, None, None, '', '',
-                               'its cells, its management board and its housing', 'S, E', ''),
-                ('Parts', 8): ('Robot B', 'Battery housing', 1, 'Battery pack', 'Torso', None, None, None, 'Mixed', '',
-                               'the battery pack, less its cells and its management board', 'E', '')}
-        self.assertFaultSays(self.faults(pack), "'Battery pack, Wh per kg (packs not weighed)'")
-        given = {**pack, ('Constants', 14): ('all', 'Battery pack, Wh per kg (packs not weighed)', 109.3, 164, 232.5,
-                                             'Wh/kg', 'S, E', '')}
+    def test_a_pack_with_no_mass_has_its_housing_a_share_of_its_cells(self):
+        # Matthias, 2026-11-02: "A, as recommended" (EVIDENCE.md E20): a pack no source weighs has its housing a share
+        # of its cells, never the pack's remainder (02 has no pack mass to take it from), and the share's row is given.
+        pack = ('Robot B', 'Battery pack', 1, 'Battery pack', 'Torso', None, None, None, '', '',
+                'its cells, its management board and its housing', 'S, E', '')
+        remainder = {('Parts', 7): pack,
+                     ('Parts', 8): ('Robot B', 'Battery housing', 1, 'Battery pack', 'Torso', None, None, None, 'Other',
+                                    '', 'the battery pack, less its cells and its management board', 'E', '')}
+        self.assertFaultSays(self.faults(remainder), 'a share of its cells')
+        share = {('Parts', 7): pack,
+                 ('Parts', 8): ('Robot B', 'Battery housing', 1, 'Battery pack', 'Torso', None, None, None, 'Other', '',
+                                "a share of its cells: Constants' Battery housing, share of its cells (packs not "
+                                'weighed)', 'E', '')}
+        self.assertFaultSays(self.faults(share), "'Battery housing, share of its cells (packs not weighed)'")
+        given = {**share, ('Constants', 14): ('all', 'Battery housing, share of its cells (packs not weighed)', 0.207,
+                                              0.414, 0.859, 'share', 'S, E', '')}
         self.assertEqual([f.text for f in self.faults(given)], [])
 
     def test_a_part_that_is_a_share_of_the_robot_needs_the_shell_share(self):
@@ -1802,8 +1870,8 @@ class TestPartsTakenApart(unittest.TestCase):
         self.assertEqual([f.text for f in self.faults(given)], [])
 
     def test_a_material_written_as_either_of_two(self):
-        self.assertEqual([f.text for f in self.faults({('Shares', 1, 1): 'Steel or Aluminium'})], [])
-        self.assertFaultSays(self.faults({('Shares', 1, 1): 'Steel or Brass'}), "'Brass'")
+        self.assertEqual([f.text for f in self.faults({('Shares', 1, 1): 'Steel or Aluminium alloys'})], [])
+        self.assertFaultSays(self.faults({('Shares', 1, 1): 'Steel or Kevlar'}), "'Kevlar'")
 
     def test_a_label_that_is_not_known(self):
         self.assertFaultSays(self.faults({('Parts', 2, 11): 'X'}), "'X'")
@@ -1929,7 +1997,7 @@ class TestSiblingData(unittest.TestCase):
 
     def test_a_magnet_grade_class_a_part_names_that_the_traction_motors_do_not_have(self):
         # Point 4: a part of magnets naming its class; the small traction-motor file has H, SH, UH and EH only.
-        faults = self.faults({('Parts', 2, 8): 'Magnets (NdFeB)', ('Parts', 2, 9): 'N'})
+        faults = self.faults({('Parts', 2, 8): 'NdFeB magnets', ('Parts', 2, 9): 'N'})
         self.assertFaultSays(faults, "the magnet grade class 'N' is not in")
 
     def test_a_board_category_the_car_file_does_not_have(self):
@@ -2012,10 +2080,13 @@ class TestGrades(unittest.TestCase):
         self.assertFaultSays(self.faults({('Shares', 1, 2): 'M19 or M99'}), "'M99'")
 
     def test_a_grade_on_a_material_that_has_none(self):
-        self.assertFaultSays(self.faults({('JointParts', 1, 6): 'GCr15'}), "not for 'Aluminium'")
+        self.assertFaultSays(self.faults({('JointParts', 1, 6): 'GCr15'}), "not for 'Aluminium alloys'")
 
-    def test_a_copper_part_may_name_its_recipe(self):
-        self.assertEqual([f.text for f in self.faults({('Shares', 0, 2): 'Brass'})], [])
+    def test_a_brass_part_names_its_recipe_and_copper_none(self):
+        # EVIDENCE.md E19 (Matthias, 2026-11-02, "Yes, agree E19"): brass a material of its own, its grade its recipe;
+        # copper, the metal, names none.
+        self.assertEqual([f.text for f in self.faults({('Shares', 0, 1): 'Brass', ('Shares', 0, 2): 'Brass'})], [])
+        self.assertFaultSays(self.faults({('Shares', 0, 2): 'Brass'}), "not for 'Copper'")
 
     def test_the_recipes_of_the_boards_rest_must_be_there(self):
         # 2026-10-29, "Yes, enter them", point 3b: the boards' glass fibre and epoxy by the recipes E-glass and Epoxy.
@@ -2024,12 +2095,12 @@ class TestGrades(unittest.TestCase):
 
     def test_a_part_of_magnets_may_name_its_grade_class(self):
         # 2026-10-29, "Yes, build them", point 4: the RP1's N52 magnets in its covers, grade class N.
-        magnets = {('Parts', 2, 8): 'Magnets (NdFeB)'}
+        magnets = {('Parts', 2, 8): 'NdFeB magnets'}
         self.assertEqual([f.text for f in self.faults({**magnets, ('Parts', 2, 9): 'N'})], [])
         self.assertFaultSays(self.faults({**magnets, ('Parts', 2, 9): 'N52'}), 'a grade of magnets is a grade class')
 
     def test_a_joints_magnets_take_their_heat_groups_class(self):
-        self.assertFaultSays(self.faults({('JointParts', 1, 5): 'Magnets (NdFeB)', ('JointParts', 1, 6): 'N'}),
+        self.assertFaultSays(self.faults({('JointParts', 1, 5): 'NdFeB magnets', ('JointParts', 1, 6): 'N'}),
                              "in a joint its heat group's")
 
     def test_a_sibling_steel_whose_maximum_is_below_its_minimum(self):
@@ -2209,7 +2280,8 @@ class TestRegister(unittest.TestCase):
         self.assertFaultSays(self.faults(self.changed(1, apart='AgiBot X1')), 'parts file of its robot types (3, 4)')
 
     def test_the_real_register_holds_together(self):
-        # Against every parts file on disk (types 1 to 4, since 2026-10-30), every sheet Type n.
+        # Against every parts file on disk (types 1 to 4, since 2026-10-30; 5 and 6 since E15.7, open point E: their
+        # robots hold together against all six files), every sheet Type n.
         params = Params()
         path, files = absolute(params.data.register), {n: real_parts_file(n) for n in TYPE_FOLDERS}
         if not all(os.path.exists(p) for p in [path, *files.values()]):

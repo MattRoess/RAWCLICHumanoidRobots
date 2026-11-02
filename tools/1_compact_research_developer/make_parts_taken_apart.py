@@ -249,12 +249,12 @@ PARTS_G1_X1_N1 = [
      'T3 (two per hip joint pair); T1 slide 39'),
     ('Unitree G1', 'Waist fan', 1, 'Waist', 'Torso', 0.005, 0.01, 0.02, None, None, 'E', 'T1 slide 41'),
     ('Unitree G1', 'Main board fan', 1, 'Boards', 'Torso', 0.005, 0.01, 0.02, None, None, 'E', 'T1 slide 39'),
-    ('Unitree G1', 'Main board heat sink', 1, 'Boards', 'Torso', 0.05, 0.1, 0.2, 'Aluminium', None, 'E',
+    ('Unitree G1', 'Main board heat sink', 1, 'Boards', 'Torso', 0.05, 0.1, 0.2, 'Aluminium alloys', None, 'E',
      'T1 slide 39'),
     ('Unitree G1', 'Battery pack', 1, 'Battery pack', 'Torso', 2.25, 2.5, 2.75, None,
      'its cells, its management board (Boards) and its housing (the rows below)', 'S',
      'T1 slide 25 ("~2.5kg"); ± 10 % for the "~" (E2.8e, accepted)'),
-    ('Unitree G1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials',
+    ('Unitree G1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery cells',
      "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg", 'S',
      'T1 slide 25; element_recipes.xlsx NMC cylindrical; composition.nmc_wh_per_kg_*'),
     ('Unitree G1', 'Battery housing, busbars and wires', 1, 'Battery pack', 'Torso', None, None, None, None,
@@ -270,7 +270,7 @@ PARTS_G1_X1_N1 = [
     ('Unitree G1', 'Shell and torso plastic parts, silicone, foam', 1, 'Frame and shell', 'Whole body', 2.25, 4.5,
      6.75, 'Plastics', None, 'E', 'T1 slides 26, 44'),
     ('Unitree G1', 'Lower-leg links', 1, 'Frame and shell', 'Legs', 0.3, 0.6, 1, 'Steel', None, 'E', 'T1 slide 45'),
-    ('Unitree G1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium',
+    ('Unitree G1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium alloys',
      'the robot (Constants), less every other part', 'E',
      'T1 slides 18, 44, 45; Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
     ('AgiBot X1', 'Joint module, small', 16, 'Ankles and arms', 'Legs 4, Arms 12', None, None, None, None,
@@ -293,7 +293,7 @@ PARTS_G1_X1_N1 = [
      'its cells, its management board (Boards) and its housing (the rows below)', 'S, E',
      'X1a "48V8AH三元电池", stainless-steel case; mass: the G1\'s 168 Wh/kg; the lower cut where the pack holds '
      'its heaviest cells (232.5 Wh/kg) and management board in the lightest robot (E2.8e, 2026-10-28)'),
-    ('AgiBot X1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials',
+    ('AgiBot X1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery cells',
      "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg", 'S',
      'X1a "12S"; element_recipes.xlsx NMC cylindrical'),
     ('AgiBot X1', 'Battery housing, busbars and wires', 1, 'Battery pack', 'Torso', None, None, None, None,
@@ -305,25 +305,27 @@ PARTS_G1_X1_N1 = [
      "X1a: 58 cable plugs (19 cables with two, 12 with one, 6 terminating resistors, 2 to the L28); 4 more, two per "
      "joint, for the two grippers (E5.19 point 2); the mass of a mated pair, Amass through LCSC (E5.22)"),
     ('AgiBot X1', 'Titanium (TC4) links: waist (2), ankles (4)', 1, 'Frame and shell', 'Legs, Torso', 0.2, 0.4, 0.6,
-     'Titanium', None, 'E', 'X1a "钛合金TC4"; masses not given'),
+     'Titanium alloy', None, 'E', 'X1a "钛合金TC4"; masses not given'),
     # The X1's screws, pins and shafts by its newer parts list (2025-01-08; Matthias, 2026-10-29, "Yes, enter all";
     # EVIDENCE.md E5.22): 827 screws, not about 980 (the old list's "Screws and pins: 980" counted its pins, then in
     # the shafts' row too); its 90 pins of SUS440C on their own; its brass inserts, sensor shield, silicone dampers and
     # XT60 from its lists.
     ('AgiBot X1', 'Stainless 17-4PH shafts and crosses', 1, 'Frame and shell', 'Whole body', 0.075, 0.15, 0.225,
-     'Steel', None, 'E', 'X1a "0Cr17Ni4Cu4Nb"; the former row of shafts and pins less its pins (E5.22)'),
-    ('AgiBot X1', 'Pins, SUS440C (90)', 1, 'Frame and shell', 'Whole body', 0.105, 0.1086, 0.112, 'Steel', None, 'S',
+     'Stainless steel', None, 'E', 'X1a "0Cr17Ni4Cu4Nb"; the former row of shafts and pins less its pins (E5.22)'),
+    ('AgiBot X1', 'Pins, SUS440C (90)', 1, 'Frame and shell', 'Whole body', 0.105, 0.1086, 0.112, 'Stainless steel',
+     None, 'S',
      'X1a 2025-01-08: 90 pins GB/T 119.2 "材质SUS440C", their sizes stated: 108.6 g at 7.7 g/cm3, ± 3 % (E5.22)'),
     ('AgiBot X1', 'Screws, class 12.9 and 10.9 (677)', 1, 'Frame and shell', 'Whole body', 0.207, 0.4145, 0.622,
      'Steel', None, 'E', 'X1a 2025-01-08: 618 of class 12.9 and 59 of 10.9, "材质碳钢 镀亮镍"; 0.6 kg for 980, by '
                          'number (E5.22)'),
-    ('AgiBot X1', 'Screws, stainless 304 (150)', 1, 'Frame and shell', 'Whole body', 0.0459, 0.0918, 0.1377, 'Steel',
-     None, 'E', 'X1a 2025-01-08: 142 "材质为不锈钢304" and 8 shoulder screws of 304; 0.6 kg for 980, by number '
+    ('AgiBot X1', 'Screws, stainless 304 (150)', 1, 'Frame and shell', 'Whole body', 0.0459, 0.0918, 0.1377,
+     'Stainless steel', None, 'E', 'X1a 2025-01-08: 142 "材质为不锈钢304" and 8 shoulder screws of 304; 0.6 kg for 980, by number '
                 '(E5.22)'),
     ('AgiBot X1', 'Brass threaded inserts, M3 (12) and M4 (4)', 1, 'Frame and shell', 'Whole body', 0.0065, 0.013,
-     0.0195, 'Copper', None, 'E', 'X1a "IUT铜螺母" M3 × 12, M4 × 4, "材质为C3604黄铜"; the sizes of typical heat-set '
+     0.0195, 'Brass', None, 'E', 'X1a "IUT铜螺母" M3 × 12, M4 × 4, "材质为C3604黄铜"; the sizes of typical heat-set '
                                   'inserts (E5.22)'),
-    ('AgiBot X1', 'Sensor shield, stainless 304', 1, 'Frame and shell', 'Torso', 0.01, 0.02, 0.03, 'Steel', None, 'E',
+    ('AgiBot X1', 'Sensor shield, stainless 304', 1, 'Frame and shell', 'Torso', 0.01, 0.02, 0.03, 'Stainless steel',
+     None, 'E',
      'X1a overall BOM "传感器屏蔽罩", "0Crl8Ni9(GB)"; its size not given (E5.22)'),
     ('AgiBot X1', 'Silicone dampers (4)', 4, 'Frame and shell', 'Whole body', 0.001, 0.002, 0.003, 'Plastics', None,
      'E', 'X1a "硅胶减震块" × 4, "硅胶"; their size not given (E5.22)'),
@@ -336,7 +338,7 @@ PARTS_G1_X1_N1 = [
      'E', 'X1a: "3D打印树脂" in the BOM list, "ABS" in the overall BOM'),
     ('AgiBot X1', 'Rubber feet and handle', 1, 'Frame and shell', 'Whole body', 0.1, 0.2, 0.3, 'Plastics', None, 'E',
      'X1a "橡胶"'),
-    ('AgiBot X1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium',
+    ('AgiBot X1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium alloys',
      'the robot (Constants), less every other part', 'E', 'X1a: 6061-T6 and 7075-T6 machined parts'),
     ('Fourier N1', 'Joint module, small', 12, 'Ankles and arms', 'Legs 4, Arms 8', None, None, None, None,
      "the Joints' module masses; inside as JointParts' joint of its size, scaled to its mass", 'E',
@@ -358,7 +360,7 @@ PARTS_G1_X1_N1 = [
      'its cells, its management board (Boards) and its housing (the rows below)', 'S, E',
      'N1a "≤3.2kg" (the upper cut); the lower cut where the pack holds its heaviest cells (232.5 Wh/kg) and '
      'management board in the lightest robot (E2.8e, 2026-10-28)'),
-    ('Fourier N1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery materials',
+    ('Fourier N1', 'Battery cells', 1, 'Battery pack', 'Torso', None, None, None, 'Battery cells',
      "from the energy: Constants voltage × capacity over the NMC cell's Wh/kg", 'S',
      'N1a "475WH", "39.6V"; NMC (E2.8e); element_recipes.xlsx NMC cylindrical'),
     ('Fourier N1', 'Battery housing, busbars and wires', 1, 'Battery pack', 'Torso', None, None, None, None,
@@ -373,7 +375,7 @@ PARTS_G1_X1_N1 = [
      'as the G1 (E2.8e)'),
     ('Fourier N1', 'Shell (engineering plastics)', 1, 'Frame and shell', 'Whole body', 2.25, 4.5, 6.75, 'Plastics',
      None, 'E', 'N1a "工程塑料"; as the G1 (E2.8e)'),
-    ('Fourier N1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium',
+    ('Fourier N1', 'Frame', 1, 'Frame and shell', 'Whole body', None, None, None, 'Aluminium alloys',
      'the robot (Constants), less every other part', 'E', 'N1a "铝合金"'),
 ]
 # --- Boards ---------------------------------------------------------------------------------------------------------
@@ -705,7 +707,7 @@ ROBOTO_ORIGIN = block(
     cables=((10, 10.5, 12), 'S, E', 'RO1: its motor cables listed add up to 10.0 m; up to 12 m for any not listed '
                                     '(E5.13, E5.14 point 5)'),
     shell=('Shell: 3D-printed parts and rubber soles', 'RO1; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'RO1: CNC parts with "black anodizing", aluminium\'s treatment; the metal not named '
+    frame=('Frame', 'Aluminium alloys', 'RO1: CNC parts with "black anodizing", aluminium\'s treatment; the metal not named '
                                  '(E5.14 point 9)'))
 
 ASIMOV_ONE = block(
@@ -749,7 +751,7 @@ ASIMOV_ONE = block(
     connectors=('S, E', 'AS1: XT30 (2+2) at every actuator (E5.13); the mass of a mated pair, Amass through LCSC '
                         '(E5.22)'),
     shell=('Shell: MJF PA12 nylon', 'AS1 "7075 aluminum and MJF PA12 nylon"; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'AS1 "7075 aluminum"'))
+    frame=('Frame', 'Aluminium alloys', 'AS1 "7075 aluminum"'))
 
 RP1 = block(
     'RoboParty RP1', 'RoboParty', 1.35, 39, 'RP1a (its BOM), RP1b, RP1c (its actuators), RP1d, RP1e (its model, '
@@ -794,15 +796,15 @@ RP1 = block(
              'RP1a "12.9级"; E5.14 point 7: 0.26 / 0.52 / 0.78 kg for its about 850 screws, split by their number'),
             ('Pins and screws, 304 stainless (61)', 1, (0.0195, 0.039, 0.0585), 'Type 304', 'E',
              'RP1a "304"; E5.14 point 7, split by their number; grade E5.18')],
-    parts=[('Brass parts (8)', 8, 'Frame and shell', 'Whole body', (0.005, 0.01, 0.02), 'Copper', 'Brass', 'E',
+    parts=[('Brass parts (8)', 8, 'Frame and shell', 'Whole body', (0.005, 0.01, 0.02), 'Brass', 'Brass', 'E',
             'RP1a (8 brass parts); 5 / 10 / 20 g each (E5.19 point 3)'),
-           ('Auxiliary battery cells (30 V)', 1, 'Battery pack', 'Torso', (0.12, 0.25, 0.5), 'Battery materials', None,
+           ('Auxiliary battery cells (30 V)', 1, 'Battery pack', 'Torso', (0.12, 0.25, 0.5), 'Battery cells', None,
             'E', 'RP1a: two "小电池" (small batteries), no data; RP1d "30V auxiliary battery" (third party): 30 V × 1 '
                  "/ 2 / 4 Ah over the NMC cells' 241.5 Wh/kg, NMC as its main pack (2026-10-29, point 4)"),
            ('Bearings outside the actuators (9)', 9, 'Frame and shell', 'Whole body', estimate(round(0.8 / 21, 4)),
             'Steel', 'GCr15', 'E', "RP1a: 9 parts of bearing steel; each as the X1's on average, 0.8 kg over 21 "
                                    '(2026-10-29, point 4)'),
-           ('Magnets in the covers, N52 (80)', 80, 'Frame and shell', 'Whole body', COVER_MAGNET, 'Magnets (NdFeB)',
+           ('Magnets in the covers, N52 (80)', 80, 'Frame and shell', 'Whole body', COVER_MAGNET, 'NdFeB magnets',
             'N', 'S, E', 'RP1a: 80 × N52 NdFeB, 4 × 4 and 4 × 2 mm, how many of each not stated: each between the two, '
                          'about 7.5 g/cm3; its grade class N (2026-10-29, point 4)')],
     cooler=[(*COOLER_FAN[:8], 'RP1a (a main-board fan); as the G1\'s main board fan (E2.8e; 2026-10-29, point 4)'),
@@ -934,7 +936,7 @@ PM01 = block(
                                                                             'only', CAMERA),
              ('Motion sensor, YIS320', 1, 'Boards', 'Torso', spread(7.7), 'S', 'PM1 (7.7 g); ± 5 %', None)],
     shell=('Shell: rubber and plastics', 'PM1m "航空铝合金和橡胶"; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'PM1 "Structural Material Aviation Aluminum"'))
+    frame=('Frame', 'Aluminium alloys', 'PM1 "Structural Material Aviation Aluminum"'))
 
 UNITREE_R1 = block(
     'Unitree R1', 'Unitree', 1.23, 29, 'UR1 (Unitree), UR1u (its model, 29.138 kg), UR1b (its battery); E5.7, E5.10',
@@ -998,7 +1000,7 @@ AI_SAPIENS_K1 = block(
     connectors=('S, E', 'ROBOTIS: XT30 (2+2) at every actuator (E5.13); the mass of a mated pair, Amass through '
                         'LCSC (E5.22)'),
     shell=('Shell: polymer covers', 'AK1 (covers 3D-printable); 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminium alloy frame" (third party)'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminium alloy frame" (third party)'))
 
 # --- Batches 2 to 4: the other robots of type 1 (E5.15 to E5.17) ------------------------------------------------------
 # Type 1's rule for a module at a torque, for a robot whose joints come from one stated joint (E14.6 point 1): the
@@ -1064,14 +1066,14 @@ AKINCI_5 = catalogue_block(
     shell=('Shell: composites',
            'HG "Aluminum alloy + composites", the composites\' kind not named: plastics as type 1; 11.5 % of the robot '
            '(E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum alloy"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum alloy"'))
 JAKA_PI = catalogue_block(
     'JAKA π', 'JAKA Robotics', 1.22, 42, ((41, 42, 43), 'S', 'HG "42 kg" ("Not Verified"); ± 1 kg'),
     27, 'Computer board, Intel Core Ultra 7 255H', cooler=X86_COOLER,
     voltage=((48, 48, 48), 'S', 'HG "48-volt pack"'),
     capacity=(estimate(10.5), 'E', '12 Wh per kg of robot at 42 kg, over 48 V (E5.17 point 2)'),
     shell=('Shell: soft-touch polymer covers', 'HG; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum frame"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum frame"'))
 ROBOTIS_K0 = block(
     'ROBOTIS K0', 'ROBOTIS', 1.3, 34, 'K0a (ROBOTIS); E5.15',
     ((33, 34, 35), 'S, E', 'K0a "34 kg"; ± 1 kg (E5.14 point 1)'),
@@ -1111,14 +1113,14 @@ DOBOT_LUMO = catalogue_block(
                    "stated counts); no joint torques: its joint modules 24.5 / 49 / 73.5 % of its mass, split as batch "
                    "1's on average (E5.17 point 1)"),
     shell=('Shell: plastic', 'HG "Aluminum alloy and plastic"; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum alloy"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum alloy"'))
 NORI_L3 = catalogue_block(
     'Nori L3', 'Nori Robotics', 1.45, 40, ((39, 40, 41), 'S', 'HG "40 kg" ("Not Verified"); ± 1 kg'),
     20, 'Computer board (not named)',
     sensors=[('Camera, 720p (not named)', 4, 'Head', 'Head', None, 'S', 'HG: four 720p cameras; their mass not '
                                                                         'stated: their elements only', CAMERA)],
     shell=('Shell: engineering plastics', 'HG "Aluminum alloy with engineering plastics"; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum alloy"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum alloy"'))
 PHYBOT_C1 = catalogue_block(
     'PHYBOT C1', 'PHYBOT', 1.25, 25, ((24, 25, 26), 'S', 'HG "25 kg" ("Not Verified"); ± 1 kg'),
     28, 'Computer board (not named)',
@@ -1127,19 +1129,19 @@ PHYBOT_C1 = catalogue_block(
              ('Depth camera (not named)', 1, 'Head', 'Head', None, 'S',
               "HG; its elements as the Intel RealSense D435's, its mass not stated", DEPTH_CAMERA)],
     shell=('Shell: composite polymer', 'HG "Composite polymer + aluminum frame"; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "aluminum frame"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "aluminum frame"'))
 QUESTER1 = catalogue_block(
     'AgiBot QUESTER1', 'AgiBot', 0.79, 25, ((20, 25, 30), 'S', 'HG "~20–30 kg" ("Not Verified")'),
     28, 'Computer board (not named)',
     joint_sources=("HG: about 24 to 32 joints, 28 for the encoders and connectors (E, the middle); no joint torques: "
                    "its joint modules 24.5 / 49 / 73.5 % of its mass, split as batch 1's on average (E5.17 point 1)"),
     shell=('Shell: plastic composites', 'HG "Aluminum + plastic composites"; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum"'))
 LEJU_ROBAN2 = catalogue_block(
     'Leju Roban2', 'Leju Robot', 1.45, 40, ((39, 40, 41), 'S', 'HG "40 kg" ("Not verified"); ± 1 kg'),
     40, 'Computer board (not named)',
     shell=('Shell: ABS composite', 'HG "Aluminum alloy + ABS composite shells"; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum alloy"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum alloy"'))
 FAUNA_SPROUT = catalogue_block(
     'Fauna Sprout', 'Fauna Robotics', 1.07, 22.7, ((21.7, 22.7, 23.7), 'S', 'SP1 "22.7 kg"; ± 1 kg'),
     29, 'Carrier board of the Jetson AGX Orin',
@@ -1161,7 +1163,7 @@ FAUNA_SPROUT = catalogue_block(
               'diode array and photodetector array; 5 / 10 / 20 g each (2026-10-29, point 4)',
               [('laser diode array', 1), ('photodetector array', 1)])],
     shell=('Shell: soft exterior', 'SP1 "soft exterior"; plastics as type 1; 11.5 % of the robot (E5.14 point 6)'),
-    frame=('Frame', 'Aluminium', 'HG (aluminium, third party)'))
+    frame=('Frame', 'Aluminium alloys', 'HG (aluminium, third party)'))
 STARBOT_ASTRA = catalogue_block(
     'StarBot Astra', 'StarBot USA', 1.52, 34, ((33, 34, 35), 'S', 'SA1 "75 lb"; ± 1 kg'),
     23, 'Computer board, NVIDIA Jetson Orin class',
@@ -1175,7 +1177,7 @@ TOTAN_O1 = catalogue_block(
     30, 'Computer board (not named)',
     shell=('Shell: composite panels', 'HG "Aluminum alloy frame with composite panels", their kind not named: plastics '
                                       'as type 1; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum alloy frame"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum alloy frame"'))
 XIAO_TUO = catalogue_block(
     'TOPSTAR Xiao Tuo', 'TOPSTAR Group', 1.2, 40, ((39, 40, 41), 'S', 'HG "40 kg" ("Not Verified"); ± 1 kg'),
     30, 'Computer board (not named)',
@@ -1184,7 +1186,7 @@ XIAO_TUO = catalogue_block(
              ('LiDAR, 3D (not named)', 1, 'Head', 'Head', None, 'S',
               "HG; its elements as the Livox Mid-360's, its mass not stated", LIDAR)],
     shell=('Shell: plastic composites', 'HG "Aluminum + plastic composites"; 11.5 % of the robot'),
-    frame=('Frame', 'Aluminium', 'HG "Aluminum"'))
+    frame=('Frame', 'Aluminium alloys', 'HG "Aluminum"'))
 YMBOT_E3 = catalogue_block(
     'YMBOT E3', 'Yunmu', 1.4, 35, ((34, 35, 36), 'S', 'HG "35 kg" ("Not Verified"); ± 1 kg'),
     24, 'Computer board, Intel 12th-generation Core i9 class', cooler=X86_COOLER,

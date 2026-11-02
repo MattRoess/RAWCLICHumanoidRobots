@@ -16,7 +16,7 @@ Every setting is in `src/params_schema.py`.
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, each robot type's `data/researched/<n>_<name>/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, for each robot type taken apart (1 to 6) its robots' table and where its kinds of part sit, the same pages (type 2's since 2026-10-30: "Yes, as type 1's"; types 3 and 4's since 2026-10-30, EVIDENCE.md E11.7 open point B, each over its robots of every parts file); for a robot type with no parts file, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
-| `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws for stock-and-flow from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type, for stock-and-flow; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
+| `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
 | `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. After robot type 6 (Matthias, 2026-10-29: "I am currently not interested in 03"). |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
@@ -102,7 +102,9 @@ To compare the six robot types, every robot is written in the same words (Matthi
 possible to compare on a material level between the 6 types of roboy"):
 - 12 part groups (what a part is; since 2026-10-30 "Wheels and wheel drives", of a robot on wheels);
 - 7 body regions (where it sits; since 2026-10-30 "Base", the wheeled base of a robot on wheels);
-- 13 materials;
+- 17 materials, one fixed list since 2026-11-02, each name what it is (EVIDENCE.md E19 point 2: copper, brass, nickel,
+  aluminium alloys, magnesium alloys, titanium alloy, steel, stainless steel, electrical steel, NdFeB magnets,
+  battery cells, boards and components, plastics, fibre composites, ceramics, other, Not allocated);
 - the number of motors.
 
 Each of the 68 parts and the 35 material names of the workbook is placed on these lists in
@@ -110,8 +112,9 @@ Each of the 68 parts and the 35 material names of the workbook is placed on thes
 reasons are in [SHARED_LISTS.md](SHARED_LISTS.md). The rules:
 - A part placed in several regions is split only where the workbook gives the units of each region, and goes to
   "Whole body" otherwise.
-- A workbook name that holds several materials or groups goes to "Mixed". One exception is split by an estimate:
-  robot 3's "Electrical & magnetics group", into magnets, electronics and copper as the remainder (point 9, sheet
+- A workbook name that holds several materials goes to "Other" ("Mixed" until E19; the part group of such names is
+  still "Mixed"). One exception is split by an estimate:
+  robot 3's "Electrical & magnetics group", into NdFeB magnets, boards and components and copper as the remainder (point 9, sheet
   Splits). Each piece is its share of the name's kilograms, so the pieces add back to the workbook's minimum, mode
   and maximum, and every page marks them E.
 - The kilograms the materials leave out of the parts list are shown as "Not allocated". Nothing is rescaled.
@@ -250,7 +253,8 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     4', '…, types 3 and 4, on wheels', 'Battery energy per kg of robot, types 3 and 4', '…, on wheels'), so that no
     shared number has two values under one name in a type drawn over several files;
     every robot its battery voltage and capacity both, or neither and the shared 'Battery energy per kg of robot'; a
-    pack with no mass and a housing, the shared 'Battery pack, Wh per kg (packs not weighed)'; a part that is a share of
+    pack with no mass, its housing a share of its cells, never the pack's remainder, and the shared 'Battery housing,
+    share of its cells (packs not weighed)' (since 2026-11-02, EVIDENCE.md E20); a part that is a share of
     the robot's mass (the shell), the shared 'Shell, share of the robot mass'; a material written 'A or B' (the battery
     housing, "Aluminium or Plastics") each on the shared lists.
 19. Robot type 1 part by part, against the sibling projects' files it reads where they lie (absolute paths in
@@ -287,7 +291,7 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     "not drawn: its type drawn from the workbook, none of its robots taken apart yet". Since 2026-10-30 ("Yes, build
     C", Q2 and Q4): a robot is taken apart where all its versions are robots of its type's parts file; in a type some of
     whose robots are, one with a mass and no rows of its own says "not drawn: not yet taken apart" (no longer a fault:
-    its type is then drawn from the workbook for stock-and-flow, point 4 of "Robot type 2 part by part"); and a robot
+    its type's draws then come from the workbook, point 4 of "Robot type 2 part by part"); and a robot
     taken apart that no sheet of its types lists is a fault (so a register without its sheet Type 1 still stops 02).
     Since 2026-10-30 ("Yes, together", "Yes, build it", EVIDENCE.md E10.1): the sheets Type 3 and Type 4 too; a robot
     without a mass says "not drawn: no mass stated" in every sheet, also while its type is drawn from the workbook: it
@@ -298,7 +302,7 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     its own parts in another of its types removed: no sheet says it any more). Type 2: 96 robots drawn, the Xialan S0
     without a mass. Type 3: 181 listed, 72 drawn (51 with their rows in type 1's or type 2's file, 21 of its batch 1),
     97 not yet taken apart, 12 without a mass; type 4: 135, 33 drawn (17 and 16), 98 not yet taken apart, 4 without a
-    mass; both with their draws for stock-and-flow from the workbook until all are in.
+    mass; both with their draws from the workbook until all are in.
 
 02 runs every one of these checks, and one of its own (`check_composition`): an item that follows the energy of a cell
 (the NMC cell's coatings and foils) sits only in the recipe of NMC cells, used as the recipe of cells; never in a row
@@ -322,8 +326,8 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
 
 - **`overview_1.png`**: how the model works, as boxes joined by arrows: the inputs (the research workbook, the
   register, robot type 1 part by part with the builders that write them, the element recipes; the sibling projects'
-  data in another colour), the stages (00, 01, 02, each with its file), what they write (the draws for
-  stock-and-flow, type 1's pages; 03 in grey, after robot type 6).
+  data in another colour), the stages (00, 01, 02, each with its file), what they write (the draws of each
+  robot type, type 1's pages; 03 in grey, after robot type 6).
 - **`overview_2.png`**: the six robot types as cards: the types taken apart (1 and 2) in colour with their robots and
   their masses, types 3 to 6 grey, "not yet worked on"; the faults found and what is open.
 - **`notes.png`**: how to read the pages, once.
@@ -408,21 +412,40 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
    - the NMC cell's coatings and foils are their mode times f, the cell's energy per kg over the mode of the NMC
      cells, 241.5 Wh/kg (E1.7i): of the drawn build's cell, or, for a kept row, drawn from the NMC triangle 232.5 /
      241.5 / 256 Wh/kg (recommendation f; the settings `composition.nmc_wh_per_kg_min`, `_mode`, `_max`).
+   Of them, only the **elements of interest** are written (EVIDENCE.md E19 point 3; Matthias, 2026-11-02, "Yes, agree
+   E19"), from what is recovered as elements, as RAWCLICDataCenters counts them: Li, B, Mg, Al, Ti, Mn, Co, Ni, Cu, Ga,
+   Sr, Nb, Pd, Ag, In, Sn, Ta, Au, Pb, Nd, Pr, Dy, Tb. Copper, nickel and the aluminium, magnesium and titanium alloys
+   are each their base metal whole (Cu, Ni, Al, Mg, Ti), with a recipe or without; the alloying elements stay in the
+   alloy and are shown in the alloys table. The NdFeB magnets give their Nd, Pr, Dy, Tb, Co, B, Nb and Ga; the battery
+   cells their Li, Ni, Co and Mn, and the Cu and Al of their foils and tabs (the recipe's items marked "As metal"; "The
+   foils are recycled to the elements"); the boards and the sensors their metals of interest, not the glass, epoxy and
+   bromine of the board. Steel, stainless steel, electrical steel, brass, plastics, fibre composites, ceramics and other
+   stay materials: no Fe, Cr, Mo, V, Zn, C, H or O. Every element of the recipes is still drawn and checked to add up,
+   but not written. This replaced, on Matthias's word ("Yes, remove them", 2026-11-02), E17's two columns per element
+   (as metal and bound) and the setting that left hydrogen, nitrogen, oxygen and the like off the pages.
 5. **Not allocated:** the parts minus the materials. The two are drawn independently, so it is below zero where the
    drawn materials weigh more than the drawn parts (recommendation b: allowed, and the summary gives the share of
    draws).
-6. **Materials without a recipe yet** (titanium, steel, copper, magnets, electronics, ceramics, and Mixed): their kilograms are drawn; their elements are not, and the summary and the pages say so
-   (recommendation c).
+6. **Materials without a recipe yet** (in the workbook's rows: the NdFeB magnets, the boards and components, the
+   steels, ceramics and other): their kilograms are drawn; their elements are not, and the summary and the pages say so
+   (recommendation c). Copper, nickel and the light alloys are their metal whole all the same.
 
 Each robot type has its own random numbers, from `composition.seed` and its number, so that it gives the same draws
 however many robot types are drawn. Nothing is normalised.
 
 After drawing, 02 checks every draw (`draw_faults`), and writes nothing if one fails:
 - the materials and Not allocated add up to the parts, and so do the part groups and the body regions;
-- the elements add up to the materials that have recipes, within 0.1 %: the compounds written as mass shares are
-  rounded to five decimals, and 01 lets a compound's shares add up to 1 within 0.001;
+- the elements of the recipes add up to the materials that have recipes, within 0.1 %: the compounds written as mass
+  shares are rounded to five decimals, and 01 lets a compound's shares add up to 1 within 0.001;
+- the elements of interest add up to the materials they come from; copper, nickel and the light alloys are each their
+  element whole; no other material gives more than it weighs (E19);
 - the cells and the rest add up to the battery row;
-- nothing is below zero except Not allocated.
+- nothing is below zero except Not allocated; and, in a draw where a remainder of the robot drawn (its frame, a weighed
+  pack's housing, a joint's structure) is below zero, what falls below zero with it (a part group, a body region, a
+  material, an element): that is reported in the run and on the type's notes page, each quantity with its number and
+  share of draws, the draws kept as they are, not a fault (Matthias, 2026-11-02, "A, as recommended", EVIDENCE.md E21:
+  the 1X NEO's stated 842 Wh in its stated 29.9 kg leaves its frame below zero in some draws, and nothing 1X states
+  sets its joints; CLAUDE.md §7: a remainder below zero keeps its negative draws, which show a fault).
 
 ## What 02 writes
 
@@ -437,19 +460,19 @@ For each robot type, a folder `data/consolidated/<n>_<name>/` (the folder anothe
 
 | File | What it holds |
 |---|---|
-| `materials.npy` | kg per robot by shared material (13 columns, Not allocated included), one row per draw, float32 |
-| `elements.npy` | kg per robot by element, for the materials that have recipes (every element the compounds hold, in the order of the periodic table) |
+| `materials.npy` | kg per robot by shared material (17 columns, Not allocated included), one row per draw, float32 |
+| `elements.npy` | kg per robot by element of interest (E19 point 3), every robot type the same columns: those any of them holds, in the order of 01's table of atomic masses |
 | `part_groups.npy`, `body_regions.npy` | kg per robot by part group and by body region |
 | `total.npy` | the robot's mass, the sum of its parts |
 | `<name>.txt` | the columns of each `.npy`, one name per line |
-| `summary.xlsx`, `summary.csv` | per material and per element: the mean, the median, the 95 % interval (2.5 % and 97.5 %), all over the draws that hold it, and "Held in", the share of the draws that hold it; the share of all the draws below zero; whether the material is in the elements (Yes, Partly, No) with its kilograms that are, at the mean of the same draws; empty statistics where it is 0 in every draw |
+| `summary.xlsx`, `summary.csv` | per material and per element: the mean, the median, the 95 % interval (2.5 % and 97.5 %), all over the draws that hold it, and "Held in", the share of the draws that hold it; the share of all the draws below zero; whether the material is in the elements of interest (Yes: its metal whole; Partly: its elements of interest; No: it stays a material, or has no recipe yet) with its kilograms that are, at the mean of the same draws; empty statistics where it is 0 in every draw |
 
-Row i is the same draw in every array of a robot type, so that stock-and-flow can pair them (the format of
-RAWCLICVehicleTractionMotor, recommendation e). With 200,000 draws that is 52 columns × 200,000 × 4 bytes, about
-42 MB per robot type.
+Row i is the same draw in every array of a robot type, so that a later stage can pair them (the format of
+RAWCLICVehicleTractionMotor, recommendation e). With 200,000 draws that is at most 60 columns × 200,000 × 4 bytes,
+at most 48 MB per robot type.
 
 And a page per robot type, `figures/composition/<n>_<name>.png`: its kg by material (all of the robot, Not allocated
-included) and its kg by element (only the materials that have a recipe so far). Each bar is the mean of the draws that
+included) and its kg by element of interest. Each bar is the mean of the draws that
 hold it; its line spans 95 % of them; "Held in" gives their share where it is not all. The numbers stand beside the
 bars, with three significant figures, so that a few grams of an element are not printed as 0.
 
@@ -464,12 +487,10 @@ zeros, since sums are made on raw draws: a robot's copper is the sum of its part
 nothing. The register likewise: a catalogue's "0.0" is "not stated", never a mass of 0 (the Reflex, 257, listed with no
 mass since 2026-11-01).
 
-**Elements not shown.** The element pages of 02 and 03 leave out hydrogen, nitrogen, oxygen, fluorine, sodium,
-phosphorus and sulfur (`composition.elements_not_shown`; Matthias, 2026-10-29: "Hydrogene and Oxygen have to go you
-should know this. Same for F, and N", as RAWCLICStockAndFlow's figures leave out nitrogen, fluorine and oxygen, and
-RAWCLICDataCenters' oxygen; then "S and P can go also Na"). The draws keep them: `elements.npy` and the summary hold every element, so that the elements still add up to
-the materials in every draw and stock-and-flow can read any of them. Each page says in a note which elements it leaves
-out. 02 stops when the setting names a symbol that is not an element.
+**The alloys and grades** (E19 point 4; Matthias, 2026-11-02: "So if elements are in alloys, then one has to know
+it"): each alloy, grade and magnet class a robot type taken apart holds, what it holds by its recipe (each element from
+its least to its most share of its mass, its base metal the rest; a magnet class by the least and most of its drawn
+fractions, RAWCLICVehicleTractionMotor's own), and its kg in one robot, on the alloys pages after the material pages.
 
 ## Robot types 5 and 6 part by part, in 02 (since 2026-11-01)
 
@@ -483,7 +504,7 @@ over their robots of every parts file.
    its own file; the Atlas, the CYBORG RO1 SE and PRO, the WO1, the DR02 and Pro, the Kaleido 9 and the Moby in type
    3's; the H1 in type 2's), type 6 over 4 (the Alex and the Fuxi on legs and on wheels in its own file; the T800 in type
    5's; the Phantom MK1 in type 3's). Not drawn: TITAN (no mass stated) and the hydraulic Atlas (old), Nadia and Neo1,
-   not yet taken apart (E16.5 question 4), so that both types' draws for stock-and-flow stay the workbook's until they
+   not yet taken apart (E16.5 question 4), so that both types' draws stay the workbook's until they
    are.
 2. **Their templates:** none of their own; their files' robots take types 3 and 4's (01's `TEMPLATE_OF_TYPE`).
 3. **Their recipes:** the workbook's aluminium and plastics of each type (type 5's "Composites & polymers", type 6's
@@ -504,8 +525,8 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
 1. **Their robots:** every robot of type 3 or 4 taken apart so far, wherever its rows stand: those of types 1 and 2's
    files that are also of type 3 or 4 (type 3: 51, type 4: 17), and batch 1 of types 3 and 4 (E11.6), each in the file
    of its first type among 3 and 4 (type 3: 21 of them, type 4: 16). Type 3 over 72 robots (75 with their versions: the
-   AgiBot X2, the Flexiv AICO 2 and the Rainbow RB-Y1 in two each), type 4 over 33 (34: the X2). Their draws for
-   stock-and-flow stay those of the workbook until all their robots with a mass are taken apart (151 still to do).
+   AgiBot X2, the Flexiv AICO 2 and the Rainbow RB-Y1 in two each), type 4 over 33 (34: the X2). Their draws
+   stay those of the workbook until all their robots with a mass are taken apart (151 still to do).
 2. **A type over several files** (E11.7 point 4): 02 reads every type's parts file; 01's `type_parts()` gives a type
    its robots of every file, each with its own rows and its file beside it; a type all of whose robots stand in its own
    file (types 1 and 2) is that file unchanged. The shared numbers (the constants for all robots, the joint's parts, the
@@ -557,6 +578,17 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    THEMIS's mass and battery from its brochure. After it the joint template 13 of 31 in type 1, 67 of 102 in type 2,
    75 of 96 in type 3, 32 of 50 in type 4; the battery template 12, 63, 68 and 30. Type 1 comes below half; types 2
    to 4 stay above it (rule 4).
+10. **Batch 3** (2026-11-02: "E15's entry", "Move on"; EVIDENCE.md E15.7, built E15.8): the other 112 robots of
+   E15.3's table, 122 blocks, as E15.2's method (each block's numbers typed in from the record read first-hand,
+   `research_2026-11-01/`): 54 robots (56 blocks) in type 3's file, 58 (66 blocks) in type 4's. Versions: the Pudu D7
+   2024 and 2026, the Tora DoubleOne P and X, the U1 Pro male and female, and the seven robots whose sources state no
+   form each on legs and on wheels, as often (E15.6 question 2). Joints: the templates; from a stated joint for 17
+   (point 6); every joint from its maker's model for the GR-3 and the Star1 (point 9's way); the Tau Humanoid the
+   Unitree G1's joints and battery from type 1's file, E. Seven robots with no stated mass are listed only (HELIOS,
+   Northstar, StarBot Flex, TARS, Tobi, Vesoma 1, Yogi). Type 3 is then drawn over 163 of its 164 robots with a mass
+   (the Neo1, hydraulic, waits for its own research step, so type 3's draws stay the workbook's), type 4 over all 124:
+   **type 4's draws are its robots' since batch 3** (E15.7 open point B). The templates after it: the joint template
+   137 of 172 in type 3, 103 of 137 in type 4; the battery template 124 and 98 (rule 4 still broken in both).
 
 ## Robot type 2 part by part, in 02 (since 2026-10-30)
 
@@ -610,8 +642,8 @@ by the same code as type 1 (what follows, and "How a robot of type 1 is drawn"),
    Wh per kg one LFP cell of the sheet Cells drawn in each draw. Its pack, with no mass from its maker, is its cells
    times the NMC packs' pack-to-cell ratio in the same draw (the NMC cell's Wh/kg over the packs' Wh/kg; "Ratio, as
    recommended", E9.8): the packs' Wh/kg is a figure of NMC packs, against which its heavier cells would leave its
-   housing below zero.
-4. **Its draws for stock-and-flow:** from the workbook until every robot of type 2 with a mass was taken apart (Q2: a
+   housing below zero. Since 2026-11-02 its housing is a share of its cells, as every pack no source weighs (E20).
+4. **Its draws:** from the workbook until every robot of type 2 with a mass was taken apart (Q2: a
    part of its robots does not represent 97); since its robots on wheels, from its 96 robots part by part, into
    `data/consolidated/2_full_scale_general_purpose_ai_research/`, and each into
    `data/parts_taken_apart/2_full_scale_general_purpose_ai_research/`, with their pages ("Robot type 2, 96 of its 97
@@ -646,35 +678,41 @@ robot is drawn part by part, with these changes:
    (24.5 / 49 / 73.5 %), drawn once and split among its joint groups by the shares batch 1's robots have on average
    (fixed, adding up to 1; E5.17 point 1); its battery's energy its voltage times its capacity, or 6 / 12 / 18 Wh per kg
    of robot times its mass (E5.17 point 2); its pack its stated mass, or its energy over 109.3 / 164 / 232.5 Wh per kg
-   of pack (E5.14 point 3; the Asimov 1's and 2's packs, lighter than their cells, have no housing); its shell 5.75 /
+   of pack (E5.14 point 3; the Asimov 1's and 2's packs, lighter than their cells, have no housing; since 2026-11-02 a
+   pack no source weighs is its cells, its management board and its housing, a share of its cells, E20); its shell 5.75 /
    11.5 / 17.25 % of its mass (E5.14 point 6); its boards, cables, connectors, screws and sensors as E5.14 points 4 to
    8; its frame the remainder. The steels and the titanium by their grades (E5.18), the battery's rest by its shares
    (E5.19). Its XT30 (2+2) connectors two per joint, each a mated pair of 1.9 / 2.12 / 2.3 g (Amass's cable
    female and board male, through LCSC), their contacts brass (2026-10-29, "Yes, enter all"; EVIDENCE.md E5.22); the X1's
    parts by its newer parts lists (E5.22: its screws split 677 : 150 into 42CrMo4 and 304, its 90 pins 440C, its brass
    inserts, sensor shield, silicone dampers and an XT60), the N1's network switch a board.
-4. **As 02 writes every robot type:** its materials (Not allocated 0, as the frame takes the rest), its elements (all
-   it holds; every robot type now has the same element columns, 0 where none is drawn), its part groups and body
+4. **As 02 writes every robot type:** its materials (Not allocated 0, as the frame takes the rest), its elements of
+   interest (every robot type the same element columns, 0 where none is drawn), its part groups and body
    regions (its kinds placed whole: the joints in Joint drives, the battery in Battery, the boards in
    Computer, the head in Sensors, the cables in Cables, the frame and shell in Frame; hips, knees, ankles in Legs,
    waist, battery and boards in Torso, arms in Arms, head in Head, cables, frame and shell in Whole body; since
    2026-10-30 a robot on wheels' wheeled base in Wheels and wheel drives and Base, its lift column in Joint drives and
    Torso). Kept so
-   (Matthias, 2026-10-29, "Yes, build them", point 5): no repository reads these two tables yet, and stock-and-flow
+   (Matthias, 2026-10-29, "Yes, build them", point 5): no repository reads these two tables yet, and a later stage
    will read the materials and the elements, which are exact; rough where a kind holds parts of another group (the
    head's joints counted as Sensors, the battery management board as Battery), as the notes page says.
    **A robot of two types** (10 of type 1's 31, the G1 among them, types 1 and 3) is drawn in full in each of its
-   types (point 6): 02 says what one robot of a type is made of; how many robots there are is stock-and-flow's, not
+   types (point 6): 02 says what one robot of a type is made of; how many robots there are is for a later stage, not
    the register's, so nothing is counted twice.
-5. **Its pages:** its notes (`1_<name>_notes_<k>.png`, on as many pages as they need, a paragraph never split), then
-   its elements nine a page, each the histogram of one robot's total over the draws, median solid and mean dotted with
+5. **Its pages:** its notes (`<n>_<name>_notes_<k>.png`, on as many pages as they need, a paragraph split only where it is longer than a page, going on over the next), then
+   its elements of interest six a page (since 2026-11-02, EVIDENCE.md E19 point 7; the preview of type 5, "Yes, build
+   them"), each the histogram of one robot's total over the draws, each bar split into the kg its draws hold from each
+   material it comes from, the smaller lower (RAWCLICDataCenters 05's form; Paul Tol's muted scheme, as published),
+   each material's mean written in the panel, one legend of the page's materials; median solid and mean dotted with
    their numbers above the panel, right, over its title's line (since 2026-10-30, "Yes, fix it": a long title ran into
    them), 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it on a separate one"; "can
-   you better adust the hight"); hydrogen, nitrogen, oxygen, fluorine, sodium, phosphorus and
-   sulfur not shown (above, "Elements not shown"), their draws kept. An element held in fewer than 2.5 % of the draws
-   has no panel; one that is 0 in some draws (lead, vanadium, arsenic, indium, tungsten: a robot or a version without
-   it) shows the draws that hold it and says in what share of all the draws it is held, as the material pages
-   (Matthias, 2026-10-29: "I told you I want to see the distribution not just the 0 value for vanadium and lead").
+   you better adust the hight"). An element held in fewer than 2.5 % of the draws has no panel; one that is 0 in some
+   draws (titanium, indium: a robot or a version without it) shows the draws that hold it and says in what share of
+   all the draws it is held, as the material pages (Matthias, 2026-10-29: "I told you I want to see the distribution
+   not just the 0 value for vanadium and lead"). Then its materials nine a page, each material of the one list, then
+   its grades, alloys or magnet classes ("Steel: gear steel 20CrMnTi"; the aluminium and, since E19, the magnesium by
+   their alloys); then its alloys and grades in a table (`<n>_<name>_alloys_<k>.png`, above, "The alloys and
+   grades").
 
 ## How a robot of type 1 is drawn, and its two figures (built as the stage 04 on 2026-10-28; in 02 since 2026-10-29)
 
@@ -701,11 +739,16 @@ and the factor over its own) were replaced on 2026-10-29 by the section above; t
 5. A component or part of shares (sheet Shares): each share a triangle, the remainder 1 minus the others (02's
    `shares_drawn`), drawn once in each draw.
 6. The battery: its energy (above, point 3); its cells the energy over the NMC cells' energy per kg
-   (`composition.nmc_wh_per_kg_*`); its housing the pack less its cells and its management board, a remainder. The
+   (`composition.nmc_wh_per_kg_*`); its housing the pack's stated mass less its cells and its management board, a
+   remainder; where no source weighs the pack, its housing a share of its cells, 0.207 / 0.414 / 0.859 (the median of
+   the packs weighed with their energy, the G1's 0.414, the PM01's 0.505 and the T800's 0.414; half of it; the Reachy
+   2's 0.859, its 2021 base's pack, E), so that it never falls below zero, and the pack its cells, its housing and its
+   board (Matthias, 2026-11-02, "A, as recommended", EVIDENCE.md E20: before, its energy over 109.3 / 164 / 232.5 Wh
+   per kg put the housing below zero in some draws of 208 robots, VERIFICATION.md V145). The
    cables: their length times two power and two signal conductors' cross-sections times copper's density, and their
    insulation as a share of that copper. The frame: the robot's mass less every other part, a remainder.
 7. A remainder below zero (a frame, a battery housing, a joint's structure) is reported (share of its robot's draws),
-   never cut.
+   never cut; what falls below zero with it in the robot type's draws is reported, not a fault (E21, above).
 
 **The elements:**
 - Aluminium and plastics by the recipes type 1's workbook rows follow ('Aluminium, robot type 1, Aluminum alloys';
@@ -803,17 +846,19 @@ legend, you know, what I think about this").
 **Robot type 1's material pages** (Matthias, 2026-10-29: "There are only figures on the element level I want to see,
 how much Copper and especially permanent magnets. The different steels and aluminum alyoys. We had this differently in
 datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
-- `figures/composition/1_<name>_materials_<k>.png`, "each material in one robot", nine panels a page, as the element
-  pages (median solid, mean dotted, 95 % dashed, each its own unit): copper, brass, the nickel strip; the permanent
-  magnets in all and by the grade class each joint's heat draws (H, SH, UH, EH); each steel by its grade (gear steel
-  20CrMnTi, bearing steel GCr15, alloy steel 42CrMo4, carbon steel C45, tool steel P20, stainless 17-4PH and 304,
-  electrical steel M19 and M27); each aluminium alloy (6061, 7075, the die-cast A380 and ADC12, by type 1's aluminium
-  recipe); titanium Ti-6Al-4V, plastics, the battery cells by their chemistry ("Battery cells, NMC (cylindrical)"),
-  electronics. A material held in fewer than 2.5 % of the draws has no panel; one that is 0 in some draws (a robot or a
+- `figures/composition/1_<name>_materials_<k>.png`, "each material in one robot, then its grades", nine panels a page
+  (median solid, mean dotted, 95 % dashed, each its own unit), since E19 (2026-11-02) each material of the one list in
+  its order, then its grades, alloys or magnet classes under it: copper, brass, nickel (the strips of the battery);
+  the aluminium alloys and each (6061, 7075, the die-cast A380 and ADC12, by type 1's aluminium recipe); titanium alloy
+  (Ti-6Al-4V); steel and each grade (gear steel 20CrMnTi, alloy steel 42CrMo4, carbon steel C45, bearing steel GCr15,
+  tool steel P20); stainless steel (17-4PH, 304, 440C); electrical steel (M19, M27); the NdFeB magnets and each grade
+  class each joint's heat draws (H, SH, UH, EH); the battery cells by their chemistry ("Battery cells: NMC
+  (cylindrical)"); boards and components; plastics. A material of one grade carries it in its title. A material held in fewer than 2.5 % of the draws has no panel; one that is 0 in some draws (a robot or a
   version without it) shows the draws that hold it and says in what share of the draws it is held (Matthias,
   2026-10-29: "If it is just a bit and a large 0 then show me the distribution").
 - `figures/parts_taken_apart/<n>_<name>/sources/<material>.png`, "where its copper sits" (as the data centres' "where the copper
-  comes from"): for copper, brass, the nickel strip, the magnets, each steel and each aluminium alloy, one row per kind
+  comes from"): for copper, the NdFeB magnets, each steel (also each stainless and electrical steel, materials of
+  their own since E19) and each aluminium alloy, one row per kind
   of part holding it, the largest median on top; each over the draws in which the kind of part holds it (those above
   0: a logarithmic axis has no place for a draw below zero, such as type 1's frame aluminium in 72 of 200,000 draws):
   a violin on a logarithmic axis, the median a filled dot and the mean an open one, the 95 % interval a line, and at
@@ -837,5 +882,5 @@ type: the mean as a bar, a line over 95 % of the draws, and the mean written bes
 with in brackets their share of the draws where it is not all ("2.00 (40 %)"; above, "A 0 is not part of a
 distribution"). Each chart has its own kg
 scale, so that a material of a few grams can be read as well as one of 25 kg. Matthias, 2026-10-26: "I want that it
-is possible to compare on a material level between the 6 types of roboy". `elements.png` leaves out hydrogen, nitrogen,
-oxygen and fluorine, with 02's function and setting ("Elements not shown", above).
+is possible to compare on a material level between the 6 types of roboy". `elements.png` shows the elements of
+interest, as 02 writes them (E19 point 3).

@@ -176,22 +176,20 @@ def label(table: str, name: str) -> str:
     return composition.element_label(name) if table == 'elements' else name
 
 
-def view_columns(robots: list, table: str, params: Params) -> list:
-    """The columns a view shows: all of the table's, but for the elements those not shown left out
-    (`composition.elements_not_shown`, with 02's own function; the draws keep them)."""
-    names = robots[0].tables[table][0]
-    return composition.shown_elements(names, params) if table == 'elements' else names
+def view_columns(robots: list, table: str) -> list:
+    """The columns a view shows: all of the table's (the elements those of interest, as 02 writes them)."""
+    return robots[0].tables[table][0]
 
 
 def draw_view(robots: list, table: str, path: str, params: Params) -> None:
     """The page of one view: one chart per column of the table, with one row per robot type."""
-    names = view_columns(robots, table, params)
+    names = view_columns(robots, table)
     draws = len(robots[0].tables['total'][1])
     rows_of_charts = -(-len(names) // COLUMNS)
     chart_height = PANEL_ROW * len(robots)
     block = 0.3 + chart_height + 0.55          # a chart's title, its rows and its kg scale
     key = schemas.wrap('; '.join(f'Robot type {r.number}: {r.title}' for r in robots) + '.', 210)
-    notes = view_notes(table, params)
+    notes = view_notes(table)
     top = 1.05 + len(key) * schemas.LINE + 0.25
     height = top + rows_of_charts * block + 0.2 + len(notes) * schemas.LINE + 0.4
     figure, page = schemas.new_page(PAGE_WIDTH, height)
@@ -211,7 +209,8 @@ def draw_view(robots: list, table: str, path: str, params: Params) -> None:
         axes = figure.add_axes([(x + PANEL_LABEL) / PAGE_WIDTH, 1 - (y + chart_height) / height,
                                 PANEL_CHART / PAGE_WIDTH, chart_height / height])
         rows = [(f'Robot type {r.number}', r.column(table, name)) for r in robots]
-        composition.interval_bars(axes, rows, size=8.5, grey=name in ('Mixed', composition.NOT_ALLOCATED))
+        composition.interval_bars(axes, rows, size=8.5,
+                                  grey=name in ('Mixed', composition.OTHER, composition.NOT_ALLOCATED))
         axes.xaxis.set_major_locator(MaxNLocator(4))   # a narrow chart: few kg marks, so that they never touch
         for i, (_, values) in enumerate(rows):
             page.text(x + PANEL_LABEL + PANEL_CHART + PANEL_NUMBER, y + (i + 0.5) * PANEL_ROW, beside(values),
@@ -221,18 +220,20 @@ def draw_view(robots: list, table: str, path: str, params: Params) -> None:
     schemas.save(figure, path, params.output.dpi)
 
 
-def view_notes(table: str, params: Params) -> list:
+def view_notes(table: str) -> list:
     """What a reader needs to read the page of one view, in plain words."""
     notes = ['–: none in this robot type.']
     if table == 'materials':
         notes.insert(0, "Not allocated: the parts' mass minus the materials' mass in each draw; below zero where the "
-                        'drawn materials weigh more than the drawn parts. Battery materials: the cells only.')
+                        'drawn materials weigh more than the drawn parts. Battery cells: the cells only.')
     elif table == 'elements':
-        notes.insert(0, 'Only the materials that have a recipe so far are in the elements; which ones, for each robot '
-                        'type, is on its page in figures/composition/. ' + composition.not_shown_note(params))
+        notes.insert(0, 'Only the elements of interest, from what is recovered as elements: copper, nickel and the '
+                        'light alloys each its metal whole; the magnets, the battery cells and the boards and '
+                        'components their metals of interest. Which materials give them, for each robot type, is on '
+                        'its page in figures/composition/.')
     elif table == 'part_groups':
         notes.insert(0, 'Battery: the battery packs as the parts list gives them; their cells alone are Battery '
-                        'materials on the page by material.')
+                        'cells on the page by material.')
     elif table == 'body_regions':
         notes.insert(0, 'Whole body: the parts spread over the body (frame, shell, cables), and the parts the workbook '
                         'places in several regions without saying how many sit where (the sheet Lists of the shared '

@@ -3,6 +3,345 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-02
+
+### V148. E20's leftovers removed; his runs of 12:45 to 12:50 read
+
+- **His words:** "Yes, remove them" (2026-11-02), on the list with proof in EVIDENCE.md E20.3.
+- **Removed, by name** (2026-11-02 12:46:59): the row 'Battery pack, Wh per kg (packs not weighed)' of
+  `SHARED_CONSTANTS_LAST` (`tools/parts_taken_apart.py`); `PACK_BY_RATIO` and its comment (the same file);
+  `PACK_WH_PER_KG` (`01_schemas.py`) and its name in `02_composition.py`; the two lines of
+  `tests/test_make_parts_taken_apart.py` that checked the row. Afterwards no Python file of the project names any of
+  them (grep over 00 to 03, `src/`, `tools/`, `tests/`). E20's check in 01 refuses the old rule coming back (a pack with
+  no mass whose housing is the pack's remainder is a fault).
+- **The suite:** 485 tests, 2 fail: types 1 and 2's builders against their files on disk, which still hold the row
+  (`scratchpad/tests_E20_removed.log`).
+- **Sandbox** (`sb_e157`, 2,000 draws): the six files rebuilt hold the share's row and not the old one; 01 "No fault
+  found"; 02 "they add up", "02 done in 1 min 46 s".
+- **His runs, read on disk (read only):** the six parts files at 12:45:07 to 12:45:53, a minute before the removal, so
+  they hold the share's row and the old row (read by nothing); 01's pages at 12:46:11; 02 wrote `data/consolidated/`
+  at 12:48:03 to 12:48:49 and `data/parts_taken_apart/` at 12:48:57 to 12:50:46, with `figures/composition/` and
+  `figures/parts_taken_apart/`: **02 ran to the end**, 200,000 draws per type. In its draws nothing is below zero but Not
+  allocated, except type 4's part group Frame in 2 draws (the 1X NEO's frame, reported under E21). No battery
+  housing put a material below zero (E20).
+- **Not covered:** his run's console, which only he saw; his notes page of type 4 not looked at by me.
+- **Date:** 2026-11-02.
+
+### V147. E21 A built: below zero where a remainder is, reported, not stopped
+
+- **His words:** "A, as recommended" (2026-11-02), on EVIDENCE.md E21, after "Research the NEO first".
+- **Tests first:** the five new tests (EVIDENCE.md E21.4) failed before the code (1 failure, 3 errors at the first
+  run), and pass after it.
+- **The suite:** 485 tests, 3 fail, the same three as in V146: they compare with the parts files on disk, written at
+  11:48 before E20's A (`scratchpad/tests_E21.log`).
+- **02 in the sandbox** (`sb_e157`, every builder of 2026-11-02 with E20 and E21, 2,000 draws, set in the sandbox's
+  copy of `src/params_schema.py`): "they add up"; "02 done in 1 min 22 s"; pages and draws written into the sandbox.
+  No quantity below zero at 2,000 draws, so no report there; per robot as before: the Matrix-1's frame below zero in
+  7.7 % of its draws, the 1X NEO's in 16.7 %.
+- **The case that stopped 02 at 200,000 draws** (V146: the part group Frame of type 4 below zero in 2 draws) can only
+  be below zero where a frame is, which is a remainder; such draws are now reported. The path is covered by the tests
+  (a part group below zero with and without a remainder below zero in its draw), not by a run at 200,000 draws.
+- **Not covered:** 02 at 200,000 draws (his run); the real `data/` and `figures/`.
+- **Date:** 2026-11-02.
+
+### V146. E20 A built: a battery housing of a pack no source weighs a share of its cells
+
+- **His words:** "A, as recommended" (2026-11-02), on EVIDENCE.md E20 (its open point too: the most 0.859).
+- **Tests first:** the new and changed tests (EVIDENCE.md E20.3) failed before the code (4 failures, 7 errors), and pass
+  after it.
+- **The suite:** 481 tests, 3 fail, all comparing with the parts files on disk, written at 11:48 before A (types 1
+  and 2's files against their builders; type 1's file against 01's check, 24 faults). One test still held E9.8's
+  pack text for the CASBOT W1; it now checks its housing by share (`scratchpad/tests_E20b.log`).
+- **02's own draws** (`scratchpad/housing/housing_in_02.py`, the sandbox `sb_e157` rebuilt with A, 20,000 draws per
+  type, types 1 to 6): no battery housing below zero; every housing of a pack no source weighs between 0.2076 and
+  0.8569 of its cells (the row's 0.207 and 0.859, with the cells' energy drawn); 02's `draw_faults` none in any type.
+  01 in the sandbox: "No fault found". The new row's texts name no source code (checked against all 378 codes).
+- **02 itself in the sandbox:** meant at 2,000 draws, it ran at 200,000, because my copy of the project's files into
+  the sandbox replaced its parameters (`00_parameters.py`); in the scratch folder only, and it wrote nothing. It
+  stopped: **"robot type 4: Frame is below zero in 2 draws"**, the part group Frame (the frame, the remainder, with the
+  shell and screws). The cause, by `scratchpad/housing/frame_type4.py` (type 4, 20,000 draws): the 1X NEO, its frame
+  below zero in 16 % of its draws, its frame, shell and screws together 0.45 kg at the least of its 180 draws, 6.9 kg
+  at the median; every other robot of type 4 far from zero. So E20's "they do not stop 02" and V144's frames "without
+  stopping the run" held at 2,000 draws only.
+- **His runs on disk:** the register and the six parts files (2026-11-02 11:47 and 11:48), `params.xlsx` (11:48) and
+  01's pages (11:49), not 02 (`data/consolidated/` of 2026-11-01 17:59). The parts files on disk hold the housings
+  before A, so 01 now finds 24 faults in type 1's ("its battery pack has no mass, so its housing is a share of its
+  cells"), until the six builders are run again.
+- **Not covered:** 02 at 200,000 draws past type 4's frame; the real `data/` and `figures/`.
+- **Date:** 2026-11-02.
+
+### V145. Battery housings below zero: counted robot by robot, and in his run of 1 November
+
+- **Why:** 02 stopped on type 4 in the sandbox (V144). The 5.6 % for the PrimeBOT T1 came from about 18 of its draws
+  (2,000 draws over 124 robots), too few to say anything.
+- **How:** `scratchpad/housing/housing_below_zero.py`, an independent count. For every robot of the six parts files in
+  the sandbox `sb_e157` with a battery housing (319), it draws the pack, the cells and the management board as 02
+  does (independent triangles; the energy from the voltage and capacity, else the template's energy per kg, on wheels
+  where the robot has a wheel joint, as 01's `on_wheels`), 400,000 draws per robot, and counts the draws with the
+  housing below zero.
+- **Result:** 208 of the 304 robots whose pack is not weighed; none of the 10 weighed packs and none of the 5 drawn by
+  the ratio. Most often: PrimeBOT T1 2.03 %, Booster K1 2 Ah 1.43 %, Syntheva Synthia 0.38 %, Unitree R1 0.12 %;
+  every other robot below 0.06 %. By file: type 1 24 of 29 robots, type 2 58 of 102, type 3 53 of 97, type 4 70 of 85,
+  type 5 none of 3, type 6 3 of 3.
+- **Against his real run** (`data/parts_taken_apart/1_compact_research_developer/`, 1 November 18:00, read only): the
+  housings below zero in type 1's 200,000 draws are the Booster K1 2 Ah's 44 (expected by the count: 47 in its 3,306
+  draws), the Unitree R1's 13 (8 in 6,768), the Noetix Bumi's 4 (3), the Booster K1 5 Ah's 1 (2). The count matches
+  his run in each robot, within its chance spread. That run did not stop, because the housing's nickel strip was
+  entered as Copper then (the code at commit 3179242), and its type's copper stayed above zero.
+- **What it means:** since E19 the strip is the material Nickel, so 02 at 200,000 draws stops on type 1 (about 60
+  draws), whether or not batch 3 is in. V142's and V143's sandbox at 2,000 draws could not show it (0.6 such draws
+  expected in type 1). Lesson: a remainder's share below zero is counted over many draws per robot, not over a type's
+  sandbox draws.
+- **Not covered:** the frames below zero (they do not stop 02); the weighed packs at 200,000 draws of 02 itself.
+- **Date:** 2026-11-02.
+
+### V144. Batch 3 of types 3 and 4 built (E15.7, E15.8)
+
+- **His words:** "Move on" (2026-11-02, after E19), on E15.7 as agreed ("E15's entry"), its open points A to E as
+  recommended.
+- **Tests first:** `TestTypesThreeAndFourBatchThree` (each block's mass, form, hands, battery, boards and wheels
+  against E15.3; the 17 joints from a stated joint against E15.3's masses, within 5 %; the GR-3's 26.9 and the Star1's
+  32.9 kg from their models; the Tau's rows the G1's) and the register's (54 and 58 robots taken apart; the seven
+  without a mass) were written first and failed (nine) before the blocks. Also: no row of the sheet Sources from a
+  robot's name (it failed: "Moon Dynamics L1" and "ROBO-T1" gave the rows L1 and T1).
+- **The suite:** 477 tests, 5 fail, all comparing with the files on disk that his runs rewrite (the register's
+  "for stock-and-flow" words, the old name "Electronics" in the parts files of types 1 and 2, the real grades, the
+  real parts file); the test of the real register, extended to types 5 and 6's files (open point E), passes
+  (`scratchpad/tests_E15_7c.log`).
+- **Sandbox** (`scratchpad/sb_e157`, a copy of the project with batch 3 built, every path inside it): the register and
+  the six builders run; 01 "No fault found"; 02 at 2,000 draws **stopped: "robot type 4: Nickel is below zero in 1
+  draw"**. Type 4 is now drawn from its robots (open point B), and 02 stops on a material below zero other than Not
+  allocated. The cause, robot by robot over the draws (`scratchpad/draw_all_2.py`, which draws as 02 does without its
+  stop): the PrimeBOT T1's battery housing, its pack less its cells and management board (an 8.5 kg robot on the
+  template's battery), below zero in 5.56 % of its draws. Below zero in some draws without stopping the run (no material
+  of the type falls below zero with them): the 1X NEO's frame in 22.22 % (batch 1), the Matrix-1's in 7.69 %.
+- **At the modes** (E15.7 point 8): no remainder below zero; frames below a quarter of the robot: Figure 02 18.2 %,
+  Matrix-1 15.5 %, Walker S2 18.5 %, Star1 21.8 %, KAI 24.2 %, Tora DoubleOne P 22.0 %, Spaceo Pro 24.4 % (seven; E15.2
+  counted nine on its own numbers).
+- **Types 1, 2, 5 and 6 unchanged** (by program, the same seed, against `draws_e19_removed.npz`): every material and
+  element within 6 × 10⁻¹⁴ kg; every type's workbook draws identical.
+- **Summaries of types 3 and 4:** no median of 0 and no 2.5 % bound below zero; type 4's Nickel below zero in 0.05 %
+  of its draws (the one draw above).
+- **E13's shares** as built: type 3 the joint template 137 of 172, the battery template 124; type 4 103 and 98 of 137.
+  E15.5 expected 139 and 99: its count missed two of type 3's robots off the template, and the Tau's battery is the
+  G1's (E15.8 point 6). Pinned in test_schemas.
+- **Pages looked at:** 02's pages of types 3 and 4 (15 each, `scratchpad/pages_34/`): the notes page that ran off the
+  page (robots resting on estimates, one paragraph longer than a page) now goes on over the next page; 01's table had
+  "Humanoid HMND 01 Alpha Bipedal" over the height column, shortened to "Humanoid HMND 01 Bipedal".
+- **Not covered:** 200,000 draws; the real `data/` and `figures/` (his runs, HANDOVER); 02 past type 4's stop; each
+  block's numbers against their sources again beyond the tests (they were typed from the record read first-hand).
+- **Date:** 2026-11-02.
+
+### V143. E19's leftovers removed; the documents
+
+- **His words:** "Yes, remove them" (2026-11-02), on the list with proof that nothing else reads them.
+- **Removed, by name:** E17's split: `SIDES`, `side_columns()`, the table `'metal'` and its two checks in `draw_faults`,
+  `Robot.metal`, `Robot.as_metal()`, `Draws.metal`, `Shared.recipe_metal`, `Shared.grade_metal()`,
+  `Shared.graded_metal`, and with them `RecipeDraws.metal()` and `element_label`'s "as metal" form, read by nothing
+  once the rest was gone; its tests `TestAsMetal` (test_composition, 3 tests; test_parts_taken_apart, 1). The setting
+  `composition.elements_not_shown`, its check in `src/params_schema.py` and in 02, `shown_elements()`,
+  `not_shown_note()`, 03's use of them; its tests (test_composition 2, test_parts_taken_apart `TestElementsNotShown`,
+  test_comparison 1; three cases and the key in test_parameters). 02's `MATERIAL_TITLES`, 01's `MAY_HAVE_GRADE`.
+  `page_elements`, `page_notes` and 03's `view_columns` and `view_notes` lost the setting they no longer read. Kept:
+  the column "As metal" and `RecipeDraws.drawn()`, which give the battery cells' foils and tabs.
+- **Proof that no draw moved:** the scratch copy drew every robot type part by part and from the workbook, 2,000
+  draws, the same seed (`scratchpad/draw_all_2.py`), against the draws before the removal: the materials and the kg
+  each material gives equal draw by draw (0.0 kg), the elements within 6 × 10⁻¹⁴ kg (the order of a sum). The removed
+  calls only read shares already drawn and kept.
+- **The suite:** 477 tests (8 removed); 15 fail, all known: batch 3's nine (not built) and six that compare the builders
+  with the files on disk (old material names until Matthias reruns them, HANDOVER 2026-11-02).
+- **Documents:** README (02's and 03's rows), METHODOLOGY (the materials, the elements of interest, the checks, what
+  02 writes, the pages, 03), EVIDENCE E19 (agreed and built) and E17 (replaced), SHARED_LISTS (the new names), HANDOVER
+  (what changed, his runs by full path, what is open).
+- **Found, not acted on:** 02's `triangles()` and 01's `element_shares()` are called only by tests (so before E19).
+- **Date:** 2026-11-02.
+
+### V142. E19 step 4 built: the element pages by material, the material pages, the alloys table
+
+- **His words:** "Yes, build them" (2026-11-02, on the preview of type 5, V141).
+- **What changed:** 02 only, and 03's notes. The element pages of a robot type taken apart six a page, each element
+  split by the material it comes from (`by_material_panel`, its kg per material kept as `Draws.by_material`), the
+  materials' means in the panel, one legend of the page's materials (Paul Tol's muted scheme, `MATERIAL_COLOURS`); the
+  material pages each material of the one list, then its grades (`material_panels`, `grade_words`); the alloys table
+  (`alloy_rows`, `alloys_pages`; what each holds, `holds_words`, from the recipes, the sibling's steels and the
+  magnets' drawn fractions); the notes pages rewritten. The panel code shared, not copied: `stacked_bars` (the
+  approved stacked form, also the parts figures'), `centre_lines`, `numbers_above`, `panel_axes`. The magnesium alloys
+  now by their alloys as the aluminium (`ALLOYS`): type 4's recipe is AM50A or AM60B, and AZ91D. Corrected on the way
+  (each test first): the sentence "the materials that have a recipe so far" on the workbook page and in 03; "Battery
+  materials" in 03's notes (missed by step 1); the material Other grey again in 03 (step 1 had renamed Mixed); the
+  "where it comes from" figures of the stainless and electrical steels again (step 1 had made them materials of their
+  own, and the figures named only Steel); "its NdFeB magnets sit".
+- **Tests (each written first and seen to fail):** each element by material adds up to it by kind of part in every
+  draw (1e-12); six panels a page, the legend in the colours' order, copper's three materials written in its panel;
+  the material pages in the one list's order, each material then its grades; the alloys table: 20CrMnTi "Cr 1–1.3, Mn
+  0.8–1.1 … ; Fe the rest", 7075, brass "Cu 58–65; Zn the rest", the nickel strip "Ni 100", the magnet classes, its kg
+  the median of the draws that hold it; type 4's AM50A, AM60B and AZ91D each a row (each in about 2 % of the draws,
+  no panel), AZ91D's nickel (0.002 %) left out; the notes; the sources figures of every steel; the readability test
+  now also over type 5 (its title had run off its notes page: "how to read its pages" now).
+- **Looked at:** 02's own pages of types 4 and 5, drawn in the scratch copy (`scratchpad/draw_pages_E19.py`, 2,000
+  draws): the element pages, the material pages, the alloys table, the notes, a sources figure.
+- **The suite:** 485 tests; the same 19 fail as in V141 (batch 3, the files on disk before his reruns, the four
+  leftovers).
+- **Date:** 2026-11-02.
+
+### V141. E19 step 3 and the preview of step 4 (type 5)
+
+- **His words:** "Yes, agree E19" (point 6: one parts vocabulary, "Boards and heat sinks" → "Boards and computers", the
+  battery "Battery pack" the part and "Battery cells" the material; point 7: a scratch preview of type 5 first; point 4:
+  the alloys table on the material pages).
+- **Step 3:** the kind of part renamed in 01's `KINDS`, the one place it is named (every reader grepped: 01, 02, 03,
+  `src/`, `tools/`, `tests/`; the other "heat sink" hits are parts' names, not the kind). The test of the kinds' names
+  was changed first and seen to fail, then passed after the rename. The battery's two names were already so since step
+  1.
+- **The preview** (`scratchpad/preview_E19/preview.py`, in Claude's scratch folder; nothing in the project): type 5
+  part by part, 2,000 draws, from the scratch copy of V140. Element pages: each element stacked by the material it
+  comes from, its kg per material from 02's own `Robot.declare`, noted by a wrapper; material pages: each material, then
+  its grades; the alloys table from the recipes, the sibling's steels and the magnets' drawn fractions. Each page looked
+  at: 16 × 9 inches at 150 dpi, fit to a 1920 × 1080 screen 0.8 of its size, so the 14-point text is about 23 pixels;
+  fixed before showing: the materials' means over the bars at nine panels a page (six now), the table's heading off the
+  page, titles broken at "die-cast", near-zero shares printed as 6.1e-05, a row cut at the page's foot.
+- **The suite in the project after steps 2 and 3:** 480 tests, 19 fail: batch 3's nine (not built), six that read the
+  parts files and the register on disk (old names, e.g. "the material 'Electronics' is not in the shared lists", until
+  Matthias reruns the six builders and the register), and V140's four leftovers.
+- **Date:** 2026-11-02.
+
+### V140. E19 step 2: only the elements of interest, from what is recovered as elements
+
+- **His words:** "Yes, agree E19" (EVIDENCE.md E19 point 3 and questions 2 to 4: the elements of interest only;
+  copper, nickel and the aluminium, magnesium and titanium alloys their element whole; the magnets Nd, Pr, Dy, Tb, Co,
+  B, Nb, Ga; the battery cells Li, Ni, Co, Mn and their foils' Cu and Al; the boards and sensors their metals of
+  interest; steel, stainless steel, electrical steel, brass, plastics, composites and ceramics stay materials).
+- **What changed:** 02 only (both paths: from the workbook and part by part), its tests. `INTEREST`, `WHOLE`,
+  `MAGNET_ELEMENTS`, `CELL_ELEMENTS`, `CELL_METALS` and `declared()` say which material gives which element; the
+  elements written are those (`elements.npy`, the summaries); every element of the recipes is still drawn and checked
+  to add up, as `recipe_elements`, but not written. New checks in every draw: the elements of interest add up to the
+  materials they come from; copper, nickel and the light alloys each its element whole; no other material gives more
+  than it weighs. Each check was seen to catch a draw broken on purpose (`TestSums`).
+- **How it was checked:** the copy of the project in Claude's scratch folder of V139 (its parts files and register
+  built anew), with step 2's 02 copied in, drew every robot type part by part and from the workbook at 2,000 draws,
+  the same seed (`scratchpad/draw_all_2.py`), against step 1's draws (`scratchpad/compare_E19_2.py`).
+- **Result:**
+  - the materials equal step 1's draw by draw (largest difference 0.0 kg); the elements of the recipes equal step 1's
+    elements draw by draw (2.8 × 10⁻¹⁴ kg): nothing drawn moved;
+  - in all twelve (six types part by part, six from the workbook) only elements of interest are written; copper,
+    nickel and the light alloys equal their element in every draw; no other material gives more than it weighs; no
+    fault of the new checks;
+  - at the mean, the element Cu is now below the copper of the recipes in every type (type 2 part by part 3.00 of
+    3.75 kg, type 5 3.84 of 4.56 kg): the brass's copper and the alloys' copper stay in them (V137 answered); the
+    element Al is above the aluminium of the recipes (type 2 46.8 against 42.5 kg), as an alloy counts whole as its
+    base metal (question 2); Co, Li, Nd, Dy, Ag, Au and Ta are unchanged; Mn and Ni lose the steels' share (type 2 Mn
+    0.06 of 0.23 kg);
+  - left out as not of interest, per robot at the mean: type 2 part by part 34.9 of 84.1 kg of elements (Fe 16.7, C
+    10.4, O 3.0, Zn 1.5, Si 1.5 kg …); the sensors' tungsten 1 to 3 mg; no platinum or germanium in any robot drawn;
+  - from the workbook, the titanium alloy is now its titanium without a recipe: types 2, 5 and 6 Ti 3.2, 11.7 and
+    6.0 kg (before, none: no recipe).
+- **The suite in the project:** passes but for the known ones (batch 3 not built; the parts files and the register on
+  disk awaiting Matthias's reruns) and four tests of what E19 replaces, listed for removal on his word: E17's two
+  columns per element (`TestAsMetal.test_written_in_two_columns_and_two_rows_each`), and the hydrogen, nitrogen, oxygen
+  and fluorine "kept in the draws" (`TestRun`, `TestElementsNotShown`, `test_comparison`): not elements of interest,
+  they are no longer drawn as elements.
+- **Found, not acted on:** type 4 part by part, its part group Frame below zero in 1 of the 2,000 draws (a robot's
+  frame, the remainder of its mass). Type 4 is still drawn from the workbook (batch 3 not built), so no run stops on
+  it; once it is drawn part by part, 02's check "nothing below zero" would stop the run.
+- **Not covered:** the pages (step 4 of E19); the alloys table (point 4, next).
+- **Date:** 2026-11-02.
+
+### V139. E19 step 1: the one list of materials changes names only
+
+- **His words:** "Yes, agree E19" (EVIDENCE.md E19 point 2 and question 1: one fixed list of materials, each name what
+  it is).
+- **What changed:** the shared lists (sheet Lists: Copper, Brass, Nickel, Aluminium alloys, Magnesium alloys, Titanium
+  alloy, Steel, Stainless steel, Electrical steel, NdFeB magnets, Battery cells, Boards and components, Plastics, Fibre
+  composites, Ceramics, Other, Not allocated; the sheets Materials, Splits and Battery cells after them), the element
+  recipes' sheet Rows, both copied first to Claude's scratch folder; 01, 02, 03, the six builders and the shared parts
+  module (a stainless steel, an electrical steel, brass and the nickel strip each under its own material, by its
+  grade: `steel_of()` for the screws); the tests' fixtures and expectations.
+- **How it was checked:** two copies of the project in Claude's scratch folder: the code of the last commit (fa75985)
+  with the data as they were before E17 (the recipes and shared lists from the backups, the parts files on disk), and
+  the code now with its six parts files and the register built anew. Each drew every robot type, part by part where
+  it is taken apart and from the workbook, at 2,000 draws, the same seed (`scratchpad/draw_all.py`,
+  `scratchpad/compare_E19_1.py`).
+- **Result:** every new material equals, draw by draw, the old one or ones it came from (Steel = Steel + Stainless
+  steel + Electrical steel; Copper = Copper + Brass + Nickel; each renamed one itself), in all six types part by part
+  and from the workbook: the largest difference 3 × 10⁻¹⁴ kg. Every element equal but the workbook's Cu, which since
+  E17 holds the workbook's copper: types 1 to 6 by 3.8, 5.2, 2.4, 4.8, 8.5 and 3.5 kg on average (type 5: Cu 1.21 kg
+  before, 9.72 after; its copper 8.50 kg, V137).
+- **The suite in the new copy:** passes but for batch 3's tests (its blocks not built, E15.7) and the stale register test
+  (types 5 and 6, E15.7 open point E). In the project itself the tests that read the parts files and the register on
+  disk fail until Matthias reruns the six builders and the register.
+- **Not covered:** the pages (step 4 of E19, after his preview).
+- **Date:** 2026-11-02.
+
+### V138. Each element by the material and grade that hold it (for E18)
+
+- **His words:** "What is permanent magnets and the Magnets of the different grades. The grade are all NdBFe or not?",
+  "We need a much better declaration of the materials and elements. Check with the datacenters, how it was done there. I
+  assume Vanadium and Cr are part of steel", "So if elements are in alloys, then one has to know it".
+- **How:** a scratch script (`scratchpad/copper/elements_by_holder.py`, not in the project) ran 02's part-by-part
+  drawing for types 1 to 6 at 2,000 draws on the inputs on disk, writing nothing, with 02's `Robot.material` and
+  `Robot.element` wrapped to note the material and grade that hold each kilogram of each element; the metal from
+  E17's code. Its output: `scratchpad/copper/elements_by_holder.txt`.
+- **Result (means per robot, the holders above 0.5 %):**
+  - **V:** type 2 1.3 g, type 3 0.4 g, all in the titanium alloy Ti-6Al-4V; none in a steel (no steel grade of the
+    recipes or of the sibling's sheets holds vanadium).
+  - **Cr:** type 3 324 g: the gear and alloy steels 52 % (20CrMnTi 18, 42CrMo4 18, the gear stage 2 mixture 14, GCr15
+    3 %), the battery cells 22 % (their stainless steel 304 can), the aluminium alloys 26 % (6061 and 7075, 0.2 % Cr);
+    type 5 346 g, 55 / 23 / 22 %.
+  - **Co:** the magnets 59 to 63 %, the battery cells' cathode 37 to 41 %. **Nd, Dy, Tb:** the magnets, over 99 %.
+  - **Cu:** as metal 74 to 77 % (types 2 and 5: 2.77 of 3.75 kg, 3.52 of 4.56 kg), the rest in the aluminium alloys,
+    the boards and sensors, and brass. **Ni:** the cells 90 %, as metal 8 % (the nickel strips and the cells' tabs).
+  - **Fe:** the steels about 90 %, the magnets 5 %, the cells' can 4 %.
+- **The magnets:** every grade class is sintered NdFeB. 02 draws each joint group's class by heat (sheet MagnetGrades),
+  and its element fractions are RAWCLICVehicleTractionMotor's `magnet_element_draws`, read where it lies (Nd, Pr, Dy,
+  Tb, B, Co, Al, Cu, Nb, Ga, iron the balance). The classes N, M, H, SH, UH, EH and AH are rated to 80, 100, 120, 150,
+  180, 200 and 230 °C (that project's `magnet_grade_temperature`, which says no source of its own states them). The
+  material page's "Permanent magnets" is all of them together; each "Magnets, grade class …" panel is the same
+  kilograms of one class.
+- **RAWCLICDataCenters, read for comparison** (its `05_data_center_elements.py` and EVIDENCE.md § 19): the elements of
+  interest only, each element's distribution split by where it comes from (stacked bars adding up to the total, the
+  mean of each part written in the panel), and stainless steel left as steel ("Stainless steel stays as sainless steel
+  not down to the elements. Exclude it"): no Fe, O or Cr there.
+- **Not covered:** the cells' elements by their parts (can, cathode, anode, foils) are one holder here, "Battery
+  materials"; the Cr of the cells is their can's by the recipe (only the 304 can holds chromium).
+- **Date:** 2026-11-02.
+
+### V137. Copper: the element Cu above the material Copper, in every robot type
+
+- **His words:** "I see for 5 and 6 a considerable different between copper material and copper element. There is more
+  copper lements. This can not be, what is the reason", then "It is for all types of robots. This can not be".
+- **What was looked at:** his 02 run of 2026-11-01 17:59 (`figures/composition/5_..._materials_1.png`: Copper, median
+  2.9 kg; `..._elements_2.png`: Cu, median 4.5 kg), and every type's `data/consolidated/<type>/summary.csv`.
+- **How:** a scratch script (`scratchpad/copper/cu_by_material.py`, not in the project) ran 02's own part-by-part
+  drawing (`draw_taken_apart`, `compose_taken_apart`) for types 1 to 6 at 2,000 draws on the inputs on disk, writing
+  nothing, with 02's `Robot.element` wrapped to add up each kilogram of Cu by the material that holds it.
+- **Result (means per robot):**
+
+  | Type | Material Copper | Element Cu | Cu in Copper | in Aluminium | in Battery materials | in Electronics | in Steel |
+  |---|---|---|---|---|---|---|---|
+  | 1 | 1.640 | 2.079 | 1.599 (76.9 %) | 0.158 (7.6 %) | 0.147 (7.1 %) | 0.166 (8.0 %) | 0.008 |
+  | 2 | 2.485 | 3.750 | 2.396 (63.9 %) | 0.713 (19.0 %) | 0.396 (10.6 %) | 0.234 (6.2 %) | 0.011 |
+  | 3 | 2.752 | 3.979 | 2.660 (66.9 %) | 0.632 (15.9 %) | 0.407 (10.2 %) | 0.265 (6.7 %) | 0.013 |
+  | 4 | 2.239 | 3.180 | 2.165 (68.1 %) | 0.477 (15.0 %) | 0.308 (9.7 %) | 0.217 (6.8 %) | 0.010 |
+  | 5 | 3.193 | 4.564 | 3.092 (67.8 %) | 0.680 (14.9 %) | 0.453 (9.9 %) | 0.321 (7.0 %) | 0.015 |
+  | 6 | 2.928 | 4.111 | 2.857 (69.5 %) | 0.631 (15.3 %) | 0.306 (7.5 %) | 0.300 (7.3 %) | 0.015 |
+
+  The element counts copper wherever it sits; the material Copper only the parts made of copper (windings, cables,
+  brass, the battery's nickel strips). The rest of the Cu is in the aluminium alloys (the element recipes in
+  `data/researched/element_recipes.xlsx`: 7075 1.2 / 1.6 / 2.0 % Cu, A380 3.0 / 3.59 / 4.0 %, ADC12 1.5 / 2.09 / 3.5 %,
+  6061 0.15 / 0.28 / 0.4 %; each type's mix of die-cast and wrought), in the battery cells (the NMC recipe's copper),
+  in the boards (copper their mass times the copper share) and in the steels. Each Cu is drawn once, from the one
+  material that holds it: no double count. The Cu in Copper is 96 to 98 % of the material Copper, the rest brass's zinc
+  and the nickel strips.
+- **Second finding:** the summaries of the draws of types 3 to 6, drawn from the workbook, give Copper "In the
+  elements: No" (type 5: Copper 8.50 kg, Cu 1.21 kg; type 3: 2.37 and 0.93; type 4: 4.77 and 0.64; type 6: 3.50 and
+  1.07). There, the element recipes hold no row for the workbook's Copper (the sheet of rows names only "Aluminum
+  alloys" for types 1 to 6), so its kilograms are drawn but not turned into Cu (02's "Materials without a recipe yet").
+  Types 1 and 2, drawn from their parts, give "Yes". Reported to him, not changed.
+  The columns add up to the element (type 5: 3.092 + 0.680 + 0.453 + 0.321 + 0.015 + 0.003 in magnets and magnesium =
+  4.564 kg); the sensors' Cu (their car elements) is in Electronics.
+- **Not covered:** whether the alloys' mix of each type is right (his recipes, not checked here).
+- **Date:** 2026-11-02.
+
 ## 2026-11-01
 
 ### V136. Types 5 and 6 entered (E16.6)

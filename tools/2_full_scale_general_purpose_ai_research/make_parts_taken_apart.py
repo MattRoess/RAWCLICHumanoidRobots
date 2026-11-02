@@ -414,7 +414,7 @@ def screws(robot_kg: float) -> list:
 def titanium(robot_kg: float, source: str) -> tuple:
     """A robot's titanium alloy parts, a share of its mass (TITANIUM_SHARE), Ti-6Al-4V (E6.8 point 12)."""
     return ('Titanium alloy parts', 1, 'Frame and shell', 'Whole body',
-            tuple(round(s * robot_kg, 4) for s in TITANIUM_SHARE), 'Titanium', 'Ti-6Al-4V', 'E', source)
+            tuple(round(s * robot_kg, 4) for s in TITANIUM_SHARE), 'Titanium alloy', 'Ti-6Al-4V', 'E', source)
 
 
 def fans(count: int, why: str) -> tuple:
@@ -529,7 +529,7 @@ def h2(name: str, stated: float | None, sources: str, mass: tuple, joints: list,
                                   "the X1's 0.4 kg of TC4 in 33 kg (E6.8 point 12)")],
         shell=('Shell: high-strength engineering plastics',
                'H2p "High-Strength Engineering Plastics"; 11.5 % of the robot (E6.8 point 10)'),
-        frame=('Frame', 'Aluminium', 'H2p "Aircraft-Grade Aluminum"; the remainder (E6.8 point 12)'))
+        frame=('Frame', 'Aluminium alloys', 'H2p "Aircraft-Grade Aluminum"; the remainder (E6.8 point 12)'))
 
 
 UNITREE_H2 = h2(
@@ -581,9 +581,9 @@ UNITREE_H1_2 = block(
     encoders=('E', 'two per joint, as type 1; the M107 "Dual Encoder" (H1p)'),
     cables=(CABLES_TALL, 'E', CABLES_SOURCE), screws=screws(70),
     shell=('Shell: plastics', 'not stated; plastics as type 1, 11.5 % of the robot (E6.8 point 10)'),
-    frame=('Frame', 'Aluminium', 'not stated; aluminium as type 1, the remainder (E6.8 point 12)'))
+    frame=('Frame', 'Aluminium alloys', 'not stated; aluminium as type 1, the remainder (E6.8 point 12)'))
 FOURIER_SHELL = ('Shell: engineering plastics', 'GR1a, GR2a "铝合金+工程塑料"; 11.5 % of the robot (E6.8 point 10)')
-FOURIER_FRAME = ('Frame', 'Aluminium', 'GR1a, GR2a "铝合金+工程塑料": aluminium alloy; the remainder (E6.8 point 12)')
+FOURIER_FRAME = ('Frame', 'Aluminium alloys', 'GR1a, GR2a "铝合金+工程塑料": aluminium alloy; the remainder (E6.8 point 12)')
 FOURIER_MICROPHONES = ('Microphone', 1, 'Head', 'Head', MICROPHONES_G, 'E', "GR2a; as the G1's microphone array (E6.8 "
                                                                             'point 8)', MICROPHONES)
 FOURIER_SPEAKER = ('Speaker', 1, 'Head', 'Head', SPEAKER_G, 'E', "GR2a; as the G1's (E6.8 point 8)", [])
@@ -665,7 +665,7 @@ IMU_NOT_NAMED = ('Motion sensor (IMU)', 1, 'Boards', 'Torso', IMU_G, 'E',
                  "its maker names none: one, as every robot that walks balances by one; as the G1's (E7.5 point 8)",
                  [('IMU', 1)])
 SHELL_NOT_STATED = ('Shell: plastics', 'not stated; plastics, 11.5 % of the robot (E7.5 point 10)')
-FRAME_NOT_STATED = ('Frame', 'Aluminium', 'not stated; aluminium, the remainder (E7.5 point 11)')
+FRAME_NOT_STATED = ('Frame', 'Aluminium alloys', 'not stated; aluminium, the remainder (E7.5 point 11)')
 # A robot's computer where its maker names none: one, as the X1's and N1's computer boards (E7.5 point 7).
 COMPUTER_NOT_NAMED = 'Computer board (not named)'
 COMPUTER_SOURCE = "its maker names none: one computer board, as the X1's and N1's (E5.17 point 3; E7.5 point 7)"
@@ -883,7 +883,7 @@ MAGICLAB_MAGICBOT = own_joints(
     sensors=[lidar('MBp "3D LiDAR"'), depth_camera('MBp two depth cameras', 2),
              camera('Fisheye camera', 3, 'Head', 'MBp three fisheye cameras'), IMU_NOT_NAMED],
     shell=('Shell: PC+ABS', 'MBp "PC+ABS"; 11.5 % of the robot (E7.5 point 10)'),
-    frame=('Frame', 'Aluminium', 'MBp aluminium alloy; the remainder (E7.5 point 11)'))
+    frame=('Frame', 'Aluminium alloys', 'MBp aluminium alloy; the remainder (E7.5 point 11)'))
 
 # The seven robots whose joints give type 2's template: every joint's torque, each robot once (the GR-1's first
 # version), their hands left out (E7.4: "split as type 2's own robots on average", agreed 2026-10-30).
@@ -919,7 +919,7 @@ def unitree_h2x(pc2: str) -> dict:
         shell=('Shell: engineering plastic and energy-absorbing cushioning',
                'H2Xp "High-Strength Engineering Plastic + Energy-Absorbing Cushioning Material"; 11.5 % of the robot '
                '(E7.5 point 10)'),
-        frame=('Frame', 'Aluminium', 'H2Xp "Aerospace-Grade Aluminum"; the remainder (E7.5 point 11)'))
+        frame=('Frame', 'Aluminium alloys', 'H2Xp "Aerospace-Grade Aluminum"; the remainder (E7.5 point 11)'))
 
 
 AEI_ALICE_4 = template(
@@ -1037,7 +1037,7 @@ LUMOS_LUS2 = template(
              "as the X1's and N1's computer boards (E7.5 point 7)"), POWER_BOARD],
     sensors=[lidar('LS2 "3D LiDAR"'), depth_camera('LS2 "Binocular Depth Camera"'),
              microphones('LS2 "4-mic array"'), speaker('LS2 "Speaker"'), IMU_NOT_NAMED],
-    frame=('Frame', 'Aluminium', 'LS2 "Material Aluminum alloy"; the remainder (E7.5 point 11)'))
+    frame=('Frame', 'Aluminium alloys', 'LS2 "Material Aluminum alloy"; the remainder (E7.5 point 11)'))
 VINMOTION_MOTION_2 = template(
     'VinMotion Motion 2', 'VinMotion', 1.625, None, ((60, 67.5, 75), 'S', 'HG "~60–75" (the register): the range, its '
                                                                           "middle the mode; VinMotion's page no figures "
@@ -1268,7 +1268,7 @@ ENGINEAI_SE01 = template(
              camera('Infrared camera', 1, 'Head', 'SEp "红外摄像头"'),
              ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "SEp \"扬声器×2\"; as the G1's (E8.3 point 8)", []),
              imu('SEp "运控IMU传感器"')],
-    frame=('Frame', 'Aluminium', 'SEp "航空级铝材机身"; the remainder (E8.3 point 10)'))
+    frame=('Frame', 'Aluminium alloys', 'SEp "航空级铝材机身"; the remainder (E8.3 point 10)'))
 ZEROTH_SEAN = from_the_register('Zeroth Sean', 'Zeroth Robotics', 1.55, 45, 16, "ZRT: not on its maker's site")
 SIASUN_SONGXING = from_the_register('Siasun Songxing', 'Siasun', 1.65, 85, 38, "SIA: no humanoid on its maker's sites")
 UNITREE_SUPERMAN = from_the_register('Unitree Superman', 'Unitree', 1.70, 45, 20, "UNI: no robot of that name at "
@@ -1590,7 +1590,7 @@ ROBOTIS_AI_WORKER = on_wheels_own(
     boards=agx_orin('RBT "NVIDIA Jetson AGX Orin 32GB"') + [POWER_BOARD],
     sensors=[binocular('RBT "Stereolabs ZED Mini"'), depth_camera('RBT "Intel RealSense D405 (x2)"', 2),
              base_lidar('RBT "LakiBeam 1 (x2)"', 2), imu('RBT "IMU"')],
-    frame=('Frame', 'Aluminium', 'RBT "Exterior Materials Aluminum, Plastic"; the remainder (E9.6 point 12)'))
+    frame=('Frame', 'Aluminium alloys', 'RBT "Exterior Materials Aluminum, Plastic"; the remainder (E9.6 point 12)'))
 POLLEN_REACHY_2 = on_wheels_own(
     'Pollen Robotics Reachy 2', 'Pollen Robotics', 1.66, 50, 'POL (Pollen Robotics), POL21 (its base, 2021); E9.1',
     ((49, 50, 51), 'S', 'POL "Up to 50 kg"; ± 1 kg (E9.6 point 1)'), REACHY_JOINTS,
@@ -1606,7 +1606,7 @@ POLLEN_REACHY_2 = on_wheels_own(
     sensors=[binocular('POL "Stereo"'), depth_camera('POL "RGB-D"'), base_lidar('POL "LiDAR"'),
              ('Motion sensor (IMU)', 3, 'Wheeled base', 'Base', IMU_G, 'E',
               "POL21 \"Hall Sensors and IMU on each wheel\"; as the G1's (E9.6 point 10)", [('IMU', 1)])],
-    frame=('Frame', 'Aluminium', 'POL21 "Aluminium, MJF 3D printed plastic parts, Steel" (its base); aluminium the '
+    frame=('Frame', 'Aluminium alloys', 'POL21 "Aluminium, MJF 3D printed plastic parts, Steel" (its base); aluminium the '
                                  'remainder, its steel not weighed (E9.6 point 12)'))
 YUE_QUAN_W_BOT = on_wheels_own(
     'Yue Quan Bionics W-Bot', 'Yue Quan Bionics', 1.78, 60, 'YQB (Yue Quan Bionics, 博文W-Bot 2.0); E9.1',
@@ -1681,7 +1681,7 @@ CASBOT_W1 = wheeled(
     cooler=[fans(2, 'its PC and graphics board'), x86_sinks(2), ARM_SINK],
     sensors=[base_lidar('CAS "腹部可扩展360球型激光"'), depth_camera('CAS "RGBD相机（结构光）" 4', 4),
              binocular('CAS "双目相机 1，头部"'), microphones('CAS "胸部2麦线阵"'), IMU_NOT_NAMED],
-    frame=('Frame', 'Aluminium', 'CAS "合金、工程塑料": alloy, aluminium (E); the remainder (E9.6 point 12)'))
+    frame=('Frame', 'Aluminium alloys', 'CAS "合金、工程塑料": alloy, aluminium (E); the remainder (E9.6 point 12)'))
 TOYOTA_CUE7 = from_the_register_on_wheels('Toyota CUE7', 'Toyota', 2.18, 74, 'no page of Toyota\'s found (E9.1)',
                                           caster_count=0)
 REALMAN_DUAL_ARM_LIFT = wheeled(
@@ -1738,7 +1738,7 @@ UNITREE_H2_D = wheeled(
              base_lidar('UNH2D "LiDAR ×1"'), base_depth_camera('UNH2D "Depth Camera ×1"'),
              ultrasonic('UNH2D "Ultrasonic Sensor ×2"', 2), IMU_NOT_NAMED],
     parts=[titanium(120, 'UNH2D "Titanium Alloy": a share of its mass as the H2\'s (E6.8 point 12)')],
-    frame=('Frame', 'Aluminium', 'UNH2D "Aerospace-Grade Aluminum, Titanium Alloy, and High-Strength Engineering '
+    frame=('Frame', 'Aluminium alloys', 'UNH2D "Aerospace-Grade Aluminum, Titanium Alloy, and High-Strength Engineering '
                                  'Plastics"; the remainder (E9.6 point 12)'))
 MAGICLAB_MAGICBOT_D1 = wheeled(
     'MagicLab MagicBot D1', 'MagicLab', 1.80, 150, ((149, 150, 151), 'S', 'MGD1 "150kg"; ± 1 kg'), 21,

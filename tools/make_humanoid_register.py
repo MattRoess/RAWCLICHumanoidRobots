@@ -91,7 +91,7 @@ ABOUT = [
     'Sheets Type 3 and Type 4 (2026-10-30, "Yes, together", EVIDENCE.md E10.1; batch 1 entered on "Yes, build it", '
     'E11.7): every robot whose types include 3, or 4, as the sheet Type 1. "drawn: its own parts" where its rows stand '
     "in the parts file of one of its types (types 1 to 6); \"not drawn: not yet taken apart\" of the others with a "
-    'mass, their types drawn for stock-and-flow from the workbook until all are; "not drawn: no mass stated".',
+    'mass, their types drawn from the workbook until all are; "not drawn: no mass stated".',
     'Sheets Type 5 and Type 6 (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data '
     'in the respective sheets", EVIDENCE.md E16.6): every robot whose types include 5, or 6, as the sheet Type 3; the '
     'hydraulic Atlas (old), Nadia and Neo1 not yet taken apart (their research step, E16.5 question 4); TITAN without a '
@@ -112,7 +112,7 @@ IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'
 IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
 # A robot with a mass of a type some of whose robots are taken apart, itself not yet (2026-10-30, "Yes, build C", Q4):
-# its type drawn from the workbook for stock-and-flow until every robot of it with a mass is taken apart (Q2).
+# its type drawn from the workbook until every robot of it with a mass is taken apart (Q2).
 IN_RUN_LATER = 'not drawn: not yet taken apart'
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
@@ -198,6 +198,22 @@ TAKEN_APART = {1: {
     # Types 5 and 6's entry (2026-11-01, "Yes, agree both", E16.6): batch 3's robots of types 5 and 6 whose first type
     # among 3 and 4 is 3, in type 3's file as E15.3 gives them.
     152: 'Kawasaki Kaleido 9', 195: 'Noble Machines Moby', 228: 'Foundation Phantom MK1',
+    # Batch 3 (2026-11-02, "E15's entry", "Move on": EVIDENCE.md E15.7): 54 robots in type 3's file, each in the file of
+    # its first type among 3 and 4; a robot of no stated form on legs and on wheels, each as often (E15.6 question 2).
+    97: 'Figure AI Figure 02', 100: 'Holiday Robotics Friday', 106: 'AgiBot G2 Max', 107: 'Galbot G1',
+    108: 'Galbot ET1', 109: 'Galbot S1', 110: 'Persona AI Gen 1', 111: 'Generative Bionics GENE.01', 112: 'Gento Luna',
+    113: 'Geek+ Gino 1', 114: 'GAC GoMate', 115: 'GAC GoMate Mini', 127: 'Humanoid HMND 01 Bipedal',
+    133: 'Huashu HSR-ER-HR705', 137: 'XPENG IRON 2025', 141: 'JAKA K1', 142: 'JAKA Kargo', 146: 'Zeroth Jupiter',
+    154: 'LG KAPEX', 156: 'Galaxea Kengo', 160: 'Kinisi KR1', 165: 'Moon Dynamics L1', 167: 'Glroad Laborer M1',
+    181: 'MagicLab MagicBot X1', 186: 'Matrix Robotics Matrix-1', 189: 'Mentee MenteeBot 2024',
+    190: 'Mentee MenteeBot V3', 197: 'O-ID Modular', 204: 'Zhejiang Navigator 2', 209: 'Galaxea NEXO',
+    213: 'Sharpa North', 215: 'ugo Nova', 226: 'Pink Robotics P0', 239: 'PsiBot Psi V1', 241: 'Pudu D9',
+    242: 'XPENG PX5', 245: 'X Square QUANTA X2', 249: 'AgiBot RAISE A1', 250: 'NineRay RayNex G3',
+    258: 'RoboScience REX G1', 262: 'Oversonic RoBee', 263: 'Roboligent Robin', 264: 'Robo Robotics ROBO-T1',
+    273: 'Ati Sherpa Mecha', 275: 'EIR SkyWalker 2 on legs; EIR SkyWalker 2 on wheels', 278: 'Muks Spaceo Pro',
+    280: 'Robotera Star1', 287: 'WorkFar Syntro', 305: 'PaXini Tora DoubleOne P; PaXini Tora DoubleOne X',
+    319: 'DexForce W1 Pro', 320: 'Walden Robotics Walden', 325: 'UBTECH Walker S2', 348: 'PL-Universe Zeus 1',
+    354: 'Perceptyne PR-OMNI',
 }, 4: {
     1: '1X NEO', 6: 'AgiBot A2', 8: 'AgiBot A3 Ultra', 9: 'Andromeda Abi', 14: 'AgiBot A3',
     17: 'AgiBot X2; AgiBot X2 Ultra', 45: 'DOBOT Atom 153 cm', 46: 'Vbot ATOM',
@@ -205,6 +221,23 @@ TAKEN_APART = {1: {
     59: 'CASBOT 02; CASBOT 02 EDU', 61: 'CasiVision CASIVIBOT', 64: 'LG CLOiD', 74: 'XYZ DEUX', 79: 'Noetix Dora',
     91: 'Realbotix F-Series', 94: 'FF Futurist',
     95: 'FF Master Classic Edu; FF Master Classic Ultra',
+    # Batch 3 (2026-11-02, E15.7): 58 robots in type 4's file; the Pudu D7 of 2024 and of 2026 and the U1 Pro male and
+    # female each as often (E15.2 point 7).
+    99: 'Pudu FlashBot Arm', 101: 'Futuring 2 on legs; Futuring 2 on wheels', 118: 'Fourier GR-3',
+    125: 'Haier HIVA Haiwa', 129: 'Noetix Hobbs W1', 130: 'HONOR', 131: 'HONOR A1', 136: 'XPENG IRON 2024',
+    139: 'Weave Isaac 1', 145: 'Jingchu Elf', 150: 'KinetixAI KAI on legs; KinetixAI KAI on wheels',
+    155: 'Keenon XMAN-R1', 161: 'Knowin-X1', 162: 'Leju KUAVO 5-W', 164: 'Leju Kuavo-my', 166: 'Glroad Laborer C1',
+    173: 'HECbot Lumen H1', 174: 'HECbot Lumen S1 on legs; HECbot Lumen S1 on wheels', 178: 'MagicLab MagicBot',
+    182: 'MagicLab MagicBot Z1', 183: 'GigaAI Maker H01', 185: 'UniX Martian', 188: 'Sunday MEMO',
+    194: 'Enchanted Tools Mirokaï', 198: 'AiMOGA Mornine', 201: 'Noetix N2', 205: 'GENISOM NE01', 206: '1X NEO Beta',
+    207: '1X NEO Gamma', 211: 'Lumos NIX', 217: 'SwitchBot Onero H1', 237: 'PrimeBOT T1', 238: 'PL-Universe ProWhite',
+    240: 'Pudu D7 2024; Pudu D7 2026', 259: 'Robot.com RNoid', 261: 'Robbyant R1', 267: 'ROBOTERA Q5',
+    270: 'EngineAI SA02 on legs; EngineAI SA02 on wheels', 277: 'Muks Spaceo M1', 283: 'StarBot Nova',
+    284: 'Sulu.be Steve on legs; Sulu.be Steve on wheels', 286: 'Syntheva Synthia', 291: 'iHub TARA GEN1',
+    293: 'Tau Robotics Tau Humanoid', 310: 'UBTECH U1 Pro male; UBTECH U1 Pro female', 317: 'Tuesday Labs Voxel',
+    321: 'UBTECH Walker C', 322: 'UBTECH Walker C1', 324: 'UBTECH Walker S1', 328: 'Yue Quan X-Bot', 330: 'BYD Xiao Di',
+    331: 'Tencent Xiao Liu on legs; Tencent Xiao Liu on wheels', 333: 'Digit XiaQi', 334: 'Leju XTRON KUAVO-MY',
+    339: 'Yunmu YMBot C', 344: 'Yunmu YMBot H', 346: 'Zerith H1', 347: 'Zerith Z1',
 }, 5: {
     # Types 5 and 6's entry (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data in
     # the respective sheets": EVIDENCE.md E16.6): type 5's own robots in its file, the T800 in two versions.
@@ -220,7 +253,15 @@ TAKEN_APART = {1: {
 # one its catalogue's own text calls unknown.
 NO_MASS_STATED = {
     65: 'no mass stated: the catalogue\'s own text "The weight of the robot is not specified" (EVIDENCE.md E12.4)',
-    236: 'no mass stated in any source (EVIDENCE.md E5.17); its estimate taken out (E12.4)'}
+    236: 'no mass stated in any source (EVIDENCE.md E5.17); its estimate taken out (E12.4)',
+    # Batch 3's seven (EVIDENCE.md E15.4, E15.7 point 5): no source states a mass of the robot.
+    124: 'no mass stated: its maker discloses nothing (heise); the catalogue\'s "~60–80" a range of its own (E15.4)',
+    214: 'no mass stated: its 40 kg is a target ("目標是…約 40 公斤", TechOrange); no robot weighed (E15.4)',
+    282: 'no mass stated: its maker, "Availability and final specifications to be announced" (E15.4)',
+    292: 'no mass stated: the catalogue\'s page links a rover team\'s site, its DoF "Assumed 30–40+" (E15.4)',
+    304: 'no mass stated: the catalogue itself, "has not yet published hardware specifications" (E15.4)',
+    316: 'no mass stated: its maker, "design visualisation. Under development." (E15.4)',
+    345: 'no mass stated: humanoid.press "Not published"; the catalogue\'s 47 kg and aiwiki\'s 8 kg disagree (E15.4)'}
 
 # The decisions, one per robot: (number, types, form, entry, decided in). Types: "4" or "3, 4", the leading one first,
 # empty where the entry says why there are none. Form: how the robot moves, as read (EVIDENCE.md E4.1 to E4.10).

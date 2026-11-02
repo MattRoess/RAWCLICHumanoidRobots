@@ -150,7 +150,7 @@ JOINTPARTS_ROWS = [
      'W; E for the spread and the factor',
      'T1 slide 43 (figure 37); factors EVIDENCE.md E2.8; Matthias, 2026-10-27, step 1: '
      '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Driver board', 12.8, 0.5, 1, 1.5, 'Electronics', None, 1.78, 3.56, 5.33,
+    ('Driver board', 12.8, 0.5, 1, 1.5, 'Boards and components', None, 1.78, 3.56, 5.33,
      'one, two or three boards of the larger size (T3k: "a stack")', 'W; E for the spread and the factor',
      'T1 slide 43 (figure 37); factors EVIDENCE.md E2.8; Matthias, 2026-10-27, step 1: '
      '"Accept all" (EVIDENCE.md E2.8)'),
@@ -158,11 +158,11 @@ JOINTPARTS_ROWS = [
      'W; E for the spread and the factor',
      'T1 slide 43 (figure 37); factors EVIDENCE.md E2.8; Matthias, 2026-10-27, step 1: '
      '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Housing', 79.3, 0.5, 1, 1.5, 'Aluminium', None, 1, 1.39, 2.09, "the joint's surface",
+    ('Housing', 79.3, 0.5, 1, 1.5, 'Aluminium alloys', None, 1, 1.39, 2.09, "the joint's surface",
      'W; E for the spread and the factor',
      'T1 slide 43 (figure 37); factors EVIDENCE.md E2.8; Matthias, 2026-10-27, step 1: '
      '"Accept all" (EVIDENCE.md E2.8)'),
-    ('Two end caps', 23.7, 0.5, 1, 1.5, 'Aluminium', None, 1, 1.78, 2.67, 'the area',
+    ('Two end caps', 23.7, 0.5, 1, 1.5, 'Aluminium alloys', None, 1, 1.78, 2.67, 'the area',
      'W; E for the spread and the factor',
      'T1 slide 43 (figure 37); factors EVIDENCE.md E2.8; Matthias, 2026-10-27, step 1: '
      '"Accept all" (EVIDENCE.md E2.8)'),
@@ -188,16 +188,16 @@ SHARES_ROWS = [
      'The winding: measured car traction motors 23-29 % (Drexler et al. 2025), car auxiliary motors 27 / 36 / 45 %; '
      'E2.10; Matthias: "Yes use this numberrs"'),
     ('Motor stator', 'Plastics', None, 0.02, 0.05, 0.1, None, 'E', "The winding's coating: E2.8"),
-    ('Motor stator', 'Steel', 'M19 or M27', None, None, None, 'Yes', 'E',
+    ('Motor stator', 'Electrical steel', 'M19 or M27', None, None, None, 'Yes', 'E',
      'The electrical steel: Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8); its grade E5.18'),
-    ('Motor rotor', 'Magnets (NdFeB)', None, 0.45, 0.9, 1, None, 'E',
+    ('Motor rotor', 'NdFeB magnets', None, 0.45, 0.9, 1, None, 'E',
      'T1 calls it "磁钢"; Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Motor rotor', 'Steel', 'M19 or M27', None, None, None, 'Yes', 'E',
+    ('Motor rotor', 'Electrical steel', 'M19 or M27', None, None, None, 'Yes', 'E',
      'Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8); its grade E5.18'),
     ('Magnet carrier', 'Plastics', None, 0.05, 0.15, 0.3, None, 'E', 'The plastic bearing: T1 "铝+塑料轴承"'),
-    ('Magnet carrier', 'Aluminium', None, None, None, None, 'Yes', 'E',
+    ('Magnet carrier', 'Aluminium alloys', None, None, None, None, 'Yes', 'E',
      'Matthias, 2026-10-27, step 1: "Accept all" (EVIDENCE.md E2.8)'),
-    ('Gear stage 2, planets, carrier and crossed roller bearing', 'Aluminium', None, 0.125, 0.25, 0.4, None, 'E',
+    ('Gear stage 2, planets, carrier and crossed roller bearing', 'Aluminium alloys', None, 0.125, 0.25, 0.4, None, 'E',
      'The carrier: T1 "保持架为铝，其余为钢"'),
     ('Gear stage 2, planets, carrier and crossed roller bearing', 'Steel', 'Gear stage 2 steel: 20CrMnTi and GCr15',
      None, None, None, 'Yes', 'E',
@@ -214,34 +214,34 @@ SHARES_ROWS = [
     ('Waist fan', 'Plastics', None, None, None, None, 'Yes', 'E', 'E2.8'),
     ('Main board fan', 'Copper', None, 0.05, 0.1, 0.2, None, 'E', 'The motor winding: E2.8'),
     ('Main board fan', 'Plastics', None, None, None, None, 'Yes', 'E', 'E2.8'),
-    ('XT30 (2+2) connectors (two per joint)', 'Copper', 'Brass', 0.175, 0.35, 0.525, None, 'E',
+    ('XT30 (2+2) connectors (two per joint)', 'Brass', 'Brass', 0.175, 0.35, 0.525, None, 'E',
      'The contacts: E2.8; brass, gold-plated (Amass, through LCSC; E5.22)'),
     ('XT30 (2+2) connectors (two per joint)', 'Plastics', None, None, None, None, 'Yes', 'E', 'The housing: E2.8'),
-    ('XT60 connector, mated pair', 'Copper', 'Brass', 0.175, 0.35, 0.525, None, 'E',
+    ('XT60 connector, mated pair', 'Brass', 'Brass', 0.175, 0.35, 0.525, None, 'E',
      "The contacts, brass, as the XT30's (E5.22)"),
     ('XT60 connector, mated pair', 'Plastics', None, None, None, None, 'Yes', 'E', "The housing, as the XT30's"),
-    ('Battery housing, busbars and wires', 'Copper', 'Nickel strip', 0.01, 0.03, 0.06, None, 'E',
+    ('Battery housing, busbars and wires', 'Nickel', 'Nickel strip', 0.01, 0.03, 0.06, None, 'E',
      'The nickel strips between the cells, 0.2 mm thick (sevarg.net, measured), counted with the copper (Matthias, '
      '2026-10-29: "With Copper"); E5.19 point 1'),
     ('Battery housing, busbars and wires', 'Copper', None, 0.05, 0.1, 0.15, None, 'E',
      'The copper wires and busbars: E5.19 point 1'),
     ('Battery housing, busbars and wires', 'Plastics', None, 0.05, 0.1, 0.2, None, 'E',
      'The cell holders, insulation and tape: E5.19 point 1'),
-    ('Battery housing, busbars and wires', 'Aluminium or Plastics', None, None, None, None, 'Yes', 'E',
+    ('Battery housing, busbars and wires', 'Aluminium alloys or Plastics', None, None, None, None, 'Yes', 'E',
      'The housing: "aluminum or high-impact plastics" (teswaybike.com, a claim), each as often (E5.19 point 1)'),
-    ('Battery housing (aluminium), busbars and wires', 'Copper', 'Nickel strip', 0.01, 0.03, 0.06, None, 'E',
+    ('Battery housing (aluminium), busbars and wires', 'Nickel', 'Nickel strip', 0.01, 0.03, 0.06, None, 'E',
      'The nickel strips between the cells, counted with the copper (Matthias, 2026-10-29: "With Copper"); E5.19 '
      'point 1'),
     ('Battery housing (aluminium), busbars and wires', 'Copper', None, 0.05, 0.1, 0.15, None, 'E',
      'The copper wires and busbars: E5.19 point 1'),
     ('Battery housing (aluminium), busbars and wires', 'Plastics', None, 0.05, 0.1, 0.2, None, 'E',
      'The cell holders, insulation and tape: E5.19 point 1'),
-    ('Battery housing (aluminium), busbars and wires', 'Aluminium', None, None, None, None, 'Yes', 'E',
+    ('Battery housing (aluminium), busbars and wires', 'Aluminium alloys', None, None, None, None, 'Yes', 'E',
      'The housing: "Aluminum Alloy" (EngineAI, the PM01; E5.6, E5.19 point 1)'),
     ('Frame: aluminium, with steel 45 and P20 parts', 'Steel', 'RP1 frame steel: C45 and P20', 0.1, 0.2, 0.3, None,
      'E', 'The steel parts: 28 of its 112 CNC parts are steel, 24 of steel 45 or AISI 1045 and 4 of P20 (RP1a), by '
      'count only (E5.14 point 9, E5.18)'),
-    ('Frame: aluminium, with steel 45 and P20 parts', 'Aluminium', None, None, None, None, 'Yes', 'E',
+    ('Frame: aluminium, with steel 45 and P20 parts', 'Aluminium alloys', None, None, None, None, 'Yes', 'E',
      'The aluminium parts: AL6061-T6, AL7075, AL5052 (RP1a); E5.14 point 9'),
     # The casters and the lift column of a robot on wheels (EVIDENCE.md E9.6 points 6 and 7, agreed 2026-10-30): no
     # source weighs their parts; the steel's grade the nearest the recipes hold (E).
@@ -253,7 +253,7 @@ SHARES_ROWS = [
     ('Lift column: aluminium profile, steel screw and guides', 'Steel', '42CrMo4', 0.15, 0.3, 0.45, None, 'E',
      'Its screw and guides (Oriental Motor\'s EL columns: "Ball Screw", ball splines); E9.6 point 7\'s 20 / 30 / 40 % '
      'widened to half to 1.5 times by the rule for estimates (the entry, E9.8); 42CrMo4 a ball screw\'s steel'),
-    ('Lift column: aluminium profile, steel screw and guides', 'Aluminium', None, None, None, None, 'Yes', 'E',
+    ('Lift column: aluminium profile, steel screw and guides', 'Aluminium alloys', None, None, None, None, 'Yes', 'E',
      'Its profile, the remainder (E9.6 point 7)'),
 ]
 
@@ -273,9 +273,13 @@ SHARED_CONSTANTS_FIRST = [
     ('all', 'Insulation and jackets, per mass of copper', 0.5, 1, 1.5, 'times', 'E', 'E2.8'),
 ]
 SHARED_CONSTANTS_LAST = [
-    ('all', 'Battery pack, Wh per kg (packs not weighed)', 109.3, 164, 232.5, 'Wh/kg', 'S, E',
-     "the median of the G1's, X1's, N1's and PM01's packs (159 to 168); the pack at most 1.5 times its mode's mass, "
-     "at least its cells at the NMC cells' lowest energy per kg (E5.14 point 3)"),
+    # A pack no source weighs (Matthias, 2026-11-02, "A, as recommended", EVIDENCE.md E20): its housing, busbars and
+    # wires a share of its cells, from the packs their makers weigh with their energy, each its pack less its cells (at
+    # the NMC cell's 241.5 Wh/kg) and its management board (33.6 g), over its cells.
+    ('all', 'Battery housing, share of its cells (packs not weighed)', 0.207, 0.414, 0.859, 'share', 'S, E',
+     "the median of the packs weighed with their energy, the Unitree G1's 0.414, the EngineAI PM01's 0.505 and "
+     "T800's 0.414; the least half of it; the most the Reachy 2's 0.859 (its 2021 base's pack, E), above 1.5 times "
+     "(E20)"),
     ('all', 'Shell, share of the robot mass', 0.0575, 0.115, 0.1725, 'share', 'E',
      "the median of the G1's 12.9, the N1's 11.5 and the X1's 9.1 %; half to 1.5 times (E5.14 point 6)"),
     ('all', 'Sensor housing, aluminium share', 0.25, 0.5, 0.75, 'share', 'E',
@@ -348,7 +352,7 @@ CONNECTOR_KG = (0.0019, 0.00212, 0.0023)
 FAN_KG = (0.005, 0.01, 0.02)
 COOLER_FAN = ('Main board fan', 1, 'Boards', 'Torso', FAN_KG, None, None, 'E',
               "as the G1's main board fan (E2.8e; 2026-10-29, point 4)")
-ARM_SINK = ('Main board heat sink', 1, 'Boards', 'Torso', (0.05, 0.1, 0.2), 'Aluminium', None, 'E',
+ARM_SINK = ('Main board heat sink', 1, 'Boards', 'Torso', (0.05, 0.1, 0.2), 'Aluminium alloys', None, 'E',
             "an ARM board's: as the G1's (E2.8e; 2026-10-29, point 4)")
 X86_SINK = ('Main board heat sink: heat pipes and fins', 1, 'Boards', 'Torso', (0.055, 0.12, 0.19), 'Copper',
             None, 'E', "an Intel or AMD laptop-class processor's: as the X1's and N1's (E2.8e; 2026-10-29, point 4)")
@@ -383,15 +387,12 @@ JOINT_MIXED = ("the Joints' module masses where given, else their shares of the 
                "mass (Constants); inside as JointParts' joint of its size, scaled to its mass")
 DRIVER_FROM = "JointParts' driver board of its size, scaled to its joint's module mass; area likewise"
 PACK_STATED = 'its cells, its management board (Boards) and its housing (the rows below)'
-PACK_FROM_ENERGY = ('its cells, its management board (Boards) and its housing (the rows below); its mass the energy '
-                    "over Constants' Battery pack, Wh per kg")
+# A pack no source weighs (Matthias, 2026-11-02, "A, as recommended", EVIDENCE.md E20): its cells from its energy, its
+# housing a share of its cells (HOUSING_OF_CELLS), its mass their sum with its management board.
+PACK_FROM_ENERGY = ('its cells, its management board (Boards) and its housing (the rows below), their sum; its housing '
+                    'a share of its cells (E20)')
 PACK_CELLS_ONLY = ("its cells, its management board (Boards) and no housing: the maker's pack is lighter than its "
                    'cells (E5.14 point 3)')
-# A pack with no mass whose cells are not NMC (the CASBOT W1's LFP; Matthias, 2026-10-30, "Ratio, as recommended",
-# EVIDENCE.md E9.8): Constants' Battery pack, Wh per kg is a figure of NMC packs, so its pack is its cells times the NMC
-# packs' pack-to-cell ratio in the same draw.
-PACK_BY_RATIO = ("its cells, its management board (Boards) and its housing (the rows below); its mass its cells times "
-                 "the NMC packs' pack-to-cell ratio: the NMC cell's Wh/kg over Constants' Battery pack, Wh per kg")
 # The cells from their energy, over the Wh/kg of their own cells: the NMC cell's, or for cells of another recipe (the
 # grade of their row) one cell of that recipe in the sheet Cells, drawn.
 CELLS_FROM_CHARGE = 'from the energy: Constants voltage × capacity over {}'
@@ -399,6 +400,7 @@ CELLS_FROM_MASS = "from the energy: Constants' Battery energy per kg of robot ti
 NMC_CELL = "the NMC cell's Wh/kg"
 CELL_OF_RECIPE = "the Wh/kg of a cell of its recipe (its grade) in the sheet Cells"
 HOUSING = 'the battery pack, less its cells and its management board'
+HOUSING_OF_CELLS = "a share of its cells: Constants' Battery housing, share of its cells (packs not weighed)"
 SHELL = "a share of the robot's mass: Constants' Shell, share of the robot mass"
 # A lift column whose maker gives it no mass: a share of the robot's mass less its motor, a joint of the sheet Joints
 # (EVIDENCE.md E9.6 point 7; 01 and 02 read the shared number it names).
@@ -414,6 +416,18 @@ HOUSING_ALUMINIUM = 'Battery housing (aluminium), busbars and wires'
 # The joints of a robot whose sources give no joint torques (E5.17 point 1): AVERAGE in its block. The text is also
 # type 1's name of what its template's rows average; another type names its own (average_joints()).
 AVERAGE = 'as batch 1 on average'
+
+
+# The steels by their grade (EVIDENCE.md E19 point 2, agreed 2026-11-02, "Yes, agree E19"): a stainless steel and an
+# electrical steel each a material of its own; every other grade is the material Steel.
+STAINLESS_GRADES = ('17-4PH', '440C', 'Type 304')
+ELECTRICAL_GRADES = ('M19', 'M27', 'M19 or M27')
+
+
+def steel_of(grade: str | None) -> str:
+    """The material of a part of steel by its grade: Stainless steel, Electrical steel, or Steel."""
+    return ('Stainless steel' if grade in STAINLESS_GRADES else 'Electrical steel' if grade in ELECTRICAL_GRADES
+            else 'Steel')
 
 
 def spread(mode: float, low: float = 1 - STATED_SPREAD, high: float = 1 + STATED_SPREAD) -> tuple:
@@ -463,7 +477,7 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
              encoders=('E', 'two per joint, as type 1 (E5.14)'),
              screws=[('Screws', 1, SCREWS_KG, '42CrMo4', 'E', 'as the G1 (E5.14 point 7); grade E5.18')],
              parts=[], cooler=ARM_COOLER, shell=('Shell: plastics', 'not stated; plastics as type 1 (E5.14 point 6)'),
-             frame=('Frame', 'Aluminium', 'not stated; aluminium as type 1 (E5.14 point 9)'),
+             frame=('Frame', 'Aluminium alloys', 'not stated; aluminium as type 1 (E5.14 point 9)'),
              # A robot on wheels (EVIDENCE.md E9.7 point 3): its battery in its base, its cells' recipe where not NMC
              # (the CASBOT W1's LFP), its template's rows where not its type's (the template on wheels), its lift
              # column ((min, mode, max) kg, label, source; its kg None: a share of its mass, LIFT).
@@ -612,9 +626,10 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     for car_type, per_sensor in ENCODER:
         out['SensorElements'].append(('Encoder', car_type, per_sensor))
 
-    # Its battery: the pack, its cells from their energy, its housing the pack's remainder, its management board; in
-    # its torso, or for a robot on wheels in its base; its cells NMC unless its block names their recipe. A robot that
-    # carries no battery has none of these rows (02 then draws no battery for it, EVIDENCE.md E16.2).
+    # Its battery: the pack, its cells from their energy, its housing the pack's remainder (a pack no source weighs: a
+    # share of its cells, E20), its management board; in its torso, or for a robot on wheels in its base; its cells NMC
+    # unless its block names their recipe. A robot that carries no battery has none of these rows (02 then draws no
+    # battery for it, EVIDENCE.md E16.2).
     region = b['battery_region']
     if not b['battery']:
         pass
@@ -623,7 +638,7 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
                              PACK_CELLS_ONLY, 'S', b['pack_source']))
     elif b['pack'] is None:
         out['Parts'].append((name, 'Battery pack', 1, 'Battery pack', region, None, None, None, None, None,
-                             PACK_BY_RATIO if b['cell_recipe'] else PACK_FROM_ENERGY, 'S, E',
+                             PACK_FROM_ENERGY, 'S, E',
                              'its mass not stated (E5.14 point 3)' + ('; its cells not NMC (E9.8)' if b['cell_recipe']
                                                                       else '')))
     else:
@@ -632,12 +647,16 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
                              PACK_STATED, label, source))
     if b['battery']:
         label, source = b['cells']
-        out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', region, None, None, None, 'Battery materials',
+        out['Parts'].append((name, 'Battery cells', 1, 'Battery pack', region, None, None, None, 'Battery cells',
                              b['cell_recipe'], (CELLS_FROM_CHARGE if b['voltage'] else CELLS_FROM_MASS).format(
                                  CELL_OF_RECIPE if b['cell_recipe'] else NMC_CELL), label, source))
         if b['housing']:
-            out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None, HOUSING,
-                                 'E', 'E5.19 point 1'))
+            if b['pack'] is None:
+                out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None,
+                                     HOUSING_OF_CELLS, 'E', 'E5.19 point 1; a share of its cells (E20)'))
+            else:
+                out['Parts'].append((name, b['housing'], 1, 'Battery pack', region, None, None, None, None, None,
+                                     HOUSING, 'E', 'E5.19 point 1'))
         out['Boards'].append((name, 'Battery management board', 1, 'Battery pack', region, *BATTERY_BOARD,
                               'area times Constants board mass per cm2', 'BMS', 'E', 'as the G1 (E5.14 point 4)'))
 
@@ -657,8 +676,8 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     out['Parts'].append((name, 'XT30 (2+2) connectors (two per joint)', 2 * in_robot, 'Cables', 'Whole body',
                          *CONNECTOR_KG, None, None, None, label, source))
     for part, count, kg, grade, label, source in b['screws']:
-        out['Parts'].append((name, part, count, 'Frame and shell', 'Whole body', *kg, 'Steel', grade, None, label,
-                             source))
+        out['Parts'].append((name, part, count, 'Frame and shell', 'Whole body', *kg, steel_of(grade), grade, None,
+                             label, source))
     for part, count, kind, region, kg, material, grade, label, source in b['cooler'] + b['parts']:
         out['Parts'].append((name, part, count, kind, region, *kg, material, grade, None, label, source))
     if b['lift_column']:
