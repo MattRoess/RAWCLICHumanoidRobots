@@ -417,9 +417,12 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
      241.5 / 256 Wh/kg (recommendation f; the settings `composition.nmc_wh_per_kg_min`, `_mode`, `_max`).
    Of them, only the **elements of interest** are written (EVIDENCE.md E19 point 3; Matthias, 2026-11-02, "Yes, agree
    E19"), from what is recovered as elements, as RAWCLICDataCenters counts them: Li, B, Mg, Al, Ti, Mn, Co, Ni, Cu, Ga,
-   Sr, Nb, Pd, Ag, In, Sn, Ta, Au, Pb, Nd, Pr, Dy, Tb. Copper, nickel and the aluminium, magnesium and titanium alloys
-   are each their base metal whole (Cu, Ni, Al, Mg, Ti), with a recipe or without; the alloying elements stay in the
-   alloy and are shown in the alloys table. The NdFeB magnets give their Nd, Pr, Dy, Tb, Co, B, Nb and Ga; the battery
+   Sr, Nb, Pd, Ag, In, Sn, Ta, Au, Pb, Nd, Pr, Dy, Tb. Copper and nickel are each their metal whole (Cu, Ni), with a
+   recipe or without. The aluminium, magnesium and titanium alloys keep their whole mass as materials, for the total
+   weight, and give as their element (Al, Mg, Ti) the metal their recipe holds, for the inflow needs (Matthias,
+   2026-11-02: "I need both alloy mass and then also the Al mass. The first for the total weight and the last for the
+   inflow needs", "Yes do it as writen in A"; EVIDENCE.md E24; a light alloy with no recipe its metal whole); their
+   other elements stay in the alloy, in no element, and are shown in the alloys table. The NdFeB magnets give their Nd, Pr, Dy, Tb, Co, B, Nb and Ga; the battery
    cells their Li, Ni, Co and Mn, and the Cu and Al of their foils and tabs (the recipe's items marked "As metal"; "The
    foils are recycled to the elements"); the boards and the sensors their metals of interest, not the glass, epoxy and
    bromine of the board. Steel, stainless steel, electrical steel, brass, plastics, fibre composites, ceramics and other
@@ -434,15 +437,17 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
    (80 to 91 % of all the copper is counted). Ni: the battery cells, Nickel and the boards, not the nickel in the
    aluminium alloys and the steels. Mn: the battery cells, not the manganese in the steels and the aluminium alloys.
    B: the magnets and the boards' metals, not the boron of glass fibre and plastics. Sn and Pb: the boards, not the
-   aluminium alloys'. Al, Mg and Ti are the light alloys' whole mass (8 to 12 % more than the metal they hold), with
-   the battery cells' and the boards' aluminium; not the aluminium of plastics, magnesium alloys, electrical steel and
+   aluminium alloys' (copper: also the copper fixed in alloys and the inflow, written apart, E25: `copper.npy`, the Cu
+   panel of the element pages). Al, Mg and Ti are the metal the light alloys hold (since E24; until then their whole mass, 8 to
+   12 % more), with the battery cells' and the boards' aluminium; not the aluminium of plastics, magnesium alloys, electrical steel and
    magnets. An element inside another material goes where that material goes when it is recycled.
 5. **Not allocated:** the parts minus the materials. The two are drawn independently, so it is below zero where the
    drawn materials weigh more than the drawn parts (recommendation b: allowed, and the summary gives the share of
    draws).
 6. **Materials without a recipe yet** (in the workbook's rows: the NdFeB magnets, the boards and components, the
    steels, ceramics and other): their kilograms are drawn; their elements are not, and the summary and the pages say so
-   (recommendation c). Copper, nickel and the light alloys are their metal whole all the same.
+   (recommendation c). Copper and nickel are their metal whole all the same, and a light alloy with no recipe its
+   metal whole.
 
 Each robot type has its own random numbers, from `composition.seed` and its number, so that it gives the same draws
 however many robot types are drawn. Nothing is normalised.
@@ -451,8 +456,8 @@ After drawing, 02 checks every draw (`draw_faults`), and writes nothing if one f
 - the materials and Not allocated add up to the parts, and so do the part groups and the body regions;
 - the elements of the recipes add up to the materials that have recipes, within 0.1 %: the compounds written as mass
   shares are rounded to five decimals, and 01 lets a compound's shares add up to 1 within 0.001;
-- the elements of interest add up to the materials they come from; copper, nickel and the light alloys are each their
-  element whole; no other material gives more than it weighs (E19);
+- the elements of interest add up to the materials they come from; copper and nickel are each their element whole;
+  no other material, the light alloys included, gives more than it weighs (E19, E24);
 - the cells and the rest add up to the battery row;
 - nothing is below zero except Not allocated; and, in a draw where a remainder of the robot drawn (its frame, a weighed
   pack's housing, a joint's structure) is below zero, what falls below zero with it (a part group, a body region, a
@@ -469,8 +474,10 @@ is drawn, part by part over its robots (every tenth robot of its parts file said
 T1") or from the workbook ("done in 3 min 40 s"); checking that the draws add up; each type's draws written and its
 pages drawn; and last "02 done in 6 min 57 s", or "02 stopped after …: nothing is written" where a fault stops it.
 
+**No text over a chart** (Matthias, 2026-11-02: "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is first and not the text Tex can go to other places"; EVIDENCE.md E26): no text inside a chart lies over its bars or lines; 02's `texts_over_data` finds any, and a test applies it to every page 02 draws of a robot type taken apart. A number that does not fit goes above the panel or onto a page of its own.
+
 **Pages of an earlier run** (Matthias, 2026-11-02, "02 removes them itself"): a robot type's numbered pages are a
-series each, `<n>_<name>_<notes|elements|materials|alloys>_<k>.png` in `figures/composition/` and
+series each, `<n>_<name>_<notes|elements|means|materials|alloys>_<k>.png` in `figures/composition/` and
 `robot_type_<n>_<notes|elements|overview>_<k>.png` in its folder of `figures/parts_taken_apart/`. After drawing a type's
 pages, 02 removes, each by its exact name, the pages of each series numbered beyond the last it has just drawn (all of
 a series of which it drew none), and says each ("… removed: a page of an earlier run no longer drawn"); nothing else
@@ -486,6 +493,7 @@ For each robot type, a folder `data/consolidated/<n>_<name>/` (the folder anothe
 | `elements.npy` | kg per robot by element of interest (E19 point 3), every robot type the same columns: those any of them holds, in the order of 01's table of atomic masses |
 | `part_groups.npy`, `body_regions.npy` | kg per robot by part group and by body region |
 | `total.npy` | the robot's mass, the sum of its parts |
+| `copper.npy` | since 2026-11-02 (EVIDENCE.md E25: "we have to destiguish, what is fixed in alloys like Al aalloysa nd brass", "and what can be recycled as elemental Cu"): kg per robot of copper recycled as copper (the element Cu: the material Copper, the boards and components, the battery cells' foils and tabs), fixed in alloys (the copper the aluminium alloys, brass, steel, stainless steel, electrical steel, the NdFeB magnets and the magnesium alloys hold by their recipes or fractions, which goes where the alloy goes), and the inflow, both; three columns, draw by draw, adding up in every draw (02 checks it); in the summary as rows of the kind Copper |
 | `<name>.txt` | the columns of each `.npy`, one name per line |
 | `summary.xlsx`, `summary.csv` | per material and per element: the mean, the median, the 95 % interval (2.5 % and 97.5 %), all over the draws that hold it, and "Held in", the share of the draws that hold it; the share of all the draws below zero; whether the material is in the elements of interest (Yes: its metal whole; Partly: its elements of interest; No: it stays a material, or has no recipe yet) with its kilograms that are, at the mean of the same draws; empty statistics where it is 0 in every draw |
 
@@ -725,7 +733,12 @@ robot is drawn part by part, with these changes:
    its elements of interest six a page (since 2026-11-02, EVIDENCE.md E19 point 7; the preview of type 5, "Yes, build
    them"), each the histogram of one robot's total over the draws, each bar split into the kg its draws hold from each
    material it comes from, the smaller lower (RAWCLICDataCenters 05's form; Paul Tol's muted scheme, as published),
-   each material's mean written in the panel, one legend of the page's materials; median solid and mean dotted with
+   one legend of the page's materials, no text inside the panel (copper since E25 as its inflow, "Copper (Cu),
+   inflow": its copper recycled as copper by material, and the copper fixed in alloys as one part in the scheme's pale
+   grey, "Copper fixed in alloys"; the scheme has no colour left for brass and the three steels); each element's mean
+   by the material it comes from on pages of their own after them (`<n>_<name>_means_<k>.png`, a table: the element,
+   then each material with its mean over the draws that hold the element, a material whose copper is fixed in it
+   marked "(fixed)"; since 2026-11-02, the means were in the panel before, over its bars); median solid and mean dotted with
    their numbers above the panel, right, over its title's line (since 2026-10-30, "Yes, fix it": a long title ran into
    them), 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it on a separate one"; "can
    you better adust the hight"). An element held in fewer than 2.5 % of the draws has no panel; one that is 0 in some

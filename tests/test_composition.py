@@ -193,15 +193,15 @@ class TestSums(Drawn):
             self.assertEqual(composition.draw_faults(c), [f'robot type {robot}: {words}.'], table)
 
     def test_a_material_not_its_element_whole_or_giving_more_than_it_is_caught(self):
-        # E19 point 3: the aluminium alloys are their aluminium whole; the battery cells never give more elements of
-        # interest than they weigh. Each broken in one draw, Not allocated taking the difference so that the materials
-        # still add up to the parts.
+        # E19 point 3: copper is its copper whole; the battery cells never give more elements of interest than they
+        # weigh. Each broken in one draw, Not allocated taking the difference so that the materials still add up to
+        # the parts. (The aluminium alloys were their aluminium whole until E24, 2026-11-02.)
         one = self.compose()[1]
         columns, kg = one.tables['materials']
-        kg[5, columns.index('Aluminium alloys')] += 0.1
+        kg[5, columns.index('Copper')] += 0.1
         kg[5, columns.index(composition.NOT_ALLOCATED)] -= 0.1
         self.assertEqual(composition.draw_faults(one),
-                         ['robot type 1: Aluminium alloys is not its element Al whole in 1 draw.'])
+                         ['robot type 1: Copper is not its element Cu whole in 1 draw.'])
         two = self.compose()[2]
         columns, kg = two.tables['materials']
         cells, rest = columns.index('Battery cells'), columns.index(composition.NOT_ALLOCATED)
@@ -362,7 +362,7 @@ class TestRun(Drawn):
             with open(os.path.join(path, 'summary.csv'), encoding='utf-8', newline='') as file:
                 rows = list(csv.DictReader(file))
             self.assertEqual(rows[0].keys(), set(composition.SUMMARY_HEADINGS))
-            self.assertEqual({r['Kind'] for r in rows}, {'Material', 'Element'})
+            self.assertEqual({r['Kind'] for r in rows}, {'Material', 'Element', 'Copper'})   # Copper since E25
             self.assertTrue(os.path.exists(os.path.join(path, 'summary.xlsx')))
 
     def test_a_page_is_drawn_for_each_robot_type_the_setting_names(self):
@@ -519,8 +519,12 @@ class TestElementsOfInterest(Drawn):
             self.assertEqual(composition.draw_faults(c), [], c.number)
 
     def test_a_whole_material_is_its_element(self):
+        # Copper its copper whole. The aluminium alloys since E24 (Matthias, 2026-11-02: "I need both alloy mass and
+        # then also the Al mass", "Yes do it as writen in A") the aluminium their recipe holds: the small recipe 'Outer'
+        # holds none, so no Al; the alloys keep their whole mass as a material.
         one = self.compose()[1]
-        np.testing.assert_allclose(one.column('elements', 'Al'), one.column('materials', 'Aluminium alloys'), rtol=1e-12)
+        self.assertFalse(one.column('elements', 'Al').any() if 'Al' in one.tables['elements'][0] else False)
+        self.assertTrue(one.column('materials', 'Aluminium alloys').all())
         np.testing.assert_allclose(one.column('elements', 'Cu'), one.column('materials', 'Copper'), rtol=1e-12)
         self.assertNotIn('Fe', one.tables['elements'][0])
         # Their recipe's elements are still drawn (the recipes add up), but not declared.
@@ -538,9 +542,32 @@ class TestElementsOfInterest(Drawn):
         self.assertEqual(composition.run(params), 0)
         drawn = self.compose()
         rows = {r['Name']: r for r in composition.summary(drawn[1]) if r['Kind'] == 'Material'}
+        # The aluminium alloys give the aluminium their recipe holds (E24): the small recipe 'Outer' holds none.
         self.assertEqual((rows['Aluminium alloys']['In the elements'], rows['Copper']['In the elements']),
-                         ('Yes', 'Yes'))
+                         ('No', 'Yes'))
         rows = {r['Name']: r for r in composition.summary(drawn[2]) if r['Kind'] == 'Material'}
         self.assertEqual(rows['Battery cells']['In the elements'], 'Partly')
         with open(os.path.join(params.output.composition_dir, '1_small', 'elements.txt'), encoding='utf-8') as file:
             self.assertTrue(set(file.read().splitlines()) <= set(E19_INTEREST))
+
+
+class TestCopperSplitOfTheWorkbook(Drawn):
+    """EVIDENCE.md E25: a robot type of the workbook writes its copper too: recycled as copper (the element Cu), fixed in
+    alloys, and the inflow, adding up in every draw."""
+
+    def test_the_copper_table(self):
+        for c in self.compose().values():
+            columns, draws = c.tables['copper']
+            self.assertEqual(columns, list(composition.COPPER_COLUMNS))
+            recycled = c.column('elements', 'Cu') if 'Cu' in c.tables['elements'][0] else np.zeros(len(draws))
+            np.testing.assert_allclose(draws[:, 0], recycled, rtol=1e-12)
+            np.testing.assert_allclose(draws[:, 0] + draws[:, 1], draws[:, 2], rtol=1e-12)
+            self.assertEqual(composition.draw_faults(c), [], c.number)
+
+    def test_it_is_written(self):
+        params = self.write()
+        self.assertEqual(composition.run(params), 0)
+        folder = os.path.join(params.output.composition_dir, '1_small')
+        with open(os.path.join(folder, 'copper.txt'), encoding='utf-8') as file:
+            self.assertEqual(file.read().splitlines(), list(composition.COPPER_COLUMNS))
+        self.assertEqual(np.load(os.path.join(folder, 'copper.npy')).shape[1], 3)

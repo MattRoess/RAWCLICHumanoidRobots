@@ -60,7 +60,36 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-02, afternoon: batch 3 of types 3 and 4 (E15.8) and the battery housings (E20) built; where to start (start here)
+## 2026-11-02, evening: elements and copper made exact, the pages' text rules; where to start (start here)
+
+What changed since the push of 13:14 (commit 98a83f5 holds the first two; the rest is this evening's commit), each on
+Matthias's word:
+- **The elements audited** (V149): every element of interest against all that 02 draws, material by material; the
+  counted elements equal what 02 writes.
+- **The cables' copper** checked against the RoboParty RP1's own 43 harness drawings and kept ("Yes, keep it"; E22,
+  V150).
+- **The material pages** without the grades of the steels and the aluminium alloys; overview_1's box; overview_2's open
+  line from the register; 02 removes a page it no longer draws (E23, V151, V152).
+- **The light alloys** (E24, V153: "I need both alloy mass and then also the Al mass"): the material their whole mass
+  (the total weight), the element Al, Mg, Ti the metal they hold (the inflow). Brass decided: a material, not recycled
+  to elements.
+- **Copper three ways** (E25, V154): recycled as copper (the element Cu), fixed in alloys (aluminium alloys, brass, the
+  steels, magnets, magnesium alloys), and the inflow, both; written as `copper.npy` with every type's draws; the Cu
+  panel "Copper (Cu), inflow".
+- **No text over a chart** (E26, V155: "The figure is first and not the text"): a rule in 02 and a test of every page;
+  the means by material on pages of their own; the critical elements' numbers above their panels.
+
+**Matthias's runs to see it** (each by pressing Run; the parts files and the register need no rebuild):
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws)
+
+**Open:**
+- The same split for the other elements of interest (manganese, nickel, magnesium, aluminium, tin, lead, titanium
+  fixed in alloys: E25 point B), only on his word.
+- The robots tables' header "Frame and shell" touches the right edge of its band (01; found, not asked).
+- 03 reads `copper.npy` but draws no view of it; 03 waits until types 1 to 6 are done.
+
+## 2026-11-02, afternoon: batch 3 of types 3 and 4 (E15.8) and the battery housings (E20) built
 
 What changed, on Matthias's word ("Move on", after E19; E15.7 as agreed, open points A to E as recommended): the other
 112 robots of E15.3, 122 blocks, in `tools/parts_types_3_and_4.py` (type 3's file 94 robots in 98 blocks, type 4's 74
@@ -108,8 +137,10 @@ RP1's own harness (EVIDENCE.md E22, VERIFICATION V150), kept on his word ("Yes, 
   `…/GitHub/RAWCLICHumanoidRobots/01_schemas.py`, then `…/GitHub/RAWCLICHumanoidRobots/02_composition.py`
   (the parts files need no rebuild).
 - 02 removes a numbered page of a type it no longer draws ("02 removes them itself", EVIDENCE.md E23, VERIFICATION V152).
-- Waiting for his word: whether Al, Mg and Ti count the alloys' whole mass or the metal they hold; whether brass's
-  copper counts as Cu.
+- Built: the light alloys, the material their mass, the element the metal they hold (EVIDENCE.md E24, V153); his run
+  of 02 to see it. Built: copper recycled as copper, fixed in alloys, and the inflow (E25, V154; `copper.npy`, the Cu
+  panel "Copper (Cu), inflow"). His run: `…/GitHub/RAWCLICHumanoidRobots/02_composition.py`. Brass decided: a material, its copper not in Cu ("Brass will not be recycled to
+  elements due to very high energy demands").
 - Found with batch 3, reported, not acted on: the Kengo's hands are 2 × 6 joints (the catalogue's "hands 12"), not
   E15.3's 2 × 12, built as 2 × 6; batches 1 and 2 of types 3 and 4 keep the ARM cooler with Intel or AMD computers;
   E15.5's expected shares (139 and 99) came out 137 and 98 (E15.8 point 6); the GoMate's height is 1.74 m as heise

@@ -227,8 +227,9 @@ def view_notes(table: str) -> list:
         notes.insert(0, "Not allocated: the parts' mass minus the materials' mass in each draw; below zero where the "
                         'drawn materials weigh more than the drawn parts. Battery cells: the cells only.')
     elif table == 'elements':
-        notes.insert(0, 'Only the elements of interest, from what is recovered as elements: copper, nickel and the '
-                        'light alloys each its metal whole; the magnets, the battery cells and the boards and '
+        notes.insert(0, 'Only the elements of interest, from what is recovered as elements: copper and nickel each '
+                        'its metal whole; the light alloys the metal they hold; the magnets, the battery cells and the '
+                        'boards and '
                         'components their metals of interest. Which materials give them, for each robot type, is on '
                         'its page in figures/composition/.')
     elif table == 'part_groups':

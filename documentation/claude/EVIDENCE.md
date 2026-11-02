@@ -8,6 +8,92 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E26. No text over a chart: the rule (2026-11-02). Built
+
+Matthias, 2026-11-02: "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is first and
+not the text Tex can go to other places"; then "Yes, build it" on the preview of type 1's pages.
+
+| What | Where it landed |
+|---|---|
+| The rule | `02_composition.py` `texts_over_data(figure)`: every text inside a chart (an axes with its axis drawn) against its bars (patches) and lines; returns those over them. `tests/test_parts_taken_apart.py` `TestNoTextOverData`: every page 02 draws of type 1 taken apart (notes, element, means, material and alloys pages, its two figures of where the critical elements sit, where each material sits). It failed on 13 texts before the change: the Cu panel's list of means, and the median and mean labels of seven panels of the critical elements' figure |
+| The element pages | the means by material out of the panels (`by_material_panel` writes none); on pages of their own after the element pages, `means_pages()`: a table, each element, then each material with its mean over the draws that hold the element, copper's alloys marked "(fixed)" (`material_means`); the bars take the panel's height |
+| The critical elements' figure | `stacked_panel` draws its lines and numbers by `centre_lines`, as the element pages: median and mean above the panel, right (one copy) |
+| Pages of an earlier run | the new series `means` in `COMPOSITION_SERIES` |
+| Memory | the rule kept for every session ("figure first, no text over data") |
+
+The preview, drawn with the tests' fixed magnet fractions, held no copper in the magnets; drawn by 02 with its own
+draws, type 4's table lists "NdFeB magnets (fixed) 1.3 g". VERIFICATION V155.
+
+## E25. Spec: copper recycled as copper, copper fixed in alloys, and the inflow (2026-11-02). Agreed and built (E25.1)
+
+Matthias, 2026-11-02: "Cu in Al Alloys. Can this be negected?", then "So we have to add it to the inflow cupper, but we
+have to destiguish, what is fixed in alloys like Al aalloysa nd brass", "and what can be recycled as elemental Cu".
+
+| # | What it builds | His words |
+|---|---|---|
+| 1 | **Cu, recycled as copper:** the element Cu as now: the material Copper, the boards and components, the battery cells' foils and tabs (V149: 1.9 to 3.9 kg per robot) | "what can be recycled as elemental Cu" |
+| 2 | **Cu fixed in alloys:** the copper the alloys hold by their recipes, a quantity of its own beside Cu: the aluminium alloys (0.16 to 0.71 kg) and brass (0.024 to 0.026 kg), and see A | "what is fixed in alloys like Al alloys and brass" |
+| 3 | **Cu, inflow:** 1 and 2 together, all the copper the robot needs (2.1 to 4.6 kg per robot, V149) | "add it to the inflow copper" |
+| 4 | Written with each robot type's draws (a column of its own, draw by draw, so that the three add up in every draw); in the summary with their statistics; on the element pages the Cu panel split by material as now, the alloys' copper marked as fixed in an alloy | "we have to distinguish" |
+| 5 | Tests first (in every draw 1 + 2 = 3 = all the Cu the recipes hold, to the rounding); METHODOLOGY, VERIFICATION, HANDOVER; his run of 02 | standing rules |
+
+**Open points, each with my recommendation:**
+- **A. Which alloys.** He named the aluminium alloys and brass ("like"). The steels (0.008 to 0.015 kg), the magnets
+  (0.001 to 0.002 kg) and the magnesium alloys (below 0.001 kg) hold copper fixed in them too. Recommended: every
+  material that holds copper in an alloy (all five), so that the inflow is all the copper.
+- **B. The other elements of interest.** The same split exists for others: manganese (the cells' 0.02 to 0.07 kg
+  counted; the steels' 0.06 to 0.13 kg and the aluminium alloys' 0.02 to 0.06 kg fixed), nickel (the aluminium alloys'
+  and steels'), aluminium (in plastics, magnesium alloys, electrical steel, magnets), magnesium (in the aluminium
+  alloys, 0.17 to 0.76 kg), tin, lead, titanium (V149). Recommended: copper now, as asked; the same rule for the others
+  only on his word.
+
+### E25.1 Built (2026-11-02, "Yes, build it"; A and B as recommended)
+
+| What | Where it landed |
+|---|---|
+| 1 to 3 | `02_composition.py`: `FIXED_IN_ALLOYS` (copper: the aluminium alloys, brass, steel, stainless steel, electrical steel, the NdFeB magnets, the magnesium alloys); `Robot.element` keeps the copper of those materials (`Draws.fixed`); `copper_table()`: 'Cu recycled as copper' (the element Cu), 'Cu fixed in alloys', 'Cu inflow', for the types taken apart (`compose_taken_apart`) and those of the workbook (`compose`) |
+| 4 | the table `copper` in `TABLES`, written as `copper.npy` / `.txt` with every type's draws; the summary's rows of the kind Copper; the element pages' Cu panel "Copper (Cu), inflow", the alloys' copper one part, "Copper fixed in alloys", in Paul Tol's muted pale grey (the scheme has no colour left for brass and the three steels), each alloy's share written in the panel marked "(fixed)" |
+| 5 | tests first: `TestCopperSplit` (type 1: recycled the element Cu, recycled and fixed the inflow, the inflow all the copper of the recipes within 0.2 %, the copper's own traces; no other material holds copper; the summary's rows; the Cu panel's title and its "(fixed)" lines), `TestCopperSplitOfTheWorkbook`; 02's `draw_faults` checks that the three add up. Two tests changed with the page (the Cu panel's title, the summary's kinds). VERIFICATION V154 |
+
+What 03 does with `copper.npy`: it reads it with every table (`TABLES`) and checks its draws and columns; it draws no
+view of it (its views are the materials, elements, part groups and body regions).
+
+## E24. Spec: the light alloys' mass and their metal's mass (2026-11-02). A agreed and built (E24.1)
+
+Matthias, 2026-11-02: "I need both alloy mass and then also the Al mass. The first for the total weight and the last
+for the inflow needs" (after V149: the Al element was the aluminium alloys' whole mass, 8 to 9 % more than the
+aluminium they hold).
+
+| # | What it builds | His words |
+|---|---|---|
+| 1 | The material Aluminium alloys keeps the alloys' whole mass (the total weight), as now | "alloy mass ... for the total weight" |
+| 2 | The element Al becomes the aluminium the alloys hold, by their recipes (6061, 7075, A380, ADC12, the type's recipe), with the battery cells' foils and the boards' aluminium as now; no longer the alloys' whole mass. In 02's draws about 8 % less: 12.6 to 45.6 kg of aluminium per robot from the alloys instead of 13.6 to 49.5 (V149). A light alloy with no recipe (none so far) stays its metal whole | "also the Al mass ... for the inflow needs" |
+| 3 | 02's check: the aluminium alloys no longer "their element whole", but no more aluminium than they weigh (as the other materials) | follows from 2 |
+| 4 | Tests first; METHODOLOGY ("What each element of interest counts"), VERIFICATION, HANDOVER; his run of 02 | standing rules |
+
+**Open points, each with my recommendation:**
+- **A. Magnesium and titanium.** The same holds for them: the Mg element is now the magnesium alloys' whole mass (11 %
+  more than their magnesium), the Ti element Ti-6Al-4V's whole mass (11 to 12 % more than its titanium).
+  Recommended: the same rule for both, the material their alloy's mass, the element the metal they hold.
+- **B. The other elements of the light alloys** (the copper, magnesium, zinc, silicon, manganese of the aluminium
+  alloys; the aluminium of AZ91 and of Ti-6Al-4V). Today they stay in the alloy and count in no element (the copper
+  of the aluminium alloys, 0.16 to 0.71 kg per robot, is not in Cu). For inflow needs they are needed too; for
+  recovery they go where the alloy goes. Recommended: as now, only what he asked; to be decided apart.
+
+### E24.1 Built (2026-11-02, "Yes do it as writen in A")
+
+`02_composition.py`: `WHOLE` holds copper and nickel only; `LIGHT_ALLOYS` (Aluminium alloys Al, Magnesium alloys Mg,
+Titanium alloy Ti) give, in `declared()`, the metal their recipe holds (with no recipe: their metal whole); the check
+"no material gives more than it weighs" now covers them. Every text that said "the light alloys whole" (02's header,
+its notes pages, the summary notes, 03's notes) rewritten. Tests: `TestLightAlloysTheirMetal` (type 1's aluminium and
+titanium, type 4's magnesium: the element 75 to 99.9 % of the alloy in every draw; failed before, the share exactly
+1), and four tests of the small workbook changed with it (its aluminium follows a recipe with no aluminium: Al none).
+B as recommended: the alloys' other elements in no element. VERIFICATION V153.
+
+**Brass, decided** (Matthias, 2026-11-02: "For brass it is the same. Brass will not be recycled to elements due to very
+high energy demands"): brass stays a material, its mass for the total weight, its copper not in the Cu element (as
+now; V149: 0.024 to 0.026 kg per robot). Read so: brass is recycled as an alloy, not to its elements. Nothing to build.
+
 ## E23. The material pages and 01's overview pages (2026-11-02). Agreed and built
 
 Matthias, 2026-11-02: "Sorry overview_1 is bad. You should have found this"; "There are far to many different types of

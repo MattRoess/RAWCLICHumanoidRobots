@@ -5,6 +5,51 @@ by Claude, newest first.
 
 ## 2026-11-02
 
+### V155. E26: no text over a chart, the rule and the pages
+
+- **His words:** "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is first and not
+  the text Tex can go to other places"; "Yes, build it" on the preview (2026-11-02).
+- **The rule as a test first:** `TestNoTextOverData` failed on 13 texts (the Cu panel's list; the median and mean
+  labels of Copper, Aluminium, Silver, Gold, Tantalum, Nd+Pr and Dysprosium on the critical elements' figure); passes
+  after the change. Four tests of the old layout rewritten to the new places (the numbers above the panel; the means
+  on their own pages; the order of the page series). The suite: 497 tests, all pass (`scratchpad/tests_rule2.log`).
+- **Pages looked at:** the preview of type 1 (element page 2, means page 1, the critical elements' page 1: no text
+  over a bar or a line); 02 in the scratch copy (2,000 draws), "they add up", "02 done", two means pages for every
+  type; type 4's means page 1 read (its copper row: Copper 2.1 kg; Aluminium alloys (fixed) 490 g; Battery cells
+  306 g; Boards and components 210 g; Brass (fixed) 24 g; Steel (fixed) 9.8 g; NdFeB magnets (fixed) 1.3 g).
+- **Not covered:** 01's pages (its tables are text in boxes by design; the box rule of V151 covers its overview);
+  the workbook types' pages; his run of 02.
+- **Date:** 2026-11-02.
+
+### V154. E25 built: copper recycled as copper, fixed in alloys, and the inflow
+
+- **His words:** "So we have to add it to the inflow cupper, but we have to destiguish, what is fixed in alloys like
+  Al aalloysa nd brass", "and what can be recycled as elemental Cu", "Yes, build it" (2026-11-02).
+- **Tests first:** the four new tests failed before the code (no table 'copper', no `COPPER_COLUMNS`, no copper.txt);
+  pass after it. The suite: 496 tests, all pass (`scratchpad/tests_E25b.log`).
+- **Scratch run of 02** (2,000 draws): "they add up"; every type's `copper.npy`, the inflow's mean per robot: type 1
+  2.08 kg (recycled 1.89, fixed 0.19), type 2 3.76 (3.01, 0.75), type 4 3.13 (2.60, 0.53); types 3, 5 and 6 as written
+  from the workbook 3.30, 9.72 and 4.56 kg (0.32 to 0.34 kg fixed).
+- **Page looked at:** type 1's element page 2: "Copper (Cu), inflow", its bars of copper, boards, cells and the grey
+  "Copper fixed in alloys", the panel's list: Copper 1.6 kg, Boards and components 166 g, Aluminium alloys (fixed)
+  158 g, Battery cells 147 g, Brass (fixed) 26 g, Steel (fixed) 7.5 g, NdFeB magnets (fixed) 1 g, Stainless steel
+  (fixed) 190 mg. The list of eight lines pushes the bars low in the panel (readable; reported).
+- **Not covered:** his run of 02; 03 with the new table (not run, as decided).
+- **Date:** 2026-11-02.
+
+### V153. E24 built: the light alloys' elements are the metal they hold
+
+- **His words:** "I need both alloy mass and then also the Al mass. The first for the total weight and the last for
+  the inflow needs", "Yes do it as writen in A" (2026-11-02).
+- **Tests first:** `TestLightAlloysTheirMetal` failed before the code (the aluminium's and magnesium's share exactly 1);
+  passes after it. The suite: 492 tests, all pass (`scratchpad/tests_E24.log`).
+- **Audit** (`scratchpad/housing/elements_audit.py` on the sandbox, 4,000 draws a type): the Al, Mg and Ti counted from
+  the alloys equal the metal their recipes hold, in all six types (Al 12.6 to 45.6 kg per robot from the aluminium
+  alloys, where the whole alloys counted 13.6 to 49.5 before; Mg 0.15 to 3.28 kg; Ti 0.004 to 0.030 kg); the counted
+  elements equal what 02 writes to 4 × 10⁻¹⁵. The materials (the alloys' whole mass) unchanged.
+- **Not covered:** his run of 02 with this code; the pages looked at (no layout changed).
+- **Date:** 2026-11-02.
+
 ### V152. 02 removes a numbered page it no longer draws
 
 - **His words:** "02 removes them itself" (2026-11-02); then "I am runing 02": the change made and tested in the scratch

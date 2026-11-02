@@ -646,6 +646,7 @@ class TestElementPages(unittest.TestCase):
             kg = c.column('elements', symbol)
             held = kg > 0
             label = composition.element_label(symbol)
+            label = label + ', inflow' if label + ', inflow' in panels else label   # copper since E25
             if held.mean() < composition.HELD_SHARE:   # nothing, or nearly: no panel
                 self.assertNotIn(label, panels)
                 continue
@@ -671,10 +672,9 @@ class TestElementPages(unittest.TestCase):
             total = sum(kinds.values())
             figure, axes = composition.plt.subplots()
             composition.stacked_panel(axes, kinds, name, True)
-            texts = ' '.join(t.get_text() for t in axes.texts)
-            share = axes.get_title(loc='right')
+            texts = share = axes.get_title(loc='right')   # the numbers above the panel since 2026-11-02
             composition.plt.close(figure)
-            self.assertNotIn(' median 0 ', texts, msg=symbol)
+            self.assertNotIn('median 0\u00a0', texts, msg=symbol)
             held = total > 0
             if held.all():   # since 2026-11-01 the right may say what lies beyond the axis (TestAxisEnd), never a share
                 self.assertNotIn('of the draws', share, msg=symbol)
@@ -682,7 +682,7 @@ class TestElementPages(unittest.TestCase):
             partly.append(symbol)
             self.assertEqual(share.split('\n')[0], f'in {composition.panel_number(100 * held.mean())} % of the draws')
             per, unit = composition.panel_unit(total[held])
-            self.assertIn(f' median {composition.panel_number(np.median(total[held]) / per)} {unit}', texts)
+            self.assertIn(f'median {composition.panel_number(np.median(total[held]) / per)}\u00a0{unit}', texts)
         self.assertIn('In', partly)
 
     def test_an_overview_row_held_in_some_draws_shows_the_draws_that_hold_it(self):
@@ -742,8 +742,10 @@ class TestCentre(unittest.TestCase):
         self.assertEqual(len(dotted), 1)
         self.assertAlmostEqual(solid[0].get_xdata()[0], np.median(self.VALUES))
         self.assertAlmostEqual(dotted[0].get_xdata()[0], self.VALUES.mean())
-        texts = [t.get_text() for t in axes.texts]
-        self.assertTrue(any('median' in t for t in texts) and any('mean' in t for t in texts), msg=texts)
+        # Their numbers above the panel, right, not over its bars (Matthias, 2026-11-02: "The figure is first").
+        above = axes.get_title(loc='right')
+        self.assertTrue('median' in above and 'mean' in above, msg=above)
+        self.assertEqual([t.get_text() for t in axes.texts], [])
         plt.close(figure)
 
     def test_the_overview_row_marks_the_median_solid_and_the_mean_dotted(self):
@@ -905,7 +907,7 @@ class TestPagesByMaterial(unittest.TestCase):
         pages = composition.taken_apart_pages(c, d, [], self.params)
         names = [name for name, _ in pages]
         kinds = [name.rsplit('_', 2)[-2] for name in names]
-        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'materials', 'alloys'].index))
+        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'means', 'materials', 'alloys'].index))
         seen = False
         for name, figure in pages:
             if '_elements_' in name:
@@ -914,12 +916,16 @@ class TestPagesByMaterial(unittest.TestCase):
                 legend = [t.get_text() for t in figure.legends[0].get_texts()]
                 self.assertEqual(legend, [m for m in composition.MATERIAL_COLOURS if m in legend], msg=name)
                 for axes in panels:
-                    if axes.get_title(loc='left') == 'Copper (Cu)':
+                    if axes.get_title(loc='left').startswith('Copper (Cu)'):   # ', inflow' since E25
                         seen = True
-                        words = ' '.join(t.get_text() for t in axes.texts)
+                        self.assertEqual([t.get_text() for t in axes.texts], [])   # no text over its bars
                         for material in ('Copper', 'Battery cells', 'Boards and components'):
-                            self.assertIn(f'{material}: ', words)
                             self.assertIn(material, legend)
+            if '_means_' in name:   # each element's mean by material, on pages of their own (2026-11-02)
+                words = ' '.join(t.get_text() for t in figure.texts)
+                if 'Copper (Cu), inflow' in words:
+                    for material in ('Copper', 'Battery cells', 'Boards and components'):
+                        self.assertIn(f'{material} ', words)
             composition.plt.close(figure)
         self.assertTrue(seen)
 
@@ -1531,8 +1537,7 @@ class TestElementsOfInterest(unittest.TestCase):
         kg = lambda kind, m: (draws[:, columns.index((kind, m))] if (kind, m) in columns  # noqa: E731
                               else np.zeros(d.n))
         for kind in composition.KINDS:
-            for material, element in (('Copper', 'Cu'), ('Nickel', 'Ni'), ('Aluminium alloys', 'Al'),
-                                      ('Magnesium alloys', 'Mg'), ('Titanium alloy', 'Ti')):
+            for material, element in (('Copper', 'Cu'), ('Nickel', 'Ni')):
                 own = d.elements.get((kind, element), np.zeros(d.n))
                 self.assertTrue((own >= kg(kind, material) - 1e-12).all(), msg=(kind, material))
         self.assertTrue(d.elements[('battery', 'Li')].any())
@@ -1642,3 +1647,105 @@ class TestPagesNoLongerDrawn(unittest.TestCase):
             composition.draw_parts_figures(d, params, folder)
             self.assertFalse(os.path.exists(stale))
             self.assertTrue(os.path.exists(os.path.join(folder, 'robot_type_1_overview_1.png')))
+
+
+class TestLightAlloysTheirMetal(unittest.TestCase):
+    """Matthias, 2026-11-02: "I need both alloy mass and then also the Al mass. The first for the total weight and the
+    last for the inflow needs", then "Yes do it as writen in A" (EVIDENCE.md E24): the aluminium, magnesium and
+    titanium alloys keep their whole mass as materials; their elements Al, Mg and Ti are the metal their recipes hold,
+    in every draw less than the alloy (the aluminium alloys 6061, 7075, A380, ADC12, Ti-6Al-4V: 75 to 99.9 %)."""
+
+    def check(self, d, material, element):
+        columns, draws = d.materials
+        alloy = sum(draws[:, k] for k, (_, m) in enumerate(columns) if m == material)
+        metal = d.by_material[(material, element)]
+        held = alloy > 0
+        self.assertTrue(held.any(), msg=material)
+        share = metal[held] / alloy[held]
+        self.assertTrue(((share > 0.75) & (share < 0.999)).all(), msg=(material, share.min(), share.max()))
+
+    def test_type_1s_aluminium_and_titanium(self):
+        params = Params()
+        params.composition.draws = 3000
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        self.check(d, 'Aluminium alloys', 'Al')
+        self.check(d, 'Titanium alloy', 'Ti')
+
+    def test_type_4s_magnesium(self):
+        params = Params()
+        params.composition.draws = 3000
+        inputs = type_inputs_or_skip(self, params, 4)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        self.check(d, 'Magnesium alloys', 'Mg')
+
+
+class TestCopperSplit(unittest.TestCase):
+    """Matthias, 2026-11-02: "So we have to add it to the inflow cupper, but we have to destiguish, what is fixed in
+    alloys like Al aalloysa nd brass", "and what can be recycled as elemental Cu", then "Yes, build it" (EVIDENCE.md E25,
+    A and B as recommended): copper recycled as copper (the element Cu), copper fixed in alloys (the aluminium alloys,
+    brass, the steels, the magnets, the magnesium alloys) and the inflow, both, in every draw."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 2000
+
+    def composed(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        return d, composition.compose_taken_apart(category, d, inputs.base.lists)
+
+    def test_recycled_and_fixed_add_up_to_the_inflow_all_the_copper(self):
+        d, c = self.composed()
+        columns, draws = c.tables['copper']
+        self.assertEqual(columns, list(composition.COPPER_COLUMNS))
+        recycled, fixed, inflow = (draws[:, k] for k in range(3))
+        np.testing.assert_allclose(recycled, c.column('elements', 'Cu'), rtol=1e-12)
+        np.testing.assert_allclose(recycled + fixed, inflow, rtol=1e-12)
+        self.assertTrue((fixed > 0).all())   # every robot's connectors hold brass, its frame an aluminium alloy
+        every = sum(kg for (_, e), kg in d.recipe_elements.items() if e == 'Cu')
+        np.testing.assert_allclose(inflow, every, rtol=2e-3)   # the copper's own traces: Copper counts whole
+        in_alloys = sum(kg for (m, e), kg in d.fixed.items() if e == 'Cu')
+        np.testing.assert_allclose(fixed, in_alloys, rtol=1e-12)
+        self.assertEqual({m for m, e in d.fixed if e == 'Cu'} - set(composition.FIXED_IN_ALLOYS['Cu']), set())
+        self.assertEqual(composition.draw_faults(c), [])
+
+    def test_the_summary_and_the_cu_panel_say_so(self):
+        d, c = self.composed()
+        rows = [r['Name'] for r in composition.summary(c) if r['Kind'] == 'Copper']
+        self.assertEqual(rows, list(composition.COPPER_COLUMNS))
+        pages = composition.taken_apart_pages(c, d, [], self.params)
+        texts = []
+        titles = []
+        for name, figure in pages:
+            if '_elements_' in name:
+                titles += [a.get_title(loc='left') for a in figure.axes]
+            if '_means_' in name:   # the means by material on pages of their own (2026-11-02)
+                texts += [t.get_text().replace('\n', ' ') for t in figure.texts]
+            composition.plt.close(figure)
+        self.assertIn('Copper (Cu), inflow', titles)
+        self.assertTrue(any('Aluminium alloys (fixed)' in t for t in texts))
+        self.assertTrue(any('Brass (fixed)' in t for t in texts))
+
+
+class TestNoTextOverData(unittest.TestCase):
+    """Matthias, 2026-11-02: "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is
+    first and not the text Tex can go to other places": on every page 02 draws of a robot type taken apart (its notes,
+    element, material and alloys pages, its two figures of where its critical elements sit, where each material sits),
+    no text inside a chart lies over its bars or lines (texts_over_data)."""
+
+    def test_no_page_has_text_over_its_data(self):
+        params = Params()
+        params.composition.draws = 2000
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        found = []
+        for name, figure in (composition.taken_apart_pages(c, d, [], params) + composition.parts_figure_pages(d)
+                             + composition.sources_pages(d)):
+            found += [f'{name}: {text}' for text in composition.texts_over_data(figure)]
+            composition.plt.close(figure)
+        self.assertEqual(found, [])
