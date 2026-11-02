@@ -5,6 +5,109 @@ by Claude, newest first.
 
 ## 2026-11-02
 
+### V152. 02 removes a numbered page it no longer draws
+
+- **His words:** "02 removes them itself" (2026-11-02); then "I am runing 02": the change made and tested in the scratch
+  copy `sb_e157` only (CLAUDE.md §4), put into the project after his run had written its last page (14:02:36; nothing
+  written after it, checked at 14:07).
+- **Tests first:** `TestPagesNoLongerDrawn` (a folder of a series' pages 1 to 4, another series, another prefix, an
+  odd name: only pages 3 and 4 and the series not written removed, by name; 02's figures with a page 9 of an earlier
+  run: removed, a gap in the numbers too). Both failed before the code; the first version of the code stopped at the
+  first missing number, which the test caught.
+- **Scratch run of 02** (2,000 draws): it said and removed exactly the 7 pages of E23
+  (`1_compact_research_developer_materials_3.png`, `_4.png`, `_materials_3.png` of types 2 to 6); every type 2 material
+  pages; "02 done". The suite in the scratch copy: 490 tests, all pass.
+- **The suite in the project:** 490 tests, all pass (`scratchpad/tests_remove_project.log`).
+- **Not covered:** his own next run with this code.
+- **Date:** 2026-11-02.
+
+### V151. E23 built: the material pages, overview_1's box, overview_2's open line
+
+- **His words:** "Yes, build it" (2026-11-02), on the specification after "Sorry overview_1 is bad", the steels and the
+  aluminium alloys ("the material is much too detailed").
+- **Tests first:** `TestMaterialPages.test_the_material_pages_show_the_steels_and_the_aluminium_alloys_whole` (each of
+  the four whole, the sum of its grades in every draw to 10⁻¹²; the magnets, cells and nickel as before; the pages of
+  where each grade sits and the alloys table keep the grades), `TestOverviewBoxes` (every text in its box, both overview
+  pages, all six types; the open line from the register). Each failed before the code: the box test on overview_1's
+  "type 1: all its 30 robots with a mass; type …", the open line on "robot types 3 and 4 together".
+- **The suite:** 488 tests, all pass (`scratchpad/tests_pages.log`); the on-disk comparisons pass since his builders'
+  run of 13:15 to 13:16.
+- **Pages looked at** (the sandbox, 2,000 draws): overview_1 (its box in three lines inside it), overview_2 (the open
+  line as above), type 1's two material pages (Steel, Stainless steel, Electrical steel, Aluminium alloys each one
+  panel; Copper, Brass, Nickel, Titanium alloy, the magnets with their heat classes, the cells, the boards, plastics).
+  01 "No fault found"; 02 "they add up", "02 done".
+- **Found:** 02 leaves a page it no longer draws in its folder (EVIDENCE.md E23, 7 pages after his next run).
+- **Not covered:** his run of 01 and 02 with this code; the pages of types 2 to 6 looked at one by one.
+- **Date:** 2026-11-02.
+
+### V150. The cables' copper against one robot's own harness, the RoboParty RP1
+
+- **His words:** "whats about the wires for the Cu?", "Contiune", "Yes, download it", "Yes, download them".
+- **How:** RoboParty's harness list and its 43 drawings of the RP1 (EVIDENCE.md E22.1), every wire, strand and length
+  transcribed (`scratchpad/rp1_text/rp1_copper.py`), the copper summed by gauge; against 02's cables for the RP1 (its
+  row 'Cable length (four conductors)' 5 / 10 / 15 m; the shared cross-sections).
+- **Result:** the RP1's harness holds 171 to 375 g of copper in about 12 m of cable; the model gives it 170 g at its
+  modes (52 to 406 g). The low end equals the model's mode; the high end, 2.2 times it, is within the model's range.
+  The span comes from one unknown: the size of the joint cables' wire CQ-RXG0250 (28 AWG, as RoboParty's other power
+  conductors, or 0.25 mm², as its name's digits might say).
+- **Not covered:** a second robot's harness (none other is published); the joint modules' inner wiring (in the joints'
+  copper); the battery's own wires (in the battery housing).
+- **Date:** 2026-11-02.
+
+### V149. The elements of interest audited: each against all of it that 02 draws, material by material
+
+- **His words:** "Are the elements now correct. Does Cu Element account for all the Cu, which can be recycled to Cu
+  metal", then "I want this verified and documented. I need to have the accurate Cu element Nd etc." (2026-11-02).
+- **How:** `scratchpad/housing/elements_audit.py` (results `scratchpad/housing/elements_audit.csv`), on 02's own draws
+  in the sandbox `sb_e157` (the code of commit 8892b93 and after; his inputs but for one row read by nothing), 4,000
+  draws of each of the six robot types part by part: for each of the 23 elements of interest, every kg of it that 02
+  draws (`Robot.element`: by the recipes, the magnets' fractions, the car and data-centre files), by the material that
+  holds it, against the kg it counts as the element of interest (`Robot.declare`), and that count against the elements
+  table 02 writes (`compose_taken_apart`). The mean kg per robot.
+- **The count is what 02 writes:** in all six types and all 23 elements, the largest difference 4 × 10⁻¹⁵ of the
+  element (the rounding of the computer). In his run of 200,000 draws (V148) 02's own checks passed in every draw: the
+  elements of interest add up to the materials they come from, copper, nickel and the light alloys each their metal
+  whole, no other material giving more than it weighs.
+- **Counted whole, all of it in the robot:** Li, Co, Nd, Pr, Dy, Tb, Nb, Ga, Pd, Ag, In, Ta, Au: what 02 draws of them
+  is all counted (Nd: 0.27 to 0.51 kg per robot, from the magnets and 2.4 to 2.7 g from the boards; Dy 0.06 to
+  0.12 kg; Co 0.09 to 0.20 kg). Sr: drawn in none of the six types (no recipe holds it).
+- **Counted in part, the rest left in another material** (mean kg per robot, the range over the six types):
+
+| Element | Counted from | Left in, not counted |
+|---|---|---|
+| Cu | Copper 1.58 to 3.08; the boards and components 0.17 to 0.32; the battery cells' foils and tabs 0.15 to 0.45 | the aluminium alloys 0.16 to 0.71; brass 0.024 to 0.026; the steels 0.008 to 0.015; the magnets 0.001 to 0.002; the magnesium alloys below 0.001. The Cu element is 91 % of all the copper in type 1, 80 to 84 % in types 2 to 6 |
+| Ni | the battery cells 0.35 to 1.07; Nickel 0.026 to 0.087; the boards 0.001 to 0.002 | the aluminium alloys 0.006 to 0.023; the steels 0.002 to 0.004; stainless steel 0.0007 (type 1) |
+| Al | the aluminium alloys **whole**, 13.6 to 49.5 (the aluminium they hold: 12.6 to 45.6); the battery cells' foils 0.06 to 0.18; the boards 0.008 to 0.016 | plastics 0.07 to 0.16; the magnesium alloys 0.015 to 0.33; electrical steel 0.006 to 0.011; the magnets 0.003 to 0.005; the boards' glass 0.02 to 0.05 |
+| Mg | the magnesium alloys **whole**, 0.17 to 3.65 (types 3 to 5; the magnesium they hold 0.15 to 3.28) | the aluminium alloys 0.17 to 0.76; plastics 0.01 to 0.03; the boards 0.005 to 0.01 |
+| Ti | the titanium alloy **whole**, 0.005 to 0.034 (types 1 to 3; the titanium it holds 0.004 to 0.030) | the aluminium alloys 0.009 to 0.035; the steels 0.003 to 0.006; plastics 0.002 to 0.005; the boards 0.001 to 0.002 |
+| Mn | the battery cells 0.023 to 0.070 | the steels 0.06 to 0.13; the aluminium alloys 0.017 to 0.065; electrical steel 0.004 to 0.008; the magnesium alloys up to 0.012 |
+| B | the magnets 0.011 to 0.022; the boards 0.0001 | the boards' glass 0.008 to 0.015; plastics 0.02 to 0.05 |
+| Sn | the boards 0.004 to 0.007 | the aluminium alloys 0.003 to 0.011 |
+| Pb | the boards 0.001 to 0.002 | the aluminium alloys 0.001 to 0.005 |
+
+- **What it means:** an element of interest counts what is recovered as that element (E19 point 3). Copper, nickel and
+  the light alloys count their whole mass: the Al element is the aluminium alloys' mass, 8 to 9 % more than the
+  aluminium in them (their Si, Mg, Cu, Zn and the rest counted with it); the Mg element 11 % more than the magnesium of
+  the magnesium alloys; the Ti element 11 to 12 % more than the titanium of Ti-6Al-4V. An element inside another
+  material is not counted: it goes where that material goes when recycled (the copper of an aluminium alloy into
+  remelted aluminium, of a steel into remelted steel; the boron and titanium of glass fibre stay bound).
+- **The wires** (his question "whats about the wires for the Cu?"; `scratchpad/housing/copper_by_part.py`, the same
+  draws, the copper by the part it sits in): all counted in the Cu element, as the material Copper: the cables'
+  conductors 0.18 (type 1) to 0.26 kg per robot (length × cross-sections × 8.96 g/cm³, 02's cables step); the
+  battery's wires and busbars 0.08 to 0.26 kg; the joints' windings and copper 1.3 to 2.5 kg; heat pipes up to 0.03 kg.
+  Not counted: the connectors' contacts, brass (XT30, XT60), 0.023 to 0.026 kg. The cables rest on estimates: their
+  length 8 m per metre of height (the G1's "全身线束不超过10m", T1; the Roboto Origin's BOM 10.0 m), their cross-sections
+  estimated (no source states them: power 0.52 / 0.82 / 1.31 mm², the XT30's wire range, second-hand; signal 0.065 /
+  0.13 / 0.2 mm², E). The one comparison so far (EVIDENCE.md, the G1 against the workbook): the model's whole harness
+  0.27 / 0.45 / 0.66 kg against the workbook's 1.1 / 1.3 / 1.5 kg, a third (the workbook's row an estimate too).
+- **Open, for his decision:** brass's copper (0.024 to 0.026 kg, about 1 % of the copper), recyclable to copper in a
+  secondary copper smelter but usually remelted as brass; and whether the Al, Mg and Ti elements should be the light
+  alloys' whole mass (as agreed in E19) or the metal they hold.
+- **Not covered:** the input numbers themselves (the recipes' fractions, against independent sources in V14 and after;
+  the parts' masses, in EVIDENCE.md per robot); the types drawn from the workbook (3, 5 and 6 for their written draws)
+  beyond their totals: Cu by the recipes 3.3 to 9.7 kg, the Cu element 0.14 to 0.42 kg less.
+- **Date:** 2026-11-02.
+
 ### V148. E20's leftovers removed; his runs of 12:45 to 12:50 read
 
 - **His words:** "Yes, remove them" (2026-11-02), on the list with proof in EVIDENCE.md E20.3.

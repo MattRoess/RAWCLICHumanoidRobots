@@ -3725,17 +3725,34 @@ def screen_arrow(axes, start: tuple, end: tuple, colour: str = SCREEN_INK) -> No
     axes.add_patch(FancyArrowPatch(start, end, arrowstyle='-|>', mutation_scale=18, color=colour, linewidth=1.4))
 
 
-def taken_words(n: int, register: list | None, apart) -> str:
-    """How many of robot type `n`'s robots of the register are drawn from their own rows of its parts file (`apart`),
-    counted over those with a mass: 'all its 31 robots', 'all its 96 robots with a mass', '5 of its 96 robots with a
-    mass'. A robot without a mass is not in the evaluation and not counted (Matthias, 2026-10-30: "If there is no mass
-    then it should not be taken into the evaluation"; EVIDENCE.md E10.1 point 4)."""
+def taken_count(n: int, register: list | None, apart) -> tuple:
+    """How many of robot type `n`'s robots of the register with a mass are drawn from their own rows of its parts file
+    (`apart`): (taken apart, with a mass, all of the type). A robot without a mass is not in the evaluation and not
+    counted (Matthias, 2026-10-30: "If there is no mass then it should not be taken into the evaluation"; EVIDENCE.md
+    E10.1 point 4)."""
     of_type = [r for r in register or [] if n in r.types]
     with_mass = [r for r in of_type if None not in r.mass]
     taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart)) for r in with_mass)
-    tail = ' with a mass' if len(with_mass) < len(of_type) else ''
-    return (f'all its {len(with_mass)} robots{tail}' if taken >= len(with_mass) else
-            f'{taken} of its {len(with_mass)} robots{tail}')
+    return taken, len(with_mass), len(of_type)
+
+
+def taken_words(n: int, register: list | None, apart) -> str:
+    """taken_count in words: 'all its 31 robots', 'all its 96 robots with a mass', '5 of its 96 robots with a mass'."""
+    taken, with_mass, of_type = taken_count(n, register, apart)
+    tail = ' with a mass' if with_mass < of_type else ''
+    return f'all its {with_mass} robots{tail}' if taken >= with_mass else f'{taken} of its {with_mass} robots{tail}'
+
+
+def open_words(register: list | None, aparts: dict | None) -> str:
+    """overview_2's line of what is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"): the robot
+    types with robots with a mass not yet taken apart, each with how many (taken_count), then the six compared (03)."""
+    left = [f'{n} ({with_mass - taken})' for n in sorted(aparts or {})
+            for taken, with_mass, _ in [taken_count(n, register, aparts[n])] if taken < with_mass]
+    if not left:
+        return 'Open: the six robot types compared.'
+    listed = left[0] if len(left) == 1 else ', '.join(left[:-1]) + ' and ' + left[-1]
+    return (f"Open: robots with a mass not yet taken apart in robot type{'s' if len(left) > 1 else ''} {listed}; then "
+            'the six robot types compared.')
 
 
 def template_shares(apart) -> tuple:
@@ -3804,13 +3821,15 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
     axes.text(0.4, 0.35, 'How the model works: from the inputs through the stages to the results',
               fontsize=SCREEN_HEADING, fontweight='bold', va='top')
     of_type = {n: sum(n in r.types for r in register) if register else 0 for n in range(1, 7)}
-    apart = '; '.join(f'type {n}: ' + taken_words(n, register, aparts[n]) for n in sorted(aparts or {})) or 'none yet'
     inputs = [
         ('The research workbook', 'six robot types, an anchor robot each, its parts and materials', 'his'),
         ('The register of humanoid robots', f'{len(register) if register else 0} robots, each in at most two robot '
                                             f'types, {of_type[1]} of robot type 1; tools/make_humanoid_register.py',
          'his'),
-        ('The robot types part by part', f"{apart}; from the makers' sources, a builder per type", 'his'),
+        # How many of each type's robots: on overview_2's cards (Matthias, 2026-11-02: "Sorry overview_1 is bad", "Yes,
+        # build it"; the counts of six types ran out of this box).
+        ('The robot types part by part', "each robot type's robots with a mass, each from its own parts; from the "
+                                         "makers' sources, a builder per type", 'his'),
         ('The element recipes', 'what each material is made of, element by element', 'his'),
         ('The sibling projects', 'car boards and sensors, data-centre tantalum, traction-motor magnets and steels',
          'sibling'),
@@ -3884,8 +3903,9 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
              'No fault found in the inputs (what was checked: the faults pages).')
     y = screen_text(axes, 0.4, y, found, 15.2, colour='#CC3311' if faults else SCREEN_INK,
                     weight='bold' if faults else 'normal')
-    # What is open (Matthias, 2026-10-30: "Can we move to type 3 and 4 together?", "Yes, together"; E10.1 point 5).
-    screen_text(axes, 0.4, y + 0.05, 'Open: robot types 3 and 4 together, then 5 and 6; then the six compared.', 15.2)
+    # What is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"; the line written by hand before
+    # was out of date).
+    screen_text(axes, 0.4, y + 0.05, open_words(register, aparts), 15.2)
     return figure
 
 

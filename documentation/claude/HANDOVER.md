@@ -98,7 +98,18 @@ changes the parts files, **his runs, in this order** (each by pressing Run):
 Until step 1 is run, three tests fail that compare the builders with the parts files on disk; after it they should
 pass.
 
+**Since, the same day:** the elements of interest audited material by material (VERIFICATION V149: Cu, Nd and the
+rest as E19 defines them; Al, Mg and Ti the light alloys' whole mass); the cables' copper checked against the RoboParty
+RP1's own harness (EVIDENCE.md E22, VERIFICATION V150), kept on his word ("Yes, keep it").
+
 **Open:**
+- Built on his word ("Yes, build it"): the material pages (the steels and the aluminium alloys whole), overview_1's
+  box, overview_2's open line (EVIDENCE.md E23, VERIFICATION V151). His runs to see them, in RAWCLICHumanoidRobots:
+  `…/GitHub/RAWCLICHumanoidRobots/01_schemas.py`, then `…/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+  (the parts files need no rebuild).
+- 02 removes a numbered page of a type it no longer draws ("02 removes them itself", EVIDENCE.md E23, VERIFICATION V152).
+- Waiting for his word: whether Al, Mg and Ti count the alloys' whole mass or the metal they hold; whether brass's
+  copper counts as Cu.
 - Found with batch 3, reported, not acted on: the Kengo's hands are 2 × 6 joints (the catalogue's "hands 12"), not
   E15.3's 2 × 12, built as 2 × 6; batches 1 and 2 of types 3 and 4 keep the ARM cooler with Intel or AMD computers;
   E15.5's expected shares (139 and 99) came out 137 and 98 (E15.8 point 6); the GoMate's height is 1.74 m as heise

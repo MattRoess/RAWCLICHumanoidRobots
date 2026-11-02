@@ -8,6 +8,82 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E23. The material pages and 01's overview pages (2026-11-02). Agreed and built
+
+Matthias, 2026-11-02: "Sorry overview_1 is bad. You should have found this"; "There are far to many different types of
+steels. Can we have this in separate plots and in the overview just steel", "It is the same with aluminum alloys", "We
+have the parts for each alloy. This is good. But the material is much too detailed"; then "Yes, build it" on the
+specification with its recommendations (three steel panels; only the steels and the aluminium alloys). VERIFICATION
+V151.
+
+| What was asked | Where it landed |
+|---|---|
+| The material pages: the steels and the aluminium alloys as their material only | `02_composition.py` `MATERIAL_ONLY` and `material_page_panels()`, used by `material_pages()`: Steel, Stainless steel, Electrical steel and Aluminium alloys each one panel, the sum of its grades; the other materials as before (the magnets by heat class, the cells by chemistry, the magnesium by its alloys). The panels by grade (`material_panels`) still give the pages of where each sits and the alloys table their grades. Type 1's material pages 2 instead of 4, the others 2 instead of 3 |
+| overview_1's box "The robot types part by part" | `01_schemas.py` `overview_flow`: "each robot type's robots with a mass, each from its own parts; from the makers' sources, a builder per type"; the counts stay on overview_2's cards |
+| A test of every box | `tests/test_schemas.py` `TestOverviewBoxes`: both overview pages drawn with all six types taken apart, every text inside the box it starts in (it failed on overview_1 before the change) |
+| overview_2's open line | `01_schemas.py` `open_words()` and `taken_count()` (taken_words now built on it): "Open: robots with a mass not yet taken apart in robot types 3 (1), 5 (2) and 6 (1); then the six robot types compared." |
+| Not in (not asked): the robots tables' header "Frame and shell", which touches the right edge of its band | — |
+
+**Left behind by 02:** 02 rewrote its pages but did not remove a page it no longer drew; after his run the old
+`1_compact_research_developer_materials_3.png` and `_4.png` and `_materials_3.png` of types 2 to 6 would have stayed.
+**Decided** (Matthias, 2026-11-02: "02 removes them itself"), and built while his run of 02 went on in the scratch
+copy only, put into the project after it had ended (14:02:36): `remove_pages_not_drawn()` with the series
+`COMPOSITION_SERIES` and `PARTS_SERIES`, called by `draw_taken_apart_pages` and `draw_parts_figures`; METHODOLOGY.md
+("Pages of an earlier run"), README, VERIFICATION V152. His folder held only pages 1 and 2 of each type's materials
+after his run of 14:00, before the change was in the project.
+
+## E22. The cables' copper: research (2026-11-02). Decided: the model's cables kept
+
+Matthias, 2026-11-02: "whats about the wires for the Cu?", "Ok I see you wrote cables", then "Contiune" (taken as yes
+to the research offered: the cables' cross-sections, RP1's harness list first). Today the cables' copper is counted
+whole in the Cu element (VERIFICATION V149): their length 8 m per metre of height (E6.8 point 9) times two power
+conductors of 0.52 / 0.82 / 1.31 mm² (the XT30's wire range, second-hand) and two signal conductors of 0.065 / 0.13 /
+0.2 mm² (E) times 8.96 g/cm³: 0.18 to 0.26 kg of copper per robot. No source so far states a humanoid's wire gauges.
+
+| Source, read first-hand on 2026-11-02 | What it states | What it is |
+|---|---|---|
+| RoboParty, RP1_hardware, `03_Harness/README.md`, https://github.com/Roboparty/RP1_hardware/blob/main/03_Harness/README.md | "RP1_Harness_BOM.xlsx: 42 种线束的名称、线径、连接器、端子与数量" (42 harnesses: name, wire gauge, connectors, terminals, quantity); "43 份 PDF 加工图纸"; the main board's power cable "18AWG 软硅胶线、XT30 公头，成品长度 120±5 mm" | the maker's own harness files (snapshot of 2026-10-15); 18 AWG is 0.82 mm², the model's power mode |
+| RoboParty, `RP1_Harness_BOM.xlsx` (14,548 bytes, SHA-256 2091eda1…a4744; downloaded on "Yes, download it" into `scratchpad/rp1_harness_download/`, read with Python isolated), https://github.com/Roboparty/RP1_hardware/blob/main/03_Harness/RP1_Harness_BOM.xlsx | 42 kinds of harness, "数量合计 60" pieces. The joint chains: 35 pieces of one cable, "CQ-RXG0250", with XT30 (2+2) connectors (body 5, arms 2 × 8, legs 2 × 7). The battery and power leads: "14AWG" XT60 (1, battery to main board), "16AWG" (3), "18AWG" (2). Signal and network lines: "26AWG" and "28AWG" (the rest). No lengths (they are in the drawings) | the maker's harness list, first-hand. CQ-RXG0250's conductors are not stated, nor found on the web |
+| RoboParty, the 43 drawings (`03_Harness/Drawings/`, 85 KB each about) | each harness's length, wires and connectors, as drawings. BODY01, seen in the browser: four colour-coded conductors of CQ-RXG0250 (two for power, two for signals, its wiring table), sheathed Φ6 × 130 ± 5 and Φ7 × 120 ± 5 mm | the conductors' sizes and lengths in its parts list too small to read in the pane: **reading them needs the PDFs, a download** |
+| EYOU, XT30PW (2+2) joint cable, https://rcdrone.top/ja/products/eyou-xt30pw-2-2-power-and-can-bus-cable-18awg-9a-daisy-chain-connection-for-planetary-robot-joint-actuators (search result, not opened) | "Power Wire Gauge 18AWG", "CAN Signal Wire Gauge 26AWG" | a seller's page of another maker's joint cable; context |
+| IWISS (crimping tools), "从GR-1到GR-3", https://www.iwiss.cn/connectors-and-crimping-tools-for-humanoid-robotics/ | GR-1: "机体内线束总长度超 50 米" (harness over 50 m), "从公开的资料中我们可以看到" | a tool maker's marketing, no source named: **left out** (not first-hand, not checkable) |
+| OFweek, 芝能科技, G1 teardown article (7 Apr 2026), https://robot.ofweek.com/2026-04/ART-898890-8420-30684472.html | hollow-shaft wiring, CAN, XT30; no length, gauge or mass | second-hand; repeats T1, adds nothing |
+| Search results only (not read): CRU Group via rehack.com, "4-8 kg of copper for actuators and wiring" in a robot of about 60 kg | — | second-hand of second-hand; context only |
+
+**So far:** nothing first-hand changes the model's cross-sections. The RP1's power leads are 18, 16 and 14 AWG (0.82,
+1.31 and 2.08 mm²; the model's power range 0.52 / 0.82 / 1.31, its most 16 AWG), its signal lines 26 and 28 AWG (0.13
+and 0.08 mm²; the model's 0.065 / 0.13 / 0.2). Its 35 joint-chain cables, most of the harness, are one cable whose
+conductors no source states; joint cables of the same connector by another maker carry 18 AWG power and 26 AWG
+signal, the model's modes. The lengths, and so the copper of the RP1's harness, are in its 43 drawings.
+
+### E22.1 The RP1's 43 drawings, read (2026-11-02, on "Yes, download them")
+
+The 43 PDFs of `03_Harness/Drawings/` (6,555,862 bytes; into `scratchpad/rp1_drawings_download/`, the size about 1.8
+times what I had said), read as text where they hold text (7) and as images rendered by macOS's PDFKit (36), each
+parts list read by eye. Their wires, strands and lengths:
+
+| Harnesses (pieces in the robot) | Wires, as drawn |
+|---|---|
+| Joint chains, 20 kinds, 35 pieces (BODY01 to 05 one each; ARM01 to 08 and LEG01 to 07 two each) | each: two power conductors of 8 CQ-RXG0250 wires (BODY03: 10), "脱皮4±0.5，并压" (stripped, crimped together), brown + and silver −; the CAN pair, white and black, 2 wires each, twisted; power lengths 50 (LEG01) to 450 mm (BODY05), the signal wires 10 mm longer ("开放端CAN线比功率线长1cm"). The 35 cables 6.95 m; 134.7 m of CQ-RXG0250 wire |
+| POWER01, POWER02, HEAD1, HEAD2, HEAD3 (one each; drawn by SHS Technology for RoboParty) | "UL1569 28AWG 红" and "黑", "8PCS" each, "8股28awg 合焊" (eight 28 AWG wires soldered together per conductor); 250, 180, 250, 100, 200 mm; a 28 AWG twisted pair of 110 to 260 mm |
+| Battery and power leads | 14 AWG red and black, 300 mm (battery to main board, XT60); 16 AWG: 6 wires of 150 mm (BACK-POWER-NX), 2 of 270 and 2 of 160 mm (the small battery board); 18 AWG: 2 of 120 (battery lead), 2 of 90 (back), 2 of 120 mm (main board) |
+| Signal and network | 22 AWG 4 × 270 mm (ARM_10, two); 26 AWG 8 × 210, 8 × 250 (two), 8 × 500, 6 × 80 mm (two); 28 AWG 4 × 360, 7 × 220, 4 × 180, 2 × 70, 3 × 120, 4 × 620 mm |
+
+**Its copper** (`scratchpad/rp1_text/rp1_copper.py`; mm² by AWG, 8.96 g/cm³): the joint chains 98 g if CQ-RXG0250 is
+of 28 AWG (0.081 mm², as RoboParty's own 8 × 28 AWG conductors of POWER01, POWER02 and HEAD1 to 3), 302 g if it is
+0.25 mm² (the digits of its name); all the other harnesses 73 g (the 14, 16 and 18 AWG leads 37 g). **The RP1's
+harness: 171 to 375 g of copper, about 12 m of cable** (9 m per metre of its 1.35 m).
+
+**Against the model:** the model gives the RP1 10 m of cable (5 / 10 / 15) and 52 / 170 / 406 g of copper (its length
+and cross-sections at their least, modes and most). The RP1's own harness is 171 g on the first reading, the model's
+mode, and 375 g on the second, 2.2 times the mode and below the model's most. Its length, about 12 m, is within the
+model's 5 to 15 m. So the RP1 confirms the model's cables within their range; which reading holds is open while
+CQ-RXG0250's size is not known (RoboParty, or the wire's maker, could say). Not compared: the battery's own wires and
+busbars, which the model counts in the battery housing (part of the RP1's 37 g of leads may be those).
+
+**Decided** (Matthias, 2026-11-02: "Yes, keep it"): the cables stay as they are (8 m per metre of height; power 0.52 /
+0.82 / 1.31 mm², signal 0.065 / 0.13 / 0.2 mm²); the RP1's own harness lies within their range. Nothing changed.
+
 ## E21. The 1X NEO's frame below zero: research and proposal (2026-11-02). A agreed and built (E21.4)
 
 Matthias, 2026-11-02: "Research the NEO first", on 02 stopping on type 4 at 200,000 draws ("Frame is below zero in 2

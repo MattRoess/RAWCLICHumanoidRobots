@@ -163,7 +163,9 @@ written. Into `output.composition_figures_dir`
 of interest six a page (<n>_<name>_elements_<k>.png), each split by the material it comes from, as RAWCLICDataCenters'
 05 (EVIDENCE.md E19 point 7; the preview of type 5, "Yes, build them", 2026-11-02); its materials nine a page
 (<n>_<name>_materials_<k>.png: each material of the one list, then its grades, alloys or magnet classes; Matthias,
-2026-10-29: "how much Copper and especially permanent magnets. The different steels and aluminum alyoys"), each as its
+2026-10-29: "how much Copper and especially permanent magnets. The different steels and aluminum alyoys"; since
+2026-11-02, "the material is much too detailed", "Yes, build it": the steels and the aluminium alloys as their material
+only, their grades on the pages of where each sits and in the alloys table), each as its
 total in one robot over the draws; and its alloys and grades in a table (<n>_<name>_alloys_<k>.png: what each holds by
 its recipe and its kg in one robot, E19 point 4: "So if elements are in alloys, then one has to know it"); for another
 robot type one page,
@@ -191,6 +193,7 @@ from __future__ import annotations
 import csv
 import importlib.util
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -2329,9 +2332,10 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         "The tables by part group and by body region (in the draws of the robot type): the type's kinds of part, each "
         "placed whole; rough where a kind holds parts of another group: the head's joints are counted as sensors, the "
         'battery management board as battery.',
-        'The material pages: each material in one robot, then its grades, alloys or grade classes: the steels by '
-        f"their grade, the aluminium by its alloys (the type's recipe: {d.aluminium}), "
-        "the NdFeB magnets by the grade class each joint's heat draws. Copper is the metal of windings, "
+        'The material pages: each material in one robot; the steels and the aluminium alloys as their material only '
+        f"(their grades on the pages of where each sits and in the alloys table; the aluminium by the type's recipe: "
+        f"{d.aluminium}); the NdFeB magnets then by the grade class each joint's heat draws, the other materials by "
+        "their grades or alloys where they have several. Copper is the metal of windings, "
         'wires, cables, busbars, contacts and heat pipes; the copper of the boards is in the boards and components. '
         'The alloys and grades: every one the robot type holds, also one held in fewer than 2.5 % of the draws (which '
         'has no panel); what each holds by its recipe, each element from its least to its most share of its '
@@ -2380,7 +2384,7 @@ def notes_pages(prefix: str, title: str, paragraphs: list) -> list:
 def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None) -> list:
     """A robot type's pages, as (file name, figure): the notes pages; its elements six a page, each split by the
     material it comes from (by_material_panel), one legend of the page's materials at the top; its materials nine a
-    page, each then its grades; its alloys and grades in a table (EVIDENCE.md E19 points 4 and 7; the preview of type
+    page (material_page_panels); its alloys and grades in a table (EVIDENCE.md E19 points 4 and 7; the preview of type
     5, "Yes, build them", 2026-11-02)."""
     # Each element of interest held in at least HELD_SHARE of the draws, as a material.
     shown = [e for e in c.tables['elements'][0] if held(c.column('elements', e))]
@@ -2414,15 +2418,40 @@ def materials_of(d: Draws, symbol: str) -> dict:
     return {m: kg for (m, e), kg in d.by_material.items() if e == symbol}
 
 
+# The numbered pages of a robot type, one series each (<prefix>_<series>_<k>.png): a page of a series beyond those a run
+# writes is removed by its exact name (Matthias, 2026-11-02, "02 removes them itself": a type's material pages went
+# from four to two, and its third and fourth of the run before would have stayed in the folder).
+COMPOSITION_SERIES = ('notes', 'elements', 'materials', 'alloys')   # figures/composition/<n>_<name>_<series>_<k>.png
+PARTS_SERIES = ('notes', 'elements', 'overview')   # figures/parts_taken_apart/<n>_<name>/robot_type_<n>_<series>_<k>.png
+
+
+def remove_pages_not_drawn(folder: str, prefix: str, series: tuple, written: list) -> list:
+    """In `folder`, the pages <prefix>_<series>_<k>.png of each of `series` numbered beyond the last one just `written`
+    (all of a series none of whose pages was written), each removed by its exact name; returns their names. Nothing
+    else in the folder is touched."""
+    removed = []
+    for kind in series:
+        page = re.compile(re.escape(f'{prefix}_{kind}_') + r'(\d+)\.png')
+        last = max((int(m.group(1)) for name in written if (m := page.fullmatch(name))), default=0)
+        for name in sorted(os.listdir(folder)):
+            if (m := page.fullmatch(name)) and int(m.group(1)) > last:
+                os.remove(os.path.join(folder, name))
+                removed.append(name)
+    return removed
+
+
 def draw_taken_apart_pages(c: Composition, d: Draws, left_out: list, folder: str, params: Params,
                            later: list | None = None) -> list:
-    """A robot type's pages into `folder`; returns their file names."""
+    """A robot type's pages into `folder`, and its pages of an earlier run beyond them removed (said as removed);
+    returns their file names."""
     os.makedirs(folder, exist_ok=True)
     written = []
     for name, figure in taken_apart_pages(c, d, left_out, params, later):
         figure.savefig(os.path.join(folder, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
         written.append(name)
+    for name in remove_pages_not_drawn(folder, c.name, COMPOSITION_SERIES, written):
+        print(f'  {name} removed: a page of an earlier run no longer drawn.', flush=True)
     return written
 
 
@@ -2716,9 +2745,14 @@ def parts_figure_pages(d: Draws) -> list:
 
 def draw_parts_figures(d: Draws, params: Params, folder: str) -> None:
     """Every page of both figures, and the figures of where each material sits (sources_pages), into `folder` (the
-    type's folder in `output.parts_figures_dir`)."""
+    type's folder in `output.parts_figures_dir`); its numbered pages of an earlier run beyond them removed (said as
+    removed)."""
+    written = []
     for name, figure in parts_figure_pages(d) + sources_pages(d):
         save_figure(figure, os.path.join(folder, name), params.output.dpi)
+        written.append(name)
+    for name in remove_pages_not_drawn(folder, f'robot_type_{d.robot_type}', PARTS_SERIES, written):
+        print(f'  {name} removed: a page of an earlier run no longer drawn.', flush=True)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -2798,6 +2832,29 @@ def material_panels(d: Draws) -> list:
     return [p for p in every_material_panel(d) if held(sum(p[3].values()))]
 
 
+# The materials the material pages show whole, their grades not under them (Matthias, 2026-11-02: "There are far to
+# many different types of steels. Can we have this in separate plots and in the overview just steel", "It is the same
+# with aluminum alloys", "We have the parts for each alloy. This is good. But the material is much too detailed", then
+# "Yes, build it"): their grades stay on the pages of where each sits (sources_pages) and in the alloys table.
+MATERIAL_ONLY = ('Steel', 'Stainless steel', 'Electrical steel', ALUMINIUM)
+
+
+def material_page_panels(d: Draws) -> list:
+    """The panels of the material pages: material_panels, the steels and the aluminium alloys (MATERIAL_ONLY) each as
+    its material only, the sum of its grades in each draw, in its place; the other materials as material_panels gives
+    them."""
+    panels, whole = [], set()
+    for title, material, detail, kinds in material_panels(d):
+        if material not in MATERIAL_ONLY:
+            panels.append((title, material, detail, kinds))
+        elif material not in whole:
+            whole.add(material)
+            panels.append((material, material, None,
+                           {kind: sum(kg for (k, m, _), kg in d.details.items() if k == kind and m == material)
+                            for kind in KINDS if any(k == kind and m == material for k, m, _ in d.details)}))
+    return panels
+
+
 def every_material_panel(d: Draws) -> list:
     """material_panels, also those held in fewer than HELD_SHARE of the draws (the alloys table lists every alloy)."""
     materials = [m for m in MATERIAL_ORDER if any(k[1] == m for k in d.details)]
@@ -2826,8 +2883,9 @@ def material_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None
 
 def material_pages(c: Composition, d: Draws) -> list:
     """A robot type's material pages, as (file name, figure): its materials nine a page, each the histogram of its kg
-    in one robot over the draws, each material then its grades (material_panels)."""
-    panels = material_panels(d)
+    in one robot over the draws, the steels and the aluminium alloys whole, the others then their grades
+    (material_page_panels)."""
+    panels = material_page_panels(d)
     per_page = APART_ACROSS * APART_DOWN
     pages = [panels[k:k + per_page] for k in range(0, len(panels), per_page)]
     out = []

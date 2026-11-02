@@ -2526,3 +2526,57 @@ class TestTypeOneSheet(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestOverviewBoxes(unittest.TestCase):
+    """Matthias, 2026-11-02: "Sorry overview_1 is bad. You should have found this", then "Yes, build it": on 01's
+    overview pages, drawn with every robot type taken apart, every text inside the box it starts in; the robot types'
+    counts on the cards of overview_2, and its line of what is open counted from the register."""
+
+    @classmethod
+    def setUpClass(cls):
+        params = Params()
+        paths = [real_parts_file(n) for n in TYPE_FOLDERS] + [absolute(params.data.register),
+                                                              absolute(params.data.workbook)]
+        if not all(os.path.exists(p) for p in paths):
+            raise unittest.SkipTest('the parts files, the register or the workbook are not on disk')
+        cls.params = params
+        cls.register = schemas.read_register(absolute(params.data.register))
+        cls.book = schemas.read_workbook(absolute(params.data.workbook), params)
+        files = {n: schemas.read_parts_taken_apart(real_parts_file(n)) for n in TYPE_FOLDERS}
+        cls.views = {n: v for n in files if (v := schemas.type_parts(files, cls.register, n)) is not None}
+
+    def pages(self) -> list:
+        reports = {c.number: None for c in self.book.categories}
+        return [schemas.overview_flow(self.register, self.views, self.params),
+                schemas.overview_types(self.book, [], reports, self.views, self.params, self.register)]
+
+    def test_every_text_inside_its_box(self):
+        from matplotlib.patches import Rectangle
+        from matplotlib.text import Text
+        for k, figure in enumerate(self.pages()):
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            boxes = [p.get_window_extent(renderer) for p in figure.axes[0].patches if isinstance(p, Rectangle)]
+            for t in figure.findobj(Text):
+                if not t.get_text().strip():
+                    continue
+                e = t.get_window_extent(renderer)
+                inside = [b for b in boxes if b.x0 <= e.x0 + 1 <= b.x1 and b.y0 <= e.y1 - 1 <= b.y1]
+                if inside:
+                    b = min(inside, key=lambda b: b.width * b.height)
+                    self.assertTrue(e.x1 <= b.x1 + 1 and e.y0 >= b.y0 - 1, msg=f'page {k + 1}: {t.get_text()[:60]}')
+            schemas.plt.close(figure)
+
+    def test_the_open_line_counted_from_the_register(self):
+        from matplotlib.text import Text
+        figure = self.pages()[1]
+        words = ' '.join(t.get_text() for t in figure.findobj(Text))
+        schemas.plt.close(figure)
+        self.assertNotIn('robot types 3 and 4 together', words)
+        self.assertIn('Open:', words)
+        for n, view in self.views.items():
+            said = schemas.taken_words(n, self.register, view)
+            if not said.startswith('all'):
+                taken, of = (int(x) for x in said.split(' robots')[0].split(' of its '))
+                self.assertIn(f'{n} ({of - taken})', words, msg=n)

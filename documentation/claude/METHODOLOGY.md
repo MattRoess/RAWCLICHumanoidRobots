@@ -325,11 +325,14 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
 ("Type 1 only"; types 1 to 4 since 2026-10-30, E11.7 open point B):
 
 - **`overview_1.png`**: how the model works, as boxes joined by arrows: the inputs (the research workbook, the
-  register, robot type 1 part by part with the builders that write them, the element recipes; the sibling projects'
+  register, the robot types part by part with the builders that write them, the element recipes; the sibling projects'
   data in another colour), the stages (00, 01, 02, each with its file), what they write (the draws of each
-  robot type, type 1's pages; 03 in grey, after robot type 6).
-- **`overview_2.png`**: the six robot types as cards: the types taken apart (1 and 2) in colour with their robots and
-  their masses, types 3 to 6 grey, "not yet worked on"; the faults found and what is open.
+  robot type, the pages; 03 in grey, after robot type 6). How many robots of each type are taken apart: on
+  overview_2's cards (since 2026-11-02: six types' counts ran out of their box; "Sorry overview_1 is bad", "Yes, build
+  it"). A test draws both overview pages with every type taken apart and checks that every text stays in its box.
+- **`overview_2.png`**: the six robot types as cards: the types taken apart in colour with their robots and their
+  masses, the others grey, "not yet worked on"; the faults found; and what is open, counted from the register (since
+  2026-11-02): the robot types with robots with a mass not yet taken apart, each with how many, then the six compared.
 - **`notes.png`**: how to read the pages, once.
 - **`faults_<k>.png`**: the faults with where each is, or "No fault found"; what was checked (CHECKS_DONE) and what the
   checks cannot tell; as many pages as needed.
@@ -423,6 +426,17 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
    stay materials: no Fe, Cr, Mo, V, Zn, C, H or O. Every element of the recipes is still drawn and checked to add up,
    but not written. This replaced, on Matthias's word ("Yes, remove them", 2026-11-02), E17's two columns per element
    (as metal and bound) and the setting that left hydrogen, nitrogen, oxygen and the like off the pages.
+   **What each element of interest counts, and what of it stays in another material** (audited on 2026-11-02, his
+   words "I want this verified and documented. I need to have the accurate Cu element Nd etc."; the numbers in
+   VERIFICATION.md V149): Li, Co, Nd, Pr, Dy, Tb, Nb, Ga, Pd, Ag, In, Ta and Au are counted wherever 02 draws them.
+   Cu is the copper of the material Copper, of the boards and components and of the battery cells' foils and tabs;
+   the copper inside the aluminium alloys, brass, the steels, the magnets and the magnesium alloys is not counted
+   (80 to 91 % of all the copper is counted). Ni: the battery cells, Nickel and the boards, not the nickel in the
+   aluminium alloys and the steels. Mn: the battery cells, not the manganese in the steels and the aluminium alloys.
+   B: the magnets and the boards' metals, not the boron of glass fibre and plastics. Sn and Pb: the boards, not the
+   aluminium alloys'. Al, Mg and Ti are the light alloys' whole mass (8 to 12 % more than the metal they hold), with
+   the battery cells' and the boards' aluminium; not the aluminium of plastics, magnesium alloys, electrical steel and
+   magnets. An element inside another material goes where that material goes when it is recycled.
 5. **Not allocated:** the parts minus the materials. The two are drawn independently, so it is below zero where the
    drawn materials weigh more than the drawn parts (recommendation b: allowed, and the summary gives the share of
    draws).
@@ -454,6 +468,14 @@ reading the inputs ("read in 12 s"); checking every input ("no fault, in 8 s", o
 is drawn, part by part over its robots (every tenth robot of its parts file said: "robot 10 of 102 drawn: Astribot
 T1") or from the workbook ("done in 3 min 40 s"); checking that the draws add up; each type's draws written and its
 pages drawn; and last "02 done in 6 min 57 s", or "02 stopped after …: nothing is written" where a fault stops it.
+
+**Pages of an earlier run** (Matthias, 2026-11-02, "02 removes them itself"): a robot type's numbered pages are a
+series each, `<n>_<name>_<notes|elements|materials|alloys>_<k>.png` in `figures/composition/` and
+`robot_type_<n>_<notes|elements|overview>_<k>.png` in its folder of `figures/parts_taken_apart/`. After drawing a type's
+pages, 02 removes, each by its exact name, the pages of each series numbered beyond the last it has just drawn (all of
+a series of which it drew none), and says each ("… removed: a page of an earlier run no longer drawn"); nothing else
+in the folders is touched (`remove_pages_not_drawn`). The pages of where each material sits, named by material or
+grade, are not numbered and not part of this.
 What it prints changes no draw.
 
 For each robot type, a folder `data/consolidated/<n>_<name>/` (the folder another repository reads; not in git):
@@ -710,8 +732,8 @@ robot is drawn part by part, with these changes:
    draws (titanium, indium: a robot or a version without it) shows the draws that hold it and says in what share of
    all the draws it is held, as the material pages (Matthias, 2026-10-29: "I told you I want to see the distribution
    not just the 0 value for vanadium and lead"). Then its materials nine a page, each material of the one list, then
-   its grades, alloys or magnet classes ("Steel: gear steel 20CrMnTi"; the aluminium and, since E19, the magnesium by
-   their alloys); then its alloys and grades in a table (`<n>_<name>_alloys_<k>.png`, above, "The alloys and
+   its grades, alloys or magnet classes (the magnesium by its alloys, the magnets by their grade classes, the cells by
+   their chemistry); the three steels and the aluminium alloys as their material only (since 2026-11-02, "the material is much too detailed", "Yes, build it": the steels and the aluminium alloys as their material only, their grades on the pages of where each sits and in the alloys table); then its alloys and grades in a table (`<n>_<name>_alloys_<k>.png`, above, "The alloys and
    grades").
 
 ## How a robot of type 1 is drawn, and its two figures (built as the stage 04 on 2026-10-28; in 02 since 2026-10-29)
@@ -847,6 +869,8 @@ legend, you know, what I think about this").
 how much Copper and especially permanent magnets. The different steels and aluminum alyoys. We had this differently in
 datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
 - `figures/composition/1_<name>_materials_<k>.png`, "each material in one robot, then its grades", nine panels a page
+  (since 2026-11-02 the steels and the aluminium alloys whole, their grades below only on the pages of where each sits
+  and in the alloys table: "the material is much too detailed", "Yes, build it"; what follows is the layout before)
   (median solid, mean dotted, 95 % dashed, each its own unit), since E19 (2026-11-02) each material of the one list in
   its order, then its grades, alloys or magnet classes under it: copper, brass, nickel (the strips of the battery);
   the aluminium alloys and each (6061, 7075, the die-cast A380 and ADC12, by type 1's aluminium recipe); titanium alloy

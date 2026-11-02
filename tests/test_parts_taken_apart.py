@@ -780,10 +780,11 @@ class TestMaterialPages(unittest.TestCase):
             parts = sum(kg for (x, m, _), kg in d.details.items() if x == kind and m == material)
             np.testing.assert_allclose(parts, draws[:, k], rtol=1e-9, atol=1e-15, err_msg=f'{kind}, {material}')
 
-    def test_the_pages_show_each_material_then_its_grades(self):
+    def test_the_panels_by_grade_each_material_then_its_grades(self):
         # EVIDENCE.md E19 point 7 and his yes to the preview of type 5 ("Yes, build them", 2026-11-02): each material of
         # the one list, in its order, then its grades, alloys or magnet classes, each under its material; a material of
-        # one grade that grade in its title.
+        # one grade that grade in its title. Since the same day the material pages show the steels and the aluminium
+        # alloys whole (material_page_panels, below); these panels by grade give the pages of where each sits.
         _, d = self.drawn()
         titles = [title for title, *_ in composition.material_panels(d)]
         wanted = ['Copper', 'Nickel: strips of the battery', 'Aluminium alloys', 'Aluminium alloys: 6061 (wrought)',
@@ -805,6 +806,30 @@ class TestMaterialPages(unittest.TestCase):
         figure = dict(composition.sources_pages(d))[os.path.join(composition.SOURCES_FOLDER, 'NdFeB_magnets.png')]
         self.assertTrue(figure.get_suptitle().endswith('where its NdFeB magnets sit'), msg=figure.get_suptitle())
         composition.plt.close('all')
+
+    def test_the_material_pages_show_the_steels_and_the_aluminium_alloys_whole(self):
+        # Matthias, 2026-11-02: "There are far to many different types of steels. Can we have this in separate plots and
+        # in the overview just steel", "It is the same with aluminum alloys", "We have the parts for each alloy. This is
+        # good. But the material is much too detailed", then "Yes, build it": on the material pages the three steels
+        # and the aluminium alloys as their material only, each the sum of its grades; the other materials as before;
+        # their grades still on the pages of where each sits and in the alloys table.
+        _, d = self.drawn()
+        panels = composition.material_page_panels(d)
+        titles = [title for title, *_ in panels]
+        for whole in ('Steel', 'Stainless steel', 'Electrical steel', 'Aluminium alloys'):
+            self.assertIn(whole, titles)
+            self.assertFalse(any(t.startswith(whole + ':') for t in titles), msg=whole)
+            kinds = next(p[3] for p in panels if p[0] == whole)
+            grades = sum(kg for (_, m, _), kg in d.details.items() if m == whole)
+            np.testing.assert_allclose(sum(kinds.values()), grades, rtol=1e-12, err_msg=whole)
+        for kept in ('NdFeB magnets: grade class SH', 'Battery cells: NMC (cylindrical)', 'Nickel: strips of the battery'):
+            self.assertIn(kept, titles)
+        sources = [name for name, _ in composition.sources_pages(d)]
+        for name in ('Gear_steel_20CrMnTi', 'Aluminium_7075', 'Stainless_steel_440C', 'Electrical_steel_M19'):
+            self.assertIn(os.path.join(composition.SOURCES_FOLDER, f'{name}.png'), sources)
+        composition.plt.close('all')
+        alloys = [row[0] for row in composition.alloy_rows(d)]
+        self.assertIn('gear steel 20crmnti', ' '.join(alloys).lower())   # the alloys table keeps the grades
 
     def test_a_material_held_in_some_draws_shows_the_draws_that_hold_it(self):
         # Matthias, 2026-10-29: "If there is nothing then show nothing. If it is just a bit and a large 0 then show me
@@ -1587,3 +1612,33 @@ class TestRemainderBelowZeroReported(unittest.TestCase):
         notes = ' '.join(composition.taken_apart_notes(c, d, [], self.params))
         self.assertIn('the part group Frame is below zero in', notes)
         self.assertIn('reported, not cut', notes)
+
+
+class TestPagesNoLongerDrawn(unittest.TestCase):
+    """Matthias, 2026-11-02: "02 removes them itself": a numbered page of a robot type that 02 no longer draws (its
+    third and fourth material pages, when it now has two) is removed by its exact name; nothing else in the folder."""
+
+    def test_the_pages_beyond_those_written_are_removed_by_name(self):
+        with tempfile.TemporaryDirectory() as folder:
+            names = ['t_materials_1.png', 't_materials_2.png', 't_materials_3.png', 't_materials_4.png',
+                     't_alloys_1.png', 't_notes_1.png', 'u_materials_3.png', 't_materials_x.png', 'other.png']
+            for name in names:
+                open(os.path.join(folder, name), 'w').close()
+            written = ['t_materials_1.png', 't_materials_2.png', 't_notes_1.png']
+            removed = composition.remove_pages_not_drawn(folder, 't', ('notes', 'materials', 'alloys'), written)
+            self.assertEqual(sorted(removed), ['t_alloys_1.png', 't_materials_3.png', 't_materials_4.png'])
+            self.assertEqual(sorted(os.listdir(folder)), sorted(['t_materials_1.png', 't_materials_2.png',
+                                                                 't_notes_1.png', 'u_materials_3.png',
+                                                                 't_materials_x.png', 'other.png']))
+
+    def test_02s_figures_leave_no_page_of_an_earlier_run(self):
+        params = Params()
+        params.composition.draws = 300
+        inputs = inputs_or_skip(self, params)
+        with tempfile.TemporaryDirectory() as folder:
+            stale = os.path.join(folder, 'robot_type_1_overview_9.png')
+            open(stale, 'w').close()
+            d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+            composition.draw_parts_figures(d, params, folder)
+            self.assertFalse(os.path.exists(stale))
+            self.assertTrue(os.path.exists(os.path.join(folder, 'robot_type_1_overview_1.png')))
