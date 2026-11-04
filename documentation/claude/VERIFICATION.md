@@ -5,6 +5,19 @@ by Claude, newest first.
 
 ## 2026-11-04
 
+### V165. His rerun of 02 after V164 read back
+
+- **His words:** "I rerun 02", "02 run complet" (2026-11-04). Read only.
+- **Times:** every page and draw of the rerun (12:58:29 to 13:00:34) after the fix in 01 (12:45:36); no page of
+  `figures/composition/` or `figures/parts_taken_apart/` older than it.
+- **The notes:** types 5 and 6's notes page 1 read by eye: the battery's energy lists five and three robots, as "the
+  battery of 5" and "the battery of 3" say; Neo1, Nadia and the Phantom MK1 no longer. Types 3, 5 and 6 by 02's
+  `on_estimates` over his files and register: 124, 5 and 3 robots listed, each type's battery count of
+  `template_shares` (137, 124, 173; 4, 5, 15; 3, 3, 8), none of them without a battery.
+- **The draws:** each type 200,000; materials adding up to the total (largest relative difference 2.3 × 10⁻⁷); no
+  median of 0; nothing below zero in the summaries. Means 34.3, 84.3, 99.3, 66.7, 192.8 and 87.0 kg.
+- **Not covered:** type 3's notes pages by eye (their list checked through the function that writes it).
+
 ### V164. The notes pages: no battery estimate for a robot without a battery
 
 - **His words:** "Yes, fix it" (2026-11-04), to "Shall I fix the notes pages' battery wording (01's estimate_kinds)?" (V163).
