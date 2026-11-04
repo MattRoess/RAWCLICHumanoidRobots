@@ -151,7 +151,9 @@ reads; not in git):
 For each robot type taken apart also, into `output.parts_dir`/<n>_<name>/ (`data/parts_taken_apart/<n>_<name>/`):
 robots.npy (the robot of the parts file each draw is, its mass, the robot of the register drawn), parts.npy,
 materials.npy, grades.npy, elements.npy and estimated.npy (every element of interest in every kind of part, and its kg
-resting on masses labelled E), each with its columns in the .txt of the same name; register.txt (the robots of the register
+resting on masses labelled E), by_material.npy (every element of interest by the material it comes from, as the element
+pages split it, '<element>: <material>', and the copper fixed in an alloy, '<element>: <material> (fixed in alloys)';
+03_comparison.py draws it: EVIDENCE.md E29), each with its columns in the .txt of the same name; register.txt (the robots of the register
 drawn) and summary.csv (each element in all and in each kind of part: its mean, median and 95 % interval over the
 draws that hold it, and the share of the draws that hold it).
 
@@ -918,7 +920,11 @@ TRACKED = {'Cu', 'Al', 'Ag', 'Au', 'Pd', 'Ta', 'Nd', 'Pr', 'Dy', 'Ga', 'In'}
 
 # What is written of a robot type part by part, in this order: each a file <name>.npy with its columns in
 # <name>.txt.
-APART_TABLES = ('robots', 'parts', 'materials', 'grades', 'elements', 'estimated')
+APART_TABLES = ('robots', 'parts', 'materials', 'grades', 'elements', 'estimated', 'by_material')
+# The table by_material's columns of an element fixed in an alloy, '<element>: <material> (fixed in alloys)' (E25): its
+# copper not recovered as copper, beside the columns of each element of interest by the material it comes from
+# (Matthias, 2026-11-04: "Yes, agree E29", question 2, "Yes, build 03").
+FIXED_MARK = ' (fixed in alloys)'
 
 # The elements of the magnets come from RAWCLICVehicleTractionMotor's own `magnet_element_draws`, run in that project's
 # own environment (its pinned numpy), where it lies; it writes each grade class's fractions into a temporary folder.
@@ -1872,6 +1878,29 @@ def statistics(values: np.ndarray) -> list:
     return [s['Mean (kg)'], s['Median (kg)'], s['2.5 % (kg)'], s['97.5 % (kg)'], s['Held in (% of the draws)']]
 
 
+def by_material_table(d: Draws) -> tuple:
+    """The table 'by_material' of a robot type (EVIDENCE.md E29 question 2): each element of interest by the material
+    it comes from (Draws.by_material, as its element pages split it), '<element>: <material>', its columns adding up to
+    the element in every draw; after each element's, the element fixed in each alloy that holds it (Draws.fixed, E25:
+    only copper so far), '<element>: <material> (fixed in alloys)', adding up to the copper fixed in alloys. The
+    elements in the order of 01's table of atomic masses, the materials in MATERIAL_ORDER, any other after them by
+    name."""
+    def material_key(material: str) -> tuple:
+        known = list(MATERIAL_ORDER)
+        return (known.index(material) if material in known else len(known), material)
+
+    recovered, fixed = d.by_material or {}, d.fixed or {}
+    columns, draws = [], []
+    for element in element_order({e for _, e in recovered} | {e for _, e in fixed}):
+        for material in sorted((m for m, e in recovered if e == element), key=material_key):
+            columns.append(f'{element}: {material}')
+            draws.append(recovered[(material, element)])
+        for material in sorted((m for m, e in fixed if e == element), key=material_key):
+            columns.append(f'{element}: {material}{FIXED_MARK}')
+            draws.append(fixed[(material, element)])
+    return columns, np.column_stack(draws) if draws else np.zeros((d.n, 0))
+
+
 def write_taken_apart(d: Draws, folder: str) -> None:
     """A robot type part by part, at every level, and its summary, into `folder` (WHAT IT WRITES in the docstring at
     the top)."""
@@ -1892,6 +1921,7 @@ def write_taken_apart(d: Draws, folder: str) -> None:
                      np.column_stack([d.elements[k] for k in element_keys])),
         'estimated': ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
                       np.column_stack([d.estimated.get(k, np.zeros(d.n)) for k in element_keys])),
+        'by_material': by_material_table(d),
     }
     for table in APART_TABLES:
         columns, draws = tables[table]

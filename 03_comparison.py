@@ -6,46 +6,66 @@
 **Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
 at the root of the repository.
 
-The robot types side by side, by material, by element, by part group and by body region, each with its 95 % interval,
-from the draws 02_composition.py wrote. Press Run. No arguments; every setting is in `src/params_schema.py`. Run
+The six robot types side by side, one item a page: the mass of one robot, each material, each element of interest,
+the part groups, the body regions and copper, each type's draws in a panel of its own, split into what contributes to
+them, in the form of 02's pages. Press Run. No arguments; every setting is in `src/params_schema.py`. Run
 `02_composition.py` first.
 
-Matthias, 2026-10-26: "I want that it is possible to compare on a material level between the 6 types of roboy", and
-on the level of the parts; "So come up with a proposition, which I can understand as 20 year old, not familiar with
-the topic". Point 15 of the specification he agreed (documentation/claude/HANDOVER.md): "03 reads the six robot
-types' draws from 02, never re-deriving them, and draws them side by side: by material, by element, by part group and
-body region, each with its 95 % interval."
+Matthias, 2026-10-26: "I want that it is possible to compare on a material level between the 6 types of roboy", and on
+the level of the parts, understandable "as 20 year old, not familiar with the topic"; 2026-11-04: "The figures should
+look similar or the same as in 02", "I want how the different contributions to the overall is", "Yes, agree E29" and
+"Yes, build 03" (documentation/claude/EVIDENCE.md E29: the form and the pages, questions 1 to 4 as recommended).
 
 WHAT IT READS
 -------------
-The draws 02 wrote, `output.composition_dir`/<n>_<name>/<table>.npy with their columns in <table>.txt, as they are: it
-draws nothing at random itself. The names of the robot types come from the workbook, through 01's `read_workbook`.
+The draws 02 wrote, as they are: it draws nothing at random itself. For each robot type,
+`output.composition_dir`/<n>_<name>/ (`data/consolidated/`): total, materials, elements (of interest), part_groups,
+body_regions and copper (02's TABLES); and `output.parts_dir`/<n>_<name>/ (`data/parts_taken_apart/`): materials (each
+material in each kind of part, '<kind>: <material>') and by_material (each element of interest by the material it
+comes from, '<element>: <material>', and the copper fixed in alloys, '<element>: <material> (fixed in alloys)'). Each is
+<table>.npy with its columns in <table>.txt. The names of the robot types come from the workbook, through 01's
+`read_workbook`.
 
 WHAT IT CHECKS
 --------------
-That the draws belong together (`problems`): every robot type has every table, with the same number of draws, the
-same columns in the same order as the first robot type, and, in every draw, its materials, part groups and body
-regions add up to its total (to the rounding of float32). Any problem stops it before anything is drawn.
+That the draws belong together (`problems`), before anything is drawn: every table of every robot type there, with
+the same number of draws, as many columns as its list names, 02's tables with the columns of the first robot type; in
+every draw its materials, part groups and body regions adding up to its total; its materials by kind of part to its
+materials; its elements by material to its elements; its copper fixed in each alloy to its copper fixed in alloys, and
+its copper recycled as copper and fixed in alloys to its inflow. All to the rounding of float32 (FLOAT32_TOLERANCE).
+Any problem stops it: nothing is drawn.
 
 WHAT IT DRAWS
 -------------
-Into `output.comparison_dir` (`figures/comparison/`; not in git), one page per view (recommendation g):
+Into `output.comparison_dir` (`figures/comparison/`; not in git), pages of 16 × 9 inches, text 14 points and up, as
+02's: the notes once, on pages of their own (comparison_notes_<k>.png), then one item a page, its six robot types in
+six panels, three across and two down:
 
-  materials.png, elements.png, part_groups.png, body_regions.png
-        one small chart per material (element, part group, body region), with one row per robot type: a bar of the
-        mean and a line over 95 % of the draws (02's interval_bars), and the mean written beside it, all of the draws
-        that hold it (those not 0: a 0 is not part of a distribution, CLAUDE.md §7), with the share of the draws that
-        hold it in brackets where not all. Each chart has its own kg scale, so that a material of a few grams can be
-        read as well as one of 25 kg.
+  comparison_total_1.png             the mass of one robot, split by material
+  comparison_materials_<k>.png       each material any type holds, split by the kind of part it sits in
+  comparison_elements_<k>.png        each element of interest any type holds, split by the material it comes from
+  comparison_part_groups_1.png       the mass of one robot, split by part group
+  comparison_body_regions_1.png      the mass of one robot, split by body region
+  comparison_copper_1.png            copper's inflow, split into recycled as copper and fixed in alloys
 
-Where it sits: after 02_composition.py, the last stage.
+Each panel 02's (`stacked_bars`, `centre_lines`, `panel_axes`): the histogram of the type's draws, the height the share
+of the draws, each bar split into its contributions, the smaller lower, each in its colour; the median a solid line,
+the mean a dotted one, the 2.5th and 97.5th percentile dashed, the numbers above the panel, never over its data; each
+panel on its own scale and unit (question 3). A type that holds the item in fewer than 2.5 % of its draws has no panel
+(02's rule; a 0 is not part of a distribution, CLAUDE.md §7): its place says so. One legend at the top of a page. A
+numbered page of an earlier run beyond those drawn is removed by its exact name, and so are the four pages of 03's old
+form (OLD_PAGES); nothing else in the folder is touched.
+
+Where it sits: after 02_composition.py. 04, the stock-and-flow model, is to come after it.
 """
 
 from __future__ import annotations
 
 import importlib.util
+import math
 import os
 import sys
+import textwrap
 from dataclasses import dataclass
 
 # Run from anywhere, and put the project root on the path, so that `src` imports. Must come before any import of src.
@@ -53,15 +73,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import numpy as np  # noqa: E402
-from matplotlib.ticker import MaxNLocator  # noqa: E402
+from matplotlib.patches import Patch  # noqa: E402
 
 from src.params_schema import ParameterError, Params, absolute, current  # noqa: E402
 
 
 def load_composition():
-    """02_composition.py as a module, for the files it writes (TABLES, folder_name) and its drawing (interval_bars,
-    mass); it loads 01 as `schemas`. Loaded from its path, registered as 'composition', and only once: where the tests
-    have loaded it already, that module is used."""
+    """02_composition.py as a module, for the files it writes (TABLES, folder_name) and its pages' drawing
+    (stacked_bars, centre_lines, notes_pages …: one copy of the code); it loads 01 as `schemas`. Loaded from its path,
+    registered as 'composition', and only once: where the tests have loaded it already, that module is used."""
     path = os.path.join(HERE, '02_composition.py')
     loaded = sys.modules.get('composition')
     if loaded is not None and os.path.samefile(getattr(loaded, '__file__', path), path):
@@ -75,21 +95,20 @@ def load_composition():
 
 composition = load_composition()
 schemas = composition.schemas
+plt = composition.plt
 
-# The pages, one per view: the table of 02's draws it shows -> its title.
-VIEWS = {'materials': 'By material', 'elements': 'By element', 'part_groups': 'By part group',
-         'body_regions': 'By body region'}
-# The draws are written as float32, whose rounding is about 6e-8 of a value; a sum of a dozen columns may miss the
-# total by some 1e-6 of it. A miss above this share of the total means the files do not belong together.
+# ------------------------------------------------------------------------------------------------------
+# What it reads and how it checks it
+# ------------------------------------------------------------------------------------------------------
+
+# The tables of each robot type part by part that 03 reads (02's APART_TABLES): each material by kind of part, each
+# element by the material it comes from.
+PARTS_TABLES = ('materials', 'by_material')
+# The draws are written as float32, whose rounding is about 6e-8 of a value; a sum of a few dozen columns may miss its
+# whole by some 1e-6 of it. A miss above this share of the whole means the files do not belong together.
 FLOAT32_TOLERANCE = 1e-4
-
-COLUMNS = 4                 # charts side by side on a page
-PANEL_LABEL = 1.05          # the robot types left of a chart, inches
-PANEL_CHART = 2.35          # the width of a chart, inches
-PANEL_NUMBER = 1.1          # the means right of a chart, with the share held where not all ("2.00 (40 %)"), inches
-PANEL_GAP = 0.45            # between two charts, inches
-PANEL_ROW = 0.21            # the height of one robot type's row, inches
-PAGE_WIDTH = 2 * composition.MARGIN + COLUMNS * (PANEL_LABEL + PANEL_CHART + PANEL_NUMBER) + (COLUMNS - 1) * PANEL_GAP
+# Below this, a miss is no miss: a picogram, where an element is 0 kg in a draw and its parts add up to 0 kg.
+FLOOR_KG = 1e-12
 
 
 @dataclass
@@ -99,40 +118,69 @@ class Robot:
     number: int               # the robot type, 1 to 6
     title: str                # its name, e.g. 'Compact Research & Developer'
     tables: dict              # one of 02's TABLES -> (its columns, its draws as written: N rows × one column each)
+    parts: dict               # one of PARTS_TABLES -> (its columns, its draws as written), of data/parts_taken_apart/
 
     def column(self, table: str, name: str) -> np.ndarray:
-        """The draws of one column of one table, in float64 for the statistics."""
+        """The draws of one column of one of 02's TABLES, in float64 for the sums and statistics."""
         columns, draws = self.tables[table]
         return draws[:, columns.index(name)].astype(np.float64)
+
+    def split(self, table: str, head: str) -> dict:
+        """The columns '<head>: <name>' of one of PARTS_TABLES, as {name: its draws in float64}, in the table's order:
+        a material in each kind of part ('materials', head the kind), or an element from each material ('by_material',
+        head the element; the copper fixed in an alloy '<material> (fixed in alloys)')."""
+        columns, draws = self.parts[table]
+        out = {}
+        for k, column in enumerate(columns):
+            first, _, rest = column.partition(': ')
+            if first == head:
+                out[rest] = draws[:, k].astype(np.float64)
+        return out
+
+    def in_kinds(self, material: str) -> dict:
+        """One material in each kind of part it sits in, {kind's name: its draws} (the parts table 'materials',
+        '<kind>: <material>')."""
+        columns, draws = self.parts['materials']
+        return {column.rpartition(': ')[0]: draws[:, k].astype(np.float64) for k, column in enumerate(columns)
+                if column.rpartition(': ')[2] == material}
+
+
+def read_table(folder: str, table: str) -> tuple:
+    """One table as 02 writes it: its columns (<table>.txt, one a line) and its draws (<table>.npy)."""
+    with open(os.path.join(folder, f'{table}.txt'), encoding='utf-8') as file:
+        columns = file.read().splitlines()
+    return columns, np.load(os.path.join(folder, f'{table}.npy'))
 
 
 def read_draws(params: Params) -> list:
     """The draws of every robot type of the workbook, as 02 wrote them. Raises FileNotFoundError where 02 has not
-    written a robot type."""
+    written a table of a robot type."""
     book = schemas.read_workbook(absolute(params.data.workbook), params)
-    out = absolute(params.output.composition_dir)
     robots = []
     for category in book.categories:
-        folder = os.path.join(out, composition.folder_name(category))
-        tables = {}
-        for table in composition.TABLES:
-            with open(os.path.join(folder, f'{table}.txt'), encoding='utf-8') as file:
-                columns = file.read().splitlines()
-            tables[table] = (columns, np.load(os.path.join(folder, f'{table}.npy')))
-        robots.append(Robot(category.number, category.name, tables))
+        name = composition.folder_name(category)
+        consolidated = os.path.join(absolute(params.output.composition_dir), name)
+        apart = os.path.join(absolute(params.output.parts_dir), name)
+        robots.append(Robot(category.number, category.name,
+                            {table: read_table(consolidated, table) for table in composition.TABLES},
+                            {table: read_table(apart, table) for table in PARTS_TABLES}))
     return robots
 
 
+def misses(sum_of_parts: np.ndarray, whole: np.ndarray) -> int:
+    """In how many draws the parts miss their whole by more than the rounding of float32."""
+    return int((np.abs(sum_of_parts - whole) > FLOAT32_TOLERANCE * np.abs(whole) + FLOOR_KG).sum())
+
+
 def problems(robots: list) -> list:
-    """Whether the draws belong together: every table of every robot type with the number of draws and the columns
-    of the first robot type, and its materials, part groups and body regions adding up to its total in every draw."""
+    """Whether the draws belong together (WHAT IT CHECKS in the docstring at the top): a sentence for each problem,
+    [] where none."""
     found = []
     first = robots[0]
     n = len(first.tables['total'][1])
     for robot in robots:
         shapes_right = True
-        for table in composition.TABLES:
-            columns, draws = robot.tables[table]
+        for table, (columns, draws) in [*robot.tables.items(), *robot.parts.items()]:
             if draws.ndim != 2 or draws.shape[0] != n:
                 found.append(f'robot type {robot.number}: {table} has {draws.shape[0]} draws, not {n}.')
                 shapes_right = False
@@ -140,111 +188,262 @@ def problems(robots: list) -> list:
                 found.append(f'robot type {robot.number}: {table} has {draws.shape[1]} columns, but its list names '
                              f'{len(columns)}.')
                 shapes_right = False
-            elif columns != first.tables[table][0]:
+        for table in composition.TABLES:
+            if robot.tables[table][0] != first.tables[table][0]:
                 found.append(f'robot type {robot.number}: the columns of {table} are not those of robot type '
                              f'{first.number}.')
+                shapes_right = False
         if not shapes_right:
             continue
         total = robot.column('total', 'Total')
         for table, what in (('materials', 'the materials'), ('part_groups', 'the part groups'),
                             ('body_regions', 'the body regions')):
-            off = np.abs(robot.tables[table][1].astype(np.float64).sum(axis=1) - total) > FLOAT32_TOLERANCE * total
-            if off.any():
-                found.append(f'robot type {robot.number}: {what} do not add up to the total in {off.sum()} draws.')
+            off = misses(robot.tables[table][1].astype(np.float64).sum(axis=1), total)
+            if off:
+                found.append(f'robot type {robot.number}: {what} do not add up to the total in {off} draws.')
+        off = [m for m in robot.tables['materials'][0]
+               if misses(sum(robot.in_kinds(m).values(), np.zeros(n)), robot.column('materials', m))]
+        if off:
+            found.append(f'robot type {robot.number}: its materials by kind of part do not add up to its materials: '
+                         f"{', '.join(off)}.")
+        off = [e for e in robot.tables['elements'][0]
+               if misses(sum(recovered_from(robot, e).values(), np.zeros(n)), robot.column('elements', e))]
+        if off:
+            found.append(f'robot type {robot.number}: its elements by material do not add up to its elements: '
+                         f"{', '.join(off)}.")
+        recycled, fixed, inflow = (robot.column('copper', c) for c in composition.COPPER_COLUMNS)
+        in_alloys = sum((kg for symbol in robot.tables['elements'][0] for kg in fixed_in(robot, symbol).values()),
+                        np.zeros(n))
+        if (misses(in_alloys, fixed) or misses(recycled, robot.column('elements', 'Cu'))
+                or misses(recycled + fixed, inflow)):
+            found.append(f'robot type {robot.number}: its copper recycled as copper, fixed in alloys and its inflow '
+                         'do not belong together.')
     return found
 
 
-def statistics(draws: np.ndarray) -> tuple:
-    """(any mass in any draw, the mean, 2.5 %, 97.5 %, the share of the draws that hold it, %) of one quantity, with
-    02's statistics_of: over the draws that hold it, those not 0 (CLAUDE.md §7); None where it is 0 in every draw."""
-    s = composition.statistics_of(draws)
-    return bool(draws.any()), s['Mean (kg)'], s['2.5 % (kg)'], s['97.5 % (kg)'], s['Held in (% of the draws)']
+def recovered_from(robot: Robot, symbol: str) -> dict:
+    """One element of interest by the material it is recovered from, {material: its draws}."""
+    return {m: kg for m, kg in robot.split('by_material', symbol).items() if not m.endswith(composition.FIXED_MARK)}
 
 
-def beside(draws: np.ndarray) -> str:
-    """The number beside a robot type's row: its mean over the draws that hold it, with in brackets the share of the
-    draws that hold it where it is not all ("2.00 (40 %)"; Matthias, 2026-11-01: "If a value is 0 then it is NOT part
-    of the distribution"); '–' where it is 0 in every draw."""
-    present, mean, _, _, held = statistics(draws)
-    if not present:
-        return '–'
-    return composition.mass(mean) + (f' ({composition.panel_number(held)} %)' if held < 100 else '')
+def fixed_in(robot: Robot, symbol: str) -> dict:
+    """One element fixed in alloys, by the alloy, {'<material> (fixed)': its draws}, as 02's element pages mark it."""
+    mark = composition.FIXED_MARK
+    return {f'{m[:-len(mark)]} (fixed)': kg for m, kg in robot.split('by_material', symbol).items()
+            if m.endswith(mark)}
 
 
-def label(table: str, name: str) -> str:
-    """A column in plain words: an element by its name, 'Carbon (C)'; anything else as 02 names it."""
-    return composition.element_label(name) if table == 'elements' else name
+# ------------------------------------------------------------------------------------------------------
+# The colours
+# ------------------------------------------------------------------------------------------------------
+# Paul Tol's discrete rainbow, as published (tol_colors.py, version 2022.10, https://sronpersonalpages.nl/~pault/, read
+# on 2026-11-04): its 29 colours, and for a scheme of n colours (1 to 23) which of them, in this order. The kinds of
+# part (01's KINDS) take their colours from it, and the materials, part groups and body regions of 03's pages each the
+# scheme of their number. The element pages keep 02's colours of the materials an element comes from (Tol's muted
+# scheme, MATERIAL_COLOURS), so that they look as 02's.
+RAINBOW = ('#E8ECFB', '#D9CCE3', '#D1BBD7', '#CAACCB', '#BA8DB4', '#AE76A3', '#AA6F9E', '#994F88', '#882E72',
+           '#1965B0', '#437DBF', '#5289C7', '#6195CF', '#7BAFDE', '#4EB265', '#90C987', '#CAE0AB', '#F7F056',
+           '#F7CB45', '#F6C141', '#F4A736', '#F1932D', '#EE8026', '#E8601C', '#E65518', '#DC050C', '#A5170E',
+           '#72190E', '#42150A')
+RAINBOW_INDEXES = (
+    (9,), (9, 25), (9, 17, 25), (9, 14, 17, 25), (9, 13, 14, 17, 25), (9, 13, 14, 16, 17, 25),
+    (8, 9, 13, 14, 16, 17, 25), (8, 9, 13, 14, 16, 17, 22, 25), (8, 9, 13, 14, 16, 17, 22, 25, 27),
+    (8, 9, 13, 14, 16, 17, 20, 23, 25, 27), (8, 9, 11, 13, 14, 16, 17, 20, 23, 25, 27),
+    (2, 5, 8, 9, 11, 13, 14, 16, 17, 20, 23, 25), (2, 5, 8, 9, 11, 13, 14, 15, 16, 17, 20, 23, 25),
+    (2, 5, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25), (2, 5, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27),
+    (2, 4, 6, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27),
+    (2, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27),
+    (2, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 26, 27),
+    (1, 3, 4, 6, 7, 8, 9, 11, 13, 14, 15, 16, 17, 19, 21, 23, 25, 26, 27),
+    (1, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 19, 21, 23, 25, 26, 27),
+    (1, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 26, 27),
+    (1, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 26, 27, 28),
+    (0, 1, 3, 4, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 25, 26, 27, 28))
 
 
-def view_columns(robots: list, table: str) -> list:
-    """The columns a view shows: all of the table's (the elements those of interest, as 02 writes them)."""
-    return robots[0].tables[table][0]
+def rainbow(names: list) -> dict:
+    """Each of `names` its colour of Tol's discrete rainbow of as many colours, in their order."""
+    if not 1 <= len(names) <= len(RAINBOW_INDEXES):
+        raise ValueError(f'Paul Tol publishes his discrete rainbow for 1 to {len(RAINBOW_INDEXES)} colours, not '
+                         f'{len(names)}.')
+    return {name: RAINBOW[i] for name, i in zip(names, RAINBOW_INDEXES[len(names) - 1])}
 
 
-def draw_view(robots: list, table: str, path: str, params: Params) -> None:
-    """The page of one view: one chart per column of the table, with one row per robot type."""
-    names = view_columns(robots, table)
-    draws = len(robots[0].tables['total'][1])
-    rows_of_charts = -(-len(names) // COLUMNS)
-    chart_height = PANEL_ROW * len(robots)
-    block = 0.3 + chart_height + 0.55          # a chart's title, its rows and its kg scale
-    key = schemas.wrap('; '.join(f'Robot type {r.number}: {r.title}' for r in robots) + '.', 210)
-    notes = view_notes(table)
-    top = 1.05 + len(key) * schemas.LINE + 0.25
-    height = top + rows_of_charts * block + 0.2 + len(notes) * schemas.LINE + 0.4
-    figure, page = schemas.new_page(PAGE_WIDTH, height)
-    page.text(composition.MARGIN, 0.35, f'{VIEWS[table]}: the robot types side by side', fontsize=15,
-              fontweight='bold', va='top')
-    page.text(composition.MARGIN, 0.75, f'kg per robot, from {draws:,} draws of each robot type. Each bar is the '
-                                         'mean of the draws that hold it, written beside it; its line spans 95 % of '
-                                         'them, from 2.5 % to 97.5 %; in brackets the share of the draws that hold '
-                                         'it, where not all. Each chart has its own kg scale.', fontsize=10,
-              color=composition.MUTED, va='top')
-    schemas.write(page, composition.MARGIN, 1.05, key, size=9, colour=composition.MUTED)
-    for k, name in enumerate(names):
-        x = composition.MARGIN + (k % COLUMNS) * (PANEL_LABEL + PANEL_CHART + PANEL_NUMBER + PANEL_GAP)
-        y = top + (k // COLUMNS) * block
-        schemas.write(page, x, y, [label(table, name)], size=10, weight='bold')
-        y += 0.3
-        axes = figure.add_axes([(x + PANEL_LABEL) / PAGE_WIDTH, 1 - (y + chart_height) / height,
-                                PANEL_CHART / PAGE_WIDTH, chart_height / height])
-        rows = [(f'Robot type {r.number}', r.column(table, name)) for r in robots]
-        composition.interval_bars(axes, rows, size=8.5,
-                                  grey=name in ('Mixed', composition.OTHER, composition.NOT_ALLOCATED))
-        axes.xaxis.set_major_locator(MaxNLocator(4))   # a narrow chart: few kg marks, so that they never touch
-        for i, (_, values) in enumerate(rows):
-            page.text(x + PANEL_LABEL + PANEL_CHART + PANEL_NUMBER, y + (i + 0.5) * PANEL_ROW, beside(values),
-                      fontsize=8.5, ha='right', va='center')
-    below = top + rows_of_charts * block + 0.2
-    schemas.write(page, composition.MARGIN, below, notes, size=9)
-    schemas.save(figure, path, params.output.dpi)
+# The kinds of part in 01's colours, by their names as 02 writes them ('Hip joints', …).
+KIND_COLOURS = {name: colour for name, colour in schemas.KINDS.values()}
+# Copper's inflow: the copper recycled as copper in 02's colour of copper, that fixed in alloys in its pale grey (E25).
+RECYCLED = 'Copper recycled as copper'
+COPPER_COLOURS = {RECYCLED: composition.MATERIAL_COLOURS[composition.COPPER],
+                  composition.FIXED_PART: composition.MATERIAL_COLOURS[composition.FIXED_PART]}
+
+# ------------------------------------------------------------------------------------------------------
+# The pages
+# ------------------------------------------------------------------------------------------------------
+
+PREFIX = 'comparison'
+# The numbered pages, one series each (comparison_<series>_<k>.png), in the order they are drawn.
+SERIES = ('notes', 'total', 'materials', 'elements', 'part_groups', 'body_regions', 'copper')
+# The four pages of 03's old form (2026-10-26 to 2026-11-04: a bar of the mean and a line over 95 % per type), removed by
+# their exact names where an earlier run left them (E29).
+OLD_PAGES = ('materials.png', 'elements.png', 'part_groups.png', 'body_regions.png')
+ACROSS, DOWN = 3, 2           # six panels a page, one per robot type
+PANEL_TITLE_WIDTH = 34        # characters in a line of a panel's title, the type's number and name
+LEGEND_WIDTH = 15.0           # inches of the page's width a legend may take
+LEGEND_ROW = 0.035            # the height of a legend's row, share of the page's height (14 points and its spacing)
 
 
-def view_notes(table: str) -> list:
-    """What a reader needs to read the page of one view, in plain words."""
-    notes = ['–: none in this robot type.']
-    if table == 'materials':
-        notes.insert(0, "Not allocated: the parts' mass minus the materials' mass in each draw; below zero where the "
-                        'drawn materials weigh more than the drawn parts. Battery cells: the cells only.')
-    elif table == 'elements':
-        notes.insert(0, 'Only the elements of interest, from what is recovered as elements: copper and nickel each '
-                        'its metal whole; the light alloys the metal they hold; the magnets, the battery cells and the '
-                        'boards and '
-                        'components their metals of interest. Which materials give them, for each robot type, is on '
-                        'its page in figures/composition/.')
-    elif table == 'part_groups':
-        notes.insert(0, 'Battery: the battery packs as the parts list gives them; their cells alone are Battery '
-                        'cells on the page by material.')
-    elif table == 'body_regions':
-        notes.insert(0, 'Whole body: the parts spread over the body (frame, shell, cables), and the parts the workbook '
-                        'places in several regions without saying how many sit where (the sheet Lists of the shared '
-                        'lists).')
-    return [line for note in notes for line in schemas.wrap('• ' + note, 210)]
+def legend_columns(names: list) -> int:
+    """How many entries of a page's legend go in a row, so that the legend stays within LEGEND_WIDTH: each entry as
+    wide as the longest name at 14 points (about 0.6 of a point's width a character) and its colour's patch."""
+    widest = max(len(name) for name in names) * composition.APART_TEXT * 0.6 / 72 + 0.8
+    return max(1, min(len(names), int(LEGEND_WIDTH // widest)))
+
+
+def not_drawn_words(total: np.ndarray) -> str:
+    """What a type's place on a page says where it has no panel: none, or held in fewer than 2.5 % of its draws."""
+    if not total.any():
+        return 'none in this robot type'
+    share = composition.panel_number(100 * float((total > 0).mean()))
+    return f'held in {share} % of its draws:\nfewer than 2.5 %, no panel'
+
+
+def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None):
+    """One page: each robot type a panel (three across, two down), the histogram of its draws of the item split into
+    its contributions, `parts_of(robot)` ({contribution: its draws}), each in its colour of `colours`, as 02's panels;
+    where `fixed_of` is given, the panel of 02's element pages (by_material_panel), the copper fixed in alloys
+    (`fixed_of(robot)`, {'<alloy> (fixed)': its draws}) one pale grey part. A type holding the item in fewer than 2.5 %
+    of its draws has no panel; its place says so. The first panel drawn in a row has the scale of the share of the
+    draws, as the first of a row on 02's pages. One legend of the contributions drawn, at the top."""
+    figure, axes = plt.subplots(DOWN, ACROSS, figsize=composition.APART_PAGE, squeeze=False)
+    panels, rows_labelled = [], set()
+    for k, robot in enumerate(robots):
+        here = axes[k // ACROSS, k % ACROSS]
+        title = textwrap.fill(f'{robot.number} {robot.title}', PANEL_TITLE_WIDTH)
+        parts = parts_of(robot)
+        fixed = fixed_of(robot) if fixed_of else {}
+        total = sum([*parts.values(), *fixed.values()], np.zeros(len(robot.tables['total'][1])))
+        if not composition.held(total):
+            here.axis('off')
+            here.set_title(title, fontsize=composition.APART_TITLE, fontweight='bold', loc='left')
+            here.text(0, 0.85, not_drawn_words(total), transform=here.transAxes, fontsize=composition.APART_TEXT,
+                      va='top', color=composition.APART_INK)
+            continue
+        first_in_row = k // ACROSS not in rows_labelled
+        rows_labelled.add(k // ACROSS)
+        if fixed_of:
+            panels.append((here, composition.by_material_panel(here, {**parts, **fixed}, title, first_in_row,
+                                                               tuple(fixed))))
+            continue
+        here.set_title(title, fontsize=composition.APART_TITLE, fontweight='bold', loc='left')
+        bars = composition.stacked_bars(here, parts, colours)
+        composition.centre_lines(here, bars.values, bars.held_in, bars.end, bars.unit, title)
+        composition.panel_axes(here, bars.unit, first_in_row)
+        panels.append((here, (bars.top, 0, bars.drawn)))
+    for spare in axes.flatten()[len(robots):]:
+        spare.axis('off')
+    drawn = {m for _, (_, _, contributions) in panels for m in contributions}
+    shown = [m for m in colours if m in drawn]
+    columns = legend_columns(shown) if shown else 1
+    rows = math.ceil(len(shown) / columns) if shown else 0
+    figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
+    if shown:
+        figure.legend(handles=[Patch(color=colours[m], label=m) for m in shown], loc='upper center',
+                      bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=composition.APART_TEXT)
+    figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * LEGEND_ROW), h_pad=0.4, w_pad=2.5)
+    composition.make_room(figure, panels)
+    return figure
+
+
+def held_by_any(robots: list, table: str, name: str) -> bool:
+    """Whether any robot type holds one column of 02's TABLES in at least 2.5 % of its draws (02's rule)."""
+    return any(composition.held(r.column(table, name)) for r in robots)
+
+
+def material_names(robots: list) -> list:
+    """The materials of the pages: those of 02's materials table (the one list's) in 02's MATERIAL_ORDER, any other
+    after them, Not allocated not (none, as each robot's frame takes the rest of its mass)."""
+    columns = [m for m in robots[0].tables['materials'][0] if m != composition.NOT_ALLOCATED]
+    order = list(composition.MATERIAL_ORDER)
+    return sorted(columns, key=lambda m: (order.index(m) if m in order else len(order), m))
+
+
+def notes(robots: list) -> list:
+    """The notes page's paragraphs, in plain words."""
+    n = len(robots[0].tables['total'][1])
+    return [
+        'Each page one item, the six robot types side by side: the mass of one robot by material, each material by '
+        'the kind of part it sits in, each element of interest by the material it comes from, the mass of one robot '
+        'by part group and by body region, and copper, recycled as copper or fixed in alloys. One panel per robot type, '
+        'in the form of the pages of each robot type (figures/composition/).',
+        'A panel: the bars the draws of one robot of the type, the height the share of the draws, each bar split into '
+        'the kg its draws hold in each contribution, the one with the smaller mean lower, each in its colour (one '
+        'legend at the top of the page). Solid line: the median; dotted line: the mean; both written above the panel, '
+        'right. Dashed lines: the 2.5th and 97.5th percentile (95 % of the draws between them). Each axis ends at the '
+        '99.5th percentile of its draws: the 0.5 % beyond are not drawn, and the panel says so and names the largest.',
+        'Each panel on its own scale and unit (kg, g, mg): compare the numbers above the panels, not the widths of '
+        'their bars. One scale shared by the six would be stretched by the heaviest robot of a type (the NeodraDynamics '
+        'Neo1, 1,200 kg, in types 3 and 5) and press every other type into its first bars.',
+        'A robot type that holds an item in some of its draws only (a robot or a version without it): its panel shows '
+        'the draws that hold it and says in what share of all its draws it is held; one held in fewer than 2.5 % of '
+        'its draws has no panel, and its place on the page says so (a 0 is not part of a distribution). An item no '
+        'type holds has no page.',
+        f'The draws: {n:,} for each robot type, as 02_composition.py wrote them (data/consolidated/ and '
+        'data/parts_taken_apart/), each one robot of the type in the register, each of its robots drawn equally often '
+        '(a robot in two versions, each as often), part by part from its parts file. 03 draws nothing at random; it '
+        'checks that the draws add up before it draws a page.',
+        'The elements: only the elements of interest, from what is recovered as elements, as on the pages of each '
+        'robot type: copper and nickel each its metal whole; the aluminium, magnesium and titanium alloys the metal '
+        'they hold; the NdFeB magnets their rare earths, cobalt, boron, niobium and gallium; the battery cells their '
+        'lithium, nickel, cobalt and manganese and the copper and aluminium of their foils and tabs; the boards and '
+        'components their metals of interest. Copper: its inflow, the copper recycled as copper and, in pale grey, the '
+        'copper fixed in alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not '
+        'recovered as copper.',
+        "The part groups and body regions: each robot type's kinds of part placed whole; rough where a kind holds parts "
+        "of another group: the head's joints are counted as sensors, the battery management board as battery; a "
+        "hydraulic robot's power unit, oil and hoses as joint drives, in the torso.",
+        "The colours: Paul Tol's schemes, as published, colour-blind safe: the materials of the page of the mass by "
+        'material, the part groups and the body regions each his discrete rainbow of their number; the kinds of part '
+        'the colours of the pages of each robot type (the same rainbow); the materials an element comes from his muted '
+        'scheme, as on the pages of each robot type.',
+    ]
+
+
+def pages(robots: list, params: Params):
+    """Every page, as (file name, figure), one at a time (each is saved and closed before the next is drawn)."""
+    yield from composition.notes_pages(PREFIX, 'Comparing the six robot types: how to read the pages', notes(robots))
+    materials = material_names(robots)
+    yield (f'{PREFIX}_total_1.png',
+           compare_page('The mass of one robot of each robot type, by material', robots,
+                        lambda r: {m: r.column('materials', m) for m in materials}, rainbow(materials)))
+    shown = [m for m in materials if held_by_any(robots, 'materials', m)]
+    for k, material in enumerate(shown, 1):
+        yield (f'{PREFIX}_materials_{k}.png',
+               compare_page(f'{material} in one robot of each robot type, by the kind of part it sits in', robots,
+                            lambda r, m=material: r.in_kinds(m), KIND_COLOURS))
+    elements = [e for e in robots[0].tables['elements'][0]
+                if any(composition.held(r.column('elements', e) + sum(fixed_in(r, e).values(), 0)) for r in robots)]
+    for k, symbol in enumerate(elements, 1):
+        inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
+        yield (f'{PREFIX}_elements_{k}.png',
+               compare_page(f'{composition.element_label(symbol)} in one robot of each robot type{inflow}, by the '
+                            'material it comes from', robots, lambda r, e=symbol: recovered_from(r, e),
+                            composition.MATERIAL_COLOURS, lambda r, e=symbol: fixed_in(r, e)))
+    for table, words in (('part_groups', 'part group'), ('body_regions', 'body region')):
+        columns = robots[0].tables[table][0]
+        yield (f'{PREFIX}_{table}_1.png',
+               compare_page(f'The mass of one robot of each robot type, by {words}', robots,
+                            lambda r, t=table, c=columns: {name: r.column(t, name) for name in c}, rainbow(columns)))
+    yield (f'{PREFIX}_copper_1.png',
+           compare_page('Copper in one robot of each robot type: its inflow, recycled as copper or fixed in alloys',
+                        robots, lambda r: {RECYCLED: r.column('copper', composition.COPPER_COLUMNS[0]),
+                                           composition.FIXED_PART: r.column('copper', composition.COPPER_COLUMNS[1])},
+                        COPPER_COLOURS))
 
 
 def run(params: Params) -> int:
-    """Reads 02's draws, checks that they belong together, and draws the four pages. 0 when it has drawn them, 1 when
+    """Reads 02's draws, checks that they belong together, and draws the pages. 0 when it has drawn them, 1 when
     something stopped it (nothing drawn)."""
+    print(f'Reading the draws of 02 from {params.output.composition_dir}/ and {params.output.parts_dir}/ …', flush=True)
     try:
         robots = read_draws(params)
     except (FileNotFoundError, schemas.WorkbookError) as error:
@@ -257,12 +456,23 @@ def run(params: Params) -> int:
         for problem in found:
             print(f'  {problem}', file=sys.stderr)
         return 1
+    print(f'{len(robots)} robot types, {len(robots[0].tables["total"][1]):,} draws each: they add up. Drawing the pages '
+          '…', flush=True)
     out = absolute(params.output.comparison_dir)
-    for table in VIEWS:
-        draw_view(robots, table, os.path.join(out, f'{table}.png'), params)
-    print(f'{len(robots)} robot types, {len(robots[0].tables["total"][1]):,} draws each, read from '
-          f'{params.output.composition_dir}/; drawn into {params.output.comparison_dir}/: '
-          f"{', '.join(f'{t}.png' for t in VIEWS)}.")
+    os.makedirs(out, exist_ok=True)
+    written = []
+    for name, figure in pages(robots, params):
+        figure.savefig(os.path.join(out, name), dpi=params.output.dpi, facecolor='white')
+        plt.close(figure)
+        written.append(name)
+        print(f'  {name}', flush=True)
+    for name in OLD_PAGES:
+        if os.path.exists(os.path.join(out, name)):
+            os.remove(os.path.join(out, name))
+            print(f'  {name} removed: a page of the old form of 03.', flush=True)
+    for name in composition.remove_pages_not_drawn(out, PREFIX, SERIES, written):
+        print(f'  {name} removed: a page of an earlier run no longer drawn.', flush=True)
+    print(f'03 done: {len(written)} pages drawn into {params.output.comparison_dir}/.', flush=True)
     return 0
 
 

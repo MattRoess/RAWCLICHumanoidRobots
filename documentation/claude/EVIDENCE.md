@@ -8,6 +8,76 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E29. Spec: 03, the six robot types compared (2026-11-04). Built
+
+Matthias, 2026-11-04: "Yes, write 03's spec", "The figures should look similar or the same as in 02", "I want how the
+different contributions to the overall is"; 2026-10-26: "compare on a material level between the 6 types of roboy",
+and on the level of the parts, understandable "as 20 year old, not familiar with the topic". 03 as it stands (since
+2026-10-26) draws a bar of the mean with a 95 % line per type, the form he rejected for 02 on 2026-10-27; it is
+redrawn. What 02 writes for 03 (V168): each type's 200,000 draws of its total, materials, elements of interest, part
+groups, body regions and copper (`data/consolidated/`), and of each material and element by kind of part (where it
+sits: hip joints, battery, frame …, `data/parts_taken_apart/`); the split of an element by the material it comes from
+(02's element pages) it keeps in memory, not written.
+
+**The form, as 02's:** a panel per type, the histogram of its 200,000 draws (the height the share of the draws), each
+bar split into its contributions, the smaller lower, each in its colour (the materials' and the kinds' of 02, Paul
+Tol's, as published); the median a solid line, the mean a dotted one, the 2.5th and 97.5th percentile dashed; the
+median, the mean, the share of the draws holding it (where not all) and what lies beyond the axis written above the
+panel, never over the data (E26's rule and test); kg, g or mg; 16 × 9 inch pages, text 14 pt and up; one legend at the
+top of a page; the notes once, on a page of their own.
+
+**The pages, one item a page, its six types in six panels (three across, two down):**
+
+| # | Page | Each type's histogram split by |
+|---|---|---|
+| 1 | The total mass of one robot | its materials |
+| 2 | Each material (16), one page each | the kinds of part it sits in |
+| 3 | Each element of interest (22), one page each | the material it comes from (question 2) |
+| 4 | The part groups and the body regions, a page each | the total mass split by part group, by body region |
+| 5 | Copper three ways | its inflow split into recycled as copper and fixed in alloys |
+
+About 42 pages and a notes page, into `figures/comparison/`.
+
+**Questions, each with my recommendation:**
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | "The different contributions to the overall": each type's total split into its contributions, the six types side by side (A); or the six types as the contributions to one overall, one robot of each added up (B) | **A**: B's "one robot of each" is no quantity of the world until the stock-and-flow model gives each type its numbers |
+| 2 | An element's contributions: the material it comes from (as 02's element pages; 02 then writes that split as a table of its own, and he reruns 02), or the kind of part it sits in (written already) | **the material**, as 02 ("the same as in 02") |
+| 3 | The six panels of a page: each on its own axis (as 02), or one shared axis | **each its own**, the numbers above to compare: a shared axis is stretched by Neo1 (1,200 kg, 976 kg of it steel) in types 3 and 5, which squeezes every other type into its first bars |
+| 4 | Pages 1 to 5 all, or fewer | **all**, one item a page as listed |
+
+Then, on his word: tests first; one page drawn in a scratch folder with few draws (Copper, page 3) for his look before
+the rest; 03 rewritten (its four old pages removed by name, the old form's tests replaced); METHODOLOGY, README.
+
+Found, not acted on: on 02's pages of type 3 Neo1 (one draw in 173) stretches some panels: titanium "median 0.0019 g,
+mean 300 g", its axis to 24 kg; steel's axis to 1,000 kg.
+
+**Agreed** (Matthias, 2026-11-04: "Yes, agree E29"): the form and the pages as written, questions 1 to 4 as recommended
+(A; an element by the material it comes from; each panel its own axis; all pages). Next: one page (Copper) drawn in a
+scratch folder for his look, then the build on his word.
+
+**Built** (Matthias, 2026-11-04: "Yes, build 03"; VERIFICATION.md V170): 02 writes `by_material` (each element of interest
+by the material it comes from, the copper fixed in each alloy beside it) into `data/parts_taken_apart/<n>_<name>/`; 03
+rewritten, its old four pages removed by name when a run finds them. Settled in the build, within the agreed form, each
+for his word to change:
+
+| # | Point | As built |
+|---|---|---|
+| 1 | A type holding the item in fewer than 2.5 % of its draws | no panel, 02's rule (its pages: "one held in fewer than 2.5 % of the draws has no panel"); its place says "none in this robot type" or "held in 0.45 % of its draws: fewer than 2.5 %, no panel" |
+| 2 | Colours where 02 has none: the 16 materials of the total, the 12 part groups, the 7 body regions | Paul Tol's discrete rainbow of 16, 12 and 7, as published (tol_colors.py 2022.10, read 2026-11-04); the kinds 01's, the element pages 02's muted, copper 02's |
+| 3 | The pages' names | `comparison_<series>_<k>.png`, numbered as 02's (`comparison_materials_1.png` copper … in 02's order of materials), so that a page no longer drawn is removed by its exact name |
+| 4 | The share scale ("share of draws") | on the first panel drawn in each row, so that a row whose first type has no panel keeps it |
+| 5 | The legend of 16 materials or 13 kinds | in rows, as many as it needs to stay within the page (tested) |
+
+**Found, not acted on** (his runs, V171; each as on 02's pages, drawn by 02's functions; his decision):
+1. 02's shares are written as whole numbers from 10 %: type 3's terbium "in 100 % of the draws" for 99.781 % (the only
+   share so rounded). A share above 99 % could be written with one decimal ("in 99.8 %").
+2. Titanium by material: in types 1, 2, 3, 5 and 6 the boards' milligrams and a titanium alloy's kilograms in one panel,
+   its mean over 100 times its median ("median 0.0000014 kg, mean 5.5 kg"), the bars one at 0 (the only page so).
+3. Steel by kind of part, types 3 and 5: the Neo1's 976 kg stretch the axis to 1,000 kg and press the other robots into
+   the first bars (in type 5 the Neo1 is one of 11 robots, 9 % of the draws).
+
 ## E28. Closing 02: the open items (2026-11-04). Built
 
 Matthias, 2026-11-04: "Can we go through and come up with paragmatic solutions", "I want that we complet this soon, as

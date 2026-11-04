@@ -60,7 +60,25 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-04: the hydraulic Atlas (old), Nadia and Neo1 built (E27); where to start (start here)
+## 2026-11-04, evening: 03 built (E29); where to start (start here)
+
+What changed, on Matthias's word ("Yes, agree E29", "Yes, build 03"; VERIFICATION.md V170): 03 rewritten in the form of
+02's pages, one item a page, the six types in six panels, each split into what contributes to it (EVIDENCE.md E29 and its
+"Built" table of five points settled in the build); 02 writes one table more for it, `by_material`. **Not committed.**
+
+**Matthias's runs, in this order, each by pressing Run:**
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   (200,000 draws; needed: 03 reads its new table `by_material`, which no run of his has written yet)
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+**Since:** both run ("Both are done!!") and read back (V171): 200,000 draws, they add up; 43 pages, each passing the tests'
+rules.
+
+**Open:** E29's three "Found" (the shares written "in 100 %", titanium's milligrams and kilograms in one panel, the Neo1
+stretching steel's panels of types 3 and 5), his decision; E25 point B postponed; then 04, the stock-and-flow model
+(Matthias, 2026-11-04: "04 will then be the stock and flow model").
+
+## 2026-11-04: the hydraulic Atlas (old), Nadia and Neo1 built (E27); where to start
 
 What changed, each on Matthias's word: the state checked (V156); their research ("Yes, prepare it"), its PDFs read ("Yes,
 download them"), its questions ("all as recommended"), the spec ("Yes, agree E27.7") and the build ("Yes, build it"):
@@ -89,6 +107,9 @@ Types 1, 2 and 4's files need no rebuild (their builders write what they wrote; 
 mass); the notes pages' battery wording fixed (V164, "Yes, fix it"): **his run of 02 to see it**
 (`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`); the frames
 below zero of types 1, 3 and 4 (V163) open; the notes' "from their torques" naming Neo1 and Nadia, reported.
+
+**03 and 04:** 03's spec agreed (E29, "Yes, agree E29"), its Copper page previewed (V169), 03 built (V170, the entry
+above); then 04 the stock-and-flow model (Matthias, 2026-11-04: "04 will then be the stock and flow model").
 
 **Closing 02 (E28, V166, V167; "Yes, do the package", "Yes, fix both"):** the frames below zero closed under E21; E25
 point B postponed until stock-and-flow needs it; the notes' torques wording, the four functions removed, the tables'

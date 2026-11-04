@@ -17,7 +17,7 @@ Every setting is in `src/params_schema.py`.
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, each robot type's `data/researched/<n>_<name>/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, for each robot type taken apart (1 to 6) its robots' table and where its kinds of part sit, the same pages (type 2's since 2026-10-30: "Yes, as type 1's"; types 3 and 4's since 2026-10-30, EVIDENCE.md E11.7 open point B, each over its robots of every parts file); for a robot type with no parts file, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
 | `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
-| `03_comparison.py` | The draws of 02; the names of the robot types from the workbook | `figures/comparison/` | Draws the robot types side by side, by material, element, part group and body region, each with its 95 % interval. Draws nothing at random itself. After robot type 6 (Matthias, 2026-10-29: "I am currently not interested in 03"). |
+| `03_comparison.py` | The draws of 02, in `data/consolidated/` and `data/parts_taken_apart/`; the names of the robot types from the workbook | `figures/comparison/` | The six robot types side by side, one item a page, each type a panel of 02's form, split into what contributes to it: the mass of one robot by material, each material by kind of part, each element of interest by the material it comes from, the mass by part group and by body region, copper recycled as copper or fixed in alloys (EVIDENCE.md E29, since 2026-11-04). Draws nothing at random itself. |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
 them", and, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
@@ -872,7 +872,9 @@ and the factor over its own) were replaced on 2026-10-29 by the section above; t
 **What it writes**, into `data/parts_taken_apart/<n>_<name>/` (answer D; not in git; a folder per type since 2026-10-30): `robots.npy` (the robot of the parts file
 each draw is, its mass, the robot of the register), `parts.npy` (every joint kind, part, board and sensor of every robot, kg; 0 in the draws of the
 other robots), `materials.npy` (every material in every kind of part), `elements.npy` (every element in every kind of
-part), each float32 with its columns in a `.txt`, row i the same draw in every file; and `summary.csv` (each element
+part), `by_material.npy` (every element of interest by the material it comes from, as the element pages split it, and
+the copper fixed in each alloy, '<element>: <material> (fixed in alloys)'; since 2026-11-04 for 03, EVIDENCE.md E29),
+each float32 with its columns in a `.txt`, row i the same draw in every file; and `summary.csv` (each element
 in all and in each kind of part: its mean, median and 95 % interval over the draws that hold it, and "Held in", the
 share of the draws that hold it).
 
@@ -944,14 +946,43 @@ datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
 ## What 03 draws
 
 `03_comparison.py` reads what 02 wrote, as it is, and draws nothing at random itself (point 15 of the specification).
-It first checks that the files belong together: every robot type with every table, the same number of draws, the same
-columns in the same order, and its materials, part groups and body regions adding up to its total in every draw.
+Since 2026-11-04 in the form of 02's pages (Matthias: "The figures should look similar or the same as in 02", "I want how
+the different contributions to the overall is", "Yes, agree E29", "Yes, build 03"; EVIDENCE.md E29); its earlier form, a
+bar of the mean and a line over 95 % per type, four pages, is gone, and its four pages are removed by their exact names
+where a run left them.
 
-It draws one page per view into `figures/comparison/`: `materials.png`, `elements.png`, `part_groups.png`,
-`body_regions.png`. Each holds one small chart per material (element, part group, body region) with one row per robot
-type: the mean as a bar, a line over 95 % of the draws, and the mean written beside it, all of the draws that hold it,
-with in brackets their share of the draws where it is not all ("2.00 (40 %)"; above, "A 0 is not part of a
-distribution"). Each chart has its own kg
-scale, so that a material of a few grams can be read as well as one of 25 kg. Matthias, 2026-10-26: "I want that it
-is possible to compare on a material level between the 6 types of roboy". `elements.png` shows the elements of
-interest, as 02 writes them (E19 point 3).
+**What it reads:** for each robot type 02's tables in `data/consolidated/<n>_<name>/` (total, materials, elements of
+interest, part groups, body regions, copper) and two of its tables in `data/parts_taken_apart/<n>_<name>/`: each material
+in each kind of part (`materials`) and each element of interest by the material it comes from (`by_material`, written by
+02 for 03 since 2026-11-04: the split its element pages draw, with the copper fixed in each alloy beside it).
+
+**What it checks,** before anything is drawn: every table there, with the same number of draws, as many columns as its
+list names, 02's tables with the same columns for every type; in every draw a type's materials, part groups and body
+regions adding up to its total, its materials by kind of part to its materials, its elements by material to its elements,
+its copper fixed in each alloy to its copper fixed in alloys, and its copper recycled and fixed to its inflow, each to the
+rounding of float32 (a miss above 1e-4 of the whole stops it). A fault of each kind was made on purpose in the tests and
+seen to stop it.
+
+**What it draws,** into `figures/comparison/`, pages of 16 × 9 inches, text 14 points and up: the notes once, on pages of
+their own (`comparison_notes_<k>.png`), then one item a page, the six robot types in six panels, three across and two
+down:
+
+| Pages | Each type's histogram split by | Colours (Paul Tol's, as published) |
+|---|---|---|
+| `comparison_total_1.png`, the mass of one robot | its materials | the discrete rainbow of 16 |
+| `comparison_materials_<k>.png`, each material any type holds (15 in V170's run: no type holds ceramics) | the kind of part it sits in | the kinds' of 01 and 02 |
+| `comparison_elements_<k>.png`, each element of interest any type holds (22 in V170's run) | the material it comes from, the copper fixed in alloys pale grey | 02's of the element pages (muted) |
+| `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the part group, the body region | the discrete rainbow of 12, of 7 |
+| `comparison_copper_1.png`, copper's inflow | recycled as copper, fixed in alloys | 02's copper, pale grey |
+
+Each panel is 02's (`stacked_bars`, `centre_lines`, `panel_axes`; on the element pages `by_material_panel`): the bars the
+draws of one robot of the type, the height the share of the draws, each bar split into the kg its draws hold in each
+contribution, the smaller lower; the median a solid line, the mean a dotted one, the 2.5th and 97.5th percentile dashed;
+the median, the mean, the share of the draws that hold it (where not all) and what lies beyond the axis written above
+the panel, never over its data (E26's rule, `texts_over_data`, tested on every page). Each panel on its own scale and unit
+(E29 question 3: one scale shared by the six would be stretched by the Neo1's 1,200 kg in types 3 and 5). A type that holds
+the item in fewer than 2.5 % of its draws has no panel, 02's rule, and its place says so ("none in this robot type", or
+"held in 0.45 % of its draws: fewer than 2.5 %, no panel"); a 0 is not part of a distribution. The first panel drawn in a
+row has the scale of the share of the draws. One legend at the top of a page, of the contributions drawn, in as many rows
+as it needs to stay within the page (tested). A numbered page of an earlier run beyond those drawn is removed by its
+exact name, as 02 does.

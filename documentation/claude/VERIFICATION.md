@@ -5,6 +5,100 @@ by Claude, newest first.
 
 ## 2026-11-04
 
+### V171. His runs of 02 and 03 after E29 read back
+
+- **His words:** "I'll run both", "Both are done!!" (2026-11-04).
+- **Times** (`stat`, against the code's): 02_composition.py changed 14:14:55, 03_comparison.py 14:29:21. 02 wrote
+  `data/consolidated/` 14:55:18 to 14:55:46, `by_material.npy` of the six types 14:55:54 to 14:57:28 (with `materials.npy`,
+  the last table 03 reads), its last page 14:57:43; no table of 02 older than its code. 03's pages 14:57:54 to 14:58:27,
+  after 02 had ended: 43, all `comparison_*`, nothing else in `figures/comparison/`.
+- **The draws, read back** with 03's own functions (nothing written): 200,000 draws each, `problems` none. Each element by
+  material against the element, largest relative miss 1.2e-07 (float32); the copper fixed by alloy against "Cu fixed in
+  alloys", largest miss 4.7e-07 kg; the alloys holding copper per type: aluminium alloys, brass, the magnets and steel in
+  all, magnesium alloys in types 3 to 5, stainless steel in types 1, 5 and 6.
+- **All 43 pages,** redrawn in memory from his draws by the scratch script `scripts/check_03_pages.py` (the tests' rules,
+  33 s): no text over data, no drawn text below 14 pt, nothing off the page. 15 material pages (no type holds ceramics),
+  22 element pages. A type without a panel: magnesium alloys (types 1, 2, 6 none; 3 and 4 in 0.59 % and 1.63 %),
+  titanium alloy (3 in 1.22 %, 4 none), stainless steel (2, 3, 4 none), fibre composites (1 to 5 none), Other (1, 2, 4
+  none; 3 in 0.62 %), magnesium the element as its alloys.
+- **Looked at by me:** the total by material, steel and the magnets by kind of part, titanium by material, the body regions,
+  the second notes page. The means of the total, 34, 84, 99, 67, 193 and 87 kg, as V168's (34.3, 84.3, 99.3, 66.7, 192.8,
+  87.0).
+- **Found, reported, not changed** (EVIDENCE.md E29, "Found"): (1) steel's panels of types 3 and 5 pressed into their first
+  bars by the Neo1 (976 kg of steel; one of type 5's 11 robots, 9 % of its draws), as the total, part groups and body
+  regions of type 5 less so; (2) titanium by material: in types 1, 2, 3, 5 and 6 the boards' milligrams and a titanium
+  alloy's kilograms in one panel, its mean over 100 times its median ("median 0.0000014 kg, mean 5.5 kg"), the bars one at
+  0; the only page so (checked over every material, element and the total); (3) terbium, type 3: held in 99.781 %, written
+  "in 100 % of the draws", the only share so rounded. All three as on 02's pages, drawn by 02's functions.
+- **Not covered:** the pages not looked at by me are checked by the script only.
+
+### V170. 03 built (EVIDENCE.md E29): tests, faults, the suite, a sandbox run and its pages
+
+- **His words:** "Yes, agree E29", "Yes, build 03" (2026-11-04).
+- **Tests first, seen to fail:** `tests/test_comparison.py` rewritten (seven tests: six robot types' draws written in 02's
+  own files into a temporary folder, 400 draws, each adding up as 02's do; then 03 run on them) and one test in
+  `tests/test_parts_taken_apart.py` (`TestCopperSplit`, 02's new table). Before the code: 8 errors (02 had no
+  `FIXED_MARK`, no table `by_material`).
+- **02:** `by_material_table` writes each element of interest by the material it comes from, '<element>: <material>',
+  and the copper fixed in each alloy, '<element>: <material> (fixed in alloys)', into `data/parts_taken_apart/<n>_<name>/
+  by_material.npy`. Checked on type 1 at 2,000 draws: each element's columns add up to the element (rtol 1e-5, float32),
+  the fixed columns are copper only and add up to "Cu fixed in alloys"; "Cu: Copper" and "Cu: Brass (fixed in alloys)"
+  among them.
+- **03, deliberate faults (each seen to stop it, nothing drawn):** a table one draw short (type 2's total); the materials
+  1 % off their total (type 1); the materials by kind of part 1 % off (type 4); the elements by material 1 % off (type 5);
+  a table missing (type 3's `by_material.npy`): 03 returns 1 and makes no folder.
+- **03, the pages (fixture):** every page of E29 written, named `comparison_<series>_<k>.png` (notes, total, a page per
+  material held, a page per element held, part groups, body regions, copper); a material no type holds (ceramics in the
+  fixture) has no page; a type without the item (terbium in type 1) has no panel, five panels drawn and its place
+  saying so, the share scale on the first panel drawn in each row (types 2 and 4 there); no text over data, no drawn text
+  below 14 pt, nothing drawn off the 16 × 9 page (the legend's rows included); the four pages of the old form and a page
+  numbered beyond those drawn removed by their exact names, another file in the folder untouched.
+- **The suite:** 522 tests, OK, 470 s (before the share scale's change, whose test file then passed alone: 7 tests, OK).
+- **Sandbox** (the scratch copy, `composition.draws` 2,000; his register and parts files of today copied in, read only
+  from the project): 02 exit 0 in 1 min 24 s; 03 exit 0 in 33 s, "6 robot types, 2,000 draws each: they add up", 43 pages
+  (2 of notes, 1 total, 15 materials: no type holds ceramics, 22 elements, part groups, body regions, copper). All 43
+  checked by a script with the tests' rules (`scripts/check_03_pages.py` in the scratch folder): `problems` none; no text
+  over data, nothing below 14 pt, nothing off the page.
+- **Looked at by me:** the total by material, copper by kind of part, magnesium alloys (types 1, 2 and 6 none; 3 and 4
+  held in 0.45 % and 1.1 %, no panel), titanium alloy, copper by material, terbium, the part groups, copper three ways, the
+  first notes page. The copper by material and the copper three ways give the same medians per type (2.1, 3.5, 3.7, 2.9,
+  4.3, 3.6 kg), as they must (both the inflow), and the same as V169's preview. The means of the total, 34, 84, 100, 67,
+  187 and 87 kg at 2,000 draws, against V168's 34.3, 84.3, 99.3, 66.7, 192.8 and 87.0 at 200,000 (type 5's: the Neo1,
+  1,200 kg, one of its 11 robots, drawn a little less often at 2,000).
+- **Checked against the draws:** terbium's "in 100 % of the draws" on type 3: held in 99.9 % (2 of 2,000 draws without,
+  both the Neo1's); 02's `panel_number` writes a share from 10 % as a whole number. On 02's pages too. Reported, not changed
+  (EVIDENCE.md E29, "Found"). Type 5's "in 97 %": 96.65 %, its 67 draws without all the Neo1's.
+- **Nothing left behind:** what the old 03 used of 02 and 01 (`interval_bars`, `mass`, `MUTED`, `MARGIN`, `schemas.write`,
+  `wrap`, `save`) is still used by 02 or 01 itself; the old 03's own functions went with its file's rewrite.
+- **Not covered:** his run at 200,000 draws (02 must be rerun first, for its new table); the pages not looked at by me
+  (the other materials and elements, body regions, the second notes page) are checked by the script only.
+
+### V169. 03's preview (EVIDENCE.md E29): the Copper page
+
+- **His words:** "Yes, agree E29" (2026-11-04).
+- **How:** a script in the scratch folder (`scripts/preview_03_copper.py`), reading the project's inputs only, each type
+  drawn in memory at 2,000 draws, six panels of 02's own `by_material_panel` (copper, inflow, by the material it comes
+  from, copper fixed in alloys grey), one legend, 02's `make_room`; nothing written into the project.
+- **Result:** 02's `texts_over_data`: none; 16 × 9 inches at 150 dpi, its smallest text 14 pt, 23 px on a 1920 × 1080
+  screen. Medians 2.1, 3.5, 3.7, 2.9, 4.3 and 3.6 kg; the long type names on two lines.
+- **Not covered:** the other pages; 02 writing its split by material (03 reads it, E29 question 2).
+
+### V168. His runs after E28 read back: 02 closed
+
+- **His words:** "02 is runing", "done" (2026-11-04). Read only.
+- **Times:** the register 13:46:36 and type 5's file 13:46:43 (its "Atlas HD ISA v2", "Atlas HD ISA v5 knees") after
+  their code (13:22:14); 01's pages 13:47:13 after 01's (13:25:35); 02's outputs 13:48:57 to 13:51:02 after 02's
+  (13:10:04). No page of `figures/composition/` or `figures/parts_taken_apart/` older than the run; no robot of types 1
+  to 6 "not yet taken apart".
+- **The draws:** each type 200,000; materials adding up to the total (≤ 2.3 × 10⁻⁷); no median of 0; nothing below zero
+  in the summaries; means 34.3, 84.3, 99.3, 66.7, 192.8 and 87.0 kg.
+- **The notes** (02's `on_estimates` over his files): "the joints' masses estimated, no torque stated" type 3 the
+  AlphaBot 2 and Neo1, type 5 Neo1, type 6 Nadia's two versions; the battery's energy 124, 5 and 3 robots, each type's
+  count.
+- **The robots tables** (01's, built from his files): no text over text in any of the six; the joints of the Atlas
+  (old) 28 and 28, Neo1 41, Nadia 31.
+- **Not covered:** the pages by eye (their checks through the functions that draw them).
+
 ### V167. The robots tables: the Atlas (old)'s names and the hydraulic robots' joints (EVIDENCE.md E28 points 6, 7)
 
 - **His words:** "Yes, fix both" (2026-11-04).

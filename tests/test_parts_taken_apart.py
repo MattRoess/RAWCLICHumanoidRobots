@@ -1732,6 +1732,32 @@ class TestCopperSplit(unittest.TestCase):
         self.assertTrue(any('Aluminium alloys (fixed)' in t for t in texts))
         self.assertTrue(any('Brass (fixed)' in t for t in texts))
 
+    def test_02_writes_each_element_by_the_material_it_comes_from(self):
+        # EVIDENCE.md E29 question 2 (Matthias, 2026-11-04, "Yes, agree E29", "Yes, build 03"): the split of an element
+        # by the material it comes from, which 02's element pages draw, written as a table of its own for 03,
+        # 'by_material', '<element>: <material>', the copper fixed in an alloy '<element>: <material> (fixed in
+        # alloys)'. Each element's columns add up to it, the copper's fixed ones to the copper fixed in alloys.
+        d, c = self.composed()
+        with tempfile.TemporaryDirectory() as folder:
+            composition.write_taken_apart(d, folder)
+            draws = np.load(os.path.join(folder, 'by_material.npy')).astype(np.float64)
+            with open(os.path.join(folder, 'by_material.txt'), encoding='utf-8') as file:
+                columns = file.read().splitlines()
+        self.assertIn('by_material', composition.APART_TABLES)
+        self.assertEqual(draws.shape, (self.params.composition.draws, len(columns)))
+        mark = composition.FIXED_MARK
+        recovered = [k for k, name in enumerate(columns) if not name.endswith(mark)]
+        fixed = [k for k, name in enumerate(columns) if name.endswith(mark)]
+        self.assertTrue(fixed)
+        for symbol in c.tables['elements'][0]:
+            own = [k for k in recovered if columns[k].split(': ', 1)[0] == symbol]
+            np.testing.assert_allclose(draws[:, own].sum(axis=1), c.column('elements', symbol), rtol=1e-5, atol=1e-9,
+                                       err_msg=symbol)
+        self.assertEqual({columns[k].split(': ', 1)[0] for k in fixed}, {'Cu'})
+        np.testing.assert_allclose(draws[:, fixed].sum(axis=1), c.column('copper', 'Cu fixed in alloys'), rtol=1e-5)
+        self.assertIn(f'Cu: Brass{mark}', columns)
+        self.assertIn('Cu: Copper', columns)
+
 
 class TestNoTextOverData(unittest.TestCase):
     """Matthias, 2026-11-02: "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is
