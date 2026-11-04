@@ -1291,38 +1291,6 @@ def one_element(recipes: ElementRecipes, compound: str) -> dict:
         return {}
 
 
-def element_shares(recipes: ElementRecipes, recipe: str, choose: dict | None = None) -> dict:
-    """The mass share of each element in `recipe`, with every share at its mode and each remainder 1 minus the modes of
-    the others; an item that is another recipe adds that recipe's elements. Where the items of a group are
-    alternatives, `choose` names the one taken (the group's name -> the item's name); without it, the first. The
-    shares add up to 1. The recipes must not contain themselves (check_element_recipes)."""
-    members: dict = {}
-    for i in recipes.items:
-        members.setdefault((i.recipe, i.within), []).append(i)
-
-    def add(name: str, within: str, weight: float, out: dict) -> None:
-        items = members.get((name, within), [])
-        if items and items[0].probability is not None:
-            wanted = (choose or {}).get(within, items[0].item)
-            items = [next((i for i in items if i.item == wanted), items[0])]
-            shares = {items[0].item: 1.0}
-        else:
-            others = sum(i.share[1] for i in items if not i.remainder)
-            shares = {i.item: 1 - others if i.remainder else i.share[1] for i in items}
-        for i in items:
-            if i.compound in recipes.compounds:
-                for element, share in composition(recipes.compounds[i.compound][0]).items():
-                    out[element] = out.get(element, 0) + weight * shares[i.item] * share
-            elif i.compound:
-                add(i.compound, '', weight * shares[i.item], out)    # another recipe, from its top
-            else:
-                add(name, i.item, weight * shares[i.item], out)
-
-    out: dict = {}
-    add(recipe, '', 1.0, out)
-    return out
-
-
 def battery_row_of(materials: MaterialsList, lists: SharedLists) -> Material | None:
     """The row of a robot type's materials that the shared lists place in the battery cells (BATTERY), or None."""
     return next((m for m in materials.materials if lists.materials.get(m.family, ('',))[0] == BATTERY), None)
@@ -1601,6 +1569,9 @@ LESS_ITS_MOTOR = '; less its motor'
 # Boards and Sensors whose names end with its place), of their bodies, the remainder (as a battery housing is its
 # pack's), and of the oil, its volume (a robot's own constant) times its density (the file's).
 ACTUATORS_WHOLE = 'its servo valves, boards and sensors'
+# The names a hydraulic robot's actuators start with (Moog's ISA as weighed; Neo1's digital ones), counted as its joints
+# in 01's table of robots.
+HYDRAULIC_ACTUATORS = ('Hydraulic actuators, ', 'Digital hydraulic actuators, ')
 ACTUATOR_REST = 'the hydraulic actuators, less'
 OIL_FROM = 'its volume'
 OIL_VOLUME, OIL_DENSITY = 'Hydraulic oil volume', 'Hydraulic oil density'
@@ -3481,9 +3452,10 @@ def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
 
 # What of a robot of type 1 rests most on estimates (E), by its rows of the parts file: its joint modules a share of
 # its mass (no joint torques in its sources, E5.17 point 1), its joints' masses from their torques (E5.12 point 4),
-# its battery's energy a share of its mass (E5.17 point 2), its mass itself (E5.17 point 6). 02's notes page words
-# them (on_estimates), 01's table of robot type 1 groups its robots by the first two.
-ESTIMATE_KINDS = ('joint shares', 'joint torques', 'battery per kg', 'mass')
+# its joints' masses estimated with no torque stated (since 2026-11-04: Neo1's forearms, Nadia's pelvis), its
+# battery's energy a share of its mass (E5.17 point 2), its mass itself (E5.17 point 6). 02's notes page words them
+# (on_estimates), 01's table of robot type 1 groups its robots by the first three (the second and third as one).
+ESTIMATE_KINDS = ('joint shares', 'joint torques', 'joint estimates', 'battery per kg', 'mass')
 
 
 def estimate_kinds(apart: PartsTakenApart, robot: str) -> list:
@@ -3496,7 +3468,13 @@ def estimate_kinds(apart: PartsTakenApart, robot: str) -> list:
     if any(j.share is not None for j in joints):
         found.append('joint shares')
     elif any(None not in j.module_mass for j in joints) and labels == {'E'}:
-        found.append('joint torques')
+        # Its body joints' masses estimated (no hands, grippers or base): from a stated torque, or with none stated
+        # (Neo1's forearms, Nadia's pelvis; Matthias, 2026-11-04, "Yes, do the package", V166).
+        body = [j for j in joints if j.name.split()[0].lower() not in TEMPLATE_OUTSIDE]
+        if any(j.torque is not None for j in body):
+            found.append('joint torques')
+        if any(j.torque is None for j in body):
+            found.append('joint estimates')
     own = apart.constants.get(robot, {})
     if BATTERY_CONSTANTS[0] not in own and has_battery(apart, robot):
         found.append('battery per kg')
@@ -3815,13 +3793,6 @@ def taken_count(n: int, register: list | None, apart) -> tuple:
     return taken, len(with_mass), len(of_type)
 
 
-def taken_words(n: int, register: list | None, apart) -> str:
-    """taken_count in words: 'all its 31 robots', 'all its 96 robots with a mass', '5 of its 96 robots with a mass'."""
-    taken, with_mass, of_type = taken_count(n, register, apart)
-    tail = ' with a mass' if with_mass < of_type else ''
-    return f'all its {with_mass} robots{tail}' if taken >= with_mass else f'{taken} of its {with_mass} robots{tail}'
-
-
 def open_words(register: list | None, aparts: dict | None) -> str:
     """overview_2's line of what is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"): the robot
     types with robots with a mass not yet taken apart, each with how many (taken_count), then the six compared (03)."""
@@ -4102,7 +4073,7 @@ T_NAME, T_HEIGHT = 0.4, 3.85
 T_MASS, T_MASS_TEXT = (4.15, 6.95), 7.08
 T_JOINTS = 8.45
 T_BATTERY = (8.85, 10.3)
-T_CELLS, T_CELL = (11.45, 0.95), (0.72, 0.22)
+T_CELLS, T_CELL = (11.3, 0.95), (0.72, 0.22)   # 11.3 since 2026-11-04: "Frame and shell" 0.1 inch inside the band
 T_BAND = (0.95, 2.05)
 T_TOP, T_ROW = 2.12, 0.32
 T_LINES = 18
@@ -4208,13 +4179,16 @@ def robots_table_rows(apart: PartsTakenApart) -> list:
                  for cell, found in cell_rows(apart, name).items()}
         if 'joint shares' in kinds:
             group = 'shares'
-        elif 'joint torques' in kinds:
+        elif 'joint torques' in kinds or 'joint estimates' in kinds:   # as before E27's robots: its group unchanged
             group = 'torques'
         else:
             group = 'weighed' if 'weighed' in bases['Joints'] else 'stated'
         if on_wheels(apart, name):
             group = 'wheels shares' if group == 'shares' else 'wheels own'
         encoders = next((p.count for p in apart.parts if p.robot == name and p.name.startswith('Encoders')), 0)
+        # A hydraulic robot's joints: its electric ones (two encoders each) and its hydraulic actuators (Matthias,
+        # 2026-11-04, "Yes, fix both": the Atlas (old) showed 0, Neo1 2).
+        hydraulic = int(sum(p.count for p in apart.parts if p.robot == name and p.name.startswith(HYDRAULIC_ACTUATORS)))
         if not has_battery(apart, name):
             wh = None
         elif BATTERY_CONSTANTS[0] in own:
@@ -4222,8 +4196,8 @@ def robots_table_rows(apart: PartsTakenApart) -> list:
         else:
             wh = shared_of(apart, name)[template_quantity(apart, name, ENERGY_PER_KG)][1][1] * mass[1]
         lift = any(j.robot == name and JOINT_KIND.get(j.name.split()[0].lower()) == 'lift' for j in apart.joints)
-        rows.append(RobotRow(name, group, robot.height, mass, int(encoders // 2), group.endswith('shares'), wh, bases,
-                             base_words(apart, name), lift))
+        rows.append(RobotRow(name, group, robot.height, mass, int(encoders // 2) + hydraulic, group.endswith('shares'),
+                             wh, bases, base_words(apart, name), lift))
     order = list(JOINT_GROUPS)
     return sorted(rows, key=lambda r: (order.index(r.group), r.mass[1], r.name))
 

@@ -1095,7 +1095,9 @@ class TestTypesThreeAndFour(unittest.TestCase):
             self.assertNotIn('Joint modules, share of the robot mass', shared)
         # The median of the seven robots on legs, at the modes, is the template's mode (E11.6 point 1).
         module = sys.modules[builder_three.SHARED.__name__]
-        self.assertAlmostEqual(module.median_share(module.SEVEN), 0.447, delta=0.0005)
+        from statistics import median
+        shares = [sum(j[1] * j[4][1] for j in module.body(b)) / b['mass'][0][1] for b in module.SEVEN]
+        self.assertAlmostEqual(median(shares), 0.447, delta=0.0005)
 
     def test_the_adam_by_its_actuators_and_the_atom_as_type_twos(self):
         knee = [j for j in self.three.joints if j.robot == 'PNDbotics Adam Lite' and j.name == 'Knee']
@@ -1832,8 +1834,9 @@ class TestHousingShareOfCells(unittest.TestCase):
 # The hydraulic robots (EVIDENCE.md E27.7; Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it"): each hydraulic
 # joint an actuator in its place's row, its valve, board and sensors drawn and its body the remainder; the power unit,
 # its manifold, oil and hoses the new kind "Hydraulics".
-# Matthias, 2026-11-04, "Yes, knees only" (E27.8): the Atlas (old)'s 1.6 kg actuators at its knees only, as HyQReal's.
-ATLAS_OLD = ('Boston Dynamics Atlas hydraulic ISA v2', 'Boston Dynamics Atlas hydraulic ISA v5 at the knees')
+# Matthias, 2026-11-04, "Yes, knees only" (E27.8): the Atlas (old)'s 1.6 kg actuators at its knees only, as HyQReal's;
+# "Yes, fix both" (V167): its names short enough for the robots table, the guide's "Atlas HD, or hydraulic".
+ATLAS_OLD = ('Atlas HD ISA v2', 'Atlas HD ISA v5 knees')
 NADIA = ('IHMC Nadia ISA v2', 'IHMC Nadia ISA v5')
 NEO1 = 'NeodraDynamics Neo1'
 ISA_KG = {'v2': 0.92, 'v5': 1.6}
@@ -1890,7 +1893,7 @@ class TestHydraulicRobots(unittest.TestCase):
             for robot in robots:
                 # The version of each place: Nadia's either all v2 or all v5; the Atlas (old)'s all v2, or the v5 at its
                 # knees only and the v2 at its other places.
-                at_knees = robot.endswith(' at the knees')
+                at_knees = robot.endswith(' knees')
                 parts = self.parts(robot)
                 boards = {b.name: b for b in self.apart(robot).boards if b.robot == robot}
                 sensors = {e.name: e for e in self.apart(robot).sensors if e.robot == robot}
@@ -2079,3 +2082,59 @@ class TestNoBatteryNoBatteryEstimate(unittest.TestCase):
     def test_a_battery_from_the_energy_per_kg_still_listed(self):
         for robot in ('IHMC Alex', 'Kawasaki Kaleido 9', 'Mirsee MH3'):
             self.assertIn('battery per kg', schemas.estimate_kinds(self.apart(robot), robot), msg=robot)
+
+    def test_the_kinds_of_joint_estimate(self):
+        # Matthias, 2026-11-04, "Yes, do the package": an estimated body joint with a stated torque, "joint torques";
+        # one without, "joint estimates"; 01's table of robots groups both as before (its group 'torques').
+        self.assertEqual([k for k in schemas.estimate_kinds(self.apart(NEO1), NEO1) if k.startswith('joint')],
+                         ['joint estimates'])
+        for robot in NADIA:
+            self.assertEqual([k for k in schemas.estimate_kinds(self.apart(robot), robot) if k.startswith('joint')],
+                             ['joint torques', 'joint estimates'], msg=robot)
+        self.assertEqual([k for k in schemas.estimate_kinds(self.apart('DEEP Robotics DR02'), 'DEEP Robotics DR02')
+                          if k.startswith('joint')], ['joint torques'])
+        groups = {r.name: r.group for a in self.files.values() for r in schemas.robots_table_rows(a)}
+        for robot in (NEO1, *NADIA, 'DEEP Robotics DR02'):
+            self.assertEqual(groups[robot], 'torques', msg=robot)
+
+
+class TestRobotsTablesOfTheHydraulicRobots(unittest.TestCase):
+    """Matthias, 2026-11-04, "Yes, fix both" (V166): in 01's tables of each type's robots no text lies over another (the
+    Atlas (old)'s names ran over its height), and a hydraulic robot's joints count its hydraulic actuators (the Atlas
+    (old) 28, not 0; Neo1 41, not 2; Nadia 31)."""
+
+    @classmethod
+    def setUpClass(cls):
+        folders = {1: builder, 2: builder_two, 3: builder_three, 4: builder_four, 5: builder_five, 6: builder_six}
+        cls.files = {n: written(b if n > 1 else None)[0] for n, b in folders.items()}
+        params = Params()
+        if not os.path.exists(absolute(params.data.humanoid_guide)):
+            raise unittest.SkipTest('the catalogue is not on disk')
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            REGISTER.build(path, params)
+            cls.register = schemas.read_register(path)
+
+    def test_no_text_over_text_in_any_robots_table(self):
+        from matplotlib.text import Text
+        for n in self.files:
+            for k, figure in enumerate(schemas.robots_table_pages(schemas.type_parts(self.files, self.register, n), n)):
+                figure.canvas.draw()
+                renderer = figure.canvas.get_renderer()
+                texts = [(t.get_text(), t.get_window_extent(renderer)) for t in figure.findobj(Text)
+                         if t.get_text().strip()]
+                for i, (one, a) in enumerate(texts):
+                    for other, b in texts[i + 1:]:
+                        over = (min(a.x1, b.x1) - max(a.x0, b.x0) > 1 and min(a.y1, b.y1) - max(a.y0, b.y0) > 1)
+                        self.assertFalse(over, msg=(n, k + 1, one[:40], other[:40]))
+                schemas.plt.close(figure)
+
+    def test_a_hydraulic_robots_joints_count_its_actuators(self):
+        joints = {r.name: r.joints for a in self.files.values() for r in schemas.robots_table_rows(a)}
+        self.assertEqual({robot: joints[robot] for robot in ATLAS_OLD}, {robot: 28 for robot in ATLAS_OLD})
+        self.assertEqual(joints[NEO1], 41)
+        self.assertEqual({robot: joints[robot] for robot in NADIA}, {robot: 31 for robot in NADIA})
+        self.assertEqual(joints['EngineAI T800 Dev'], 25)   # an electric robot as before
+        # Written as whole numbers ("28", not "28.0": the sandbox's preview, V167).
+        self.assertTrue(all(type(v) is int for v in joints.values()), msg=[k for k, v in joints.items() if type(v) is not int])
+

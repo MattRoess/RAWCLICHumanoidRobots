@@ -116,11 +116,6 @@ def at_mode(rng, low, mode, high, n):
     return np.broadcast_to(np.asarray(mode, dtype=float), (n,)).copy()
 
 
-def modes(rng, low, mode, high):
-    """02's triangles of the register's masses, each at its mode."""
-    return np.asarray(mode, dtype=float).copy()
-
-
 class TestDraws(unittest.TestCase):
     """Each draw one robot of the register's type 1, its mass, everything adding up; robot type 1 as 02 writes every
     robot type."""
@@ -255,7 +250,7 @@ class TestHandCalculations(unittest.TestCase):
 
     def at(self):
         inputs = inputs_or_skip(self, self.params)
-        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+        with mock.patch.object(composition, 'triangle', at_mode):
             return draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
     def element(self, d, robot: str, kind: str, element: str) -> np.ndarray:
@@ -854,7 +849,7 @@ class TestMaterialPages(unittest.TestCase):
         # Every triangle at its mode: die-cast 20 % of the aluminium, of the wrought rest 7075 32 % (25.6 %) and 6061
         # the remainder (54.4 %), in every kind of part.
         inputs = inputs_or_skip(self, self.params)
-        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+        with mock.patch.object(composition, 'triangle', at_mode):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         aluminium = sum(kg for (_, m, _), kg in d.details.items() if m == composition.ALUMINIUM)
         alloy = lambda name: sum(kg for (_, m, x), kg in d.details.items() if m == composition.ALUMINIUM and x == name)  # noqa
@@ -1105,7 +1100,7 @@ class TestTypeTwo(unittest.TestCase):
 
     def test_the_copper_of_its_cables_by_hand(self):
         inputs = type_two_inputs_or_skip(self, self.params)
-        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+        with mock.patch.object(composition, 'triangle', at_mode):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
 
         def copper(robot, table='elements'):
@@ -1174,7 +1169,7 @@ class TestTypeTwoOnWheels(unittest.TestCase):
         # recommended", E20) every pack no source weighs is so: its housing 0.414 of its cells at the modes, above zero
         # in every draw.
         inputs = type_two_inputs_or_skip(self, self.params)
-        with mock.patch.object(composition, 'triangle', at_mode), mock.patch.object(composition, 'triangles', modes):
+        with mock.patch.object(composition, 'triangle', at_mode):
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         columns, draws = d.parts
         rows = d.robot == d.robots.index('CASBOT W1')
@@ -1775,8 +1770,8 @@ class TestHydraulicActuators(unittest.TestCase):
 
     def test_the_body_the_actuators_less_their_valves_boards_and_sensors(self):
         for robot_type, robot in ((6, 'IHMC Nadia ISA v2'), (6, 'IHMC Nadia ISA v5'),
-                                  (5, 'Boston Dynamics Atlas hydraulic ISA v2'),
-                                  (5, 'Boston Dynamics Atlas hydraulic ISA v5 at the knees')):
+                                  (5, 'Atlas HD ISA v2'),
+                                  (5, 'Atlas HD ISA v5 knees')):
             inputs, d = self.drawn(robot_type)
             columns, draws = d.parts
             rows = d.robot == d.robots.index(robot)
@@ -1803,7 +1798,7 @@ class TestHydraulicActuators(unittest.TestCase):
 
     def test_a_robot_without_an_electric_joint_drawn(self):
         inputs, d = self.drawn(5)
-        robot = 'Boston Dynamics Atlas hydraulic ISA v5 at the knees'
+        robot = 'Atlas HD ISA v5 knees'
         self.assertFalse([j for j in inputs.apart.joints if j.robot == robot])
         columns, draws = d.parts
         rows = d.robot == d.robots.index(robot)
@@ -1815,7 +1810,30 @@ class TestHydraulicActuators(unittest.TestCase):
         # frame fell below zero in 2.1 % of its draws (V161); at its knees only, in none.
         inputs, d = self.drawn(5)
         columns, draws = d.parts
-        for robot in ('Boston Dynamics Atlas hydraulic ISA v2', 'Boston Dynamics Atlas hydraulic ISA v5 at the knees'):
+        for robot in ('Atlas HD ISA v2', 'Atlas HD ISA v5 knees'):
             frame = draws[d.robot == d.robots.index(robot), columns.index(f'{robot}: Frame: titanium and aluminium')]
             self.assertTrue(np.all(frame > 0), msg=robot)
+
+
+class TestJointsEstimatedWithoutTorque(unittest.TestCase):
+    """Matthias, 2026-11-04, "Yes, do the package" (V163): the notes pages name a robot under "the joints' masses from
+    their torques" only where an estimated body joint has a stated torque; one whose estimated body joints have none
+    (Neo1's forearms, Nadia's pelvis) under "the joints' masses estimated, no torque stated"."""
+
+    TORQUES = "the joints' masses from their torques"
+    NO_TORQUE = "the joints' masses estimated, no torque stated"
+
+    def test_the_notes_of_types_5_and_6(self):
+        params = Params()
+        params.composition.draws = 300
+        for robot_type, robots in ((5, ['NeodraDynamics Neo1']), (6, ['IHMC Nadia ISA v2', 'IHMC Nadia ISA v5'])):
+            inputs = type_inputs_or_skip(self, params, robot_type)
+            drawn = [v for r in inputs.robots for v in schemas.versions(r.taken_apart)]
+            said = composition.on_estimates(inputs.apart, drawn)
+            for robot in robots:
+                self.assertIn(robot, said.get(self.NO_TORQUE, []), msg=robot)
+        self.assertNotIn('NeodraDynamics Neo1', composition.on_estimates(
+            type_inputs_or_skip(self, params, 5).apart, ['NeodraDynamics Neo1']).get(self.TORQUES, []))
+        self.assertIn('DEEP Robotics DR02', composition.on_estimates(
+            type_inputs_or_skip(self, params, 5).apart, ['DEEP Robotics DR02']).get(self.TORQUES, []))
 

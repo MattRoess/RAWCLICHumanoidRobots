@@ -8,6 +8,21 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E28. Closing 02: the open items (2026-11-04). Built
+
+Matthias, 2026-11-04: "Can we go through and come up with paragmatic solutions", "I want that we complet this soon, as
+I want then, if nothing in 02 is still open, move to 03", then "Yes, do the package" (VERIFICATION.md V166).
+
+| # | Open item | Decided | Built |
+|---|---|---|---|
+| 1 | Frames below zero in some draws (V163: the 1X NEO 16 %, the Matrix-1 7 %, the Figure 02 2.6 %, the Walker S2 2.2 %, about 20 below 1 %) | **closed under E21:** kept and reported on each type's notes page ("A, as recommended"); in each the template's joint share (up to 67 % of the mass), the shell (up to 17 %) and a heavy stated part (the NEO's 842 Wh, its 22-joint hands) drawn high together. A research pass for their makers' joint data may follow after 03 | nothing |
+| 2 | The notes' "the joints' masses from their torques" naming Neo1 and Nadia | a robot under it only where an estimated body joint has a stated torque; one with none stated under "the joints' masses estimated, no torque stated" (Neo1; Nadia under both, its arms from torques, its pelvis not; the AI² AlphaBot 2 under both, one joint without a torque). 01's table of robots groups them as before | 01's `estimate_kinds` ('joint estimates'), 02's `on_estimates` |
+| 3 | Code no stage calls (V156) | removed: 01's `element_shares` (now the tests' own helper, its ten checks of the recipes kept) and `taken_words` (its two tests count with `taken_count`), 02's `triangles` (four tests' patches of it gone), `median_share` (its test computes the template's 44.7 % itself); `texts_over_data` stays, the rule's check | 01, 02, `tools/parts_types_3_and_4.py`, tests |
+| 4 | E25 point B: copper's three ways for the other elements | **postponed** until the stock-and-flow model needs it; 03 does not | nothing |
+| 5 | The robots tables' heading "Frame and shell" 1.3 px past the right edge of its band (every type's table) | the five cells 0.15 inch to the left (`T_CELLS` from 11.45 to 11.3): every heading at least 0.1 inch inside the band, checked by a test | 01 |
+| 6 | Found in item 5's preview, mine from E27: the Atlas (old)'s names ("Boston Dynamics Atlas hydraulic ISA v2", "… ISA v5 at the knees") ran over its height in type 5's table | "Yes, fix both": "Atlas HD ISA v2" and "Atlas HD ISA v5 knees" (IRG: "Atlas HD, or hydraulic"), its maker in the sheet Robots; no text over text in any robots table, checked by a test | type 5's builder, the register |
+| 7 | The same: the table's Joints counted electric joints only (the Atlas (old) 0, Neo1 2) | a hydraulic robot's joints its electric ones and its hydraulic actuators: the Atlas (old) 28, Neo1 41, Nadia 31 | 01's `robots_table_rows` |
+
 ## E27. The hydraulic Atlas (old), Nadia and Neo1: research (2026-11-04). Nothing entered
 
 Matthias, 2026-11-04: "Yes, prepare it", to "Shall I prepare the research step for the three robots left?". The step

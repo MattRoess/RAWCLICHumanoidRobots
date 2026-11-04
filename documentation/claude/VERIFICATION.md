@@ -5,6 +5,42 @@ by Claude, newest first.
 
 ## 2026-11-04
 
+### V167. The robots tables: the Atlas (old)'s names and the hydraulic robots' joints (EVIDENCE.md E28 points 6, 7)
+
+- **His words:** "Yes, fix both" (2026-11-04).
+- **Measured first:** text over text in every robots table of the six types (his files): only the Atlas (old)'s two
+  names, over the column Height of type 5's table.
+- **Tests first:** `TestRobotsTablesOfTheHydraulicRobots` (no text over text in any of the six tables, built in a
+  temporary folder with the register; the Atlas (old) 28 joints, Neo1 41, Nadia 31, the T800 Dev 25 as before) and the
+  tests renamed to "Atlas HD ISA v2" and "Atlas HD ISA v5 knees" failed before the code, pass after.
+- **Found in the sandbox's preview after it:** the joints written "28.0" and "41.0" (the counts read as decimals), "1200
+  kg" touching "41.0"; the test checked 28 == 28.0. A test of whole numbers added (failed, then passed); the count made
+  whole. The preview again: names inside their column, "28", "28", "41", the heading inside its band.
+- **The suite:** 520 tests, all pass but the register on disk (its builder writes the new names until his run).
+- **Not covered:** his runs; the Atlas HD's cell "Joints" of "where its numbers come from" stays white (its actuators
+  stand in the sheet Parts, the cell reads the sheet Joints), reported.
+
+### V166. Closing 02: the package built (EVIDENCE.md E28)
+
+- **His words:** "Yes, do the package" (2026-11-04).
+- **Measured first:** the robots tables' heading "Frame and shell" 1.3 px past the band's right edge on every type's
+  table (his files, 100 dpi); after the fix at least 0.1 inch inside on all six (a test).
+- **Tests first:** three new tests (the headings inside the band; `estimate_kinds`' 'joint estimates' for Neo1 and Nadia,
+  the DR02 'joint torques' only, 01's table groups unchanged; 02's notes naming Neo1 and Nadia under "the joints'
+  masses estimated, no torque stated") failed before the code, pass after. The removals: the tests that used the four
+  functions changed first (element_shares the tests' own helper, its ten checks of the recipes kept; taken_count for
+  taken_words; the triangles patches gone; the template's 44.7 % computed in its test) and passed before and after.
+- **Found in the build:** cutting `median_share` by a script took the module's lines after it up to the next function
+  (AVERAGE_JOINTS, TYPES_34_SHARED); seen in its diff (38 lines), the file restored from git and only the function
+  removed; the other three cuts checked line by line (only their functions), the spacing as before.
+- **The new kind of joint estimate across the six files:** Neo1 (only), Nadia's two versions and the AI² AlphaBot 2
+  (both kinds).
+- **The suite:** 518 tests, all pass. **The sandbox** (2,000 draws): 01 "No fault found", 02 "02 done in 1 min 21 s".
+- **Found in its preview (type 5's robots table, 01), mine from E27:** the Atlas (old)'s two names run over the
+  Height and Mass columns (text over text, no test catches it); the Joints column counts electric joints only (the
+  Atlas (old) 0, Neo1 2). Reported, for his word.
+- **Not covered:** his runs of 01 and 02.
+
 ### V165. His rerun of 02 after V164 read back
 
 - **His words:** "I rerun 02", "02 run complet" (2026-11-04). Read only.

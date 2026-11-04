@@ -1449,14 +1449,6 @@ class Robot:
                                  element in INTEREST)
 
 
-def triangles(rng: np.random.Generator, low: np.ndarray, mode: np.ndarray, high: np.ndarray) -> np.ndarray:
-    """One draw of a triangle for each entry of the arrays; the mode itself where minimum and maximum are equal."""
-    out = np.array(mode, dtype=float)
-    spread = high > low
-    out[spread] = rng.triangular(low[spread], mode[spread], high[spread])
-    return out
-
-
 def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=None) -> Draws:
     """A robot type over its robots of the register taken apart, drawn `composition.draws` times (HOW IT DRAWS A
     ROBOT TYPE TAKEN APART in the docstring at the top): each draw one of the register's robots of the type taken
@@ -1621,6 +1613,7 @@ def on_estimates(apart, drawn: list) -> dict:
                      and j.name.endswith(')')), '') or 'on average'
 
     words = {'joint torques': "the joints' masses from their torques",
+             'joint estimates': "the joints' masses estimated, no torque stated",
              'battery per kg': "the battery's energy a share of the robot's mass",
              'mass': 'the mass itself'}
     out: dict = {}

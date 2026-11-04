@@ -164,9 +164,11 @@ def atlas_hydraulic(version: str | dict) -> dict:
           'point 9.9)' + ('; the v5 at its knees only (SEM19 "These ISAs (v5) are mounted in the upper leg of the robot ' \
                           'to actuate the knee joints"; E27.8)' if isinstance(version, dict) else '')
     actuators = isa_actuators(ATLAS_OLD_PLACES, version, why)
-    name = 'v5 at the knees' if isinstance(version, dict) else version
+    # Its name short enough for 01's table of robots (Matthias, 2026-11-04, "Yes, fix both": the long one ran over its
+    # height), "HD" as IRG names it ("Atlas HD, or hydraulic"); its maker in the sheet Robots.
+    name = 'v5 knees' if isinstance(version, dict) else version
     return block(
-        f'Boston Dynamics Atlas hydraulic ISA {name}', 'Boston Dynamics', 1.50, 80,
+        f'Atlas HD ISA {name}', 'Boston Dynamics', 1.50, 80,
         'BDs (Boston Dynamics, 2016: "180 lbs"), FPW (Saunders: "about 1.5 meters tall and weighs 80 kg", "28 degrees '
         'of freedom", its power unit "approaching a Kilowatt per kg"), BDb ("190-pound frame"), IRG, HBR; E27',
         ((80, 81.6, 86.2), 'S', 'FPW "weighs 80 kg" the min, BDs "180 lbs" (81.6 kg) the mode, BDb "190-pound" (86.2 '

@@ -90,7 +90,12 @@ mass); the notes pages' battery wording fixed (V164, "Yes, fix it"): **his run o
 (`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`); the frames
 below zero of types 1, 3 and 4 (V163) open; the notes' "from their torques" naming Neo1 and Nadia, reported.
 
-**Open, as before:** E25 point B; the "Frame and shell" header (01); a view of copper in 03; 03 itself (types 1 to 6
+**Closing 02 (E28, V166, V167; "Yes, do the package", "Yes, fix both"):** the frames below zero closed under E21; E25
+point B postponed until stock-and-flow needs it; the notes' torques wording, the four functions removed, the tables'
+heading, the Atlas (old)'s names ("Atlas HD ISA v2", "… v5 knees") and the hydraulic robots' joints in the tables.
+His runs: the register, type 5's builder, 01, 02. **Then 03.**
+
+**Open, as before:** E25 point B (postponed); the "Frame and shell" header (01); a view of copper in 03; 03 itself (types 1 to 6
 now taken apart, so 03 may be proposed when he asks for it); the leftovers of V156 (`taken_words`, `element_shares`,
 `triangles`, `median_share`), asked once, not yet answered.
 

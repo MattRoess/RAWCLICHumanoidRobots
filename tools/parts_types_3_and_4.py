@@ -185,12 +185,6 @@ def body(b: dict) -> list:
     return [j for j in b['joints'] if not j[0].startswith(('Hand', 'Gripper'))]
 
 
-def median_share(blocks: list) -> float:
-    """The median over `blocks` of their body joints' modules' share of the robot's mass, at the modes (E11.6 point 1);
-    the template's mode, checked by tests/test_make_parts_taken_apart.py."""
-    return median(sum(j[1] * j[4][1] for j in body(b)) / b['mass'][0][1] for b in blocks)
-
-
 AVERAGE_JOINTS = average_joints([dict(b, joints=body(b)) for b in SEVEN], TEMPLATE_LABEL)
 # On wheels: E9.6's split of type 2's four (its rows), named as types 3 and 4's (what they stand for here).
 WHEELED_JOINTS = [(row[0].replace(T2.WHEELED_TEMPLATE_LABEL, WHEELED_LABEL),) + tuple(row[1:])

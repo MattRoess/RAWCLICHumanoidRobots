@@ -36,6 +36,39 @@ _spec.loader.exec_module(schemas)
 
 from src.params_schema import Params, absolute  # noqa: E402
 
+
+def element_shares(recipes, recipe: str, choose: dict | None = None) -> dict:
+    """The mass share of each element in `recipe`, every share at its mode and each remainder 1 minus the modes of the
+    others; an item that is another recipe adds that recipe's elements; of alternatives `choose` names the one taken
+    (the group's name -> the item's name), else the first. The tests' own reading of the recipes, at their modes (01
+    draws them; since 2026-11-04 no longer 01's, which no stage called: "Yes, do the package", VERIFICATION.md
+    V166)."""
+    members: dict = {}
+    for i in recipes.items:
+        members.setdefault((i.recipe, i.within), []).append(i)
+
+    def add(name: str, within: str, weight: float, out: dict) -> None:
+        items = members.get((name, within), [])
+        if items and items[0].probability is not None:
+            wanted = (choose or {}).get(within, items[0].item)
+            items = [next((i for i in items if i.item == wanted), items[0])]
+            shares = {items[0].item: 1.0}
+        else:
+            others = sum(i.share[1] for i in items if not i.remainder)
+            shares = {i.item: 1 - others if i.remainder else i.share[1] for i in items}
+        for i in items:
+            if i.compound in recipes.compounds:
+                for element, share in schemas.composition(recipes.compounds[i.compound][0]).items():
+                    out[element] = out.get(element, 0) + weight * shares[i.item] * share
+            elif i.compound:
+                add(i.compound, '', weight * shares[i.item], out)    # another recipe, from its top
+            else:
+                add(name, i.item, weight * shares[i.item], out)
+
+    out: dict = {}
+    add(recipe, '', 1.0, out)
+    return out
+
 HEADER = ['Category', 'BOM Anchor Robot', 'Subsystem', 'Component', 'Location / Joint', 'Qty',
           'Per-Unit Min (kg)', 'Per-Unit Mode (kg)', 'Per-Unit Max (kg)', 'Total Min (kg)', 'Total Mode (kg)',
           'Total Max (kg)', 'Primary Material Grade', 'Secondary / Mixed Material', 'EU Critical Raw Material',
@@ -636,7 +669,7 @@ class TestTypeTwoPages(unittest.TestCase):
                          'Its 135 robots of the register listed, 124 with a mass; drawn from the workbook until they '
                          'are taken apart.')
         self.assertIsNone(schemas.type_card_text(5, 'Anchor', None, self.register, False))
-        self.assertEqual(schemas.taken_words(2, self.register, self.apart), 'all its 96 robots with a mass')
+        self.assertEqual(schemas.taken_count(2, self.register, self.apart)[:2], (96, 96))
 
     def test_its_robots_on_wheels_in_sections_of_their_own_with_their_base_and_lift(self):
         # E9.7 point 8: the robots on wheels in sections of their own, each row its base and its lift.
@@ -985,8 +1018,8 @@ class TestElementRecipes(unittest.TestCase):
 
     def test_the_small_recipe_is_read_without_fault_and_adds_up(self):
         self.assertEqual(self.recipe_faults(), [])
-        iron = schemas.element_shares(self.recipes, 'Test recipe', {'Can': 'Iron can'})
-        plated = schemas.element_shares(self.recipes, 'Test recipe', {'Can': 'Plated can'})
+        iron = element_shares(self.recipes, 'Test recipe', {'Can': 'Iron can'})
+        plated = element_shares(self.recipes, 'Test recipe', {'Can': 'Plated can'})
         lipf6 = schemas.composition('LiPF6')
         for shares in (iron, plated):
             self.assertAlmostEqual(sum(shares.values()), 1)
@@ -1051,7 +1084,7 @@ class TestElementRecipes(unittest.TestCase):
 
     def test_a_recipe_within_a_recipe(self):
         self.assertEqual(self.recipe_faults(recipe=RECIPE + NESTED), [])
-        shares = schemas.element_shares(self.recipes, 'Outer')
+        shares = element_shares(self.recipes, 'Outer')
         self.assertAlmostEqual(shares['Fe'], 0.4)
         self.assertAlmostEqual(shares['C'], 0.6 * (0.5 + 0.5 * 0.5))
         self.assertAlmostEqual(shares['H'], 0.6 * 0.5 * 0.5)
@@ -1302,7 +1335,7 @@ class TestTheWorkbook(unittest.TestCase):
         # workbook holds them to five, which moves a share by up to 0.02 percentage points. The compounds written as
         # mass shares are rounded to five decimals, so the elements add up to 1 within 0.00001.
         for (recipe, can), elements in expected.items():
-            shares = schemas.element_shares(recipes, recipe, {'Can and cap': can})
+            shares = element_shares(recipes, recipe, {'Can and cap': can})
             self.assertAlmostEqual(sum(shares.values()), 1, places=5)
             for element, percent in elements.items():
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.03, msg=f'{recipe}, {can}, {element}')
@@ -1321,7 +1354,7 @@ class TestTheWorkbook(unittest.TestCase):
                  | {('LFP cylindrical', item) for item in ('Copper foil', 'Aluminium foil')})   # its recipe: no tabs
         self.assertEqual({(i.recipe, i.item) for i in recipes.items if i.as_metal},
                          cells | {('Copper metal', 'Cu'), ('Nickel strip', 'Ni')})
-        self.assertEqual(schemas.element_shares(recipes, 'Copper metal'), {'Cu': 1.0})
+        self.assertEqual(element_shares(recipes, 'Copper metal'), {'Cu': 1.0})
         rows = {(r.robot, r.family, r.shared): r.recipe for r in recipes.rows}
         for robot_type, family in ((1, 'Copper conductors'), (2, 'Copper conductors'),
                                    (3, 'Electrical & magnetics group'), (4, 'Electrical conductors'),
@@ -1376,7 +1409,7 @@ class TestTheWorkbook(unittest.TestCase):
                     'Plastics, robot type 6, Reinforced polymers': {'C': 64.7, 'N': 4.6, 'Al': 1.1},
                     'Plastics, robot type 6, Protective ballistic fibers': {'C': 78.1, 'H': 9.3, 'O': 6.7, 'N': 5.9}}
         for recipe, elements in expected.items():
-            shares = schemas.element_shares(recipes, recipe)
+            shares = element_shares(recipes, recipe)
             self.assertAlmostEqual(sum(shares.values()), 1, places=6, msg=recipe)
             for element, percent in elements.items():
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.06, msg=f'{recipe}, {element}')
@@ -1402,7 +1435,7 @@ class TestTheWorkbook(unittest.TestCase):
                                                                                'H': 2.9}}
         self.assertEqual(rows[(1, 'Carbon-fiber composite')], 'CFRP')
         for (recipe, epoxy), elements in expected.items():
-            shares = schemas.element_shares(recipes, recipe, {'Epoxy system': epoxy})
+            shares = element_shares(recipes, recipe, {'Epoxy system': epoxy})
             self.assertAlmostEqual(sum(shares.values()), 1, places=6, msg=recipe)
             self.assertEqual('S' in shares, epoxy == 'Aromatic amine', msg=recipe)
             for element, percent in elements.items():
@@ -1438,7 +1471,7 @@ class TestTheWorkbook(unittest.TestCase):
                     (6, 'A380'): {'Al': 91.07, 'Zn': 2.92, 'Si': 2.08, 'Cu': 1.60, 'Mg': 1.56, 'Fe': 0.37},
                     (6, 'ADC12'): {'Al': 90.86, 'Zn': 2.97, 'Si': 2.55, 'Mg': 1.60, 'Cu': 1.30, 'Fe': 0.34}}
         for (n, alloy), elements in expected.items():
-            shares = schemas.element_shares(recipes, rows[(n, 'Aluminum alloys')], {'Alloy': alloy})
+            shares = element_shares(recipes, rows[(n, 'Aluminum alloys')], {'Alloy': alloy})
             self.assertAlmostEqual(sum(shares.values()), 1, places=9, msg=f'robot type {n}, {alloy}')
             self.assertEqual('Pb' in shares, alloy == 'ADC12', msg=f'robot type {n}, {alloy}')
             for element, percent in elements.items():
@@ -1471,7 +1504,7 @@ class TestTheWorkbook(unittest.TestCase):
                     (6, 'AM60B'): {'Mg': 91.62, 'Al': 7.50, 'Zn': 0.425, 'Mn': 0.400},
                     (6, 'AM50A'): {'Mg': 92.33, 'Al': 6.96, 'Zn': 0.370, 'Mn': 0.300}}
         for (n, alloy), elements in expected.items():
-            shares = schemas.element_shares(recipes, rows[(n, 'Magnesium alloys')], {'AM alloy': alloy})
+            shares = element_shares(recipes, rows[(n, 'Magnesium alloys')], {'AM alloy': alloy})
             self.assertAlmostEqual(sum(shares.values()), 1, places=9, msg=f'robot type {n}, {alloy}')
             for element, percent in elements.items():
                 self.assertAlmostEqual(shares[element] * 100, percent, delta=0.006,
@@ -2335,7 +2368,7 @@ class TestGradeRecipes(unittest.TestCase):
 
     def test_at_the_modes_each_adds_up_to_one(self):
         for recipe in self.REMAINDER:
-            shares = schemas.element_shares(self.recipes, recipe)
+            shares = element_shares(self.recipes, recipe)
             self.assertAlmostEqual(sum(shares.values()), 1.0, places=9, msg=recipe)
 
 
@@ -2577,9 +2610,8 @@ class TestOverviewBoxes(unittest.TestCase):
         self.assertNotIn('robot types 3 and 4 together', words)
         self.assertIn('Open:', words)
         for n, view in self.views.items():
-            said = schemas.taken_words(n, self.register, view)
-            if not said.startswith('all'):
-                taken, of = (int(x) for x in said.split(' robots')[0].split(' of its '))
+            taken, of, _ = schemas.taken_count(n, self.register, view)
+            if taken < of:
                 self.assertIn(f'{n} ({of - taken})', words, msg=n)
 
 
@@ -2603,3 +2635,32 @@ class TestHydraulicsKind(unittest.TestCase):
         self.assertEqual(schemas.PART_KIND['Ankles'], 'ankles')
         for table in (schemas.SPOTS, schemas.MARKS, schemas.KIND_HOLDS):
             self.assertIn('hydraulics', table)
+
+
+class TestTableHeadingsInsideTheBand(unittest.TestCase):
+    """Matthias, 2026-11-04, "Yes, do the package" (the robots tables' "Frame and shell" heading touched the right edge
+    of its band: 1.3 px past it on every type's table, V166): every heading of the band at least 0.1 inch inside it."""
+
+    def test_every_heading_inside_the_band(self):
+        from matplotlib.colors import to_rgb
+        from matplotlib.patches import Rectangle
+        from matplotlib.text import Text
+        params = Params()
+        paths = [real_parts_file(n) for n in TYPE_FOLDERS] + [absolute(params.data.register)]
+        if not all(os.path.exists(p) for p in paths):
+            self.skipTest('the parts files or the register are not on disk')
+        register = schemas.read_register(absolute(params.data.register))
+        files = {n: schemas.read_parts_taken_apart(real_parts_file(n)) for n in TYPE_FOLDERS}
+        for n in files:
+            figure = schemas.robots_table_pages(schemas.type_parts(files, register, n), n)[0]
+            figure.canvas.draw()
+            renderer = figure.canvas.get_renderer()
+            band = next(p for p in figure.axes[0].patches if isinstance(p, Rectangle)
+                        and p.get_facecolor()[:3] == to_rgb(schemas.TABLE_BAND)).get_window_extent(renderer)
+            for t in figure.findobj(Text):
+                e = t.get_window_extent(renderer)
+                if t.get_text().strip() and band.y0 <= (e.y0 + e.y1) / 2 <= band.y1:
+                    self.assertLessEqual(e.x1, band.x1 - 0.1 * figure.dpi, msg=(n, t.get_text()))
+                    self.assertGreaterEqual(e.x0, band.x0, msg=(n, t.get_text()))
+            schemas.plt.close(figure)
+

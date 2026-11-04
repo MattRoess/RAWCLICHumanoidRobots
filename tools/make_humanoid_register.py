@@ -246,7 +246,7 @@ TAKEN_APART = {1: {
     # The hydraulic Atlas (old) (2026-11-04, "Yes, agree E27.7", "Yes, build it": EVIDENCE.md E27.7), its actuators as
     # Moog's ISA v2, or the v5 at its knees only ("Yes, knees only", E27.8), each as often; Neo1, of types 5 and 3, in
     # type 3's file (208 above).
-    44: 'Boston Dynamics Atlas hydraulic ISA v2; Boston Dynamics Atlas hydraulic ISA v5 at the knees',
+    44: 'Atlas HD ISA v2; Atlas HD ISA v5 knees',   # "Atlas HD, or hydraulic" (IEEE Robots Guide; "Yes, fix both")
 }, 6: {
     # Type 6's own robots in its file, the Fuxi on legs and on wheels, each as often (E16.2, E15.6 question 2).
     24: 'IHMC Alex', 351: 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels',
