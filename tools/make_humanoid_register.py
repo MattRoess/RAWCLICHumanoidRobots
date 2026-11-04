@@ -93,9 +93,9 @@ ABOUT = [
     "in the parts file of one of its types (types 1 to 6); \"not drawn: not yet taken apart\" of the others with a "
     'mass, their types drawn from the workbook until all are; "not drawn: no mass stated".',
     'Sheets Type 5 and Type 6 (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data '
-    'in the respective sheets", EVIDENCE.md E16.6): every robot whose types include 5, or 6, as the sheet Type 3; the '
-    'hydraulic Atlas (old), Nadia and Neo1 not yet taken apart (their research step, E16.5 question 4); TITAN without a '
-    'stated mass.',
+    'in the respective sheets", EVIDENCE.md E16.6): every robot whose types include 5, or 6, as the sheet Type 3; '
+    'since 2026-11-04 the hydraulic Atlas (old), Nadia and Neo1 taken apart too (EVIDENCE.md E27.7, "Yes, build it"); '
+    'TITAN without a stated mass.',
 ]
 
 # --- The sheets of robot types --------------------------------------------------------------------------------------
@@ -206,7 +206,8 @@ TAKEN_APART = {1: {
     133: 'Huashu HSR-ER-HR705', 137: 'XPENG IRON 2025', 141: 'JAKA K1', 142: 'JAKA Kargo', 146: 'Zeroth Jupiter',
     154: 'LG KAPEX', 156: 'Galaxea Kengo', 160: 'Kinisi KR1', 165: 'Moon Dynamics L1', 167: 'Glroad Laborer M1',
     181: 'MagicLab MagicBot X1', 186: 'Matrix Robotics Matrix-1', 189: 'Mentee MenteeBot 2024',
-    190: 'Mentee MenteeBot V3', 197: 'O-ID Modular', 204: 'Zhejiang Navigator 2', 209: 'Galaxea NEXO',
+    190: 'Mentee MenteeBot V3', 197: 'O-ID Modular', 204: 'Zhejiang Navigator 2', 208: 'NeodraDynamics Neo1',
+    209: 'Galaxea NEXO',
     213: 'Sharpa North', 215: 'ugo Nova', 226: 'Pink Robotics P0', 239: 'PsiBot Psi V1', 241: 'Pudu D9',
     242: 'XPENG PX5', 245: 'X Square QUANTA X2', 249: 'AgiBot RAISE A1', 250: 'NineRay RayNex G3',
     258: 'RoboScience REX G1', 262: 'Oversonic RoBee', 263: 'Roboligent Robin', 264: 'Robo Robotics ROBO-T1',
@@ -242,9 +243,15 @@ TAKEN_APART = {1: {
     # Types 5 and 6's entry (2026-11-01, "Yes, agree both", "Find all the data for 5 and 6 and then fill in the data in
     # the respective sheets": EVIDENCE.md E16.6): type 5's own robots in its file, the T800 in two versions.
     191: 'Mirsee MH3', 288: 'EngineAI T800 Dev; EngineAI T800 PRO',
+    # The hydraulic Atlas (old) (2026-11-04, "Yes, agree E27.7", "Yes, build it": EVIDENCE.md E27.7), its actuators as
+    # Moog's ISA v2, or the v5 at its knees only ("Yes, knees only", E27.8), each as often; Neo1, of types 5 and 3, in
+    # type 3's file (208 above).
+    44: 'Boston Dynamics Atlas hydraulic ISA v2; Boston Dynamics Atlas hydraulic ISA v5 at the knees',
 }, 6: {
     # Type 6's own robots in its file, the Fuxi on legs and on wheels, each as often (E16.2, E15.6 question 2).
     24: 'IHMC Alex', 351: 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels',
+    # The hydraulic Nadia (E27.7), as the Atlas (old).
+    202: 'IHMC Nadia ISA v2; IHMC Nadia ISA v5',
 }}
 
 # A robot with no stated mass: number -> why. Its mass empty, so that it is listed but not in the evaluation (Matthias,

@@ -661,10 +661,10 @@ class TestTypeTwoPages(unittest.TestCase):
         self.assertEqual([name for name, _ in schemas.KINDS.values()],
                          ['Hip joints', 'Knee joints', 'Ankle joints', 'Waist joints', 'Arm joints and hands',
                           'Battery pack', 'Boards and computers', 'Head', 'Cables', 'Frame and shell', 'Wheeled base',
-                          'Lift column'])
+                          'Lift column', 'Hydraulic power unit, oil and hoses'])   # the last since E27.7
         self.assertEqual({schemas.JOINT_KIND[w] for w in ('wheel', 'steering', 'lift')}, {'base', 'lift'})
         self.assertTrue({'wheel', 'steering', 'lift', 'hand', 'gripper'} <= schemas.TEMPLATE_OUTSIDE)
-        self.assertEqual(set(schemas.kinds_of(self.apart)), set(schemas.KINDS))
+        self.assertEqual(set(schemas.kinds_of(self.apart)), set(schemas.KINDS) - {'hydraulics'})   # no hydraulic robot
         figure, axes = schemas.plt.subplots()
         schemas.draw_kinds(axes, {}, 10, set(schemas.KINDS))
         with_base = len(axes.patches)
@@ -752,10 +752,11 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         # Since batch 3 (E15.7 point 6): type 3 137 of 172 (E15.5's arithmetic said 139: its 11 robots of type 3 from a
         # stated joint or a model, as E15.3's rows give them), type 4 103 and 98 of 137 (E15.5 said 99: the Tau
         # Humanoid has the G1's battery, as its row gives it).
-        self.assertEqual(schemas.template_shares(self.views[3]), (137, 124, 172))
+        # Since E27.7 (2026-11-04) Neo1 too, on neither template: 173.
+        self.assertEqual(schemas.template_shares(self.views[3]), (137, 124, 173))
         self.assertEqual(schemas.template_shares(self.views[4]), (103, 98, 137))
         self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
-                                                                '137 of its 172 robots and versions, the battery of '
+                                                                '137 of its 173 robots and versions, the battery of '
                                                                 '124.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
@@ -2580,3 +2581,25 @@ class TestOverviewBoxes(unittest.TestCase):
             if not said.startswith('all'):
                 taken, of = (int(x) for x in said.split(' robots')[0].split(' of its '))
                 self.assertIn(f'{n} ({of - taken})', words, msg=n)
+
+
+class TestHydraulicsKind(unittest.TestCase):
+    """EVIDENCE.md E27.7 points 8 and 9.7 (Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it"): the hydraulic
+    power unit, its manifold, the oil and the hoses one kind of part of their own, "Hydraulic power unit, oil and
+    hoses", its colour of the same published palette (Paul Tol's discrete rainbow) as the others, unused before; a
+    hydraulic actuator in the row of its place, the ankles' too."""
+
+    TOL_DISCRETE_RAINBOW = {'#E8ECFB', '#D9CCE3', '#D1BBD7', '#CAACCB', '#BA8DB4', '#AE76A3', '#AA6F9E', '#994F88',
+                            '#882E72', '#1965B0', '#437DBF', '#5289C7', '#6195CF', '#7BAFDE', '#4EB265', '#90C987',
+                            '#CAE0AB', '#F7F056', '#F7CB45', '#F6C141', '#F4A736', '#F1932D', '#EE8026', '#E8601C',
+                            '#E65518', '#DC050C', '#A5170E', '#72190E', '#42150A'}
+
+    def test_the_kind_and_its_colour(self):
+        name, colour = schemas.KINDS['hydraulics']
+        self.assertEqual(name, 'Hydraulic power unit, oil and hoses')
+        self.assertIn(colour, self.TOL_DISCRETE_RAINBOW)
+        self.assertNotIn(colour, {c for k, (_, c) in schemas.KINDS.items() if k != 'hydraulics'})
+        self.assertEqual(schemas.PART_KIND['Hydraulics'], 'hydraulics')
+        self.assertEqual(schemas.PART_KIND['Ankles'], 'ankles')
+        for table in (schemas.SPOTS, schemas.MARKS, schemas.KIND_HOLDS):
+            self.assertIn('hydraulics', table)

@@ -1444,8 +1444,10 @@ class TestTypesFiveAndSix(unittest.TestCase):
         return self.apart(robot).constants[robot]['Robot mass, with battery'][1]
 
     def test_each_file_holds_its_own_robots(self):
-        self.assertEqual(set(self.files[5].robots), {'EngineAI T800 Dev', 'EngineAI T800 PRO', 'Mirsee MH3'})
-        self.assertEqual(set(self.files[6].robots), {'IHMC Alex', 'NORINCO Fuxi on legs', 'NORINCO Fuxi on wheels'})
+        # Since E27.7 (2026-11-04) the hydraulic Atlas (old) and Nadia, each in two versions (TestHydraulicRobots).
+        self.assertEqual(set(self.files[5].robots), {'EngineAI T800 Dev', 'EngineAI T800 PRO', 'Mirsee MH3', *ATLAS_OLD})
+        self.assertEqual(set(self.files[6].robots), {'IHMC Alex', 'NORINCO Fuxi on legs', 'NORINCO Fuxi on wheels',
+                                                     *NADIA})
         for name in ('Kawasaki Kaleido 9', 'Noble Machines Moby', 'Foundation Phantom MK1'):
             self.assertIn(name, self.files[3].robots)
         names = {n for t in (3, 5, 6) for n in REGISTER.TAKEN_APART[t].values() for n in schemas.versions(n)}
@@ -1604,8 +1606,9 @@ TYPE_FOUR_BATCH_3 = {
     'Zerith H1': ((54, 55, 56), True, 0, None), 'Zerith Z1': ((32, 33, 34), False, 0, None)}
 # Type 3's file in the register's order: batch 3 with E16.6's three in their places (E11.7 point 1).
 TYPE_THREE_ORDER_3 = (list(TYPE_THREE_BATCH_3)[:18] + ['Kawasaki Kaleido 9'] + list(TYPE_THREE_BATCH_3)[18:27]
-                      + ['Noble Machines Moby'] + list(TYPE_THREE_BATCH_3)[27:33] + ['Foundation Phantom MK1']
-                      + list(TYPE_THREE_BATCH_3)[33:])
+                      + ['Noble Machines Moby'] + list(TYPE_THREE_BATCH_3)[27:29]
+                      + ['NeodraDynamics Neo1']                        # since E27.7, after the Navigator 2 (204)
+                      + list(TYPE_THREE_BATCH_3)[29:33] + ['Foundation Phantom MK1'] + list(TYPE_THREE_BATCH_3)[33:])
 TYPES_34_ON_WHEELS_3 = {n for d in (TYPE_THREE_BATCH_3, TYPE_FOUR_BATCH_3) for n, row in d.items() if row[1]}
 # The 17 blocks with joints from a stated joint (E15.7 point 2): its torque (N·m), the joint it is, and E15.3's body
 # joint modules at the modes (kg), batch3_plan.py's arithmetic (its ratios before E12.7's elbow 0.17 and second waist
@@ -1824,3 +1827,255 @@ class TestHousingShareOfCells(unittest.TestCase):
         housing = {p.robot: p.computed for p in apart.parts if p.name == 'Battery housing, busbars and wires'}
         self.assertTrue(housing['Unitree G1'].startswith(schemas.PACK_REMAINDER))
         self.assertTrue(housing['Booster K1 2 Ah'].startswith(schemas.CELLS_SHARE))
+
+
+# The hydraulic robots (EVIDENCE.md E27.7; Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it"): each hydraulic
+# joint an actuator in its place's row, its valve, board and sensors drawn and its body the remainder; the power unit,
+# its manifold, oil and hoses the new kind "Hydraulics".
+# Matthias, 2026-11-04, "Yes, knees only" (E27.8): the Atlas (old)'s 1.6 kg actuators at its knees only, as HyQReal's.
+ATLAS_OLD = ('Boston Dynamics Atlas hydraulic ISA v2', 'Boston Dynamics Atlas hydraulic ISA v5 at the knees')
+NADIA = ('IHMC Nadia ISA v2', 'IHMC Nadia ISA v5')
+NEO1 = 'NeodraDynamics Neo1'
+ISA_KG = {'v2': 0.92, 'v5': 1.6}
+# Point 4.2: Atlas (old)'s 28 by the seven template robots' joints by place (42, 14, 28, 16, 10, 90 of 200), the largest
+# remainders; point 3.2: Nadia's 12 as IHMC names them; point 5.2: Neo1's 39 as 上海证券报 counts them.
+ATLAS_PLACES = {'hips': 6, 'knees': 2, 'ankles': 4, 'waist': 2, 'head': 1, 'arms': 13}
+NADIA_PLACES = {'hips': 4, 'knees': 2, 'ankles': 4, 'waist': 2}
+NEO1_PLACES = {'arms': 22, 'hips': 6, 'knees': 2, 'ankles': 4, 'waist': 3, 'head': 2}
+
+
+class TestHydraulicRobots(unittest.TestCase):
+    """E27.7 points 1 to 7: the hydraulic Atlas (old) and Nadia in two versions each, their actuators as Moog's ISA,
+    and Neo1, its digital hydraulic actuators, each in its file and in the register."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {3: written(builder_three)[0], 5: written(builder_five)[0], 6: written(builder_six)[0]}
+
+    def apart(self, robot: str):
+        return next(a for a in self.files.values() if robot in a.robots)
+
+    def parts(self, robot: str) -> dict:
+        return {p.name: p for p in self.apart(robot).parts if p.robot == robot}
+
+    def own(self, robot: str) -> dict:
+        return self.apart(robot).constants[robot]
+
+    def shares(self, robot: str, item: str) -> dict:
+        return {s.material: (s.grade, s.share, s.remainder) for s in self.apart(robot).shares if s.item == item}
+
+    def test_the_register_takes_them_apart(self):
+        self.assertEqual(REGISTER.TAKEN_APART[5][44], '; '.join(ATLAS_OLD))
+        self.assertEqual(REGISTER.TAKEN_APART[6][202], '; '.join(NADIA))
+        self.assertEqual(REGISTER.TAKEN_APART[3][208], NEO1)
+        self.assertTrue(set(ATLAS_OLD) <= set(self.files[5].robots))
+        self.assertTrue(set(NADIA) <= set(self.files[6].robots))
+        self.assertIn(NEO1, self.files[3].robots)
+
+    def test_every_file_passes_every_check_of_01(self):
+        params = Params()
+        lists_path, recipes_path = absolute(params.data.shared_lists), absolute(params.data.element_recipes)
+        if not all(os.path.exists(p) for p in (lists_path, recipes_path)):
+            self.skipTest('the shared lists or the element recipes are not on disk')
+        lists, recipes = schemas.read_shared_lists(lists_path), schemas.read_element_recipes(recipes_path)
+        for robot_type, apart in self.files.items():
+            faults = (schemas.check_parts_taken_apart(apart, lists, params) + schemas.check_sibling_data(apart, params)
+                      + schemas.check_grades(apart, recipes, params))
+            self.assertEqual([f.text for f in faults], [], msg=robot_type)
+
+    def test_moogs_actuators_of_atlas_old_and_nadia(self):
+        # Points 2.1 to 2.5: the actuator as weighed ± 5 %, its valve 95 g ± 5 %, its board as the small joint's driver
+        # board, a position and two pressure sensors, its body the remainder.
+        for robots, places in ((ATLAS_OLD, ATLAS_PLACES), (NADIA, NADIA_PLACES)):
+            for robot in robots:
+                # The version of each place: Nadia's either all v2 or all v5; the Atlas (old)'s all v2, or the v5 at its
+                # knees only and the v2 at its other places.
+                at_knees = robot.endswith(' at the knees')
+                parts = self.parts(robot)
+                boards = {b.name: b for b in self.apart(robot).boards if b.robot == robot}
+                sensors = {e.name: e for e in self.apart(robot).sensors if e.robot == robot}
+                found = {name.rsplit(', ', 1)[1]: p.count for name, p in parts.items()
+                         if name.startswith('Hydraulic actuators, ')}
+                self.assertEqual(found, places, msg=robot)
+                for place, count in places.items():
+                    version = (('v5' if place == 'knees' else 'v2') if at_knees
+                               else robot.rsplit(' ', 1)[1])
+                    whole = parts[f'Hydraulic actuators, {place}']
+                    self.assertEqual(whole.bounds, stated(ISA_KG[version]), msg=(robot, place))
+                    self.assertTrue(whole.computed.startswith(schemas.ACTUATORS_WHOLE), msg=robot)
+                    self.assertEqual((parts[f'Servo valves, {place}'].count, parts[f'Servo valves, {place}'].bounds),
+                                     (count, stated(0.095)), msg=robot)
+                    self.assertEqual((boards[f'Actuator boards, {place}'].count,
+                                      boards[f'Actuator boards, {place}'].bounds), (count, (11.5, 22.9, 28.3)))
+                    self.assertEqual(sensors[f'Actuator position sensors, {place}'].count, count)
+                    self.assertEqual(sensors[f'Actuator pressure sensors, {place}'].count, 2 * count)
+                    body = parts[f'Actuator bodies, rods and seals, {place}']
+                    self.assertTrue(body.computed.startswith(schemas.ACTUATOR_REST), msg=robot)
+                    self.assertEqual(body.count, count)
+                    self.assertEqual(self.shares(robot, f'Servo valves, {place}'),
+                                     {'Copper': ('', (0.05, 0.1, 0.15), False),
+                                      'Other': ('', (0.1, 0.2, 0.3), False),
+                                      'Aluminium alloys': ('', (0.025, 0.05, 0.075), False),
+                                      'Stainless steel': ('17-4PH', (None, None, None), True)})
+                    self.assertEqual(self.shares(robot, f'Actuator bodies, rods and seals, {place}'),
+                                     {'Steel': ('C45', (0.06, 0.12, 0.18), False),
+                                      'Plastics': ('', (0.005, 0.01, 0.015), False),
+                                      'Titanium alloy': ('Ti-6Al-4V', (None, None, None), True)})
+
+    def test_nadia(self):
+        # Point 3: its mass, its electric arms as the Alex's and pelvis on the template, grippers, no battery, power unit
+        # or computer, no plastics shell, its carbon-fibre frame and shell, hoses and oil.
+        for robot in NADIA:
+            self.assertEqual(self.own(robot)['Robot mass, with battery'][1], (99, 100, 101))
+            joints = [j for j in self.apart(robot).joints if j.robot == robot]
+            arms = [(j.name, j.count, j.torque, j.module_mass) for j in joints
+                    if j.name.startswith(('Shoulder', 'Elbow', 'Wrist'))]
+            self.assertEqual(arms, ALEX_ARMS)
+            self.assertTrue(all(j.share is None for j in joints))   # module masses, no shares (01's rule)
+            pelvis = {j.name: (j.count, j.module) for j in joints if j.name in ('Hip yaw', 'Waist yaw (spine)')}
+            self.assertEqual(pelvis, {'Hip yaw': (2, 'large'), 'Waist yaw (spine)': (1, 'large')})
+            for j in joints:
+                if j.name in pelvis:   # the template's per joint at its mode, its own spread: half to 1.5 times
+                    self.assertEqual(j.module_mass, half_to_one_and_a_half(j.module_mass[1]), msg=j.name)
+            grippers = [(j.count, j.module_mass) for j in joints if j.name.startswith('Gripper')]
+            self.assertEqual(grippers, [(2, stated(0.4))])
+            parts = self.parts(robot)
+            self.assertFalse([p for p in parts if p.startswith('Battery')], msg=robot)
+            self.assertNotIn('Hydraulic power unit', parts)
+            self.assertFalse([p for p in parts if p.startswith('Shell')], msg=robot)
+            frame = [p for p in parts.values() if p.computed.startswith(schemas.ROBOT_REMAINDER)]
+            self.assertEqual([(p.name, p.material) for p in frame],
+                             [('Frame and shell: carbon-fibre exoskeleton', 'Fibre composites')])
+            boards = {b.name for b in self.apart(robot).boards if b.robot == robot and b.kind == 'Boards'}
+            self.assertEqual(boards, {'Power distribution board'})
+            hoses = parts['Hydraulic hoses']
+            self.assertEqual((hoses.bounds, hoses.material, hoses.kind), ((0.5, 1, 1.5), 'Plastics', 'Hydraulics'))
+            self.assertEqual(self.own(robot)[schemas.OIL_VOLUME][1], (0.25, 0.5, 0.75))
+            self.assertTrue(parts['Hydraulic oil'].computed.startswith(schemas.OIL_FROM))
+            self.assertEqual(parts['Hydraulic oil'].material, 'Other')
+
+    def test_atlas_old(self):
+        # Point 4: its mass Boston Dynamics', no electric joint, its manifold, power unit, battery, frame of titanium and
+        # aluminium, oil; its lines in its frame (no hoses apart).
+        for robot in ATLAS_OLD:
+            self.assertEqual(self.own(robot)['Robot mass, with battery'][1], (80, 81.6, 86.2))
+            self.assertFalse([j for j in self.apart(robot).joints if j.robot == robot])
+            parts = self.parts(robot)
+            self.assertFalse([p for p in parts if p.startswith(('Encoders', 'XT30'))], msg=robot)
+            manifold = parts['Hydraulic manifold']
+            self.assertEqual((manifold.bounds, manifold.material, manifold.grade, manifold.kind),
+                             ((1.05, 2.1, 3.15), 'Titanium alloy or Aluminium alloys', 'Ti-6Al-4V', 'Hydraulics'))
+            unit = parts['Hydraulic power unit']
+            self.assertEqual((unit.bounds, unit.material, unit.kind), ((2.5, 5, 12), '', 'Hydraulics'))
+            self.assertEqual(self.shares(robot, 'Hydraulic power unit'),
+                             {'Steel': ('42CrMo4', (0.1, 0.2, 0.3), False),
+                              # its motor 11 % of it, 22, 39 and 25 % of the motor copper, electrical steel and magnets
+                              # (E27.7 point 4.4, there rounded), half to 1.5 times
+                              'Copper': ('', (0.0121, 0.0242, 0.0363), False),
+                              'Electrical steel': ('M19 or M27', (0.02145, 0.0429, 0.06435), False),
+                              'NdFeB magnets': ('SH', (0.01375, 0.0275, 0.04125), False),
+                              'Titanium alloy or Aluminium alloys': ('Ti-6Al-4V', (None, None, None), True)})
+            own = self.own(robot)
+            # its capacity 1400 / 48 V to four decimals
+            self.assertAlmostEqual(own['Battery voltage'][1][1] * own['Battery capacity'][1][1], 1400, delta=0.01)
+            self.assertEqual(own[schemas.OIL_VOLUME][1], (1, 2, 4))
+            self.assertNotIn('Hydraulic hoses', parts)
+            frame = [p for p in parts.values() if p.computed.startswith(schemas.ROBOT_REMAINDER)]
+            self.assertEqual([p.name for p in frame], ['Frame: titanium and aluminium'])
+            self.assertEqual(self.shares(robot, 'Frame: titanium and aluminium'),
+                             {'Titanium alloy': ('Ti-6Al-4V', (0.25, 0.5, 0.75), False),
+                              'Aluminium alloys': ('', (None, None, None), True)})
+            boards = {b.name: b.count for b in self.apart(robot).boards if b.robot == robot and b.kind == 'Boards'}
+            self.assertEqual(boards, {'Computer board (not named)': 3, 'Power distribution board': 1})
+
+    def test_neo1(self):
+        # Point 5: its mass the maker's, its 39 digital hydraulic actuators by place, their insides as shares, its two
+        # electric forearm joints, no battery or power unit, its steel frame, no sensors, hoses and oil.
+        self.assertEqual(self.own(NEO1)['Robot mass, with battery'][1], (1199, 1200, 1201))
+        parts = self.parts(NEO1)
+        found = {name.rsplit(', ', 1)[1]: p.count for name, p in parts.items()
+                 if name.startswith('Digital hydraulic actuators, ')}
+        self.assertEqual(found, NEO1_PLACES)
+        self.assertEqual(sum(found.values()), 39)
+        for place in NEO1_PLACES:
+            self.assertEqual(parts[f'Digital hydraulic actuators, {place}'].bounds, (1.0, 1.1, 1.65))
+            self.assertEqual(self.shares(NEO1, f'Digital hydraulic actuators, {place}'),
+                             {'Copper': ('', (0.022, 0.044, 0.066), False),
+                              'Electrical steel': ('M19 or M27', (0.039, 0.078, 0.117), False),
+                              'NdFeB magnets': ('H or SH', (0.025, 0.05, 0.075), False),
+                              'Steel': ('C45', (0.15, 0.3, 0.45), False),
+                              'Plastics': ('', (0.005, 0.01, 0.015), False),
+                              'Titanium alloy': ('Ti-6Al-4V', (None, None, None), True)})
+        joints = [(j.name, j.count, j.module, j.module_mass) for j in self.apart(NEO1).joints if j.robot == NEO1]
+        self.assertEqual(joints, [('Elbow yaw (forearm rotation)', 2, 'large', (1.3, 2.6, 3.9))])
+        self.assertFalse([p for p in parts if p.startswith('Battery')])
+        self.assertNotIn('Hydraulic power unit', parts)
+        frame = [p for p in parts.values() if p.computed.startswith(schemas.ROBOT_REMAINDER)]
+        self.assertEqual([(p.material, p.grade) for p in frame], [('Steel', 'C45')])
+        self.assertFalse([e for e in self.apart(NEO1).sensors if e.robot == NEO1 and e.kind != 'In the joints'])
+        self.assertEqual(parts['Hydraulic hoses'].bounds, (4, 8, 12))
+        self.assertEqual(self.own(NEO1)[schemas.OIL_VOLUME][1], (1, 2, 3))
+
+    def test_the_oil_density_in_the_files_of_the_hydraulic_robots_only(self):
+        for robot_type, apart in self.files.items():
+            self.assertEqual(apart.constants[schemas.ALL_ROBOTS][schemas.OIL_DENSITY][1], (0.86, 0.87, 0.88),
+                             msg=robot_type)
+        for which in (None, builder_two, builder_four):
+            apart = written(which)[0] if which else written()[0]
+            self.assertNotIn(schemas.OIL_DENSITY, apart.constants[schemas.ALL_ROBOTS], msg=apart.source)
+
+    def test_atlas_olds_places_by_the_seven(self):
+        self.assertEqual(builder_three.SHARED.places_of(28), ATLAS_PLACES)
+
+    def faults_of(self, apart) -> list:
+        params = Params()
+        lists_path = absolute(params.data.shared_lists)
+        if not os.path.exists(lists_path):
+            self.skipTest('the shared lists are not on disk')
+        return [f.text for f in schemas.check_parts_taken_apart(apart, schemas.read_shared_lists(lists_path), params)]
+
+    def test_01_faults_a_body_without_its_actuators(self):
+        import dataclasses
+        apart = self.files[6]
+        parts = [p for p in apart.parts if not (p.robot == NADIA[0] and p.name == 'Hydraulic actuators, hips')]
+        faults = self.faults_of(dataclasses.replace(apart, parts=parts))
+        self.assertTrue(any('Actuator bodies, rods and seals, hips' in f and 'no row' in f for f in faults),
+                        msg=faults)
+
+    def test_01_faults_oil_without_its_volume(self):
+        import dataclasses
+        apart = self.files[6]
+        constants = dict(apart.constants)
+        constants[NADIA[0]] = {q: v for q, v in constants[NADIA[0]].items() if q != schemas.OIL_VOLUME}
+        faults = self.faults_of(dataclasses.replace(apart, constants=constants))
+        self.assertTrue(any(schemas.OIL_VOLUME in f for f in faults), msg=faults)
+
+    def test_01_faults_an_actuator_whose_lightest_cannot_hold_its_valve_and_board(self):
+        import dataclasses
+        apart = self.files[6]
+        parts = [dataclasses.replace(p, bounds=(0.1, 0.92, 0.966))
+                 if p.robot == NADIA[0] and p.name == 'Hydraulic actuators, hips' else p for p in apart.parts]
+        faults = self.faults_of(dataclasses.replace(apart, parts=parts))
+        self.assertTrue(any('Hydraulic actuators, hips' in f and 'below zero' in f for f in faults), msg=faults)
+
+
+class TestNoBatteryNoBatteryEstimate(unittest.TestCase):
+    """Matthias, 2026-11-04, "Yes, fix it" (VERIFICATION.md V163): a robot that carries no battery (the Phantom MK1,
+    Nadia, Neo1) rests on no estimate of its battery's energy; 02's notes pages listed it under "the battery's energy a
+    share of the robot's mass" (type 5's said "the battery of 5" and named six)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {3: written(builder_three)[0], 5: written(builder_five)[0], 6: written(builder_six)[0]}
+
+    def apart(self, robot: str):
+        return next(a for a in self.files.values() if robot in a.robots)
+
+    def test_no_battery_no_battery_estimate(self):
+        for robot in (*NADIA, NEO1, 'Foundation Phantom MK1'):
+            self.assertFalse(schemas.has_battery(self.apart(robot), robot), msg=robot)
+            self.assertNotIn('battery per kg', schemas.estimate_kinds(self.apart(robot), robot), msg=robot)
+
+    def test_a_battery_from_the_energy_per_kg_still_listed(self):
+        for robot in ('IHMC Alex', 'Kawasaki Kaleido 9', 'Mirsee MH3'):
+            self.assertIn('battery per kg', schemas.estimate_kinds(self.apart(robot), robot), msg=robot)

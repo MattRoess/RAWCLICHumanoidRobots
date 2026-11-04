@@ -1819,6 +1819,74 @@ PERCEPTYNE_PR_OMNI = wheeled(
              IMU_NOT_NAMED],
     frame=('Frame', 'Aluminium alloys', 'PRCo Body Material "Aluminium": aluminium; the remainder (E15.6 question 6)'))
 
+# --- The hydraulic robots (EVIDENCE.md E27.7; Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it") --------------
+# The place of a joint by the first word of its name, for the seven template robots' joints by place.
+PLACE_OF_JOINT = {'Hip': 'hips', 'Knee': 'knees', 'Ankle': 'ankles', 'Waist': 'waist', 'Shoulder': 'arms',
+                  'Elbow': 'arms', 'Wrist': 'arms', 'Head': 'head', 'Neck': 'head'}
+
+
+def places_of(count: int) -> dict:
+    """A robot's `count` hydraulic joints by place where no source splits them (E27.7 point 9.9): as the seven robots of
+    types 3 and 4's template on legs have their body joints by place (SEVEN: hips 42, knees 14, ankles 28, waist 16,
+    head 10, arms 90 of 200), each place its share of `count`, rounded down, the joints left to the largest remainders.
+    Atlas (old)'s 28: hips 6, knees 2, ankles 4, waist 2, head 1, arms 13."""
+    counts: dict = {}
+    for b in SEVEN:
+        for j in body(b):
+            place = PLACE_OF_JOINT[j[0].split()[0]]
+            counts[place] = counts.get(place, 0) + j[1]
+    total = sum(counts.values())
+    exact = {place: count * n / total for place, n in counts.items()}
+    out = {place: int(v) for place, v in exact.items()}
+    for place in sorted(exact, key=lambda k: exact[k] - out[k], reverse=True)[:count - sum(out.values())]:
+        out[place] += 1
+    return out
+
+
+def template_joint(name: str, count: int, group: str, robot_kg: float) -> tuple:
+    """`count` electric joints of no stated torque or mass of a robot of `robot_kg` on the template's rows (E27.7 point
+    3.3, Nadia's pelvis): each the template's share of the joint modules of its group (AVERAGE_JOINTS, 'Hip joints' or
+    'Waist joints', both sizes) over the joints the seven robots have in the group on average, times the template's
+    joint modules' share of the robot's mass at its mode (TYPES_34_SHARED, 44.7 %) and the robot's mass: its module
+    mass at the mode, half to 1.5 times, the template's own spread (E); a large joint, as the group's large rows hold
+    most of it. A module mass, not a share: 01 lets a robot's joints be shares only as the template's whole groups."""
+    share = sum(a[7] for a in AVERAGE_JOINTS if a[0].startswith(group + ','))
+    place = {'Hip joints': 'hips', 'Waist joints': 'waist'}[group]
+    per_robot = sum(j[1] for b in SEVEN for j in body(b) if PLACE_OF_JOINT[j[0].split()[0]] == place) / len(SEVEN)
+    modules = next(r[3] for r in TYPES_34_SHARED if r[1] == JOINT_SHARE_34)
+    return joint(name, count, None, estimate(round(share / per_robot * modules * robot_kg, 3)),
+                 *JOINT_PLACES[name.split()[0]], size='large')
+
+
+def digital_actuators(place: str, count: int) -> tuple:
+    """Neo1's `count` digital hydraulic actuators at one place (PLACES; E27.7 point 5.2): each 1.0 / 1.1 / 1.65 kg, its
+    insides its shares in the sheet Shares (point 5.3)."""
+    kind, region = PLACES[place]
+    return (f'Digital hydraulic actuators, {place}', count, kind, region, (1.0, 1.1, 1.65), None, None, 'S, E',
+            'NAT "each actuator weighs about 1 kg" the min, NEW "自重1.1公斤" ("最小的直线驱动单元之一", one of its '
+            'smallest) the mode, 1.5 times it the max (E27.4 question 9)')
+
+
+# Neo1 (208): its 41 joints by place as 上海证券报's reporter counts them (SSB: "双臂14个、双手10个、双腿及脚部12个、腰部3个、
+# 头部2个"), its two forearm rotary joints electric, the 39 others digital hydraulic actuators; the hands' 10 with the
+# arms (the row "Arm joints and hands"); its legs' 12 as two legs of 6 (E).
+NEO1_PLACES = {'arms': 14 - 2 + 10, 'hips': 6, 'knees': 2, 'ankles': 4, 'waist': 3, 'head': 2}
+NEODRA_NEO1 = block(
+    'NeodraDynamics Neo1', 'NeodraDynamics', 4.0, 1200,
+    'NAT (New Atlas, 2026-11-01: "1.2 metric tons", "a cable supplies its power. A battery will come once it moves"), '
+    'SSB (上海证券报: its 41 joints), NEW (its founder: "钛合金外壳", "小功率电机", "PLC"); E27',
+    makers(1200, 'NAT "a weight of 1.2 metric tons"'),
+    [joint('Elbow yaw (forearm rotation)', 2, None, estimate(2.6), 'Elbows and wrists', 'Arms', size='large')],
+    joint_sources='SSB "双前臂两处旋关节采用电驱": no torque or mass stated; the heaviest module the files weigh, the '
+                  "T800's Q300H-L 2.6 kg, half to 1.5 times (E27.7 point 9.5)",
+    battery=False, oil=((1, 2, 3), 'E', 'its 39 actuators and their hoses: no source states it (E27.7 point 5.9)'),
+    **with_defaults(4.0, 1200, dict(
+        boards=[named_board('PLC', 'NEW "一台廉价的可编程逻辑控制器（PLC）"'), POWER_BOARD], sensors=[],
+        parts=[digital_actuators(place, count) for place, count in NEO1_PLACES.items()]
+        + [hoses((4, 8, 12), 'two lines to each of its 39 actuators: no source states them (E27.7 point 9.10)')],
+        frame=('Frame', 'Steel', 'not stated: steel, its founder\'s "液压件是一堆铁" (E27.4 question 10); the remainder; '
+                                 'C45 the grade (E)', 'C45'))))
+
 # Each robot in the file of its first type among 3 and 4 (E11.7 point 1), in the register's order of numbers.
 BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX, PNDBOTICS_ADAM_LITE,
             PNDBOTICS_ADAM_SP, HEXAGON_AEON, AGILE_ONE, AIDOL, AEI_ALICE_M1, TEKNTRASH_ALPHA, AI2_ALPHABOT_2, ANIGON,
@@ -1830,14 +1898,14 @@ BLOCKS_3 = [NEURA_4NE1_GEN_3, NEURA_4NE1_GEN_35, NEURA_4NE1_GEN_4, AGIBOT_A2_MAX
             DEEP_DR02_PRO, DUATIC_ALPHA, SIASUN_DUCO, ADDVERB_ELIXIS, ADDVERB_ELIXIS_W, GENESIS_ENO, AVIC_FENGXING_001,
             # Batch 3 (E15.7), 56 blocks, with types 5 and 6's entry in their places (E16.6: the Kaleido 9, the Moby
             # and the Phantom MK1), in the register's order; the SkyWalker 2 on legs and on wheels, the Tora DoubleOne
-            # P and X.
+            # P and X; the hydraulic Neo1 since E27.7 (2026-11-04).
             FIGURE_AI_FIGURE_02, HOLIDAY_ROBOTICS_FRIDAY, AGIBOT_G2_MAX, GALBOT_G1, GALBOT_ET1, GALBOT_S1,
             PERSONA_AI_GEN_1, GENERATIVE_BIONICS_GENE_01, GENTO_LUNA, GEEK_PLUS_GINO_1, GAC_GOMATE, GAC_GOMATE_MINI,
             HUMANOID_HMND_01_ALPHA_BIPEDAL, HUASHU_HSR_ER_HR705, XPENG_IRON_2025, JAKA_K1, JAKA_KARGO, ZEROTH_JUPITER,
             KAWASAKI_KALEIDO_9, LG_KAPEX, GALAXEA_KENGO, KINISI_KR1, MOON_DYNAMICS_L1, GLROAD_LABORER_M1,
             MAGICLAB_MAGICBOT_X1, MATRIX_ROBOTICS_MATRIX_1, MENTEE_MENTEEBOT_2024, MENTEE_MENTEEBOT_V3,
-            NOBLE_MACHINES_MOBY, O_ID_MODULAR, ZHEJIANG_NAVIGATOR_2, GALAXEA_NEXO, SHARPA_NORTH, UGO_NOVA,
-            PINK_ROBOTICS_P0, FOUNDATION_PHANTOM_MK1, PSIBOT_PSI_V1, PUDU_D9, XPENG_PX5, X_SQUARE_QUANTA_X2,
+            NOBLE_MACHINES_MOBY, O_ID_MODULAR, ZHEJIANG_NAVIGATOR_2, NEODRA_NEO1, GALAXEA_NEXO, SHARPA_NORTH,
+            UGO_NOVA, PINK_ROBOTICS_P0, FOUNDATION_PHANTOM_MK1, PSIBOT_PSI_V1, PUDU_D9, XPENG_PX5, X_SQUARE_QUANTA_X2,
             AGIBOT_RAISE_A1, NINERAY_RAYNEX_G3, ROBOSCIENCE_REX_G1, OVERSONIC_ROBEE, ROBOLIGENT_ROBIN,
             ROBO_ROBOTICS_ROBO_T1, ATI_SHERPA_MECHA, EIR_SKYWALKER_2_ON_LEGS, EIR_SKYWALKER_2_ON_WHEELS,
             MUKS_SPACEO_PRO, ROBOTERA_STAR1, WORKFAR_SYNTRO, PAXINI_TORA_DOUBLEONE_P, PAXINI_TORA_DOUBLEONE_X,
@@ -2266,6 +2334,16 @@ OWN_SOURCES = [
      'https://aiwiki.ai/wiki/pl_universe_zeus_1', 'Second-hand: a wiki'),
     ('PRCo', 'Perceptyne, PR-OMNI page ("120 kg", "3 kWh (2 × 1.5 kWh, swappable)")',
      'https://www.perceptyne.com/product/omni', "Manufacturer's specification"),
+    # The hydraulic Neo1 (E27.7), read first-hand on 2026-11-04 (VERIFICATION.md V157, V159); and the hydraulic rows'
+    # sources, shared with types 5 and 6 (tools/parts_taken_apart.py).
+    ('NAT', 'New Atlas, Kardoudi, 2026-11-01: NeodraDynamics\' Neo1 ("1.2 metric tons", "a cable supplies its power. A '
+            'battery will come once it moves")',
+     'https://newatlas.com/robotics/neodradynamics-neo1-giant-hydraulic-humanoid-robot/',
+     'Second-hand: a press report with the maker interviewed'),
+    ('SSB', '上海证券报 via 新浪财经, 2026-08-19: Neo1\'s 41 joints ("双臂14个、双手10个、双腿及脚部12个、腰部3个、头部2个")',
+     'https://finance.sina.com.cn/roll/2026-08-19/doc-ininwpnf6934528.shtml',
+     "Second-hand: a press report at the maker's show"),
+    *HYDRAULIC_SOURCES,
 ]
 
 

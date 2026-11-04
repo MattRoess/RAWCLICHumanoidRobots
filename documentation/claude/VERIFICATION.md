@@ -3,6 +3,167 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-04
+
+### V164. The notes pages: no battery estimate for a robot without a battery
+
+- **His words:** "Yes, fix it" (2026-11-04), to "Shall I fix the notes pages' battery wording (01's estimate_kinds)?" (V163).
+- **What:** 01's `estimate_kinds` gives "battery per kg" only to a robot that carries a battery (`has_battery`); 02's
+  notes pages list under "the battery's energy a share of the robot's mass" only those. 01's pages unchanged (its robots
+  table reads the joints' kinds only); 02's draws unchanged.
+- **Tests first:** `TestNoBatteryNoBatteryEstimate`: the Phantom MK1, Nadia's two versions and Neo1 without, the Alex,
+  the Kaleido 9 and the MH3 with; it failed before the fix, passes after.
+- **The suite:** 515 tests, all pass (the register on disk too, since his run of its builder).
+- **The sandbox** (02 at 2,000 draws): type 5's notes list five robots under the battery's energy ("the battery of 5"),
+  type 6's three ("the battery of 3"); Neo1, Nadia and the Phantom MK1 no longer.
+- **Not covered:** his run of 02. The notes' "the joints' masses from their torques" still names Neo1 and Nadia (their
+  forearm and pelvis joints' masses estimated, not from torques): not asked, reported.
+
+### V163. His runs of E27 read back
+
+- **His words:** "all are run, check. Are we now done with all robots?" (2026-11-04). Read only.
+- **Times** (each output against the code that writes it): the register 12:03:53 and type 5's file 12:04:08, after
+  their code's last change (11:48:14); 01's pages 12:04:19; 02's draws and pages 12:06 to 12:08, after 02's last change
+  (10:46). Types 3 and 6's files (11:47) and types 1, 2 and 4's (2 November) older than the shared module's change of
+  11:48: every one of the six files and the register rebuilt in a temporary folder by the code as it is now equals the
+  file on disk cell by cell.
+- **What they hold:** every robot with a mass of types 1 to 6 drawn from its own parts (30, 96, 164, 124, 11, 5; 301
+  robots, none "not yet taken apart"); 23 robots of types 1 to 6 have no stated mass, listed, not drawn (his rule). The
+  Atlas (old) "ISA v5 at the knees": its knees 1.6 kg, its other places 0.92 kg. 01's checks of the six files (in
+  memory): no fault.
+- **02's draws** (each type 200,000; the parts files read in slices): every draw's parts and materials add up to its
+  total (largest relative difference 2.4 × 10⁻⁷, the files' single precision); no median of 0; no quantity of a summary
+  below zero. No remainder of types 5 and 6 below zero. Frames below zero, reported by 02, none of them changed by E27:
+  type 3 the Matrix-1 (85 of 1,223 draws of it, 7 %), the Figure 02 (2.6 %), the Walker S2 (2.2 %), the Agile One and
+  the 1X NEO Beta (one draw each); type 4 the 1X NEO (16 %, E21), the MagicBot (0.57 %) and five with one or two draws;
+  type 1 twelve, each in 0.015 to 0.14 % of its draws.
+- **Pages:** types 3, 5 and 6's 104 pages (42 in `figures/composition/`, 62 in `figures/parts_taken_apart/`) all of this
+  run, none left from before. Read by eye: type 5's notes page 1 and overview page 1, type 6's notes page 1 and overview
+  page 1. **Found: the notes pages list robots that carry no battery under "the battery's energy a share of the robot's
+  mass"** (type 5: Neo1; type 6: Nadia's two versions and the Phantom MK1, the Phantom since E16.6): 01's
+  `estimate_kinds` takes every robot without a battery voltage for one, a battery or not; type 5's page says "the
+  battery of 5" and names 6. Its "the joints' masses from their torques" also names Neo1, whose two joints have no
+  torque (an estimated mass). Reported, not changed.
+- **Not covered:** the other 100 pages by eye (the suite's page tests check every page kind on the sandbox: no text over
+  data, readable, no project words).
+
+### V162. The Atlas (old)'s v5 at its knees only
+
+- **His words:** "Yes, knees only" (2026-11-04), EVIDENCE.md E27.8.
+- **Tests first:** the builders' and the drawing tests changed to the version "ISA v5 at the knees" (its knees 1.6 kg
+  each, its other places 0.92 kg) and a new test, its frame and the v2 version's above zero in every draw (3,000
+  draws): 6 failed before the code, all 15 pass after.
+- **The suite:** 513 tests, all pass but the register on disk, as in V161 (until his run of its builder).
+- **The sandbox** (2,000 draws; the register, type 5's builder, 01 "No fault found", 02 "02 done in 1 min 22 s"): type 5
+  drawn over its 11 robots (15 with their versions), no remainder of it below zero any more. Reported still, not new
+  and untouched by this step: the Figure 02's frame below zero in 8.3 % of its draws (type 3; its frame 18 % of it at
+  the modes, E15.7) and the 1X NEO's in 11.1 % (type 4, E21).
+- **Not covered:** his runs.
+
+### V161. E27.7 built: tests first, the suite, the sandbox
+
+- **His words:** "Yes, build it" (2026-11-04), E27.7 as agreed ("Yes, agree E27.7").
+- **Tests first:** 13 new tests of the builders, the register and the new kind (`TestHydraulicRobots`,
+  `TestHydraulicsKind`, the register's sheets Type 3 to 6) failed before the code (V161's run at 14 tests: 4
+  failures, 9 errors); 3 drawing tests (`TestHydraulicActuators`: the body the actuators less their valves, boards and
+  sensors in every draw, never below zero, among the remainders; the oil its volume times its density; the Atlas (old)
+  without an electric joint, its parts adding up to its mass) failed before types 5 and 6 were built into the tests'
+  folder. All pass.
+- **01's new checks seen to catch their fault:** a body without its actuators, oil without its volume, actuators too
+  light for their valves and boards (three tests, each a fault put in on purpose).
+- **The suite:** 512 tests, all pass but one, as expected: the register on disk differs from what its builder now
+  writes (`test_what_it_writes_equals_the_register_on_disk`) until his run of `tools/make_humanoid_register.py`.
+  Tests changed to the agreed state: type 3's 164 robots in 173 versions, its template 137 of 173; types 5 and 6 none
+  left to take apart; the kinds' names with the new one; type 3's order with Neo1.
+- **The sandbox** (`scratchpad/sb_e277`, a copy of the code and `data/raw` and `data/researched`, its draws 2,000, its
+  outputs in it): the register and the six builders, 01 ("No fault found"), 02 ("02 done in 1 min 21 s"); types 5 and
+  6 drawn part by part over 11 and 5 robots, type 3 over its 164. From its draws: Neo1 1,200 kg, its 39 actuators about
+  48 kg, its frame of steel about 976 kg, its shell 140 kg (the template's 11.5 %); Nadia's frame and shell 59 to 67
+  kg; every actuator body above zero; **the Atlas (old) with the v5 its frame below zero in 2.1 % of its draws**
+  (E27.8). The new row drawn on type 5's pages (its preview) with no text over its data.
+- **Not covered:** his runs (the register, the builders of types 3, 5 and 6, 01, 02 at 200,000 draws); 03; types 3,
+  5 and 6's pages read page by page (the sandbox's overview page 1 of type 5 only).
+
+### V160. The oil's density read (EVIDENCE.md E27.7 point 6)
+
+- **His words:** "Yes, agree E27.7" (2026-11-04), its point 9.6: "download and read both before 6 is entered".
+- **How:** the two datasheets downloaded into an empty folder of the scratchpad (`pdfs_oil/`; 212,004 and 447,875
+  bytes, as their servers' headers said, each a 2-page PDF), their text taken out with PDFKit, each table read.
+- **Result:** ENEOS 5606J 0.869 g/cm³ and Chevron 5606 0.87 kg/l, both at 15 °C, typical values; the mode 0.87 holds.
+- **Not covered:** the density at the robots' working temperature (both at 15 °C); the oil any of the three robots
+  uses (none states it).
+
+### V159. The facts behind E27.7's spec
+
+- **His words:** "all as recommended" (2026-11-04), E27's questions 2 to 14; the spec next.
+- **Read:** Neo1's 41 joints by region on the Sina page itself (上海证券报's reporter), its words in E27.7; the DRC
+  Atlas's IEEE Spectrum page (no split of the 28); the register builder (`mass_bounds`, `ADDED`, `TAKEN_APART`: a
+  register mass is the catalogue's, a block's own mass is drawn, as the Moby's); `tools/parts_taken_apart.py`
+  (`block`, `robot_rows`, the shell's share 0.0575 / 0.115 / 0.1725); 02's `Shared` (the joint sizes 'small' and
+  'large' only) and its magnets by grade class; the sibling's car sensor types (`07_VehicleSensorComposition.xlsx`,
+  sheet Sensor Details: 'position sensor', 'pressure sensor' among them).
+- **Arithmetic:** the G1's weighed motor (JointParts: stator 94.3 g at 36 % copper and 5 % plastics, rotor 42.9 g at
+  90 % magnets, carrier 16.9 g) 22 % copper, 25 % magnets, 39 % electrical steel; MiniHyQ's motor 11 % of its unit,
+  so 2.4, 2.75 and 4.3 % of the unit; Neo1's motor 20 % (E) of its actuator, so 4.4, 5 and 7.8 %; the ISA's rod (12 mm,
+  120 to 140 mm of steel) and piston 0.12 and 0.15 kg of 0.825 and 1.505 kg; Neo1's shell 69 / 138 / 207 kg.
+- **Not covered:** whether 01 and 02 take a robot without electric joints, and magnets named by grade class in a
+  part's shares: tests first, in the build.
+
+### V158. The seven PDFs read (EVIDENCE.md E27.6)
+
+- **His words:** "Yes, download them" (2026-11-04), the seven PDFs of E27.5.
+- **How:** downloaded with `curl` into an empty folder of the scratchpad (`pdfs_e27/`), each checked as a PDF by
+  `file`, its size equal to its server's header; the text taken out with macOS's PDFKit (`osascript`; poppler and
+  pypdf not installed, nothing installed) and searched for masses, materials, oil and parts; each quote in E27.6
+  read in its paragraph or table.
+- **Result:** E27.6. Two readings of tables taken out as text, checked in their row: HyQ's "70kg (external hydraulic
+  system), 91kg (onboard hydraulic system)" and the Type 30's weight column, whose five rows stand in the order of its "Five Basic Sizes", Series 30 to 35
+  (0.19 kg the first, the Series 30's; the series' names come out of the PDF apart from the table, so the row is
+  matched by its order).
+- **Arithmetic:** HyQ's hydraulics on board 91 − 70 = 21 kg; MiniHyQ's pump, motor and gearbox 1.94, 1.36 and 0.43
+  of 12 kg = 16, 11 and 4 %.
+- **Not covered:** the figures in the PDFs (images; their labels only as text); the oil's density.
+
+### V157. The hydraulic robots' sources read first-hand (EVIDENCE.md E27)
+
+- **His words:** "Yes, prepare it" (2026-11-04), the research step of E16.5 question 4.
+- **What:** the three agents' quotes behind E27, against the pages themselves.
+- **How:** each page opened in the built-in browser, its text searched for the quoted words: New Atlas on Neo1; the
+  163.com interview of Neo1's founder; IEEE Spectrum on Nadia (2022) and on HyQReal (2019); Moog's 24 Series page;
+  the Frontiers paper's Tables 1 and 2 and its ISA text; habr.com's Atlas article; Calvert's thesis (arXiv HTML).
+  The PDFs' sizes from their servers' headers only (`curl -I`), nothing downloaded.
+- **Result:** every quote E27 marks "read" stands on its page as written. The agents' readings agree with the pages,
+  but on one point: the agent saw Nadia's "3 DoF electric pelvis" (2022) against the 2024 paper's electric hip and
+  spine yaw as a disagreement; they agree (two hip yaws and the spine yaw, three).
+- **Arithmetic:** type 5's mean mass with Neo1 188 kg, without 86 kg; type 3's 97 and 90 (the register's modes, each
+  robot as often).
+- **Not covered:** the sources E27 marks "agent" (P4's release showed no text to me; Neo1's site refused its
+  certificate); the seven PDFs (E27.5, his permission first).
+
+### V156. Are types 1 to 6 complete, and are 01 and 02 done? A check of the state
+
+- **His words:** "Read the handover and check all the code and then tell me what are the next step. Do you have now
+  all the data of type 1 to 6? This is essential as I want to be sure that 01 and 02 are done and verified"
+  (2026-11-04). Read only; nothing run into `data/` or `figures/`.
+- **Git:** `main` equals GitHub (`11ae306`, 2026-11-02 15:56), no change in the working tree.
+- **The robots of each type** (the register and the six parts files on disk, through 01's `taken_count`): type 1 30
+  of its 30 robots with a mass taken apart; type 2 96 of 96; type 3 163 of 164 (left: 208 Neo1); type 4 124 of 124;
+  type 5 9 of 11 (left: 44 Atlas (old), 208 Neo1); type 6 4 of 5 (left: 202 Nadia). Without a stated mass, not in the
+  evaluation: 1, 1, 17, 11, 1 and 0. The three left are the hydraulic robots kept for their own research step (E15.7
+  point 10, E16.5 question 4); until they are in, 02 writes types 3, 5 and 6's draws from the workbook.
+- **01's checks on the real inputs** (every check of its `main`, without drawing): 22 checks, the six parts files
+  among them, no fault.
+- **The suite:** 497 tests, all pass (`scratchpad/tests_check_1104.log`).
+- **The outputs on disk against the code:** 01's pages of 2026-11-02 13:58 and 02's draws and pages of 14:00, before
+  the last commits of `01_schemas.py` (14:49) and `02_composition.py` (15:56): no `copper.npy`, no means pages, the Al,
+  Mg and Ti elements still the alloys' whole mass. 01 and 02 are to be run again.
+- **Code called by no code, only by tests:** `taken_words` (01; its caller replaced by E23 in `98a83f5`, not listed
+  then), `element_shares` (01) and `triangles` (02), known since E19, `median_share` (`tools/parts_types_3_and_4.py`,
+  since 2026-10-30: a test checks the template's 0.447 with it); `texts_over_data` (02) is the rule E26 checks with, by
+  design.
+- **Not covered:** the outputs of the next run of 01 and 02 (to be checked after it).
+- **Date:** 2026-11-04.
+
 ## 2026-11-02
 
 ### V155. E26: no text over a chart, the rule and the pages

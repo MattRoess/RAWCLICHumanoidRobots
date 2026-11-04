@@ -17,8 +17,9 @@ sheets, the same machinery in tools/parts_taken_apart.py, types 3 and 4's templa
 which types 5 and 6 use, having none of their own): EngineAI's T800 in two versions, Dev and PRO, each joint its
 stated motor (E16.2, E16.5 question 2), and Mirsee's MH3 on its wheels. A robot of type 5 whose rows stand in another
 type's file (the Atlas, the CYBORG RO1 and WO1, the DR02, the Kaleido 9 and the Moby in type 3's; the H1 in type 2's) is
-drawn by 02 from there (E11.7 point 4), not written here. The hydraulic Atlas (old) and Neo1 wait for their research
-step (E16.5 question 4); TITAN has no stated mass.
+drawn by 02 from there (E11.7 point 4), not written here. Since 2026-11-04 (EVIDENCE.md E27.7, "Yes, build it") the
+hydraulic Atlas (old) of 2016 to 2024, its actuators as Moog's ISA v2, or in its other version the v5 at its knees (E27.8),
+each as often, its power unit, battery and oil; Neo1, also of type 5, stands in type 3's file. TITAN has no stated mass.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -42,9 +43,9 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 import parts_types_3_and_4 as SHARED  # noqa: E402  (types 3 and 4's templates, used by types 5 and 6)
-from parts_taken_apart import (HOUSING_ALUMINIUM, JOINT_PLACES, SHARED_CONSTANTS_FIRST,  # noqa: E402
-                               SHARED_CONSTANTS_LAST, block, joint, robot_rows, sensor_elements, sheets, spread,
-                               type_output_path, write_file)
+from parts_taken_apart import (HOUSING_ALUMINIUM, HYDRAULIC_CONSTANTS, HYDRAULICS, JOINT_PLACES,  # noqa: E402
+                               SHARED_CONSTANTS_FIRST, SHARED_CONSTANTS_LAST, block, estimate, isa_actuators, joint,
+                               robot_rows, sensor_elements, sheets, spread, type_output_path, write_file)
 
 ROBOT_TYPE = 5
 FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
@@ -67,6 +68,9 @@ ABOUT = [
     "The T800: each joint its motor as EngineAI's developer documents weigh it (Q25H 0.5 to Q300H-L 2.6 kg), matched "
     "to the joint by its model files' efforts, ± 5 %; its battery 61.2 V × 20 Ah, NMC, its pack 7.2 kg in aluminium. "
     "The MH3: types 3 and 4's template on wheels, its four mecanum wheels driven.",
+    "The hydraulic Atlas (old) (EVIDENCE.md E27.7, 2026-11-04): its 28 hydraulic joints each an actuator as Moog's ISA "
+    'v2, or in its other version the v5 at its knees (E27.8, "Yes, knees only"), each version as often; its valve, '
+    'board and sensors, its titanium body the remainder; its power unit, manifold, battery and oil; no electric joint.',
     "Robots of type 5 in other files (types 2 and 3) are drawn by 02 from there; the sheet Type 5 of the register "
     'names every robot of type 5 and what the run does with it.',
     'Sheet Sources: every source code used here, as in EVIDENCE.md E16.',
@@ -141,8 +145,63 @@ MIRSEE_MH3 = SHARED.wheeled(
     boards=SHARED.agx_orin('IEm "NVIDIA Jetson processors" (E: as an AGX Orin)', label='E') + [SHARED.POWER_BOARD],
     sensors=[SHARED.binocular('IEm "Hadron Vision System … custom-designed stereo cameras"'), SHARED.IMU_NOT_NAMED])
 
+# --- Boston Dynamics' hydraulic Atlas of 2016 to 2024, the register's Atlas (old) (EVIDENCE.md E27.7 point 4) ----------
+# Its 28 hydraulic joints (FPW, IRG "Degrees of Freedom (DoF) 28") by place as the seven robots of types 3 and 4's
+# template have theirs (point 9.9); each an actuator as Moog's ISA, none electric: in one version each the v2, in the
+# other the v5 at its knees only and the v2 at its other places (Matthias, 2026-11-04, "Yes, knees only", E27.8: with
+# the v5 at all 28 its frame fell below zero in 2.1 % of its draws, V161; HyQReal has its v5 at its knees, SEM19).
+ATLAS_OLD_PLACES = SHARED.places_of(28)
+V5_AT_THE_KNEES = {place: 'v5' if place == 'knees' else 'v2' for place in ATLAS_OLD_PLACES}
+
+
+def atlas_hydraulic(version: str | dict) -> dict:
+    """The hydraulic Atlas with its actuators as Moog's ISA of `version` (or V5_AT_THE_KNEES), each version as
+    often: its mass Boston
+    Dynamics' (point 4.1, its block's, not the register's 89 kg: point 9.1), its actuators, manifold and power unit, its
+    battery from its energy, its three computers, its sensors, its oil; its hydraulic lines in its frame of titanium and
+    aluminium (points 4.8, 4.10); its shell, cables, screws and cooler the template's (point 4.11)."""
+    why = 'FPW "28 degrees of freedom", by the seven robots of types 3 and 4\'s template, their joints by place (E27.7 ' \
+          'point 9.9)' + ('; the v5 at its knees only (SEM19 "These ISAs (v5) are mounted in the upper leg of the robot ' \
+                          'to actuate the knee joints"; E27.8)' if isinstance(version, dict) else '')
+    actuators = isa_actuators(ATLAS_OLD_PLACES, version, why)
+    name = 'v5 at the knees' if isinstance(version, dict) else version
+    return block(
+        f'Boston Dynamics Atlas hydraulic ISA {name}', 'Boston Dynamics', 1.50, 80,
+        'BDs (Boston Dynamics, 2016: "180 lbs"), FPW (Saunders: "about 1.5 meters tall and weighs 80 kg", "28 degrees '
+        'of freedom", its power unit "approaching a Kilowatt per kg"), BDb ("190-pound frame"), IRG, HBR; E27',
+        ((80, 81.6, 86.2), 'S', 'FPW "weighs 80 kg" the min, BDs "180 lbs" (81.6 kg) the mode, BDb "190-pound" (86.2 '
+                                'kg) the max (E27.4 question 2); the register\'s 89 kg (the catalogue\'s) has no '
+                                'first-hand origin (E27.7 point 9.1)'),
+        [], **SHARED.energy(1400, 'HBR "1400 ватт*час"'),
+        oil=((1, 2, 4), 'E', 'its actuators, lines and reservoir: no source states it; HyQ\'s "4-litre plastic oil tank" '
+                             '(SEM11) the most (E27.7 point 4.9)'),
+        **SHARED.with_defaults(1.50, 81.6, dict(
+            boards=[(SHARED.COMPUTER_NOT_NAMED, 3, 'Boards', 'Torso', SHARED.COMPUTER, 'ITC', 'E',
+                     'IRG "Three on-board computers inside torso": each as the template\'s computer board (E)'),
+                    SHARED.POWER_BOARD] + actuators['boards'],
+            sensors=[SHARED.lidar('BDs "LIDAR and stereo sensors in its head"'),
+                     SHARED.binocular('BDs "LIDAR and stereo sensors in its head"'), SHARED.IMU_NOT_NAMED]
+            + actuators['sensors'],
+            parts=actuators['parts'] + [
+                ('Hydraulic manifold', 1, HYDRAULICS, 'Torso', estimate(2.1), 'Titanium alloy or Aluminium alloys',
+                 'Ti-6Al-4V', 'E', 'FPW "Atlas\' manifold has 18 valves, which service the upper body": as the ISA\'s '
+                                   'smart manifold, FRO Table 2 "2,100 g", half to 1.5 times; IRG titanium and '
+                                   'aluminium, either, each as often (E27.4 question 7); Ti-6Al-4V the titanium\'s '
+                                   "grade (E), the aluminium the type's"),
+                ('Hydraulic power unit', 1, HYDRAULICS, 'Torso', (2.5, 5, 12), None, None, 'S, E',
+                 'HBR "массой всего 5 кг и мощностью 5 кВт" the mode (second-hand: a retelling of the maker\'s talk); '
+                 'half of it the min (E); KHN MiniHyQ\'s pack "Weight 12 kg" at "5.5 kW" the max (E27.4 question 8); '
+                 'its materials in the sheet Shares')],
+            frame=('Frame: titanium and aluminium', None, 'IRG "Mixture of titanium and aluminum 3D-printed parts. '
+                                                          'Actuators and hydraulic lines embedded in leg structures": '
+                                                          'the remainder, its shares in the sheet Shares (E27.7 point '
+                                                          '4.10)'))))
+
+
+ATLAS_HYDRAULIC_V2, ATLAS_HYDRAULIC_V5_KNEES = atlas_hydraulic('v2'), atlas_hydraulic(V5_AT_THE_KNEES)
+
 # Every robot of type 5 written here, in the register's order of numbers.
-BLOCKS_5 = [MIRSEE_MH3, ENGINEAI_T800_DEV, ENGINEAI_T800_PRO]
+BLOCKS_5 = [ATLAS_HYDRAULIC_V2, ATLAS_HYDRAULIC_V5_KNEES, MIRSEE_MH3, ENGINEAI_T800_DEV, ENGINEAI_T800_PRO]
 GENERATED = [robot_rows(b, ROBOT_TYPE, SHARED.AVERAGE_JOINTS) for b in BLOCKS_5]
 
 # --- Sources --------------------------------------------------------------------------------------------------------
@@ -171,6 +230,21 @@ OWN_SOURCES = [
     ('IEm', 'Interesting Engineering, Mirsee MH3, 2026-07-03 ("NVIDIA Jetson processors", "Mecanum wheels")',
      'https://interestingengineering.com/ai-robotics/canada-firms-humanoid-robot-hazardous',
      'Second-hand: a press report'),
+    # The hydraulic Atlas (old) (EVIDENCE.md E27), read first-hand on 2026-11-01 and 2026-11-04 (V135, V157, V158).
+    ('BDs', 'IEEE Spectrum, 2016-02-23, quoting Boston Dynamics\' video ("about 5\' 9" tall … and weighs 180 lbs", '
+            '"LIDAR and stereo sensors in its head")',
+     'https://spectrum.ieee.org/next-generation-of-boston-dynamics-atlas-robot', "Second-hand: the maker's video quoted"),
+    ('FPW', 'Fluid Power World, 2018-03-23, Boston Dynamics\' Aaron Saunders ("weighs 80 kg", "28 degrees of freedom", '
+            '"Atlas\' manifold has 18 valves")', 'https://www.fluidpowerworld.com/?p=131942',
+     "Second-hand: the maker's engineer reported"),
+    ('BDb', 'Boston Dynamics, blog "Build it, break it, fix it" ("its 190-pound frame")',
+     'https://bostondynamics.com/blog/build-it-break-it-fix-it/', "Manufacturer's blog"),
+    ('HBR', 'habr.com, 2021-01-26, how Atlas works, after Raibert\'s and Kuindersma\'s talk ("гидравлический силовой '
+            'агрегат массой всего 5 кг и мощностью 5 кВт", "1400 ватт*час")', 'https://habr.com/ru/articles/539290/',
+     "Second-hand: a blog retelling the maker's talk"),
+    ('SEM11', 'Semini et al. (IIT), Design of HyQ, IMechE Part I 225 (2011) ("a 4-litre plastic oil tank", "70kg '
+              '(external hydraulic system), 91kg (onboard hydraulic system)")',
+     'https://iit-dlslab.github.io/papers/semini11jsce.pdf', 'Peer-reviewed'),
 ]
 
 
@@ -196,7 +270,8 @@ PARTS_ROWS = generated('Parts')
 BOARDS_ROWS = generated('Boards')
 SENSORS_ROWS = generated('Sensors')
 SENSORELEMENTS_ROWS = sensor_elements([], generated('SensorElements'))
-CONSTANTS_ROWS = SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + generated('Constants')
+CONSTANTS_ROWS = (SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + HYDRAULIC_CONSTANTS
+                  + generated('Constants'))
 SOURCES_ROWS = sources({'Robots': ROBOTS_ROWS, 'Joints': JOINTS_ROWS, 'Parts': PARTS_ROWS, 'Boards': BOARDS_ROWS,
                         'Sensors': SENSORS_ROWS, 'Constants': CONSTANTS_ROWS})
 

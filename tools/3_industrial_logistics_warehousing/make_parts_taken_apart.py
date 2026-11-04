@@ -18,7 +18,8 @@ type among 3 and 4 is 3, 19, and batch 2's, 18 (20 blocks, the CYBORG RO1 and th
 E12.6 point 1). Their blocks, and types 3 and 4's templates (on legs and on wheels, under
 names of their own), are held in tools/parts_types_3_and_4.py, one copy for both builders (E11.7 open point A). A robot
 of type 3 whose rows stand in another type's file (types 1 and 2, or the other of 3 and 4) is drawn by 02 from there
-(E11.7 point 4), not written here.
+(E11.7 point 4), not written here. Since 2026-11-04 (EVIDENCE.md E27.7, "Yes, build it") the hydraulic Neo1 too, with
+the oil's density its rows need (HYDRAULIC_CONSTANTS).
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -41,8 +42,8 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 import parts_types_3_and_4 as SHARED  # noqa: E402  (types 3 and 4's templates and blocks)
-from parts_taken_apart import (SHARED_CONSTANTS_FIRST, SHARED_CONSTANTS_LAST, robot_rows,  # noqa: E402
-                               sensor_elements, sheets, type_output_path, write_file)
+from parts_taken_apart import (HYDRAULIC_CONSTANTS, SHARED_CONSTANTS_FIRST, SHARED_CONSTANTS_LAST,  # noqa: E402
+                               robot_rows, sensor_elements, sheets, type_output_path, write_file)
 
 ROBOT_TYPE = 3
 FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
@@ -88,7 +89,8 @@ PARTS_ROWS = generated('Parts')
 BOARDS_ROWS = generated('Boards')
 SENSORS_ROWS = generated('Sensors')
 SENSORELEMENTS_ROWS = sensor_elements([], generated('SensorElements'))
-CONSTANTS_ROWS = SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + generated('Constants')
+CONSTANTS_ROWS = (SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + HYDRAULIC_CONSTANTS
+                  + generated('Constants'))
 SOURCES_ROWS = SHARED.sources({'Robots': ROBOTS_ROWS, 'Joints': JOINTS_ROWS, 'Parts': PARTS_ROWS,
                                'Boards': BOARDS_ROWS, 'Sensors': SENSORS_ROWS, 'Constants': CONSTANTS_ROWS})
 

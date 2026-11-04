@@ -8,6 +8,258 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E27. The hydraulic Atlas (old), Nadia and Neo1: research (2026-11-04). Nothing entered
+
+Matthias, 2026-11-04: "Yes, prepare it", to "Shall I prepare the research step for the three robots left?". The step
+as E16.5 question 4 named it (agreed 2026-11-01): "the hydraulic actuator's materials (the ISA's titanium body, valve,
+rod, seals), a hydraulic power unit's mass and parts from sources of the same kind (IIT's HyQ, Boston Dynamics'
+statements), the oil. Then proposed". Searched by three agents (English, Chinese and Russian pages; no PDF downloaded).
+**read**: opened and read by me on 2026-11-04 (V157); **read 11-01**: read by me then (E16); **agent**: an agent's
+quote only, second-hand to me. Nothing entered, no estimate proposed before the PDFs (question 1).
+
+### E27.1 The hydraulic actuator
+
+| # | Source | What it is | What it says |
+|---|---|---|---|
+| H1 | Barasuol et al. 2018, IIT with Moog, https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2018.00051/full | peer-reviewed, the maker's engineers among the authors; design and datasheet values; read | the ISA "consists of a hydraulic cylinder, servo valve, various sensors, overload protection and electronics for control and communication. Its body is additively manufactured (AM) in a titanium alloy"; Table 2 "Dry weight 920 g 1,600 g 2,100 g" (ISA v2, ISA v5, smart manifold), rod 12 mm, bore 16 and 21.5 mm, "Operating pressure 20.7 MPa"; Table 1 the Moog E024 valve "92" g (its datasheet); HyQ's actuator of separate parts "1.3 kg" without its electronics; the valve's "2 coils" |
+| H2 | Moog, its 24 Series page, https://www.moog.com/products/servovalves-servo-proportional-valves/industrial/miniature-servo-valves/direct-operated-servo-valves-for-analog-signals-E024-series.html | the maker's datasheet values; read | "Weight 95 g (3.35 oz)", "Max. Operating Pressure 280 bar"; no materials |
+| H3 | Machine Design, 2006 | trade press after Moog; agent | the E024 "weighs 92 gm"; "steel construction" |
+| H4 | Moog's Type 30 catalogue | the maker's catalogue of the aerospace valve the E024 descends from (E27.6); read (the PDF) | body "Stainless steel", magnets "Alnico alloy", flexure sleeve "Beryllium copper" (E27.6) |
+| H5 | Moog's patent US5473298A, 1995 | a patent; agent | the torque motor's magnets "preferably neodymium iron or samarium cobalt": context only |
+| H6 | IIT DLS, https://dls.iit.it/hydraulic-control | the lab's page; agent | HyQ's cylinders "Hoerbiger LB6 1610 0080", its valves "Moog E024"; "The hydraulic fluid serves also as coolant" |
+
+Not found: the mass of any component inside an ISA; the materials of the rod, the piston and the seals; the E024's
+materials and the kind of its magnets.
+
+### E27.2 The power unit, the battery and the oil
+
+| # | Source | What it is | What it says |
+|---|---|---|---|
+| P1 | habr.com, 2021-01-26, https://habr.com/ru/articles/539290/ | a blog's retelling of a talk by Boston Dynamics' Raibert and Kuindersma (https://slideslive.com/38946802, no transcript); second-hand; read | the hydraulic Atlas's power unit "массой всего 5 кг и мощностью 5 кВт" (5 kg, 5 kW), holding "электродвигатель, насос, резервуар, аккумулятор, несколько фильтров, электронику и систему охлаждения" (an electric motor, a pump, a reservoir, an accumulator, filters, electronics, cooling); "батареи емкость 1400 ватт*час" (a 1,400 Wh battery); a printed manifold of "все 18 клапанов" (all 18 valves) |
+| P2 | Fluid Power World, 2018, Boston Dynamics' Saunders | a reporter's account of the maker's engineer; read 11-01 | the power unit "approaching a Kilowatt per kg", printed "around the reservoir": 5 kW at about 5 kg agrees with P1 |
+| P3 | IEEE Spectrum, 2019, https://spectrum.ieee.org/watch-iits-new-hyqreal-quadruped-robot-pull-an-airplane | journalism after IIT's talk; read. A quadruped on Moog's ISAs: the same kind for the actuator and the power unit, not a humanoid | "130kg considering hydraulics and batteries onboard"; "two independent hydraulic pumps"; "The battery (which weighs 15kg)"; "an aluminum roll cage and a skin made of Kevlar, glass fiber and plastic" |
+| P4 | IIT's release, 2019 | the institute; agent (EurekAlert showed me no text) | "48 Volt battery which power 4 electric motors connected to 4 hydraulic pumps": four pumps against P3's two |
+| P5 | Boston Dynamics' blog, https://bostondynamics.com/blog/build-it-break-it-fix-it/ | the maker; read 11-01, more by agent | hoses "rated for a pressure of 3,000 pounds per square inch"; (agent) "custom titanium fittings", "braided Teflon", "three metal hoses on Atlas's left leg" |
+
+Not found: the masses or materials of a power unit's parts; the battery's chemistry; the kind or volume of oil in any
+robot (only a simulation's 834.3 kg/m³, Huang et al. 2021, agent); the mass of a hose.
+
+### E27.3 The three robots
+
+| | Atlas (old) | Nadia | Neo1 |
+|---|---|---|---|
+| Mass | the register's 89 kg is humanoid.guide's "atlas-2013" page, whose text describes the 2024 Atlas (agent); no first-hand origin of 89 found. Boston Dynamics: "180 lbs" (2016, read 11-01), 80 kg (2018, P2, read 11-01), "190-pound" (its blog, read 11-01), "190 pounds (85 kg)" (2021 video, agent, through Wikipedia) | the register's 100 kg (IHMC 2025, "about 100 kilograms", read 11-01); its designer in IEEE Spectrum 2022, https://spectrum.ieee.org/ihmc-nadia-humanoid-robot: "about 90 kilograms right now, without the hydraulic pump or battery on board" (read) | 1,200 kg (the maker); its site: "~1.2t \| Depends on battery & pump configuration" (agent; its certificate refused) |
+| Joints | 28, all hydraulic; the cylinders printed into the legs' structure (read 11-01) | 12 Moog ISAs ("a 2 DoF hydraulic torso and 5 DoF hydraulic legs", read); 3 electric pelvis joints, 14 electric arm joints (cycloidal, their peak torques E16.1); 2 SAKE grippers, 0.4 kg (S); the ISAs' version stated nowhere | 39 hydraulic, 2 electric forearm joints; "each actuator weighs about 1 kg" (New Atlas, https://newatlas.com/robotics/neodradynamics-neo1-giant-hydraulic-humanoid-robot/, read); its founder (https://www.163.com/dy/article/L9AAAKRI0553D9NB.html, read): "最小的直线驱动单元之一，钛合金外壳，自重1.1公斤" (one of its smallest linear drive units, a titanium-alloy housing, 1.1 kg), each with "小功率电机，伺服或步进电机都行" (a small electric motor, servo or stepper), "数字液压内部不需要需电子器件检测" (no electronics inside for sensing); humanoid.guide "1.6 kg, 10 kN" (agent; no source, "Not Verified") |
+| Power | a power unit and a battery on board (P1, P2) | none on board: "tethered to a hydraulic pump across the room" (Calvert 2026, https://arxiv.org/html/2606.26425, read) | "a cable supplies its power. A battery will come once it moves" (New Atlas, read); a pump on board not stated |
+| Computers | "Three on-board computers inside torso" (IEEE Robots Guide, read 11-01) | "There was no onboard compute so a laptop was tethered" (Calvert, read; said of one demonstration) | "一台廉价的可编程逻辑控制器（PLC）" (a cheap PLC; the founder, read) |
+| Sensors | lidar and stereo in its head (read 11-01) | an Ouster OS0-128 lidar, a stereo pair of Blackfly cameras, a ZED X Mini (Calvert, read; before them a MultiSense SL); a ZED 2i and an IMU (its 2024 paper, read 11-01) | none stated |
+| Structure | "Mixture of titanium and aluminum 3D-printed parts" (read 11-01) | "Carbon fiber shells covering most of the robot" (read); "a carbon fiber exoskeleton" (its 2024 paper, read 11-01) | not stated; the founder (read): "目前3D打印成本占比过高" (3D printing is too large a share of the cost now), "液压件是一堆铁" (hydraulic parts are "a pile of iron"), "不需要铜和稀土" (no copper or rare earths) |
+| Its use | | | New Atlas (read): "Walking is on hold too"; "The plan is to fit its heavy-duty arms onto a wheeled base" |
+
+### E27.4 Questions, each with my recommendation
+
+| # | Question | Recommendation |
+|---|---|---|
+| 1 | The seven PDFs of E27.5: download them before any estimate? | **Answered**: "Yes, download them" (2026-11-04); what they hold, E27.6 |
+| 2 | Atlas (old)'s mass: the register's 89 kg has no first-hand origin | Boston Dynamics' own, 80 / 81.6 / 86.2 kg (S: 80 kg; "180 lbs"; "190" lb), in the register's builder |
+| 3 | Nadia's mass: 90 kg without pump and battery (2022) or about 100 kg (2025) | the register's 99 / 100 / 101 kg unchanged: IHMC's latest; the robot has changed since 2022 (its arms upgraded) |
+| 4 | Nadia and Neo1, tethered: no battery, no power unit (as the Phantom MK1's no battery, E16.2) | as stated: no battery, no power unit; the pump is not part of the robot. Neo1's pump not stated: none, until a source says otherwise |
+| 5 | A hydraulic actuator taken apart: a set of its own, as the electric joints' JointParts | a set of its own: its titanium-alloy body (the remainder), its valve (95 g, S; Atlas (old) and Nadia) or its small motor (Neo1), its rod and piston (steel), its seals (plastics), its sensors and board (not Neo1's), the oil it holds; each share E (E27.6 weighs none of them). The valve of the materials of the Type 30 it descends from (E27.6): stainless steel, nickel-iron steel, AlNiCo magnets, beryllium copper, aluminium, its potted coils copper (question 14) |
+| 6 | Nadia's 12 ISAs: their version not stated | the v2 (0.92 kg) or the v5 (1.6 kg), each as often (a discrete state, E) |
+| 7 | Atlas (old)'s 28 joints: no masses | each an actuator as the ISA (the same kind: the servo actuators of hydraulic robots of 80 to 130 kg), v2 or v5 as Nadia's; its 18 upper-body valves in one printed manifold as the ISA's smart manifold (2.1 kg, S); E |
+| 8 | Atlas (old)'s power unit and battery | its power unit 2.5 / 5 / 12 kg: the mode C (P1, second-hand), the min half of it (the rule for estimates), the max MiniHyQ's weighed 12 kg at 5.5 kW (S, E27.6, the same kind). Its parts as MiniHyQ's (S): the pump 16 %, the motor 11 %, its gearbox 4 % of the unit (1.94, 1.36 and 0.43 of 12 kg, Claude's arithmetic), the rest (manifold, accumulator, filter, cooler, reservoir) the remainder, of titanium or aluminium alloys each as often (E; Atlas's printed parts "titanium and aluminum"). Its battery 1,400 Wh (C, P1), its cells NMC as the template |
+| 9 | Neo1's 39 actuators: 1 kg, 1.1 kg, or more (the 1.1 kg one is "one of its smallest") | 1.0 / 1.1 / 1.65 kg (S at the min and the mode; the max 1.5 times the mode, which covers humanoid.guide's unsourced 1.6) |
+| 10 | Neo1's structure, about 1,150 of its 1,200 kg: of what | steel (E: its founder's "a pile of iron"), in place of the default aluminium (E5.14 point 9) |
+| 11 | The oil: no robot states its volume | the material Other (no element); in the actuators and hoses of all three and the reservoir of Atlas (old), up to HyQ's "4-litre" tank (S, E27.6, the largest the same kind states); its volume E; its density still without a source read |
+| 12 | The figure's rows | the actuators in their joints' rows (hips, knees, ankles, waist, arms), where they sit; the power unit with its oil a row of its own, "Hydraulic power unit" |
+| 13 | Neo1 would hold 58 % of type 5's mean mass (188 kg with it, 86 without) and 8 % of type 3's (97 against 90); the register's modes, each robot as often, Claude's arithmetic | for your decision; the rule (each robot as often) unchanged |
+| 14 | The valve's nickel-iron steel, AlNiCo magnets and beryllium copper are none of the 17 materials (E19) | the material Other, no element; at 95 g a valve, 12 to 28 valves are 1.1 to 2.7 kg a robot (Claude's arithmetic), and no source splits the valve |
+
+**Agreed** (Matthias, 2026-11-04: "all as recommended"): questions 2 to 14 as recommended. Nothing entered: the spec
+with every estimate's min, mode and max next (E27.7), for his word.
+
+### E27.5 The PDFs found (sizes from the servers' headers, 2026-11-04); downloaded on his word, "Yes, download them", into the scratchpad, not into git
+
+| File | Where | Size | What it may hold |
+|---|---|---|---|
+| E024_Series_Datasheet.pdf | https://www.moog.com/content/dam/moog/literature/products/servovalves/E024_Series_Datasheet.pdf | 0.86 MB | the valve's construction |
+| Moog-Type30-Servo-Valve-Catalog.pdf | https://www.moog.com/content/dam/moog/literature/sdg/defense/Moog-Type30-Servo-Valve-Catalog.pdf | 2.3 MB | a servo valve's materials part by part (another valve) |
+| semini11jsce.pdf (the design of HyQ, 2011) | https://iit-dlslab.github.io/papers/semini11jsce.pdf | 1.6 MB | HyQ's actuators and power unit |
+| khan15sicfp.pdf (MiniHyQ's power pack, 2015) | https://iit-dlslab.github.io/papers/khan15sicfp.pdf | 0.55 MB | a power pack on board, its parts and mass |
+| semini19irim.pdf (HyQReal, 2019) | https://iit-dlslab.github.io/papers/semini19irim.pdf | 1.4 MB | its power system and battery in the torso |
+| semini15icar.pdf (additive manufacturing for legged robots, 2015) | https://iit-dlslab.github.io/papers/semini15icar.pdf | 2.6 MB | printed manifolds, aluminium or titanium |
+| ihmc_roboticscapabilities_0.pdf | https://namconsortium.org/sites/default/files/applicants_capabilities_pdfs/ihmc_roboticscapabilities_0.pdf | 6.6 MB | Nadia's hydraulic joints |
+
+### E27.6 What the seven PDFs hold (read by me, 2026-11-04)
+
+| PDF | What it holds for the three robots |
+|---|---|
+| Moog, E024 datasheet (© 10/2025) | "Mass: 95 g (3.35 oz)"; "developed from the proven E030 series aerospace servovalve"; "retains the robust two-stage nozzle flapper construction of the 30/50 Series Valve"; "(coils in parallel) +/- 10 mA into a 360 ohm"; "Valves mounted in close proximity may experience magnetic interaction" (permanent magnets); no materials |
+| Moog, Type 30 catalogue | the materials of the valve the E024 descends from: "Body* Stainless steel", "End caps Stainless steel", "Spool and bushing* Stainless steel", "Filter (35 micron absolute) Sintered stainless steel wire mesh", "Flexure sleeve Beryllium copper", "Polepieces and armature Nickel-iron steel", "Magnets Alnico alloy", "Feedback spring Stainless steel", "Torque motor cover Anodized aluminum alloy"; "Motor coils have resilient potting"; a Series 30 valve "0.19" kg; no masses of its parts; its test fluid "MIL-PRF-5606" |
+| Semini et al. 2019, HyQReal (IIT with Moog) | "130 kg (onboard hydraulics and battery)"; "a complete hydraulic power system with Lithium-Polymer battery" in its torso, a "Front HPU" and a "Hind HPU"; its parts "mainly made of a high-strength aluminium alloy and stainless steel"; "A Kevlar and glass fibre skin"; the ISA v2 cut open: "Servovalve 2nd stage", "Electronic boards", "Servovalve 1st stage", "Position sensor", "Pressure relief valves", "Pressure sensors", "3D-printed Titanium body"; the ISA v5 in its knees; an "Intel core i7" |
+| Semini et al. 2011, the design of HyQ | "Weight 70kg (external hydraulic system), 91kg (onboard hydraulic system)": its hydraulics on board 21 kg (Claude's arithmetic); "a pump powered by an AC electric motor, a 4-litre plastic oil tank, a heat exchanger with electric fan, a 0.7-litre accumulator, a filter, a central manifold …, two valve manifolds …, eight double-acting cylinders, fittings, and hosing"; its cylinders' bore and rod "16mm, 10mm", stroke "80mm"; its legs "Ergal, a strong aluminium alloy (type 7075)", the heavily stressed parts "stainless steel (AISI 303)"; a leg 8.94 kg |
+| Khan et al. 2015, MiniHyQ's power pack | "Weight 12 kg", "Max Power Consumption 5.5 kW", "Rated flow rate 10 L/min", 20 MPa; its axial piston pump "weight 1.94 kg", its brushless motor "weight 1.36kg" and gearbox "weight 0.43kg"; a "HYDAC 0.32 L diaphragm accumulator", a line filter, an oil cooler of "aluminum honeycomb", "an accumulator as a reservoir"; the robot "24kg, 35kg" (power pack off or on board); 12 Moog E024 valves; its torso "2 mm thick folded aluminium sheet" |
+| Semini et al. 2015, printed manifolds | AlSiMg "2.68 g/cm3" against "4.41 g/cm3" of Ti64; the printed manifold of a HyQ2Max leg "0.313kg", milled "0.520kg" |
+| IHMC, its capabilities | Nadia "features 12 hydraulic joints with an electrically actuated pelvis and arms" |
+
+Still not found: the masses of the parts inside an ISA or a valve; the materials of the rod and the seals; the oil in
+any robot beyond HyQ's 4-litre tank; the oil's density.
+
+Found, not acted on: type 3's AVIC Fengxing-001, "electro-hydraulic hybrid-drive architecture" (E15), is entered on the
+electric template.
+
+### E27.7 Spec: the three robots taken apart (2026-11-04). For his word; nothing built
+
+From E27.4 as agreed ("all as recommended"). Read for it (V159): Neo1's joints by body region, first-hand
+(上海证券报's reporter at its show, https://finance.sina.com.cn/roll/2026-08-19/doc-ininwpnf6934528.shtml): "全身配置41个
+主动自由度：双臂14个、双手10个、双腿及脚部12个、腰部3个、头部2个。除双前臂两处旋关节采用电驱外，其余39个…数字液压线性执行器" (41 active
+joints: arms 14, hands 10, legs and feet 12, waist 3, head 2; all but the two forearm rotary joints, which are
+electric, digital hydraulic linear actuators). No source splits Atlas (old)'s 28 joints by region (the DRC Atlas's
+page names "28 hydraulically actuated joints" only). Every share below is of the part it names, its remainder
+explicit (no normalisation); half to 1.5 times the mode where E.
+
+**1. Where each robot goes.** A robot in two versions is drawn as each, as often (as the Booster K1's two batteries).
+
+| # | Robot | File | Versions |
+|---|---|---|---|
+| 1.1 | 44 Atlas (old), type 5 | `tools/5_…/make_parts_taken_apart.py` | "Atlas hydraulic ISA v2", "Atlas hydraulic ISA v5" (its actuators as either, question 7) |
+| 1.2 | 202 Nadia, type 6 | `tools/6_…/make_parts_taken_apart.py` | "IHMC Nadia ISA v2", "IHMC Nadia ISA v5" (question 6) |
+| 1.3 | 208 Neo1, types 3 and 5 | type 3's file (`tools/parts_types_3_and_4.py`), drawn in both types as the DR02 (E16.5 question 5) | "NeodraDynamics Neo1" |
+| 1.4 | the register | `tools/make_humanoid_register.py`: `TAKEN_APART[3]`, `[5]`, `[6]` | — |
+
+**2. The hydraulic actuator as Moog's ISA (Atlas (old) and Nadia).** One per hydraulic joint, in its joint's row
+(question 12).
+
+| # | Part | Mass of one (kg) | Materials | Label, basis |
+|---|---|---|---|---|
+| 2.1 | Hydraulic actuator | v2 0.874 / 0.92 / 0.966; v5 1.52 / 1.6 / 1.68 | its four rows below | S, Table 2's dry weights ± 5 % (stated masses) |
+| 2.2 | its servo valve | 0.09025 / 0.095 / 0.09975 | copper 5 / 10 / 15 % (coils); Other 10 / 20 / 30 % (nickel-iron, AlNiCo, beryllium copper; question 14); aluminium alloys 2.5 / 5 / 7.5 % (cover); stainless steel 17-4PH the remainder | S mass ± 5 %; the materials the Type 30's, their shares E |
+| 2.3 | its board (sheet Boards) | area 11.5 / 22.9 / 28.3 cm² | boards and components | E: as the small joint's driver board; S "Electronic boards" |
+| 2.4 | its sensors, elements only | — | a position sensor, two pressure sensors (car types 'position sensor', 'pressure sensor') | S "Position sensor", "Pressure sensors" |
+| 2.5 | its body, rod and seals | the actuator less its valve and its board (computed in 02, as the battery housing is) | steel C45 6 / 12 / 18 % (rod and piston); plastics 0.5 / 1 / 1.5 % (seals); titanium alloy Ti-6Al-4V the remainder | E; the steel from Table 2's 12 mm rod at 120 to 140 mm (0.12 of 0.825 kg, 0.15 of 1.505 kg, Claude's arithmetic); S "3D-printed Titanium body" |
+
+**3. Nadia (type 6).**
+
+| # | What | Value | Label, basis |
+|---|---|---|---|
+| 3.1 | Mass, height | 99 / 100 / 101 kg (question 3), 1.90 m | S, IHMC |
+| 3.2 | Hydraulic actuators | 12: hips 4, knees 2, ankles 4, waist 2 (2.1 to 2.5) | S: hip pitch and roll, knee, two ankle, spine pitch and roll |
+| 3.3 | Electric joints | arms 14 as the Alex's (`ALEX_ARMS`: Nadia's own arms); pelvis 3 (hip yaws, spine yaw) on types 3 and 4's template rows | S torques, E6.8's fit; E (no torque) |
+| 3.4 | Grippers | 2 × 0.38 / 0.4 / 0.42 kg | S, SAKE "365g + 35g (mount)", ± 5 % |
+| 3.5 | Battery, power unit, computer | none | S, "tethered", "no onboard compute" |
+| 3.6 | Boards | a power distribution board | E, as the G1's |
+| 3.7 | Sensors | lidar 1 (Ouster OS0-128), cameras 2 (Blackfly), depth camera 1 (ZED X Mini), IMU 1 | S; their masses the helpers' (E) |
+| 3.8 | Hoses on the robot | 0.5 / 1 / 1.5 kg, plastics | E (point 9.10) |
+| 3.9 | Oil | 0.25 / 0.5 / 0.75 litre | E: 12 actuators and their hoses (question 11) |
+| 3.10 | Frame and shell | the remainder, fibre composites; no plastics shell | S "a carbon fiber exoskeleton", "Carbon fiber shells"; point 9.8 |
+
+**4. Atlas (old) (type 5).**
+
+| # | What | Value | Label, basis |
+|---|---|---|---|
+| 4.1 | Mass, height | 80 / 81.6 / 86.2 kg, 1.50 m | S, Boston Dynamics (question 2; point 9.1) |
+| 4.2 | Hydraulic actuators | 28, by type 5's template ratios between the rows | S count; E the rows (point 9.9) |
+| 4.3 | Manifold | 1.05 / 2.1 / 3.15 kg, titanium alloy or aluminium alloys, each as often | E: the ISA's smart manifold 2.1 kg (S); question 7 |
+| 4.4 | Hydraulic power unit | 2.5 / 5 / 12 kg (question 8), drawn once; steel 10 / 20 / 30 % (pump and gearbox); its motor's copper 1.2 / 2.4 / 3.6 %, electrical steel 2.1 / 4.3 / 6.4 %, NdFeB magnets 1.4 / 2.75 / 4.1 %; titanium alloy or aluminium alloys, each as often, the remainder | MiniHyQ's pump and gearbox 20 %, motor 11 % (S); the motor as the G1's weighed motor, 22 % copper, 39 % electrical steel, 25 % magnets (Claude's arithmetic from JointParts); E the ranges |
+| 4.5 | Battery | 1,400 Wh, NMC cells, its pack from its energy | C, P1; the template's cells |
+| 4.6 | Boards | three computers (as the template's computer board, E), a power distribution board (E); each actuator's board (2.3) | S "Three on-board computers" |
+| 4.7 | Sensors | lidar 1, stereo camera 1, IMU 1 | S lidar and stereo; E the IMU |
+| 4.8 | Hoses | none apart: in its frame | S "Actuators and hydraulic lines embedded in leg structures" |
+| 4.9 | Oil | 1 / 2 / 4 litres | E; the max HyQ's "4-litre" tank (S, question 11) |
+| 4.10 | Frame | the remainder: titanium alloy 25 / 50 / 75 %, aluminium alloys the remainder | S "Mixture of titanium and aluminum 3D-printed parts"; E the share |
+| 4.11 | Shell, cables, screws, cooler | the template's | E5.14 |
+
+**5. Neo1 (types 3 and 5).**
+
+| # | What | Value | Label, basis |
+|---|---|---|---|
+| 5.1 | Mass, height | 1,199 / 1,200 / 1,201 kg, 4.0 m | S, the maker |
+| 5.2 | Digital hydraulic actuators | 39 × 1.0 / 1.1 / 1.65 kg (question 9): arms 12, hands 10 (both the row "Arm joints and hands"), hips 6, knees 2, ankles 4, waist 3, head 2 | S counts; E the legs' 12 split as two legs of 6 |
+| 5.3 | Inside one | its small motor's copper 2.2 / 4.4 / 6.6 %, electrical steel 3.9 / 7.8 / 11.7 %, NdFeB magnets 2.5 / 5 / 7.5 %; steel C45 15 / 30 / 45 % (rod, piston, its mechanical servo); plastics 0.5 / 1 / 1.5 % (seals); titanium alloy the remainder; no board | S "钛合金外壳", "小功率电机", "不需要需电子器件检测"; E the motor 20 % of the actuator, as the G1's weighed motor (point 4.4); E the steel ("一堆铁") |
+| 5.4 | Electric forearm joints | 2, large, 1.3 / 2.6 / 3.9 kg each | E: the heaviest module the files weigh, the T800's 2.6 kg (point 9.5) |
+| 5.5 | Battery, power unit | none | S "a cable supplies its power"; question 4 |
+| 5.6 | Boards | its PLC as the template's computer board, a power distribution board | S "PLC"; E their areas |
+| 5.7 | Sensors | none | none stated (point 9.4) |
+| 5.8 | Hoses | 4 / 8 / 12 kg, plastics | E: two lines to each of 39 actuators (point 9.10) |
+| 5.9 | Oil | 1 / 2 / 3 litres | E (question 11) |
+| 5.10 | Frame | the remainder, steel C45 | question 10; E the grade |
+| 5.11 | Shell, cables, screws | the template's | point 9.2, 9.3 |
+
+**6. The oil.** Its mass the litres times 0.86 / 0.87 / 0.88 kg per litre, the material Other (question 11); point 9.6:
+the mode S, two makers' datasheets of MIL-PRF-5606 oils, read (V160): ENEOS's Hydraulic Oil 5606J "Density (15°C)
+g/cm3 0.869" (June 2022); Chevron's Hydraulic Oil 5606 "Density at 15°C, kg/l 0.87", "a mineral base oil", "for use in
+systems where clean oil is required; for example, in autopilots and robotics". Both typical values; the min and max E
+(about 1 % either side).
+
+**7. The code** (tests first, each failing before its code; a sandbox at 2,000 draws; then his runs):
+- `tools/parts_taken_apart.py`: the Shares rows of 2.2, 2.5, 4.3, 4.4, 4.10, 5.3 and the hoses; the oil's density
+  (Constants); a block without a shell (3.10).
+- `01_schemas.py`: the new kind (point 9.7) in `KINDS`, `PART_KIND`, `KIND_HOLDS`; its checks for the actuator's
+  remainder and for a robot without electric joints (Atlas (old)).
+- `02_composition.py`: the actuator's body as its remainder (2.5), drawn and checked as the battery housing is.
+- The three builders and the register (1.1 to 1.4).
+- `METHODOLOGY.md`, `README.md`, the handover.
+- Then his runs: the register, the builders of types 3, 5 and 6, 01, 02.
+
+**8. The new kind on the figures** is drawn first as a scratch preview, for his word, its colour from the same
+published palette as the other kinds.
+
+**9. Points to decide, each with my recommendation**
+
+| # | Point | Recommendation |
+|---|---|---|
+| 9.1 | Atlas (old)'s mass: the register reads his catalogue (89 kg), which I do not change; a mass from a source goes into the robot's block, as the Moby's 72 kg (its register row the catalogue's 45) | its block, 80 / 81.6 / 86.2 kg; the register row unchanged (question 2 said "in the register's builder") |
+| 9.2 | Neo1's shell: the template's share of the robot's mass, 5.75 / 11.5 / 17.25 %, is 69 / 138 / 207 kg of plastics | the template's, as for every robot whose shell no source names |
+| 9.3 | Neo1's cables (5 / 10 / 15 m) and screws (0.2 / 0.5 / 1 kg): made for robots of 30 to 170 kg | the template's: no source |
+| 9.4 | Neo1's sensors: none stated | none |
+| 9.5 | Neo1's two electric forearm joints: no torque, no mass | 1.3 / 2.6 / 3.9 kg each (5.4) |
+| 9.6 | The oil's density: two datasheets of MIL-PRF-5606 oils (the fluid Moog tests its Type 30 with), seen in search results only: ENEOS 5606J, 0.21 MB, https://www.eneos.co.jp/english/products/lubricants/pdf/ind-4032-2306e.pdf; Chevron 5606, 0.45 MB, https://www.chevronmarineproducts.com/content/dam/chevron-marine/pds-2020/Chevron_PDS_HydraulicOil_HydraulicOil5606_v0720_1.pdf | download and read both before 6 is entered |
+| 9.7 | The new row's name: Nadia and Neo1 have oil and hoses but no power unit | "Hydraulic power unit, oil and hoses", the manifold in it too |
+| 9.8 | Nadia's shell: its carbon fibre is its frame and shell | no plastics shell (code: a block without a shell) |
+| 9.9 | Atlas (old)'s 28 actuators between the rows | type 5's template ratios, as robots whose joints no source splits |
+| 9.10 | The hoses: Atlas (old)'s lines are in its structure; Nadia's and Neo1's are not | Nadia 0.5 / 1 / 1.5 kg, Neo1 4 / 8 / 12 kg, plastics (E) |
+
+**Agreed** (Matthias, 2026-11-04: "Yes, agree E27.7"): the spec and points 9.1 to 9.10 as recommended; the two
+datasheets of point 9.6 downloaded and read (point 6). Nothing built: the build (point 7, tests first, the new kind's
+preview of point 8) on his word.
+
+### E27.8 Built (2026-11-04). Nothing committed; his runs not yet
+
+Matthias, 2026-11-04: "Yes, build it". Built as E27.7 says, tests first (VERIFICATION.md V161): the three builders,
+the register, the shared rows and helpers (`tools/parts_taken_apart.py`), Neo1 (`tools/parts_types_3_and_4.py`), 01's
+new kind and its checks, 02's oil and actuator bodies; METHODOLOGY.md ("The hydraulic robots part by part"), README.md.
+With these three, every robot with a mass of types 3, 5 and 6 is taken apart: **02 draws types 3, 5 and 6 part by
+part, no longer from the workbook.**
+
+**What the build had to settle that E27.7 does not say, each for his word:**
+
+| # | Point | As built | Why |
+|---|---|---|---|
+| 1 | The magnets' grade class of the parts outside the joints | the power unit's motor SH; Neo1's small motors H or SH, each as often (E) | a part names its own class (no heat group); SH the class a joint that moves often draws most (the waist), H or SH as the elbows and wrists, the lowest load |
+| 2 | 01 let a grade class of magnets stand on the sheet Parts only | now also in the shares of a part of Parts | E27.7 points 4.4 and 5.3 put the motors' magnets in the shares |
+| 3 | The new kind in 02's part groups and body regions | part group Joint drives (as the lift column's motor), body region Torso (where the power unit sits) | 02 places every kind in one group and one region |
+| 4 | Its colour (point 8) | #90C987, of Paul Tol's discrete rainbow, unused before, last in the rows | its preview in the sandbox (V161); a third green beside the waist's and the arms' |
+| 5 | Nadia's pelvis "on the template's rows" (point 3.3) | module masses: each hip yaw 1.295 / 2.59 / 3.885 kg, the spine yaw 0.78 / 1.56 / 2.34 kg | 01 lets a robot's joints be shares of its mass only as the template's whole groups; each is its group's share of the template per joint, at the template's 44.7 % and Nadia's 100 kg, half to 1.5 times (the template's own spread) |
+| 6 | Titanium needs its grade (01, E5.18), but "titanium or aluminium, each as often" had none | the manifold's and the power unit's titanium Ti-6Al-4V (E); 02 gives the grade of a material written 'A or B' to the alternative it is a grade of only, the aluminium following its type's recipe | no row before had a grade on 'A or B' |
+| 7 | The actuators' boards: "E" with the G1's weighed area (11.5 / 22.9 / 28.3 cm²) | labelled W, E, as the shared row of that area | 01 wants an E at least half to 1.5 times its mode |
+| 8 | The power unit's motor's shares, rounded in point 4.4 | exact: copper 1.21 / 2.42 / 3.63 %, electrical steel 2.145 / 4.29 / 6.435 %, magnets 1.375 / 2.75 / 4.125 % | 11 % times the G1's 22, 39 and 25 %, half to 1.5 times |
+| 9 | **A correction of mine, point 9.3:** I wrote the template's cables and screws as 5 / 10 / 15 m and 0.2 / 0.5 / 1 kg | types 3 and 4's template scales them: Neo1's cables 16 / 32 / 48 m (8 m per metre of its 4 m), its screws 6.86 / 17.14 / 34.29 kg (the G1's times 1,200 / 35 kg) | as built, "the template's" as agreed; the numbers I quoted were type 1's |
+| 10 | Atlas (old)'s 28 by place (point 9.9) | hips 6, knees 2, ankles 4, waist 2, head 1, arms 13 | the seven's 42, 14, 28, 16, 10, 90 of 200 joints, the largest remainders |
+
+**Found in the sandbox (2,000 draws, V161), for his decision:** the Atlas (old) with Moog's ISA v5 at all 28 joints
+(44.8 kg of its 80 to 86 kg) leaves its frame below zero in 2.1 % of its draws (median 7.1 kg, least −2.35 kg; with the
+v2 25.6 kg): reported on type 5's notes page, not cut, a fault by the rule (E21). HyQReal, the one robot whose paper says
+where the v5 sits, has it at its knees only (SEM19: "These ISAs (v5) are mounted in the upper leg of the robot to
+actuate the knee joints").
+
+**Decided** (Matthias, 2026-11-04, "Yes, knees only", to "For the Atlas (old), should the 1.6 kg actuators sit only at
+its knees, as on IIT's HyQReal robot?"): built as the smallest change, the version with the v5 its v5 at its two knees
+only, the v2 at its other 26 joints ("Boston Dynamics Atlas hydraulic ISA v5 at the knees", 27.1 kg of actuators); its
+version with the v2 at all 28 as it was; each as often; Nadia unchanged (V162).
+
+**Agreed** (Matthias, 2026-11-04: "Yes, agree all ten"): points 1 to 10 above as built, the new row's colour #90C987
+among them. Nothing more to build; his runs next.
+
 ## E26. No text over a chart: the rule (2026-11-02). Built
 
 Matthias, 2026-11-02: "Cupper is bad. Text over the figures. Build a rule, which prevents this. The figure is first and

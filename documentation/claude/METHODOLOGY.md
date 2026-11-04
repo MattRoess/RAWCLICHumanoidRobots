@@ -522,6 +522,40 @@ it"): each alloy, grade and magnet class a robot type taken apart holds, what it
 its least to its most share of its mass, its base metal the rest; a magnet class by the least and most of its drawn
 fractions, RAWCLICVehicleTractionMotor's own), and its kg in one robot, on the alloys pages after the material pages.
 
+## The hydraulic robots part by part (since 2026-11-04)
+
+Matthias, 2026-11-04: "Yes, prepare it", "all as recommended", "Yes, agree E27.7", "Yes, build it" (EVIDENCE.md E27).
+The hydraulic Atlas (old), Nadia and Neo1 are taken apart, the last robots with a mass of types 3, 5 and 6: since then
+those types are drawn part by part over their robots, as types 1, 2 and 4, no longer from the workbook.
+
+1. **Where they stand:** the Atlas (old) in type 5's file and Nadia in type 6's, each in two versions, each as often
+   (no source names the version): Nadia's actuators all Moog's ISA v2 or all v5; the Atlas (old)'s all v2, or the v5 at
+   its knees only and the v2 elsewhere (Matthias, "Yes, knees only": with the v5 at all 28 its frame fell below zero in
+   2.1 % of its draws; HyQReal has its v5 at its knees); Neo1, of types 5 and 3, in type 3's file, drawn in
+   both types as the DR02.
+2. **A hydraulic actuator as Moog's ISA** (Atlas (old), Nadia): in the row of its place (hips, knees, ankles, waist,
+   arms, head), its mass as weighed (920 g or 1,600 g dry, ± 5 %), its servo valve (95 g, ± 5 %; the materials of the
+   Type 30 valve it descends from, their shares E), its board (as the small joint's driver board), its position sensor
+   and two pressure sensors (their elements only), and its body, rod and seals the remainder: the actuators less their
+   valves, boards and sensors, in every draw, as a weighed battery pack's housing is (steel 6 / 12 / 18 %, plastics 0.5 /
+   1 / 1.5 %, titanium alloy the rest). 01 checks that the actuators at their lightest hold their heaviest valves and
+   boards, so that the body never falls below zero; 02 counts it among the remainders (E21).
+3. **Neo1's digital hydraulic actuator:** 1.0 / 1.1 / 1.65 kg, its small motor 20 % of it (its copper, electrical steel
+   and magnets as the G1's weighed motor), its steel 15 / 30 / 45 %, its seals, its titanium-alloy housing the rest; no
+   board. Its two forearm joints electric (1.3 / 2.6 / 3.9 kg each, E).
+4. **The power unit, manifold, oil and hoses:** a kind of their own, "Hydraulic power unit, oil and hoses" (its colour
+   of the same discrete rainbow; in the part group Joint drives, in the torso). The Atlas (old)'s power unit 2.5 / 5 /
+   12 kg, split as MiniHyQ's weighed pack (pump and gearbox steel 20 %, its motor 11 %), the rest titanium or aluminium,
+   each as often; its manifold 1.05 / 2.1 / 3.15 kg. The oil its volume (each robot's, E) times its density (0.86 / 0.87
+   / 0.88 kg per litre, two makers' datasheets of MIL-PRF-5606 oils), the material Other. Hoses on Nadia and Neo1 only
+   (the Atlas (old)'s lines are printed into its frame).
+5. **Tethered:** Nadia and Neo1 carry no battery and no power unit; Nadia no computer either, and no plastics shell (its
+   carbon-fibre exoskeleton its frame and shell). The Atlas (old) has no electric joint: 01 lets a robot with hydraulic
+   actuators have no row in the sheet Joints, and gives it no encoders or connectors.
+6. **Grades:** a part of magnets outside the joints names its grade class, now also in the shares of a part (the power
+   unit's motor SH, Neo1's small motors H or SH, each as often; E); the grade of a material written 'A or B' goes to the
+   alternative it is a grade of only (a manifold of titanium alloy, Ti-6Al-4V, or of aluminium alloys, the type's).
+
 ## Robot types 5 and 6 part by part, in 02 (since 2026-11-01)
 
 Matthias, 2026-11-01: "do now all the rest for type 5 and 6 research all data use the internet as much as possible and
@@ -533,9 +567,8 @@ over their robots of every parts file.
 1. **Their robots:** type 5's 12 of the register, type 6's 5. Drawn: type 5 over 9 (the MH3 and the T800 Dev and PRO in
    its own file; the Atlas, the CYBORG RO1 SE and PRO, the WO1, the DR02 and Pro, the Kaleido 9 and the Moby in type
    3's; the H1 in type 2's), type 6 over 4 (the Alex and the Fuxi on legs and on wheels in its own file; the T800 in type
-   5's; the Phantom MK1 in type 3's). Not drawn: TITAN (no mass stated) and the hydraulic Atlas (old), Nadia and Neo1,
-   not yet taken apart (E16.5 question 4), so that both types' draws stay the workbook's until they
-   are.
+   5's; the Phantom MK1 in type 3's). Not drawn: TITAN (no mass stated). Since 2026-11-04 the hydraulic Atlas (old),
+   Nadia and Neo1 too ("The hydraulic robots part by part", above), so that both types' draws are their robots'.
 2. **Their templates:** none of their own; their files' robots take types 3 and 4's (01's `TEMPLATE_OF_TYPE`).
 3. **Their recipes:** the workbook's aluminium and plastics of each type (type 5's "Composites & polymers", type 6's
    "Reinforced polymers"); type 5 has no magnesium recipe, so the Kaleido 9's magnesium-alloy frame, drawn in type 5,
@@ -616,7 +649,8 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    (point 6); every joint from its maker's model for the GR-3 and the Star1 (point 9's way); the Tau Humanoid the
    Unitree G1's joints and battery from type 1's file, E. Seven robots with no stated mass are listed only (HELIOS,
    Northstar, StarBot Flex, TARS, Tobi, Vesoma 1, Yogi). Type 3 is then drawn over 163 of its 164 robots with a mass
-   (the Neo1, hydraulic, waits for its own research step, so type 3's draws stay the workbook's), type 4 over all 124:
+   (the Neo1, hydraulic, then waited for its own research step; since 2026-11-04 it too, and type 3's draws are its
+   robots'), type 4 over all 124:
    **type 4's draws are its robots' since batch 3** (E15.7 open point B). The templates after it: the joint template
    137 of 172 in type 3, 103 of 137 in type 4; the battery template 124 and 98 (rule 4 still broken in both).
 

@@ -815,7 +815,11 @@ HOUSING_OF_CELLS = schemas.CELLS_SHARE                                 # of a pa
 CABLES = 'from Constants: length'                                      # the cables' conductors and insulation
 SHELL = schemas.ROBOT_SHARE                                            # the shell: a share of the robot's mass
 FRAME = schemas.ROBOT_REMAINDER                                        # the frame: the robot's remainder
-COMPUTED = FROM_JOINTS + (FROM_SENSORS, PACK, CELLS, HOUSING, HOUSING_OF_CELLS, CABLES, SHELL, FRAME)
+# A hydraulic robot's (EVIDENCE.md E27.7): a place's actuators (their valves, boards, sensors and bodies), their bodies
+# (the remainder), the oil (its volume times its density).
+ACTUATORS, ACTUATOR_REST, OIL = schemas.ACTUATORS_WHOLE, schemas.ACTUATOR_REST, schemas.OIL_FROM
+COMPUTED = FROM_JOINTS + (FROM_SENSORS, PACK, CELLS, HOUSING, HOUSING_OF_CELLS, CABLES, SHELL, FRAME, ACTUATORS,
+                          ACTUATOR_REST, OIL)
 
 # The JointParts component whose material is the joint's driver board.
 DRIVER_BOARD = 'Driver board'
@@ -1345,8 +1349,11 @@ class Robot:
         metal of their recipe (E24); the battery cells' foils and tabs by their items 'As metal'). A material or
         grade written 'A or B' is either, drawn (Shared.state). A part of magnets outside the joints may name its grade
         class, a part of battery cells follows the cells' recipe as the main pack (2026-10-29, "Yes, build them", point
-        4). Electronics are added by board() and sensor()."""
-        for written, call in ((material, lambda m, k: self.material(part, kind, m, k, estimate, heat_group, grade)),
+        4). The grade of a material written 'A or B' goes to the alternative it is a grade of only, the other following
+        its type's recipe (a hydraulic manifold of titanium alloy, Ti-6Al-4V, or of aluminium alloys: EVIDENCE.md
+        E27.7). Electronics are added by board() and sensor()."""
+        for written, call in ((material, lambda m, k: self.material(part, kind, m, k, estimate, heat_group,
+                                                                    grade if m in schemas.GRADED else '')),
                               (grade, lambda g, k: self.material(part, kind, material, k, estimate, heat_group, g))):
             if schemas.OR in written:
                 drawn = self.of(self.shared.state(written))
@@ -1673,11 +1680,12 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
             r.sensor(kind, units, e.count / in_robot * j.count, e.label.startswith('E'))
 
-    # The parts: of one material or of shares, the cables from their length, the shell a share of the robot's mass.
-    # The battery follows below; the frame is added last, by draw_taken_apart().
+    # The parts: of one material or of shares, the cables from their length, the shell a share of the robot's mass, a
+    # hydraulic robot's oil its volume times its density. The bodies of hydraulic actuators and the battery follow
+    # below; the frame is added last, by draw_taken_apart().
     for p in apart.parts:
         if p.robot != name or p.kind in IN_THE_JOINTS or p.computed.startswith((PACK, CELLS, HOUSING, HOUSING_OF_CELLS,
-                                                                                FRAME)):
+                                                                                FRAME, ACTUATORS, ACTUATOR_REST)):
             continue
         kind, estimate, column = KIND_OF[p.kind], p.label.startswith('E'), f'{name}: {p.name}'
         if p.computed.startswith(CABLES):
@@ -1692,7 +1700,9 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             r.material(column, kind, COPPER, copper, estimate)
             r.material(column, kind, 'Plastics', copper * r.of(s.constant[INSULATION]), estimate)
             continue
-        if p.computed.startswith(SHELL):
+        if p.computed.startswith(OIL):
+            kg = triangle(rng, *constants[schemas.OIL_VOLUME][1], n) * r.of(s.constant[schemas.OIL_DENSITY])
+        elif p.computed.startswith(SHELL):
             # A share of the robot's mass by the shared number it names (the shell's; a lift column's, less its motor,
             # a joint drawn above: E9.7 point 3).
             kg = r.mass * r.of(s.constant[schemas.share_quantity(p.computed) or SHELL_SHARE])
@@ -1729,6 +1739,19 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             r.material(column, kind, ALUMINIUM, aluminium, estimate)
             r.material(column, kind, 'Plastics', kg - inside - aluminium, estimate)
         r.sensor(kind, units, e.count, estimate)
+
+    # The hydraulic actuators (EVIDENCE.md E27.7 point 2): each place's actuators as weighed; their valves, boards and
+    # sensors drawn above (the rows whose names end with the place); their bodies, rods and seals the remainder, as a
+    # weighed pack's housing is (01 checks that it never falls below zero).
+    for body in (p for p in apart.parts if p.robot == name and p.computed.startswith(ACTUATOR_REST)):
+        place = schemas.place_of(body.name)
+        whole = next(p for p in apart.parts if p.robot == name and p.computed.startswith(ACTUATORS)
+                     and schemas.place_of(p.name) == place)
+        inside = sum((kg for column, kg in r.parts.items() if column.startswith(f'{name}: ')
+                      and schemas.place_of(column) == place), np.zeros(n))
+        kg = whole.count * triangle(rng, *whole.bounds, n) - inside
+        r.piece(f'{name}: {body.name}', KIND_OF[body.kind], body.name, body.material, kg, body.label.startswith('E'),
+                grade=body.grade)
 
     # The battery: its energy (its voltage times its capacity, or its energy per kg of robot times its mass), its cells
     # from it, its housing the pack's stated mass less its cells and its management board (the boards of the kind
@@ -1780,7 +1803,7 @@ def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: lis
 
     part_columns = [c for r in done for c in r.parts]
     parts = np.column_stack([put(c, r.parts, r) for r in done for c in r.parts])
-    remainders = [f'{p.robot}: {p.name}' for p in apart.parts if p.computed.startswith((FRAME, HOUSING))]
+    remainders = [f'{p.robot}: {p.name}' for p in apart.parts if p.computed.startswith((FRAME, HOUSING, ACTUATOR_REST))]
     structures = {c: put(c, r.structures, r) for r in done for c in r.structures}
     material_keys = sorted({k for r in done for k in r.materials}, key=lambda k: (list(KINDS).index(k[0]), k[1]))
     materials = np.column_stack([sum((put(k, r.materials, r) for r in done if k in r.materials), np.zeros(n))
@@ -1916,11 +1939,15 @@ def write_taken_apart(d: Draws, folder: str) -> None:
 # another group (the head's joints in Sensors, the battery management board in Battery), as the notes page says.
 KIND_PART_GROUP = {'hips': 'Joint drives', 'knees': 'Joint drives', 'ankles': 'Joint drives', 'waist': 'Joint drives',
                    'arms': 'Joint drives', 'battery': 'Battery', 'boards': 'Computer', 'head': 'Sensors',
-                   'cables': 'Cables', 'frame': 'Frame', 'base': 'Wheels and wheel drives', 'lift': 'Joint drives'}
+                   'cables': 'Cables', 'frame': 'Frame', 'base': 'Wheels and wheel drives', 'lift': 'Joint drives',
+                   # A hydraulic robot's power unit, manifold, oil and hoses drive its joints, as a lift column's motor
+                   # (EVIDENCE.md E27.7).
+                   'hydraulics': 'Joint drives'}
 # The wheeled base in the body region Base, the lift column in the torso (2026-10-30, "Yes, agree E9.4", point 3).
 KIND_BODY_REGION = {'hips': 'Legs', 'knees': 'Legs', 'ankles': 'Legs', 'waist': 'Torso', 'arms': 'Arms',
                     'battery': 'Torso', 'boards': 'Torso', 'head': 'Head', 'cables': 'Whole body',
-                    'frame': 'Whole body', 'base': 'Base', 'lift': 'Torso'}
+                    'frame': 'Whole body', 'base': 'Base', 'lift': 'Torso',
+                    'hydraulics': 'Torso'}   # a hydraulic robot's: where its power unit sits (EVIDENCE.md E27.7)
 
 
 def compose_taken_apart(category, d: Draws, lists) -> Composition:

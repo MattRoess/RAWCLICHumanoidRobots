@@ -60,7 +60,41 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-02, evening: elements and copper made exact, the pages' text rules; where to start (start here)
+## 2026-11-04: the hydraulic Atlas (old), Nadia and Neo1 built (E27); where to start (start here)
+
+What changed, each on Matthias's word: the state checked (V156); their research ("Yes, prepare it"), its PDFs read ("Yes,
+download them"), its questions ("all as recommended"), the spec ("Yes, agree E27.7") and the build ("Yes, build it"):
+EVIDENCE.md E27 to E27.8, VERIFICATION.md V156 to V161. **Nothing committed or pushed.**
+- Every robot with a mass of types 1 to 6 is now taken apart: types 3, 5 and 6 are drawn part by part, no longer from
+  the workbook.
+- A new kind of part, "Hydraulic power unit, oil and hoses" (its colour #90C987, a preview for his word, E27.8 point 4).
+
+**Agreed (E27.8):** the ten points the build had to settle ("Yes, agree all ten": magnet classes SH and H or SH, the
+kind's group and region, its colour #90C987, Nadia's pelvis as module masses, the 'A or B' grade rule, the boards'
+label, the exact shares, my correction of point 9.3, Atlas (old)'s places); the Atlas (old)'s v5 at its knees only ("Yes,
+knees only", V162): its frame no longer below zero.
+
+**Matthias's runs, in this order, each by pressing Run** (his word on the above given):
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/5_heavy_duty_high_performance_hazardous_environment/make_parts_taken_apart.py`
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/6_defense_public_safety/make_parts_taken_apart.py`
+5. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+6. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` (200,000 draws)
+
+Types 1, 2 and 4's files need no rebuild (their builders write what they wrote; the suite's on-disk tests of types 1 and
+2 pass). After his runs: read every output back (V156's way), every page of types 3, 5 and 6.
+
+**Since:** his runs read back (V163: every robot with a mass of types 1 to 6 drawn from its parts, 301; 23 without a
+mass); the notes pages' battery wording fixed (V164, "Yes, fix it"): **his run of 02 to see it**
+(`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`); the frames
+below zero of types 1, 3 and 4 (V163) open; the notes' "from their torques" naming Neo1 and Nadia, reported.
+
+**Open, as before:** E25 point B; the "Frame and shell" header (01); a view of copper in 03; 03 itself (types 1 to 6
+now taken apart, so 03 may be proposed when he asks for it); the leftovers of V156 (`taken_words`, `element_shares`,
+`triangles`, `median_share`), asked once, not yet answered.
+
+## 2026-11-02, evening: elements and copper made exact, the pages' text rules
 
 What changed since the push of 13:14 (commit 98a83f5 holds the first two; the rest is this evening's commit), each on
 Matthias's word:

@@ -125,7 +125,8 @@ class TestMakeHumanoidRegister(unittest.TestCase):
                          # since types 5 and 6's entry (2026-11-01, E16.6): the Kaleido 9, the Moby and the Phantom MK1
                          # in type 3's file, the MH3 and the T800 in type 5's, the Alex and the Fuxi in type 6's
                          | {152, 195, 228} | {191, 288} | {24, 351}
-                         | types_34_batch_three)                         # since 2026-11-02 (E15.7)
+                         | types_34_batch_three                          # since 2026-11-02 (E15.7)
+                         | {44, 202, 208})                               # since 2026-11-04 (E27.7): the hydraulic
         self.assertEqual(apart[288], 'EngineAI T800 Dev; EngineAI T800 PRO')
         self.assertEqual(apart[351], 'NORINCO Fuxi on legs; NORINCO Fuxi on wheels')
         self.assertEqual(apart[326], 'Walker Tienkung Vision; Walker Tienkung Embodied')
@@ -222,8 +223,9 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # Since types 5 and 6's entry (E16.6): type 3 also the Kaleido 9, the Moby and the Phantom MK1 (E15's rows).
         # Since batch 3 (E15.7): type 3 163 drawn, 17 without a mass (the four of E15.4 with type 3), Neo1 the one not
         # yet taken apart; type 4 124 drawn, 11 without a mass (the five of E15.4 with type 4), none left (open point
-        # B: type 4's draws from its robots).
-        for robot_type, count, own, without in ((3, 181, 163, 17), (4, 135, 124, 11)):
+        # B: type 4's draws from its robots). Since E27.7 (2026-11-04, "Yes, build it") Neo1 too: type 3 164 drawn, none
+        # left.
+        for robot_type, count, own, without in ((3, 181, 164, 17), (4, 135, 124, 11)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
@@ -239,9 +241,9 @@ class TestMakeHumanoidRegister(unittest.TestCase):
     def test_the_sheets_type_5_and_type_6(self):
         # Matthias, 2026-11-01: "Yes, agree both" (E16), "Find all the data for 5 and 6 and then fill in the data in the
         # respective sheets" (E16.6): every robot whose types include 5 or 6; drawn with its own parts where it has them
-        # in the file of one of its types (types 1 to 6), TITAN without a mass, the hydraulic Atlas (old), Nadia and
-        # Neo1 not yet taken apart (E16.5 question 4).
-        for robot_type, count, own, without in ((5, 12, 9, 1), (6, 5, 4, 0)):
+        # in the file of one of its types (types 1 to 6), TITAN without a mass. Since E27.7 (2026-11-04, "Yes, build it")
+        # the hydraulic Atlas (old), Nadia and Neo1 taken apart too: none left in types 5 and 6.
+        for robot_type, count, own, without in ((5, 12, 11, 1), (6, 5, 5, 0)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
@@ -253,7 +255,7 @@ class TestMakeHumanoidRegister(unittest.TestCase):
                                                                        named)], [])
         later = {r.number for t in (5, 6) for r in schemas.read_type_sheet(self.path, t)
                  if r.in_run == schemas.IN_RUN_LATER}
-        self.assertEqual(later, {44, 202, 208})
+        self.assertEqual(later, set())
 
     def test_the_wheeled_robots_of_batch_2_on_wheels(self):
         # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E7.3, question 1): the Astribot S1 and the Moz1 stand on

@@ -1202,6 +1202,13 @@ PARTS_BUILDER_THREE.build(PARTS_PATTERN.format(folder='3_industrial_logistics_wa
 PARTS_BUILDER_FOUR = load('make_parts_taken_apart_4', os.path.join('tools', '4_service_healthcare_interaction',
                                                                   'make_parts_taken_apart.py'))
 PARTS_BUILDER_FOUR.build(PARTS_PATTERN.format(folder='4_service_healthcare_interaction'))
+# Types 5 and 6's (E16.6; since E27.7 the hydraulic Atlas (old) and Nadia): their files too, each in its own folder.
+PARTS_BUILDER_FIVE = load('make_parts_taken_apart_5', os.path.join('tools', '5_heavy_duty_high_performance_hazardous_'
+                                                                  'environment', 'make_parts_taken_apart.py'))
+PARTS_BUILDER_FIVE.build(PARTS_PATTERN.format(folder='5_heavy_duty_high_performance_hazardous_environment'))
+PARTS_BUILDER_SIX = load('make_parts_taken_apart_6', os.path.join('tools', '6_defense_public_safety',
+                                                                 'make_parts_taken_apart.py'))
+PARTS_BUILDER_SIX.build(PARTS_PATTERN.format(folder='6_defense_public_safety'))
 
 
 def type_inputs_or_skip(test: unittest.TestCase, params: Params, robot_type: int):
@@ -1239,8 +1246,9 @@ class TestTypesThreeAndFour(unittest.TestCase):
         # the CYBORG RO1 and the DR02 in two each; type 4's and the X2, the CASBOT 02 and the FF Master in two. Since
         # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out); since types 5 and 6's entry (E16.6) type 3 94: the
         # Kaleido 9, the Moby and the Phantom MK1; since batch 3 (E15.7) type 3 163 robots in 172 versions (Neo1 the
-        # one not taken apart), type 4 124 in 137 (each of its robots with a mass).
-        for robot_type, count, versions in ((3, 163, 172), (4, 124, 137)):
+        # one not taken apart), type 4 124 in 137 (each of its robots with a mass); since E27.7 (2026-11-04) type 3 164
+        # in 173, Neo1 too.
+        for robot_type, count, versions in ((3, 164, 173), (4, 124, 137)):
             inputs = type_inputs_or_skip(self, self.params, robot_type)
             self.assertEqual(len(inputs.robots), count, msg=robot_type)
             self.assertGreater(len(inputs.files), 1)
@@ -1749,3 +1757,65 @@ class TestNoTextOverData(unittest.TestCase):
             found += [f'{name}: {text}' for text in composition.texts_over_data(figure)]
             composition.plt.close(figure)
         self.assertEqual(found, [])
+
+
+class TestHydraulicActuators(unittest.TestCase):
+    """EVIDENCE.md E27.7 (Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it"): a hydraulic actuator's body, rod
+    and seals the remainder of its place's actuators less their valves, boards and sensors, in every draw, as the
+    battery housing is the pack's; the oil its volume times its density; a robot without an electric joint drawn."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 3000
+
+    def drawn(self, robot_type: int):
+        inputs = type_inputs_or_skip(self, self.params, robot_type)
+        return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def test_the_body_the_actuators_less_their_valves_boards_and_sensors(self):
+        for robot_type, robot in ((6, 'IHMC Nadia ISA v2'), (6, 'IHMC Nadia ISA v5'),
+                                  (5, 'Boston Dynamics Atlas hydraulic ISA v2'),
+                                  (5, 'Boston Dynamics Atlas hydraulic ISA v5 at the knees')):
+            inputs, d = self.drawn(robot_type)
+            columns, draws = d.parts
+            rows = d.robot == d.robots.index(robot)
+            whole = {p.name.rsplit(', ', 1)[1]: p for p in inputs.apart.parts
+                     if p.robot == robot and p.computed.startswith(schemas.ACTUATORS_WHOLE)}
+            self.assertTrue(whole, msg=robot)
+            for place, p in whole.items():
+                body = f'{robot}: Actuator bodies, rods and seals, {place}'
+                inside = [f'{robot}: {name}, {place}' for name in ('Servo valves', 'Actuator boards',
+                                                                   'Actuator position sensors',
+                                                                   'Actuator pressure sensors')]
+                total = draws[rows, columns.index(body)] + sum(draws[rows, columns.index(c)] for c in inside)
+                low, high = p.count * p.bounds[0], p.count * p.bounds[2]
+                self.assertTrue(np.all((total >= low - 1e-9) & (total <= high + 1e-9)), msg=(robot, place))
+                self.assertTrue(np.all(draws[rows, columns.index(body)] > 0), msg=(robot, place))
+                self.assertIn(body, d.remainders)
+
+    def test_the_oil_its_volume_times_its_density(self):
+        inputs, d = self.drawn(6)
+        columns, draws = d.parts
+        for robot in ('IHMC Nadia ISA v2', 'IHMC Nadia ISA v5'):
+            oil = draws[d.robot == d.robots.index(robot), columns.index(f'{robot}: Hydraulic oil')]
+            self.assertTrue(np.all((oil >= 0.25 * 0.86 - 1e-12) & (oil <= 0.75 * 0.88 + 1e-12)), msg=robot)
+
+    def test_a_robot_without_an_electric_joint_drawn(self):
+        inputs, d = self.drawn(5)
+        robot = 'Boston Dynamics Atlas hydraulic ISA v5 at the knees'
+        self.assertFalse([j for j in inputs.apart.joints if j.robot == robot])
+        columns, draws = d.parts
+        rows = d.robot == d.robots.index(robot)
+        self.assertTrue(np.all(np.abs(draws[rows].sum(axis=1) - d.mass[rows]) < 1e-9 * d.mass[rows]))
+        self.assertIn(f'{robot}: Hydraulic power unit', columns)
+
+    def test_the_atlas_olds_frame_never_below_zero(self):
+        # Matthias, 2026-11-04, "Yes, knees only" (EVIDENCE.md E27.8): with the 1.6 kg actuators at all 28 joints its
+        # frame fell below zero in 2.1 % of its draws (V161); at its knees only, in none.
+        inputs, d = self.drawn(5)
+        columns, draws = d.parts
+        for robot in ('Boston Dynamics Atlas hydraulic ISA v2', 'Boston Dynamics Atlas hydraulic ISA v5 at the knees'):
+            frame = draws[d.robot == d.robots.index(robot), columns.index(f'{robot}: Frame: titanium and aluminium')]
+            self.assertTrue(np.all(frame > 0), msg=robot)
+

@@ -257,6 +257,139 @@ SHARES_ROWS = [
      'Its profile, the remainder (E9.6 point 7)'),
 ]
 
+# --- The hydraulic robots -------------------------------------------------------------------------------------------
+# The hydraulic Atlas (old), Nadia and Neo1 (EVIDENCE.md E27.7; Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build
+# it"): each hydraulic joint an actuator in the row of its place (PLACES, the joints' kinds of the figures); Moog's ISA
+# as its servo valve, its board, its sensors and its body, rod and seals, the remainder (point 2); Neo1's digital
+# hydraulic actuator by its shares (point 5.3); the power unit, its manifold, the oil and the hoses a kind of their own,
+# HYDRAULICS (point 9.7). No source weighs the parts inside an actuator, a valve or a power unit: their materials are
+# the sources', their shares estimates, half to 1.5 times the mode.
+HYDRAULICS = 'Hydraulics'
+# A hydraulic actuator's place: its kind (the figure's row) and its body region.
+PLACES = {'hips': ('Hips', 'Legs'), 'knees': ('Knees', 'Legs'), 'ankles': ('Ankles', 'Legs'),
+          'waist': ('Waist', 'Torso'), 'arms': ('Arms', 'Arms'), 'head': ('Head', 'Head')}
+# Moog's ISA dry, kg, by its version (FRO, Barasuol et al. 2018, Table 2: "Dry weight 920 g 1,600 g"), and its servo
+# valve, kg (MOO, Moog's E024 datasheet: "Mass: 95 g (3.35 oz)").
+ISA_KG = {'v2': 0.92, 'v5': 1.6}
+VALVE_KG = 0.095
+# The texts of what a hydraulic row is computed from (its column "Remainder of, or computed from"); 01 and 02 read
+# their starts (ACTUATORS_WHOLE, ACTUATOR_REST, OIL_FROM). The actuators of a place are its servo valves, boards,
+# sensors and bodies, the bodies their remainder, as a battery pack is its cells, board and housing.
+ACTUATORS_STATED = 'its servo valves, boards and sensors, and its bodies, rods and seals (the rows of its place)'
+ACTUATOR_BODY = 'the hydraulic actuators, less their servo valves, boards and sensors (the rows of its place)'
+OIL_VOLUME = 'Hydraulic oil volume'
+OIL_DENSITY = 'Hydraulic oil density'
+OIL = f"its volume (Constants' {OIL_VOLUME}) times the oil's density (Constants' {OIL_DENSITY})"
+# The share of a motor that is copper, electrical steel and magnets: the G1's weighed small joint (JointParts: the
+# stator 94.3 g, 36 % of it copper and 5 % plastics; the rotor 42.9 g, 90 % of it magnets; the magnet carrier 16.9 g),
+# 22, 39 and 25 % of its 154.1 g (Claude's arithmetic, E27.7 point 4.4).
+MOTOR_SHARES = (('Copper', None, 0.22), ('Electrical steel', 'M19 or M27', 0.39), ('NdFeB magnets', None, 0.25))
+
+
+def motor_share_rows(item: str, motor: float, magnets: str, why: str) -> list:
+    """The copper, electrical steel and magnets of a motor that is `motor` of `item` (a share), each its share of the
+    G1's weighed motor times `motor`, half to 1.5 times (E); its magnets of the grade class `magnets` (a part outside
+    the joints names its own, 'A or B' each as often)."""
+    return [(item, material, magnets if material == 'NdFeB magnets' else grade,
+             *(round(f * motor * share, 6) for f in (0.5, 1, 1.5)), None, 'E',
+             f"{why}; {share:.0%} of it {material.lower()}, as the G1's weighed motor (JointParts, arith.)")
+            for material, grade, share in MOTOR_SHARES]
+
+
+def hydraulic_share_rows(place: str) -> list:
+    """The shares of a place's hydraulic parts (PLACES): Moog's servo valve and the ISA's body, rod and seals, and Neo1's
+    digital hydraulic actuator; one set of rows each, by its name with its place."""
+    return [
+        # The servo valve (E27.7 point 2.2): the materials of the Type 30 it descends from (M30, MOO), no mass of any.
+        (f'Servo valves, {place}', 'Copper', None, 0.05, 0.1, 0.15, None, 'E',
+         'its torque motor\'s coils (MOO "coils in parallel"; M30 "Motor coils have resilient potting"): no mass '
+         'stated (E27.7 point 2.2)'),
+        (f'Servo valves, {place}', 'Other', None, 0.1, 0.2, 0.3, None, 'E',
+         'its "Polepieces and armature Nickel-iron steel", "Magnets Alnico alloy", "Flexure sleeve Beryllium copper" '
+         '(M30): none of the 17 materials (E27.4 question 14)'),
+        (f'Servo valves, {place}', 'Aluminium alloys', None, 0.025, 0.05, 0.075, None, 'E',
+         'its "Torque motor cover Anodized aluminum alloy" (M30)'),
+        (f'Servo valves, {place}', 'Stainless steel', '17-4PH', None, None, None, 'Yes', 'E',
+         'its "Body* Stainless steel", end caps, spool and bushing, filter and feedback spring (M30), the remainder; '
+         '17-4PH the grade (E)'),
+        # The body, rod and seals of Moog's ISA (point 2.5): the remainder of the actuator (ACTUATOR_BODY).
+        (f'Actuator bodies, rods and seals, {place}', 'Steel', 'C45', 0.06, 0.12, 0.18, None, 'E',
+         'its rod and piston: FRO Table 2\'s 12 mm rod at 120 to 140 mm of steel, 0.12 of 0.825 kg and 0.15 of 1.505 kg '
+         '(arith.); C45 the grade (E)'),
+        (f'Actuator bodies, rods and seals, {place}', 'Plastics', None, 0.005, 0.01, 0.015, None, 'E',
+         'its seals: no source'),
+        (f'Actuator bodies, rods and seals, {place}', 'Titanium alloy', 'Ti-6Al-4V', None, None, None, 'Yes', 'S, E',
+         'its body: SEM19 "3D-printed Titanium body", the remainder; Ti-6Al-4V the grade (E)'),
+        # Neo1's digital hydraulic actuator (point 5.3): its small motor 20 % of it (E), its steel, its seals, its
+        # titanium-alloy housing the remainder; no board ("数字液压内部不需要需电子器件检测").
+        *motor_share_rows(f'Digital hydraulic actuators, {place}', 0.2, 'H or SH',
+                          'its small motor (NEW "小功率电机，伺服或步进电机都行"), 20 % of the actuator (E); H or SH, each '
+                          'as often, as the elbows and wrists, the lowest load (E)'),
+        (f'Digital hydraulic actuators, {place}', 'Steel', 'C45', 0.15, 0.3, 0.45, None, 'E',
+         'its rod, piston and mechanical servo: NEW "液压件是一堆铁" (hydraulic parts are "a pile of iron"); C45 the '
+         'grade (E)'),
+        (f'Digital hydraulic actuators, {place}', 'Plastics', None, 0.005, 0.01, 0.015, None, 'E',
+         'its seals: no source'),
+        (f'Digital hydraulic actuators, {place}', 'Titanium alloy', 'Ti-6Al-4V', None, None, None, 'Yes', 'S, E',
+         'its housing: NEW "钛合金外壳", the remainder; Ti-6Al-4V the grade (E)'),
+    ]
+
+
+SHARES_ROWS += [row for place in PLACES for row in hydraulic_share_rows(place)]
+SHARES_ROWS += [
+    # The power unit of Atlas (old) (point 4.4): as MiniHyQ's weighed pack (KHN), its pump and gearbox, its motor; the
+    # rest of its printed parts, titanium or aluminium.
+    ('Hydraulic power unit', 'Steel', '42CrMo4', 0.1, 0.2, 0.3, None, 'E',
+     'its pump and gearbox: KHN\'s MiniHyQ pack, "weight 1.94 kg" and "0.43kg" of "12 kg", 20 % (arith.); 42CrMo4 the '
+     'grade (E)'),
+    *motor_share_rows('Hydraulic power unit', 0.11, 'SH',
+                      'its motor: KHN "weight 1.36kg" of "12 kg", 11 % (arith.); SH, the class a joint that moves often '
+                      'draws most (the waist, E)'),
+    ('Hydraulic power unit', 'Titanium alloy or Aluminium alloys', 'Ti-6Al-4V', None, None, None, 'Yes', 'E',
+     'its manifold, reservoir, accumulator, filter and cooler, the remainder: IRG "Mixture of titanium and aluminum '
+     '3D-printed parts", either, each as often (E27.4 question 8); Ti-6Al-4V the titanium\'s grade (E), the aluminium '
+     "the type's"),
+    # The frame of Atlas (old) (point 4.10).
+    ('Frame: titanium and aluminium', 'Titanium alloy', 'Ti-6Al-4V', 0.25, 0.5, 0.75, None, 'E',
+     'IRG "Mixture of titanium and aluminum 3D-printed parts": no share stated; Ti-6Al-4V the grade (E)'),
+    ('Frame: titanium and aluminium', 'Aluminium alloys', None, None, None, None, 'Yes', 'S, E',
+     'IRG "Mixture of titanium and aluminum 3D-printed parts": its aluminium, the remainder'),
+]
+# The oil's density (point 6), in the files of the hydraulic robots only (types 3, 5 and 6).
+HYDRAULIC_CONSTANTS = [
+    ('all', OIL_DENSITY, 0.86, 0.87, 0.88, 'kg/l', 'S, E',
+     'ENE "Density (15°C) g/cm3 0.869", CHV "Density at 15°C, kg/l 0.87": the mode; about 1 % either side (E); '
+     'EVIDENCE.md E27.7 point 6'),
+]
+# The sources the hydraulic rows cite, read first-hand on 2026-11-04 (EVIDENCE.md E27, VERIFICATION.md V157 to V160);
+# each builder of a hydraulic robot places them among its own.
+HYDRAULIC_SOURCES = [
+    ('FRO', 'Barasuol et al. (IIT with Moog), Frontiers in Robotics and AI 5:51, 2018: the ISA ("Dry weight 920 g 1,600 '
+            'g", "additively manufactured (AM) in a titanium alloy")',
+     'https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2018.00051/full',
+     'Peer-reviewed; design and datasheet values'),
+    ('MOO', 'Moog, E024 Series datasheet ("Mass: 95 g (3.35 oz)")',
+     'https://www.moog.com/content/dam/moog/literature/products/servovalves/E024_Series_Datasheet.pdf',
+     "Manufacturer's datasheet"),
+    ('M30', 'Moog, Type 30 servo valve catalogue ("Materials used in Standard Type 30 Servo valves")',
+     'https://www.moog.com/content/dam/moog/literature/sdg/defense/Moog-Type30-Servo-Valve-Catalog.pdf',
+     "Manufacturer's catalogue of the valve the E024 descends from"),
+    ('SEM19', 'Semini et al. (IIT with Moog), Brief introduction to the quadruped robot HyQReal, I-RIM 2019 (the ISA '
+              'v2 cut open)', 'https://iit-dlslab.github.io/papers/semini19irim.pdf', 'Conference paper'),
+    ('KHN', "Khan et al. (IIT), MiniHyQ's on-board power pack, SICFP 2015 (\"Weight 12 kg\", \"Max Power Consumption "
+            '5.5 kW")', 'https://iit-dlslab.github.io/papers/khan15sicfp.pdf', 'Conference paper, its parts weighed'),
+    ('IRG', 'IEEE Robots Guide, Atlas (hydraulic, 2016 to 2024: "Mixture of titanium and aluminum 3D-printed parts")',
+     'https://robotsguide.com/robots/atlas2016', 'Second-hand: a guide'),
+    ('ENE', 'ENEOS, Hydraulic Oil 5606J ("Density (15°C) g/cm3 0.869")',
+     'https://www.eneos.co.jp/english/products/lubricants/pdf/ind-4032-2306e.pdf', "Manufacturer's datasheet"),
+    ('CHV', 'Chevron, Hydraulic Oil 5606 ("Density at 15°C, kg/l 0.87", "autopilots and robotics")',
+     'https://www.chevronmarineproducts.com/content/dam/chevron-marine/pds-2020/'
+     'Chevron_PDS_HydraulicOil_HydraulicOil5606_v0720_1.pdf', "Manufacturer's datasheet"),
+    ('NEW', "Neo1's founder Yang Tao, interviewed by 着陆TouchBase, 2026-10-15 (\"钛合金外壳，自重1.1公斤\", "
+            '"小功率电机", "液压件是一堆铁")', 'https://www.163.com/dy/article/L9AAAKRI0553D9NB.html',
+     "Second-hand: the maker's founder interviewed"),
+]
+
 # --- Constants: the shared numbers ----------------------------------------------------------------------------
 # The numbers every robot of a file uses, once under the robot "all" (EVIDENCE.md E2.8, E2.8b, E5.14, E5.21, E5.22):
 # the first six before a robot type's own shared numbers (type 1's for the robots whose sources stop, E5.17), the
@@ -461,11 +594,15 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
     `more` what differs from the template (E5.14): battery (False for a robot that carries none, the Phantom MK1's
     "lacks a battery", EVIDENCE.md E16.2: no pack, cells, housing or management board), voltage and capacity ((min,
     mode, max), label, source; none: the energy per kg of robot), pack ((min, mode, max), label, source; None: from its
-    energy; PACK_CELLS_ONLY), housing, boards, sensors, cables (and cable_quantity, CABLE_FOUR or CABLE_ETHERNET), screws, parts, cooler (ARM_COOLER
-    unless its computer is an Intel or AMD processor's), shell, frame, and the labels and sources of its joints,
-    connectors, encoders and cells. A block whose joints are AVERAGE may also have `stated_joints` (joint() each), which
-    take the place of their groups' rows of the template, and `added_joints` (its hands or grippers), which the
-    template leaves out (it counts body joints only: EVIDENCE.md E7.4, E7.5 points 2 and 4)."""
+    energy; PACK_CELLS_ONLY), housing, boards, sensors, cables (and cable_quantity, CABLE_FOUR or CABLE_ETHERNET), screws,
+    parts (each (part, count, kind, region, kg, material, grade, label, source), and what it is computed from where it
+    is), cooler (ARM_COOLER unless its computer is an Intel or AMD processor's), shell (None: none, its frame its shell,
+    Nadia's carbon fibre, EVIDENCE.md E27.7 point 9.8), frame ((name, material, source), its grade a fourth item where
+    given), oil (a hydraulic robot's volume of oil, ((min, mode, max) litres, label, source), E27.7 point 6), and the
+    labels and sources of its joints, connectors, encoders and cells. A block whose joints are AVERAGE may also have
+    `stated_joints` (joint() each), which take the place of their groups' rows of the template, and `added_joints` (its
+    hands or grippers), which the template leaves out (it counts body joints only: EVIDENCE.md E7.4, E7.5 points 2 and
+    4)."""
     b = dict(name=name, maker=maker, height=height, stated=stated, sources=sources, mass=mass, joints=joints,
              stated_joints=[], added_joints=[],
              joints_stated=None, joint_label={'small': 'E', 'large': 'E'}, joint_sources='', battery=True,
@@ -481,7 +618,7 @@ def block(name: str, maker: str, height: float, stated: float | None, sources: s
              # A robot on wheels (EVIDENCE.md E9.7 point 3): its battery in its base, its cells' recipe where not NMC
              # (the CASBOT W1's LFP), its template's rows where not its type's (the template on wheels), its lift
              # column ((min, mode, max) kg, label, source; its kg None: a share of its mass, LIFT).
-             battery_region='Torso', cell_recipe=None, averaged=None, lift_column=None)
+             battery_region='Torso', cell_recipe=None, averaged=None, lift_column=None, oil=None)
     b.update(more)
     return b
 
@@ -590,6 +727,41 @@ def model_joints(rows: list, module) -> list:
     return [joint(name, count, torque, module(torque), *JOINT_PLACES[name.split()[0]]) for name, count, torque in rows]
 
 
+# --- A hydraulic robot's rows (EVIDENCE.md E27.7) --------------------------------------------------------------------
+def isa_actuators(places: dict, version: str | dict, why: str) -> dict:
+    """The hydraulic actuators of a robot as Moog's ISA of `version` ('v2' or 'v5', or a version for each place: the
+    Atlas (old)'s v5 at its knees only, Matthias, 2026-11-04, "Yes, knees only", E27.8), `places` its count at each place
+    (PLACES), `why` where the counts come from (E27.7 point 2): for its block, the rows of the sheets Parts (each place's
+    actuators as weighed; their servo valves, 95 g each; their bodies, rods and seals the remainder), Boards (each its
+    board, as the small joint's driver board) and Sensors (each a position sensor and two pressure sensors, their
+    elements only, their mass in the actuator's)."""
+    parts, boards, sensors = [], [], []
+    for place, count in places.items():
+        kind, region = PLACES[place]
+        its = version[place] if isinstance(version, dict) else version
+        parts += [(f'Hydraulic actuators, {place}', count, kind, region, spread(ISA_KG[its]), None, None, 'S',
+                   f'{why}; as Moog\'s ISA {its}: FRO Table 2 "Dry weight 920 g 1,600 g", ± 5 %', ACTUATORS_STATED),
+                  (f'Servo valves, {place}', count, kind, region, spread(VALVE_KG), None, None, 'S',
+                   'MOO "Mass: 95 g (3.35 oz)", ± 5 % (E27.7 point 2.2)'),
+                  (f'Actuator bodies, rods and seals, {place}', count, kind, region, (None, None, None), None, None,
+                   'S, E', 'SEM19 "3D-printed Titanium body"; the remainder (E27.7 point 2.5)', ACTUATOR_BODY)]
+        boards.append((f'Actuator boards, {place}', count, kind, region, DRIVER_BOARD_AREA, 'PE_HVS', 'W, E',
+                       'SEM19 "Electronic boards": as the small joint\'s driver board, the G1\'s weighed (E27.7 point '
+                       '2.3)'))
+        sensors += [(f'Actuator position sensors, {place}', count, kind, region, None, 'S',
+                     'SEM19 "Position sensor"; elements only, in the actuator (E27.7 point 2.4)',
+                     [('position sensor', 1)]),
+                    (f'Actuator pressure sensors, {place}', 2 * count, kind, region, None, 'S, E',
+                     'SEM19 "Pressure sensors", one for each of the cylinder\'s two chambers (E); elements only, in the '
+                     'actuator (E27.7 point 2.4)', [('pressure sensor', 1)])]
+    return dict(parts=parts, boards=boards, sensors=sensors)
+
+
+def hoses(kg: tuple, source: str) -> tuple:
+    """A hydraulic robot's hoses on the robot (E27.7 point 9.10): plastics, of `kg` (min, mode, max), an estimate."""
+    return 'Hydraulic hoses', 1, HYDRAULICS, 'Whole body', kg, 'Plastics', None, 'E', source
+
+
 def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) -> dict:
     """Every row of one robot's block on the sheets Robots, Joints, Parts, Boards, Sensors and Constants, and the car
     sensor elements of its sensors (sheet SensorElements, by the sensor's name). `robot_type` is the type of its file;
@@ -607,7 +779,7 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         out['Joints'].append((name, number, joint_name, count, size, torque, low, mode, high,
                               share[0] if share else None, 'not stated', heat, region, b['joint_sources'],
                               MAGNETS_BASIS))
-    in_robot = b['joints_stated'] or sum(j[1] for j in joints)
+    in_robot = b['joints_stated'] or sum(j[1] for j in joints)   # 0: a robot without an electric joint (Atlas (old))
     for size in ('small', 'large'):
         mine = [j for j in joints if j[2] == size]
         if mine:
@@ -619,12 +791,13 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
             out['Boards'].append((name, f'Driver board, {size} joint', count, 'In the joints', where, None, None, None,
                                   DRIVER_FROM, 'PE_HVS', 'E', 'as the G1 (E5.12 point 2)'))
     label, source = b['encoders']
-    out['Parts'].append((name, 'Encoders (two per joint)', 2 * in_robot, 'In the joints', 'as their joints', None,
-                         None, None, None, None, 'Sensors and SensorElements (Encoder)', label, source))
-    out['Sensors'].append((name, 'Encoder', 2 * in_robot, 'In the joints', 'as their joints', None, None, None, label,
-                           f'{source}; elements only'))
-    for car_type, per_sensor in ENCODER:
-        out['SensorElements'].append(('Encoder', car_type, per_sensor))
+    if in_robot:
+        out['Parts'].append((name, 'Encoders (two per joint)', 2 * in_robot, 'In the joints', 'as their joints', None,
+                             None, None, None, None, 'Sensors and SensorElements (Encoder)', label, source))
+        out['Sensors'].append((name, 'Encoder', 2 * in_robot, 'In the joints', 'as their joints', None, None, None,
+                               label, f'{source}; elements only'))
+        for car_type, per_sensor in ENCODER:
+            out['SensorElements'].append(('Encoder', car_type, per_sensor))
 
     # Its battery: the pack, its cells from their energy, its housing the pack's remainder (a pack no source weighs: a
     # share of its cells, E20), its management board; in its torso, or for a robot on wheels in its base; its cells NMC
@@ -673,24 +846,32 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     out['Parts'].append((name, 'Cable conductors and insulation', 1, 'Cables', 'Whole body', None, None, None, None,
                          None, 'from Constants: length, cross-sections, insulation', b['cables'][1], b['cables'][2]))
     label, source = b['connectors']
-    out['Parts'].append((name, 'XT30 (2+2) connectors (two per joint)', 2 * in_robot, 'Cables', 'Whole body',
-                         *CONNECTOR_KG, None, None, None, label, source))
+    if in_robot:
+        out['Parts'].append((name, 'XT30 (2+2) connectors (two per joint)', 2 * in_robot, 'Cables', 'Whole body',
+                             *CONNECTOR_KG, None, None, None, label, source))
     for part, count, kg, grade, label, source in b['screws']:
         out['Parts'].append((name, part, count, 'Frame and shell', 'Whole body', *kg, steel_of(grade), grade, None,
                              label, source))
-    for part, count, kind, region, kg, material, grade, label, source in b['cooler'] + b['parts']:
-        out['Parts'].append((name, part, count, kind, region, *kg, material, grade, None, label, source))
+    for part, count, kind, region, kg, material, grade, label, source, *computed in b['cooler'] + b['parts']:
+        out['Parts'].append((name, part, count, kind, region, *kg, material, grade, computed[0] if computed else None,
+                             label, source))
+    if b['oil']:
+        # A hydraulic robot's oil (EVIDENCE.md E27.7 point 6): its volume in Constants, its density the file's.
+        values, label, source = b['oil']
+        out['Parts'].append((name, 'Hydraulic oil', 1, HYDRAULICS, 'Whole body', None, None, None, 'Other', None, OIL,
+                             label, source))
     if b['lift_column']:
         # Its lift column beside its motor (a joint): its stated mass, or a share of the robot's mass less its motor.
         kg, label, source = b['lift_column']
         out['Parts'].append((name, LIFT_PART, 1, 'Lift column', 'Torso', *(kg or (None, None, None)), None, None,
                              None if kg else LIFT, label, source))
-    shell, source = b['shell']
-    out['Parts'].append((name, shell, 1, 'Frame and shell', 'Whole body', None, None, None, 'Plastics', None, SHELL,
-                         'E', source))
-    frame, material, source = b['frame']
-    out['Parts'].append((name, frame, 1, 'Frame and shell', 'Whole body', None, None, None, material, None, FRAME, 'E',
-                         source))
+    if b['shell']:
+        shell, source = b['shell']
+        out['Parts'].append((name, shell, 1, 'Frame and shell', 'Whole body', None, None, None, 'Plastics', None, SHELL,
+                             'E', source))
+    frame, material, source, *grade = b['frame']
+    out['Parts'].append((name, frame, 1, 'Frame and shell', 'Whole body', None, None, None, material,
+                         grade[0] if grade else None, FRAME, 'E', source))
 
     # Its own constants: its mass, its battery's voltage and capacity (or none: its energy per kg of robot), its cables.
     values, label, source = b['mass']
@@ -701,6 +882,9 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
             out['Constants'].append((name, quantity, *values, unit, label, source))
     values, label, source = b['cables']
     out['Constants'].append((name, b['cable_quantity'], *values, 'm', label, source))
+    if b['oil']:
+        values, label, source = b['oil']
+        out['Constants'].append((name, OIL_VOLUME, *values, 'l', label, source))
     return out
 
 

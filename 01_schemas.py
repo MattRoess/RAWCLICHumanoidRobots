@@ -1596,6 +1596,14 @@ HOUSING_SHARE = 'Battery housing, share of its cells (packs not weighed)'
 # structure the share less its motor, a joint of the sheet Joints).
 SHARE_OF = "Constants' "
 LESS_ITS_MOTOR = '; less its motor'
+# The hydraulic robots (EVIDENCE.md E27.7; Matthias, 2026-11-04, "Yes, agree E27.7", "Yes, build it"): the start of
+# what a place's hydraulic actuators are computed from (its valves, boards, sensors and bodies, the rows of the Parts,
+# Boards and Sensors whose names end with its place), of their bodies, the remainder (as a battery housing is its
+# pack's), and of the oil, its volume (a robot's own constant) times its density (the file's).
+ACTUATORS_WHOLE = 'its servo valves, boards and sensors'
+ACTUATOR_REST = 'the hydraulic actuators, less'
+OIL_FROM = 'its volume'
+OIL_VOLUME, OIL_DENSITY = 'Hydraulic oil volume', 'Hydraulic oil density'
 # A material or a grade written 'A or B' is either, each as often (a discrete state, drawn by 02).
 OR = ' or '
 # An estimate (E) spans at least half to 1.5 times its mode (Matthias, 2026-10-27: "Estimates should be larger than
@@ -1896,6 +1904,10 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
                 faults.append(Fault(where + sheet, item.row, f"'{item.robot}' is not in the sheet Robots."))
     for robot in apart.robots:
         for sheet in APART_ROBOT_SHEETS:
+            # A hydraulic robot may have no electric joint (Atlas (old): EVIDENCE.md E27.7 point 4.2).
+            if sheet == 'Joints' and any(p.robot == robot and p.computed.startswith(ACTUATORS_WHOLE)
+                                         for p in apart.parts):
+                continue
             if not any(item.robot == robot for item in on_sheet[sheet]):
                 faults.append(Fault(where + sheet, 0, f'{robot} has no rows in the sheet {sheet}.'))
     for robot in apart.constants:
@@ -2169,10 +2181,57 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         elif motor and not column:
             faults.append(Fault(where + 'Joints', 0, f'{robot}: it has a lift motor, but no lift column in the sheet '
                                                      'Parts.'))
+        faults += hydraulic_faults(apart, robot, where)
     for robot, given in apart.constants.items():
         for quantity, (row, values, _, label, _) in given.items():
             faults += label_faults(on, row, f'{robot}, {quantity}', label)
             faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E')
+    return faults
+
+
+def place_of(name: str) -> str:
+    """The place of a hydraulic row, the last words of its name after its last comma ('Servo valves, hips': 'hips')."""
+    return name.rsplit(', ', 1)[1] if ', ' in name else ''
+
+
+def hydraulic_faults(apart: PartsTakenApart, robot: str, where: str) -> list[Fault]:
+    """A hydraulic robot's rows (EVIDENCE.md E27.7): each place's actuators with the one row that takes their
+    remainder, their bodies, and each body with its actuators; the actuators at their lightest room for the heaviest
+    of what sits in them (the other rows of their place: their valves, at the most the board mass per cm2 times their
+    boards' largest area), so that the body never falls below zero; the oil with its volume (the robot's) and its
+    density (the file's)."""
+    faults, on = [], where + 'Parts'
+    parts = [p for p in apart.parts if p.robot == robot]
+    wholes = {place_of(p.name): p for p in parts if p.computed.startswith(ACTUATORS_WHOLE)}
+    bodies = {place_of(p.name): p for p in parts if p.computed.startswith(ACTUATOR_REST)}
+    for place, body in bodies.items():
+        if place not in wholes:
+            faults.append(Fault(on, body.row, f"{robot}, {body.name}: no row of the actuators of its place whose "
+                                              f"remainder it is (computed from '{ACTUATORS_WHOLE}…')."))
+    shared = apart.constants.get(ALL_ROBOTS, {})
+    g_per_cm2 = shared.get(APART_SHARED_CONSTANTS[0], (0, (None, None, None)))[1][2] or 0
+    for place, whole in wholes.items():
+        if place not in bodies:
+            faults.append(Fault(on, whole.row, f"{robot}, {whole.name}: no row takes their remainder (computed from "
+                                               f"'{ACTUATOR_REST}…')."))
+        inside = sum((p.bounds[2] or 0) * p.count for p in parts
+                     if place_of(p.name) == place and p is not whole and p is not bodies.get(place)
+                     and None not in p.bounds)
+        inside += sum((b.bounds[2] or 0) * b.count * g_per_cm2 / 1000 for b in apart.boards
+                      if b.robot == robot and place_of(b.name) == place and None not in b.bounds)
+        if None in whole.bounds or whole.bounds[0] * whole.count < inside:
+            faults.append(Fault(on, whole.row, f'{robot}, {whole.name}: at their lightest they hold less than the '
+                                               f'heaviest of their valves and boards ({inside:g} kg), so that their '
+                                               'bodies would fall below zero.'))
+    own = apart.constants.get(robot, {})
+    for p in parts:
+        if p.computed.startswith(OIL_FROM):
+            if OIL_VOLUME not in own:
+                faults.append(Fault(where + 'Constants', 0, f"{robot}: its {p.name} is {OIL_FROM}, but its "
+                                                            f"'{OIL_VOLUME}' is missing."))
+            if OIL_DENSITY not in shared:
+                faults.append(Fault(where + 'Constants', 0, f"{robot}: its {p.name} needs '{OIL_DENSITY}' (for "
+                                                            f'{ALL_ROBOTS}), which is missing.'))
     return faults
 
 
@@ -2286,8 +2345,13 @@ CELL_MATERIAL = BATTERY   # the material of battery cells, which may name their 
 
 
 def stated_magnet_classes(apart: PartsTakenApart) -> set:
-    """The grade classes the parts of magnets of the sheet Parts name in their column Grade."""
-    return {p.grade for p in apart.parts if p.material == MAGNET_MATERIAL and p.grade}
+    """The grade classes the parts of magnets of the sheet Parts name in their column Grade, and those the shares of a
+    part of Parts name (a hydraulic power unit's motor, Neo1's actuators' small motors: EVIDENCE.md E27.7), each of 'A
+    or B'."""
+    parts = {p.name for p in apart.parts}
+    named = [p.grade for p in apart.parts if p.material == MAGNET_MATERIAL and p.grade]
+    named += [s.grade for s in apart.shares if s.material == MAGNET_MATERIAL and s.grade and s.item in parts]
+    return {klass for grade in named for klass in alternatives(grade)}
 
 
 def sibling_steels(path: str) -> dict:
@@ -2327,13 +2391,19 @@ def check_grades(apart: PartsTakenApart, recipes: ElementRecipes, params: Params
             + [('Parts', p.row, f'{p.robot}, {p.name}', p.material, p.grade) for p in apart.parts]
             + [('Shares', s.row, f'{s.item}, {s.material}', s.material, s.grade) for s in apart.shares])
     used = set()
+    parts = {p.name for p in apart.parts}
     for sheet, row, what, material, grade in rows:
         materials = alternatives(material)
         if material == MAGNET_MATERIAL and grade:
-            if sheet != 'Parts' or grade not in MAGNET_CLASSES:
+            # A part of magnets outside the joints names its grade class, on the sheet Parts or in the shares of a part
+            # of Parts (EVIDENCE.md E27.7: a hydraulic power unit's motor, Neo1's actuators' small motors), 'A or B'
+            # each as often; a joint's magnets take its heat group's.
+            of_a_part = sheet == 'Parts' or (sheet == 'Shares' and what.rsplit(', ', 1)[0] in parts)
+            if not of_a_part or any(g not in MAGNET_CLASSES for g in alternatives(grade)):
                 classes = ', '.join(MAGNET_CLASSES)
                 faults.append(Fault(sheet, row, f"{what}: a grade of magnets is a grade class ({classes}), on the "
-                                                f"sheet Parts only; in a joint its heat group's, not '{grade}'."))
+                                                "sheet Parts or in the shares of a part of it only; in a joint its heat "
+                                                f"group's, not '{grade}'."))
             continue
         if material == CELL_MATERIAL and grade:
             # Battery cells may name their recipe where it is not the NMC cells' (the CASBOT W1's LFP, EVIDENCE.md E9.7
@@ -3288,12 +3358,17 @@ KINDS = {
     'frame': ('Frame and shell', '#F7F056'),
     'base': ('Wheeled base', '#BA8DB4'),
     'lift': ('Lift column', '#42150A'),
+    # The hydraulic robots' power unit, manifold, oil and hoses (Matthias, 2026-11-04, "Yes, agree E27.7", point 9.7):
+    # last, in a colour of the same discrete rainbow not used before, unlike its neighbour the lift column's.
+    'hydraulics': ('Hydraulic power unit, oil and hoses', '#90C987'),
 }
 # The kind of a part, board or sensor of a parts file, by its column "Kind (the figure's row)" (02 draws by it; one
 # copy here): the short names the builders write.
 PART_KIND = {'Hips': 'hips', 'Knees': 'knees', 'Waist': 'waist', 'Arms': 'arms', 'Battery pack': 'battery',
              'Boards': 'boards', 'Head': 'head', 'Cables': 'cables', 'Frame and shell': 'frame',
-             'Wheeled base': 'base', 'Lift column': 'lift'}
+             'Wheeled base': 'base', 'Lift column': 'lift',
+             # A hydraulic actuator in the row of its place, the ankles' too (EVIDENCE.md E27.7 point 9.7).
+             'Ankles': 'ankles', 'Hydraulics': 'hydraulics'}
 # What each kind holds, in plain words, for 01's page of robot type 1.
 KIND_HOLDS = {
     'hips': 'each joint a motor (copper winding, electrical steel, magnets), gears, bearings, a housing, a driver '
@@ -3310,6 +3385,8 @@ KIND_HOLDS = {
     'base': 'the wheels with their hub motors, the steering motors (each made as a joint), the casters, the sensors '
             'of the base',
     'lift': 'its motor (made as a joint), its screw and guides (steel), its profile (aluminium)',
+    'hydraulics': "a hydraulic robot's power unit (its pump, motor and gearbox, its printed parts), its manifold, the "
+                  'oil, the hoses',
 }
 # The kind of a joint, by the first word of its name in the sheet Joints: the head and neck joints in the head, the
 # X1's grippers drawn as joints with the arms (2026-10-29, "Yes, build it").
@@ -3329,9 +3406,9 @@ SPOTS = {'hips': [(-0.06, 0.475), (0.06, 0.475)], 'knees': [(-0.065, 0.27), (0.0
          'arms': [(-0.16, 0.81), (-0.175, 0.64), (-0.185, 0.475), (0.16, 0.81), (0.175, 0.64), (0.185, 0.475)],
          'battery': [(-0.07, 0.62)], 'boards': [(0.07, 0.75)], 'head': [(0.0, 0.925)],
          'cables': [(0.075, 0.62)], 'frame': [(-0.07, 0.75)],
-         'base': [(0.225, 0.075)], 'lift': [(0.225, 0.24)]}
+         'base': [(0.225, 0.075)], 'lift': [(0.225, 0.24)], 'hydraulics': [(0.0, 0.685)]}
 MARKS = {'hips': '1', 'knees': '2', 'ankles': '3', 'waist': '4', 'arms': '5', 'battery': 'A', 'boards': 'B',
-         'head': 'C', 'cables': 'D', 'frame': 'E', 'base': 'F', 'lift': 'G'}
+         'head': 'C', 'cables': 'D', 'frame': 'E', 'base': 'F', 'lift': 'G', 'hydraulics': 'H'}
 DARK = {'hips', 'knees', 'battery', 'cables', 'head', 'lift'}   # the kinds whose colour takes white text
 # The base on wheels drawn beside the robot's feet for a type that has robots on wheels (E9.7 point 9, open point B), in
 # the body's units: the base (across from, to; up from, to), its two wheels (across; their radius), and the lift column
@@ -3371,7 +3448,7 @@ def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
     marks in text of `size` points. `kinds`: those the robot type has (every kind but the wheeled base and the lift
     column where not given); a type with a wheeled base or a lift column has them drawn beside the feet, a base on two
     wheels with a column above it (E9.7 point 9)."""
-    kinds = set(KINDS) - {'base', 'lift'} if kinds is None else set(kinds)
+    kinds = set(KINDS) - {'base', 'lift', 'hydraulics'} if kinds is None else set(kinds)
     body_shapes(axes, 0.0, 0.0, 1.0, facecolor=BODY_FILL, edgecolor=BODY_EDGE, linewidth=1.0)
     if kinds & {'base', 'lift'}:
         style = dict(facecolor=BODY_FILL, edgecolor=BODY_EDGE, linewidth=1.0)
@@ -3410,7 +3487,9 @@ ESTIMATE_KINDS = ('joint shares', 'joint torques', 'battery per kg', 'mass')
 
 
 def estimate_kinds(apart: PartsTakenApart, robot: str) -> list:
-    """The ESTIMATE_KINDS that hold for one robot of the parts file."""
+    """The ESTIMATE_KINDS that hold for one robot of the parts file. A robot that carries no battery (the Phantom MK1,
+    Nadia, Neo1) rests on no estimate of its battery's energy (Matthias, 2026-11-04, "Yes, fix it"; VERIFICATION.md
+    V163)."""
     joints = [j for j in apart.joints if j.robot == robot]
     labels = {p.label for p in apart.parts if p.robot == robot and p.name.startswith('Joint module')}
     found = []
@@ -3419,7 +3498,7 @@ def estimate_kinds(apart: PartsTakenApart, robot: str) -> list:
     elif any(None not in j.module_mass for j in joints) and labels == {'E'}:
         found.append('joint torques')
     own = apart.constants.get(robot, {})
-    if BATTERY_CONSTANTS[0] not in own:
+    if BATTERY_CONSTANTS[0] not in own and has_battery(apart, robot):
         found.append('battery per kg')
     if own.get(APART_ROBOT_CONSTANTS[0], (0, None, '', '', ''))[3] == 'E':
         found.append('mass')

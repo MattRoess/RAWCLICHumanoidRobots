@@ -17,7 +17,8 @@ machinery, types 3 and 4's templates): IHMC's Alex, its arms as Nadia's cycloida
 the actuators made for Nadia's arms", E16.5 question 1), the rest on the template; NORINCO's Fuxi, its form stated by
 no source, in two versions, on legs and on wheels, each as often (E15.6 question 2). A robot of type 6 whose rows stand
 in another type's file (the T800 in type 5's, the Phantom MK1 in type 3's) is drawn by 02 from there (E11.7 point 4).
-The hydraulic Nadia waits for its research step (E16.5 question 4).
+Since 2026-11-04 (EVIDENCE.md E27.7, "Yes, build it") the hydraulic Nadia, its 12 hydraulic joints each an actuator as
+Moog's ISA v2 or v5 (two versions, each as often), its arms as Alex's, tethered: no battery, power unit or computer.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -40,8 +41,9 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 import parts_types_3_and_4 as SHARED  # noqa: E402  (types 3 and 4's templates, used by types 5 and 6)
-from parts_taken_apart import (SHARED_CONSTANTS_FIRST, SHARED_CONSTANTS_LAST, joint, model_joints,  # noqa: E402
-                               robot_rows, sensor_elements, sheets, spread, type_output_path, write_file)
+from parts_taken_apart import (HYDRAULIC_CONSTANTS, SHARED_CONSTANTS_FIRST, SHARED_CONSTANTS_LAST,  # noqa: E402
+                               block, estimate, hoses, isa_actuators, joint, model_joints, robot_rows, sensor_elements,
+                               sheets, spread, type_output_path, write_file)
 
 ROBOT_TYPE = 6
 FOLDER = os.path.basename(os.path.dirname(os.path.abspath(__file__)))
@@ -64,6 +66,10 @@ ABOUT = [
     "Alex: its arms as Nadia's cycloidal arm actuators (peak 158, 158, 79, 79, 19, 19, 19 N·m), each module type 2's "
     "refit at its torque (E); its legs, spine and neck on types 3 and 4's template; its PSYONIC hands 490 g each. Fuxi "
     'on legs and on wheels, each as often, its form stated by no source.',
+    "The hydraulic Nadia (EVIDENCE.md E27.7, 2026-11-04): its 12 hydraulic joints each an actuator as Moog's ISA v2 or "
+    'v5 (two versions, each as often), its valve, board and sensors, its titanium body the remainder; its arms as '
+    "Alex's, its pelvis on the template, its grippers; tethered: no battery, power unit or computer; its carbon-fibre "
+    'exoskeleton its frame and shell.',
     "Robots of type 6 in other files (types 3 and 5) are drawn by 02 from there; the sheet Type 6 of the register names "
     'every robot of type 6 and what the run does with it.',
     'Sheet Sources: every source code used here, as in EVIDENCE.md E16.',
@@ -100,8 +106,55 @@ NORINCO_FUXI_WHEELS = SHARED.wheeled(
     'NORINCO Fuxi on wheels', 'NORINCO', 1.80, None, FUXI_MASS, SHARED.WHEELED_JOINTS_MEDIAN, sources=FUXI_SOURCES,
     added=(SHARED.hands(6),))
 
+# --- IHMC Nadia, hydraulic (EVIDENCE.md E27.7 point 3) ---------------------------------------------------------------
+# Its 12 hydraulic joints as IHMC names them (IHn2: "The ankle, knee, hip pitch and roll, and spine pitch and roll
+# joints are actuated by Moog Integrated Smart Actuators (ISAs)"; IHc "12 hydraulic joints"): per leg hip pitch and roll,
+# knee, two at the ankle, and the spine's pitch and roll; each as Moog's ISA v2 or v5 (E27.4 question 6).
+NADIA_PLACES = {'hips': 4, 'knees': 2, 'ankles': 4, 'waist': 2}
+# Its electric joints: its arms Alex's (ALEX_ARMS, Nadia's own cycloidal arms), its pelvis's two hip yaws and spine yaw
+# on the template's rows at its 100 kg (no torque stated, E27.7 point 3.3); its grippers SAKE's, ± 5 %.
+NADIA_PELVIS = [SHARED.template_joint('Hip yaw', 2, 'Hip joints', 100),
+                SHARED.template_joint('Waist yaw (spine)', 1, 'Waist joints', 100)]
+NADIA_GRIPPER = joint('Gripper (SAKE EZGripper)', 2, None, spread(0.4), 'Elbows and wrists', 'Arms', size='small')
+
+
+def ihmc_nadia(version: str) -> dict:
+    """Nadia with its actuators as Moog's ISA of `version`, each version as often: its mass IHMC's, its hydraulic
+    actuators, its electric arms, pelvis and grippers, its power board and sensors, its hoses and oil; no battery, power
+    unit or computer (tethered); no plastics shell, its carbon-fibre exoskeleton its frame and shell (point 9.8)."""
+    actuators = isa_actuators(NADIA_PLACES, version, 'IHn2 "The ankle, knee, hip pitch and roll, and spine pitch and '
+                                                     'roll joints are actuated by Moog Integrated Smart Actuators", IHc '
+                                                     '"12 hydraulic joints"')
+    return block(
+        f'IHMC Nadia ISA {version}', 'IHMC', 1.90, 100,
+        'IHnw (IHMC, 2025: "Nadia, which weighed about 100 kilograms"), ISP (its designer, 2022: "about 90 kilograms '
+        'right now, without the hydraulic pump or battery on board"), IHn2, IHn, IHc, CAL, SAK; E27',
+        ((99, 100, 101), 'S', 'IHnw "about 100 kilograms"; ± 1 kg (E11.2 point 1); ISP\'s 90 kg of 2022 an earlier '
+                              'state, its arms since upgraded (E27.4 question 3)'),
+        ALEX_ARMS + NADIA_PELVIS + [NADIA_GRIPPER],
+        joint_sources="its arms as Alex's (IHn Fig. 4, peak N·m), each the refit at its torque (E); its pelvis's hip "
+                      "yaws and spine yaw each its group's share of types 3 and 4's template at its 100 kg, half to 1.5 "
+                      'times (E27.7 point 3.3, E); its grippers SAK "365g + 35g (mount)", ± 5 % (S)',
+        battery=False, cooler=[], shell=None,
+        boards=[SHARED.POWER_BOARD] + actuators['boards'],
+        sensors=[SHARED.lidar('CAL "the Ouster OS0-128 lidar sensor"'),
+                 SHARED.camera('Camera (Blackfly)', 2, 'Head', 'CAL "a stereo pair of Blackfly cameras with fisheye '
+                                                              'lenses"'),
+                 SHARED.binocular('CAL "the ZED X Mini depth image"'), SHARED.imu('IHn2 "pelvis-mounted IMU"')]
+        + actuators['sensors'],
+        parts=actuators['parts'] + [hoses(estimate(1), 'CAL "the hydraulic hoses were very stiff": those on the robot, '
+                                                       'no mass stated (E27.7 point 9.10)')],
+        oil=((0.25, 0.5, 0.75), 'E', 'its 12 actuators and the hoses on it: no source states it (E27.7 point 3.9)'),
+        cables=SHARED.cables_by_height(1.90), screws=SHARED.screws(100),
+        frame=('Frame and shell: carbon-fibre exoskeleton', 'Fibre composites',
+               'ISP "Carbon fiber shells covering most of the robot", IHn2 "a carbon fiber exoskeleton for the thighs, '
+               'shins, and torso": the remainder (E27.7 point 3.10)'))
+
+
+IHMC_NADIA_V2, IHMC_NADIA_V5 = ihmc_nadia('v2'), ihmc_nadia('v5')
+
 # Every robot of type 6 written here, in the register's order of numbers.
-BLOCKS_6 = [IHMC_ALEX, NORINCO_FUXI_LEGS, NORINCO_FUXI_WHEELS]
+BLOCKS_6 = [IHMC_ALEX, IHMC_NADIA_V2, IHMC_NADIA_V5, NORINCO_FUXI_LEGS, NORINCO_FUXI_WHEELS]
 GENERATED = [robot_rows(b, ROBOT_TYPE, SHARED.AVERAGE_JOINTS) for b in BLOCKS_6]
 
 # --- Sources --------------------------------------------------------------------------------------------------------
@@ -121,6 +174,23 @@ OWN_SOURCES = [
      'https://www.163.com/dy/article/KDLOLOCA0514R9OJ.html', 'Second-hand: a press report'),
     ('GTt', "Global Times, NORINCO's teleoperation system, 2026-08-18", 'https://www.globaltimes.cn/page/202608/'
                                                                        '1368491.shtml', 'Second-hand: a press report'),
+    # The hydraulic Nadia (EVIDENCE.md E27), read first-hand on 2026-11-01 and 2026-11-04 (V135, V157, V158).
+    ('IHnw', 'IHMC, news of 2025-11-19 ("Nadia, which weighed about 100 kilograms")', 'https://www.ihmc.us/news20251119/',
+     "Manufacturer's news"),
+    ('ISP', 'IEEE Spectrum, Ackerman, 2022-10-05: IHMC\'s Nadia ("about 90 kilograms right now, without the hydraulic '
+            'pump or battery on board", "Carbon fiber shells")', 'https://spectrum.ieee.org/ihmc-nadia-humanoid-robot',
+     "Second-hand: the maker's designer interviewed"),
+    ('IHn2', 'Calvert et al. (IHMC), arXiv 2411.03532, 2024: Nadia ("Moog Integrated Smart Actuators", "a carbon fiber '
+             'exoskeleton", "tethered to a hydraulic pump", "pelvis-mounted IMU")', 'https://arxiv.org/abs/2411.03532',
+     "Manufacturer's paper"),
+    ('IHc', 'IHMC, High Mobility Robotics Capabilities ("12 hydraulic joints with an electrically actuated pelvis and '
+            'arms")', 'https://namconsortium.org/sites/default/files/applicants_capabilities_pdfs/'
+                     'ihmc_roboticscapabilities_0.pdf', "Manufacturer's document"),
+    ('CAL', 'Calvert, PhD thesis (IHMC), arXiv 2606.26425, 2026 ("no onboard compute", "Ouster OS0-128", "Blackfly", '
+            '"tethered to a hydraulic pump across the room")', 'https://arxiv.org/html/2606.26425',
+     "The maker's operator, first-hand"),
+    ('SAK', 'SAKE Robotics, EZGripper ("Gripper Weight 365g + 35g (mount)")', 'https://sakerobotics.com/',
+     "Manufacturer's specification"),
 ]
 
 
@@ -146,7 +216,8 @@ PARTS_ROWS = generated('Parts')
 BOARDS_ROWS = generated('Boards')
 SENSORS_ROWS = generated('Sensors')
 SENSORELEMENTS_ROWS = sensor_elements([], generated('SensorElements'))
-CONSTANTS_ROWS = SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + generated('Constants')
+CONSTANTS_ROWS = (SHARED_CONSTANTS_FIRST + SHARED.TYPES_34_SHARED + SHARED_CONSTANTS_LAST + HYDRAULIC_CONSTANTS
+                  + generated('Constants'))
 SOURCES_ROWS = sources({'Robots': ROBOTS_ROWS, 'Joints': JOINTS_ROWS, 'Parts': PARTS_ROWS, 'Boards': BOARDS_ROWS,
                         'Sensors': SENSORS_ROWS, 'Constants': CONSTANTS_ROWS})
 
