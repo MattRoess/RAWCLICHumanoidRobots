@@ -60,7 +60,39 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-04, evening: 03 built (E29); where to start (start here)
+## 2026-11-04, end of the day: where to start tomorrow, at home (start here)
+
+Matthias, 2026-11-04: "write an handover. I will work tomorrow from home".
+
+**Git.** On GitHub's `main`: `174077d` (03 rebuilt in 02's form, 02's table `by_material`, VERIFICATION V168 to V171,
+EVIDENCE E29), pushed today. **Not committed** (in the iCloud files only): 03's element pages in alphabetical order (V172:
+`03_comparison.py`, `tests/test_comparison.py`, METHODOLOGY, EVIDENCE E29, VERIFICATION), EVIDENCE E30 and this entry. On
+the other Mac first `git status` (CLAUDE.md §9: its git folder lives in `$HOME/gitdirs/` and does not sync; where its git
+lags behind GitHub while iCloud holds the newest files, commit nothing there and align it only on his word).
+
+**First: the Neo1 out of the draws, marked an outlier (EVIDENCE.md E30).** Decided by him: "Ok it is neo. It should be out.
+Mark it as outlier." Settled: 02 no longer draws it, in types 3 and 5; it stays in the register and in type 3's parts
+file, its "In the run" "not drawn: an outlier"; Neo1 only. **To confirm with him before building** (E30's points 3 to 5):
+the setting in 00 (`composition.outliers`: 208 and his reason), the mention on the notes pages of 02 (types 3 and 5) and 03
+rather than a page of its own, its mark in 01's robots table of type 3. E30 lists where the code decides it (01, the
+register builder, 02, 03) and the tests that will change. Then, as always: tests first, the sandbox (a new one: today's
+was in this session's scratch folder, not on the other Mac; a copy of the project with `composition.draws` 2,000 in its
+`src/params_schema.py` and its own `data/` and `figures/`), the documents, VERIFICATION. Nothing of it is built.
+
+**His runs after the Neo1 build, in this order, each by pressing Run** (they also show the element pages' new order;
+until then 03's run alone would show only that):
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+**Open, his decision:** E29's findings: (1) shares written "in 100 %" for 99.781 % (type 3's terbium; likely gone with
+the Neo1, whose draws were the only ones without it); (2) titanium by material, the boards' milligrams and a titanium
+alloy's kilograms in one panel (types 1, 2, 3, 5, 6; the boards hold titanium in about half the draws, why not yet
+traced: their data come from the sibling projects); (3) steel's panels of types 3 and 5 stretched by the Neo1 (gone with
+E30). E25 point B postponed. Then 04, the stock-and-flow model ("04 will then be the stock and flow model").
+
+## 2026-11-04, evening: 03 built (E29); where to start
 
 What changed, on Matthias's word ("Yes, agree E29", "Yes, build 03"; VERIFICATION.md V170): 03 rewritten in the form of
 02's pages, one item a page, the six types in six panels, each split into what contributes to it (EVIDENCE.md E29 and its
@@ -72,7 +104,8 @@ What changed, on Matthias's word ("Yes, agree E29", "Yes, build 03"; VERIFICATIO
 2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
 
 **Since:** both run ("Both are done!!") and read back (V171): 200,000 draws, they add up; 43 pages, each passing the tests'
-rules.
+rules; committed and pushed (174077d). Then the element pages in alphabetical order of their names ("Elements only",
+V172): **his run of 03 to see it**, not committed.
 
 **Open:** E29's three "Found" (the shares written "in 100 %", titanium's milligrams and kilograms in one panel, the Neo1
 stretching steel's panels of types 3 and 5), his decision; E25 point B postponed; then 04, the stock-and-flow model

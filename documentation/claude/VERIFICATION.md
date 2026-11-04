@@ -5,6 +5,16 @@ by Claude, newest first.
 
 ## 2026-11-04
 
+### V172. 03's element pages in alphabetical order of their names
+
+- **His words:** "Alphabtetic is easier to find", then, of the two answers offered, "Elements only" (2026-11-04).
+- **Test first, seen to fail:** `test_the_element_pages_in_alphabetical_order_of_their_names` (the fixture's 22 elements):
+  the pages began "Lithium, Boron, Magnesium, Aluminium …". After the change (`pages`: the elements sorted by
+  `element_label`, 'Aluminium (Al)' …): the eight tests of `tests/test_comparison.py` OK (115 s); the material pages
+  checked to keep 02's order.
+- **Not covered:** his run of 03 (the same 22 element pages, so the same 22 files, now in the new order); the rest of the
+  suite not rerun (no other test reads 03; the change is in 03's `pages` only).
+
 ### V171. His runs of 02 and 03 after E29 read back
 
 - **His words:** "I'll run both", "Both are done!!" (2026-11-04).

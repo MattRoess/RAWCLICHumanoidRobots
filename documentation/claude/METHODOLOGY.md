@@ -971,7 +971,7 @@ down:
 |---|---|---|
 | `comparison_total_1.png`, the mass of one robot | its materials | the discrete rainbow of 16 |
 | `comparison_materials_<k>.png`, each material any type holds (15 in V170's run: no type holds ceramics) | the kind of part it sits in | the kinds' of 01 and 02 |
-| `comparison_elements_<k>.png`, each element of interest any type holds (22 in V170's run) | the material it comes from, the copper fixed in alloys pale grey | 02's of the element pages (muted) |
+| `comparison_elements_<k>.png`, each element of interest any type holds (22 in V170's run), in alphabetical order of their names, 1 Aluminium … 22 Titanium (Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only") | the material it comes from, the copper fixed in alloys pale grey | 02's of the element pages (muted) |
 | `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the part group, the body region | the discrete rainbow of 12, of 7 |
 | `comparison_copper_1.png`, copper's inflow | recycled as copper, fixed in alloys | 02's copper, pale grey |
 

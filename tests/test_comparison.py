@@ -141,6 +141,24 @@ class TestComparison(Compared):
         self.assertTrue(notes)
         self.assertEqual(sorted(set(written) - set(notes)), sorted(expected))
 
+    def test_the_element_pages_in_alphabetical_order_of_their_names(self):
+        # Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only": comparison_elements_1.png Aluminium (Al)
+        # … the last Titanium (Ti), by the element's name, as its page's title begins; the material pages keep 02's order.
+        robots = comparison.read_draws(self.params)
+        elements, materials = [], []
+        for name, figure in comparison.pages(robots, self.params):
+            heading = figure._suptitle.get_text() if figure._suptitle else ''
+            if '_elements_' in name:
+                elements.append((int(name.rsplit('_', 1)[1].split('.')[0]), heading.split(' (')[0]))
+            if '_materials_' in name:
+                materials.append(heading.split(' in one robot')[0])
+            composition.plt.close(figure)
+        names = [n for _, n in sorted(elements)]
+        self.assertEqual(names, sorted(composition.ELEMENT_NAMES[e] for e in ELEMENTS))
+        self.assertEqual(names[0], 'Aluminium')
+        self.assertEqual(names[-1], 'Titanium')
+        self.assertEqual(materials, [m for m in composition.MATERIAL_ORDER if m != NOT_HELD])
+
     def test_each_page_six_panels_of_02s_form_no_text_over_data_readable(self):
         # 02's form (E29): a panel per type holding the item; no text over a chart's data (E26's rule); text 14 pt and
         # up on a 16 × 9 inch page.

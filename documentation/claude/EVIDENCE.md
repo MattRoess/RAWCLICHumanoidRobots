@@ -8,6 +8,50 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E30. The NeodraDynamics Neo1 an outlier, not drawn (2026-11-04). Decided; nothing built
+
+Matthias, 2026-11-04, after 03's pages (V171): "We might need to qualify Neo the huge robot as an outlyer, as it was
+just built as a few of them and never will be build in large numbers", "So kick it out of the statistics and just hae it
+mentioned or in as the outlier"; asked "I am right the neo is the real big robot?" and answered yes (below); then "Ok it
+is neo. It should be out. Mark it as outlier."
+
+**What it is** (read first-hand 2026-11-04, V157): 208 NeodraDynamics Neo1 (清卓动力, Beijing), hydraulic, about 4 m,
+41 joints; "a weight of 1.2 metric tons" and "a cable supplies its power. A battery will come once it moves" (New Atlas,
+2026-11-01, https://newatlas.com/robotics/neodradynamics-neo1-giant-hydraulic-humanoid-robot/; a press report with the
+maker interviewed, second-hand). The register: status "Prototype", types "5, 3". The next heaviest of the 301 robots with
+a mass: Galbot S1 320 kg (type 3), AICO 2 281 kg (type 2), CYBORG WO1 170 kg (type 5). No source states how many were
+built: "built as a few, never in large numbers" is Matthias's judgement, recorded as his words.
+
+**What leaving it out does** (his 200,000 draws with Neo1's taken away; 02's rerun draws the other robots instead):
+
+| | Neo1's share of the draws | Mean mass with / without | Mean steel with / without | Heaviest without |
+|---|---|---|---|---|
+| Type 3 (164 robots with a mass) | 0.62 % | 99.3 / 92.5 kg | 20.9 / 14.7 kg | 396 kg |
+| Type 5 (11 robots with a mass) | 9.1 % | 192.8 / 92.5 kg | 105.4 / 15.0 kg | 171 kg |
+
+**The points** (written back to him 2026-11-04; his answer "It should be out. Mark it as outlier."):
+
+| # | Point | Status |
+|---|---|---|
+| 1 | 02 no longer draws Neo1, in types 3 and 5 (type 3 over 163 robots, type 5 over 10) | decided: "It should be out" |
+| 2 | Neo1 stays in the register and in type 3's parts file (every humanoid keeps its type); its "In the run" "not drawn: an outlier" | decided: "Mark it as outlier" |
+| 3 | Where it is set: one setting in 00, `composition.outliers` (register number 208 and the reason in his words), read by 02, by 01's check of the register and by the register builder | my recommendation; to confirm with him before building |
+| 4 | Mentioned, not a page of its own: on 02's notes pages of types 3 and 5 and on 03's notes page, "Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers" | read from "Mark it as outlier"; to confirm |
+| 5 | 01's robots table of type 3 keeps it, marked an outlier, not drawn | my recommendation; to confirm (a change to a figure: described first) |
+| 6 | Neo1 only, no other heavy robot | decided: "Ok it is neo" |
+
+**Where the code decides it** (read 2026-11-04, nothing changed): 01 `IN_RUN_*` (the words of "In the run") and
+`check_type_sheet` (checks each robot's "In the run"); `tools/make_humanoid_register.py` `IN_RUN_*` and `in_the_run`
+(writes it); 02 `read_apart_inputs` (`drawn`: taken apart and with a mass; `ApartInputs.left_out`, `.listed`), `lead`
+("all its n robots", counts `listed`), `taken_apart_notes` ("Not drawn: …"), the console line of `run` ("not drawn (no
+mass stated)"); 01 `robots_table_rows` (the table lists the robots of the parts file); 03's notes paragraph naming the
+Neo1 as the reason for each panel's own scale (to be rewritten). Tests that count type 3's or 5's robots or draw Neo1
+will change (`tests/test_make_humanoid_register.py`, `tests/test_parts_taken_apart.py`, `tests/test_parameters.py` for
+a new setting).
+
+**Effects expected:** E29's third finding goes (steel's panels of types 3 and 5); its first likely too (type 3's
+terbium: Neo1's draws were the only ones without it, V170); its second (titanium) stays.
+
 ## E29. Spec: 03, the six robot types compared (2026-11-04). Built
 
 Matthias, 2026-11-04: "Yes, write 03's spec", "The figures should look similar or the same as in 02", "I want how the
@@ -66,7 +110,7 @@ for his word to change:
 |---|---|---|
 | 1 | A type holding the item in fewer than 2.5 % of its draws | no panel, 02's rule (its pages: "one held in fewer than 2.5 % of the draws has no panel"); its place says "none in this robot type" or "held in 0.45 % of its draws: fewer than 2.5 %, no panel" |
 | 2 | Colours where 02 has none: the 16 materials of the total, the 12 part groups, the 7 body regions | Paul Tol's discrete rainbow of 16, 12 and 7, as published (tol_colors.py 2022.10, read 2026-11-04); the kinds 01's, the element pages 02's muted, copper 02's |
-| 3 | The pages' names | `comparison_<series>_<k>.png`, numbered as 02's (`comparison_materials_1.png` copper … in 02's order of materials), so that a page no longer drawn is removed by its exact name |
+| 3 | The pages' names | `comparison_<series>_<k>.png`, numbered, so that a page no longer drawn is removed by its exact name: the materials in 02's order (`comparison_materials_1.png` copper); the elements, since his "Alphabtetic is easier to find", "Elements only" (2026-11-04, V172), in alphabetical order of their names (`comparison_elements_1.png` aluminium … `_22` titanium) |
 | 4 | The share scale ("share of draws") | on the first panel drawn in each row, so that a row whose first type has no panel keeps it |
 | 5 | The legend of 16 materials or 13 kinds | in rows, as many as it needs to stay within the page (tested) |
 

@@ -43,7 +43,8 @@ six panels, three across and two down:
 
   comparison_total_1.png             the mass of one robot, split by material
   comparison_materials_<k>.png       each material any type holds, split by the kind of part it sits in
-  comparison_elements_<k>.png        each element of interest any type holds, split by the material it comes from
+  comparison_elements_<k>.png        each element of interest any type holds, split by the material it comes from, in
+                                     alphabetical order of their names (1 Aluminium … 22 Titanium)
   comparison_part_groups_1.png       the mass of one robot, split by part group
   comparison_body_regions_1.png      the mass of one robot, split by body region
   comparison_copper_1.png            copper's inflow, split into recycled as copper and fixed in alloys
@@ -420,8 +421,11 @@ def pages(robots: list, params: Params):
         yield (f'{PREFIX}_materials_{k}.png',
                compare_page(f'{material} in one robot of each robot type, by the kind of part it sits in', robots,
                             lambda r, m=material: r.in_kinds(m), KIND_COLOURS))
-    elements = [e for e in robots[0].tables['elements'][0]
-                if any(composition.held(r.column('elements', e) + sum(fixed_in(r, e).values(), 0)) for r in robots)]
+    # The elements in alphabetical order of their names, as each page's title begins ('Aluminium (Al)' … 'Titanium (Ti)';
+    # Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only"); the materials keep 02's order.
+    elements = sorted((e for e in robots[0].tables['elements'][0]
+                       if any(composition.held(r.column('elements', e) + sum(fixed_in(r, e).values(), 0))
+                              for r in robots)), key=composition.element_label)
     for k, symbol in enumerate(elements, 1):
         inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
         yield (f'{PREFIX}_elements_{k}.png',
