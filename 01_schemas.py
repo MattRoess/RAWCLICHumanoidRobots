@@ -125,17 +125,16 @@ from src.params_schema import ParameterError, Params, absolute, current  # noqa:
 # What the overview says about the project
 # ------------------------------------------------------------------------------------------------------
 
-# The stages of the project, in the order they are run, as the overview page shows them. A test
-# (tests/test_schemas.py) compares this list with the numbered files at the top of the project, so that a
+# The stages of the project, in the order they are run, as the overview page shows them: its file, the title of its
+# box and the words in it ({draws}: the setting composition.draws). overview_1 draws its stage boxes from this list
+# (Matthias, 2026-11-05, "Yes, all ten", open item 2: until then a list of its own, 03 among the outputs as "later").
+# A test (tests/test_schemas.py) compares this list with the numbered files at the top of the project, so that a
 # stage cannot be added without the overview saying what it does.
 STAGES = [
-    ('00_parameters.py', 'The settings: checks them and writes their register.'),
-    ('01_schemas.py', 'Every input checked before anything is drawn at random: these pages.'),
-    ('02_composition.py', 'What each robot type is made of, drawn at random (Monte Carlo): its materials, elements, '
-                          'part groups and body regions, written as the draws of each robot type; robot type 1 from '
-                          'its robots, each part by part, with its element and material pages and where they sit.'),
-    ('03_comparison.py', 'The robot types side by side, by material, element, part group and body region, from the '
-                         'draws of 02; after robot type 6.'),
+    ('00_parameters.py', '00 Settings', '00_parameters.py: every setting, checked'),
+    ('01_schemas.py', '01 Checks', '01_schemas.py: every input checked, these pages'),
+    ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} draws, each robot taken apart from its own parts'),
+    ('03_comparison.py', '03 Comparison', '03_comparison.py: the six robot types side by side, from the draws of 02'),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -3871,14 +3870,15 @@ def taken_count(n: int, register: list | None, apart) -> tuple:
 
 def open_words(register: list | None, aparts: dict | None) -> str:
     """overview_2's line of what is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"): the robot
-    types with robots with a mass not yet taken apart, each with how many (taken_count), then the six compared (03)."""
+    types with robots with a mass not yet taken apart, each with how many (taken_count), then the stock-and-flow model,
+    04 (since 2026-11-05: 03 built; Matthias, 2026-11-04, "04 will then be the stock and flow model")."""
     left = [f'{n} ({with_mass - taken})' for n in sorted(aparts or {})
             for taken, with_mass, _ in [taken_count(n, register, aparts[n])] if taken < with_mass]
     if not left:
-        return 'Open: the six robot types compared.'
+        return 'Open: the stock-and-flow model (04).'
     listed = left[0] if len(left) == 1 else ', '.join(left[:-1]) + ' and ' + left[-1]
     return (f"Open: robots with a mass not yet taken apart in robot type{'s' if len(left) > 1 else ''} {listed}; then "
-            'the six robot types compared.')
+            'the stock-and-flow model (04).')
 
 
 def template_shares(apart) -> tuple:
@@ -3949,9 +3949,9 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
 
 
 def overview_flow(register: list | None, aparts: dict | None, params: Params):
-    """The overview's first page: how the model works, from its inputs through its stages to what they write, as
-    boxes joined by arrows; Matthias's inputs, the sibling projects' data, the stages and the outputs each in its
-    colour; what is later in grey."""
+    """The overview's first page: how the model works, from its inputs through its stages (STAGES) to what each
+    writes, as boxes joined by arrows; Matthias's inputs, the sibling projects' data, the stages and the outputs each
+    in its colour."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, 'How the model works: from the inputs through the stages to the results',
               fontsize=SCREEN_HEADING, fontweight='bold', va='top')
@@ -3969,31 +3969,29 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
         ('The sibling projects', 'car boards and sensors, data-centre tantalum, traction-motor magnets and steels',
          'sibling'),
     ]
-    stages = [('00 Settings', '00_parameters.py: every setting, checked'),
-              ('01 Checks', '01_schemas.py: every input checked, these pages'),
-              ('02 Monte Carlo', f'02_composition.py: {params.composition.draws:,} draws, each robot taken apart '
-                                 'from its own parts')]
-    outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw',
-                'output'),
+    stages = [(title, words.format(draws=f'{params.composition.draws:,}')) for _, title, words in STAGES]
+    # What each stage writes, by the stage that writes it (its place in STAGES): 02 the draws and its pages, 03 its.
+    outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw', 2),
                ('The pages of the robot types taken apart', 'their elements and materials in one robot; where '
-                                                            'their critical elements and each material sit', 'output'),
-               ('03 Comparison', '03_comparison.py: the robot types side by side; after robot type 6', 'later')]
+                                                            'their critical elements and each material sit', 2),
+               ('The comparison pages', 'the six robot types side by side, one item a page', 3)]
     left, middle, right, width = 0.4, 6.3, 11.2, 5.1
     tops = [1.1 + k * 1.42 for k in range(len(inputs))]
+    stage_tops = [1.1 + k * 1.75 for k in range(len(stages))]   # four stages in the height of five inputs
     for k, ((title, text, colour), y) in enumerate(zip(inputs, tops)):
         screen_box(axes, left, y, width, title, text, TOL_LIGHT[colour], 1.3)
-        screen_arrow(axes, (left + width, y + 0.65), (middle, 3.9 + k * 0.28))   # each read by 01, then by 02
-    for k, (title, text) in enumerate(stages):
-        y = 1.6 + k * 2.2
+        # Each read by 01, then by 02: its arrow into 01's box.
+        screen_arrow(axes, (left + width, y + 0.65), (middle, stage_tops[1] + 0.15 + k * 0.28))
+    for k, ((title, text), y) in enumerate(zip(stages, stage_tops)):
         screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], 1.45)
         if k:
-            screen_arrow(axes, (middle + 2.0, y - 0.75), (middle + 2.0, y))
-    for k, (title, text, colour) in enumerate(outputs):
+            screen_arrow(axes, (middle + 2.0, y - 0.3), (middle + 2.0, y))
+    for k, (title, text, stage) in enumerate(outputs):
         y = 2.5 + k * 1.95
-        screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT[colour], 1.55)
-        screen_arrow(axes, (middle + 4.0, 6.8), (right, y + 0.78), SCREEN_MUTED if colour == 'later' else SCREEN_INK)
+        screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT['output'], 1.55)
+        screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.72), (right, y + 0.78))
     legend = [('his', 'Matthias\'s inputs'), ('sibling', 'the sibling projects\' data'), ('stage', 'the stages, run '
-              'by pressing Run'), ('output', 'what they write'), ('later', 'later')]
+              'by pressing Run'), ('output', 'what they write')]
     x = 0.4
     for key, label in legend:
         axes.add_patch(Rectangle((x, 8.45), 0.3, 0.3, facecolor=TOL_LIGHT[key], edgecolor=SCREEN_INK, linewidth=0.8))
@@ -4336,7 +4334,9 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
     height_at, mass_axis, mass_text, joints_at, battery_axis = (
         (T_WHEELS['height'], T_WHEELS['mass'], T_WHEELS['mass_text'], T_WHEELS['joints'], T_WHEELS['battery'])
         if wheels else (T_HEIGHT, T_MASS, T_MASS_TEXT, T_JOINTS, T_BATTERY))
-    mass_ticks = axis_ticks(max(r.mass[2] for r in rows), 2 if wheels else 5)   # its axis narrower on wheels
+    # The mass axis to the largest robot drawn: an outlier (not drawn) keeps its row and its mass written, no bar
+    # (Matthias, 2026-11-05, "Yes, all ten", open item 4: the Neo1's 1,200 kg ran the axis to 1,600 kg).
+    mass_ticks = axis_ticks(max(r.mass[2] for r in rows if not r.outlier), 2 if wheels else 5)   # narrower on wheels
     # The battery's axis leaves room for the label of the longest bar: that bar ends at 90 % of the column at most, its
     # label beside it then clear of the cells (2026-10-30, batch 2b's entry: "1584 Wh" ran into them; type 1's axis the
     # same as before, 0 to 800 Wh).
@@ -4402,9 +4402,10 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
                       **words)
             axes.text(height_at, middle, f'{kg(r.height)} m' if r.height else '', ha='right', va='center', **words)
             low, mode, high = r.mass
-            axes.add_patch(Rectangle((mass_x(low), middle - 0.06), mass_x(high) - mass_x(low), 0.12,
-                                     facecolor=TABLE_BAR, edgecolor=SCREEN_INK, linewidth=0.6, zorder=2))
-            axes.plot(mass_x(mode), middle, 'o', color=SCREEN_INK, markersize=6, zorder=3)
+            if not r.outlier:
+                axes.add_patch(Rectangle((mass_x(low), middle - 0.06), mass_x(high) - mass_x(low), 0.12,
+                                         facecolor=TABLE_BAR, edgecolor=SCREEN_INK, linewidth=0.6, zorder=2))
+                axes.plot(mass_x(mode), middle, 'o', color=SCREEN_INK, markersize=6, zorder=3)
             axes.text(mass_text, middle, f'{kg(mode)} kg', ha='left', va='center', **words)
             axes.text(joints_at, middle, str(r.joints), ha='right', va='center', **words)
             marks = (SHARES_MARK if r.shares else '') + (LIFT_MARK if r.lift else '')

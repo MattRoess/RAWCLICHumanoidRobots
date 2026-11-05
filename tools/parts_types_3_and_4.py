@@ -2343,8 +2343,13 @@ OWN_SOURCES = [
 def sources(rows: dict) -> list:
     """The sheet Sources of a file: its own sources that its rows name, and type 2's file's sources its rows name (the
     shared rows' and the helpers' codes), each once. A robot's name is no citation: the names, some of which hold a
-    source's code ("Moon Dynamics L1", "Robo Robotics ROBO-T1"), are left out of the text searched (E15.7)."""
-    text = ' '.join(str(cell) for sheet in rows.values() for row in sheet for cell in row)
+    source's code ("Moon Dynamics L1", "Robo Robotics ROBO-T1"), are left out of the text searched (E15.7). The sheets
+    that are one set for all are searched too, as sheets() writes them (MagnetGrades, JointParts, and the Shares of the
+    file's parts): their rows cite sources as well (the servo valve's M30, the G1's teardown T1; Matthias, 2026-11-05,
+    "Yes, all ten", open item 7)."""
+    named = {r[0] for r in JOINTPARTS_ROWS} | {r[1] for r in rows.get('Parts', [])}
+    one_set = MAGNETGRADES_ROWS + JOINTPARTS_ROWS + [r for r in SHARES_ROWS if r[0] in named]
+    text = ' '.join(str(cell) for sheet in [*rows.values(), one_set] for row in sheet for cell in row)
     # The robots' names of this file and of type 2's, whose helpers' texts name its robots ("type 2's Tlibot T1").
     names = {str(row[0]) for row in rows.get('Robots', []) if row} | {str(row[0]) for row in T2.ROBOTS_ROWS if row}
     for name in sorted(names, key=len, reverse=True):

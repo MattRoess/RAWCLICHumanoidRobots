@@ -186,7 +186,7 @@ SHARES_HEADINGS = ['Part or component', 'Material', 'Grade', 'Share min', 'Share
                    'Label', 'Basis']
 SHARES_ROWS = [
     ('Motor stator', 'Copper', None, 0.23, 0.36, 0.45, None, 'S',
-     'The winding: measured car traction motors 23-29 % (Drexler et al. 2025), car auxiliary motors 27 / 36 / 45 %; '
+     'The winding: measured car traction motors 23-29 % (Drexler 2025), car auxiliary motors 27 / 36 / 45 %; '
      'E2.10; Matthias: "Yes use this numberrs"'),
     ('Motor stator', 'Plastics', None, 0.02, 0.05, 0.1, None, 'E', "The winding's coating: E2.8"),
     ('Motor stator', 'Electrical steel', 'M19 or M27', None, None, None, 'Yes', 'E',
@@ -399,7 +399,7 @@ SHARED_CONSTANTS_FIRST = [
     ('all', 'Board mass per cm2 (boards not weighed)', 0.28, 0.56, 0.84, 'g/cm2', 'E',
      'the weighed small driver board, 12.8 g on 22.9 cm2, ± 50 %; E2.8'),
     ('all', "Copper share of a board's mass", 0.125, 0.2, 0.287, 'share', 'S',
-     'Bizzo et al. 2014, Table 3: 14 analyses combined (min / mean / max); E2.8b'),
+     'Bizzo 2014, Table 3: 14 analyses combined (min / mean / max); E2.8b'),
     ('all', 'Power conductor cross-section (2 conductors)', 0.52, 0.82, 1.31, 'mm2', 'S',
      "20 / 18 / 16 AWG, the XT30's wire range (TME, second-hand)"),
     ('all', 'Signal conductor cross-section (2 conductors)', 0.065, 0.13, 0.2, 'mm2', 'E', 'E2.8'),

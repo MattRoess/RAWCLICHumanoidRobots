@@ -52,6 +52,18 @@ def save(folder: str, table: str, columns: list, draws: np.ndarray) -> None:
         file.write('\n'.join(columns) + '\n')
 
 
+def median_along_bars(axes) -> float:
+    """Where a panel's median (its panel_numbers) sits along its bars: 0 at the left edge of its first bar (its smallest
+    draw), 1 at the right edge of its last (its axis's end), on the axis's own scale, linear or logarithmic; the axis's
+    margins left out, as the rule measures (02's logarithmic; as in test_parts_taken_apart.py)."""
+    median = axes.panel_numbers[2]
+    low = min(p.get_x() for p in axes.patches)
+    high = max(p.get_x() + p.get_width() for p in axes.patches)
+    if axes.get_xscale() == 'log':
+        return float((np.log10(median) - np.log10(low)) / (np.log10(high) - np.log10(low)))
+    return float((median - low) / (high - low))
+
+
 def write_six(params: Params, rng: np.random.Generator) -> None:
     """Six robot types' draws in 02's files, each adding up as 02's do: the materials, part groups and body regions to
     the total; each material by kind of part to the material; each element by material to the element, its copper
@@ -86,14 +98,20 @@ def write_six(params: Params, rng: np.random.Generator) -> None:
         save(parts, 'materials', by_kind_columns, np.column_stack(by_kind))
         by_material_columns, by_material = [], []
         for k, e in enumerate(ELEMENTS):
-            # A light alloy's metal from its own alloy (E24, E33), every other element from the aluminium alloys.
-            for m, f in ((composition.ALLOY_OF.get(e, 'Aluminium alloys'), share),
-                         ('Boards and components', 1 - share)):
+            # A light alloy's metal from its own alloy (E24, E33), every other element from the aluminium alloys; the
+            # titanium beside its alloy in the sensors, the cameras and the other sensors (02's components, E32).
+            electronics = ([(composition.component_label(composition.CAMERAS), 0.7 * (1 - share)),
+                            (composition.component_label(composition.OTHER_SENSORS), 0.3 * (1 - share))]
+                           if e in composition.SENSORS_OF else [('Boards and components', 1 - share)])
+            for m, f in [(composition.ALLOY_OF.get(e, 'Aluminium alloys'), share), *electronics]:
                 by_material_columns.append(f'{e}: {m}')
                 by_material.append(elements[:, k] * f)
         by_material_columns.append(f'Cu: Brass{composition.FIXED_MARK}')
         by_material.append(fixed)
         save(parts, 'by_material', by_material_columns, np.column_stack(by_material))
+        # The robots of the register drawn, '<number> <name>', as 02 writes them (none an outlier).
+        with open(os.path.join(parts, 'register.txt'), 'w', encoding='utf-8') as file:
+            file.write(f'{t}00 Robot A of type {t}\n{t}01 Robot B of type {t}\n')
 
 
 class Compared(unittest.TestCase):
@@ -135,8 +153,10 @@ class TestComparison(Compared):
         self.assertEqual(comparison.run(self.params), 0)
         written = sorted(os.listdir(self.params.output.comparison_dir))
         materials = [m for m in MATERIALS if m not in (NOT_HELD, composition.NOT_ALLOCATED)]
+        # Each element a page, the titanium also its sensors' (2026-11-05, "Yes, add it").
+        pages_of_elements = len(ELEMENTS) + len([e for e in ELEMENTS if e in composition.SENSORS_OF])
         expected = (['comparison_body_regions_1.png', 'comparison_copper_1.png']
-                    + [f'comparison_elements_{k}.png' for k in range(1, len(ELEMENTS) + 1)]
+                    + [f'comparison_elements_{k}.png' for k in range(1, pages_of_elements + 1)]
                     + [f'comparison_materials_{k}.png' for k in range(1, len(materials) + 1)]
                     + ['comparison_part_groups_1.png', 'comparison_total_1.png'])
         # Each page of panels followed by the page of its numbers (E34).
@@ -144,6 +164,71 @@ class TestComparison(Compared):
         notes = [w for w in written if w.startswith('comparison_notes_')]
         self.assertTrue(notes)
         self.assertEqual(sorted(set(written) - set(notes)), sorted(expected))
+
+    def test_the_sensors_titanium_a_page_of_its_own(self):
+        # Matthias, 2026-11-05: "where the hell is titanium in the sensor … I only see titanium alloy the heavy stuff",
+        # "Yes, add it": beside the page of the alloy's titanium, a page of the sensors' titanium, the cameras and the
+        # other sensors, its own scale.
+        robots = comparison.read_draws(self.params)
+        pages = dict(comparison.pages(robots, self.params))
+        titles = {n: f._suptitle.get_text() for n, f in pages.items() if f._suptitle}
+        name = next(n for n, t in titles.items() if t == 'Titanium (Ti) in the sensors of one robot of each robot type')
+        labels = {t.get_text() for legend in pages[name].legends for t in legend.get_texts()}
+        self.assertEqual(labels, {composition.component_label(composition.CAMERAS),
+                                  composition.component_label(composition.OTHER_SENSORS)})
+        self.assertIn('Titanium (Ti) held in the titanium alloy of one robot of each robot type', titles.values())
+        for figure in pages.values():
+            composition.plt.close(figure)
+
+    def test_no_median_in_the_first_part_of_its_axis(self):
+        # Matthias, 2026-11-05: "Titanium in sensors the x axis is not good, You know this", then "Yes, build it" (E36,
+        # 02's rule, one copy): type 2's sensors' titanium spread as in V186 (96 % of the draws 1 to 10 mg from the
+        # cameras, 4 % 100 to 470 mg from the PZT of ultrasonic sensors), its panel on a logarithmic axis; no panel of
+        # 03's pages with its median in the first LOG_BELOW of its bars.
+        path = self.table_path(2, 'parts_dir', 'by_material')
+        with open(path[:-len('.npy')] + '.txt', encoding='utf-8') as file:
+            columns = file.read().split('\n')[:-1]
+        draws = np.load(path).astype(float)
+        rng = np.random.default_rng(2)
+        ultrasonic = rng.random(len(draws)) < 0.04
+        draws[:, columns.index(f'Ti: {composition.component_label(composition.CAMERAS)}')] = (
+            rng.uniform(1, 10, len(draws)) * 1e-6)
+        draws[:, columns.index(f'Ti: {composition.component_label(composition.OTHER_SENSORS)}')] = np.where(
+            ultrasonic, rng.uniform(100, 470, len(draws)), rng.uniform(0.1, 1, len(draws))) * 1e-6
+        save(os.path.dirname(path), 'by_material', columns, draws)
+        robots = comparison.read_draws(self.params)
+        checked, sensors = 0, None
+        for name, figure in comparison.pages(robots, self.params):
+            panels = [a for a in figure.axes if getattr(a, 'panel_numbers', None) is not None]
+            if figure._suptitle and figure._suptitle.get_text() == ('Titanium (Ti) in the sensors of one robot of '
+                                                                    'each robot type'):
+                sensors = [a.get_xscale() for a in panels]
+            for axes in panels:
+                checked += 1
+                self.assertGreaterEqual(median_along_bars(axes), composition.LOG_BELOW,
+                                        msg=(name, axes.panel_numbers[0]))
+            composition.plt.close(figure)
+        self.assertEqual(sensors, ['linear', 'log', 'linear', 'linear', 'linear', 'linear'])
+        self.assertGreater(checked, 100)
+
+    def test_it_stops_where_the_draws_hold_an_outlier(self):
+        # Matthias, 2026-11-05, "Yes, all ten" (open item 5): older draws on disk may hold a robot set as an outlier
+        # since (the Neo1, E30), and 03's notes page would then name it "not drawn". 03 stops before drawing and says
+        # which type's draws hold it.
+        path = absolute(self.params.data.register)
+        if not os.path.exists(path):
+            self.skipTest('the register is not on disk')
+        outlier = schemas.outlier_robots(schemas.read_register(path), self.params)[0]
+        self.assertEqual(comparison.outliers_in_draws(self.params, [outlier]), [])
+        register = os.path.join(os.path.dirname(self.table_path(3, 'parts_dir', 'by_material')), 'register.txt')
+        with open(register, 'a', encoding='utf-8') as file:
+            file.write(f'{outlier.number} {outlier.name}\n')
+        found = comparison.outliers_in_draws(self.params, [outlier])
+        self.assertEqual(len(found), 1, found)
+        self.assertIn(f'robot type 3: its draws hold {outlier.number} {outlier.name}', found[0])
+        self.assertEqual(comparison.run(self.params), 1)
+        self.assertFalse(os.path.exists(self.params.output.comparison_dir)
+                         and os.listdir(self.params.output.comparison_dir))
 
     def test_its_notes_name_the_outlier_not_drawn(self):
         # Matthias, 2026-11-04: "Mark it as outlier"; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E30 point 4): 03's notes
@@ -220,7 +305,10 @@ class TestComparison(Compared):
                 materials.append(heading.split(' in one robot')[0])
             composition.plt.close(figure)
         names = [n for _, n in sorted(elements)]
-        self.assertEqual(names, sorted(composition.ELEMENT_NAMES[e] for e in ELEMENTS))
+        # Titanium twice since 2026-11-05 ("Yes, add it"): its alloy's page, then its sensors' right after it.
+        expected = [name for name in sorted(composition.ELEMENT_NAMES[e] for e in ELEMENTS)
+                    for _ in range(2 if name in {composition.ELEMENT_NAMES[e] for e in composition.SENSORS_OF} else 1)]
+        self.assertEqual(names, expected)
         self.assertEqual(names[0], 'Aluminium')
         self.assertEqual(names[-1], 'Titanium')
         self.assertEqual(materials, [m for m in composition.MATERIAL_ORDER if m != NOT_HELD])

@@ -718,8 +718,10 @@ class TestElementPages(unittest.TestCase):
                                         for t in axes.texts}))
             composition.plt.close(figure)
         for symbol, at in panels:
-            kinds = composition.by_kind(d, symbol)
-            shown = [k for k in composition.KINDS if k in kinds and composition.held(kinds[k])]
+            # Its rows by place since 2026-11-05 ("Yes, fix all three"): each kind of part, the electronics by their
+            # components (by_place, places_order).
+            kinds = composition.by_place(d, symbol)
+            shown = [k for k in composition.places_order() if k in kinds and composition.held(kinds[k])]
             if not shown:
                 continue
             per, _ = composition.panel_unit(sum(kinds[k] for k in shown))
@@ -731,7 +733,9 @@ class TestElementPages(unittest.TestCase):
                 self.assertEqual(at[(median_x, y)], composition.panel_number(np.median(kinds[kind][held]) / per))
                 if not held.all():
                     partly.append((symbol, kind))
-        self.assertIn(('In', 'head'), partly)   # the torso boards' aluminium in every draw since point 3a
+        # Indium in the cameras, held in some draws only (its row by place since 2026-11-05, before: the head); the
+        # torso boards' aluminium in every draw since point 3a.
+        self.assertIn(('In', composition.component_label(composition.CAMERAS)), partly)
 
 
 class TestCentre(unittest.TestCase):
@@ -980,15 +984,23 @@ class TestPagesByMaterial(unittest.TestCase):
                         right = axes.get_title(loc='right')
                         self.assertNotIn('outside', right, msg=left)
                         self.assertNotIn('battery', right, msg=left)
-                # No legend entry of a light alloy: its panel's title names it (one colour, no legend).
+                # The light alloys named in the page's legend with every other colour the page draws (Matthias,
+                # 2026-11-05, on 2 element_1: "There are also legend colors missing", "Yes, fix all three"; until then
+                # no legend entry of a light alloy); 03's page of one light alloy, one colour, keeps no legend.
                 legend = [t.get_text() for t in figure.legends[0].get_texts()] if figure.legends else []
-                self.assertFalse(set(legend) & set(composition.ALLOY_OF.values()), legend)
+                titles = {axes.get_title(loc='left') for axes in figure.axes}
+                for title, alloy in (('Aluminium (Al) in the alloys', composition.ALUMINIUM),
+                                     ('Titanium (Ti) in the alloy', 'Titanium alloy')):
+                    if title in titles:
+                        self.assertIn(alloy, legend, msg=name)
             if '_notes_' in name:
                 words = ' '.join(t.get_text() for t in figure.texts).replace('\n', ' ')
                 if 'held in the alloys' in words:
                     found.add('notes')
             composition.plt.close(figure)
-        self.assertEqual(found, {'Aluminium (Al) in the alloys', 'Titanium (Ti) in the alloy', 'notes'})
+        # Beside the alloy's titanium, the sensors' its own panel (Matthias, 2026-11-05: "Yes, add it").
+        self.assertEqual(found, {'Aluminium (Al) in the alloys', 'Titanium (Ti) in the alloy',
+                                 'Titanium (Ti) in the sensors', 'notes'})
 
     def test_the_electronics_by_their_components(self):
         # Matthias, 2026-11-05: "senors are par of the elctronics!!", "3 yes", "Yes, include them" (the cables, connectors
@@ -2078,3 +2090,173 @@ class TestDrawnNumbers(unittest.TestCase):
         of_k1, of_pi = d.robot == d.robots.index('ROBOTIS AI Sapiens K1'), d.robot == d.robots.index('JAKA π')
         self.assertTrue((k1[of_k1] > 0).all() and (k1[~of_k1] == 0).all())
         self.assertAlmostEqual(k1[of_k1].mean() / pi[of_pi].mean(), 16 / 3, delta=16 / 3 * 0.25)
+
+    def test_the_notes_say_the_cameras_no_source_counts_are_estimated(self):
+        # Matthias, 2026-11-05, "Yes, all ten" (open item 6): the notes page says, in the electronics' sentence, how
+        # the number of a robot's cameras is drawn where no source counts it (E31 point 3), in plain words.
+        params = Params()
+        params.composition.draws = 1000
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        notes = ' '.join(composition.taken_apart_notes(c, d, [], params))
+        self.assertIn(composition.ESTIMATED_CAMERAS_WORDS, notes)
+        self.assertIn('1 to 12 colour image sensors, most often 3, a whole number in every draw',
+                      composition.ESTIMATED_CAMERAS_WORDS)
+
+
+class TestLegendsAndPlaces(unittest.TestCase):
+    """Matthias, 2026-11-05, going through the figures: "1_elements_2 has text for the legend cut", "There are also
+    legend colors missing", "parts_taken element indum is head. it is sensors. Cameras.", then "Yes, fix all three".
+    Every legend of 02's pages within its page, in as many rows as it needs (03's legend_columns, one copy); every colour
+    a page draws named in its legend, the light alloys too; the pages of where the critical elements sit split by place:
+    each kind of part, and the electronics by their components (E32), adding up to the same element."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        return d, c, inputs
+
+    def pages(self):
+        d, c, inputs = self.drawn()
+        out = composition.taken_apart_pages(c, d, inputs.left_out, self.params) + composition.parts_figure_pages(d)
+        return [(name, figure) for name, figure in out if figure.legends]
+
+    def test_every_legend_within_its_page(self):
+        for name, figure in self.pages():
+            renderer = figure.canvas.get_renderer()
+            for legend in figure.legends:
+                box = legend.get_window_extent(renderer)
+                self.assertTrue(box.x0 >= 0 and box.x1 <= figure.bbox.width, msg=(name, box.x0, box.x1))
+            composition.plt.close(figure)
+
+    def test_every_colour_a_page_draws_in_its_legend(self):
+        from matplotlib.colors import to_hex
+        from matplotlib.patches import Rectangle
+        for name, figure in self.pages():
+            named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
+            for axes in figure.axes:
+                drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
+                         and p.get_height() > 0 and p.get_facecolor()[3] > 0}
+                self.assertTrue(drawn <= named, msg=(name, sorted(drawn - named)))
+            composition.plt.close(figure)
+
+    def test_the_places_add_up_to_the_elements(self):
+        d, _, _ = self.drawn()
+        for element in {e for _, e in d.elements}:
+            by_kind = sum((v for (k, e), v in d.elements.items() if e == element), np.zeros(d.n))
+            by_place = sum((v for (p, e), v in d.places.items() if e == element), np.zeros(d.n))
+            np.testing.assert_allclose(by_place, by_kind, rtol=1e-9, err_msg=element)
+
+    def test_indium_from_the_cameras_and_sensors_not_the_head(self):
+        d, _, _ = self.drawn()
+        places = composition.by_place(d, 'In')
+        self.assertTrue(places)
+        self.assertTrue(set(places) <= {composition.component_label(c) for c in composition.ELECTRONICS_COMPONENTS},
+                        set(places))
+        self.assertIn('hips', composition.by_place(d, 'Cu'))   # the windings: their kind of part as before
+        self.assertEqual(composition.place_label('hips'), 'Hip joints')
+
+    def test_the_sensors_titanium_a_panel_of_its_own(self):
+        # Matthias, 2026-11-05: "where the hell is titanium in the sensor … I only see titanium alloy the heavy stuff",
+        # "Yes, add it": on 02's element pages beside "Titanium (Ti) in the alloy" (kg) a panel "Titanium (Ti) in the
+        # sensors", the cameras and the other sensors, in mg, its numbers on the page of numbers.
+        d, c, inputs = self.drawn()
+        pages = composition.taken_apart_pages(c, d, inputs.left_out, self.params)
+        panels = {getattr(a, 'panel_numbers', (None,))[0]: a for _, f in pages for a in f.axes}
+        self.assertIn('Titanium (Ti) in the alloy', panels)
+        sensors = panels['Titanium (Ti) in the sensors']
+        self.assertEqual(sensors.panel_numbers[6], 'mg')
+        page = next(f for _, f in pages if sensors in f.axes)
+        labels = {t.get_text() for legend in page.legends for t in legend.get_texts()}
+        self.assertIn(composition.component_label(composition.CAMERAS), labels)
+        for _, figure in pages:
+            composition.plt.close(figure)
+
+
+def median_along_bars(axes) -> float:
+    """Where a panel's median (its panel_numbers) sits along its bars: 0 at the left edge of its first bar (its smallest
+    draw), 1 at the right edge of its last (its axis's end), on the axis's own scale, linear or logarithmic; the axis's
+    margins left out, as the rule measures (02's logarithmic)."""
+    median = axes.panel_numbers[2]
+    low = min(p.get_x() for p in axes.patches)
+    high = max(p.get_x() + p.get_width() for p in axes.patches)
+    if axes.get_xscale() == 'log':
+        return float((np.log10(median) - np.log10(low)) / (np.log10(high) - np.log10(low)))
+    return float((median - low) / (high - low))
+
+
+class TestAxisNotPressedLeft(unittest.TestCase):
+    """Matthias, 2026-11-05: "Titanium in sensors the x axis is not good, You know this" (as on 2026-11-01: "The
+    distribution figures show the distribution pressed to the left side"), then "Yes, build it": where the median of a
+    panel's draws would lie in the first LOG_BELOW of its linear axis, from its smallest draw to its end, its mass axis
+    is logarithmic, its bars evenly spaced on it (EVIDENCE.md E36). No panel's median in the first LOG_BELOW of its bars;
+    a panel of a narrow spread keeps its linear axis."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    @staticmethod
+    def panel(parts: dict):
+        """One panel drawn as 02 draws a panel of its pages: stacked_bars, centre_lines, panel_axes."""
+        figure, axes = composition.plt.subplots()
+        bars = composition.stacked_bars(axes, parts, {k: '#000000' for k in parts})
+        composition.centre_lines(axes, bars.values, bars.held_in, bars.end, bars.unit, 'a panel')
+        composition.panel_axes(axes, bars.unit, True)
+        return figure, axes
+
+    def test_a_spread_over_orders_of_magnitude_a_logarithmic_axis(self):
+        # As type 2's titanium in the sensors (V186): 96 % of the draws 1 to 10 mg (the cameras), 4 % 100 to 470 mg (the
+        # PZT of ultrasonic sensors), in kg.
+        rng = np.random.default_rng(1)
+        n = 10_000
+        ultrasonic = rng.random(n) < 0.04
+        parts = {'cameras': rng.uniform(1, 10, n) * 1e-6,
+                 'other sensors': np.where(ultrasonic, rng.uniform(100, 470, n), rng.uniform(0.1, 1, n)) * 1e-6}
+        figure, axes = self.panel(parts)
+        self.assertEqual(axes.get_xscale(), 'log')
+        self.assertGreaterEqual(median_along_bars(axes), composition.LOG_BELOW)
+        # Its bars evenly spaced on the logarithmic axis; its ticks plain numbers, no powers of ten.
+        lefts = np.array(sorted({round(p.get_x(), 15) for p in axes.patches}))
+        steps = np.diff(np.log10(lefts))
+        np.testing.assert_allclose(steps, steps[0], rtol=1e-6)
+        figure.canvas.draw()
+        labels = [t.get_text() for t in axes.get_xticklabels() if t.get_text()]
+        self.assertTrue(labels)
+        self.assertFalse([t for t in labels if '$' in t or '^' in t], labels)
+        composition.plt.close(figure)
+
+    def test_a_narrow_spread_a_linear_axis(self):
+        rng = np.random.default_rng(1)
+        figure, axes = self.panel({'alloy': rng.triangular(1, 2, 4, 10_000)})
+        self.assertEqual(axes.get_xscale(), 'linear')
+        self.assertGreaterEqual(median_along_bars(axes), composition.LOG_BELOW)
+        composition.plt.close(figure)
+
+    def test_no_median_in_the_first_part_of_its_axis(self):
+        # Every panel of type 1's pages: the element and material pages, the pages of where the elements sit.
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        pages = composition.taken_apart_pages(c, d, inputs.left_out, self.params) + composition.parts_figure_pages(d)
+        checked = 0
+        for name, figure in pages:
+            for axes in figure.axes:
+                if getattr(axes, 'panel_numbers', None) is None:
+                    continue
+                checked += 1
+                self.assertGreaterEqual(median_along_bars(axes), composition.LOG_BELOW,
+                                        msg=(name, axes.panel_numbers[0]))
+            composition.plt.close(figure)
+        self.assertGreater(checked, 20)

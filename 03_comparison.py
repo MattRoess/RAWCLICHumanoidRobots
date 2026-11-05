@@ -26,7 +26,7 @@ comes from, '<element>: <material>', and the copper fixed in alloys, '<element>:
 <table>.npy with its columns in <table>.txt. The names of the robot types come from the workbook, through 01's
 `read_workbook`. The register (`data.register`, 01's `read_register`), for the outliers of the setting
 `composition.outliers`, not drawn by 02, which the notes page names (the Neo1: Matthias, 2026-11-04, "Mark it as
-outlier"; EVIDENCE.md E30 point 4).
+outlier"; EVIDENCE.md E30 point 4); and 02's register.txt of each type (the robots of the register drawn).
 
 WHAT IT CHECKS
 --------------
@@ -35,7 +35,8 @@ the same number of draws, as many columns as its list names, 02's tables with th
 every draw its materials, part groups and body regions adding up to its total; its materials by kind of part to its
 materials; its elements by material to its elements; its copper fixed in each alloy to its copper fixed in alloys, and
 its copper recycled as copper and fixed in alloys to its inflow. All to the rounding of float32 (FLOAT32_TOLERANCE).
-Any problem stops it: nothing is drawn.
+And that no type's draws hold a robot set as an outlier (`outliers_in_draws`, its register.txt; Matthias, 2026-11-05,
+"Yes, all ten"): such draws are older than the setting. Any problem stops it: nothing is drawn.
 
 WHAT IT DRAWS
 -------------
@@ -53,8 +54,9 @@ six panels, three across and two down:
 
 Each panel 02's (`stacked_bars`, `centre_lines`, `panel_axes`): the histogram of the type's draws, the height the share
 of the draws, each bar split into its contributions, the smaller lower, each in its colour; the median a solid line,
-the mean a dotted one, the 2.5th and 97.5th percentile dashed, the numbers above the panel, never over its data; each
-panel on its own scale and unit (question 3). A type that holds the item in fewer than 2.5 % of its draws has no panel
+the mean a dotted one, the 2.5th and 97.5th percentile dashed, the numbers on the page after its page (02's E34); each
+panel on its own scale and unit (question 3); a panel whose draws spread over orders of magnitude, its median in the
+first 5 % of its axis, on a logarithmic mass axis (02's LOG_BELOW, E36). A type that holds the item in fewer than 2.5 % of its draws has no panel
 (02's rule; a 0 is not part of a distribution, CLAUDE.md §7): its place says so. One legend at the top of a page. A
 numbered page of an earlier run beyond those drawn is removed by its exact name, and so are the four pages of 03's old
 form (OLD_PAGES); nothing else in the folder is touched.
@@ -168,6 +170,25 @@ def read_draws(params: Params) -> list:
                             {table: read_table(consolidated, table) for table in composition.TABLES},
                             {table: read_table(apart, table) for table in PARTS_TABLES}))
     return robots
+
+
+def outliers_in_draws(params: Params, outliers: list) -> list:
+    """Whether the draws on disk hold a robot set as an outlier (Matthias, 2026-11-05, "Yes, all ten", open item 5):
+    02 draws no outlier (composition.outliers, E30), so draws that hold one are older than the setting, and the notes
+    page would name as "not drawn" a robot they hold. A sentence for each, [] where none, from 02's register.txt of every
+    robot type (the robots of the register drawn, '<number> <name>'). Raises FileNotFoundError where it is missing."""
+    book = schemas.read_workbook(absolute(params.data.workbook), params)
+    numbers = {r.number: r for r in outliers}
+    found = []
+    for category in book.categories:
+        path = os.path.join(absolute(params.output.parts_dir), composition.folder_name(category), 'register.txt')
+        with open(path, encoding='utf-8') as file:
+            drawn = [line.split(' ', 1) for line in file.read().splitlines() if line.strip()]
+        for number, name in drawn:
+            if int(number) in numbers:
+                found.append(f'robot type {category.number}: its draws hold {number} {name}, set as an outlier '
+                             '(composition.outliers), which 02 does not draw: the draws are older than the setting.')
+    return found
 
 
 def misses(sum_of_parts: np.ndarray, whole: np.ndarray) -> int:
@@ -291,15 +312,7 @@ SERIES = ('notes', 'total', 'materials', 'elements', 'part_groups', 'body_region
 OLD_PAGES = ('materials.png', 'elements.png', 'part_groups.png', 'body_regions.png')
 ACROSS, DOWN = 3, 2           # six panels a page, one per robot type
 PANEL_TITLE_WIDTH = 34        # characters in a line of a panel's title, the type's number and name
-LEGEND_WIDTH = 15.0           # inches of the page's width a legend may take
-LEGEND_ROW = 0.035            # the height of a legend's row, share of the page's height (14 points and its spacing)
-
-
-def legend_columns(names: list) -> int:
-    """How many entries of a page's legend go in a row, so that the legend stays within LEGEND_WIDTH: each entry as
-    wide as the longest name at 14 points (about 0.6 of a point's width a character) and its colour's patch."""
-    widest = max(len(name) for name in names) * composition.APART_TEXT * 0.6 / 72 + 0.8
-    return max(1, min(len(names), int(LEGEND_WIDTH // widest)))
+# The legend of a page in as many rows as it needs: 02's legend_columns, LEGEND_ROW (one copy, since 2026-11-05).
 
 
 def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None, symbol: str = ''):
@@ -345,13 +358,13 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
     drawn = {m for _, (_, _, contributions) in panels for m in contributions}
     # No legend for a light alloy's metal (E33, relabelled): one colour, its page's title naming the alloy.
     shown = [m for m in colours if m in drawn] if symbol not in composition.ALLOY_OF else []
-    columns = legend_columns(shown) if shown else 1
+    columns = composition.legend_columns(shown) if shown else 1
     rows = math.ceil(len(shown) / columns) if shown else 0
     figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
     if shown:
         figure.legend(handles=[Patch(color=colours[m], label=m) for m in shown], loc='upper center',
                       bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=composition.APART_TEXT)
-    figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * LEGEND_ROW), h_pad=0.4, w_pad=2.5)
+    figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * composition.LEGEND_ROW), h_pad=0.4, w_pad=2.5)
     composition.make_room(figure, panels)
     return figure
 
@@ -382,7 +395,8 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         'the kg its draws hold in each contribution, the one with the smaller mean lower, each in its colour (one '
         'legend at the top of the page). Solid line: the median; dotted line: the mean. Dashed lines: the 2.5th and '
         '97.5th percentile (95 % of the draws between them). Each axis ends at the 99.5th percentile of its draws: the '
-        "0.5 % beyond are not drawn. Every panel's numbers (in what share of the draws it is held, its median, mean and "
+        "0.5 % beyond are not drawn. " + composition.LOG_WORDS + " Every panel's numbers (in what share of the draws "
+        "it is held, its median, mean and "
         '95 %, the draws beyond its axis) are on the page after its page.',
         'Each panel on its own scale and unit (kg, g, mg): compare the numbers of the panels, not the widths of '
         'their bars. One scale shared by the six would be stretched by the type with the heaviest robots and press '
@@ -444,16 +458,26 @@ def panel_pages(robots: list):
     elements = sorted((e for e in robots[0].tables['elements'][0]
                        if any(composition.held(r.column('elements', e) + sum(fixed_in(r, e).values(), 0))
                               for r in robots)), key=composition.element_label)
-    for k, symbol in enumerate(elements, 1):
+    k = 0
+    for symbol in elements:
         inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
         # A light alloy's metal titled as what its panels draw, the metal its alloy holds (E33, "Yes, relabel").
         heading = (f'{composition.element_label(symbol)} held in the {composition.ALLOY_OF[symbol].lower()} of one '
                    'robot of each robot type' if symbol in composition.ALLOY_OF else
                    f'{composition.element_label(symbol)} in one robot of each robot type{inflow}, by the material it '
                    'comes from')
+        k += 1
         yield (f'{PREFIX}_elements_{k}.png',
                compare_page(heading, robots, lambda r, e=symbol: recovered_from(r, e),
                             composition.MATERIAL_COLOURS, lambda r, e=symbol: fixed_in(r, e), symbol))
+        # The titanium in the sensors beside its alloy, a page of its own, its cameras and other sensors (02's
+        # SENSORS_OF; Matthias, 2026-11-05: "where the hell is titanium in the sensor", "Yes, add it").
+        if symbol in composition.SENSORS_OF:
+            k += 1
+            yield (f'{PREFIX}_elements_{k}.png',
+                   compare_page(f'{composition.element_label(symbol)} in the sensors of one robot of each robot type',
+                                robots, lambda r, e=symbol: composition.sensors_split(e, recovered_from(r, e)),
+                                composition.MATERIAL_COLOURS))
     for table, words in (('part_groups', 'part group'), ('body_regions', 'body region')):
         columns = robots[0].tables[table][0]
         yield (f'{PREFIX}_{table}_1.png',
@@ -482,7 +506,12 @@ def run(params: Params) -> int:
         print(f'{error}\nThe register is needed for the outliers on the notes page: run '
               'tools/make_humanoid_register.py first.', file=sys.stderr)
         return 1
-    found = problems(robots)
+    # The draws belong together, and hold no robot set as an outlier (02's register.txt of each type, open item 5).
+    try:
+        found = problems(robots) + outliers_in_draws(params, outliers)
+    except FileNotFoundError as error:
+        print(f'{error}\nThe draws of 02 are not all there: run 02_composition.py first.', file=sys.stderr)
+        return 1
     if found:
         print('The draws of 02 do not belong together; nothing is drawn. Run 02_composition.py again.',
               file=sys.stderr)

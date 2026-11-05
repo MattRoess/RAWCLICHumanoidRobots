@@ -5,6 +5,85 @@ by Claude, newest first.
 
 ## 2026-11-05
 
+### V186. His figures fixed: the legends, the places, the sensors' titanium and its axis (EVIDENCE.md E36)
+
+- **His words:** "1_elements_2 has text for the legend cut", "There are also legend colors missing", "2 element_1",
+  "parts_taken element indum is head. it is sensors. Cameras.", "Yes, fix all three"; "where the hell is titanium in
+  the sensor", "Yes, add it"; "Titanium in sensors the x axis is not good, You know this", "Yes, build it".
+- **Points 1 to 4, tests:** `TestLegendsAndPlaces` (six: every legend within its page, every colour a page draws in its
+  legend, the places adding up to the elements to 1e-9, indium the cameras' and the other sensors' and copper's
+  windings still their joints, the sensors' titanium a panel of its own in mg); 03's
+  `test_the_sensors_titanium_a_page_of_its_own`. Two older tests set to his later words: the overview's rows by place
+  (indium in the cameras, held in some draws, in place of the head), and the light alloys' legend (E33's "no legend
+  entry of a light alloy" now: the alloy named in the legend of the page that draws it; the expected panels with "Titanium
+  (Ti) in the sensors").
+- **Point 5, tests first, seen to fail:** `TestAxisNotPressedLeft` (three): a panel shaped as type 2's sensors'
+  titanium (96 % of 10,000 draws 1 to 10 mg, 4 % 100 to 470 mg) logarithmic, its median at least 5 % along its bars,
+  its bars evenly spaced on the logarithmic axis, its ticks plain numbers; a narrow spread linear; every panel of type
+  1's pages its median at least 5 % along its bars. Failing before the build ("'linear' != 'log'", `LOG_BELOW`
+  missing), passing after. 03's `test_no_median_in_the_first_part_of_its_axis`: type 2's sensors' titanium in the
+  test's draws spread as above, its panel the one logarithmic of the six, no panel of 03's pages with its median in the
+  first 5 % of its bars.
+- **Deliberate fault:** the rule switched off (`logarithmic` always False): both tests fail, 03's at
+  "comparison_elements_23.png, type 2: 0.010 not ≥ 0.05". It first passed with the rule off (0.0549): the test
+  measured along the drawn axis, whose margins moved the median past 5 %; since then it measures along the bars, from
+  the smallest draw to the axis's end, as the rule does.
+- **The source of the spread** read first-hand: RAWCLICVehicleElectronics' `07_VehicleSensorComposition.xlsx`, sheet
+  Sensor Details, row "ultrasonic sensor" (PZT ceramic disc): titanium 10 / 40 / 120 mg; in the sandbox's draws the
+  robots above 30 mg: type 2 the AgiBot G2 (median 359 mg), the MagicBot D1 (162) and the H2-D Flagship (109), 3.9 % of
+  the draws; type 3 the G2 and the D1, 1.1 %.
+- **02 and 03 in the sandbox** (2,000 draws, the repository's code): 02 "done in 1 min 17 s", 03 86 pages. The page
+  check of every page as it is saved (legends within the page, every colour drawn in a legend, every text and panel
+  within the page, and since today every panel's median at least 5 % along its bars): 263 pages of 02, 86 of 03, no
+  problem. Panels with a median: 286 (02) and 221 (03); logarithmic: 4, the sensors' titanium of types 2 and 3 on 02's
+  element pages 1 and on comparison_elements_23 (their medians at 31 % and 37 % along the bars); the smallest median of
+  a linear panel at 7.4 %.
+- **Looked at:** 1_elements_1 and 1_elements_2 (the legend in two rows, the alloys named, the Ti alloy and Ti sensors
+  panels); type 5's parts elements_2 (indium as cameras and other sensors) and overview_5 (their rows); type 2's and 3's
+  elements_1 and comparison_elements_23 (the logarithmic panels: the cameras' 0.1 to 10 mg and the ultrasonic sensors'
+  50 to 470 mg both visible, ticks 0.1, 0.3, 1 … 300; the four other types linear as before); type 2's numbers_1 (the
+  sensors' titanium held in 97 %, median 1.7 mg, mean 13 mg, 95 % 0.4 to 164 mg, beyond 0.51 % up to 920 mg); the notes
+  pages of type 2, of its parts figures and of 03, page 1 (the sentence of the logarithmic axis, within the page).
+- **Seen, older than today, not changed (reported):** on the numbers pages a share held rounded to "100 %" where not
+  quite every draw holds it (type 2's manganese), and the "Held in" column a few pixels below the others.
+- **The whole suite:** 569 tests (551 s), 2 failed: the two `test_what_it_writes_equals_the_data_file_on_disk` of
+  types 1 and 2, as at V185 (his files of 15:24 hold the citations of before E35 until his runs of the builders). Its
+  first run (548 s) had 2 more: the two older tests above, since set to his later words.
+- **Not covered:** his runs (the builders, 01, 02 at 200,000 draws, 03). At 200,000 draws the medians move a little;
+  the panel nearest the 5 % at 7.4 %.
+
+### V185. The ten open items solved ("Yes, all ten"; EVIDENCE.md E35)
+
+- **His words:** "can we solve the open items?", "in a pragmatic way", "Yes, all ten".
+- **Tests first, seen to fail:** item 7, `TestSourcesOfTheShares` (three: every code the Shares cite on the sheet
+  Sources, M30 on types 5 and 6, Bizzo 2014 and Drexler 2025 in every file), failing "(3, 'Bizzo 2014')", "(3, 'T1')":
+  type 3's Shares cite T1, which its Sources lacked, beside M30, Bizzo and Drexler; item 5,
+  `test_it_stops_where_the_draws_hold_an_outlier` (03), failing on `outliers_in_draws` missing; item 6,
+  `test_the_notes_say_the_cameras_no_source_counts_are_estimated`, failing on the words missing; items 2 and 4,
+  `test_the_overview_draws_its_stages_from_stages_03_among_them` (failing: STAGES of two fields) and
+  `test_the_mass_axis_without_the_outlier` (failing: "1600" among type 3's page's texts). After the build all pass,
+  with the Neo1's and the overview's earlier tests and 03's twelve.
+- **Item 3:** the 28 files "… 2" of 4 November listed by their exact paths, each deleted only where its plain-named
+  file (today's run) was there; none left (`find data figures -name '* 2*'`: 0).
+- **The builders in the sandbox:** their files against his (written 14:23 to 15:24): only the motor stator's Shares
+  row (its basis "Drexler 2025"), the board copper constant (its source "Bizzo 2014") and the sheet Sources changed:
+  Bizzo 2014, Drexler 2025, T3, T3k added to types 3 to 6, T1 to 3, 5 and 6, M30 to 5 and 6. No number changes.
+- **01, 02, 03 in the sandbox** (2,000 draws): 01 "No fault found."; overview_1 looked at (four stages from `STAGES`, 03
+  writing the comparison pages, no "later", the arrows of the inputs into 01's box), overview_2 ("Open: the
+  stock-and-flow model (04)."), type 5's robots table (its mass axis 0 to 200 kg, the Neo1's row "1200 kg" without a
+  dot); 02's notes of type 4, page 4: the sentence of the cameras' estimate in its place, on the page (its nested
+  bracket "(an estimate))" then written ", an estimate"); 03 its check passed on the sandbox's draws, 84 pages.
+- **Item 10:** over every parts file (01's `type_parts`), the robots taken apart of each type's robots with a mass:
+  30/30, 96/96, 164/164, 124/124, 11/11, 5/5 (each type's own file alone: fewer, a robot taken apart in another type's
+  file); `open_words` with the register and the files "Open: the stock-and-flow model (04)."; the materials "No" and
+  "Partly" in the elements from his run's `summary.xlsx` of each type.
+- **The whole suite:** 559 tests (537 s), 3 failed: the two `test_what_it_writes_equals_the_data_file_on_disk` of
+  types 1 and 2 (his files hold the citations "Drexler et al. 2025", "Bizzo et al. 2014" until his runs of the
+  builders), and `test_no_source_row_from_a_robots_name`, which held T1 off type 3's Sources: T1 is cited by the rows
+  of MagnetGrades ("T1 slide 42") and JointParts ("T1 slide 43") every file holds, which item 7 searches; changed to
+  check that T1 comes from those citations and L1 (a robot's name only) stays off; its class OK.
+- **Not covered:** his runs (the six builders, 01, 03); 02's notes at his next run of 02.
+
 ### V184. His runs after the cameras (E31) and the removal (V183), read back
 
 - **His words:** "I have run make 01 to 06 now 02 runs", "02 and 03 have run I also have run again the make 01 and 02".

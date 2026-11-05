@@ -1772,9 +1772,14 @@ class TestTypesThreeAndFourBatchThree(unittest.TestCase):
 
     def test_no_source_row_from_a_robots_name(self):
         # A robot's name holding a source code ("Moon Dynamics L1", "Robo Robotics ROBO-T1") brings no row of that
-        # code into the sheet Sources: only the codes its rows' texts cite.
+        # code into the sheet Sources: only the codes its rows' texts cite. Since 2026-11-05 ("Yes, all ten", open item
+        # 7) the sheets one set for all are searched too, and their rows cite T1, the G1's teardown ("T1 slide 42" in
+        # MagnetGrades, "T1 slide 43" in JointParts): so T1 is on type 3's Sources by those citations, not the name.
         self.assertNotIn('L1', self.three.sources)
-        self.assertNotIn('T1', self.three.sources)
+        shared = sys.modules['parts_taken_apart']
+        self.assertTrue(any('T1 slide' in str(cell) for row in shared.MAGNETGRADES_ROWS + shared.JOINTPARTS_ROWS
+                            for cell in row))
+        self.assertIn('T1', self.three.sources)
 
 
 # --- E19 (Matthias, 2026-11-02, "Yes, agree E19"): the one fixed list of materials, each name what it is --------------
@@ -2248,3 +2253,42 @@ class TestCamerasE31(unittest.TestCase):
         lists = schemas.read_shared_lists(absolute(Params().data.shared_lists))
         for apart in self.files:
             self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, Params())], [])
+
+
+class TestSourcesOfTheShares(unittest.TestCase):
+    """Every source a file's rows cite is on its sheet Sources (Matthias, 2026-11-05, "Yes, all ten", open item 7;
+    VERIFICATION.md V183: the servo valve's Shares rows of types 5 and 6 cite M30, which their Sources lacked, as the
+    builders of types 3 to 6 searched every sheet but Shares; the shared rows cited "Bizzo et al. 2014" and "Drexler et al.
+    2025", not the codes "Bizzo 2014" and "Drexler 2025")."""
+
+    @classmethod
+    def setUpClass(cls):
+        both = {t: written(b) for t, b in enumerate((builder, builder_two, builder_three, builder_four, builder_five,
+                                                       builder_six), start=1)}
+        cls.files = {t: apart for t, (apart, _) in both.items()}
+        # The text of each file's sheet Shares, every cell (01's reader keeps no row's basis).
+        cls.shares = {t: ' '.join(str(c) for row in book['Shares'].iter_rows(min_row=2, values_only=True) for c in row
+                                  if c is not None) for t, (_, book) in both.items()}
+        shared = sys.modules['parts_taken_apart']
+        cls.codes = ({c for a in cls.files.values() for c in a.sources} | {r[0] for r in shared.HYDRAULIC_SOURCES}
+                     | set(shared.SHARED_SOURCES))
+
+    def test_every_code_the_shares_cite_on_the_sheet_sources(self):
+        for t, apart in self.files.items():
+            text = self.shares[t]
+            for code in self.codes:
+                if re.search(rf'(?<![\w-]){re.escape(code)}(?![\w-])', text):
+                    self.assertIn(code, apart.sources, msg=(t, code))
+
+    def test_the_servo_valves_m30_on_the_files_of_its_robots(self):
+        for t in (5, 6):
+            self.assertIn('M30', self.files[t].sources, msg=t)
+
+    def test_bizzo_and_drexler_cited_by_their_codes_in_every_file(self):
+        for t, apart in self.files.items():
+            for code in ('Bizzo 2014', 'Drexler 2025'):
+                self.assertIn(code, apart.sources, msg=(t, code))
+        self.assertIn('Drexler 2025', next(r for r in sys.modules['parts_taken_apart'].SHARES_ROWS
+                                           if r[0] == 'Motor stator' and r[1] == 'Copper')[8])
+        self.assertIn('Bizzo 2014', next(r for r in sys.modules['parts_taken_apart'].SHARED_CONSTANTS_FIRST
+                                         if r[1] == "Copper share of a board's mass")[7])

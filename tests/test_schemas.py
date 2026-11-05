@@ -431,7 +431,20 @@ class TestPages(Small):
 
     def test_the_overview_names_every_stage_of_the_project(self):
         files = sorted(os.path.basename(p) for p in glob.glob(os.path.join(ROOT, '[0-9][0-9]_*.py')))
-        self.assertEqual([name for name, _ in schemas.STAGES], files)
+        self.assertEqual([stage[0] for stage in schemas.STAGES], files)
+
+    def test_the_overview_draws_its_stages_from_stages_03_among_them(self):
+        # Matthias, 2026-11-05, "Yes, all ten" (open item 2): overview_1 draws a box for every stage of STAGES (one
+        # list), 03 a stage with its own output, nothing "later"; overview_2's open line what is open now.
+        from matplotlib.text import Text
+        figure = schemas.overview_flow(None, None, Params())
+        words = [t.get_text() for t in figure.findobj(Text)]
+        for _, title, _ in schemas.STAGES:
+            self.assertIn(title, words)
+        self.assertIn('03 Comparison', words)
+        self.assertIn('The comparison pages', words)
+        self.assertNotIn('later', words)
+        self.assertEqual(schemas.open_words(None, None), 'Open: the stock-and-flow model (04).')
 
 
 class TestScreenPages(unittest.TestCase):
@@ -841,6 +854,25 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         self.assertEqual(schemas.type_card_text(4, 'Anchor', self.views[4], counted, True, []),
                          schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 
+
+    def test_the_mass_axis_without_the_outlier(self):
+        # Matthias, 2026-11-05, "Yes, all ten" (open item 4): the Neo1's 1,200 kg ran the mass axis of the robots tables
+        # of types 3 and 5 to 1,600 kg; the axis runs to the largest robot drawn, the Neo1's row its mass written, no
+        # bar, no dot.
+        from matplotlib.text import Text
+        from matplotlib.lines import Line2D
+        names = schemas.outlier_names(schemas.outlier_robots(self.register, Params()), Params())
+        for n in (3, 5):
+            rows = schemas.robots_table_rows(self.views[n], names)
+            pages = schemas.robots_table_pages(self.views[n], n, outliers=names)
+            figure = next(f for f in pages if 'NeodraDynamics Neo1 *' in [t.get_text() for t in f.findobj(Text)])
+            words = [t.get_text() for t in figure.findobj(Text)]
+            self.assertIn('1200 kg', words, msg=n)
+            self.assertNotIn('1600', words, msg=n)
+            lines = schemas.table_pages(rows)[pages.index(figure)]
+            dots = [line for line in figure.findobj(Line2D) if line.get_marker() == 'o']
+            self.assertEqual(len(dots), sum(1 for line in lines if line[0] == 'robot' and not line[1].outlier),
+                             msg=n)
 
 class TestMaterialFaults(Small):
     """The checks of the sheet 'Material Composition per Cat', each seen to catch the fault it guards."""

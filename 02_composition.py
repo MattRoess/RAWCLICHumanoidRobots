@@ -162,7 +162,9 @@ robots.npy (the robot of the parts file each draw is, its mass, the robot of the
 materials.npy, grades.npy, elements.npy and estimated.npy (every element of interest in every kind of part, and its kg
 resting on masses labelled E), by_material.npy (every element of interest by the material it comes from, as the element
 pages split it, '<element>: <material>', and the copper fixed in an alloy, '<element>: <material> (fixed in alloys)';
-03_comparison.py draws it: EVIDENCE.md E29), each with its columns in the .txt of the same name; register.txt (the robots of the register
+03_comparison.py draws it: EVIDENCE.md E29), places.npy and places_estimated.npy (every element of interest by its place: each
+kind of part, the electronics by their components wherever they sit; the pages of where the critical elements sit, since
+2026-11-05), each with its columns in the .txt of the same name; register.txt (the robots of the register
 drawn) and summary.csv (each element in all and in each kind of part: its mean, median and 95 % interval over the
 draws that hold it, and the share of the draws that hold it).
 
@@ -206,6 +208,7 @@ from __future__ import annotations
 
 import csv
 import importlib.util
+import math
 import os
 import re
 import subprocess
@@ -528,6 +531,38 @@ def alloy_title(symbol: str) -> str:
     alloys', 'Titanium (Ti) in the alloy'; every other element its label."""
     return (f'{element_label(symbol)} in the {ALLOY_OF[symbol].split()[-1]}' if symbol in ALLOY_OF
             else element_label(symbol))
+
+
+# The light alloys' metals held in the sensors too, beside their alloy, shown by a panel of their own (Matthias,
+# 2026-11-05: "where the hell is titanium in the sensor … I only see titanium alloy the heavy stuff. But not any
+# information about the sensors", "Yes, add it"): titanium, its cameras' and other sensors' milligrams, its own scale,
+# never in one panel with the alloy's kilograms (E33).
+SENSORS_OF = ('Ti',)
+
+
+def sensors_split(symbol: str, parts: dict) -> dict:
+    """The sensors' part of an element ({the component's label: its draws}): its cameras' and other sensors' (the
+    components CAMERAS and OTHER_SENSORS of the electronics, E32)."""
+    labels = {component_label(c) for c in (CAMERAS, OTHER_SENSORS)}
+    return {m: kg for m, kg in parts.items() if m in labels}
+
+
+def sensors_title(symbol: str) -> str:
+    """The panel title of an element's sensors: 'Titanium (Ti) in the sensors'."""
+    return f'{element_label(symbol)} in the sensors'
+
+
+# A page's legend in as many rows as it needs (Matthias, 2026-11-05: "1_elements_2 has text for the legend cut"; in 03
+# until then, here since, one copy for 02's and 03's pages).
+LEGEND_WIDTH = 15.0           # inches of the page's width a legend may take
+LEGEND_ROW = 0.035            # the height of a legend's row, share of the page's height (14 points and its spacing)
+
+
+def legend_columns(names: list) -> int:
+    """How many entries of a page's legend go in a row, so that the legend stays within LEGEND_WIDTH: each entry as
+    wide as the longest name at 14 points (about 0.6 of a point's width a character) and its colour's patch."""
+    widest = max(len(name) for name in names) * APART_TEXT * 0.6 / 72 + 0.8
+    return max(1, min(len(names), int(LEGEND_WIDTH // widest)))
 
 
 def not_drawn_words(total: np.ndarray) -> str:
@@ -925,6 +960,10 @@ CIRCUIT_BOARDS, CAMERAS, OTHER_SENSORS, CABLE_PARTS, CONNECTORS = ELECTRONICS_CO
 # The car sensor types (RAWCLICVehicleElectronics' 07_, sheet Sensor Details) that are an image sensor: a sensor of the
 # parts file whose elements hold one is a camera.
 IMAGE_SENSORS = ('CMOS image sensor', 'IR camera sensor')
+# The notes page's words on the cameras no source counts (EVIDENCE.md E31 point 3; Matthias, 2026-11-05, "Yes, all
+# ten", open item 6): their number drawn from the robot's constant NUMBER_OF, 1 / 3 / 12 (whole_numbers).
+ESTIMATED_CAMERAS_WORDS = ("where no source counts a robot's cameras, 1 to 12 colour image sensors, most often 3, a "
+                           'whole number in every draw, an estimate')
 CABLE_KIND = 'Cables'   # the sheets' kind of the cables and connectors (Kind (the figure's row))
 # The elements of interest, and what each material gives of them (EVIDENCE.md E19 point 3 and questions 2 to 4;
 # Matthias, 2026-11-02, "Yes, agree E19"): only what is recovered as elements, as RAWCLICDataCenters counts them, its
@@ -1018,7 +1057,8 @@ TRACKED = {'Cu', 'Al', 'Ag', 'Au', 'Pd', 'Ta', 'Nd', 'Pr', 'Dy', 'Ga', 'In'}
 
 # What is written of a robot type part by part, in this order: each a file <name>.npy with its columns in
 # <name>.txt.
-APART_TABLES = ('robots', 'parts', 'materials', 'grades', 'elements', 'estimated', 'by_material')
+APART_TABLES = ('robots', 'parts', 'materials', 'grades', 'elements', 'estimated', 'by_material', 'places',
+                'places_estimated')
 # The table by_material's columns of an element fixed in an alloy, '<element>: <material> (fixed in alloys)' (E25): its
 # copper not recovered as copper, beside the columns of each element of interest by the material it comes from
 # (Matthias, 2026-11-04: "Yes, agree E29", question 2, "Yes, build 03").
@@ -1264,6 +1304,11 @@ class Draws:
     listed: int = 0                # the robots of its sheet Type n with a mass (drawn, or not yet taken apart)
     aluminium: str = ''            # its aluminium recipe in words, for the notes page
     templates: str = ''            # how many of its robots rest on templates, in 01's words (E13 rules 2 and 4)
+    # (place, element of interest) -> kg in each draw, and the kg resting on masses labelled E: a place a kind of part,
+    # or the component of the electronics (E32) whatever kind it sits in (Matthias, 2026-11-05: "parts_taken element
+    # indum is head. it is sensors. Cameras.", "Yes, fix all three"): the pages of where the critical elements sit.
+    places: dict = None
+    places_estimated: dict = None
 
 
 class Shared:
@@ -1413,6 +1458,8 @@ class Robot:
         self.elements: dict = {}    # (kind, element of interest) -> kg (E19 point 3)
         self.recipe_elements: dict = {}   # (kind, element) -> kg, every element by the recipes and fractions
         self.estimated: dict = {}   # (kind, element of interest) -> kg resting on masses labelled E
+        self.places: dict = {}      # (place: a kind of part, or the electronics' component, element) -> kg (PLACES)
+        self.places_estimated: dict = {}   # the same, the kg resting on masses labelled E
         self.structures: dict = {}  # '<robot>: <joint> structure' -> kg of one joint's structure
         self.followed: dict = {}    # material -> kg of its elements of interest
         self.by_material: dict = {}   # (material, element of interest) -> kg
@@ -1448,8 +1495,12 @@ class Robot:
         self.followed[booked] = self.followed.get(booked, 0) + kg
         source = component_label(component) if component else material
         self.by_material[(source, element)] = self.by_material.get((source, element), 0) + kg
+        # Its place: the electronics' component wherever it sits, every other part its kind of part (PLACES).
+        place = component_label(component) if component else kind
+        self.places[(place, element)] = self.places.get((place, element), 0) + kg
         if estimate and element in TRACKED:
             self.estimated[(kind, element)] = self.estimated.get((kind, element), 0) + kg
+            self.places_estimated[(place, element)] = self.places_estimated.get((place, element), 0) + kg
 
     def declare_all(self, kind: str, material: str, shares: dict, metal: dict, kg: np.ndarray, estimate: bool,
                     component: str = '') -> None:
@@ -1953,9 +2004,13 @@ def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: lis
                    for k in {k for r in done for k in r.by_material}}
     fixed = {k: sum((put(k, r.fixed, r) for r in done if k in r.fixed), np.zeros(n))
              for k in {k for r in done for k in r.fixed}}
+    places = {k: sum((put(k, r.places, r) for r in done if k in r.places), np.zeros(n))
+              for k in {k for r in done for k in r.places}}
+    places_estimated = {k: sum((put(k, r.places_estimated, r) for r in done if k in r.places_estimated), np.zeros(n))
+                        for k in {k for r in done for k in r.places_estimated}}
     return Draws(n, names, robot, mass, (part_columns, parts), remainders, structures, (material_keys, materials),
                  elements, estimated, hot, shared.heat, shared.heat_grade, followed, details, recipe_elements,
-                 in_recipes, by_material, fixed=fixed)
+                 in_recipes, by_material, fixed=fixed, places=places, places_estimated=places_estimated)
 
 
 def kind_kg(d: Draws, kind: str) -> np.ndarray:
@@ -2053,6 +2108,11 @@ def write_taken_apart(d: Draws, folder: str) -> None:
         'estimated': ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
                       np.column_stack([d.estimated.get(k, np.zeros(d.n)) for k in element_keys])),
         'by_material': by_material_table(d),
+        # Each element of interest by its place (PLACES): a kind of part, or the electronics' component, '<place>: <e>'.
+        'places': ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
+                   np.column_stack([d.places[k] for k in place_keys(d)])),
+        'places_estimated': ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
+                             np.column_stack([d.places_estimated.get(k, np.zeros(d.n)) for k in place_keys(d)])),
     }
     for table in APART_TABLES:
         columns, draws = tables[table]
@@ -2344,6 +2404,16 @@ APART_BINS = 70                              # the bars of a distribution, as in
 # the largest draw, type 2's 97.5th percentile sat at a third of the axis, at the 99.5th it sits at two thirds). The
 # draws beyond are not drawn; the panel says how many and the largest (beyond_words).
 AXIS_END = 99.5
+# Where a panel's mass axis is logarithmic: where the median of its draws would lie in the first LOG_BELOW (5 %) of its
+# linear axis, from its smallest draw to its end, the draws spread over orders of magnitude (Matthias, 2026-11-05:
+# "Titanium in sensors the x axis is not good, You know this", then "Yes, build it"; EVIDENCE.md E36, V186: type 2's
+# sensors' titanium, 96 % of its draws 0.1 to 10 mg from the cameras, 4 % 50 to 470 mg from the PZT of ultrasonic
+# sensors, its median at 0.3 % of a linear axis). In the 2,000-draw run of V186 four panels of 412: the sensors'
+# titanium of types 2 and 3, on 02's pages and on 03's; the next median sat at 7 % of its axis.
+LOG_BELOW = 0.05
+# What the notes pages of 02 and 03 say of it.
+LOG_WORDS = (f"Where a panel's median would lie in the first {100 * LOG_BELOW:g} % of its axis, its draws spread over "
+             "orders of magnitude, its mass axis is logarithmic (0.1, 0.3, 1, 3 …), its bars evenly spaced on it.")
 APART_BAR = '#4477AA'                        # Paul Tol's bright blue, as published
 APART_INK = '#222222'                        # lines and numbers
 APART_NOTE_WIDTH = 140                       # characters in a line of a notes page
@@ -2362,6 +2432,28 @@ def axis_end(values: np.ndarray) -> float:
     percentile is its smallest (draws that are nearly all the same)."""
     end = float(np.percentile(values, AXIS_END))
     return end if end > float(values.min()) else float(values.max())
+
+
+def logarithmic(values: np.ndarray, end: float) -> bool:
+    """Whether a distribution panel's mass axis is logarithmic (LOG_BELOW, E36): where the median of its draws would
+    lie in the first LOG_BELOW of its linear axis, from its smallest draw to its axis's `end`, the draws spread over
+    orders of magnitude, most of them pressed into its first bars. Only draws above 0 (a logarithmic axis has no place
+    for 0; a panel's draws are those that hold it)."""
+    low = float(values.min())
+    if low <= 0 or end <= low:
+        return False
+    return (float(np.median(values)) - low) / (end - low) < LOG_BELOW
+
+
+def mass_ticks(axes, count: int) -> None:
+    """The ticks of a panel's mass axis in plain numbers (panel_number): about `count` on a linear axis; on a
+    logarithmic one (logarithmic) at 1 and 3 of each power of ten (0.1, 0.3, 1, 3, 10 …), no powers of ten written."""
+    if axes.get_xscale() == 'log':
+        axes.xaxis.set_major_locator(plt.LogLocator(base=10, subs=(1.0, 3.0)))
+        axes.xaxis.set_minor_locator(plt.NullLocator())
+    else:
+        axes.xaxis.set_major_locator(plt.MaxNLocator(count))
+    axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
 
 
 def beyond_words(values: np.ndarray, end: float, unit: str) -> str:
@@ -2411,9 +2503,15 @@ def element_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
     values = kg / per
     axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     # Its 70 bars from the smallest draw to the axis's end (AXIS_END), each the share of all the panel's draws; the
-    # draws beyond the end not drawn, said above the panel.
+    # draws beyond the end not drawn, said above the panel. Its draws spread over orders of magnitude (LOG_BELOW): the
+    # bars even on a logarithmic axis.
     end = axis_end(values)
-    counts, edges = np.histogram(values[values <= end], bins=APART_BINS, range=(float(values.min()), end))
+    if logarithmic(values, end):
+        axes.set_xscale('log')
+        edges = np.geomspace(float(values.min()), end, APART_BINS + 1)
+    else:
+        edges = np.histogram_bin_edges(values[values <= end], bins=APART_BINS, range=(float(values.min()), end))
+    counts, edges = np.histogram(values[values <= end], bins=edges)
     axes.bar(edges[:-1], counts / values.size, width=np.diff(edges), align='edge', color=APART_BAR,
              edgecolor='none')
     # The bars up to about nine tenths of the panel (Matthias, 2026-10-28: "can you better adust the hight. we loose
@@ -2490,9 +2588,8 @@ def with_numbers(pages: list, prefix: str, first: int = 1) -> list:
 
 def panel_axes(axes, unit: str, first_in_row: bool) -> None:
     """The axes of a panel of the element and material pages: mass in one robot in its unit, the share of the draws
-    on the first of a row, plain numbers, hairlines on the mass."""
-    axes.xaxis.set_major_locator(plt.MaxNLocator(5))
-    axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
+    on the first of a row, plain numbers (mass_ticks, also on a logarithmic mass axis), hairlines on the mass."""
+    mass_ticks(axes, 5)
     axes.yaxis.set_major_locator(plt.MaxNLocator(3))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.tick_params(labelsize=APART_TEXT)
@@ -2690,7 +2787,7 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'panel on its own scale and unit (kg, g, mg). The numbers of every panel are on the page after its page: in '
         'what share of the draws it is held, its median, mean and 95 %, and the draws beyond its axis. An element or '
         'material 0 in some draws: its panel shows the draws that hold it; one held in fewer than 2.5 % of the draws '
-        'has no panel. Each axis ends at the 99.5th percentile of its draws: the 0.5 % beyond are not drawn.',
+        'has no panel. Each axis ends at the 99.5th percentile of its draws: the 0.5 % beyond are not drawn. ' + LOG_WORDS,
         f"The draws: {d.n:,}, each one robot of type {d.robot_type} in the register, each of its {len(d.register)} "
         'robots taken apart drawn equally often (a robot in two versions, each as often); its mass a triangle on its '
         'own mass, its parts its own, part by part (the parts file, from its sources).',
@@ -2713,7 +2810,8 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'battery cells their lithium, nickel, cobalt and manganese and the copper and aluminium of their foils and '
         'tabs; the boards and components (the electronics) their metals of interest, not the glass, epoxy and bromine '
         'of the board, each element by the component it comes from: the circuit boards, the cameras (their image '
-        "chips, a depth camera's infrared chips and laser diode), the other sensors (encoders, motion sensors, LiDARs, "
+        f"chips, a depth camera's infrared chips and laser diode; {ESTIMATED_CAMERAS_WORDS}), the other sensors "
+        "(encoders, motion sensors, LiDARs, "
         'microphones, ultrasonic sensors, satellite receivers and modems with their antennas), the cables (their '
         "conductors and insulation) and the connectors (whose brass keeps its copper fixed in the alloy). "
         + LIGHT_ALLOY_NOTE + ' '
@@ -2778,18 +2876,26 @@ def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, 
     elements six a page, each split by the material it comes from (by_material_panel), one legend of the page's
     materials at the top; its materials nine a page (material_page_panels); its alloys and grades in a table
     (EVIDENCE.md E19 points 4 and 7; the preview of type 5, "Yes, build them", 2026-11-02)."""
-    # Each element of interest held in at least HELD_SHARE of the draws, as a material.
+    # Each element of interest held in at least HELD_SHARE of the draws, as a material; the titanium also its sensors'
+    # (SENSORS_OF), a panel of its own after its alloy's, where the sensors hold it in HELD_SHARE of the draws.
     shown = [e for e in c.tables['elements'][0] if held(c.column('elements', e))]
+    entries = [(e, sensors) for e in shown for sensors in (False, True)
+               if not sensors or e in SENSORS_OF and held(sum(sensors_split(e, materials_of(d, e)).values(),
+                                                              np.zeros(d.n)))]
     per_page = APART_ACROSS * ELEMENT_DOWN
-    pages = [shown[k:k + per_page] for k in range(0, len(shown), per_page)]
+    pages = [entries[k:k + per_page] for k in range(0, len(entries), per_page)]
     notes = notes_pages(c.name, f'Robot type {d.robot_type}, {c.title}: how to read its pages',
                         taken_apart_notes(c, d, left_out, params, later, outliers))
     out = []
     for p, page in enumerate(pages, 1):
         figure, axes = plt.subplots(ELEMENT_DOWN, APART_ACROSS, figsize=APART_PAGE, squeeze=False)
         panels = []
-        for k, symbol in enumerate(page):
+        for k, (symbol, sensors) in enumerate(page):
             here = axes[k // APART_ACROSS, k % APART_ACROSS]
+            if sensors:   # the sensors' titanium, a panel of its own (SENSORS_OF)
+                panels.append((here, by_material_panel(here, sensors_split(symbol, materials_of(d, symbol)),
+                                                       sensors_title(symbol), k % APART_ACROSS == 0, ())))
+                continue
             # Copper: the inflow, its copper recycled as copper and, marked (fixed), that fixed in alloys (E25).
             fixed = {m: kg for (m, e), kg in (d.fixed or {}).items() if e == symbol and kg.any()}
             title = alloy_title(symbol) + (', inflow' if fixed else '')
@@ -2802,14 +2908,18 @@ def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, 
                                                    tuple(fixed))))
         for spare in axes.flatten()[len(page):]:
             spare.axis('off')
-        # The legend: the materials drawn, not a light alloy, whose panel's title names it (E33, relabelled).
-        drawn = {m for _, (_, _, materials) in panels for m in materials} - set(ALLOY_OF.values())
+        # The legend: every material the page draws, the light alloys too (Matthias, 2026-11-05: "There are also
+        # legend colors missing"; from E33's relabelling until then without them), in as many rows as it needs.
+        drawn = {m for _, (_, _, materials) in panels for m in materials}
+        shown = [m for m in MATERIAL_COLOURS if m in drawn]
+        columns = legend_columns(shown) if shown else 1
+        rows = math.ceil(len(shown) / columns) if shown else 0
         figure.suptitle(f'{lead(d)}: each element in one robot, by the material it comes from ({p} of {len(pages)})',
                         fontsize=APART_HEADING, y=0.985)
-        figure.legend(handles=[Patch(color=colour, label=m) for m, colour in MATERIAL_COLOURS.items() if m in drawn],
-                      loc='upper center', bbox_to_anchor=(0.5, 0.955), ncol=len(drawn), frameon=False,
-                      fontsize=APART_TEXT)
-        figure.tight_layout(rect=(0, 0, 1, 0.915), h_pad=0.4, w_pad=2.5)
+        if shown:
+            figure.legend(handles=[Patch(color=MATERIAL_COLOURS[m], label=m) for m in shown], loc='upper center',
+                          bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=APART_TEXT)
+        figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * LEGEND_ROW), h_pad=0.4, w_pad=2.5)
         make_room(figure, panels)
         out.append((f'{c.name}_elements_{p}.png', figure))
     # Each page of panels followed by the page of its numbers (E34), the element pages', then the material pages'.
@@ -2911,6 +3021,40 @@ def save_figure(figure, path: str, dpi: int) -> None:
     plt.close(figure)
 
 
+def places_order() -> list:
+    """The places of the pages of where the critical elements sit, in their order: the kinds of part, then the
+    electronics' components (E32), each by its label."""
+    return list(KINDS) + [component_label(c) for c in ELECTRONICS_COMPONENTS]
+
+
+def place_label(place: str) -> str:
+    """A place's name on the pages: a kind of part's, or the component's label ('Boards and components: cameras')."""
+    return KINDS[place][0] if place in KINDS else place
+
+
+def place_colour(place: str) -> str:
+    """A place's colour: a kind of part's (KINDS), or the component's (MATERIAL_COLOURS), as on the element pages."""
+    return KINDS[place][1] if place in KINDS else MATERIAL_COLOURS[place]
+
+
+def place_keys(d: Draws) -> list:
+    """(place, element) of Draws.places, in the order of places_order, the elements in element_order."""
+    return [(p, e) for p in places_order() for e in element_order({e for q, e in d.places if q == p})]
+
+
+def by_place(d: Draws, symbol: str) -> dict:
+    """place -> kg of one figure element in each draw ('Nd+Pr' the two added): each kind of part, and the electronics
+    by their components wherever they sit (Matthias, 2026-11-05, "Yes, fix all three": indium the cameras', not the
+    head's)."""
+    wanted = symbol.split('+')
+    out = {}
+    for place in places_order():
+        found = [d.places[(place, e)] for e in wanted if (place, e) in d.places]
+        if found:
+            out[place] = sum(found)
+    return out
+
+
 def by_kind(d: Draws, symbol: str) -> dict:
     """kind -> kg of one figure element in each draw; 'Nd+Pr' is the two added."""
     wanted = symbol.split('+')
@@ -2939,7 +3083,8 @@ def stacked_bars(axes, parts: dict, colours: dict) -> SimpleNamespace:
     `parts` (each kg in each draw) over the draws, the height the share of the draws, each bar split into the kg its
     draws hold in each part, the part with the smaller mean lower, in its colour; the parts held in fewer than
     HELD_SHARE of the draws not drawn. Where the total is 0 in some draws, over the draws that hold it. Its 70 bars from
-    the smallest draw to the axis's end (AXIS_END), the draws beyond not drawn. Returns its values (in its unit), unit,
+    the smallest draw to the axis's end (AXIS_END), the draws beyond not drawn; where its draws spread over orders of
+    magnitude (logarithmic, LOG_BELOW), even on a logarithmic axis. Returns its values (in its unit), unit,
     end, the words of the share held ('' where all), the parts drawn, the parts over those draws, the top of its bars."""
     total = sum(parts.values())
     drawn = [k for k in parts if held(parts[k])]   # the parts holding it in at least HELD_SHARE of all the draws
@@ -2952,8 +3097,12 @@ def stacked_bars(axes, parts: dict, colours: dict) -> SimpleNamespace:
     values = total / per
     end = axis_end(values)
     on_axis = values <= end
-    edges = (np.linspace(float(values.min()), end, APART_BINS + 1) if end > values.min()
-             else np.histogram_bin_edges(values, bins=APART_BINS))
+    if logarithmic(values, end):   # spread over orders of magnitude (LOG_BELOW): its bars even on a logarithmic axis
+        axes.set_xscale('log')
+        edges = np.geomspace(float(values.min()), end, APART_BINS + 1)
+    else:
+        edges = (np.linspace(float(values.min()), end, APART_BINS + 1) if end > values.min()
+                 else np.histogram_bin_edges(values, bins=APART_BINS))
     index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)[on_axis]   # the bar each draw falls into
     share_of_draws = np.bincount(index, minlength=len(edges) - 1) / values.size
     kg_all = np.bincount(index, weights=total[on_axis], minlength=len(edges) - 1)
@@ -2984,12 +3133,11 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
         axes.set_xticks([])
         axes.set_yticks([])
         return
-    bars = stacked_bars(axes, kinds, {k: KINDS[k][1] for k in kinds})
+    bars = stacked_bars(axes, kinds, {k: place_colour(k) for k in kinds})   # a kind of part or a component
     # Its lines as the element pages (centre_lines), its numbers on the page after it (E34).
     centre_lines(axes, bars.values, bars.held_in, bars.end, bars.unit, title)
     unit = bars.unit
-    axes.xaxis.set_major_locator(plt.MaxNLocator(4))
-    axes.xaxis.set_major_formatter(plt.FuncFormatter(panel_number))
+    mass_ticks(axes, 4)
     axes.yaxis.set_major_locator(plt.MaxNLocator(4))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.tick_params(labelsize=APART_TEXT)
@@ -3001,20 +3149,27 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
 
 def element_page(d: Draws, page: list, number: int):
     """One page of the element figure Matthias approved (V49), for the three robots: its elements three across, each
-    the stacked distribution of the robot's total; the legend of the kinds of part at the top."""
+    the stacked distribution of the robot's total by place (by_place: each kind of part, the electronics by their
+    components, since 2026-11-05); the legend of the places the page draws at the top, in as many rows as it needs."""
     columns = 3
     figure, axes = plt.subplots(2, columns, figsize=APART_PAGE, squeeze=False)
+    drawn = set()
     for k, (symbol, name) in enumerate(page):
-        stacked_panel(axes[k // columns, k % columns], by_kind(d, symbol),
+        places = by_place(d, symbol)
+        drawn |= set(places)
+        stacked_panel(axes[k // columns, k % columns], places,
                       textwrap.fill(f'{name} ({symbol})', FIGURE_TITLE_WIDTH), k % columns == 0)
     for spare in axes.flatten()[len(page):]:
         spare.axis('off')
     figure.suptitle(f'{lead(d)}: critical elements in one robot ({number} of {len(ELEMENT_PAGES)})',
                     fontsize=APART_HEADING, y=0.985)
-    handles = [Patch(color=colour, label=label) for label, colour in KINDS.values()]
-    figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.94), ncol=5, frameon=False,
-                  fontsize=APART_TEXT)
-    figure.tight_layout(rect=(0, 0.01, 1, 0.86))
+    shown = [p for p in places_order() if p in drawn]
+    names = [place_label(p) for p in shown]
+    ncol = legend_columns(names) if names else 1
+    rows = math.ceil(len(names) / ncol) if names else 0
+    figure.legend(handles=[Patch(color=place_colour(p), label=place_label(p)) for p in shown], loc='upper center',
+                  bbox_to_anchor=(0.5, 0.955), ncol=ncol, frameon=False, fontsize=APART_TEXT)
+    figure.tight_layout(rect=(0, 0.01, 1, 0.95 - max(rows, 1) * LEGEND_ROW))
     return figure
 
 
@@ -3027,7 +3182,7 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     overview's rows as the element panels: a kind of part holding it in only some draws showed a median of 0); one
     scale and unit for the panel, its axis ending at the largest of the rows' AXIS_END-th percentiles, the draws beyond
     not drawn and said on its label."""
-    shown = [k for k in KINDS if k in kinds and held(kinds[k])]
+    shown = [k for k in places_order() if k in kinds and held(kinds[k])]   # kinds of part, then components
     axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
     if not shown:
         axes.text(0.5, 0.5, 'none in these robots', transform=axes.transAxes, ha='center', va='center',
@@ -3046,7 +3201,7 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         counts, _ = np.histogram(values[values <= edges[-1]], bins=edges)
         heights = 0.8 * counts / max(counts.max(), 1)
         hatched = float(estimated[kind].mean()) > 0.5 * float(kinds[kind].mean())
-        axes.bar(edges[:-1], heights, width=np.diff(edges), align='edge', bottom=row + 0.05, color=KINDS[kind][1],
+        axes.bar(edges[:-1], heights, width=np.diff(edges), align='edge', bottom=row + 0.05, color=place_colour(kind),
                  edgecolor=APART_INK if hatched else 'none', linewidth=0, hatch='///' if hatched else None)
         median, mean = float(np.median(values)), float(values.mean())
         axes.plot([median, median], [row + 0.05, row + 0.9], color=APART_INK, linewidth=1.8)
@@ -3064,7 +3219,9 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     axes.set_title(f'{title}, in {unit}', fontsize=APART_TITLE, fontweight='bold', loc='left')
     axes.set_ylim(0, len(shown))
     axes.set_yticks([row + 0.45 for row in range(len(shown))])
-    axes.set_yticklabels([f'{MARKS[k]}  {KINDS[k][0]}' for k in reversed(shown)], fontsize=APART_TEXT)
+    # A kind of part with its mark on the robot; a component of the electronics by its name (it has no one place).
+    axes.set_yticklabels([f'{MARKS[k]}  {KINDS[k][0]}' if k in KINDS else k.replace(f'{ELECTRONICS}: ', '')
+                          for k in reversed(shown)], fontsize=APART_TEXT)
     axes.tick_params(axis='y', length=0)
     axes.set_xlim(0, edges[-1])
     axes.xaxis.set_major_locator(plt.MaxNLocator(6))
@@ -3092,15 +3249,15 @@ def overview_page(d: Draws, page: list, number: int):
     figure = plt.figure(figsize=APART_PAGE)
     figure.add_axes((0.01, 0.04, 0.22, 0.85))
     draw_schema(figure.axes[0], d)
-    panels = [(symbol, name, by_kind(d, symbol)) for symbol, name in page]
+    panels = [(symbol, name, by_place(d, symbol)) for symbol, name in page]
     rows = [sum(held(v) for v in kinds.values()) + 1 for _, _, kinds in panels]
     bottom, top, gap = 0.09, 0.875, 0.11
     height = top - bottom - gap * (len(panels) - 1)
     for k, (symbol, name, kinds) in enumerate(panels):
         tall = height * rows[k] / sum(rows)
         y = top - tall - sum(height * rows[i] / sum(rows) + gap for i in range(k))
-        estimated = {kind: sum((d.estimated[(kind, e)] for e in symbol.split('+') if (kind, e) in d.estimated),
-                               np.zeros(d.n)) for kind in kinds}
+        estimated = {place: sum((d.places_estimated[(place, e)] for e in symbol.split('+')
+                                 if (place, e) in d.places_estimated), np.zeros(d.n)) for place in kinds}
         ridge_panel(figure.add_axes((0.43, y, PANEL_WIDTH, tall)), kinds, estimated, f'{name} ({symbol})')
     figure.suptitle(f'Robot type {d.robot_type} taken apart: where the critical materials sit, and how sure we are '
                     f'({number} of {len(OVERVIEW_PAGES)})', fontsize=APART_HEADING, y=0.975)
@@ -3113,12 +3270,14 @@ def parts_notes(d: Draws) -> list:
     return [
         'The element pages: one panel per critical element, its bars the draws of the element in one robot, the '
         'height the share of the draws, each bar split into the weight its draws hold in each kind of part, the '
-        'smaller lower. Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
+        'electronics by their components wherever they sit (circuit boards, cameras, other sensors, cables, '
+        'connectors), the smaller lower. Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit; its numbers (in what share of the '
         'draws it is held, its median, mean and 95 %, the draws beyond its axis) on the page after its page. An '
         'element that is 0 in some draws: its panel shows the draws that hold it. Each axis ends at the 99.5th '
-        'percentile of its draws: those beyond are not drawn.',
-        "The overview pages: each row the element's weight in one kind of part over the draws that hold it, the "
+        'percentile of its draws: those beyond are not drawn. ' + LOG_WORDS,
+        "The overview pages: each row the element's weight in one kind of part, or in one component of the "
+        "electronics, over the draws that hold it, the "
         'height the share of those draws scaled to the row, the lines as on the element pages, of those draws; at the '
         "right their median and mean, and 'held in': in what share of all the draws the kind of part holds the "
         'element. Hatched: more than half of the mean rests on parts whose mass is an estimate. Each axis ends at the '

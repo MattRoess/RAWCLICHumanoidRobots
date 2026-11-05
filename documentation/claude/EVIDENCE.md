@@ -8,6 +8,53 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E36. His figures: the legends, where the elements sit, the sensors' titanium and its axis (2026-11-05). Built
+
+Matthias, 2026-11-05, going through his figures: "1_elements_2 has text for the legend cut", "There are also legend
+colors missing", "2 element_1", "parts_taken element indum is head. it is sensors. Cameras. Head sorry I though we
+solved this", then "Yes, fix all three"; "where the hell is titanium in the sensor … I only see titanium alloy the heavy
+stuff. But not any infoprmation about the sensors", then "Yes, add it"; "Titanium in sensors the x axis is not good,
+You know this" (as on 2026-11-01: "The distribution figures show the distribution pressed to the left side"), then
+"Yes, build it" (VERIFICATION.md V186).
+
+| # | His point | Built |
+|---|---|---|
+| 1 | The legend cut | `legend_columns`, `LEGEND_WIDTH` and `LEGEND_ROW` moved from 03 into 02 (one copy; 03 uses them from 02): the legend of 02's element pages in as many rows as it needs, the panels below it |
+| 2 | Legend colours missing | the legend names every material the page draws, the light alloys too (E33's "no legend entry of a light alloy" replaced on 02's pages by his word; 03's page of one light alloy, one colour, keeps no legend) |
+| 3 | Indium in the head | the pages of where the critical elements sit drawn by place (`by_place`): each kind of part, the electronics by their components (circuit boards, cameras, other sensors, cables, connectors) wherever they sit; booked part by part in `declare()`, written as `places.npy` and `places_estimated.npy`; the element and overview pages read them |
+| 4 | Titanium in the sensors | `SENSORS_OF = ('Ti',)`, `sensors_split`: on 02's element pages a panel "Titanium (Ti) in the sensors" beside "Titanium (Ti) in the alloy", the cameras and the other sensors, in mg, its numbers on the numbers page; on 03 a page "Titanium (Ti) in the sensors of one robot of each robot type" after the alloy's |
+| 5 | Its axis | `LOG_BELOW = 0.05`, `logarithmic()`: where the median of a panel's draws would lie in the first 5 % of its linear axis (from its smallest draw to its end), its mass axis is logarithmic, its 70 bars evenly spaced on it, ticks 0.1, 0.3, 1, 3 … (`mass_ticks`); in `stacked_bars` and `element_panel`, so on every page of 02 and 03; `LOG_WORDS` on the notes pages of 02 (each robot type's and its parts') and of 03 |
+
+**Why the sensors' titanium spreads over orders of magnitude.** Its median is 1.7 mg (type 2), from the cameras. A few
+wheeled robots carry ultrasonic sensors, drawn as the car list's "ultrasonic sensor" (RAWCLICVehicleElectronics,
+`Data/07_VehicleSensorComposition.xlsx`, sheet Sensor Details, read 2026-11-05): a piezoelectric PZT ceramic disc in an
+aluminium housing, titanium 10 / 40 / 120 mg per sensor (lead 100 / 400 / 1200 mg, zirconium 15 / 60 / 180 mg). The
+robots: AgiBot G2, 8 (AGG2m "底盘超声波雷达 8"), median 359 mg in type 2; MagicLab MagicBot D1, 3, 162 mg; Unitree H2-D
+Flagship, 2, 109 mg. So 96 % of type 2's draws lie at 0.1 to 10 mg and 4 % at 50 to 470 mg; type 3, 1.1 % (the G2 and the
+D1). On a linear axis to the 99.5th percentile (491 mg) the median sat at 0.3 % of the axis, the cameras' draws in its
+first bar; on the logarithmic axis at 31 %, both groups visible. The data are as they were; nothing in them changed.
+
+**Which panels.** In the 2,000-draw run of V186, of 286 panels on 02's pages and 221 on 03's, four are logarithmic: the
+sensors' titanium of types 2 and 3, on each. Every other panel's median sits at 7.4 % of its axis or further.
+
+## E35. The open items of the evening, solved (2026-11-05). Built
+
+Matthias, 2026-11-05: "can we solve the open items?", "in a pragmatic way", and to the table of ten "Yes, all ten"
+(VERIFICATION.md V185).
+
+| # | Item | Solved |
+|---|---|---|
+| 1 | The electronics' name | kept "Boards and components" (E19, RAWCLICDataCenters' name); his `shared_lists.xlsx` untouched; E32's open point closed |
+| 2 | 01's overview: 03 drawn as "later" | `STAGES` holds each stage's file, box title and words; `overview_flow` draws its four stage boxes from it, 03 a stage writing "The comparison pages", no "later" in the page or its legend; `open_words` "Open: the stock-and-flow model (04)." |
+| 3 | iCloud's copies | the 28 files "… 2" of 4 November in `data/parts_taken_apart/5_…/` and `6_…/` deleted by their exact names, each after its plain-named file of today was found; `figures 2/` was gone |
+| 4 | The Neo1 stretching the robots tables' mass axis | the axis to the largest robot drawn (`robots_table_pages`); an outlier's row its mass written, no bar, no dot |
+| 5 | 03 naming an outlier older draws hold | `outliers_in_draws`: 03 reads 02's register.txt of every type and stops, nothing drawn, where a robot set as an outlier is among them |
+| 6 | The cameras' estimate on 02's notes | `ESTIMATED_CAMERAS_WORDS` in the notes' sentence on the electronics: "where no source counts a robot's cameras, 1 to 12 colour image sensors, most often 3, a whole number in every draw, an estimate" |
+| 7 | Sources missing from the files | the shared `sources()` of types 3 to 6 searches the sheets that are one set for all as well (MagnetGrades, JointParts, the Shares of the file's parts): M30 now on types 5 and 6, T1 on 3, 5 and 6, T3 and T3k on 3 to 6; the shared rows cite "Drexler 2025" and "Bizzo 2014", their codes, now on every file |
+| 8 | The 1X NEO's frame below zero | closed as decided in E21: reported, not cut |
+| 9 | E25 point B | stays postponed until 04 |
+| 10 | The steps per robot type (HANDOVER, 29 and 30 October) | checked: every step done for all six types (every robot with a mass drawn from its own parts: 30, 96, 164, 124, 11, 5; the pages 16 × 9 with median and mean; every material by its recipe, those holding no element of interest of E19 staying materials) |
+
 ## E34. The numbers of the panels on pages of their own (2026-11-05). Built
 
 Matthias, 2026-11-05, of the panels' numbers (in what share of the draws, median, mean, beyond the axis) written above
@@ -71,9 +118,9 @@ they sat on the circuit boards (V175); they are the sensors', which 02 booked wi
 | 4 | The element pages by component; the materials pages and tables the electronics one material | `by_material` '<element>: Boards and components: <component>', ordered at the electronics' place; colours in `MATERIAL_COLOURS`; the detail of the electronics whole |
 | 5 | The draws unchanged in total | the sums as before (tests: each element by material adds up to it; the electronics' elements to their mass) |
 
-**Open, for his word:** the name. Point 1 said "renamed Electronics"; E19 (2026-11-02, "Yes, agree E19") took "Boards and
-components" from RAWCLICDataCenters, and the name stands in his `data/researched/shared_lists.xlsx` (8 cells: About, Lists,
-Materials). Built with "Boards and components" (one constant, `ELECTRONICS`); a rename needs those cells changed, his data.
+**The name, decided** (2026-11-05, "Yes, all ten", E35 item 1): "Boards and components", as E19 (2026-11-02, "Yes, agree
+E19") took it from RAWCLICDataCenters and as it stands in his `data/researched/shared_lists.xlsx` (one constant,
+`ELECTRONICS`); point 1's "renamed Electronics" not done.
 Not changed either: the sensors' housings (aluminium and plastics, 2026-10-29 point 3c), not named in the checklist.
 
 ## E31. The cameras of the robots that list none; the Phantom MK1's battery (2026-11-05). Researched; built 2026-11-05

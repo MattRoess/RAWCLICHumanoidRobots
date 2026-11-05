@@ -329,13 +329,15 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
 
 - **`overview_1.png`**: how the model works, as boxes joined by arrows: the inputs (the research workbook, the
   register, the robot types part by part with the builders that write them, the element recipes; the sibling projects'
-  data in another colour), the stages (00, 01, 02, each with its file), what they write (the draws of each
-  robot type, the pages; 03 in grey, after robot type 6). How many robots of each type are taken apart: on
+  data in another colour), the stages (00 to 03, each with its file, drawn from `STAGES`, the one list a test compares
+  with the numbered files; since 2026-11-05, "Yes, all ten", E35), what each writes (02 the draws of each robot type and
+  its pages, 03 the comparison pages). How many robots of each type are taken apart: on
   overview_2's cards (since 2026-11-02: six types' counts ran out of their box; "Sorry overview_1 is bad", "Yes, build
   it"). A test draws both overview pages with every type taken apart and checks that every text stays in its box.
 - **`overview_2.png`**: the six robot types as cards: the types taken apart in colour with their robots and their
   masses, the others grey, "not yet worked on"; the faults found; and what is open, counted from the register (since
-  2026-11-02): the robot types with robots with a mass not yet taken apart, each with how many, then the six compared.
+  2026-11-02): the robot types with robots with a mass not yet taken apart, each with how many, then the stock-and-flow
+  model (04); with every robot taken apart, "Open: the stock-and-flow model (04)." (since 2026-11-05).
 - **`notes.png`**: how to read the pages, once.
 - **`faults_<k>.png`**: the faults with where each is, or "No fault found"; what was checked (CHECKS_DONE) and what the
   checks cannot tell; as many pages as needed.
@@ -346,7 +348,10 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
   its mass; its battery's energy at the modes as a bar on one Wh axis, written; five cells (mass, joints, battery,
   boards, frame and shell) coloured by where the numbers of their rows come from: weighed (label W), from the maker
   (label S, its first source in the sheet Sources the manufacturer's or the actuators' maker's), from a third party
-  (S, any other source), estimated (E); a cell whose rows differ is striped, one stripe each.
+  (S, any other source), estimated (E); a cell whose rows differ is striped, one stripe each. Each parts file's sheet
+  Sources holds every source its rows cite, those of the sheets one set for all (MagnetGrades, JointParts, Shares)
+  too (since 2026-11-05, "Yes, all ten", E35 item 7: M30, T1, T3, T3k, Bizzo 2014 and Drexler 2025 had been missing
+  from some files).
 - **`categories/1_<name>_robot.png`**: robot type 1's kinds of part, where they sit on the robot (the marks and
   colours of 02's figures, one copy of the drawing in 01), the joints whose magnets are for 150 °C or more in most
   draws ringed red, and what each kind holds.
@@ -570,7 +575,8 @@ twice; each source a count rests on was read first-hand (VERIFICATION.md V181).
    image sensors, most often 3, median 4). 02 draws the number in every draw as a whole number (`whole_numbers`): each
    whole number k takes the share of the triangle widened by half a unit on each side (0.5, 3, 12.5) between k - 0.5 and
    k + 0.5, the way RAWCLICDataCenters draws its counts; the mean stays 16/3. Its elements are that number times one
-   camera's. A microphone array of four where a source names a microphone or speech (31 robots).
+   camera's. A microphone array of four where a source names a microphone or speech (31 robots). 02's notes pages say
+   it in their sentence on the electronics (`ESTIMATED_CAMERAS_WORDS`; E35 item 6).
 3. **None (7 robots):** where the maker sells the camera only as an option (the RB-Y1, the Torobo, the N1, the Roboto
    Origin, the Roban2, the RP1) or the robot has no head (the Adam Lite).
 4. **01's checks:** a sensor's row without a number only with its constant, never both, and the constant's minimum,
@@ -621,8 +627,11 @@ It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E
    own: "Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers."; on 01's
    cards of types 3 and 5, "The Neo1, an outlier, is not drawn and not counted."
 5. **Marked:** 01's robots tables of types 3 and 5 keep its row, its name marked '*', and the key of its page says "* an
-   outlier, not drawn: built as a few, never in large numbers." The mass axis of those tables still runs to 1,600 kg
-   for its row (for his word).
+   outlier, not drawn: built as a few, never in large numbers." The mass axis runs to the largest robot drawn, the
+   outlier's row its mass written without bar or dot (since 2026-11-05, "Yes, all ten", E35 item 4; until then 1,600 kg
+   for its row).
+6. **Checked by 03:** draws on disk older than the setting could hold an outlier, which 03's notes would then name "not
+   drawn"; 03 reads 02's register.txt of every type and stops, nothing drawn, where one is among them (E35 item 5).
 
 ## The hydraulic robots part by part (since 2026-11-04)
 
@@ -994,7 +1003,21 @@ still the share of all the panel's draws; the draws beyond are not drawn, and th
 ("0.5 % beyond the axis, up to 13 kg": on the page of numbers after the element and material pages since 2026-11-05,
 E34; on the axis's label on the overview). Matthias, 2026-11-01: "The distribution figures show the distribution pressed to the left side. You give
 away have of the x axis. This can be done much better", then "Yes, build it": up to the largest draw, type 2's 97.5th
-percentile sat at a third of the axis (V124).
+percentile sat at a third of the axis (V124). Where the median of a panel's draws would lie in the first 5 % of its
+linear axis, from its smallest draw to its end (`LOG_BELOW`, `logarithmic`), its draws spread over orders of
+magnitude, its mass axis is logarithmic, its 70 bars evenly spaced on it, the ticks 0.1, 0.3, 1, 3 … in plain numbers
+(`mass_ticks`); the notes pages say so (`LOG_WORDS`). Matthias, 2026-11-05: "Titanium in sensors the x axis is not good,
+You know this", then "Yes, build it" (E36): the sensors' titanium of types 2 and 3, the cameras' few mg and the
+ultrasonic sensors' PZT (40 mg each, most often) in a few wheeled robots; in the run of V186 these four panels of 507.
+- **Where the critical elements sit, by place** (E36, "Yes, fix all three", 2026-11-05): the element and overview pages
+  of the parts figures split each element by place, `by_place`: each kind of part as before, the electronics by their
+  components (circuit boards, cameras, other sensors, cables, connectors) wherever they sit, so that indium is the
+  cameras' and the other sensors', not the head's. Each part is booked to its place as it is declared (`Robot.places`,
+  `places_estimated`), written as `places.npy` and `places_estimated.npy`; the places add up to the kinds of part.
+- **The sensors' titanium** (E36, "Yes, add it"): titanium is held in the titanium alloy (kg) and in the sensors (mg);
+  beside the panel "Titanium (Ti) in the alloy" each robot type's element pages draw a panel "Titanium (Ti) in the
+  sensors", the cameras and the other sensors (`SENSORS_OF`, `sensors_split`), and 03 a page of its own. The legend of an
+  element page names every material it draws, the alloys too, in as many rows as it needs (`legend_columns`).
 - `robot_type_1_elements_1.png` and `_2.png`, the element figure Matthias approved ("Yes, the element figure is right
   now", V49), for the three robots: one panel per element, three across (page 1 copper, aluminium, silver, gold,
   palladium, tantalum; page 2 neodymium and praseodymium, dysprosium, gallium, indium); in each the histogram of the
