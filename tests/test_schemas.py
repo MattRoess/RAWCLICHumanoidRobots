@@ -1805,6 +1805,56 @@ class TestPartsTakenApart(unittest.TestCase):
         self.assertFaultSays(faults, "'Robot mass, with battery'")
         self.assertIn('Robot B', faults[0].text)
 
+    # A sensor whose number no source states (EVIDENCE.md E31 point 3; Matthias, 2026-11-05, "Yes, build 1 to 5", "Yes,
+    # A to H"): its row in Sensors without a number, its number drawn by 02 from the robot's own constant
+    # 'Number: <sensor>', a minimum, mode and maximum, each a whole number from 1 up (never 0: a robot with cameras has
+    # one at least). 01 refuses the row without its constant, the constant without its row, a number beside it, and a
+    # count that is not whole or starts at 0.
+    DRAWN = {('Sensors', 2): ('Robot A', 'Cameras (number not stated)', None, 'Head', 'Head', None, None, None, 'E',
+                              'E31 point 3'),
+             ('SensorElements', 2): ('Cameras (number not stated)', 'CMOS image sensor', 1),
+             ('Constants', 99): ('Robot A', schemas.NUMBER_OF + 'Cameras (number not stated)', 1, 3, 12, 'sensors', 'E',
+                                 'E31 point 3')}
+
+    def drawn(self, **changes):
+        """DRAWN, changed: `sensor` a new Sensors row, `number` a new Constants row, either None to leave it out."""
+        given = dict(self.DRAWN)
+        for key, value in changes.items():
+            sheet = {'sensor': ('Sensors', 2), 'number': ('Constants', 99)}[key]
+            if value is None:
+                del given[sheet]
+            else:
+                given[sheet] = value
+        return self.faults(given)
+
+    def test_a_sensor_of_a_drawn_number_is_read_without_fault(self):
+        self.assertEqual(self.drawn(), [])
+
+    def test_a_sensor_without_a_number_and_without_its_drawn_number(self):
+        faults = self.drawn(number=None)
+        self.assertFaultSays(faults, "'Number: Cameras (number not stated)'")
+        self.assertIn('Robot A', faults[0].text)
+
+    def test_a_drawn_number_of_no_sensor(self):
+        faults = self.drawn(sensor=None)
+        self.assertEqual(len(faults), 2, [f.text for f in faults])   # the constant without its row, and the element
+        self.assertTrue(any("no sensor 'Cameras (number not stated)'" in f.text for f in faults), [f.text for f in faults])
+
+    def test_a_drawn_number_beside_a_stated_number(self):
+        sensor = list(self.DRAWN[('Sensors', 2)])
+        sensor[2] = 2
+        self.assertFaultSays(self.drawn(sensor=tuple(sensor)), 'not both')
+
+    def test_a_drawn_number_not_whole(self):
+        number = list(self.DRAWN[('Constants', 99)])
+        number[3] = 3.5
+        self.assertFaultSays(self.drawn(number=tuple(number)), 'whole numbers from 1 up')
+
+    def test_a_drawn_number_from_zero(self):
+        number = list(self.DRAWN[('Constants', 99)])
+        number[2] = 0
+        self.assertFaultSays(self.drawn(number=tuple(number)), 'whole numbers from 1 up')
+
     # Matthias, 2026-10-29, "Yes, build it" (the entry of type 1's research, point 7: 01 checks the new rows, tests
     # first, a planted fault for each): the joints as shares of the robot's mass (E5.17 point 1), the battery's energy
     # per kg of robot (point 2), a pack drawn from its energy (E5.14 point 3), the shell a share of the robot (point 6),

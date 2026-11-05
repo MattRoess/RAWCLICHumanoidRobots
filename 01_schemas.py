@@ -1520,6 +1520,12 @@ ETHERNET_CS = 'Ethernet conductor cross-section (8 conductors)'
 # Boards in type 1's file (the G1's own) and a shared number in a file without the G1 (type 2's; 2026-10-30).
 DRIVER_AREA = "Driver board area, small joint (the G1's, weighed)"
 BATTERY_CONSTANTS = ('Battery voltage', 'Battery capacity')
+# A sensor whose number in the robot no source states (EVIDENCE.md E31 point 3; Matthias, 2026-11-05, "Yes, build 1 to
+# 5", "Yes, A to H": the cameras of a robot whose sources name cameras without a count, or none, 1 / 3 / 12 image
+# sensors): its row in Sensors without a number, and the robot's own constant '<NUMBER_OF><the sensor's name>', a
+# minimum, mode and maximum, each a whole number from 1 up, from which 02 draws a whole number in every draw.
+# tools/parts_taken_apart.py writes the same prefix.
+NUMBER_OF = 'Number: '
 # The shared numbers of the robots whose own sources stop (E5.14, E5.17, agreed 2026-10-29), each needed only where a
 # robot uses it: the joint modules a share of the robot's mass (its joints with shares), its battery's energy per kg
 # of robot (no voltage and capacity), a pack's energy per kg (a pack with a housing and no mass of its own), the shell
@@ -2059,7 +2065,15 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         what = f'{p.robot}, {p.name}'
         faults += label_faults(on, p.row, what, p.label)
         faults += region_faults(on, p.row, what, p.region, lists)
-        if p.count is None or p.count < 1 or p.count != int(p.count):
+        # A sensor's number drawn (E31 point 3): no number in its row, its constant NUMBER_OF + its name instead.
+        drawn = p.sheet == 'Sensors' and NUMBER_OF + p.name in apart.constants.get(p.robot, {})
+        if p.count is None and p.sheet == 'Sensors' and not drawn:
+            faults.append(Fault(on, p.row, f"{what}: no number in the robot, and no '{NUMBER_OF}{p.name}' among its "
+                                           'constants to draw it from.'))
+        elif p.count is not None and drawn:
+            faults.append(Fault(on, p.row, f"{what}: give its number in the robot or its '{NUMBER_OF}{p.name}' among "
+                                           'its constants, not both.'))
+        elif p.count is None and not drawn or p.count is not None and (p.count < 1 or p.count != int(p.count)):
             faults.append(Fault(on, p.row, f'{what}: the number in the robot must be a whole number from 1 up.'))
         if p.computed.startswith(ROBOT_REMAINDER):
             remainders.setdefault(p.robot, []).append(p)
@@ -2176,6 +2190,16 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         for quantity, (row, values, _, label, _) in given.items():
             faults += label_faults(on, row, f'{robot}, {quantity}', label)
             faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E')
+            # A sensor's drawn number (E31 point 3): of a sensor of the robot, whole numbers from 1 up, never 0 (a
+            # robot with cameras holds one at least).
+            if quantity.startswith(NUMBER_OF):
+                sensor = quantity[len(NUMBER_OF):]
+                if not any(s.robot == robot and s.name == sensor for s in apart.sensors):
+                    faults.append(Fault(on, row, f"{robot}, '{quantity}': no sensor '{sensor}' of the robot in the "
+                                                 'sheet Sensors.'))
+                if any(v is None or v < 1 or v != int(v) for v in values):
+                    faults.append(Fault(on, row, f"{robot}, '{quantity}': its min, mode and max must be whole numbers "
+                                                 f'from 1 up, not {values}.'))
     return faults
 
 

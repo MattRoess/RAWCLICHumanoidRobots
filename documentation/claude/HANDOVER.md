@@ -60,7 +60,83 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-05, afternoon: the electronics by their components built (E32); where to go on (start here)
+## 2026-11-05, evening: where to start tomorrow (start here)
+
+Matthias: "can you afterwards write the hnadover for tomorrow and also commit and push". Everything below and in the
+entries of today is committed and pushed with this entry (the commit after `7dc924b`, on `main`; this Mac, mac-mini,
+its git in `$HOME/gitdirs/RAWCLICHumanoidRobots.git`).
+
+**Today, in order:** the Neo1 an outlier, not drawn (E30, `53c5ae0`); titanium and gallium traced to the sensors, not
+the circuit boards (V175); the electronics by their five components (E32), the light alloys' metal drawn alone (E33),
+the panels' numbers on pages of their own (E34; `b840133`); his runs read back (V180, `7dc924b`); the exceptions
+dropped ("2 can be killed"); the cameras of the 144 robots whose parts named none (E31: second search, sources read
+first-hand, built; V181, V182); the code under tools that nothing needed, removed (V183); his runs read back (V184).
+
+**The outputs are current:** his runs of today all after the code: the builders of types 3 to 6 at 14:23 to 14:24 and
+of types 1 and 2 at 15:24 (each file equal to the build), 02 at 200,000 draws from 15:09 to 15:12, 03 at 15:24. No run
+is needed. The whole suite at V183: 552 tests, 550 OK, the other 2 OK since his runs of the builders (V184).
+
+**What comes next, in his words:** before stock and flow, "Yes, those first" (the cameras: done; the exceptions:
+dropped); "I will verify all the figures again before we move"; "04 will then be the stock and flow model"
+(2026-11-04). Nothing of 04 specified or built: it starts with his specification, written back as a checklist.
+
+**Open, for his word** (none started):
+1. The electronics' name: "Electronics" or "Boards and components" (E32; the name stands in 8 cells of his
+   `data/researched/shared_lists.xlsx`, his data).
+2. 01's overview: 03 drawn grey as "later", its stage boxes a list beside `STAGES`, `overview_2.png` "Open: the six
+   robot types compared." (my proposal 1 to 3, midday entry, item 6).
+3. iCloud's copies: the 28 files "… 2" in `data/parts_taken_apart/5_…/` and `6_…/`, and `figures 2/`.
+4. The robots tables of types 3 and 5: their mass axis still runs to 1,600 kg for the Neo1's row.
+5. Proposed: 03 checks that the draws it reads hold no outlier.
+6. Proposed: one sentence on 02's notes pages that the cameras no source counts are estimated (E31 point 3).
+7. Found: the servo valve's Shares rows of types 5 and 6 cite M30, which neither file's Sources holds; the shared rows
+   cite "Bizzo et al. 2014" and "Drexler et al. 2025", not the codes "Bizzo 2014" and "Drexler 2025" (V183).
+8. Known, reported: the 1X NEO's frame below zero in 15.6 % of its draws (E21), on type 4's notes page 4 at 200,000
+   draws ("the part group Frame is below zero in 3 draws").
+9. E25 point B (copper's three ways for the other elements) postponed until 04 needs it.
+10. Not checked: the list of steps per robot type at the top of this file (29 and 30 October) still marks items open
+    (type 1's electronics beyond the boards and sensors; the recipes of the other types beyond the five materials);
+    later work may have closed them.
+
+**Where the camera research lies:** EVIDENCE E31 (both searches by class, the sources of every count, what was built);
+VERIFICATION V181 (each source as read). The agents' full reports and the sandboxes were in the scratch folder, which
+is emptied overnight; nothing of them is needed.
+
+## 2026-11-05, late afternoon: his runs read back, the exceptions dropped, the cameras' second search
+
+- **Committed and pushed:** E32 to E34 (`b840133`); V180, his runs of 02 and 03 read back (`7dc924b`). Since then, not
+  committed: V180's line on E29's terbium and steel (confirmed in his run), EVIDENCE E31's second search, this entry.
+- **The exceptions dropped** (Matthias: "2 can be killed, as now things are part of camera and electronics sensors"):
+  titanium and gallium now show as the cameras' and the other sensors'; item 5 of the midday table is closed, nothing built.
+- **The cameras built** (E31, "Yes, build 1 to 5", "Yes, those first", "Yes, A to H"; VERIFICATION V181, V182; not
+  committed): point 2's sources read first-hand (23 robots; the NEO Beta, NE01, Kengo and Kuavo-my to point 3 by what
+  they say), the two data sheets downloaded on "Yes, download both". `tools/parts_taken_apart.py` holds the E31 tables
+  (`CAMERAS_STATED`, `CAMERAS_ESTIMATED`, `E31_SOURCES`) and the camera helpers moved from type 2's builder; 01 checks a
+  sensor's drawn number (`NUMBER_OF`); 02 draws it as a whole number (`whole_numbers`). Tests first (17 new); the
+  sandbox at 2,000 draws (builders, 01, 02, 03). **His runs, in this order, each by pressing Run** (type 5's file does
+  not change; 01's pages do not either, and 02 makes 01's checks itself):
+  1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/1_compact_research_developer/make_parts_taken_apart.py`
+  2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`
+  3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`
+  4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/4_service_healthcare_interaction/make_parts_taken_apart.py`
+  5. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/6_defense_public_safety/make_parts_taken_apart.py`
+  6. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+     (200,000 draws: every type's draws and pages rewritten)
+  7. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+  Until runs 1 to 5, the tests that compare a builder's file with the one on disk fail: the file on disk is the old one.
+  His runs of 14:19 (types 1, 2, 5, 6) came before the removal below, so 1 and 2 again; 3 and 4 he stopped with
+  Ctrl-C (each takes about 7 s and prints nothing until "Written: …"); type 5's run changed nothing.
+- **Removed on his word** ("there is code, which is not needed anymore under tools", "Yes, remove 1 to 4";
+  VERIFICATION V183): in `tools/parts_types_3_and_4.py` the aliases of the seven helpers moved today and the unused
+  imports `SHARED_CONSTANTS_FIRST`, `SHARED_CONSTANTS_LAST`; in type 2's builder my pointer comment; the source rows
+  `N1c` (type 1) and `ORM` (type 2), cited by no row. **Found, not changed, his word:** the servo valve's Shares rows
+  of types 5 and 6 cite M30, which neither file's Sources holds; the shared rows cite "Bizzo et al. 2014" and
+  "Drexler et al. 2025", not the codes "Bizzo 2014" and "Drexler 2025".
+  **Proposed, not built:** one sentence on 02's notes pages that the cameras no source counts are estimated.
+- **Still for his word:** the electronics' name; the overview of 01; the iCloud copies; the Neo1's row in the robots
+  tables of types 3 and 5; 03 checking for outliers. E25 point B postponed until 04, the stock-and-flow model.
+
+## 2026-11-05, afternoon: the electronics by their components built (E32); where to go on
 
 Matthias, after his walk: "Have you combined the eletronics, PCB, sensore, cables antenas etc.", then "Yes, include
 them" (cables, connectors, antennas as components) and "yes do it" (the checklist of EVIDENCE.md E32). **Built, not

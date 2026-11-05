@@ -17,6 +17,7 @@ the project is changed.
 """
 import importlib.util
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -685,10 +686,12 @@ class TestTypeTwoBatchTwo(unittest.TestCase):
         self.assertEqual(got, {r: (2, 'small', m) for r, m in expected.items()})
 
     def test_one_motion_sensor_where_the_maker_names_no_sensor(self):
-        # E7.5 point 8.
+        # E7.5 point 8. The block's own sensors: since 2026-11-05 the cameras of E31 beside them (their sources E31's),
+        # TestCamerasE31.
         for robot in ('DOBOT Atom', 'MirrorMe Bolt', 'Deep Robotics DR01', 'HONOR D1', 'Simplexity I-Series',
                       'KAIST Humanoid', 'LimX CL', 'VinMotion Motion 2', 'Zhejiang NAVAI-I3', 'Digit Nezha P01'):
-            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
+            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder'
+                       and not p.sources.startswith('E31')]
             self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
 
     def test_a_compute_module_where_the_maker_names_only_its_power(self):
@@ -805,11 +808,13 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
             self.assertEqual(modules, [(43.5, 87, 130.5)], msg=robot)
 
     def test_one_motion_sensor_where_the_maker_names_none(self):
+        # The block's own sensors: since 2026-11-05 the cameras of E31 beside them (their sources E31's), TestCamerasE31.
         for robot in ('Tesla Optimus Gen 3', 'Cyan Robotics Orca', 'Sanctuary Phoenix', 'PHYBOT M1', 'PAL REEM-C',
                       'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman',   # THEMIS: its brochure's, since E14
                       'X-Humanoid TianGong Ultra', 'Tlibot Tianzhen Z1', 'Tlibot T1', 'OpenLoong Qinglong',
                       'X-Humanoid Tien Kung 2.0'):
-            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder']
+            sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder'
+                       and not p.sources.startswith('E31')]
             self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
 
 # Type 2's robots on wheels (EVIDENCE.md E9.6, agreed 2026-10-30, "Yes, agree E9.6"; entered on "Yes, build it", E9.7):
@@ -2138,3 +2143,108 @@ class TestRobotsTablesOfTheHydraulicRobots(unittest.TestCase):
         # Written as whole numbers ("28", not "28.0": the sandbox's preview, V167).
         self.assertTrue(all(type(v) is int for v in joints.values()), msg=[k for k, v in joints.items() if type(v) is not int])
 
+
+
+# --- The cameras of the robots whose parts named none (EVIDENCE.md E31; Matthias, 2026-11-05, "Yes, build 1 to 5",
+# "Yes, those first", "Yes, A to H"). 144 robots of the six parts files listed no camera and no microphone; their makers'
+# pages and, where those say nothing, third parties were searched twice. Point 1 and 2: the robots whose source states
+# their cameras hold them as it states, each source read first-hand (VERIFICATION.md V181); point 3: those whose
+# cameras no source counts an estimate, a row without a number and its drawn number 1 / 3 / 12 (E), and a microphone
+# array of four where a source names a microphone or voice; point 4: the makers who sell the camera only as an option,
+# none. The numbers below are the image sensors each robot holds (a camera one, a stereo camera two, a depth camera
+# one colour and two infrared, as the D435's) and its microphones, counted by hand from E31's sources.
+E31_STATED = {
+    'Foundation Phantom MK1': (8, 0), 'PAL TALOS': (3, 0), 'PAL REEM-C': (3, 4), 'AgiBot A2': (6, 4),
+    'DOBOT Atom': (4, 0), 'Keenon XMAN-R1': (16, 4), 'UBTECH U1 Pro male': (2, 6), 'UBTECH U1 Pro female': (2, 6),
+    'Yunmu YMBot D': (3, 4), 'NEURA 4NE1 Gen 3': (7, 4), 'AIDOL Lab AIDOL': (4, 7), 'Mentee MenteeBot V3': (5, 4),
+    'Apptronik Apollo': (1, 0), 'PrimeBOT T1': (1, 4), 'Agility Digit': (3, 0), 'Astribot S1': (14, 0),
+    'Noetix Dora': (9, 6), 'JAKA Kargo': (2, 0), 'JAKA π': (1, 4), 'Spirit AI Moz1': (9, 0),
+    'X-Humanoid Tien Kung 2.0': (9, 0), 'Tlibot Y1': (5, 4), 'Yunmu YMBot D4': (6, 4), 'Toyota CUE7': (3, 0)}
+# Point 3, by the register's numbers; those whose sources name a microphone or voice (E31's table of point 3).
+E31_ESTIMATED = [4, 5, 7, 9, 13, 19, 21, 23, 28, 31, 33, 41, 42, 43, 46, 51, 53, 56, 57, 58, 61, 63, 73, 74, 76, 78, 80, 83,
+                 85, 86, 90, 93, 100, 101, 106, 110, 112, 114, 115, 125, 131, 132, 134, 136, 137, 139, 141, 146, 147, 150,
+                 151, 154, 156, 164, 165, 167, 170, 175, 183, 184, 188, 189, 197, 199, 203, 204, 205, 206, 209, 210, 213,
+                 221, 222, 223, 224, 226, 229, 230, 232, 238, 240, 242, 244, 246, 250, 258, 261, 263, 264, 272, 275, 276,
+                 280, 281, 284, 285, 291, 293, 297, 298, 302, 308, 320, 330, 331, 333, 336, 337, 339, 341, 343, 344, 348,
+                 351]
+E31_MICROPHONES = [4, 5, 9, 33, 57, 74, 76, 85, 101, 114, 131, 132, 136, 137, 150, 175, 188, 189, 223, 224, 240, 244, 250,
+                   261, 275, 291, 293, 330, 333, 339, 344]
+# Point 4: none, as the maker states (the RB-Y1 "The vision camera is not provided.", the Adam Lite without head).
+E31_NONE = [10, 251, 260, 268, 269, 307, 350]
+IMAGE_SENSORS = ('CMOS image sensor', 'IR camera sensor')
+
+
+def names_of(numbers: list) -> list:
+    """The parts files' names of the register's robots `numbers`, every version once."""
+    taken = {n: names for d in REGISTER.TAKEN_APART.values() for n, names in d.items()}
+    return [name for n in numbers for name in schemas.versions(taken[n])]
+
+
+class TestCamerasE31(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = [written(b)[0] for b in (builder, builder_two, builder_three, builder_four, builder_five,
+                                             builder_six)]
+
+    def apart(self, robot: str):
+        return next(a for a in self.files if robot in a.robots)
+
+    def held(self, robot: str, car_types) -> float:
+        """How many units of `car_types` the robot's sensors hold (a sensor without a number not counted)."""
+        apart = self.apart(robot)
+        units = {}
+        for _, sensor, car_type, n in apart.elements:
+            units.setdefault(sensor, {})[car_type] = n
+        return sum((s.count or 0) * units.get(s.name, {}).get(t, 0) for s in apart.sensors if s.robot == robot
+                   for t in car_types)
+
+    def test_the_144_robots_each_in_one_point(self):
+        stated = set(E31_STATED)
+        self.assertEqual(len(set(names_of(E31_ESTIMATED)) | set(names_of(E31_NONE)) | stated),
+                         len(names_of(E31_ESTIMATED)) + len(names_of(E31_NONE)) + len(stated))
+        self.assertEqual(len(E31_ESTIMATED) + len(E31_NONE) + len(stated) - 1, 144)   # the U1 Pro in two versions
+
+    def test_points_1_and_2_the_cameras_and_microphones_as_their_sources_state(self):
+        for robot, (sensors, microphones) in E31_STATED.items():
+            self.assertEqual(self.held(robot, IMAGE_SENSORS), sensors, msg=robot)
+            self.assertEqual(self.held(robot, ('MEMS microphone array',)), microphones, msg=robot)
+
+    def test_point_3_a_drawn_number_of_cameras_and_a_microphone_array_where_named(self):
+        for robot in names_of(E31_ESTIMATED):
+            apart = self.apart(robot)
+            rows = [s for s in apart.sensors if s.robot == robot and s.name == builder.ESTIMATED_CAMERAS]
+            self.assertEqual([(s.count, s.kind, s.label) for s in rows], [(None, 'Head', 'E')], msg=robot)
+            row, values, unit, label, _ = apart.constants[robot][schemas.NUMBER_OF + builder.ESTIMATED_CAMERAS]
+            self.assertEqual((values, label), ((1, 3, 12), 'E'), msg=robot)
+            self.assertEqual(self.held(robot, IMAGE_SENSORS), 0, msg=robot)   # none counted beside the drawn ones
+        mics = set(names_of(E31_MICROPHONES))
+        for robot in names_of(E31_ESTIMATED):
+            self.assertEqual(self.held(robot, ('MEMS microphone array',)), 4 if robot in mics else 0, msg=robot)
+
+    def test_point_4_no_camera(self):
+        for robot in names_of(E31_NONE):
+            self.assertEqual(self.held(robot, IMAGE_SENSORS), 0, msg=robot)
+            self.assertFalse(any(s.robot == robot and s.name == builder.ESTIMATED_CAMERAS
+                                 for s in self.apart(robot).sensors), msg=robot)
+
+    def test_the_phantom_without_battery_its_source_the_bbc(self):
+        apart = self.apart('Foundation Phantom MK1')
+        self.assertFalse(any(p.robot == 'Foundation Phantom MK1' and p.kind == 'Battery pack' for p in apart.parts))
+        self.assertIn('E31-BBC', apart.robots['Foundation Phantom MK1'].sources)
+        self.assertNotIn('TBS', apart.sources)
+        self.assertIn('bbc.com/news/articles/cedpxwe26l1o', apart.sources['E31-BBC'][2])
+
+    def test_every_source_a_camera_cites_on_the_sheet_sources(self):
+        for apart in self.files:
+            for s in apart.sensors:
+                for code in re.findall(r'E31-\w+', s.sources):
+                    self.assertIn(code, apart.sources, msg=(s.robot, s.name))
+
+    def test_the_number_prefix_is_01s(self):
+        self.assertEqual(builder.NUMBER_OF, schemas.NUMBER_OF)
+
+    def test_what_they_write_passes_every_check_of_01(self):
+        lists = schemas.read_shared_lists(absolute(Params().data.shared_lists))
+        for apart in self.files:
+            self.assertEqual([f.text for f in schemas.check_parts_taken_apart(apart, lists, Params())], [])

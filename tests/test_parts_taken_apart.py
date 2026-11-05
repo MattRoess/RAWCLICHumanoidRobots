@@ -2028,3 +2028,53 @@ class TestJointsEstimatedWithoutTorque(unittest.TestCase):
         self.assertIn('DEEP Robotics DR02', composition.on_estimates(
             type_inputs_or_skip(self, params, 5).apart, ['DEEP Robotics DR02']).get(self.TORQUES, []))
 
+
+
+class TestDrawnNumbers(unittest.TestCase):
+    """A count no source states, drawn as a whole number in every draw (EVIDENCE.md E31 point 3; Matthias, 2026-11-05,
+    "Yes, build 1 to 5", "Yes, A to H"): the cameras of a robot whose sources name cameras without a count, or none,
+    1 / 3 / 12 image sensors (E). Each whole number k takes the share of the triangle widened by half a unit on each
+    side (0.5 to 12.5, its mode 3) that lies between k - 0.5 and k + 0.5, as RAWCLICDataCenters draws its counts
+    (`whole_number_probabilities`, Matthias, 2026-10-15: "there is no 2.3 board, there is 1, 2 or 3"); the mean stays
+    the triangle's, (1 + 3 + 12) / 3."""
+
+    @staticmethod
+    def cdf(x: float, low: float, mode: float, high: float) -> float:
+        """The share of the triangle (low, mode, high) below x, written out by hand for the test."""
+        if x <= low:
+            return 0.0
+        if x >= high:
+            return 1.0
+        if x <= mode:
+            return (x - low) ** 2 / ((high - low) * (mode - low))
+        return 1 - (high - x) ** 2 / ((high - low) * (high - mode))
+
+    def test_whole_numbers_with_the_triangles_shares(self):
+        n = 400_000
+        k = composition.whole_numbers(np.random.default_rng(5), 1, 3, 12, n)
+        self.assertEqual(k.shape, (n,))
+        self.assertTrue((k == np.round(k)).all())
+        values, counts = np.unique(k, return_counts=True)
+        self.assertEqual(values.tolist(), list(range(1, 13)))
+        for value, count in zip(values, counts):
+            p = self.cdf(value + 0.5, 0.5, 3, 12.5) - self.cdf(value - 0.5, 0.5, 3, 12.5)
+            self.assertAlmostEqual(count / n, p, delta=4 * np.sqrt(p * (1 - p) / n), msg=value)
+        self.assertAlmostEqual(k.mean(), 16 / 3, delta=0.02)
+
+    def test_a_count_of_one_value_is_that_value(self):
+        self.assertEqual(composition.whole_numbers(np.random.default_rng(5), 2, 2, 2, 10).tolist(), [2] * 10)
+
+    def test_type_1s_estimated_cameras_whole_in_every_draw_and_their_mean_the_triangles(self):
+        # The Sapiens K1 (point 3: no source counts its cameras) and the JAKA π (point 2: "a camera on its head"), both
+        # cameras of one colour image sensor and nothing else: in every draw of the K1 its cameras are there; over the
+        # draws, their kilograms per draw are the π's one camera's times the number drawn, 16 / 3 at the mean.
+        params = Params()
+        params.composition.draws = 6000
+        inputs = inputs_or_skip(self, params)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        columns, kg = d.parts
+        k1 = kg[:, columns.index('ROBOTIS AI Sapiens K1: ' + PARTS_BUILDER.ESTIMATED_CAMERAS)]
+        pi = kg[:, columns.index('JAKA π: Camera')]
+        of_k1, of_pi = d.robot == d.robots.index('ROBOTIS AI Sapiens K1'), d.robot == d.robots.index('JAKA π')
+        self.assertTrue((k1[of_k1] > 0).all() and (k1[~of_k1] == 0).all())
+        self.assertAlmostEqual(k1[of_k1].mean() / pi[of_pi].mean(), 16 / 3, delta=16 / 3 * 0.25)

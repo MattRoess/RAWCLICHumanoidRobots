@@ -55,8 +55,8 @@ TOOLS = os.path.dirname(os.path.abspath(__file__))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from parts_taken_apart import *  # noqa: E402,F401,F403  (every shared name: the sheets, the template, the functions)
-from parts_taken_apart import (DRIVER_AREA, DRIVER_BOARD_AREA, SHARED_CONSTANTS_FIRST,  # noqa: E402
-                               SHARED_CONSTANTS_LAST, average_joints, block, estimate, joint, spread, template_block)
+from parts_taken_apart import (DRIVER_AREA, DRIVER_BOARD_AREA, average_joints, block, estimate, joint,  # noqa: E402
+                               spread, template_block)
 
 
 def _type_two():
@@ -74,8 +74,7 @@ def _type_two():
 
 T2 = _type_two()
 fitted, voltage_capacity, cables_by_height, screws = T2.fitted, T2.voltage_capacity, T2.cables_by_height, T2.screws
-binocular, depth_camera, camera, lidar, imu = T2.binocular, T2.depth_camera, T2.camera, T2.lidar, T2.imu
-microphones, speaker, base_lidar, base_depth_camera = T2.microphones, T2.speaker, T2.base_lidar, T2.base_depth_camera
+base_lidar, base_depth_camera = T2.base_lidar, T2.base_depth_camera
 thor, agx_orin, intel, orin_nx_boards, hands, grippers = T2.thor, T2.agx_orin, T2.intel, T2.orin_nx_boards, T2.hands, \
     T2.grippers
 COMPUTER, POWER_BOARD, IMU_G, RK3588_BOARDS = T2.COMPUTER, T2.POWER_BOARD, T2.IMU_G, T2.RK3588_BOARDS
@@ -868,12 +867,14 @@ def phantom_mk1_joints() -> list:
 FOUNDATION_PHANTOM_MK1 = block(
     'Foundation Phantom MK1', 'Foundation', 1.80, 80,
     'FDp (Foundation: "5\'-11", (1.8m)", "176lbs, (80kg)", "29º", "MAX PEAK TORQUE, 160Nm", "LEGS TORQUE, >160", '
-    '"SHOULDER TORQUE, 119", "WRIST TORQUE, 20", "9 RAD/S @ 48V"), TBS (the BBC via UNB: "lacks a battery"); E15, E16',
+    '"SHOULDER TORQUE, 119", "WRIST TORQUE, 20", "9 RAD/S @ 48V"), E31-BBC (the BBC\'s reporter: "Phantom MK-1, '
+    'which I am shown, doesn\'t have a battery"); E15, E16, E31',
     makers(80, 'FDp "176lbs, (80kg)"'), phantom_mk1_joints(),
     joint_sources=stated_joint_sources('FDp', '"MAX PEAK TORQUE, 160Nm"', 160, 'knee') +
     '; its shoulders "119 Nm" and wrists "20 Nm" as stated, each the refit at its torque; its joints per body part as '
     "the Unitree G1's 29 (E)",
-    # TBS: "Phantom MK-1 … lacks a battery" (E16.2): no battery rows; it draws its power by cable.
+    # E31-BBC, the BBC's reporter at Foundation (since 2026-11-05, E31 point 1; before, the BBC via UNB): "Phantom MK-1,
+    # which I am shown, doesn't have a battery" (E16.2): no battery rows; it draws its power by cable.
     battery=False, **with_defaults(1.80, 80, {}))
 
 # --- Batch 3, robot by robot (EVIDENCE.md E15.3 and E15.6, agreed 2026-11-01, "Yes, agree both"; entered on "E15's
@@ -2101,8 +2102,6 @@ OWN_SOURCES = [
     ('MKm', 'Mike Kalil, on Moby ("Standing 170 cm", "a reported 34 degrees of freedom")',
      'https://mikekalil.com/blog/noble-machines-moby/', 'Second-hand: a blog'),
     ('FDp', 'Foundation, Phantom page', 'https://www.foundation.bot/phantom', "Manufacturer's specification"),
-    ('TBS', 'The Business Standard (UNB, after the BBC), 2026-06-09 ("Phantom MK-1 … lacks a battery")',
-     'https://www.tbsnews.net/node/1457841', 'Second-hand: a press report'),
     # Batch 3 (E15.7): every source its blocks cite, read first-hand on 2026-11-01 and 2026-11-02 (V134; the records in
     # documentation/claude/research_2026-11-01/), but where a row says it was not reread.
     ('FIGr', 'New Atlas on the Figure 02\'s launch ("six RGB cameras", "16 degrees of freedom", "a new 2.25-kWh")',

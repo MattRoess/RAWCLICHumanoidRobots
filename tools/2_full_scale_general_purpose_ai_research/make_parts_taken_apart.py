@@ -362,9 +362,6 @@ SOURCES_ROWS = [
      'https://www.uumotor.com/4-inch-robot-brushless-servo-hub-motor.html', "Component maker's catalogue"),
     ('TEN', 'Tente, swivel castors 75 mm (5920UAP075L51-10 "Overall weight 0.18 kg"; 1470PAO075P40 0.27 kg)',
      'https://www.tente.com/en-sg/swivel-castor-75-mm/1470pao075p40-tente', "Component maker's catalogue"),
-    ('ORM', "Oriental Motor, EL series lifting columns (20.4 to 30.5 kg for 50 to 300 mm)",
-     'https://catalog.orientalmotor.com/viewitems/-linear-actuator-dc-input-electric-lifting-columns/'
-     'lifting-columns-el-series-electric-lifting-columns', "Component maker's catalogue"),
     SHARED_SOURCES['L1'],
     SHARED_SOURCES['T1'],
     SHARED_SOURCES['T3'],
@@ -384,10 +381,6 @@ FIT_KG, FIT_POWER = 0.0689, 0.566
 # Unitree's M107: "Weight 1.9kg", 360 N·m (H1p, its table), ± 5 % as a figure stated once (E5.12 point 3); the H1-2's
 # knees ("uses the self-developed M107", H1d; knee "About 360N.m", H1p).
 M107 = spread(1.9)
-# The camera of a robot whose maker names it but gives no mass: as a D435 (75 g), a stereo camera too, half to 1.5
-# times (E6.8 point 8); its elements two image sensors.
-STEREO_CAMERA_G = estimate(75)
-STEREO = [('CMOS image sensor', 2)]
 # The cables of a robot of type 2 (E6.8 point 9): the X1's 11 m listed and the G1's "not longer than 10m", both at
 # 1.3 m, scaled by the robot's height, half to 1.5 times (E).
 CABLES_TALL = (7, 14, 21)      # m: 1.75 to 1.82 m (the H2, H2 Plus, H1-2, GR-2)
@@ -751,41 +744,6 @@ RK3588_BOARDS = [('Compute module, Rockchip RK3588', 1, 'Boards', 'Torso', estim
                   'E7.5 point 7)'),
                  ('Carrier board of the RK3588', 1, 'Boards', 'Torso', COMPUTER, 'ITC', 'E',
                   "as the X1's and N1's computer boards (E7.5 point 7)")]
-# Sensors whose makers name their kind but not their model (E7.5 point 8): a binocular or depth camera as a D435, 75 g,
-# half to 1.5 times (STEREO_CAMERA_G); a camera of one sensor and a LiDAR as type 1's of no named model (their kind's
-# elements, no mass of their own).
-
-
-def binocular(source: str, count: int = 1, name: str = 'Binocular camera') -> tuple:
-    return (name, count, 'Head', 'Head', STEREO_CAMERA_G, 'E', f'{source}; its mass not stated: as a D435 (E7.5 point '
-                                                               '8)', STEREO)
-
-
-def depth_camera(source: str, count: int = 1) -> tuple:
-    return ('Depth camera (not named)', count, 'Head', 'Head', STEREO_CAMERA_G, 'E',
-            f'{source}; its mass not stated: as a D435 (E7.5 point 8)', DEPTH_CAMERA)
-
-
-def camera(name: str, count: int, kind: str, source: str) -> tuple:
-    return (name, count, kind, kind, None, 'S', f'{source}; as type 1\'s cameras of no named model (E7.5 point 8)',
-            CAMERA)
-
-
-def lidar(source: str) -> tuple:
-    return ('LiDAR, 3D (not named)', 1, 'Head', 'Head', None, 'S',
-            f"{source}; as type 1's LiDAR of no named model (E7.5 point 8)", LIDAR)
-
-
-def imu(source: str, name: str = 'Motion sensor (IMU)') -> tuple:
-    return (name, 1, 'Boards', 'Torso', IMU_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [('IMU', 1)])
-
-
-def microphones(source: str, name: str = 'Microphone array') -> tuple:
-    return (name, 1, 'Head', 'Head', MICROPHONES_G, 'E', f"{source}; as the G1's four (E7.5 point 8)", MICROPHONES)
-
-
-def speaker(source: str) -> tuple:
-    return ('Speaker', 1, 'Head', 'Head', SPEAKER_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [])
 
 
 def voltage_capacity(volts: float, volt_source: str, amp_hours: float, ah_source: str, label: str = 'S') -> dict:

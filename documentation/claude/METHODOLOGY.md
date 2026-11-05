@@ -551,6 +551,31 @@ are par of the elctronics!!", "3 yes", the cables, connectors and antennas "Yes,
    plastics, 2026-10-29 point 3c), the kinds of part and body regions, the copper three ways, every sum: the draws are the
    same, only split.
 
+## The cameras of the robots whose parts named none (since 2026-11-05)
+
+Matthias, 2026-11-05: "Yes, build 1 to 5", "Yes, those first", "Yes, A to H" (EVIDENCE.md E31). 144 robots of the six
+parts files listed no camera and no microphone, so their electronics held the cameras' elements (titanium, gallium,
+indium) in about half the draws only. Their makers' pages and, where those say nothing, third parties were searched
+twice; each source a count rests on was read first-hand (VERIFICATION.md V181).
+
+1. **Stated (23 robots):** their cameras and microphones as their sources state, each robot its own rows, added to its
+   block's sensors by the builders' shared `robot_rows()` (`CAMERAS_STATED` in `tools/parts_taken_apart.py`): a camera
+   one colour image sensor, a stereo camera two, a depth camera as Intel's D435 (one colour and two infrared image
+   sensors, a laser diode array); a microphone array of the number stated, or four as the G1's. A camera outside the
+   head where its source places it (the arms; the torso, as the motion sensors). No LiDAR the same sources name: the
+   research was of cameras and microphones. The Phantom MK1 among them (eight cameras; no battery, the BBC's reporter).
+2. **Estimated (114 robots, 122 with their versions):** the robots whose sources name cameras without a count, or none.
+   Each a row "Cameras (number not stated)" without a number, colour image sensors, and its own constant
+   "Number: Cameras (number not stated)", 1 / 3 / 12 (E: the 172 robots and versions that list cameras hold 1 to 20
+   image sensors, most often 3, median 4). 02 draws the number in every draw as a whole number (`whole_numbers`): each
+   whole number k takes the share of the triangle widened by half a unit on each side (0.5, 3, 12.5) between k - 0.5 and
+   k + 0.5, the way RAWCLICDataCenters draws its counts; the mean stays 16/3. Its elements are that number times one
+   camera's. A microphone array of four where a source names a microphone or speech (31 robots).
+3. **None (7 robots):** where the maker sells the camera only as an option (the RB-Y1, the Torobo, the N1, the Roboto
+   Origin, the Roban2, the RP1) or the robot has no head (the Adam Lite).
+4. **01's checks:** a sensor's row without a number only with its constant, never both, and the constant's minimum,
+   mode and maximum whole numbers from 1 up (never 0: a robot with cameras holds one at least).
+
 ## The numbers of the panels on pages of their own (since 2026-11-05)
 
 Matthias, 2026-11-05: "Do we really need all this text in the figure. It might be better to have it separate. I can read

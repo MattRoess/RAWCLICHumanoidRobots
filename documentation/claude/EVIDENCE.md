@@ -76,7 +76,7 @@ components" from RAWCLICDataCenters, and the name stands in his `data/researched
 Materials). Built with "Boards and components" (one constant, `ELECTRONICS`); a rename needs those cells changed, his data.
 Not changed either: the sensors' housings (aluminium and plastics, 2026-10-29 point 3c), not named in the checklist.
 
-## E31. The cameras of the robots that list none; the Phantom MK1's battery (2026-11-05). Researched; nothing entered
+## E31. The cameras of the robots that list none; the Phantom MK1's battery (2026-11-05). Researched; built 2026-11-05
 
 Matthias, 2026-11-05: "I do not understand, why there is titanium on the boards. Where do you have the information. I
 want both investigated. It does absoultly not make any sense", then "Yes, research both" (VERIFICATION.md V175, V176).
@@ -112,9 +112,69 @@ without a number):
 | f. Catalogues only (7) | 184 Blue Worm Mantis (binocular head camera, wrist cameras optional); 224 Cyan Orca (a depth camera, a 6-microphone ring); 246 AgiBot QUESTER1 (RGB cameras); 101 Futuring 2 (6 RGB cameras, microphones); 125 Haier HIVA (RGB and stereo); 131 HONOR A1 (stereo and RGB, a LiDAR); 183 GigaAI Maker H01 (5 RGB and 4 RGB-D; the maker: "multiple sensors") |
 | g. Nothing found (78) | 19 AI Sapiens K1, 147 K0, 143 JAKA π (a voice module), 281 StarBot Astra, 308 Totan O1, 343 YMBOT E3, 21 AICO 2, 40 Astribot S1, 41 Astribot T1, 42 AstroDroid AD-01, 53 Bolt, 68 CUE7, 80 DR01, 86 Eggie; 134 Simplexity I-Series, 151 KAIST, 170 LimX CL, 199 Motion 2, 200 Moz1, 203 NAVAI-I3, 210 Nezha P01, 221 Optimus Gen 3, 222 Optimus Gen 2, 223 Optimus V2.5, 229 Phoenix ("most sensor-rich", none named), 272 Sean, 276 Songxing, 285 Superman, 297 TianGong Ultra, 298 Tianzhen Z1; 299 Tien Kung 2.0, 302 TLIBOT T1, 335 Y1, 336 Y2-B, 337 Y2-P, 341 YMBot D2, 342 YMBot D4, 4 4NE1 Gen 3.5, 7 A2 Max, 10 Adam Lite, 28 TeknTrash ALPHA (its hyperspectral camera at the conveyor, not on the robot), 56 Borg 01, 63 Cinnamon 1, 73 Sharpa D01; 76 DexBot, 93 Fengxing-001, 110 Persona Gen 1, 141 JAKA K1, 142 JAKA Kargo, 146 Jupiter, 154 KAPEX, 165 L1, 167 Laborer M1 (its table lists only joint encoders), 189 MenteeBot 2024, 197 O-ID Modular, 204 Navigator 2; 209 NEXO, 213 Sharpa North, 226 Pink P0, 242 XPENG PX5, 250 RayNex G3, 263 Robin, 264 ROBO-T1, 320 Walden, 348 Zeus 1, 46 Vbot ATOM, 61 CASIVIBOT, 79 Noetix Dora, 150 KAI; 238 ProWhite, 261 Robbyant R1, 284 Steve, 291 TARA GEN1, 330 Xiao Di, 331 Xiao Liu, 333 XiaQi, 344 YMBot H, 351 Fuxi |
 
-**Open, for his word** (nothing entered): which of these land in the parts files and how; what the robots of classes c
-to g, whose cameras no source counts, take (an estimate, E, by his rules: never 0, never left open); whether an optional
-camera (class a) counts; a second search for class g, whose robots had the fewest lookups.
+**Approved** (Matthias, 2026-11-05, "Yes, build 1 to 5", and after the split of the electronics "Yes, those first"):
+1 the Phantom MK1 keeps no battery (the BBC itself) and gets its 8 head cameras (Newsweek); 2 the robots with a stated
+count or set "entered as their sources state", each robot its own rows; 3 the robots with cameras but no count and those
+with nothing found, an estimate (E) of 1 / 3 / 12 image sensors, microphones 4 where a source names a microphone or
+voice, never 0; 4 the 6 whose makers sell the camera only as an option, none, as the maker states; 5 a second search of
+the 78 with nothing found, before point 3's estimate is entered for them. Nothing entered yet.
+
+**The second search (point 5), 2026-11-05 afternoon.** Four research agents, about 20 robots each, by the rules of the
+first: the maker's pages first (read in the built-in browser where a site shows its text only with JavaScript; removed
+pages from the Wayback Machine), a third party only where the maker says nothing, the exact words and the link, nothing
+from photos or from another model or version. humanoid.guide skipped (one agent used two of its pages, marked below as a
+catalogue). Not yet re-read by me. By class, as the first search:
+
+| Class | Robots |
+|---|---|
+| a. Maker: no camera as standard (3) | 10 Adam Lite (the maker's wiki, its spec table: the Lite without perception sensor and head; Standard and SP an Intel RealSense D455, Pro a ZED MINI; wiki.pndbotics.com/en/robot/humanoid_robot/); 264 ROBO-T1 (robo.inc/fleet: "Choose mobility, grippers, cameras, and fleet size around the work you want to automate.", a page not naming the T1); 151 KAIST (the maker's release of 19 Sep 2025, a lower body: balance "even with its eyes closed"; Interesting Engineering: "navigates obstacles without using cameras or vision-based sensors") |
+| b. Maker: cameras with a count or a set (8) | 40 Astribot S1 (Astribot's data sheet, hosted by igus/RBTX: "Head camera RGB-D camera * 1 Stereo vision camera*1", "Gripper camera RGB-D camera*2", "Chest camera RGB-D camera*1"; a.storyblok.com/f/298593/x/d5cf3ddd99/astribot-s1_eng.pdf); 79 Noetix Dora (the maker's page, archived: "深度相机3个", structured light, 2 tilted down and 1 forward; "阵列麦克风 6"; web.archive.org/web/20251028183926/https://www.noetixrobotics.com/products-137.html); 142 JAKA Kargo (the maker's English page "JAKA Kargo": "Vision camera \| 2"; the Chinese pages two variants, Kargo10 "视觉相机 \| 4", Kargo50 "3D视觉相机 \| 2"; jaka.com/en/productDetails/JAKA_Kargo); 143 JAKA π (the maker's news of 26 Jun 2026: "Using a camera on its head, it safely walks around rooms"; its page "语音模块 \| 具备"; jaka.com/en/newsDetail/1493); 200 Spirit AI Moz1 (its manual: "头部相机（Intel D455） \| 1", "腕部相机（Intel D405） \| 2"; docs.spirit-ai.com/zh/moz1/mechanics.html); 299 Tien Kung 2.0 (X-Humanoid's brochure, WRC July 2025, p. 4: "全场景双目结构光3D相机*3"); 335 Tlibot Y1 (its manual: "头部深度相机\*1、7自由度带 视觉机械臂\*2", "Y1机器人视觉系统采用realsense D435相机"; its API an upper and a lower head camera; an iFlytek voice module; tlibot.com/arm/127.html, /arm/231.html, /arm/446.html); 342 YMBot D4 (the maker: "感知系统: 双目相机/激光雷达/六维力传感器 RGBD相机/鱼眼相机", "交互系统: 阵列麦克风/扬声器/多彩灯带"; ymbot.com/product/detail/7) |
+| c. Maker: cameras or vision, count not stated (13) | 42 AstroDroid AD-01 ("视觉感知"); 61 CASIVIBOT ("仿人眼成像系统"; voice for the Z1Pro only); 238 ProWhite ("Precision Visual Localization"); 336 Y2-B and 337 Y2-P (the Y2 manual: a D435 depth camera, no number; "一个语音模块（选配）"); 63 Cinnamon 1 (a vision-language model); 73 Sharpa D01 ("High-Fidelity Depth Perception"); 213 Sharpa North ("real-time vision"); 110 Persona Gen 1 ("camera video streams", the generation not named); 189 MenteeBot 2024 ("camera-only sensing" said of the production version; verbal commands); 229 Phoenix (the Gen 8's "depth and vision cameras", the Gen 7's "visual acuity"); 263 Robin ("alongside vision"); 222 Optimus Gen 2 ("using only 2D cameras", a Tesla video of May 2024 not naming the version) |
+| d. Third party only, with a count (5) | 146 Zeroth Jupiter (humanoid.guide: "A torso depth camera supports perception"); 167 Laborer M1 (humanoid.guide, no source given: "A depth camera in its head…"; the maker lists only joint encoders); 4 4NE1 Gen 3.5 (aiwiki, no source: "Seven cameras, LiDAR, NEURA Omnisensor, microphone array", the number from the Gen 3's coverage); 68 Toyota CUE7 (tokyonewsmedia.com/archives/21230: "頭部のステレオカメラ"; newswitch.jp/p/49050: "ドリブル用のカメラセンサーをＣＵＥ７の腰に配置した。"); 86 Eggie (a researcher's blog: "seems to have a dual stereo camera head", from a video) |
+| e. Third party only, count not stated (7) | 141 JAKA K1 ("视觉系统", Jiemian); 204 Navigator 2 (Origin of Bots); 272 Sean ("HD–4K vision system", Origin of Bots); 331 Xiao Liu (the vision of its data-collection system); 56 Borg 01 ("multi-RGBD cameras and stereo vision"); 154 KAPEX (a vision-language model); 320 Walden ("two sensors that resemble eyes") |
+| f. Catalogues and wikis only (12) | 53 Bolt, 76 DexBot (speech), 203 NAVAI-I3, 242 PX5, 250 RayNex G3 (voice commands, Xinhua's reporter), 261 Robbyant R1 (spoken explanations), 276 Songxing (natural-language interaction), 348 Zeus 1, 28 ALPHA (its hyperspectral camera at the conveyor), 199 Motion 2 (multi-language interaction), 226 Pink P0, 291 TARA GEN1 (the maker: "100+ languages") |
+| g. Nothing found (30) | 7 A2 Max (in development; the base A2's cameras not used), 41 Astribot T1, 46 ATOM, 80 DR01, 93 Fengxing-001, 134 I-Series, 150 KAI (talks with visitors; the eight cameras are its headset's), 165 L1, 170 LimX CL, 209 NEXO, 210 Nezha P01, 285 Superman, 297 TianGong Ultra, 330 Xiao Di (speech), 333 XiaQi (the maker: voice dialogue, sound-source localisation), 351 Fuxi, 298 Tianzhen Z1, 302 TLIBOT T1, 341 YMBot D2, 308 Totan O1, 19 AI Sapiens K1, 147 K0, 21 AICO 2, 343 YMBOT E3 (voice optional), 344 YMBot H (the maker: voice interaction), 197 O-ID Modular, 221 Optimus Gen 3, 223 Optimus V2.5 (voice input), 281 StarBot Astra, 284 Steve |
+
+Refused or unreadable, among others: tesla.com (403), several trade-press pages (403), a WeChat post and theprint.in
+(a verification step, not bypassed), nineray.com (TLS), aiwiki (429 at times). The agents' full reports with every quote:
+`scratchpad/cameras_second_search/` (not durable).
+
+**The 78 sorted by the approved points:** point 2 (entered as stated) classes b and d, point 4 (none) class a, point 3
+(the estimate) classes c, e, f and g. **Agreed as recommended** (Matthias, 2026-11-05: "Yes, A to H"):
+
+| | Point | Recommendation |
+|---|---|---|
+| A | LiDARs named by the same sources as the cameras (AgiBot A2, KEENON XMAN-R1, Galaxea Kengo, Astribot S1, JAKA Kargo50, Moz1) | not entered: the research was of cameras and microphones |
+| B | The AgiBot A2-W ("4 AI vision sensors", a reseller's blog) and the HONOR D1 (Orbbec's page of HONOR's "first humanoid", not naming the D1) | point 3 |
+| C | The kind of the estimated image sensors (no source says) | colour image sensors (CMOS), as `CAMERA` |
+| D | Counts from weak sources: 4 4NE1 Gen 3.5 (the Gen 3's number), 86 Eggie ("seems", from a video), 146 Jupiter and 167 Laborer M1 (humanoid.guide, a catalogue) | point 3 |
+| E | "None" not stated by the maker of that robot: 264 ROBO-T1 (a fleet page not naming it), 151 KAIST (walks "with its eyes closed") | point 3; only 10 Adam Lite none |
+| F | 335 Y1: "head depth camera ×1", "arm with vision ×2" | a D435 in the head and a camera on each arm |
+| G | Microphones of a voice module sold as an option (336 Y2-B, 337 Y2-P, 343 YMBOT E3) or of another variant (61 CASIVIBOT's Z1Pro) | none, as the optional cameras of point 4 |
+| H | 142 JAKA Kargo: 2 on the English page of that name, 4 or 2 on the Chinese pages of its variants | 2 |
+
+And: each source of point 2 read by me first-hand before its robot is entered; a source I cannot open (as Gasgoo's of
+the Kengo) sends its robot to point 3. With A to H as recommended: point 2 holds 9 robots of the second search (the 8 of
+class b and the CUE7) and 18 of the first, point 4 one of the second (Adam Lite) and 6 of the first, point 3 the rest.
+
+**Built** (2026-11-05, on "Yes, A to H"; VERIFICATION.md V181 the sources read, V182 the build checked). Reading the
+sources first-hand moved four robots of point 2 to point 3, by its own words ("entered as their sources state", nothing
+from another robot or version): 206 1X NEO Beta (its count the production NEO's, "not stated for the Beta"), 205 GENISOM
+NE01 (its page blank, not archived), 156 Galaxea Kengo (Gasgoo refuses it, HTTP 468), 164 Leju Kuavo-my (its page now
+the KUAVO 4Pro's, 1.66 m and 55 kg, not the register's 145 cm and 45 kg). Two PDFs downloaded on his word ("Yes, download
+both"): the Astribot S1's and the TALOS's data sheets. So **point 1 and 2: 23 robots** (24 with the U1 Pro's two
+versions), **point 3: 114** (122 with their versions), **point 4: 7**.
+
+| Point | Robots | In the data and the code |
+|---|---|---|
+| 1 | 228 Phantom MK1: 8 cameras (Newsweek's caption "Phantom MK1 has eight cameras in its head."); no battery, its source the BBC itself (E31-BBC in place of TBS, The Business Standard after the BBC) | `tools/parts_taken_apart.py`: `CAMERAS_STATED`, `E31_SOURCES`; `tools/parts_types_3_and_4.py`: its block's sources, the row TBS removed from type 3's Sources |
+| 2 | image sensors (a camera 1, a stereo camera 2, a depth camera 3: one colour, two infrared, as the D435) and microphones: TALOS 3 / 0; REEM-C 3 / 4; AgiBot A2 6 / 4; DOBOT Atom (the ATOM Max's page) 4 / 0; XMAN-R1 16 / 4; U1 Pro 2 / 6; YMBot D 3 / 4; 4NE1 Gen 3 7 / 4; AIDOL 4 / 7; MenteeBot V3 5 / 4; Apollo 1 / 0; PrimeBOT T1 1 / 4; Digit 3 / 0; Astribot S1 14 / 0; Dora 9 / 6; JAKA Kargo 2 / 0; JAKA π 1 / 4; Moz1 9 / 0; Tien Kung 2.0 9 / 0; Y1 5 / 4; YMBot D4 6 / 4; CUE7 3 / 0. A camera outside the head where its source places it: the arms (Astribot's grippers, Moz1's wrists, Y1's arms) or the torso (REEM-C's back, Astribot's chest, CUE7's waist; kind Boards, as the motion sensors) | `CAMERAS_STATED`, with the helpers `camera`, `binocular`, `depth_camera`, `microphones` (moved from type 2's builder, unchanged), `placed`, `several_microphones`; each source a code E31-… on the sheet Sources of the file that cites it (`sheets()`) |
+| 3 | a row `Cameras (number not stated)` without a number, colour image sensors (point C); the robot's constant `Number: Cameras (number not stated)`, 1 / 3 / 12, E; a microphone array of four where a source names a microphone or speech (31 robots: listening, dialogue, voice, talks, verbal commands, dialects; not "natural language interaction" alone, not an optional voice module or another variant's, point G) | `CAMERAS_ESTIMATED` (name → the words naming its microphones), `robot_rows()`; 01: `NUMBER_OF`, the row without a number accepted only with its constant, whole numbers from 1 up; 02: `whole_numbers()`, the way RAWCLICDataCenters draws its counts, in the sensor loop of `draw_robot()` |
+| 4 | RB-Y1 A and M, Torobo, N1, Roboto Origin, Roban2, RP1, Adam Lite: none | nothing entered |
+| A–H | as agreed | in the rows above |
+
+Not changed: 02's notes pages list what rests on estimates by a robot's mass and joints only (`on_estimates`); they
+name the cameras as a component, not that their number is estimated (said to Matthias as a proposal).
 
 ## E30. The NeodraDynamics Neo1 an outlier, not drawn (2026-11-04). Built 2026-11-05
 

@@ -537,8 +537,6 @@ SOURCES_ROWS = [
      "Manufacturer's documentation"),
     ('N1b', 'Fourier, FOURIERN1.urdf (joints, limits, link masses)', 'https://github.com/FFTAI/fourier_lab',
      "Manufacturer's model file"),
-    ('N1c', 'A teardown article on Zhihu (actuators FSA80-29E, FSA60-43E, FSA45-30E)',
-     'https://zhuanlan.zhihu.com/p/1899242762072749284', 'Second-hand, through a search summary (login)'),
     ('FW1', 'Framework, Laptop 13 Heatsink and Fan Kit ("Weight: 67.5g"; 28 W continuous, 60 W turbo)',
      'https://frame.work/products/heatsink-and-fan-kit',
      "Manufacturer's specification; a laptop's cooler, not a mini PC's: context only"),

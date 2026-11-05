@@ -362,6 +362,28 @@ def triangle(rng: np.random.Generator, low: float, mode: float, high: float, n: 
     return rng.triangular(low, mode, high, n)
 
 
+def whole_numbers(rng: np.random.Generator, low: float, mode: float, high: float, n: int) -> np.ndarray:
+    """n draws of a count stated as a minimum, mode and maximum, each a whole number (EVIDENCE.md E31 point 3: the
+    cameras no source counts, 1 / 3 / 12): the whole numbers from the minimum to the maximum, each k with the share of
+    the triangle widened by half a unit on each side (minimum - 0.5, mode, maximum + 0.5) that lies between k - 0.5 and
+    k + 0.5, so that the minimum and the maximum occur too and the mean stays the triangle's, (min + mode + max) / 3.
+    The way RAWCLICDataCenters draws its counts (its `whole_number_probabilities`; Matthias, 2026-10-15: "there is no
+    2.3 board, there is 1, 2 or 3"). One value where the minimum is the maximum. 01 has checked that the three are whole
+    numbers from 1 up."""
+    if high == low:
+        return np.full(n, int(mode))
+    values = np.arange(int(low), int(high) + 1)
+    left, right = low - 0.5, high + 0.5
+
+    def below(x: np.ndarray) -> np.ndarray:
+        """The share of the widened triangle below x."""
+        rising = (x - left) ** 2 / ((right - left) * (mode - left))
+        falling = 1 - (right - x) ** 2 / ((right - left) * (right - mode))
+        return np.clip(np.where(x <= mode, rising, falling), 0, 1)
+
+    return rng.choice(values, size=n, p=below(values + 0.5) - below(values - 0.5))
+
+
 def shares_drawn(rng: np.random.Generator, pieces: list, n: int) -> list:
     """The shares of a group (a split row, or the rest of a battery row) in every draw, as (name, share): each piece
     given as (name, (minimum, mode, maximum), is the remainder); each share a triangle, the remainder 1 minus the
@@ -1827,20 +1849,24 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
     # its elements (electronics) and its housing, the rest of its mass: aluminium a share of it, plastics the remainder
     # (2026-10-29, "Yes, build them", point 3c; the car file holds the elements, "not the complete module housing").
     # A sensor whose mass no source states is its elements at least (point 3b: the electronics wholly in the elements);
-    # its housing, not known, stays in the frame's remainder.
+    # its housing, not known, stays in the frame's remainder. A sensor whose number no source states (E31 point 3: the
+    # cameras of a robot whose sources count none) has its number drawn, a whole number in every draw, from the
+    # robot's own constant NUMBER_OF + its name (whole_numbers).
     for e in apart.sensors:
         if e.robot != name or e.kind in IN_THE_JOINTS:
             continue
         units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
         estimate, column, kind = e.label.startswith('E'), f'{name}: {e.name}', KIND_OF[e.kind]
-        inside = r.sensor_kg(units, e.count)
+        count = (e.count if e.count is not None else
+                 whole_numbers(rng, *constants[schemas.NUMBER_OF + e.name][1], n))
+        inside = r.sensor_kg(units, count)
         r.material(column, kind, ELECTRONICS, inside, estimate)
         if None not in e.bounds:
-            kg = e.count * triangle(rng, *e.bounds, n) / 1000
+            kg = count * triangle(rng, *e.bounds, n) / 1000
             aluminium = (kg - inside) * r.of(s.constant[SENSOR_ALUMINIUM])
             r.material(column, kind, ALUMINIUM, aluminium, estimate)
             r.material(column, kind, 'Plastics', kg - inside - aluminium, estimate)
-        r.sensor(kind, units, e.count, estimate)
+        r.sensor(kind, units, count, estimate)
 
     # The hydraulic actuators (EVIDENCE.md E27.7 point 2): each place's actuators as weighed; their valves, boards and
     # sensors drawn above (the rows whose names end with the place); their bodies, rods and seals the remainder, as a

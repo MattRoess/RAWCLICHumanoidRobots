@@ -5,6 +5,118 @@ by Claude, newest first.
 
 ## 2026-11-05
 
+### V184. His runs after the cameras (E31) and the removal (V183), read back
+
+- **His words:** "I have run make 01 to 06 now 02 runs", "02 and 03 have run I also have run again the make 01 and 02".
+- **The parts files:** types 3 to 6 written 14:23:54 to 14:24:29, types 1 and 2 again at 15:24:39 and 15:24:46; all
+  six equal the sandbox's build of the final code, sheet by sheet, row by row.
+- **02 and 03:** 02 wrote `data/consolidated` (84 files) and `figures/composition` (126) from 15:09:31, `data/parts_taken_apart`
+  (96) and `figures/parts_taken_apart` (138) to 15:12:28; 03 `figures/comparison` (84) from 15:23:57 to 15:24:30. No file
+  of them older than the builders' runs. The names as the sandbox's, but one page more: type 4's notes, 6 pages in his
+  run, 5 in the sandbox. The sixth holds the closing paragraph; the difference is page 4's paragraph "Below zero where a
+  remainder is …: the part group Frame is below zero in 3 draws (0.0015 % of the draws)", reported, not cut (E21). The 3
+  draws are the 1X NEO's (draws 105015, 187879, 194714; −0.07 to −0.22 kg), its frame below zero in 256 of its 1,646
+  draws (15.6 %); before E31 the same (the sandbox of the morning: 2 of its 18 draws; V146, E21: about 16 %, its stated
+  842 Wh in its stated 29.9 kg). Not from the cameras: the NEO is not among E31's robots, its rows unchanged.
+- **The draws:** 200,000 in every type; each element by material equals it by part, the copper fixed in alloys aside,
+  within 1 × 10⁻⁷. The cameras' titanium held in 86.6, 97.9, 98.1, 98.4, 100 and 100 % of the draws of types 1 to 6
+  (the sandbox's at 2,000 draws 86.9, 97.4, 98.2, 98.5, 100, 100), its median above 0 0.99 to 1.71 mg; type 1's 86.6 %
+  its 26 robots of 30 with cameras (86.7 %). Looked at: 03's indium page (the cameras and the other sensors, mg).
+- **The two tests that failed in V183** (`test_what_it_writes_equals_the_data_file_on_disk`, types 1 and 2): run again
+  after his runs of the builders, both OK.
+- **Not covered:** the other pages, not opened one by one; the rest of the suite not run again (the code unchanged
+  since V183's run).
+
+### V183. The code under tools that nothing needs, found and removed ("Yes, remove 1 to 4")
+
+- **His words:** "there is code, which is not needed anymore under tools", then "Yes, remove 1 to 4".
+- **How found** (`scratchpad/cameras_build/unused_in_tools.py`, `unused_in_tools2.py`, read only): every top-level name
+  of the nine files under tools/ (functions, classes, constants) counted in the code of every Python file of the project,
+  comments and strings left out: none used nowhere. Every explicit import of tools/ counted in its file. Every source row
+  of the six files as the builders write them searched in every other cell of its file.
+- **Removed, each with its proof:** (1) `tools/parts_types_3_and_4.py`, the aliases `binocular, depth_camera, camera,
+  lidar, imu, microphones, speaker = T2.…`: since today's move the same functions (`T2.camera is parts_taken_apart.camera`,
+  True for all seven) come with the file's `from parts_taken_apart import *`; `base_lidar` and `base_depth_camera`,
+  type 2's own, kept. (2) There, `SHARED_CONSTANTS_FIRST` and `SHARED_CONSTANTS_LAST`, imported and used nowhere in the
+  file. (3) My two-line pointer comment in type 2's builder. (4) The source rows `N1c` (type 1's builder) and `ORM`
+  (type 2's), cited by no cell of any file (N1c named in EVIDENCE only).
+- **Checked:** the six builders run in the sandbox; their files against those of before the removal: types 3 to 6
+  identical, type 1 without N1c, type 2 without ORM, nothing else. The whole suite: 552 tests (1,288 s, beside his run
+  of 02), 550 OK; the 2 failing `test_what_it_writes_equals_the_data_file_on_disk` of types 1 and 2, his files of
+  14:23 still holding N1c and ORM ("['N1c', 'A teardown article on Zhihu…" and "['ORM', 'Oriental Motor…" the only
+  differences). His files of types 3 to 6 (14:23 to 14:24) equal the build; 02 and 03 read no Sources, so his run of
+  02 is the same either way.
+- **Found, not changed (his word):** the servo valve's Shares rows of types 5 and 6 cite M30, which neither file's
+  Sources holds; the shared rows cite "Bizzo et al. 2014" and "Drexler et al. 2025", not the codes "Bizzo 2014" and
+  "Drexler 2025".
+- **Not covered:** his reruns of the builders of types 1 and 2.
+
+### V182. The cameras built (E31, "Yes, A to H"): tests, the files, the sandbox
+
+- **Tests first, seen to fail** (the code not yet written): 01's six (`test_a_sensor_of_a_drawn_number_is_read_without_fault`
+  and five planted faults: no constant, a constant without its row, a number beside it, a count of 3.5, a count from
+  0), failing on `NUMBER_OF` missing; the builders' eight (`TestCamerasE31`: the 144 robots each in one point, points 1
+  and 2 their image sensors and microphones as counted by hand from the sources, point 3's row and constant 1 / 3 / 12 E
+  and its microphones in the 31, point 4 none, the Phantom without battery and its source the BBC, every E31 code on the
+  sheet Sources, the prefix 01's, every file passing 01's checks), failing "0.0 != 8 : Foundation Phantom MK1" and on
+  the names missing; 02's three (`TestDrawnNumbers`: 400,000 whole numbers of 1 / 3 / 12 each at the widened triangle's
+  share, a hand-written CDF, within four standard errors, their mean 16/3 ± 0.02; a count of one value; type 1 at 6,000
+  draws: the Sapiens K1's estimated cameras in every one of its draws and none outside, their mean 16/3 times the JAKA
+  π's one camera, ± 25 %), failing on `whole_numbers` missing. After the build all 17 pass.
+- **The files the builders write, against those on disk** (`scratchpad/cameras_build/diff_parts.py`, read only): only
+  rows added, 206 in Sensors, 27 in SensorElements, 122 constants "Number: Cameras (number not stated)", 25 sources E31-…;
+  removed only the Phantom's row of Robots (its sources' words, TBS → E31-BBC) and the source TBS. Type 5's file
+  unchanged; every other row of every file as before (the helpers moved from type 2's builder write the same rows).
+- **The sandbox** (`scratchpad/sandbox_e31`, the code of this build, the inputs copied, 2,000 draws): the six builders,
+  01 ("No fault found."), 02 (1 min 25 s), 03 (84 pages). Each element by material equals it by part, the copper fixed
+  in alloys aside, within 1 × 10⁻⁷ in every type. The cameras' titanium held in 87 to 100 % of the draws (before 47 to
+  91 %), its median above 0 1.0 to 1.7 mg; type 1's 87 % its four robots of point 4. Gallium and indium of the cameras
+  rise only where a depth camera was stated (type 2: 41 → 48 %): the estimated cameras are colour sensors (point C),
+  which hold neither. Looked at: 03's indium page (cameras and other sensors, mg, nothing written over the panels).
+- **The whole suite:** 552 tests (518 s), 4 failed. Two expected: `test_what_it_writes_equals_the_data_file_on_disk` of
+  types 1 and 2, the builders' files against those on disk, which are the old ones until his runs of the builders. Two
+  older tests of E7.5 point 8 ("one motion sensor where the maker names none"), which counted every sensor of a block:
+  changed to leave aside the rows whose sources are E31's (TestCamerasE31 checks those); what each checks unchanged,
+  both pass (23 tests of their classes OK).
+- **Not covered:** his runs (the builders of types 1, 2, 3, 4 and 6, 02 at 200,000 draws, 03).
+
+### V181. The cameras' sources of point 2 read first-hand (E31, "Yes, A to H")
+
+- **What:** every source a camera count of E31's points 1 and 2 rests on, opened and read by me before the robot was
+  entered (the rule "Read it yourself"; the agents' findings second-hand to me), the two searches' quotes against the
+  pages.
+- **How:** the built-in browser, its pages' text searched for the words of cameras and microphones (camera, 相机,
+  摄像头, カメラ, камер, microphone, 麦克风, voice); tables printed in images looked at (KEENON, UBTECH, Leju); sites that
+  show their text only by script read from their own data feed or script file (Yunmu); two PDFs downloaded on his word
+  ("Yes, download both") into the scratch folder and read with macOS's own PDFKit (Astribot S1 542,745 bytes, TALOS
+  608,559 bytes); X-Humanoid's brochure from its text as extracted in the second search. No cookie banner accepted, no
+  verification step passed.
+- **Confirmed, as the searches had them (23 robots):** Phantom MK1 (Newsweek's caption "Phantom MK1 has eight cameras in
+  its head."; the article's text says the CEO "envisions Phantom … with eight cameras in its head"); TALOS (one RGB-D
+  block, "RGB 1280x720 at 30 fps", "Depth 640x480"; "Speakers 5 W", no microphone); REEM-C ("Stereo camera as eyes",
+  "Back camera", "4 omnidirectional microphones"); AgiBot A2 ("six high-definition cameras", "sound source
+  localization", "voice commands"); DOBOT ATOM Max ("a 60FPS Full HD vision system, and Intel RealSense D455 depth
+  sensing"; "binocular" is the ATOM D's, not used); XMAN-R1 ("Depth Vision Cameras *4", "HD Wide-Angle Cameras *4",
+  "High-definition omnidirectional microphones"); U1 Pro ("6-microphone array built into the head … 2 RGB cameras built
+  into the eyes"); YMBot D (the script file's camera block after "YMBOT D chassis humanoid robot": "Active binocular
+  structured light depth camera", "Color camera resolution: 1280 x 800"; its data feed "耳部收声/喇叭"); 4NE1 Gen 3 (The
+  Robot Report: "With the patented Omnisensor and seven cameras", "speakers, and microphones"); AIDOL (3DNews: "две
+  стереокамеры", "семь микрофонов"); MenteeBot V3 (Ynet: "five cameras", "voice commands"); Apollo (CNN: "a perception
+  camera"); PrimeBOT T1 (IE: "a flip camera", "a multi-microphone array"); Digit (RealSense: "Embedded in the neck of the
+  robot, RealSense Depth Camera D455"); Astribot S1 (its sheet with astribot.com's addresses: head RGB-D ×1 and stereo
+  ×1, gripper RGB-D ×2, chest RGB-D ×1); Dora (archived: "深度相机 3 斜向下 2 向前 1", "结构光深度相机", "阵列麦克风 6");
+  JAKA Kargo ("Vision camera 2"); JAKA π ("Using a camera on its head", "listen to commands"); Moz1 ("头部相机（Intel
+  D455） 1", "腕部相机（Intel D405） 2"); Tien Kung 2.0 ("全场景双目结构光3D相机*3" in the 具身天工2.0 block, 173 cm,
+  73 kg); Y1 ("头部深度相机*1、7自由度带 视觉机械臂*2", "realsense D435相机", "讯飞语音节点已启动"); YMBot D4 ("双目相机/
+  激光雷达/六维力传感器 RGBD相机/鱼眼相机", "阵列麦克风"); CUE7 ("頭部のステレオカメラ"; "ドリブル用のカメラセンサーを
+  ＣＵＥ７の腰に配置した。").
+- **Not confirmed, so to point 3 (4 robots):** NEO Beta (its count the production NEO's), GENISOM NE01 (page blank, no
+  archived copy), Galaxea Kengo (Gasgoo HTTP 468), Leju Kuavo-my (the page now the KUAVO 4Pro's: 1.66 m, about 55 kg,
+  against the register's 145 cm and 45 kg).
+- **Not covered:** the sources of point 3's microphones (the searches' quotes, not reopened); the robots of point 4
+  (the first search's quotes, re-read in part in V176); whether the image sensors' kinds (a camera as one colour sensor,
+  a depth camera as the D435's) fit each robot's actual cameras.
+
 ### V180. His runs of 02 and 03 after E32, E33 and E34, read back
 
 - **His words:** "02 has run", "03 is done" (2026-11-05).
@@ -40,6 +152,9 @@ by Claude, newest first.
   `_2` with their pages of numbers (the critical elements by kind of part, titanium not among them; nothing over the
   panels), `5_…_elements_1` with `5_…_numbers_1` (magnesium and aluminium "in the alloys", titanium "in the alloy",
   33 kg held in 10 %).
+- **E29's first and third findings, confirmed in his run** (as the handover of the morning asked): terbium held in
+  100 % of the draws of every type (type 3's 99.781 % was the Neo1's); steel no longer stretched, type 3 at most
+  80.9 kg (97.5 %: 35.8 kg), type 5 at most 35.2 kg (25.4 kg); the Neo1 in no type's `robots.txt`.
 - **Not covered:** the other pages, not opened one by one; the means pages; the tests not run again (the code unchanged
   since V179's 535 OK).
 

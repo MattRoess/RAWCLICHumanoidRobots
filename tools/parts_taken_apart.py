@@ -30,6 +30,7 @@ WHERE IT SITS
 Not a stage and not run by itself: the builders in tools/<n>_<name>/ import it. Importing it writes nothing.
 """
 import os
+import re
 import sys
 
 import openpyxl
@@ -575,6 +576,367 @@ def estimate(mode: float) -> tuple:
     return spread(mode, 0.5, 1.5)
 
 
+# --- Sensors whose makers name their kind but not their model (E7.5 point 8) ------------------------------------
+# A binocular or depth camera as a D435, 75 g, half to 1.5 times (STEREO_CAMERA_G); a camera of one sensor and a LiDAR
+# as type 1's of no named model (their kind's elements, no mass of their own). Each a row of a block's `sensors`:
+# (sensor, number in the robot, kind of part, body region, grams min / mode / max or None, label, sources, its car
+# sensor elements). In type 2's builder until 2026-11-05, here since, as every type uses them (EVIDENCE.md E31).
+# The camera of a robot whose maker names it but gives no mass: as a D435 (75 g), a stereo camera too, half to 1.5
+# times (E6.8 point 8); its elements two image sensors.
+STEREO_CAMERA_G = estimate(75)
+STEREO = [('CMOS image sensor', 2)]
+
+
+def binocular(source: str, count: int = 1, name: str = 'Binocular camera') -> tuple:
+    """`count` binocular (stereo) cameras in the head: two image sensors each, a D435's mass."""
+    return (name, count, 'Head', 'Head', STEREO_CAMERA_G, 'E', f'{source}; its mass not stated: as a D435 (E7.5 point '
+                                                               '8)', STEREO)
+
+
+def depth_camera(source: str, count: int = 1) -> tuple:
+    """`count` depth cameras in the head, as a D435: its laser diode array, two infrared and one colour image sensor."""
+    return ('Depth camera (not named)', count, 'Head', 'Head', STEREO_CAMERA_G, 'E',
+            f'{source}; its mass not stated: as a D435 (E7.5 point 8)', DEPTH_CAMERA)
+
+
+def camera(name: str, count: int, kind: str, source: str) -> tuple:
+    """`count` cameras of one colour image sensor in the kind of part `kind` (its body region of the same name), their
+    elements only."""
+    return (name, count, kind, kind, None, 'S', f'{source}; as type 1\'s cameras of no named model (E7.5 point 8)',
+            CAMERA)
+
+
+def lidar(source: str) -> tuple:
+    """A 3D LiDAR in the head, as type 1's of no named model (the Mid-360's elements)."""
+    return ('LiDAR, 3D (not named)', 1, 'Head', 'Head', None, 'S',
+            f"{source}; as type 1's LiDAR of no named model (E7.5 point 8)", LIDAR)
+
+
+def imu(source: str, name: str = 'Motion sensor (IMU)') -> tuple:
+    """A motion sensor in the torso, as the G1's."""
+    return (name, 1, 'Boards', 'Torso', IMU_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [('IMU', 1)])
+
+
+def microphones(source: str, name: str = 'Microphone array') -> tuple:
+    """A microphone array in the head, as the G1's four microphones."""
+    return (name, 1, 'Head', 'Head', MICROPHONES_G, 'E', f"{source}; as the G1's four (E7.5 point 8)", MICROPHONES)
+
+
+def speaker(source: str) -> tuple:
+    """A speaker in the head, as the G1's."""
+    return ('Speaker', 1, 'Head', 'Head', SPEAKER_G, 'E', f"{source}; as the G1's (E7.5 point 8)", [])
+
+
+# --- The cameras of the robots whose parts named none (EVIDENCE.md E31) -------------------------------------------
+# Matthias, 2026-11-05: "Yes, build 1 to 5", "Yes, those first", "Yes, A to H". 144 robots of the six parts files listed
+# no camera and no microphone. Their makers' pages and, where those say nothing, third parties were searched twice
+# (E31), and every source below read first-hand before it was entered (VERIFICATION.md V181). Each robot its own rows,
+# added by robot_rows() to its block's sensors, whatever its type:
+#   point 1 and 2 (CAMERAS_STATED): the robots whose source states their cameras, as it states them; the microphones
+#     the same source names (E31 point A: no LiDAR, the research was of cameras and microphones);
+#   point 3 (CAMERAS_ESTIMATED): the robots whose cameras no source counts, ESTIMATED_CAMERAS, a row without a number,
+#     and its number drawn by 02 in every draw, a whole number from the robot's constant NUMBER_OF + ESTIMATED_CAMERAS,
+#     1 / 3 / 12 image sensors (E: the 172 robots and versions of the parts files that list cameras hold 1 to 20, most
+#     often 3, median 4; colour image sensors, E31 point C); and a microphone array, four as the G1's, where a source
+#     names a microphone or speech (listening, dialogue, voice; not "natural language interaction" alone, not a voice
+#     module sold as an option or of another variant, E31 point G);
+#   point 4: the makers who sell the camera only as an option (the RB-Y1, the Torobo, the N1, the Roboto Origin, the
+#     Roban2, the RP1, the Adam Lite): none, so no row here.
+# A camera outside the head where the source places it: in the arms (wrists, grippers) or the torso (kind Boards, as
+# the motion sensors), each place a sensor of its own name.
+NUMBER_OF = 'Number: '   # 01_schemas.py reads the same prefix (NUMBER_OF)
+ESTIMATED_CAMERAS = 'Cameras (number not stated)'
+CAMERAS_NUMBER = (1, 3, 12)
+CAMERAS_NUMBER_SOURCE = ("E31 point 3: no source counts its cameras; the 172 robots and versions of the parts files "
+                         'that list cameras hold 1 to 20 image sensors, most often 3, median 4 (E)')
+MICROPHONES_6 = [('MEMS microphone array', 6)]
+MICROPHONES_7 = [('MEMS microphone array', 7)]
+# The sources E31's rows cite, each a row of the sheet Sources of every file whose rows cite it (sheets()).
+E31_SOURCES = {
+    'E31-BBC': ('E31-BBC', "BBC News, 8 June 2026, its reporter at Foundation's facility (\"Phantom MK-1, which I am "
+                           "shown, doesn't have a battery\")", 'https://www.bbc.com/news/articles/cedpxwe26l1o',
+                'First-hand: a journalist\'s own look'),
+    'E31-NWK': ('E31-NWK', 'Newsweek on the Phantom, its photo caption ("Phantom MK1 has eight cameras in its head.")',
+                'https://www.newsweek.com/could-this-humanoid-robot-become-the-armys-ultimate-warrior-11063424',
+                'Second-hand: a press report'),
+    'E31-PALt': ('E31-PALt', 'PAL Robotics, TALOS data sheet (TALOS-DataSheet-1.pdf: "RGB 1280x720 at 30 fps", "Depth '
+                             '640x480 at 30 fps, 0.4-8m range")',
+                 'https://pal-robotics.com/wp-content/uploads/2025/09/TALOS-DataSheet-1.pdf', "Manufacturer's datasheet"),
+    'E31-PALr': ('E31-PALr', 'PAL Robotics, "Unplug and play with REEM-C humanoid robot!", 21 Nov 2013',
+                 'https://pal-robotics.com/blog/unplug-play-reem-c/', "Manufacturer's blog"),
+    'E31-AGA': ('E31-AGA', 'AgiBot, A2 page ("six high-definition cameras", "sound source localization")',
+                'https://agibot.com/products/A2', "Manufacturer's specification"),
+    'E31-DBA': ('E31-DBA', 'DOBOT, ATOM series page (the ATOM Max: "a 60FPS Full HD vision system, and Intel '
+                           'RealSense D455 depth sensing")',
+                'https://www.dobot-robots.com/products/humanoid-robots/atom.html', "Manufacturer's specification"),
+    'E31-KNX': ('E31-KNX', 'KEENON, XMAN-R1 page ("Depth Vision Cameras *4", "HD Wide-Angle Cameras *4", "High-'
+                           'definition omnidirectional microphones")', 'https://www.keenon.com/en/product/XMAN-R1',
+                "Manufacturer's specification"),
+    'E31-UBU': ('E31-UBU', 'UBTECH, U1 Pro page, its table ("6-microphone array built into the head", "2 RGB cameras '
+                           'built into the eyes")', 'https://www.ubtrobot.com/en/humanoid/products/u1-pro',
+                "Manufacturer's specification"),
+    'E31-YMD': ('E31-YMD', 'Yunmu, YMBOT D page (the site\'s script index-DGa4y2sb.js: "Active binocular structured '
+                           'light depth camera", "Color camera resolution: 1280 x 800"; its data feed api/products/4: '
+                           '"耳部收声/喇叭")', 'https://www.ymbot.com/product/detail/4', "Manufacturer's specification"),
+    'E31-TRR': ('E31-TRR', 'The Robot Report, 24 Jun 2025, after NEURA ("With the patented Omnisensor and seven '
+                           'cameras", "speakers, and microphones")',
+                'https://www.therobotreport.com/neura-robotics-launches-latest-cognitive-robots-neuraverse-ecosystem/',
+                'Second-hand: trade press after the maker'),
+    'E31-3DN': ('E31-3DN', '3DNews, 11 Nov 2025, on the AIDOL ("две стереокамеры", "семь микрофонов")',
+                'https://3dnews.ru/1132222', 'Second-hand: a press report'),
+    'E31-YNT': ('E31-YNT', 'Ynet on the MenteeBot V3 ("Its head is equipped with five cameras", "can follow voice '
+                           'commands")', 'https://www.ynetnews.com/tech-and-digital/article/hkwyqhezbg',
+                'Second-hand: a press report'),
+    'E31-CNN': ('E31-CNN', 'CNN (A. Strickland), 23 Aug 2023, on the Apollo ("Apollo\'s head contains a perception '
+                           'camera")', 'https://kioncentralcoast.com/?p=931628', 'Second-hand: a press report'),
+    'E31-IET': ('E31-IET', 'Interesting Engineering on the PrimeBOT T1 ("a flip camera", "a multi-microphone array")',
+                'https://interestingengineering.com/ai-robotics/china-qiyuan-t1-robot-humanoid-quadruped-modes',
+                'Second-hand: a press report'),
+    'E31-RSD': ('E31-RSD', 'RealSense, its case study of Agility\'s Digit ("Embedded in the neck of the robot, '
+                           'RealSense Depth Camera D455")', 'https://www.realsenseai.com/?p=25482',
+                "Second-hand: the camera maker's case study"),
+    'E31-AST': ('E31-AST', 'Astribot, S1 data sheet (astribot-s1_eng.pdf, hosted by igus/RBTX: "Head camera RGB-D '
+                           'camera * 1 Stereo vision camera*1", "Gripper camera RGB-D camera*2", "Chest camera RGB-D '
+                           'camera*1")', 'https://a.storyblok.com/f/298593/x/d5cf3ddd99/astribot-s1_eng.pdf',
+                "Manufacturer's datasheet"),
+    'E31-NTX': ('E31-NTX', 'Noetix, Dora page, archived 28 Oct 2025 ("深度相机 3 斜向下 2 向前 1", "结构光深度相机", '
+                           '"阵列麦克风 6")',
+                'https://web.archive.org/web/20251028183926/https://www.noetixrobotics.com/products-137.html',
+                "Manufacturer's specification (archived)"),
+    'E31-JKK': ('E31-JKK', 'JAKA, JAKA Kargo page ("Vision camera 2")',
+                'https://www.jaka.com/en/productDetails/JAKA_Kargo', "Manufacturer's specification"),
+    'E31-JKP': ('E31-JKP', 'JAKA, news of 26 Jun 2026 on the JAKA π ("Using a camera on its head", "It can talk with '
+                           'you, listen to commands")', 'https://www.jaka.com/en/newsDetail/1493',
+                "Manufacturer's news"),
+    'E31-SPM': ('E31-SPM', 'Spirit AI, Moz1 manual, mechanics ("头部相机（Intel D455） 1", "腕部相机（Intel D405） 2")',
+                'https://docs.spirit-ai.com/zh/moz1/mechanics.html', "Manufacturer's manual"),
+    'E31-XHB': ('E31-XHB', 'X-Humanoid, company brochure, WRC July 2025, p. 4, 具身天工2.0 ("全场景双目结构光3D相机*3")',
+                'https://www.worldrobotconference.com/profile/robot/download/2025/07/11/'
+                '18公司介绍手册印刷版_20250711192526A076.pdf', "Manufacturer's brochure"),
+    'E31-TLY': ('E31-TLY', 'Tlibot, Y1 manual ("头部深度相机*1、7自由度带 视觉机械臂*2", "Y1机器人视觉系统采用realsense '
+                           'D435相机", "讯飞语音节点已启动")', 'https://www.tlibot.com/arm/127.html',
+                "Manufacturer's manual"),
+    'E31-YM4': ('E31-YM4', 'Yunmu, YMBot D4 page, its data feed api/products/7 ("双目相机/激光雷达/六维力传感器 RGBD相机/'
+                           '鱼眼相机", "阵列麦克风/扬声器/多彩灯带")', 'https://www.ymbot.com/product/detail/7',
+                "Manufacturer's specification"),
+    'E31-TNM': ('E31-TNM', '東京報道新聞, 17 Apr 2026, on the CUE7 ("頭部のステレオカメラ")',
+                'https://tokyonewsmedia.com/archives/21230', 'Second-hand: a press report'),
+    'E31-NKK': ('E31-NKK', '日刊工業新聞 (newswitch), April 2026, on the CUE7 ("ドリブル用のカメラセンサーをＣＵＥ７の腰に'
+                           '配置した。")', 'https://newswitch.jp/p/49050', 'Second-hand: trade press after the maker'),
+}
+
+
+def placed(sensor: tuple, kind: str, region: str, name: str = '') -> tuple:
+    """A sensor row of the helpers above in another kind of part and body region (a camera in the wrists or the
+    torso), under `name` where given."""
+    return (name or sensor[0], sensor[1], kind, region, *sensor[4:])
+
+
+def several_microphones(units: list, source: str) -> tuple:
+    """A microphone array of the number of microphones its source states (`units`, MICROPHONES_6 or _7)."""
+    return (f'Microphone array, {units[0][1]} microphones', 1, 'Head', 'Head', MICROPHONES_G, 'E',
+            f"{source}; its mass as the G1's (E31)", units)
+
+
+# Points 1 and 2: each robot's cameras and microphones as its source states them (the source's code first, its words).
+CAMERAS_STATED = {
+    'Foundation Phantom MK1': [camera('Camera', 8, 'Head', 'E31-NWK, its photo caption: "Phantom MK1 has eight '
+                                                           'cameras in its head." (E31 point 1)')],
+    'PAL TALOS': [depth_camera('E31-PALt, its head camera: "RGB 1280x720 at 30 fps", "Depth 640x480 at 30 fps"')],
+    'PAL REEM-C': [binocular('E31-PALr "Stereo camera as eyes (15 Hz, 656×492, software sync)"'),
+                   placed(camera('Camera, back', 1, 'Boards', 'E31-PALr, its torso: "Back camera (15Hz, 752×480)"'),
+                          'Boards', 'Torso'),
+                   microphones('E31-PALr "4 omnidirectional microphones in an asymmetric linear array"')],
+    'AgiBot A2': [camera('Camera, high-definition', 6, 'Head', 'E31-AGA "360° Lidar and six high-definition cameras"'),
+                  microphones('E31-AGA "accurate sound source localization", "voice commands"')],
+    'DOBOT Atom': [depth_camera('E31-DBA, the ATOM Max: "Intel RealSense D455 depth sensing"'),
+                   camera('Camera, Full HD vision system', 1, 'Head',
+                          'E31-DBA, the ATOM Max: "a 60FPS Full HD vision system"; its image sensors not stated: one')],
+    'Keenon XMAN-R1': [depth_camera('E31-KNX "Depth Vision Cameras *4"', 4),
+                       camera('Camera, HD wide-angle', 4, 'Head', 'E31-KNX "HD Wide-Angle Cameras *4"'),
+                       microphones('E31-KNX "High-definition omnidirectional microphones", their number not stated')],
+    'UBTECH U1 Pro male': [camera('Camera, RGB', 2, 'Head', 'E31-UBU "2 RGB cameras built into the eyes"'),
+                           several_microphones(MICROPHONES_6, 'E31-UBU "6-microphone array built into the head"')],
+    'UBTECH U1 Pro female': [camera('Camera, RGB', 2, 'Head', 'E31-UBU "2 RGB cameras built into the eyes"'),
+                             several_microphones(MICROPHONES_6, 'E31-UBU "6-microphone array built into the head"')],
+    'Yunmu YMBot D': [depth_camera('E31-YMD "Active binocular structured light depth camera", "Color camera '
+                                   'resolution: 1280 x 800"'),
+                      microphones('E31-YMD "耳部收声/喇叭" (sound pick-up and speaker at the ears), their number not '
+                                  'stated')],
+    'NEURA 4NE1 Gen 3': [camera('Camera', 7, 'Head', 'E31-TRR, after NEURA: "With the patented Omnisensor and seven '
+                                                     'cameras"'),
+                         microphones('E31-TRR "Its conversational AI, speakers, and microphones", their number not '
+                                     'stated')],
+    'AIDOL Lab AIDOL': [binocular('E31-3DN "две стереокамеры" (two stereo cameras)', 2),
+                        several_microphones(MICROPHONES_7, 'E31-3DN "семь микрофонов" (seven microphones)')],
+    'Mentee MenteeBot V3': [camera('Camera', 5, 'Head', 'E31-YNT "Its head is equipped with five cameras that provide '
+                                                        '360-degree vision"'),
+                            microphones('E31-YNT "The robot can follow voice commands"')],
+    'Apptronik Apollo': [camera('Camera, perception', 1, 'Head', 'E31-CNN "Apollo\'s head contains a perception '
+                                                                 'camera"')],
+    'PrimeBOT T1': [camera('Camera, flip', 1, 'Head', 'E31-IET "a flip camera"'),
+                    microphones('E31-IET "a multi-microphone array", its number not stated')],
+    'Agility Digit': [depth_camera('E31-RSD "Embedded in the neck of the robot, RealSense Depth Camera D455"')],
+    'Astribot S1': [depth_camera('E31-AST "Head camera RGB-D camera * 1"'),
+                    binocular('E31-AST "Stereo vision camera*1" (its head)'),
+                    placed(depth_camera('E31-AST "Gripper camera RGB-D camera*2"', 2), 'Arms', 'Arms',
+                           'Depth camera, grippers (RGB-D)'),
+                    placed(depth_camera('E31-AST "Chest camera RGB-D camera*1"'), 'Boards', 'Torso',
+                           'Depth camera, chest (RGB-D)')],
+    'Noetix Dora': [depth_camera('E31-NTX "深度相机 3 斜向下 2 向前 1" (depth cameras 3, 2 tilted down, 1 forward), '
+                                 '"结构光深度相机" (structured light)', 3),
+                    several_microphones(MICROPHONES_6, 'E31-NTX "阵列麦克风 6" (array microphones 6)')],
+    'JAKA Kargo': [camera('Camera, vision', 2, 'Head', 'E31-JKK "Vision camera 2" (E31 point H)')],
+    'JAKA π': [camera('Camera', 1, 'Head', 'E31-JKP "Using a camera on its head"'),
+               microphones('E31-JKP "It can talk with you, listen to commands"')],
+    'Spirit AI Moz1': [depth_camera('E31-SPM "头部相机（Intel D455） 1" (head camera)'),
+                       placed(depth_camera('E31-SPM "腕部相机（Intel D405） 2" (wrist cameras)', 2), 'Arms', 'Arms',
+                              'Depth camera, wrists (Intel D405)')],
+    'X-Humanoid Tien Kung 2.0': [depth_camera('E31-XHB "全场景双目结构光3D相机*3" (binocular structured-light 3D '
+                                              'cameras ×3)', 3)],
+    'Tlibot Y1': [depth_camera('E31-TLY "头部深度相机*1" (head depth camera), "realsense D435相机"'),
+                  camera('Camera, arm', 2, 'Arms', 'E31-TLY "7自由度带 视觉机械臂*2" (7-DoF arm with vision ×2): a camera '
+                                                   'on each arm (E31 point F)'),
+                  microphones('E31-TLY "讯飞语音节点已启动" (its iFlytek voice node), its microphones not stated')],
+    'Yunmu YMBot D4': [binocular('E31-YM4 "双目相机" (binocular camera)'),
+                       depth_camera('E31-YM4 "RGBD相机" (RGB-D camera)'),
+                       camera('Camera, fisheye', 1, 'Head', 'E31-YM4 "鱼眼相机" (fisheye camera)'),
+                       microphones('E31-YM4 "阵列麦克风" (microphone array), its number not stated')],
+    'Toyota CUE7': [binocular('E31-TNM "頭部のステレオカメラ" (the stereo camera of its head)'),
+                    placed(camera('Camera, waist', 1, 'Boards', 'E31-NKK "ドリブル用のカメラセンサーをＣＵＥ７の腰に配置'
+                                                                'した。" (a camera sensor for dribbling at its waist)'),
+                           'Boards', 'Torso')],
+}
+
+# Point 3: each robot (by its name in its parts file; the register's number beside it) whose cameras no source counts,
+# with the words of its sources that name a microphone or speech ('' where none do): its cameras drawn, 1 / 3 / 12,
+# and, where named, a microphone array of four.
+CAMERAS_ESTIMATED = {
+    'NEURA 4NE1 Gen 3.5': 'a microphone array (aiwiki), microphones (Origin of Bots)',   # 4
+    'NEURA 4NE1 Gen 4': '"hears", "AI Voice" (4NE1 Gen 4)',   # 5
+    'AgiBot A2 Max': '',   # 7
+    'Andromeda Abi': 'microphone arrays',   # 9
+    'AgiBot A2-W': '',   # 13
+    'ROBOTIS AI Sapiens K1': '',   # 19
+    'Flexiv AICO 2-4': '',   # 21
+    'Flexiv AICO 2-10': '',   # 21
+    'AKINROBOTICS AKINCI-5': '',   # 23
+    'TeknTrash ALPHA': '',   # 28
+    'Anigon': '',   # 31
+    'Apptronik Apollo 2': '"listening capabilities"',   # 33
+    'Astribot T1': '',   # 41
+    'ELU.AI AstroDroid AD-01': '',   # 42
+    'Boston Dynamics Atlas': '',   # 43
+    'Vbot ATOM': '',   # 46
+    'NEUBILITY Billi': '',   # 51
+    'MirrorMe Bolt': '',   # 53
+    'Borg Robotics Borg 01': '',   # 56
+    'Noetix Bumi': 'a "voice module"',   # 57
+    'Wandercraft CALVIN-40': '',   # 58
+    'CasiVision CASIVIBOT': '',   # 61
+    'Donut Cinnamon 1': '',   # 63
+    'Sharpa D01': '',   # 73
+    'XYZ DEUX': 'a voice-interaction model (Venture Square)',   # 74
+    'BOSHIAC DexBot': 'speech (a catalogue)',   # 76
+    'Agility Digit 5': '',   # 78
+    'Deep Robotics DR01': '',   # 80
+    'Duatic Alpha': '',   # 83
+    'Noetix E1': 'a circular microphone',   # 85
+    'Tangible Robots Eggie': '',   # 86
+    'Genesis AI Eno': '',   # 90
+    'AVIC Fengxing-001': '',   # 93
+    'Holiday Robotics Friday': '',   # 100
+    'Futuring 2 on legs': 'microphones',   # 101
+    'Futuring 2 on wheels': 'microphones',   # 101
+    'AgiBot G2 Max': '',   # 106
+    'Persona AI Gen 1': '',   # 110
+    'Gento Luna': '',   # 112
+    'GAC GoMate': 'responds to voice commands',   # 114
+    'GAC GoMate Mini': '',   # 115
+    'Haier HIVA Haiwa': '',   # 125
+    'HONOR A1': '"intelligent voice interaction"',   # 131
+    'HONOR D1': '"voice interaction"',   # 132
+    'Simplexity I-Series': '',   # 134
+    'XPENG IRON 2024': 'a "speech interaction system"',   # 136
+    'XPENG IRON 2025': 'a "microphone array" at the ears',   # 137
+    'Weave Isaac 1': '',   # 139
+    'JAKA K1': '',   # 141
+    'Zeroth Jupiter': '',   # 146
+    'ROBOTIS K0': '',   # 147
+    'KinetixAI KAI on legs': 'talks with visitors (10jqka)',   # 150
+    'KinetixAI KAI on wheels': 'talks with visitors (10jqka)',   # 150
+    'KAIST Humanoid': '',   # 151
+    'LG KAPEX': '',   # 154
+    'Galaxea Kengo': '',   # 156
+    'Leju Kuavo-my': '',   # 164
+    'Moon Dynamics L1': '',   # 165
+    'Glroad Laborer M1': '',   # 167
+    'LimX CL': '',   # 170
+    'DOBOT LUMO': '"voice"',   # 175
+    'GigaAI Maker H01': '',   # 183
+    'Blue Worm Mantis Standard': '',   # 184
+    'Sunday MEMO': 'microphones',   # 188
+    'Mentee MenteeBot 2024': 'a verbal command',   # 189
+    'O-ID Modular': '',   # 197
+    'VinMotion Motion 2': '',   # 199
+    'Zhejiang NAVAI-I3': '',   # 203
+    'Zhejiang Navigator 2': '',   # 204
+    'GENISOM NE01': '',   # 205
+    '1X NEO Beta': '',   # 206
+    'Galaxea NEXO': '',   # 209
+    'Digit Nezha P01': '',   # 210
+    'Sharpa North': '',   # 213
+    'Tesla Optimus Gen 3': '',   # 221
+    'Tesla Optimus Gen 2': '',   # 222
+    'Tesla Optimus V2.5': 'responds to voice input (heise)',   # 223
+    'Cyan Robotics Orca': 'a 6-microphone ring array',   # 224
+    'Pink Robotics P0': '',   # 226
+    'Sanctuary Phoenix': '',   # 229
+    'Sanctuary Phoenix Gen 8': '',   # 230
+    'PHYBOT M1': '',   # 232
+    'PL-Universe ProWhite': '',   # 238
+    'Pudu D7 2024': '"auditory sensing"',   # 240
+    'Pudu D7 2026': '"auditory sensing"',   # 240
+    'XPENG PX5': '',   # 242
+    'OpenLoong Qinglong': 'a "hearing" module',   # 244
+    'AgiBot QUESTER1': '',   # 246
+    'NineRay RayNex G3': 'responds to voice commands (Xinhua)',   # 250
+    'RoboScience REX G1': '',   # 258
+    'Robbyant R1': 'spoken explanations (aiwiki)',   # 261
+    'Roboligent Robin': '',   # 263
+    'Robo Robotics ROBO-T1': '',   # 264
+    'Zeroth Sean': '',   # 272
+    'EIR SkyWalker 2 on legs': 'its perception for dialogue',   # 275
+    'EIR SkyWalker 2 on wheels': 'its perception for dialogue',   # 275
+    'Siasun Songxing': '',   # 276
+    'Robotera Star1': '',   # 280
+    'StarBot Astra': '',   # 281
+    'Sulu.be Steve on legs': '',   # 284
+    'Sulu.be Steve on wheels': '',   # 284
+    'Unitree Superman': '',   # 285
+    'iHub TARA GEN1': '"natural conversations"',   # 291
+    'Tau Robotics Tau Humanoid': 'microphones, fitted and disabled',   # 293
+    'X-Humanoid TianGong Ultra': '',   # 297
+    'Tlibot Tianzhen Z1': '',   # 298
+    'Tlibot T1': '',   # 302
+    'WL Robotics Totan O1': '',   # 308
+    'Walden Robotics Walden': '',   # 320
+    'BYD Xiao Di': 'speaks six dialects and six languages',   # 330
+    'Tencent Xiao Liu on legs': '',   # 331
+    'Tencent Xiao Liu on wheels': '',   # 331
+    'Digit XiaQi': 'voice dialogue, sound-source localisation',   # 333
+    'Tlibot Y2-B': '',   # 336
+    'Tlibot Y2-P': '',   # 337
+    'Yunmu YMBot C': 'voice input and output',   # 339
+    'Yunmu YMBot D2': '',   # 341
+    'YMBOT E3': '',   # 343
+    'Yunmu YMBot H': '"语音交互" (voice interaction)',   # 344
+    'PL-Universe Zeus 1': '',   # 348
+    'NORINCO Fuxi on legs': '',   # 351
+    'NORINCO Fuxi on wheels': '',   # 351
+}
+
+
 def size_of(torque: float) -> str:
     """A joint's class by its actuator's peak torque (E5.12 point 1)."""
     return 'large' if torque >= LARGE_FROM_NM else 'small'
@@ -837,7 +1199,16 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     for board, count, kind, region, area, category, label, source in b['boards']:
         out['Boards'].append((name, board, count, kind, region, *area, 'area times Constants board mass per cm2',
                               category, label, source))
-    for sensor, count, kind, region, grams, label, source, units in b['sensors']:
+    # The cameras E31 found for a robot whose parts named none (EVIDENCE.md E31, "Yes, A to H"): as their source states
+    # them (points 1 and 2), or a row without a number whose number 02 draws (point 3) and, where a source names a
+    # microphone or speech, a microphone array of four.
+    estimated = []
+    if name in CAMERAS_ESTIMATED:
+        estimated.append((ESTIMATED_CAMERAS, None, 'Head', 'Head', None, 'E', CAMERAS_NUMBER_SOURCE, CAMERA))
+        if CAMERAS_ESTIMATED[name]:
+            estimated.append(microphones(f'E31 point 3: its sources name {CAMERAS_ESTIMATED[name]}'))
+    for sensor, count, kind, region, grams, label, source, units in (b['sensors'] + CAMERAS_STATED.get(name, [])
+                                                                     + estimated):
         out['Sensors'].append((name, sensor, count, kind, region, *(grams or (None, None, None)), label, source))
         for car_type, per_sensor in units or []:
             out['SensorElements'].append((sensor, car_type, per_sensor))
@@ -885,6 +1256,9 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     if b['oil']:
         values, label, source = b['oil']
         out['Constants'].append((name, OIL_VOLUME, *values, 'l', label, source))
+    if name in CAMERAS_ESTIMATED:   # E31 point 3: the number of its cameras, drawn by 02 as a whole number
+        out['Constants'].append((name, NUMBER_OF + ESTIMATED_CAMERAS, *CAMERAS_NUMBER, 'image sensors', 'E',
+                                 CAMERAS_NUMBER_SOURCE))
     return out
 
 
@@ -925,8 +1299,13 @@ def sheets(robots: list, joints: list, parts: list, boards: list, sensors: list,
            sources: list) -> list:
     """Every sheet after About, in the order of the file: its name, first row, rows and column widths. The robots' own
     rows are a builder's; MagnetGrades, JointParts and Shares are the one set for all, Shares only the rows of a
-    component of JointParts or a part of `parts` (01 faults a share of a part the file does not have)."""
+    component of JointParts or a part of `parts` (01 faults a share of a part the file does not have). The sources of
+    E31 (E31_SOURCES) that the file's rows cite follow the builder's own `sources`, each once."""
     named = {r[0] for r in JOINTPARTS_ROWS} | {r[1] for r in parts}
+    cited = ' '.join(str(cell) for rows in (robots, parts, boards, sensors, constants) for row in rows for cell in row
+                     if cell)
+    sources = list(sources) + [row for code, row in E31_SOURCES.items()
+                               if re.search(rf'(?<![\w-]){re.escape(code)}(?![\w-])', cited)]
     return [
         ('Robots', ROBOTS_HEADINGS, robots, ROBOTS_WIDTHS),
         ('Joints', JOINTS_HEADINGS, joints, JOINTS_WIDTHS),
