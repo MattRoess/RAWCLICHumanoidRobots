@@ -91,7 +91,10 @@ HOW IT DRAWS A ROBOT TYPE TAKEN APART (type 1: Matthias, 2026-10-28, "Yes in 02 
     parts, the shares, the magnets by heat, the driver board) drawn once per file, each robot with its own file's; its
     recipes the type's own. Types 1 and 2 stand in their own file only and are drawn as before.
   - Each draw is one of the robots of the register's sheet Type n taken apart, all equally often; those without a
-    stated mass are not drawn (named on the notes page; the sheet says "not drawn"). A robot in several versions (the
+    stated mass are not drawn (named on the notes page; the sheet says "not drawn"), nor an outlier of the setting
+    `composition.outliers` (the Neo1, in types 3 and 5: Matthias, 2026-11-04, "Ok it is neo. It should be out. Mark it
+    as outlier."; EVIDENCE.md E30), which stays in its parts file, is named on the notes pages of its types and is
+    counted nowhere (the sheet says "not drawn: an outlier"). A robot in several versions (the
     Booster K1, 5 Ah and 2 Ah; the GR-1, one or two cameras) is one of them, each as often (a discrete state). Its
     mass: a triangle on its own mass in the parts file (its sheet Constants); its parts: its own rows of the parts
     file, part by part, nothing scaled from another robot. Each type has random numbers of its own, from the seed and
@@ -964,6 +967,7 @@ class ApartInputs:
     listed: int = 0       # the robots of the sheet Type n with a mass (one without is not in the evaluation, E10.1)
     files: dict = None    # robot type -> the parts file its robots' rows are read from (E11.7 point 4): one for types
                           # 1 and 2, several for types 3 and 4; each robot drawn with its own file's shared numbers
+    outliers: list = None  # the robots of the sheet not drawn, outliers (composition.outliers; E30), counted nowhere
 
 
 def read_parts_files(params: Params, base: Inputs) -> dict:
@@ -979,13 +983,18 @@ def read_apart_inputs(params: Params, base: Inputs, register: list, category, fi
     functions, beside 02's inputs (`base`) and the robots of the register's sheet of that type (`register`); those
     taken apart with a stated mass are drawn. `files` are the parts files read (robot type -> file; only the type's own
     where not given): the type's robots are taken from every one that holds one (01's type_parts, E11.7 point 4), each
-    with its own rows. Raises schemas.WorkbookError when a file cannot be read."""
+    with its own rows. An outlier of composition.outliers (01's outlier_robots) is not drawn and not counted: its rows
+    left out of what is drawn (01's without_robots), kept in its file (Matthias, 2026-11-04, "Ok it is neo. It should be
+    out. Mark it as outlier."; EVIDENCE.md E30 point 1). Raises schemas.WorkbookError when a file cannot be read."""
     if files is None:
         files = {category.number: schemas.read_parts_taken_apart(schemas.parts_path(params, category))}
     apart = schemas.type_parts(files, register, category.number)
     if apart is None:
         raise schemas.WorkbookError(f'{schemas.parts_path(params, category)}: no parts file holds a robot of type '
                                     f'{category.number}.')
+    of_type = [r for r in register if category.number in r.types]
+    outliers = schemas.outlier_robots(of_type, params)
+    apart = schemas.without_robots(apart, schemas.outlier_names(outliers, params))
     used = {t: f for t, f in files.items() if f is apart or set(f.robots) & set(apart.robots)}
     triple = lambda row, keys: tuple(schemas.number(row.get(k)) for k in keys)  # noqa: E731
     pcb: dict = {}
@@ -1010,13 +1019,13 @@ def read_apart_inputs(params: Params, base: Inputs, register: list, category, fi
                      if schemas.text(r.get('Element')) == 'Ta']
     tantalum = triple(tantalum_rows[0], ('Min', 'Mode', 'Max')) if tantalum_rows else (None, None, None)
     steels = schemas.sibling_steels(params.data.traction_motor_steels)
-    of_type = [r for r in register if category.number in r.types]
-    taken = [r for r in of_type if r.taken_apart and all(v in apart.robots for v in schemas.versions(r.taken_apart))]
+    counted = [r for r in of_type if r not in outliers]
+    taken = [r for r in counted if r.taken_apart and all(v in apart.robots for v in schemas.versions(r.taken_apart))]
     drawn = [r for r in taken if None not in r.mass]
     return ApartInputs(base, apart, pcb, sensor_types, tantalum, steels, drawn,
-                       [r for r in of_type if None in r.mass], category.number,
-                       [r for r in of_type if r not in taken and None not in r.mass],
-                       sum(None not in r.mass for r in of_type), used)
+                       [r for r in counted if None in r.mass], category.number,
+                       [r for r in counted if r not in taken and None not in r.mass],
+                       sum(None not in r.mass for r in counted), used, outliers)
 
 
 def file_inputs(inputs: ApartInputs, robot_type: int, file) -> ApartInputs:
@@ -2450,10 +2459,32 @@ def lead(d: Draws) -> str:
                                              f'{drawn} of its {listed} robots')
 
 
-def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None) -> list:
+def outlier_words(outliers: list, params: Params, types: bool = False) -> str:
+    """The sentence of the notes pages naming the robots not drawn as outliers (`outliers`: 01's outlier_robots), each
+    its number, its name as taken apart, its mass at the mode and the reason of the setting composition.outliers, and
+    with `types` its robot types (03's notes); '' where there is none. Matthias, 2026-11-04: "So kick it out of the
+    statistics and just hae it mentioned or in as the outlier"; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E30 point 4: on
+    the notes pages of 02 and 03, not a page of its own)."""
+    reasons = dict(params.composition.outliers)
+    said = []
+    for r in outliers:
+        name = r.taken_apart if r.taken_apart and len(schemas.versions(r.taken_apart)) == 1 else r.name
+        kinds = sorted(r.types)
+        said.append(f'{r.number} {name}' + (f', {r.mass[1]:,g} kg' if r.mass[1] is not None else '')
+                    + f', {reasons[r.number]}'
+                    + (f" (robot type{'s' if len(kinds) > 1 else ''} "
+                       f"{', '.join(map(str, kinds[:-1])) + ' and ' if len(kinds) > 1 else ''}{kinds[-1]})"
+                       if types else ''))
+    if not said:
+        return ''
+    return ('Not drawn, an outlier: ' if len(said) == 1 else 'Not drawn, outliers: ') + '; '.join(said) + '.'
+
+
+def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None,
+                      outliers: list | None = None) -> list:
     """The notes page's paragraphs: how to read the element, material and alloys pages, what is drawn, which
     elements are counted and which materials stay materials (EVIDENCE.md E19); `later` the robots of the type not yet
-    taken apart (the type's draws then from the workbook)."""
+    taken apart (the type's draws then from the workbook); `outliers` its robots not drawn, outliers (E30 point 4)."""
     rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
     # Each with its median and mean over the draws that hold it, and their share where not all (CLAUDE.md §7).
     missing = [f"{name} (median {panel_number(rows[name]['Median (kg)'])} kg, mean "
@@ -2488,6 +2519,7 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'Not drawn: ' + ('; '.join(f'{r.number} {r.name} (no mass stated)' for r in left_out) or 'none') + '.' +
         (f' A robot lighter than {params.composition.type_one_lowest_kg:g} kg is not of robot type 1.'
          if d.robot_type == TYPE_ONE else ''),
+        outlier_words(outliers or [], params),
         'The elements: only the elements of interest, from what is recovered as elements: copper and nickel each its '
         'metal whole; the aluminium, magnesium and titanium alloys the metal they hold, their whole mass in the '
         'materials (their other elements stay in the alloy: the alloys table); '
@@ -2548,17 +2580,18 @@ def notes_pages(prefix: str, title: str, paragraphs: list) -> list:
     return out
 
 
-def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None) -> list:
-    """A robot type's pages, as (file name, figure): the notes pages; its elements six a page, each split by the
-    material it comes from (by_material_panel), one legend of the page's materials at the top; its materials nine a
-    page (material_page_panels); its alloys and grades in a table (EVIDENCE.md E19 points 4 and 7; the preview of type
-    5, "Yes, build them", 2026-11-02)."""
+def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, later: list | None = None,
+                      outliers: list | None = None) -> list:
+    """A robot type's pages, as (file name, figure): the notes pages (`outliers` named there, E30 point 4); its
+    elements six a page, each split by the material it comes from (by_material_panel), one legend of the page's
+    materials at the top; its materials nine a page (material_page_panels); its alloys and grades in a table
+    (EVIDENCE.md E19 points 4 and 7; the preview of type 5, "Yes, build them", 2026-11-02)."""
     # Each element of interest held in at least HELD_SHARE of the draws, as a material.
     shown = [e for e in c.tables['elements'][0] if held(c.column('elements', e))]
     per_page = APART_ACROSS * ELEMENT_DOWN
     pages = [shown[k:k + per_page] for k in range(0, len(shown), per_page)]
     out = notes_pages(c.name, f'Robot type {d.robot_type}, {c.title}: how to read its pages',
-                      taken_apart_notes(c, d, left_out, params, later))
+                      taken_apart_notes(c, d, left_out, params, later, outliers))
     for p, page in enumerate(pages, 1):
         figure, axes = plt.subplots(ELEMENT_DOWN, APART_ACROSS, figsize=APART_PAGE, squeeze=False)
         panels = []
@@ -2611,12 +2644,12 @@ def remove_pages_not_drawn(folder: str, prefix: str, series: tuple, written: lis
 
 
 def draw_taken_apart_pages(c: Composition, d: Draws, left_out: list, folder: str, params: Params,
-                           later: list | None = None) -> list:
-    """A robot type's pages into `folder`, and its pages of an earlier run beyond them removed (said as removed);
-    returns their file names."""
+                           later: list | None = None, outliers: list | None = None) -> list:
+    """A robot type's pages into `folder` (its `outliers` named on its notes pages), and its pages of an earlier run
+    beyond them removed (said as removed); returns their file names."""
     os.makedirs(folder, exist_ok=True)
     written = []
-    for name, figure in taken_apart_pages(c, d, left_out, params, later):
+    for name, figure in taken_apart_pages(c, d, left_out, params, later, outliers):
         figure.savefig(os.path.join(folder, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
         written.append(name)
@@ -3354,7 +3387,7 @@ def run(params: Params) -> int:
             shown = c if not aparts[c.number].later else compose_taken_apart(
                 next(k for k in inputs.book.categories if k.number == c.number), taken[c.number], inputs.lists)
             draw_taken_apart_pages(shown, taken[c.number], aparts[c.number].left_out, pages, params,
-                                   aparts[c.number].later)
+                                   aparts[c.number].later, aparts[c.number].outliers)
         elif c.number in with_pages:
             draw_page(c, params.composition.draws, os.path.join(pages, c.name + '.png'), params)
         if c.number in with_pages:
@@ -3377,6 +3410,8 @@ def run(params: Params) -> int:
         print(f"  Robot type {d.robot_type} drawn part by part over {len(d.register)} robots of the register's sheet "
               f"Type {d.robot_type}; not drawn (no mass stated): "
               f"{', '.join(f'{r.number} {r.name}' for r in a.left_out) or 'none'}"
+              + (f"; not drawn, an outlier: {', '.join(f'{r.number} {r.name}' for r in a.outliers)}"
+                 if a.outliers else '')
               + (f'; not yet taken apart: {len(a.later)}, so its draws are from the workbook.'
                  if a.later else '.'))
         for column, share in below_zero(d).items():

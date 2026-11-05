@@ -47,8 +47,10 @@ projects' files it names (`data.vehicle_pcb_composition`, `data.vehicle_sensor_c
 `data.data_center_element_composition`, `data.traction_motor_magnets`, `data.traction_motor_steels`), read where they
 lie, and its grades against the element recipes. It reads the register `data.register`
 (`data/researched/humanoid_register.xlsx`, written by tools/make_humanoid_register.py): its sheet Robots, every known
-humanoid robot with its robot types, and its sheets Type 1 to Type 4, every robot of that type with what 02's run
-does with it, checked against the sheet Robots (`check_register`, `check_type_sheets`). And it looks in
+humanoid robot with its robot types, and its sheets Type 1 to Type 6, every robot of that type with what 02's run
+does with it, checked against the sheet Robots (`check_register`, `check_type_sheets`); the outliers of
+`composition.outliers`, robots of the register not drawn (the Neo1, EVIDENCE.md E30), against it (`check_outliers`),
+each marked in its type's robots table and left out of what the pages say is drawn. And it looks in
 `data.sources_dir` (`documentation/sources/`) for the report of each category.
 
 WHAT IT CHECKS
@@ -1726,6 +1728,23 @@ def type_parts(files: dict, register: list | None, robot_type: int) -> PartsTake
         origin={n: a for a in holding.values() for n in a.robots if n in names})
 
 
+def without_robots(apart: PartsTakenApart, names) -> PartsTakenApart:
+    """A robot type's robots taken apart (`apart`: its parts file or its view over several files) without the robots
+    `names` and all their rows: what 02 draws of it where they are outliers (outlier_names; EVIDENCE.md E30 point 1).
+    The file itself where it holds none of them; nothing is changed in it."""
+    names = set(names) & set(apart.robots)
+    if not names:
+        return apart
+    keep = lambda rows: [x for x in rows if x.robot not in names]  # noqa: E731
+    return PartsTakenApart(
+        robots={n: r for n, r in apart.robots.items() if n not in names}, joints=keep(apart.joints),
+        grades=apart.grades, joint_parts=apart.joint_parts, parts=keep(apart.parts), shares=apart.shares,
+        boards=keep(apart.boards), sensors=keep(apart.sensors), elements=apart.elements,
+        constants={n: c for n, c in apart.constants.items() if n not in names}, sources=apart.sources,
+        faults=apart.faults, source=apart.source,
+        origin=None if apart.origin is None else {n: a for n, a in apart.origin.items() if n not in names})
+
+
 def read_parts_taken_apart(path: str) -> PartsTakenApart:
     """Read the file of one robot type's robots taken apart; never writes to it. A missing file, sheet or heading
     stops the reading (WorkbookError), as with the other files 01 reads."""
@@ -2445,6 +2464,9 @@ IN_RUN_OWN = 'drawn: its own parts'
 IN_RUN_NOT = 'not drawn: no mass stated'
 IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robots taken apart yet'
 IN_RUN_LATER = 'not drawn: not yet taken apart'
+# An outlier of the setting composition.outliers, in every sheet of its types, also where it is taken apart (Matthias,
+# 2026-11-04: "Ok it is neo. It should be out. Mark it as outlier."; EVIDENCE.md E30 point 2).
+IN_RUN_OUTLIER = 'not drawn: an outlier'
 
 
 def drawn_part_by_part(sheet: list) -> bool:
@@ -2516,6 +2538,22 @@ def versions(taken_apart: str) -> list:
     """The robots of the parts file a robot of the register is drawn as: one, or several versions separated by '; '
     (the Booster K1's two batteries), each drawn as often."""
     return [name.strip() for name in taken_apart.split(';') if name.strip()]
+
+
+def outlier_robots(register: list | None, params: Params) -> list:
+    """The robots of the register named in the setting composition.outliers, in the register's order: listed, kept in
+    the register and in their parts file, not drawn (Matthias, 2026-11-04, of the Neo1: "So kick it out of the
+    statistics and just hae it mentioned or in as the outlier", "Ok it is neo. It should be out. Mark it as outlier.";
+    EVIDENCE.md E30). [] where the register is not read."""
+    numbers = {number for number, _ in params.composition.outliers}
+    return [r for r in register or [] if r.number in numbers]
+
+
+def outlier_names(outliers: list, params: Params) -> dict:
+    """The robots of the parts files the outliers (outlier_robots) are taken apart as, every version of each: robot
+    name -> the reason of the setting, for the marks of the robots tables and to leave them out of what is drawn."""
+    reasons = dict(params.composition.outliers)
+    return {name: reasons[r.number] for r in outliers for name in versions(r.taken_apart)}
 
 
 def check_register(register: list, params: Params, taken_apart: dict) -> list[Fault]:
@@ -2590,7 +2628,8 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
     (IN_RUN_NOT; since 2026-10-30 also while its type is drawn from the workbook, E10.1 point 4); where none of the type
     is taken apart, the type is drawn from the workbook and each robot says so (IN_RUN_WORKBOOK); else one with a mass
     not yet taken apart is not drawn either (IN_RUN_LATER), its type drawn from the workbook until every robot with a
-    mass is (2026-10-30, "Yes, build C", Q2 and Q4)."""
+    mass is (2026-10-30, "Yes, build C", Q2 and Q4). An outlier of composition.outliers is not drawn, whatever else
+    holds of it (IN_RUN_OUTLIER; 2026-11-04, "Mark it as outlier", EVIDENCE.md E30 point 2)."""
     where = os.path.basename(params.data.register) + ': ' + TYPE_SHEET.format(robot_type)
     of_type = {r.number: r for r in register if robot_type in r.types}
     numbers = [r.number for r in listed]
@@ -2600,6 +2639,7 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
         return bool(r.taken_apart) and all(name in apart for name in versions(r.taken_apart))
 
     any_apart = any(is_apart(o) for o in listed)
+    outliers = {number for number, _ in params.composition.outliers}
     faults = []
     for r in listed:
         what = f'{r.number} {r.name}'
@@ -2613,7 +2653,9 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
         if differ:
             faults.append(Fault(where, r.row, f"{what}: {', '.join(differ)} not as in its row "
                                               f'{of_type[r.number].row} of the sheet {REGISTER_SHEET}.'))
-        if is_apart(r):
+        if r.number in outliers:    # E30 point 2: also where it is taken apart
+            want, why = IN_RUN_OUTLIER, 'an outlier is not drawn (composition.outliers, src/params_schema.py)'
+        elif is_apart(r):
             want, why = IN_RUN_OWN, 'a robot taken apart is drawn with its own parts'
         elif None in r.mass:
             want, why = IN_RUN_NOT, 'a robot without a stated mass is not drawn (not in the evaluation)'
@@ -2629,6 +2671,16 @@ def check_type_sheet(register: list, listed: list, robot_type: int, params: Para
             faults.append(Fault(where, 0, f'{number} {r.name}: a robot of type {robot_type} in row {r.row} of the '
                                           f'sheet {REGISTER_SHEET}, missing here.'))
     return faults
+
+
+def check_outliers(register: list, params: Params) -> list[Fault]:
+    """Whether every outlier of the setting composition.outliers is a robot of the register (EVIDENCE.md E30 point 3:
+    the setting names the robots by their numbers; a number no robot has would leave out nothing, unnoticed)."""
+    numbers = {r.number for r in register}
+    where = os.path.basename(params.data.register) + ': ' + REGISTER_SHEET
+    return [Fault(where, 0, f'{number}: an outlier of composition.outliers (src/params_schema.py), but no robot of the '
+                            'register has this number.') for number, _ in params.composition.outliers
+            if number not in numbers]
 
 
 def type_sheet_numbers(path: str) -> list:
@@ -3827,12 +3879,15 @@ def template_words(apart) -> str:
             f'Its robots on templates: {counts}.')
 
 
-def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bool) -> str | None:
+def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bool, outliers: list = ()
+                   ) -> str | None:
     """The words of robot type `n`'s card on the overview's second page. A type taken apart (`apart`, its parts file):
     its robots drawn from their own parts and their masses, counted over those with a mass, those without named as not
     in the evaluation (EVIDENCE.md E10.1 point 4); while not all are, how many so far. A type listed in the register
     (`listed`: its sheet Type n) and drawn from the workbook: its robots listed and how many have a mass (point 5).
-    None for any other type, whose card says its anchor robot, as before."""
+    None for any other type, whose card says its anchor robot, as before. `outliers`, the type's robots of the register
+    not drawn (outlier_robots), are named as such and counted nowhere: `apart` and `register` are then without them
+    (EVIDENCE.md E30 point 1)."""
     of_type = [r for r in register or [] if n in r.types]
     with_mass = [r for r in of_type if None not in r.mass]
     without = [r.name for r in of_type if None in r.mass]
@@ -3845,8 +3900,14 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
                         for r in with_mass)
         else:
             total = taken = len(apart.robots)
-        # Each card of a type taken apart ends with how many of its robots rest on templates (E13 rules 2 and 4).
+        # Each card of a type taken apart ends with how many of its robots rest on templates (E13 rules 2 and 4),
+        # after its outliers, where it has any (E30).
         on_templates = template_words(apart)
+        if outliers:
+            out = [r.name for r in outliers]
+            out = out[0] if len(out) == 1 else ', '.join(out[:-1]) + ' and ' + out[-1]
+            on_templates = (f"The {out}, {'an outlier, is' if len(outliers) == 1 else 'outliers, are'} not drawn and "
+                            f'not counted. {on_templates}')
         if taken < total:
             return (f'{taken} of its {total} robots of the register with a mass taken apart so far, each drawn part by '
                     f'part; {span}. Its draws from the workbook until all are. {on_templates}')
@@ -3918,11 +3979,12 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
 
 
 def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | None, params: Params,
-                   register: list | None = None, listed: tuple = ()):
+                   register: list | None = None, listed: tuple = (), outliers: list = ()):
     """The overview's second page: the six robot types as cards, those whose steps have begun (`output.
     robot_types_with_pages`) in colour with what the model holds of them, the others in grey (a type `listed` in the
     register's sheets, drawn from the workbook, says how many robots it lists: type_card_text); below them the faults
-    found and what is open."""
+    found and what is open. `outliers` (outlier_robots) are named on the cards of their types, `aparts` and `register`
+    then without them (EVIDENCE.md E30)."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, 'The six robot types', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
     worked = params.output.robot_types_with_pages
@@ -3932,7 +3994,8 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
         anchor = category.anchor.splitlines()[0] if category.anchor else 'none'
         apart = (aparts or {}).get(category.number)
         if category.number in worked and apart is not None:
-            text = type_card_text(category.number, anchor, apart, register, category.number in listed)
+            text = type_card_text(category.number, anchor, apart, register, category.number in listed,
+                                  [r for r in outliers if category.number in r.types])
             colour = TOL_LIGHT['output']
         elif category.number in worked:
             text = f'The workbook\'s anchor robot: {anchor}.'
@@ -4062,6 +4125,11 @@ JOINT_GROUPS = {'weighed': 'Joints weighed, from a robot taken apart',
                 'wheels shares': "On wheels, joints a share of the robot's mass"}
 SHARES_MARK = '†'   # beside the joints of a robot whose joints are a share of its mass
 LIFT_MARK = '‡'     # beside the joints of a robot on wheels with a lift column
+# Beside the name of an outlier, kept in the table and not drawn (Matthias, 2026-11-04, "Mark it as outlier";
+# 2026-11-05, "Yes, 3 to 5": "It keeps the Neo1, marked 'an outlier, not drawn'"; EVIDENCE.md E30 point 5), its reason
+# in the key.
+OUTLIER_MARK = '*'
+TABLE_KEY_OUTLIER = ' {mark} an outlier, not drawn: {reason}.'
 TABLE_KEY = ('Two colours in a cell: its numbers rest on both. Mass: the bar from its min to its max, the dot its '
              f'mode. Battery: its energy at the modes. {SHARES_MARK} its joints a share of its mass.')
 TABLE_KEY_WHEELS = f' {LIFT_MARK} a lift column.'   # the base in its own plain words ("2 wheels, 2 casters")
@@ -4100,6 +4168,7 @@ class RobotRow:
     bases: dict           # cell of TABLE_CELLS -> the keys of BASES its rows rest on, in the order of BASES
     base: str = ''        # its wheeled base in words ('' for a robot on legs)
     lift: bool = False    # a lift column
+    outlier: bool = False  # an outlier, not drawn (composition.outliers; EVIDENCE.md E30 point 5)
 
 
 def has_battery(apart: PartsTakenApart, robot: str) -> bool:
@@ -4164,11 +4233,12 @@ def base_words(apart: PartsTakenApart, robot: str) -> str:
     return f'{driven} omni wheels' if driven >= 3 else f'{driven} wheels'
 
 
-def robots_table_rows(apart: PartsTakenApart) -> list:
+def robots_table_rows(apart: PartsTakenApart, outliers: dict | None = None) -> list:
     """The rows of the table of a robot type's robots, one per robot of its parts file, in the order of JOINT_GROUPS and by the
     mode of its mass within each group, the lightest first. A robot's group: its joints a share of its mass, or their
     masses from their torques (estimate_kinds); else its joints weighed where any of their rows is, else stated; a robot
-    on wheels in the sections on wheels (E9.7 point 8), its base and its lift column with it."""
+    on wheels in the sections on wheels (E9.7 point 8), its base and its lift column with it. A robot of `outliers`
+    (outlier_names) is marked an outlier, not drawn (E30 point 5)."""
     shared = apart.constants.get(ALL_ROBOTS, {})
     rows = []
     for name, robot in apart.robots.items():
@@ -4197,7 +4267,7 @@ def robots_table_rows(apart: PartsTakenApart) -> list:
             wh = shared_of(apart, name)[template_quantity(apart, name, ENERGY_PER_KG)][1][1] * mass[1]
         lift = any(j.robot == name and JOINT_KIND.get(j.name.split()[0].lower()) == 'lift' for j in apart.joints)
         rows.append(RobotRow(name, group, robot.height, mass, int(encoders // 2) + hydraulic, group.endswith('shares'),
-                             wh, bases, base_words(apart, name), lift))
+                             wh, bases, base_words(apart, name), lift, name in (outliers or {})))
     order = list(JOINT_GROUPS)
     return sorted(rows, key=lambda r: (order.index(r.group), r.mass[1], r.name))
 
@@ -4231,11 +4301,12 @@ def axis_ticks(top: float, bins: int) -> list:
 
 
 def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int | None = None,
-                       listed: int | None = None, without: int = 0) -> list:
+                       listed: int | None = None, without: int = 0, outliers: dict | None = None) -> list:
     """The table of a robot type's robots, its pages as table_pages splits them: the heading band with the two axes'
     ticks and the five cells' names, the rows, the key at the foot. Its title says how many of the type's robots of the
-    register (`listed`) are taken apart (`taken`) where not all are (type 2's, since 2026-10-30)."""
-    rows = robots_table_rows(apart)
+    register (`listed`) are taken apart (`taken`) where not all are (type 2's, since 2026-10-30). A robot of `outliers`
+    (outlier_names: robot -> reason) keeps its row, its name marked, the mark and its reason in the key of its page."""
+    rows = robots_table_rows(apart, outliers)
     # A table with robots on wheels: the narrower columns and the base's (T_WHEELS); else type 1's places.
     wheels = any(r.base for r in rows)
     height_at, mass_axis, mass_text, joints_at, battery_axis = (
@@ -4303,7 +4374,8 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
             if shaded:
                 axes.add_patch(Rectangle((0.25, top), 15.5, T_ROW, facecolor=TABLE_SHADE, edgecolor='none', zorder=0))
             shaded = not shaded
-            axes.text(T_NAME, middle, r.name, ha='left', va='center', **words)
+            axes.text(T_NAME, middle, r.name + (f' {OUTLIER_MARK}' if r.outlier else ''), ha='left', va='center',
+                      **words)
             axes.text(height_at, middle, f'{kg(r.height)} m' if r.height else '', ha='right', va='center', **words)
             low, mode, high = r.mass
             axes.add_patch(Rectangle((mass_x(low), middle - 0.06), mass_x(high) - mass_x(low), 0.12,
@@ -4339,7 +4411,10 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
             axes.add_patch(Rectangle((x, y), 0.32, 0.22, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.6))
             axes.text(x + 0.42, y + 0.11, text, ha='left', va='center', **words)
             x += 0.42 + len(text) / SCREEN_CHARS + 0.45
-        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (TABLE_KEY_WHEELS if wheels else ''), 15.2)
+        # An outlier's mark and reason on the page that holds its row (E30 point 5).
+        reasons = dict.fromkeys(outliers[line[1].name] for line in lines if line[0] == 'robot' and line[1].outlier)
+        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (TABLE_KEY_WHEELS if wheels else '')
+                    + ''.join(TABLE_KEY_OUTLIER.format(mark=OUTLIER_MARK, reason=reason) for reason in reasons), 15.2)
         figures.append(figure)
     return figures
 
@@ -4351,19 +4426,22 @@ def draw_screen_pages(pages: list, folder: str, params: Params) -> list:
     return [name for name, _ in pages]
 
 
-def taken_apart_type_pages(stem: str, apart: PartsTakenApart, robot_type: int, register: list | None) -> list:
+def taken_apart_type_pages(stem: str, apart: PartsTakenApart, robot_type: int, register: list | None,
+                           outliers: dict | None = None, drawn: PartsTakenApart | None = None) -> list:
     """The pages 01 draws of a robot type with a parts file, as (file name, figure), each name beginning with `stem`
     (its folder and name in `output.schemas_dir`): its robots' table, then where its kinds of part sit, as type 1's
     (Matthias, 2026-10-30, "Yes, as type 1's"). How many of its robots of the register are taken apart: those whose
     versions are all robots of its parts file, counted over those with a mass (one without is not in the evaluation,
-    2026-10-30, E10.1 point 4)."""
+    2026-10-30, E10.1 point 4). The outliers (E30): `register` without them, so that they are not counted; their rows
+    in the table marked (`outliers`, outlier_names); where its kinds of part sit as 02 draws it (`drawn`, the parts
+    without them; `apart` where not given)."""
     of_type = [r for r in register or [] if robot_type in r.types]
     with_mass = [r for r in of_type if None not in r.mass]
     taken = sum(bool(r.taken_apart) and all(v in apart.robots for v in versions(r.taken_apart)) for r in with_mass)
     pages = [(f'{stem}_robots_{k}.png', figure) for k, figure in
-             enumerate(robots_table_pages(apart, robot_type, taken, len(with_mass), len(of_type) - len(with_mass)),
-                       1)]
-    return pages + [(f'{stem}_robot.png', robot_type_page(apart, robot_type))]
+             enumerate(robots_table_pages(apart, robot_type, taken, len(with_mass), len(of_type) - len(with_mass),
+                                          outliers), 1)]
+    return pages + [(f'{stem}_robot.png', robot_type_page(apart if drawn is None else drawn, robot_type))]
 
 
 def former_page_types(with_pages: tuple, aparts: dict) -> list:
@@ -4425,13 +4503,18 @@ def main() -> int:
                 aparts[category.number] = apart
             except WorkbookError as error:
                 print(f'{error} Robot type {category.number} taken apart is not checked.')
-    # Each robot type taken apart as 02 draws it: its robots of every file read (E11.7 point 4); types 1 and 2 their own
-    # file, unchanged.
+    # Each robot type taken apart over its robots of every file read (E11.7 point 4); types 1 and 2 their own file,
+    # unchanged. Its robots tables list them all; what is drawn is without the outliers of composition.outliers, which
+    # are named, not counted (Matthias, 2026-11-04, "Ok it is neo. It should be out. Mark it as outlier."; E30).
     views = {n: v for n in aparts if (v := type_parts(aparts, register, n)) is not None}
-    # The register against the robots taken apart; then each of its sheets Type n against it.
+    outliers = outlier_robots(register, params)
+    out_names = outlier_names(outliers, params)
+    counted = None if register is None else [r for r in register if r not in outliers]
+    drawn = {n: without_robots(v, out_names) for n, v in views.items()}
+    # The register against the robots taken apart and the outliers of the setting; then each of its sheets Type n.
     if register is not None:
         named = {number: list(a.robots) for number, a in aparts.items()}
-        faults += check_register(register, params, named)
+        faults += check_register(register, params, named) + check_outliers(register, params)
         try:
             faults += check_type_sheets(absolute(params.data.register), register, params, named)
         except WorkbookError as error:
@@ -4450,8 +4533,8 @@ def main() -> int:
     # The pages (2026-10-29: the overview, the notes and the faults by his figure rules; robot type 1 as 02 draws it;
     # pages only for the robot types `output.robot_types_with_pages` names, "Type 1 only").
     with_pages = params.output.robot_types_with_pages
-    pages = [('overview_1.png', overview_flow(register, views, params)),
-             ('overview_2.png', overview_types(book, faults, reports, views, params, register, listed)),
+    pages = [('overview_1.png', overview_flow(register, drawn, params)),
+             ('overview_2.png', overview_types(book, faults, reports, drawn, params, counted, listed, outliers)),
              ('notes.png', notes_page(params))]
     pages += [(f'faults_{k}.png', figure) for k, figure in enumerate(fault_pages(faults), 1)]
     former = former_page_types(with_pages, views)
@@ -4461,7 +4544,8 @@ def main() -> int:
         stem = os.path.join('categories', file_name(category)[:-len('.png')])
         if category.number not in former:
             # A robot type taken apart: the pages of its robots, as type 1's (2026-10-30, "Yes, as type 1's").
-            pages += taken_apart_type_pages(stem, views[category.number], category.number, register)
+            pages += taken_apart_type_pages(stem, views[category.number], category.number, counted, out_names,
+                                            drawn[category.number])
             continue
         # A robot type whose steps have not begun: its former pages, of the workbook's anchor robot.
         parts_list = book.parts_lists.get(category.number)

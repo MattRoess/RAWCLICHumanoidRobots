@@ -60,7 +60,52 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-04, end of the day: where to start tomorrow, at home (start here)
+## 2026-11-05: the Neo1 an outlier, built (E30); where to start (start here)
+
+Matthias, 2026-11-05, at home (mac-mini): "Get the the handover and check with the code here", "Yes, align git", "Yes, 3
+to 5"; and "we afterwards have like to investigate titanium".
+
+**This Mac, checked** (VERIFICATION.md V173): its files were GitHub's `main` (`d02a2eb`), its git 8 commits behind; on
+his word aligned (`git reset --mixed origin/main`, no file touched). The entry below says V172, E30 and itself are "Not
+committed": `d02a2eb` holds them. **iCloud kept two versions** of outputs here, for his decision (his runs rewrite the
+plain names; then the copies are leftovers):
+- `data/parts_taken_apart/5_…/` and `6_…/`: 14 files "… 2" each (28): the "… 2" are his run of 2026-11-04 14:57, the
+  plain names his run of 2026-11-01 18:01 (12 and 6 robots, before E27.7). 03 reads the plain names: do not run 03 on
+  this Mac before 02.
+- `figures 2/` (schemas, composition, comparison, parts_taken_apart): the other Mac's pages of 2026-11-04; `figures/`
+  holds only `parts_taken_apart/` of types 3 to 6 of 2026-11-01.
+
+**Built** (EVIDENCE.md E30, its "Built" table; VERIFICATION.md V174), **not committed**: the setting
+`composition.outliers` = `((208, 'built as a few, never in large numbers'),)`; the register builder writes "not drawn:
+an outlier" in the sheets Type 3 and Type 5; 01 checks it and the setting against the register, marks the Neo1 '*' in
+the robots tables of types 3 and 5 (the key: "* an outlier, not drawn: built as a few, never in large numbers."), and
+counts what is drawn without it (cards: "The Neo1, an outlier, is not drawn and not counted."); 02 draws type 3 over 163
+robots and type 5 over 10 and names it on their notes pages; 03 names it on its notes page, its paragraph on the scales
+no longer pointing to it. Files: `src/params_schema.py`, `tools/make_humanoid_register.py`, `01_schemas.py`,
+`02_composition.py`, `03_comparison.py`, the tests of all five, README, METHODOLOGY ("The outliers, not drawn"),
+EVIDENCE E30, VERIFICATION V173 and V174, this entry.
+
+**His runs, in this order, each by pressing Run** (all needed: the new setting, the register's "In the run", the draws
+of types 3 and 5, 03's notes):
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py`
+   (`params.xlsx` and `documentation/claude/PARAMETER_REFERENCE.md` rewritten, the new setting in them)
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/tools/make_humanoid_register.py`
+   (until then the test `test_what_it_writes_equals_the_register_on_disk` fails: the file on disk is the old one)
+3. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`
+4. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   (200,000 draws)
+5. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+**Next, his word:** titanium ("we afterwards have like to investigate titanium"): E29's second finding, the boards'
+milligrams and a titanium alloy's kilograms in one panel (types 1, 2, 3, 5, 6), the boards holding titanium in about half
+the draws, why not yet traced. E29's first and third findings: gone in the sandbox (type 3's terbium in 100 % of its
+draws; steel of types 3 and 5 at most 73 and 31 kg); to confirm in his run.
+
+**Open, for his word:** (a) the mass axis of the robots tables of types 3 and 5 still runs to 1,600 kg for the Neo1's
+row; (b) 03 could check that the draws it reads hold no outlier (02's `register.txt`), so that its notes cannot name one
+not drawn while older draws are on disk (as the "… 2" copies here). E25 point B postponed; then 04.
+
+## 2026-11-04, end of the day: where to start tomorrow, at home
 
 Matthias, 2026-11-04: "write an handover. I will work tomorrow from home".
 

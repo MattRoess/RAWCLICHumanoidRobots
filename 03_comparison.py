@@ -24,7 +24,9 @@ body_regions and copper (02's TABLES); and `output.parts_dir`/<n>_<name>/ (`data
 material in each kind of part, '<kind>: <material>') and by_material (each element of interest by the material it
 comes from, '<element>: <material>', and the copper fixed in alloys, '<element>: <material> (fixed in alloys)'). Each is
 <table>.npy with its columns in <table>.txt. The names of the robot types come from the workbook, through 01's
-`read_workbook`.
+`read_workbook`. The register (`data.register`, 01's `read_register`), for the outliers of the setting
+`composition.outliers`, not drawn by 02, which the notes page names (the Neo1: Matthias, 2026-11-04, "Mark it as
+outlier"; EVIDENCE.md E30 point 4).
 
 WHAT IT CHECKS
 --------------
@@ -368,10 +370,11 @@ def material_names(robots: list) -> list:
     return sorted(columns, key=lambda m: (order.index(m) if m in order else len(order), m))
 
 
-def notes(robots: list) -> list:
-    """The notes page's paragraphs, in plain words."""
+def notes(robots: list, outliers: list, params: Params) -> list:
+    """The notes page's paragraphs, in plain words; `outliers` (01's outlier_robots) named, each with its robot types,
+    in 02's words (EVIDENCE.md E30 point 4)."""
     n = len(robots[0].tables['total'][1])
-    return [
+    paragraphs = [
         'Each page one item, the six robot types side by side: the mass of one robot by material, each material by '
         'the kind of part it sits in, each element of interest by the material it comes from, the mass of one robot '
         'by part group and by body region, and copper, recycled as copper or fixed in alloys. One panel per robot type, '
@@ -382,8 +385,8 @@ def notes(robots: list) -> list:
         'right. Dashed lines: the 2.5th and 97.5th percentile (95 % of the draws between them). Each axis ends at the '
         '99.5th percentile of its draws: the 0.5 % beyond are not drawn, and the panel says so and names the largest.',
         'Each panel on its own scale and unit (kg, g, mg): compare the numbers above the panels, not the widths of '
-        'their bars. One scale shared by the six would be stretched by the heaviest robot of a type (the NeodraDynamics '
-        'Neo1, 1,200 kg, in types 3 and 5) and press every other type into its first bars.',
+        'their bars. One scale shared by the six would be stretched by the type with the heaviest robots and press '
+        'every other type into its first bars.',
         'A robot type that holds an item in some of its draws only (a robot or a version without it): its panel shows '
         'the draws that hold it and says in what share of all its draws it is held; one held in fewer than 2.5 % of '
         'its draws has no panel, and its place on the page says so (a 0 is not part of a distribution). An item no '
@@ -392,6 +395,7 @@ def notes(robots: list) -> list:
         'data/parts_taken_apart/), each one robot of the type in the register, each of its robots drawn equally often '
         '(a robot in two versions, each as often), part by part from its parts file. 03 draws nothing at random; it '
         'checks that the draws add up before it draws a page.',
+        composition.outlier_words(outliers, params, types=True),
         'The elements: only the elements of interest, from what is recovered as elements, as on the pages of each '
         'robot type: copper and nickel each its metal whole; the aluminium, magnesium and titanium alloys the metal '
         'they hold; the NdFeB magnets their rare earths, cobalt, boron, niobium and gallium; the battery cells their '
@@ -407,11 +411,14 @@ def notes(robots: list) -> list:
         'the colours of the pages of each robot type (the same rainbow); the materials an element comes from his muted '
         'scheme, as on the pages of each robot type.',
     ]
+    return [p for p in paragraphs if p]   # no outlier: no paragraph
 
 
-def pages(robots: list, params: Params):
-    """Every page, as (file name, figure), one at a time (each is saved and closed before the next is drawn)."""
-    yield from composition.notes_pages(PREFIX, 'Comparing the six robot types: how to read the pages', notes(robots))
+def pages(robots: list, params: Params, outliers: list = ()):
+    """Every page, as (file name, figure), one at a time (each is saved and closed before the next is drawn); the
+    `outliers` named on the notes page."""
+    yield from composition.notes_pages(PREFIX, 'Comparing the six robot types: how to read the pages',
+                                       notes(robots, list(outliers), params))
     materials = material_names(robots)
     yield (f'{PREFIX}_total_1.png',
            compare_page('The mass of one robot of each robot type, by material', robots,
@@ -453,6 +460,13 @@ def run(params: Params) -> int:
     except (FileNotFoundError, schemas.WorkbookError) as error:
         print(f'{error}\nThe draws of 02 are not all there: run 02_composition.py first.', file=sys.stderr)
         return 1
+    # The outliers, not drawn by 02, for the notes page (E30 point 4): from the register.
+    try:
+        outliers = schemas.outlier_robots(schemas.read_register(absolute(params.data.register)), params)
+    except schemas.WorkbookError as error:
+        print(f'{error}\nThe register is needed for the outliers on the notes page: run '
+              'tools/make_humanoid_register.py first.', file=sys.stderr)
+        return 1
     found = problems(robots)
     if found:
         print('The draws of 02 do not belong together; nothing is drawn. Run 02_composition.py again.',
@@ -465,7 +479,7 @@ def run(params: Params) -> int:
     out = absolute(params.output.comparison_dir)
     os.makedirs(out, exist_ok=True)
     written = []
-    for name, figure in pages(robots, params):
+    for name, figure in pages(robots, params, outliers):
         figure.savefig(os.path.join(out, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
         written.append(name)

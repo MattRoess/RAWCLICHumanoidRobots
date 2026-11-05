@@ -769,7 +769,7 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
                 files[n] = schemas.read_parts_taken_apart(os.path.join(folder, f'{n}.xlsx'))
             register.build(os.path.join(folder, 'register.xlsx'), params)
             cls.register = schemas.read_register(os.path.join(folder, 'register.xlsx'))
-        cls.views = {n: schemas.type_parts(files, cls.register, n) for n in (3, 4)}
+        cls.views = {n: schemas.type_parts(files, cls.register, n) for n in (3, 4, 5)}
 
     def test_they_are_readable_fit_to_a_screen_with_no_overlap_and_no_project_words(self):
         for n, view in self.views.items():
@@ -793,6 +793,53 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
                                                                 '124.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
+
+    def test_the_neo1_an_outlier_marked_in_the_tables_and_left_out_of_what_is_drawn(self):
+        # Matthias, 2026-11-04: "Ok it is neo. It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5"
+        # (EVIDENCE.md E30). Point 5: 01's robots table of type 3 keeps it, marked an outlier, not drawn (type 5's the
+        # same, where it stands too). Point 1: what 01 says is drawn is without it: the table's title, the cards, the
+        # kinds of part, the templates; it stays in the parts file (point 2).
+        params = Params()
+        outliers = schemas.outlier_robots(self.register, params)
+        self.assertEqual([(r.number, r.name, r.taken_apart) for r in outliers], [(208, 'Neo1', 'NeodraDynamics Neo1')])
+        names = schemas.outlier_names(outliers, params)
+        self.assertEqual(names, {'NeodraDynamics Neo1': 'built as a few, never in large numbers'})
+        counted = [r for r in self.register if r not in outliers]
+        for n, robots in ((3, 163), (5, 10)):
+            full, drawn = self.views[n], schemas.without_robots(self.views[n], names)
+            self.assertIn('NeodraDynamics Neo1', full.robots)
+            self.assertNotIn('NeodraDynamics Neo1', drawn.robots)
+            self.assertEqual(len(drawn.robots), len(full.robots) - 1)
+            for rows in (drawn.joints, drawn.parts, drawn.boards, drawn.sensors):
+                self.assertFalse([x for x in rows if x.robot == 'NeodraDynamics Neo1'], msg=n)
+            self.assertNotIn('NeodraDynamics Neo1', drawn.constants)
+            # The table: every robot of the file, the Neo1 marked; its title counts the robots drawn.
+            rows = schemas.robots_table_rows(full, names)
+            self.assertEqual(len(rows), len(full.robots))
+            self.assertEqual([r.name for r in rows if r.outlier], ['NeodraDynamics Neo1'], msg=n)
+            pages = schemas.taken_apart_type_pages(f'categories/{n}_type', full, n, counted, names, drawn)
+            from matplotlib.text import Text
+            texts = {name: [t.get_text() for t in figure.findobj(Text)] for name, figure in pages}
+            marked = [name for name, words in texts.items() if 'NeodraDynamics Neo1 *' in words]
+            self.assertEqual(len(marked), 1, msg=n)
+            self.assertTrue(any('* an outlier, not drawn: built as a few, never in large numbers.' in t
+                                for t in texts[marked[0]]), msg=n)
+            self.assertTrue(any(f'all its {robots} robots with a mass' in t for t in texts[marked[0]]), msg=n)
+            self.assertFalse(any('an outlier' in t for name, words in texts.items() if name not in marked
+                                 for t in words), msg=n)
+            readable_pages(self, pages)
+            # The card: the robots drawn and their masses without it, and the sentence saying so.
+            card = schemas.type_card_text(n, 'Anchor', drawn, counted, True, [r for r in outliers if n in r.types])
+            self.assertIn(f'Its {robots} robots of the register with a mass, each drawn from its own parts', card)
+            self.assertIn('The Neo1, an outlier, is not drawn and not counted.', card)
+            self.assertNotIn('1200', card)
+            self.assertEqual(schemas.taken_count(n, counted, drawn)[:2], (robots, robots))
+        # Its templates: neither (E27.7), so 172 robots and versions of type 3 drawn, not 173.
+        self.assertEqual(schemas.template_shares(schemas.without_robots(self.views[3], names)), (137, 124, 172))
+        # No outlier: the type as it was.
+        self.assertIs(schemas.without_robots(self.views[4], names), self.views[4])
+        self.assertEqual(schemas.type_card_text(4, 'Anchor', self.views[4], counted, True, []),
+                         schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 
 
 class TestMaterialFaults(Small):
@@ -2467,6 +2514,45 @@ class TestTypeOneSheet(unittest.TestCase):
         faults, _ = self.type_four([schemas.IN_RUN_WORKBOOK, schemas.IN_RUN_OWN])
         self.assertFaultSays(faults, "2 Robot B: 'In the run' is '" + schemas.IN_RUN_WORKBOOK + "', but")
         self.assertFalse(hasattr(schemas, 'IN_RUN_ELSEWHERE'))   # E11.7 open point C: the wording of E10.1 goes
+
+    def outlier_sheet(self, outlier_run: str, params: Params) -> list:
+        """01's check of the sheet Type 1 of the small register, Robot E (6, taken apart in two versions) saying
+        `outlier_run`, the others as the builder writes them, with the settings `params`."""
+        listed = [(r, outlier_run if r[0] == 6 else run) for r, run in self.listed()]
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS, type_one=listed)
+            register, sheet = schemas.read_register(path), schemas.read_type_sheet(path, 1)
+        return schemas.check_type_sheet(register, sheet, 1, params, self.APART)
+
+    def test_an_outlier_says_it_is_not_drawn(self):
+        # Matthias, 2026-11-04: "Ok it is neo. It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5"
+        # (EVIDENCE.md E30 points 2 and 3): a robot of the setting composition.outliers stays in every sheet of its
+        # types and says it is not drawn, also where it is taken apart (Robot E: its own rows in type 1's file).
+        params = Params()
+        params.composition.outliers = ((6, 'built as a few'),)
+        self.assertEqual([f.text for f in self.outlier_sheet(schemas.IN_RUN_OUTLIER, params)], [])
+        self.assertFaultSays(self.outlier_sheet(schemas.IN_RUN_OWN, params),
+                             "6 Robot E: 'In the run' is '" + schemas.IN_RUN_OWN + "', but an outlier is not drawn")
+        # The outlier's words where the setting does not name it: a fault too.
+        self.assertFaultSays(self.outlier_sheet(schemas.IN_RUN_OUTLIER, Params()),
+                             "6 Robot E: 'In the run' is '" + schemas.IN_RUN_OUTLIER + "', but a robot taken apart")
+
+    def test_an_outlier_of_the_setting_not_in_the_register(self):
+        # E30 point 3: the setting names robots of the register by their numbers; one not there is a fault of 01's.
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'register.xlsx')
+            build_register(path, self.ROWS)
+            register = schemas.read_register(path)
+        self.assertFaultSays(schemas.check_outliers(register, Params()),
+                             '208: an outlier of composition.outliers (src/params_schema.py), but no robot of the '
+                             'register has this number.')
+        params = Params()
+        params.composition.outliers = ((6, 'built as a few'),)
+        self.assertEqual(schemas.check_outliers(register, params), [])
+        self.assertEqual([(r.number, r.name) for r in schemas.outlier_robots(register, params)], [(6, 'Robot E')])
+        self.assertEqual(schemas.outlier_names(schemas.outlier_robots(register, params), params),
+                         {'AgiBot X1': 'built as a few', 'Fourier N1': 'built as a few'})
 
     def test_template_quantities_of_types_3_and_4_have_names_of_their_own(self):
         # E11.7 point 2: a robot of a file of type 3 or 4 takes "…, types 3 and 4"; of types 1 and 2 as before.

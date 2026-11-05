@@ -264,6 +264,19 @@ class CompositionParams:
         default=15.0,
         metadata={'doc': "Robot type 1's lowest mass, kg (Matthias, 2026-10-28); lighter robots are not type 1."})
 
+    # The robots of the register that are outliers: listed, not drawn. Each its number in the register and the reason,
+    # in Matthias's words. Matthias, 2026-11-04, of the NeodraDynamics Neo1 (208, about 4 m and 1,200 kg, hydraulic):
+    # "We might need to qualify Neo the huge robot as an outlyer, as it was just built as a few of them and never will
+    # be build in large numbers", "Ok it is neo. It should be out. Mark it as outlier."; this setting on 2026-11-05,
+    # "Yes, 3 to 5" (documentation/claude/EVIDENCE.md E30). The register builder writes "not drawn: an outlier" in the
+    # sheets of its robot types, 01 checks it and marks it in its robots tables, 02 does not draw it and names it on its
+    # notes pages, 03 on its notes page. It stays in the register and in its parts file.
+    # SAFE TO CHANGE: only on Matthias's word; each a number of the register, once, with its reason.
+    outliers: tuple = field(
+        default=((208, 'built as a few, never in large numbers'),),
+        metadata={'doc': 'The robots of the register not drawn, outliers: (its number, the reason), each once '
+                         '(Matthias, 2026-11-04; EVIDENCE.md E30).'})
+
 
 @dataclass
 class OutputParams:
@@ -371,6 +384,15 @@ def validate(params: Params) -> None:
         raise ParameterError('composition.nmc_wh_per_kg_min, _mode and _max must be above 0 and in order, not '
                              f'{composition.nmc_wh_per_kg_min}, {composition.nmc_wh_per_kg_mode}, '
                              f'{composition.nmc_wh_per_kg_max}.')
+    # The outliers: pairs of a register number (a whole number from 1) and a reason in words, each number once; none
+    # is allowed. 01 checks that each number is a robot of the register.
+    outliers = composition.outliers
+    if (not isinstance(outliers, tuple)
+            or not all(isinstance(o, tuple) and len(o) == 2 and isinstance(o[0], int) and not isinstance(o[0], bool)
+                       and o[0] >= 1 and isinstance(o[1], str) and o[1].strip() for o in outliers)
+            or len({o[0] for o in outliers}) < len(outliers)):
+        raise ParameterError('composition.outliers must be a tuple of (register number, reason) pairs, each number '
+                             f"once, such as ((208, 'built as a few, never in large numbers'),), not {outliers!r}.")
 
     # The sibling projects' files: absolute, .xlsx where a file is named.
     for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',

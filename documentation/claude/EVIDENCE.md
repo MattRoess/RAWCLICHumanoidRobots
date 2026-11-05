@@ -8,7 +8,7 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
-## E30. The NeodraDynamics Neo1 an outlier, not drawn (2026-11-04). Decided; nothing built
+## E30. The NeodraDynamics Neo1 an outlier, not drawn (2026-11-04). Built 2026-11-05
 
 Matthias, 2026-11-04, after 03's pages (V171): "We might need to qualify Neo the huge robot as an outlyer, as it was
 just built as a few of them and never will be build in large numbers", "So kick it out of the statistics and just hae it
@@ -35,9 +35,9 @@ built: "built as a few, never in large numbers" is Matthias's judgement, recorde
 |---|---|---|
 | 1 | 02 no longer draws Neo1, in types 3 and 5 (type 3 over 163 robots, type 5 over 10) | decided: "It should be out" |
 | 2 | Neo1 stays in the register and in type 3's parts file (every humanoid keeps its type); its "In the run" "not drawn: an outlier" | decided: "Mark it as outlier" |
-| 3 | Where it is set: one setting in 00, `composition.outliers` (register number 208 and the reason in his words), read by 02, by 01's check of the register and by the register builder | my recommendation; to confirm with him before building |
-| 4 | Mentioned, not a page of its own: on 02's notes pages of types 3 and 5 and on 03's notes page, "Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers" | read from "Mark it as outlier"; to confirm |
-| 5 | 01's robots table of type 3 keeps it, marked an outlier, not drawn | my recommendation; to confirm (a change to a figure: described first) |
+| 3 | Where it is set: one setting in 00, `composition.outliers` (register number 208 and the reason in his words), read by 02, by 01's check of the register and by the register builder | confirmed 2026-11-05: "Yes, 3 to 5" |
+| 4 | Mentioned, not a page of its own: on 02's notes pages of types 3 and 5 and on 03's notes page, "Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers" | confirmed 2026-11-05: "Yes, 3 to 5" |
+| 5 | 01's robots table of type 3 keeps it, marked an outlier, not drawn | confirmed 2026-11-05: "Yes, 3 to 5" |
 | 6 | Neo1 only, no other heavy robot | decided: "Ok it is neo" |
 
 **Where the code decides it** (read 2026-11-04, nothing changed): 01 `IN_RUN_*` (the words of "In the run") and
@@ -51,6 +51,21 @@ a new setting).
 
 **Effects expected:** E29's third finding goes (steel's panels of types 3 and 5); its first likely too (type 3's
 terbium: Neo1's draws were the only ones without it, V170); its second (titanium) stays.
+
+**Built** (2026-11-05, on "Yes, 3 to 5"; tests first, the sandbox with 2,000 draws: VERIFICATION.md V174):
+
+| Point | Where in the code | What it does |
+|---|---|---|
+| 3 | `src/params_schema.py`, `CompositionParams.outliers` = `((208, 'built as a few, never in large numbers'),)`; `validate` | pairs of a register number and a reason, each number once; none allowed |
+| 2 | `tools/make_humanoid_register.py`: `IN_RUN_OUTLIER`, `in_the_run`, `type_rows`, `build`; a line of the sheet About | the Neo1's "In the run" "not drawn: an outlier" in the sheets Type 3 and Type 5 |
+| 2, 3 | 01: `IN_RUN_OUTLIER`, `check_type_sheet` (an outlier must say so, also where taken apart), `check_outliers` (each number a robot of the register), `outlier_robots`, `outlier_names` | 01's checks of the register |
+| 1 | 01: `without_robots` (a type's parts without the outliers' rows, its file unchanged); 02: `read_apart_inputs` (`ApartInputs.outliers`; the outliers not drawn, not in `listed`, `later` or `left_out`) | type 3 drawn over 163 robots in 172 versions, type 5 over 10 in 14 |
+| 4 | 02: `outlier_words`, `taken_apart_notes`, `taken_apart_pages`, `draw_taken_apart_pages`, the console line of `run`; 03: `notes`, `pages`, `run` (reads the register) | the sentence on the notes pages of types 3 and 5 and on 03's, with "(robot types 3 and 5)" there; 03's paragraph on each panel's scale no longer names the Neo1 |
+| 5 | 01: `OUTLIER_MARK` '*', `TABLE_KEY_OUTLIER`, `RobotRow.outlier`, `robots_table_rows`, `robots_table_pages`, `taken_apart_type_pages` | its row kept, its name marked '*', the key of its page "* an outlier, not drawn: built as a few, never in large numbers."; type 5's table the same, where it stands too |
+| 1 | 01: `type_card_text`, `overview_types`, `main` (the counts, the masses, the templates and the kinds of part of what is drawn, without it) | the cards of types 3 and 5: "Its 163 (10) robots …; their masses … to 396 (171) kg … The Neo1, an outlier, is not drawn and not counted." |
+
+Not changed, for his word: the mass axis of the robots tables of types 3 and 5 runs to 1,600 kg for the Neo1's row, as
+before; the other robots' bars sit in its first eighth.
 
 ## E29. Spec: 03, the six robot types compared (2026-11-04). Built
 

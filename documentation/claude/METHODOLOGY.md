@@ -296,7 +296,10 @@ list is `CHECKS_DONE` in `01_schemas.py`:
     Since 2026-10-30 ("Yes, together", "Yes, build it", EVIDENCE.md E10.1): the sheets Type 3 and Type 4 too; a robot
     without a mass says "not drawn: no mass stated" in every sheet, also while its type is drawn from the workbook: it
     is not in the evaluation (Matthias, 2026-10-30: "If there is no mass then it should not be taken into the
-    evaluation"), and the pages count only the robots with a mass. Since 2026-10-30 ("Yes, build it", E11.7 point 5 and
+    evaluation"), and the pages count only the robots with a mass. Since 2026-11-05 ("Yes, 3 to 5", EVIDENCE.md E30): an
+    outlier of the setting `composition.outliers` says "not drawn: an outlier" in the sheet of each of its types, also
+    where it is taken apart (`check_type_sheet`), and every number of the setting is a robot of the register
+    (`check_outliers`); see "The outliers, not drawn". Since 2026-10-30 ("Yes, build it", E11.7 point 5 and
     open point C): a robot taken apart in the parts file of any of its types is "drawn: its own parts" in the sheet of
     each of its types, and a type is drawn part by part when a robot of its sheet is (E10.1's wording for a robot with
     its own parts in another of its types removed: no sheet says it any more). Type 2: 96 robots drawn, the Xialan S0
@@ -522,6 +525,29 @@ it"): each alloy, grade and magnet class a robot type taken apart holds, what it
 its least to its most share of its mass, its base metal the rest; a magnet class by the least and most of its drawn
 fractions, RAWCLICVehicleTractionMotor's own), and its kg in one robot, on the alloys pages after the material pages.
 
+## The outliers, not drawn (since 2026-11-05)
+
+Matthias, 2026-11-04, of the NeodraDynamics Neo1 (208; about 4 m, 1,200 kg, hydraulic, a prototype, of types 5 and 3):
+"We might need to qualify Neo the huge robot as an outlyer, as it was just built as a few of them and never will be
+build in large numbers", "So kick it out of the statistics and just hae it mentioned or in as the outlier", "Ok it is neo.
+It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E30).
+
+1. **The setting:** `composition.outliers` in `src/params_schema.py`, pairs of a register number and the reason in his
+   words: `((208, 'built as a few, never in large numbers'),)`. The Neo1 only.
+2. **Kept:** in the register and in type 3's parts file, its rows unchanged; in the sheets Type 3 and Type 5 its "In the
+   run" is "not drawn: an outlier" (the register builder; 01 checks it, and that each number of the setting is a robot
+   of the register).
+3. **Not drawn and not counted:** 02 draws its types without its rows (01's `without_robots`): type 3 over 163 robots
+   (172 with their versions), type 5 over 10 (14). It is not among a type's robots with a mass, not yet taken apart or
+   without a mass; 01 counts the same on its overview cards, its robots tables' titles and its pages of where the kinds
+   of part sit.
+4. **Named:** on 02's notes pages of types 3 and 5 and on 03's notes page (with its robot types), not a page of its
+   own: "Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers."; on 01's
+   cards of types 3 and 5, "The Neo1, an outlier, is not drawn and not counted."
+5. **Marked:** 01's robots tables of types 3 and 5 keep its row, its name marked '*', and the key of its page says "* an
+   outlier, not drawn: built as a few, never in large numbers." The mass axis of those tables still runs to 1,600 kg
+   for its row (for his word).
+
 ## The hydraulic robots part by part (since 2026-11-04)
 
 Matthias, 2026-11-04: "Yes, prepare it", "all as recommended", "Yes, agree E27.7", "Yes, build it" (EVIDENCE.md E27).
@@ -532,7 +558,7 @@ those types are drawn part by part over their robots, as types 1, 2 and 4, no lo
    (no source names the version): Nadia's actuators all Moog's ISA v2 or all v5; the Atlas (old)'s all v2, or the v5 at
    its knees only and the v2 elsewhere (Matthias, "Yes, knees only": with the v5 at all 28 its frame fell below zero in
    2.1 % of its draws; HyQReal has its v5 at its knees); Neo1, of types 5 and 3, in type 3's file, drawn in
-   both types as the DR02.
+   both types as the DR02 until 2026-11-05, since then an outlier, not drawn ("The outliers, not drawn", above).
 2. **A hydraulic actuator as Moog's ISA** (Atlas (old), Nadia): in the row of its place (hips, knees, ankles, waist,
    arms, head), its mass as weighed (920 g or 1,600 g dry, ± 5 %), its servo valve (95 g, ± 5 %; the materials of the
    Type 30 valve it descends from, their shares E), its board (as the small joint's driver board), its position sensor
@@ -568,7 +594,8 @@ over their robots of every parts file.
    its own file; the Atlas, the CYBORG RO1 SE and PRO, the WO1, the DR02 and Pro, the Kaleido 9 and the Moby in type
    3's; the H1 in type 2's), type 6 over 4 (the Alex and the Fuxi on legs and on wheels in its own file; the T800 in type
    5's; the Phantom MK1 in type 3's). Not drawn: TITAN (no mass stated). Since 2026-11-04 the hydraulic Atlas (old),
-   Nadia and Neo1 too ("The hydraulic robots part by part", above), so that both types' draws are their robots'.
+   Nadia and Neo1 too ("The hydraulic robots part by part", above), so that both types' draws are their robots'; since
+   2026-11-05 the Neo1 not, an outlier ("The outliers, not drawn"): type 5 over 10.
 2. **Their templates:** none of their own; their files' robots take types 3 and 4's (01's `TEMPLATE_OF_TYPE`).
 3. **Their recipes:** the workbook's aluminium and plastics of each type (type 5's "Composites & polymers", type 6's
    "Reinforced polymers"); type 5 has no magnesium recipe, so the Kaleido 9's magnesium-alloy frame, drawn in type 5,
@@ -650,7 +677,8 @@ code as types 1 and 2, with one thing more: a type drawn over robots of several 
    Unitree G1's joints and battery from type 1's file, E. Seven robots with no stated mass are listed only (HELIOS,
    Northstar, StarBot Flex, TARS, Tobi, Vesoma 1, Yogi). Type 3 is then drawn over 163 of its 164 robots with a mass
    (the Neo1, hydraulic, then waited for its own research step; since 2026-11-04 it too, and type 3's draws are its
-   robots'), type 4 over all 124:
+   robots'; since 2026-11-05 an outlier, not drawn: type 3 over 163 again, "The outliers, not drawn"), type 4 over all
+   124:
    **type 4's draws are its robots' since batch 3** (E15.7 open point B). The templates after it: the joint template
    137 of 172 in type 3, 103 of 137 in type 4; the battery template 124 and 98 (rule 4 still broken in both).
 
@@ -980,7 +1008,8 @@ draws of one robot of the type, the height the share of the draws, each bar spli
 contribution, the smaller lower; the median a solid line, the mean a dotted one, the 2.5th and 97.5th percentile dashed;
 the median, the mean, the share of the draws that hold it (where not all) and what lies beyond the axis written above
 the panel, never over its data (E26's rule, `texts_over_data`, tested on every page). Each panel on its own scale and unit
-(E29 question 3: one scale shared by the six would be stretched by the Neo1's 1,200 kg in types 3 and 5). A type that holds
+(E29 question 3: one scale shared by the six would be stretched by the type with the heaviest robots; when it was
+decided, by the Neo1's 1,200 kg in types 3 and 5, not drawn since 2026-11-05, E30). A type that holds
 the item in fewer than 2.5 % of its draws has no panel, 02's rule, and its place says so ("none in this robot type", or
 "held in 0.45 % of its draws: fewer than 2.5 %, no panel"); a 0 is not part of a distribution. The first panel drawn in a
 row has the scale of the share of the draws. One legend at the top of a page, of the contributions drawn, in as many rows

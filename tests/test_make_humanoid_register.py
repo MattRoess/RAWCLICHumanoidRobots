@@ -224,14 +224,14 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # Since batch 3 (E15.7): type 3 163 drawn, 17 without a mass (the four of E15.4 with type 3), Neo1 the one not
         # yet taken apart; type 4 124 drawn, 11 without a mass (the five of E15.4 with type 4), none left (open point
         # B: type 4's draws from its robots). Since E27.7 (2026-11-04, "Yes, build it") Neo1 too: type 3 164 drawn, none
-        # left.
-        for robot_type, count, own, without in ((3, 181, 164, 17), (4, 135, 124, 11)):
+        # left. Since E30 (2026-11-05, "Yes, 3 to 5") Neo1 an outlier, not drawn: type 3 163 drawn.
+        for robot_type, count, own, without, outliers in ((3, 181, 163, 17, 1), (4, 135, 124, 11, 0)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
             runs = Counter(r.in_run for r in listed)
-            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_LATER]),
-                             (own, without, count - own - without))
+            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_OUTLIER],
+                              runs[schemas.IN_RUN_LATER]), (own, without, outliers, count - own - without - outliers))
             named = set().union(*APART.values())
             self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, robot_type, Params(),
                                                                        named)], [])
@@ -242,20 +242,35 @@ class TestMakeHumanoidRegister(unittest.TestCase):
         # Matthias, 2026-11-01: "Yes, agree both" (E16), "Find all the data for 5 and 6 and then fill in the data in the
         # respective sheets" (E16.6): every robot whose types include 5 or 6; drawn with its own parts where it has them
         # in the file of one of its types (types 1 to 6), TITAN without a mass. Since E27.7 (2026-11-04, "Yes, build it")
-        # the hydraulic Atlas (old), Nadia and Neo1 taken apart too: none left in types 5 and 6.
-        for robot_type, count, own, without in ((5, 12, 11, 1), (6, 5, 5, 0)):
+        # the hydraulic Atlas (old), Nadia and Neo1 taken apart too: none left in types 5 and 6. Since E30 (2026-11-05,
+        # "Yes, 3 to 5") Neo1 an outlier, not drawn: type 5 10 drawn.
+        for robot_type, count, own, without, outliers in ((5, 12, 10, 1, 1), (6, 5, 5, 0, 0)):
             listed = schemas.read_type_sheet(self.path, robot_type)
             self.assertEqual([r.number for r in listed], [r.number for r in self.register if robot_type in r.types])
             self.assertEqual(len(listed), count)
             runs = Counter(r.in_run for r in listed)
-            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_LATER]),
-                             (own, without, count - own - without))
+            self.assertEqual((runs[schemas.IN_RUN_OWN], runs[schemas.IN_RUN_NOT], runs[schemas.IN_RUN_OUTLIER],
+                              runs[schemas.IN_RUN_LATER]), (own, without, outliers, count - own - without - outliers))
             named = set().union(*APART.values())
             self.assertEqual([f.text for f in schemas.check_type_sheet(self.register, listed, robot_type, Params(),
                                                                        named)], [])
         later = {r.number for t in (5, 6) for r in schemas.read_type_sheet(self.path, t)
                  if r.in_run == schemas.IN_RUN_LATER}
         self.assertEqual(later, set())
+
+    def test_the_neo1_an_outlier_in_the_sheets_of_types_3_and_5(self):
+        # Matthias, 2026-11-04: "Ok it is neo. It should be out. Mark it as outlier." (EVIDENCE.md E30 points 1 and 2):
+        # it stays in the register and in type 3's parts file, its "In the run" in the sheets of both its types says it
+        # is an outlier, not drawn; the setting is 00's (point 3, "Yes, 3 to 5"); the words are 01's.
+        self.assertEqual(builder.IN_RUN_OUTLIER, schemas.IN_RUN_OUTLIER)
+        self.assertEqual(schemas.IN_RUN_OUTLIER, 'not drawn: an outlier')
+        neo1 = next(r for r in self.register if r.number == 208)
+        self.assertEqual((neo1.name, neo1.taken_apart, neo1.types), ('Neo1', 'NeodraDynamics Neo1', (5, 3)))
+        for robot_type in (3, 5):
+            runs = {r.number: r.in_run for r in schemas.read_type_sheet(self.path, robot_type)}
+            self.assertEqual(runs[208], schemas.IN_RUN_OUTLIER, msg=robot_type)
+            self.assertEqual([n for n, run in runs.items() if run == schemas.IN_RUN_OUTLIER], [208], msg=robot_type)
+        self.assertEqual([f.text for f in schemas.check_outliers(self.register, Params())], [])
 
     def test_the_wheeled_robots_of_batch_2_on_wheels(self):
         # Matthias, 2026-10-30, "Yes, all six" (EVIDENCE.md E7.3, question 1): the Astribot S1 and the Moz1 stand on

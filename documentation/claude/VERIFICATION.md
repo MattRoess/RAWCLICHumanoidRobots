@@ -3,6 +3,62 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-05
+
+### V173. The handover of 2026-11-04 against the code and the outputs on mac-mini
+
+- **His words:** "Get the the handover and check with the code here. icloud is still syching", then "Yes, align git".
+- **Git:** `git fetch`, then `git diff --name-only origin/main` (no tracked file different, `.DS_Store` aside) and
+  `git ls-files --others --exclude-standard` (nothing untracked): the files were GitHub's `main` at `d02a2eb`
+  (2026-11-04 15:21), the local `main` at `fa75985`, 8 commits behind. On his word `git reset --mixed origin/main`:
+  `main` at `d02a2eb`, `git status` clean; no file touched.
+- **The handover against the code:** V172's alphabetical element pages are in `03_comparison.py`; E30 not built (no
+  "outlier" in the code; every place E30 names exists: 01's `IN_RUN_*`, `check_type_sheet`, `robots_table_rows`, the
+  register builder's `in_the_run`, 02's `read_apart_inputs`, `lead`, `taken_apart_notes`, the console line); its line
+  "Not committed" out of date (`d02a2eb` holds V172, E30 and the entry). The run paths under `~/Library/Mobile Documents/…`
+  are the same files as `~/Documents/GitHub/…` here (one inode).
+- **The test suite** on the code as it was: 523 tests OK (454 s).
+- **The outputs** (`stat`, `cmp`; numpy headers read, nothing written): in `data/parts_taken_apart/5_…/` and `6_…/` iCloud
+  kept 14 files "… 2" each: the "… 2" his run of 2026-11-04 14:57 (type 5 15 robots drawn with the Neo1, the Atlas HD ISA
+  v2 and v5 knees; type 6 8 with the Nadia ISA v2 and v5), the plain names his run of 2026-11-01 18:01 (12 and 6); both
+  sets 200,000 draws, columns as their lists; `by_material` from 2026-11-04 only. `figures 2/` holds the other Mac's
+  pages of 2026-11-04 (comparison 43, composition 84, parts_taken_apart 126, schemas 45 files); `figures/` only
+  `parts_taken_apart/` of types 3 to 6 of 2026-11-01. No file "dataless". Nothing deleted: his decision.
+- **Not covered:** the other Mac (whether iCloud brought the old plain names there too); his runs since 2026-11-04.
+
+### V174. The Neo1 an outlier, not drawn (E30), built
+
+- **His words:** "Ok it is neo. It should be out. Mark it as outlier." (2026-11-04); "Yes, 3 to 5" (2026-11-05).
+- **Tests first, seen to fail** (2026-11-05, before the build; `AttributeError`: no `IN_RUN_OUTLIER`, `check_outliers`,
+  `outlier_robots`; the settings' tests 4 failures and 1 error): `test_the_neo1_the_one_outlier` and six refused values of
+  `composition.outliers` (test_parameters); `test_the_neo1_an_outlier_in_the_sheets_of_types_3_and_5` and the counts of
+  the sheets Type 3 (163 drawn, 17 without a mass, 1 outlier) and Type 5 (10, 1, 1) (test_make_humanoid_register);
+  `test_an_outlier_says_it_is_not_drawn` (also where taken apart; the old words a fault; the outlier's words without the
+  setting a fault) and `test_an_outlier_of_the_setting_not_in_the_register` (test_schemas, a small register);
+  `test_the_neo1_an_outlier_marked_in_the_tables_and_left_out_of_what_is_drawn` (types 3 and 5: the table keeps every
+  robot, the Neo1 alone marked, on one page with the key's words, the titles "all its 163 / 10 robots with a mass", the
+  pages readable with no overlap, the cards, the counts, the templates 137 / 124 / 172; type 4 unchanged);
+  `test_the_neo1_an_outlier_not_drawn_in_types_3_and_5_and_named_on_their_notes` (02: not in the inputs or the draws, its
+  rows kept in type 3's file, `listed` 163 and 10, the lead "Robot type 5, all its 10 robots", the sentence on the notes
+  and nowhere else); `test_its_notes_name_the_outlier_not_drawn` (03). Changed: type 3 drawn over 163 robots in 172
+  versions (was 164 in 173); the words for the Neo1's joints read from type 3's file, where its rows stay.
+- **After the build:** the new and changed tests OK (19 of 01's pages, 02 and 03: 163 s; 43 fast: 3 s), but one, as it
+  must until his run of the register builder: `test_what_it_writes_equals_the_register_on_disk` (the file on disk lacks
+  the About line and "not drawn: an outlier"). The whole suite (476 s): 530 tests, 528 OK; the 2 failures both the
+  register on disk, written before the change: that one, and `test_the_real_register_holds_together`, where 01's new
+  check finds the Neo1 "drawn: its own parts" in the sheets Type 3 and Type 5 ("but an outlier is not drawn"). Both
+  pass once he runs the register builder (his run 2, before 01).
+- **The sandbox** (a copy of the project in the session's scratch folder, `composition.draws` 2,000, its own `data/` and
+  `figures/`): the register builder (Type 3 181, Type 5 12 robots), 00 (the setting in force), 01 ("No fault found"; 46
+  pages), 02 (1 min 23 s: type 3 "drawn part by part over 163 robots …; not drawn, an outlier: 208 Neo1", type 5 over 10,
+  the same; they add up), 03 (43 pages, they add up). Read back: no type's `register.txt` names the Neo1; type 3 91.8 kg
+  at the mean, its heaviest draw 395 kg; type 5 92.9 kg, 171 kg (E30's table at 200,000 draws: 92.5, 396; 92.5, 171);
+  steel at the mean 14.7 and 14.9 kg (E30: 14.7, 15.0), at most 73 and 31 kg; type 3's terbium in 100 % of its draws
+  (E29's first finding gone at 2,000 draws). Looked at: 01's `overview_2.png` (the cards of types 3 and 5), the robots
+  tables of type 3 (page 2 of 11) and type 5 (page 1 of 2), type 5's notes page 1, 03's notes page 1: as described.
+- **Not covered:** his runs (200,000 draws); the other Mac; the robots tables' mass axis, still to 1,600 kg for the
+  Neo1's row (his word).
+
 ## 2026-11-04
 
 ### V172. 03's element pages in alphabetical order of their names

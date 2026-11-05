@@ -27,7 +27,9 @@ second type, with every cell of its row in Robots and one more, "In the run": wh
 (drawn with its own rows of the parts file, which every robot of type 1 has since 2026-10-29). 02 draws robot type 1
 over the robots of this sheet; 01 checks that it lists exactly the robots of type 1 of the sheet Robots, as they
 are there. The sheet Type 2 the same for robot type 2 (2026-10-29), none of its robots taken apart yet: 02 draws type
-2 from the workbook, and the sheet says so of each.
+2 from the workbook, and the sheet says so of each. A robot of 00's setting `composition.outliers` (the Neo1, since
+2026-11-05; EVIDENCE.md E30) says "not drawn: an outlier" in the sheet of each of its types, also where it is taken
+apart.
 
 WHAT IT READS AND WRITES
 ------------------------
@@ -96,6 +98,9 @@ ABOUT = [
     'in the respective sheets", EVIDENCE.md E16.6): every robot whose types include 5, or 6, as the sheet Type 3; '
     'since 2026-11-04 the hydraulic Atlas (old), Nadia and Neo1 taken apart too (EVIDENCE.md E27.7, "Yes, build it"); '
     'TITAN without a stated mass.',
+    'Outliers (Matthias, 2026-11-04, of the Neo1: "Ok it is neo. It should be out. Mark it as outlier."; EVIDENCE.md '
+    'E30): a robot named in the setting composition.outliers of src/params_schema.py stays in the register and in its '
+    'parts file, and in the sheet of each of its types says "not drawn: an outlier", also where it is taken apart.',
 ]
 
 # --- The sheets of robot types --------------------------------------------------------------------------------------
@@ -114,6 +119,9 @@ IN_RUN_WORKBOOK = 'not drawn: its type drawn from the workbook, none of its robo
 # A robot with a mass of a type some of whose robots are taken apart, itself not yet (2026-10-30, "Yes, build C", Q4):
 # its type drawn from the workbook until every robot of it with a mass is taken apart (Q2).
 IN_RUN_LATER = 'not drawn: not yet taken apart'
+# An outlier of the setting composition.outliers, also where it is taken apart: listed, not drawn (Matthias, 2026-11-04,
+# "Ok it is neo. It should be out. Mark it as outlier."; EVIDENCE.md E30 point 2).
+IN_RUN_OUTLIER = 'not drawn: an outlier'
 
 # --- Robots ---------------------------------------------------------------------------------------------------------
 HEADINGS = ['Number', 'Robot', 'Maker', 'Country', 'Status', 'Height (cm)', 'Mass (kg), stated', 'Mass min (kg)',
@@ -715,12 +723,16 @@ def taken_apart(row: list) -> bool:
     return any(row[0] in TAKEN_APART.get(t, {}) for t in types_of(row))
 
 
-def in_the_run(row: list, robot_type: int, any_apart: bool) -> str:
+def in_the_run(row: list, robot_type: int, any_apart: bool, outliers=frozenset()) -> str:
     """What 02_composition.py does with a robot of `robot_type` (its row of the register), `any_apart` whether any
-    robot of the type is taken apart: drawn with its own rows, where it has them in the parts file of one of its types
-    (every robot of type 1 since 2026-10-29; since 2026-10-30 a robot of types 3 or 4 also from type 1's or 2's file,
-    E11.7 point 5); not drawn where no mass is stated (in every sheet, E10.1 point 4); while none of its type is taken
-    apart, its type drawn from the workbook; else not drawn where it is not yet taken apart (Q4)."""
+    robot of the type is taken apart: not drawn where it is an outlier (its number in `outliers`, the setting
+    composition.outliers; E30 point 2), whatever else holds of it; drawn with its own rows, where it has them in the
+    parts file of one of its types (every robot of type 1 since 2026-10-29; since 2026-10-30 a robot of types 3 or 4
+    also from type 1's or 2's file, E11.7 point 5); not drawn where no mass is stated (in every sheet, E10.1 point 4);
+    while none of its type is taken apart, its type drawn from the workbook; else not drawn where it is not yet taken
+    apart (Q4)."""
+    if row[0] in outliers:
+        return IN_RUN_OUTLIER
     if taken_apart(row):
         return IN_RUN_OWN
     if row[HEADINGS.index('Mass mode (kg)')] in (None, ''):
@@ -728,12 +740,13 @@ def in_the_run(row: list, robot_type: int, any_apart: bool) -> str:
     return IN_RUN_WORKBOOK if not any_apart else IN_RUN_LATER
 
 
-def type_rows(rows: list, robot_type: int) -> list:
+def type_rows(rows: list, robot_type: int, outliers=frozenset()) -> list:
     """The rows of the sheet of `robot_type`: every robot of the register whose types include it, in the register's
-    order, each its row of the sheet Robots and what the run does with it."""
+    order, each its row of the sheet Robots and what the run does with it (`outliers`: the register numbers of the
+    setting composition.outliers)."""
     of_type = [row for row in rows if robot_type in types_of(row)]
     any_apart = any(taken_apart(row) for row in of_type)
-    return [row + [in_the_run(row, robot_type, any_apart)] for row in of_type]
+    return [row + [in_the_run(row, robot_type, any_apart, outliers)] for row in of_type]
 
 
 def write_sheet(sheet, headings: list, rows: list, widths: list) -> None:
@@ -764,8 +777,9 @@ def build(path: str, params: Params) -> dict:
     write_sheet(book.create_sheet('Robots'), HEADINGS, rows, WIDTHS)
     # The same robots' rows again, those of each listed type, with what the run does with each: one list of decisions.
     counts = {}
+    outliers = {number for number, _ in params.composition.outliers}   # 00's setting (E30 point 3)
     for robot_type in TYPES_LISTED:
-        listed = type_rows(rows, robot_type)
+        listed = type_rows(rows, robot_type, outliers)
         write_sheet(book.create_sheet(TYPE_SHEET.format(robot_type)), HEADINGS + ['In the run'], listed,
                     WIDTHS + [IN_RUN_WIDTH])
         counts[robot_type] = len(listed)

@@ -1242,14 +1242,45 @@ class TestTypesThreeAndFour(unittest.TestCase):
         # batch 2: type 3 91 robots, type 4 47 (the PrimeBOT Q1 out); since types 5 and 6's entry (E16.6) type 3 94: the
         # Kaleido 9, the Moby and the Phantom MK1; since batch 3 (E15.7) type 3 163 robots in 172 versions (Neo1 the
         # one not taken apart), type 4 124 in 137 (each of its robots with a mass); since E27.7 (2026-11-04) type 3 164
-        # in 173, Neo1 too.
-        for robot_type, count, versions in ((3, 164, 173), (4, 124, 137)):
+        # in 173, Neo1 too; since E30 (2026-11-05, "Yes, 3 to 5") 163 in 172, Neo1 an outlier, not drawn.
+        for robot_type, count, versions in ((3, 163, 172), (4, 124, 137)):
             inputs = type_inputs_or_skip(self, self.params, robot_type)
             self.assertEqual(len(inputs.robots), count, msg=robot_type)
             self.assertGreater(len(inputs.files), 1)
             d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
             self.assertEqual(len(d.register), count)
             self.assertEqual(len(d.robots), versions, msg=robot_type)
+
+    def test_the_neo1_an_outlier_not_drawn_in_types_3_and_5_and_named_on_their_notes(self):
+        # Matthias, 2026-11-04: "So kick it out of the statistics and just hae it mentioned or in as the outlier", "Ok
+        # it is neo. It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E30): 02 no longer
+        # draws it (point 1), in either of its types; it stays in type 3's parts file (point 2); the notes pages of
+        # types 3 and 5 name it, not a page of its own (point 4); the other robots drawn as before.
+        words = 'Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large numbers.'
+        for robot_type, listed in ((3, 163), (5, 10)):
+            inputs = type_inputs_or_skip(self, self.params, robot_type)
+            self.assertEqual([r.number for r in inputs.outliers], [208], msg=robot_type)
+            self.assertNotIn(208, [r.number for r in inputs.robots])
+            self.assertNotIn('NeodraDynamics Neo1', inputs.apart.robots)
+            self.assertFalse([x for x in inputs.apart.joints + inputs.apart.parts + inputs.apart.boards
+                              + inputs.apart.sensors if x.robot == 'NeodraDynamics Neo1'], msg=robot_type)
+            self.assertIn('NeodraDynamics Neo1', inputs.files[3].robots)       # its rows stay in type 3's file
+            self.assertEqual((inputs.listed, inputs.later), (listed, []), msg=robot_type)
+            self.assertEqual(composition.outlier_words(inputs.outliers, self.params), words)
+        params = Params()
+        params.composition.draws = 300
+        inputs = type_inputs_or_skip(self, params, 5)
+        d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
+        self.assertNotIn('208 Neo1', d.register)
+        self.assertNotIn('NeodraDynamics Neo1', d.robots)
+        self.assertEqual(composition.lead(d), 'Robot type 5, all its 10 robots')
+        category = next(c for c in inputs.base.book.categories if c.number == 5)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        notes = composition.taken_apart_notes(c, d, inputs.left_out, params, inputs.later, inputs.outliers)
+        self.assertIn(words, notes)
+        self.assertNotIn('Neo1', ' '.join(n for n in notes if n != words))
+        # A type without an outlier: no such sentence.
+        self.assertEqual(composition.outlier_words([], params), '')
 
     def test_a_robot_of_another_file_drawn_from_its_own_rows(self):
         inputs = type_inputs_or_skip(self, self.params, 3)
@@ -1852,14 +1883,17 @@ class TestJointsEstimatedWithoutTorque(unittest.TestCase):
     def test_the_notes_of_types_5_and_6(self):
         params = Params()
         params.composition.draws = 300
-        for robot_type, robots in ((5, ['NeodraDynamics Neo1']), (6, ['IHMC Nadia ISA v2', 'IHMC Nadia ISA v5'])):
+        for robot_type, robots in ((6, ['IHMC Nadia ISA v2', 'IHMC Nadia ISA v5']),):
             inputs = type_inputs_or_skip(self, params, robot_type)
             drawn = [v for r in inputs.robots for v in schemas.versions(r.taken_apart)]
             said = composition.on_estimates(inputs.apart, drawn)
             for robot in robots:
                 self.assertIn(robot, said.get(self.NO_TORQUE, []), msg=robot)
-        self.assertNotIn('NeodraDynamics Neo1', composition.on_estimates(
-            type_inputs_or_skip(self, params, 5).apart, ['NeodraDynamics Neo1']).get(self.TORQUES, []))
+        # Neo1, since E30 (2026-11-05) an outlier and not drawn: the words for its rows, in type 3's file, where they
+        # stay.
+        said = composition.on_estimates(type_inputs_or_skip(self, params, 5).files[3], ['NeodraDynamics Neo1'])
+        self.assertIn('NeodraDynamics Neo1', said.get(self.NO_TORQUE, []))
+        self.assertNotIn('NeodraDynamics Neo1', said.get(self.TORQUES, []))
         self.assertIn('DEEP Robotics DR02', composition.on_estimates(
             type_inputs_or_skip(self, params, 5).apart, ['DEEP Robotics DR02']).get(self.TORQUES, []))
 

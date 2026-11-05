@@ -29,7 +29,7 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         'data.vehicle_pcb_composition', 'data.vehicle_sensor_composition', 'data.data_center_element_composition',
         'data.traction_motor_magnets', 'data.traction_motor_steels', 'data.traction_motor_dir', 'data.humanoid_guide',
         'data.register',
-        'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg',
+        'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg', 'composition.outliers',
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
         'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'output.parts_dir',
@@ -64,6 +64,12 @@ class TestSettings(unittest.TestCase):
                                      ('composition', 'draws', 2_000_000),
                                      ('composition', 'seed', -1),
                                      ('composition', 'nmc_wh_per_kg_mode', 300.0),
+                                     ('composition', 'outliers', 208),
+                                     ('composition', 'outliers', (208,)),
+                                     ('composition', 'outliers', (('208', 'a reason'),)),
+                                     ('composition', 'outliers', ((0, 'a reason'),)),
+                                     ('composition', 'outliers', ((208, ' '),)),
+                                     ('composition', 'outliers', ((208, 'a reason'), (208, 'another'))),
                                      ('output', 'composition_dir', ' '),
                                      ('output', 'dpi', 10),
                                      ('output', 'robot_types_with_pages', ()),
@@ -74,6 +80,14 @@ class TestSettings(unittest.TestCase):
             setattr(getattr(params, section), name, value)
             with self.assertRaises(ParameterError, msg=f'{section}.{name} = {value!r}'):
                 validate(params)
+
+    def test_the_neo1_the_one_outlier(self):
+        # Matthias, 2026-11-04: "Ok it is neo. It should be out. Mark it as outlier."; 2026-11-05, "Yes, 3 to 5"
+        # (EVIDENCE.md E30 point 3): one setting, the register number and the reason in his words; Neo1 only (point 6).
+        self.assertEqual(current().composition.outliers, ((208, 'built as a few, never in large numbers'),))
+        params = Params()
+        params.composition.outliers = ()   # none left out: a valid setting
+        validate(params)
 
 
 class TestRegister(unittest.TestCase):

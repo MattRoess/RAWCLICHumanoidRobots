@@ -141,6 +141,22 @@ class TestComparison(Compared):
         self.assertTrue(notes)
         self.assertEqual(sorted(set(written) - set(notes)), sorted(expected))
 
+    def test_its_notes_name_the_outlier_not_drawn(self):
+        # Matthias, 2026-11-04: "Mark it as outlier"; 2026-11-05, "Yes, 3 to 5" (EVIDENCE.md E30 point 4): 03's notes
+        # page names the Neo1, not drawn, an outlier, in its types; the paragraph on each panel's own scale no longer
+        # gives it as the reason.
+        path = absolute(self.params.data.register)
+        if not os.path.exists(path):
+            self.skipTest('the register is not on disk')
+        outliers = schemas.outlier_robots(schemas.read_register(path), self.params)
+        notes = comparison.notes(comparison.read_draws(self.params), outliers, self.params)
+        self.assertIn('Not drawn, an outlier: 208 NeodraDynamics Neo1, 1,200 kg, built as a few, never in large '
+                      'numbers (robot types 3 and 5).', notes)
+        scale = next(n for n in notes if n.startswith('Each panel on its own scale'))
+        self.assertNotIn('Neo1', scale)
+        self.assertEqual([n for n in comparison.notes(comparison.read_draws(self.params), [], self.params)
+                          if 'outlier' in n], [])
+
     def test_the_element_pages_in_alphabetical_order_of_their_names(self):
         # Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only": comparison_elements_1.png Aluminium (Al)
         # … the last Titanium (Ti), by the element's name, as its page's title begins; the material pages keep 02's order.
