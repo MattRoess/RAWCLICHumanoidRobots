@@ -8,6 +8,114 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E34. The numbers of the panels on pages of their own (2026-11-05). Built
+
+Matthias, 2026-11-05, of the panels' numbers (in what share of the draws, median, mean, beyond the axis) written above
+each: "Do we really need all this text in the figure. It might be better to have it separate. I can read such figure",
+then, to the proposal (on the figure the bars, the lines, the titles, the axes; after each page a page of its numbers;
+the notes saying once what the lines are), "Yes, hopefully now it is OK. I am not happy how long it takes to have decent
+looking figures".
+
+| What | Built |
+|---|---|
+| No number over a panel | 02: `centre_lines` keeps the numbers (`axes.panel_numbers`) instead of writing them; `numbers_above` and `PANEL_NUMBERS_GAP` removed |
+| A page of numbers after each page of panels | 02: `panel_rows`, `numbers_page`, `with_numbers`; on the element and material pages (`taken_apart_pages`), the figures of where the critical elements sit (`parts_figure_pages`, `parts_figures`), 03's pages (`pages`, `panel_pages`); the series `numbers` in `COMPOSITION_SERIES`, `PARTS_SERIES` and 03's `SERIES` |
+| The notes | 02's, its figures' and 03's notes pages: the lines once, and where their numbers are |
+
+Not changed: the overview pages of where the elements sit (each row its median, mean and "held in" at its right), not in
+the proposal.
+
+## E33. The light alloys' metals on the element pages: the alloy drawn, the rest beside (2026-11-05). Built
+
+Matthias, 2026-11-05: "the titanium figures does not make any sense. The small aounts belong to the electronics sensors.
+But not the several g and kg this is somthing else", "It alloys and you know, how we handle aluminum alloys so the same
+for tinatium alloys", "the aluminum alloy figure is shit. It is just the al in the alloy. Do not anymore show me such
+figures", then, shown the numbers (aluminium: the alloys 99 to 100 %, the battery cells 0.3 to 0.5 %, the electronics
+0.03 to 0.07 %; magnesium: the alloys only; titanium: the alloy, and the sensors 1 to 16 mg), "Ok three separate
+collections and then just one total, but there I do not need an additional figure, as the alloys is so dominate. Work
+out a pragmatic solution", and to the six points "Yes".
+
+| # | Point | Built |
+|---|---|---|
+| 1 | Three collections and one total in the data | as since E32: '<metal>: <alloy>', '<metal>: Battery cells', '<metal>: Boards and components: <component>' in by_material; the total the element |
+| 2 | One figure, the alloy | 02: `ALLOY_OF`, `alloy_split`; the panel draws the alloy's metal alone, its numbers over the draws that hold it |
+| 3 | The other two as numbers | first a line above the panel; taken off again (below): they are in the draws and on 02's means pages, named once on the notes pages (`LIGHT_ALLOY_NOTE`) |
+| 4 | No figure of the total | none |
+| 5 | A type without the alloy (type 4's titanium; type 3's, held in 0.5 %) | 02: `alloy_place`; "Titanium alloy: none in this robot type" / "held in 0.5 % of its draws: fewer than 2.5 %, no panel", with the line beside |
+| 6 | Every other element as before; the means pages list every source | unchanged; 03's `compare_page(symbol=)` the same; `not_drawn_words` moved to 02 (one copy) |
+
+**Relabelled** (Matthias, seeing it: "I do NOT like this figure. It is completly missleading. What are you showing, alloy
+total what???"; then "Yes, relabel"): the panel is the metal the alloys hold, not their total mass, and now says so.
+03's page title "Aluminium (Al) held in the aluminium alloys of one robot of each robot type" (titanium, magnesium the
+same); no legend (one colour); 02's panel title "Aluminium (Al) in the alloys", "Titanium (Ti) in the alloy", and no
+legend entry for the light alloys (`alloy_title`).
+
+**The line beside taken off** (Matthias, of the relabelled page: "there is much to much text, which does not fit to the
+thitle. A figure is a figure and not text"): the panels show the metal held in the alloys alone, with the numbers every
+panel has (median, mean, what lies beyond the axis); the battery cells' and the electronics' aluminium and the
+electronics' titanium are in the draws and on 02's means pages, and one sentence of the notes pages of 02 and 03 says so
+(`LIGHT_ALLOY_NOTE`). `beside_words` and its width removed; `alloy_split` returns the alloy's draws alone; a type without
+the alloy's place names the alloy only ("Titanium alloy: none in this robot type").
+
+## E32. The electronics by their components (2026-11-05). Built
+
+Matthias, 2026-11-05: "senors are par of the elctronics!!", "3 yes", then, asked whether cables, connectors and antennas
+are components too, "Yes, include them", and to the checklist below "yes do it". Why: titanium and gallium looked as if
+they sat on the circuit boards (V175); they are the sensors', which 02 booked with the boards in one material.
+
+| # | Point (agreed) | Built |
+|---|---|---|
+| 1 | The electronics one material, its components circuit boards, cameras, other sensors, cables, connectors | 02: `ELECTRONICS_COMPONENTS`, `component_label`, `sensor_component` (a camera: elements holding an image sensor, `IMAGE_SENSORS`) |
+| 2 | Cables and connectors booked in the electronics, no longer in copper, brass and plastics (A) | 02: `Robot.material`, `element`, `declare`, `declare_all`, `piece` take a `component`: the kilograms booked in the electronics, the elements those of what it is made of (a cable's copper whole, a connector's brass its copper fixed, E25); the cables' conductors (`CABLE_PARTS`) and every other part of the kind Cables (`CONNECTORS`) |
+| 3 | Antennas: none as rows; inside the satellite receivers and modems, so in "other sensors" (B) | no new rows; said in 02's notes |
+| 4 | The element pages by component; the materials pages and tables the electronics one material | `by_material` '<element>: Boards and components: <component>', ordered at the electronics' place; colours in `MATERIAL_COLOURS`; the detail of the electronics whole |
+| 5 | The draws unchanged in total | the sums as before (tests: each element by material adds up to it; the electronics' elements to their mass) |
+
+**Open, for his word:** the name. Point 1 said "renamed Electronics"; E19 (2026-11-02, "Yes, agree E19") took "Boards and
+components" from RAWCLICDataCenters, and the name stands in his `data/researched/shared_lists.xlsx` (8 cells: About, Lists,
+Materials). Built with "Boards and components" (one constant, `ELECTRONICS`); a rename needs those cells changed, his data.
+Not changed either: the sensors' housings (aluminium and plastics, 2026-10-29 point 3c), not named in the checklist.
+
+## E31. The cameras of the robots that list none; the Phantom MK1's battery (2026-11-05). Researched; nothing entered
+
+Matthias, 2026-11-05: "I do not understand, why there is titanium on the boards. Where do you have the information. I
+want both investigated. It does absoultly not make any sense", then "Yes, research both" (VERIFICATION.md V175, V176).
+Why: the titanium of "Boards and components" is the sensors' (RAWCLICVehicleElectronics' `07_VehicleSensorComposition.xlsx`:
+camera chips, microphones, satellite receivers, ultrasonic sensors), held in about half the draws because 145 robots of
+the parts files (144 without the Neo1, not drawn) list no camera and no microphone, only encoders, motion sensors and
+sometimes a LiDAR. The robots that list cameras hold 1 to 20 image sensors (median 4; a depth camera 1 colour and 2
+infrared); 75 list microphones (4 in 70 of them).
+
+**The Phantom MK1's battery, read first-hand:** Foundation's own pages (foundation.bot: Phantom, Cortex, home) give 1.8 m,
+80 kg, 20 kg payload, 29 DoF, its actuators at 48 V / 72 V, and say nothing of a battery or a sensor. The BBC itself
+(bbc.com/news/articles/cedpxwe26l1o, 8 June 2026; the reporter at Foundation's facility): "Phantom MK-1, which I am
+shown, doesn't have a battery"; the MK-2 is to have "a large battery" of about six hours. Militarnyi (31 May 2026,
+second-hand, no source named): "lacks sufficient battery life for large-scale deployment". Class: C, a journalist's own
+look (no longer "the BBC via UNB"); the maker silent.
+
+**How the cameras were researched:** six research agents, one per batch of about 25 robots, each robot's maker's own
+pages first (product page, specification, datasheet, manual, press release), a third party only where the maker says
+nothing, an exact quote and its link for each finding, nothing taken from photos or from another robot. The agents' web
+searches ran out before every robot had four lookups (shared limit of the session); humanoid.guide answered HTTP 500
+throughout; Tesla, Gasgoo and some Chinese sites refused the reading. Seven findings re-read by me (V176).
+
+**What the makers and sources say** (register number and name; "count not stated" where the source names cameras
+without a number):
+
+| Class | Robots |
+|---|---|
+| a. Maker: no camera as standard (6) | 251 RB-Y1 A and M ("The vision camera is not provided."; a bracket only); 307 Torobo (the default head "without any sensors"; the optional head a wide-angle stereo, a fisheye and a ToF depth camera and a stereo microphone); 350 Fourier N1 ("Stereo camera (Optional)"); 268 Roboto Origin (D435i depth camera optional); 260 Roban2 (Agile: none; Advanced A/B/C: a depth camera and a LiDAR; our version not known); 269 RP1 (open-source: none, D435i optional; PRO: 1 monocular RGB camera and a microphone; our version not known) |
+| b. Maker: cameras with a count or a set (10) | 290 TALOS (1 RGB-D camera in the head; datasheet); 256 REEM-C (a stereo camera as eyes and a back camera; 4 microphones; maker blog 2013); 6 AgiBot A2 ("six high-definition cameras", RGB-D and fisheye named; a microphone; 360° LiDAR); 47 DOBOT Atom Max (a 60 fps Full HD binocular camera and an Intel RealSense D455); 155 KEENON XMAN-R1 (4 depth and 4 wide-angle cameras; microphones; 2 LiDAR); 310 UBTECH U1 Pro (2 RGB cameras in the eyes; a 6-microphone array); 340 YMBot D (an active binocular depth camera with a 1280 × 800 colour camera); 205 GENISOM NE01 (a 1080p stereo camera; a microphone; its table's 1328 mm and about 37 kg not the register's 145 cm and 40 kg); 206 1X NEO Beta (the production NEO's 2 stereo fisheye cameras and 4 microphones; not stated for the Beta); 164 Leju Kuavo-my (a binocular camera, a 6-microphone array, a LiDAR; the page now shows the KUAVO 4Pro, 1.66 m, 55 kg, register 334, not 164) |
+| c. Maker: cameras, count not stated (18) | 85 Noetix E1 (depth camera; a ring microphone); 57 Noetix Bumi ("camera"; the reseller RBTX for the Pro: a structured-light depth and an RGB camera); 339 YMBot C (a 5-megapixel colour camera; voice); 230 Sanctuary Phoenix Gen 8 (depth and vision cameras); 258 REX G1 (360° stereo vision); 31 Anigon (RGB and depth, several cameras); 43 Atlas, electric ("360° camera view", spec sheet 10/2026); 58 CALVIN-40 ("3D sensor and vision"); 83 Duatic Alpha ("vision system"); 112 Gento Luna ("visual recognition"; 3D LiDAR, ultrasonic); 139 Weave Isaac 1 ("video cameras", its privacy policy); 293 Tau Humanoid (cameras on the head and the wrists; microphones disabled); 240 Pudu D7 2026 ("vision" and "auditory sensing"; 2 LiDAR); 33 Apollo 2 ("perception systems", "listening"); 5 4NE1 Gen 4 ("sees in 3D", "hears"); 74 XYZ DEUX (a dual camera with a 220° lens, perhaps the data rig); 244 OpenLoong Qinglong (depth and surround cameras; its open hardware); 9 Andromeda Abi (several cameras, microphone arrays; its job advert) |
+| d. Third party only, with a count (10) | 228 Phantom MK1 (8 cameras in the head: Newsweek, a photo caption); 3 4NE1 Gen 3 (7 cameras: The Robot Report, attributed to NEURA, whose release names none); 22 AIDOL (2 stereo cameras, 7 microphones: 3DNews, Meduza); 156 Galaxea Kengo (7 HD GMSL cameras and a LiDAR: Gasgoo, its excerpt only, the page refused); 190 MenteeBot V3 (5 head cameras: Ynet); 32 Apollo (1 perception camera in the head: CNN 2023); 237 PrimeBOT T1 (1 flip camera, a microphone array: Interesting Engineering); 77 Digit (at least 1 RealSense D455 in the neck: RealSense's case study); 132 HONOR D1 (an Orbbec Gemini 330 stereo camera: Orbbec, of HONOR's "first humanoid", not naming the D1); 13 AgiBot A2-W (4 "AI vision sensors": a reseller's blog) |
+| e. Third party only, count not stated (15) | 23 AKINCI-5 (RGB and stereo, LiDAR); 175 DOBOT LUMO ("vision"); 232 PHYBOT M1 (stereo RGB, 3D LiDAR); 100 Holiday Friday (several cameras, LiDAR; the maker's job posting); 137 XPENG IRON 2025 (a microphone array at the ears; "720° vision" said of the April 2025 IRON); 136 XPENG IRON 2024 (720° cameras: Fox News); 275 EIR SkyWalker 2 ("3D vision", LiDAR); 280 Robotera Star1 ("vision sensors" at the eyes); 188 Sunday MEMO (cameras and microphones in the brim); 51 NEUBILITY Billi (camera-based); 90 Genesis AI Eno (cameras in the fingertips and palms, unconfirmed); 78 Digit 5 ("multiple sensor technologies"); 114 GAC GoMate and 115 GoMate Mini (vision named); 106 AgiBot G2 Max (2D/3D LiDAR, ultrasonic; the base G2's datasheet, not the Max's: 1 stereo, 3 fisheye, 1 head and 2 wrist RGB-D cameras, a microphone array) |
+| f. Catalogues only (7) | 184 Blue Worm Mantis (binocular head camera, wrist cameras optional); 224 Cyan Orca (a depth camera, a 6-microphone ring); 246 AgiBot QUESTER1 (RGB cameras); 101 Futuring 2 (6 RGB cameras, microphones); 125 Haier HIVA (RGB and stereo); 131 HONOR A1 (stereo and RGB, a LiDAR); 183 GigaAI Maker H01 (5 RGB and 4 RGB-D; the maker: "multiple sensors") |
+| g. Nothing found (78) | 19 AI Sapiens K1, 147 K0, 143 JAKA π (a voice module), 281 StarBot Astra, 308 Totan O1, 343 YMBOT E3, 21 AICO 2, 40 Astribot S1, 41 Astribot T1, 42 AstroDroid AD-01, 53 Bolt, 68 CUE7, 80 DR01, 86 Eggie; 134 Simplexity I-Series, 151 KAIST, 170 LimX CL, 199 Motion 2, 200 Moz1, 203 NAVAI-I3, 210 Nezha P01, 221 Optimus Gen 3, 222 Optimus Gen 2, 223 Optimus V2.5, 229 Phoenix ("most sensor-rich", none named), 272 Sean, 276 Songxing, 285 Superman, 297 TianGong Ultra, 298 Tianzhen Z1; 299 Tien Kung 2.0, 302 TLIBOT T1, 335 Y1, 336 Y2-B, 337 Y2-P, 341 YMBot D2, 342 YMBot D4, 4 4NE1 Gen 3.5, 7 A2 Max, 10 Adam Lite, 28 TeknTrash ALPHA (its hyperspectral camera at the conveyor, not on the robot), 56 Borg 01, 63 Cinnamon 1, 73 Sharpa D01; 76 DexBot, 93 Fengxing-001, 110 Persona Gen 1, 141 JAKA K1, 142 JAKA Kargo, 146 Jupiter, 154 KAPEX, 165 L1, 167 Laborer M1 (its table lists only joint encoders), 189 MenteeBot 2024, 197 O-ID Modular, 204 Navigator 2; 209 NEXO, 213 Sharpa North, 226 Pink P0, 242 XPENG PX5, 250 RayNex G3, 263 Robin, 264 ROBO-T1, 320 Walden, 348 Zeus 1, 46 Vbot ATOM, 61 CASIVIBOT, 79 Noetix Dora, 150 KAI; 238 ProWhite, 261 Robbyant R1, 284 Steve, 291 TARA GEN1, 330 Xiao Di, 331 Xiao Liu, 333 XiaQi, 344 YMBot H, 351 Fuxi |
+
+**Open, for his word** (nothing entered): which of these land in the parts files and how; what the robots of classes c
+to g, whose cameras no source counts, take (an estimate, E, by his rules: never 0, never left open); whether an optional
+camera (class a) counts; a second search for class g, whose robots had the fewest lookups.
+
 ## E30. The NeodraDynamics Neo1 an outlier, not drawn (2026-11-04). Built 2026-11-05
 
 Matthias, 2026-11-04, after 03's pages (V171): "We might need to qualify Neo the huge robot as an outlyer, as it was

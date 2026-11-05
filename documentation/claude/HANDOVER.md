@@ -60,7 +60,57 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-05: the Neo1 an outlier, built (E30); where to start (start here)
+## 2026-11-05, afternoon: the electronics by their components built (E32); where to go on (start here)
+
+Matthias, after his walk: "Have you combined the eletronics, PCB, sensore, cables antenas etc.", then "Yes, include
+them" (cables, connectors, antennas as components) and "yes do it" (the checklist of EVIDENCE.md E32). **Built, not
+committed:** 02 books the electronics (the material Boards and components) by five components, circuit boards, cameras,
+other sensors, cables, connectors; the cables and connectors moved in from copper, brass and plastics; an element of the
+electronics on 02's and 03's element pages by its component (VERIFICATION.md V177). Tests first; the sandbox with 2,000
+draws (titanium from the cameras and the other sensors, never the circuit boards; gallium from the magnets, cameras and
+other sensors). **Open, his word:** the name ("Electronics" asked; "Boards and components" is E19's and stands in his
+`shared_lists.xlsx`, 8 cells). **His runs** (01 and the builders unchanged, so not needed):
+1. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+   (200,000 draws: every type's draws and pages rewritten)
+2. `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`
+
+**Then built too, not committed** (EVIDENCE.md E33, on "Work out a pragmatic solution", "Yes"): on 02's and 03's
+element pages aluminium, magnesium and titanium draw the metal the alloys hold, titled so ("Aluminium (Al) held in the
+aluminium alloys of one robot of each robot type"; no legend), nothing else written on them ("A figure is a figure and
+not text"); the battery cells' and the electronics' amounts on 02's means pages and named once on the notes pages; a type
+without the alloy says so (type 4's titanium, type 3's at 0.5 %). This settles E29's second finding (the milligrams and kilograms in one panel). The same
+two runs (02, 03) show both. Matthias: "Do not anymore show me such figures" (the aluminium page before).
+
+**And** (E34, "Yes"): no number written over any panel of 02 and 03; after each page of panels a page of its numbers
+(held in, median, mean, 95 %, beyond the axis). 03 then writes 84 pages (2 of notes, 41 of panels, 41 of numbers).
+
+**Next, in the agreed order:** 4 the cameras (E31; paused), 5 the exceptions (re-listed after the split, his criteria),
+6 the overview, then the read-back of his runs. Items 1 to 8 of the entry below as written there, item 3 now built.
+
+## 2026-11-05, midday: where to restart after his walk
+
+Matthias, 2026-11-05: "3 yes, but have a hand over I want to goi for a walk so we can restart in about 2 hours. We lost
+something like 5 hours!!" The hours were lost by my misreadings (kilograms where he said milligrams; his 20 % condition
+dropped; his "2 % per type" asked back; gold and silver chased where he asked for titanium and gallium; a kind of part
+"Cameras" proposed where "senors are par of the elctronics!!"). His words are the specification: apply them as written.
+
+**State, item by item** (nothing of 3 to 6 built; E31, V175, V176 and this entry not committed):
+
+| # | Item | State |
+|---|---|---|
+| 1 | The Neo1 an outlier (E30) | built, committed and pushed (`53c5ae0`). His runs today, after the code: 00 04:54:21, the register 04:55:07, 01 04:55:24, 02 05:08 to 05:10:37, 03 05:22 (43 pages). Read back in part only (the titanium and gallium tables below); the full read-back (type 3 over 163, type 5 over 10, E29's steel and terbium at 200,000 draws) not yet written into VERIFICATION. |
+| 2 | Titanium and gallium "on the boards" (V175) | traced: neither is on the circuit boards (RAWCLICVehicleElectronics' `04_VehiclePCBComposition.xlsx` has no Ti or Ga row). Both are the sensors' (`07_VehicleSensorComposition.xlsx`, sheet Sensor Details, "derived from known material formulas", no source per value), which 02 books with the boards in one material, "Boards and components". Titanium: camera chips 0.2 mg each (CMOS image sensor 0.05 / 0.2 / 1 mg; IR camera sensor 0.03 / 0.1 / 0.5), microphones 0.05 mg, satellite receivers 20 mg, ultrasonic sensors 40 mg. Gallium: laser diode arrays 5 / 30 / 150 mg (LiDARs, depth cameras), IR LEDs 8, photodetectors 1, cellular modems 5. The titanium in the arm joints and hands is the wrist and palm cameras' (Booster T2, Figure 03, Dex, HMND 01, Nova; 2 cameras each). Matthias: "Now I understand ... Then the titanium can stay, but we have to have a clear understanding where such interesting element are located". |
+| 3 | **The electronics split into its components: approved ("3 yes")** | **next, on the restart.** The material "Boards and components" (02's `ELECTRONICS`) shown by its components on 02's and 03's element pages: circuit boards (02's `board()`: the boards' area and mass), cameras (the sensor rows that are cameras: camera chips, a depth camera's infrared chips and laser diode), other sensors (encoders, motion sensors, LiDARs, microphones, ultrasonic sensors, satellite receivers). The draws stay as they are, only split into three that add up to the electronics. To settle with him before building (the spec, as always): whether the materials pages and the materials table also show the three, or only the element pages; the components' names; that a camera is a sensor row whose elements hold an image sensor (CMOS or IR camera), its laser diode with it. Then tests first, the sandbox (a copy of the project, 2,000 draws), the documents, his runs of 02 and 03. |
+| 4 | The cameras of the 144 robots that list none (EVIDENCE E31; points 1 to 5, "Yes, build 1 to 5") | approved, paused twice by me on his messages. The first search's findings in E31 (6 / 10 / 18 / 10 / 15 / 7 / 78 robots by class); the second search of the 78 (point 5) stopped halfway, its four agents' partial findings not collected. Point 1: the Phantom MK1 keeps no battery, its source the BBC itself (bbc.com/news/articles/cedpxwe26l1o, 8 June 2026, read first-hand), and gets its 8 head cameras (Newsweek). Point 3's estimate: 1 / 3 / 12 image sensors, drawn as whole numbers (a new drawn count: a Sensors row without a number and a Constants quantity "Number: <sensor>", read by 01 and 02), microphones 4 where a source names microphones or voice. After item 3, so that the cameras land in their component. |
+| 5 | Exceptions not to become the focus ("They are not the focus of the study") | his criteria: under 10 mg, under 2 % of the element's total in its type, held by fewer than 20 % of the type's robots; "list them and the reason", "excluded from the further work. Have a clean version". 22 cases today, all an element in a kind of part: types 1 and 3 silver, gold, palladium, tantalum in the cables (G1, G1+, RP1: their boards listed under cables); types 2 to 4 gold, palladium, tantalum in the lift column (its driver board); type 1 boron and titanium in the PM01's boards; titanium in the arms of the Booster T2 (type 1), Figure 03 (type 2), Dex, HMND 01, Nova, Figure 03 (type 3). He then said gold and silver "are part of PCB" and to focus on titanium and gallium: re-list after item 3, nothing built. |
+| 6 | 01's overview out of date | 03 drawn grey as "later" on `overview_1.png`, its stage boxes a list of their own (00 to 02) beside `STAGES`, which the test checks but nothing draws; `overview_2.png` "Open: the six robot types compared.". Proposal 1 to 3 (03 a stage with its output; the boxes from `STAGES`; the open line): waiting for his yes. |
+| 7 | iCloud's two versions on mac-mini | `data/parts_taken_apart/5_…/` and `6_…/`: 14 files "… 2" each, the 4 November run (his run of 02 today rewrote the plain names); `figures 2/` the other Mac's pages of 4 November. His decision. |
+| 8 | Documents | EVIDENCE E31, VERIFICATION V175 and V176, this entry: written, not committed. |
+
+**The order agreed:** 3, then 4, then 5, then 6, then the read-back of his runs into VERIFICATION; one commit on his
+word.
+
+## 2026-11-05: the Neo1 an outlier, built (E30); where to start
 
 Matthias, 2026-11-05, at home (mac-mini): "Get the the handover and check with the code here", "Yes, align git", "Yes, 3
 to 5"; and "we afterwards have like to investigate titanium".

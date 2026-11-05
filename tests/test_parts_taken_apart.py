@@ -111,6 +111,18 @@ def fixed_magnets(inputs, n: int) -> dict:
     return {klass: (names, np.tile(row, (n, 1))) for klass in composition.grade_classes(inputs)}
 
 
+def numbers_of(axes) -> str:
+    """A panel's numbers as they were written above it until 2026-11-05 (since then on the page of numbers after its
+    page, EVIDENCE.md E34, from the numbers the panel keeps): in what share of the draws it is held, its median, its
+    mean, what lies beyond its axis, a line each; '' for a panel without numbers."""
+    numbers = getattr(axes, 'panel_numbers', None)
+    if numbers is None:
+        return ''
+    _, held_in, median, mean, _, _, unit, beyond = numbers
+    return '\n'.join(line for line in (held_in, f'median {composition.panel_number(median)}\u00a0{unit}',
+                                        f'mean {composition.panel_number(mean)}\u00a0{unit}', beyond) if line)
+
+
 def at_mode(rng, low, mode, high, n):
     """A triangle drawn at its mode in every draw (the varied mass: the robot's own)."""
     return np.broadcast_to(np.asarray(mode, dtype=float), (n,)).copy()
@@ -600,7 +612,7 @@ class TestPartsNotes(unittest.TestCase):
         d = draw(inputs, params, fixed_magnets(inputs, params.composition.draws))
         pages = composition.parts_figure_pages(d)
         notes = [figure for name, figure in pages if '_notes_' in name]
-        figures = [(name, figure) for name, figure in pages if '_notes_' not in name]
+        figures = [(name, figure) for name, figure in pages if '_notes_' not in name and '_numbers_' not in name]
         self.assertEqual([name for name, _ in pages][:len(notes)],
                          [f'robot_type_1_notes_{k}.png' for k in range(1, len(notes) + 1)])   # first in the folder
         for name, figure in figures:
@@ -632,15 +644,18 @@ class TestElementPages(unittest.TestCase):
         category = next(c for c in inputs.base.book.categories if c.number == 1)
         c = composition.compose_taken_apart(category, d, inputs.base.lists)
         pages = composition.taken_apart_pages(c, d, [], self.params)
-        panels = {axes.get_title(loc='left'): axes.get_title(loc='right')
+        panels = {axes.get_title(loc='left'): numbers_of(axes)
                   for name, figure in pages if '_elements_' in name for axes in figure.axes}
         for _, figure in pages:
             composition.plt.close(figure)
         partly = []
         for symbol in c.tables['elements'][0]:
             kg = c.column('elements', symbol)
+            if symbol in composition.ALLOY_OF:   # E33: a light alloy's metal, its panel the alloy's draws alone
+                kg = composition.alloy_split(symbol, composition.materials_of(d, symbol)).get(
+                    composition.ALLOY_OF[symbol], np.zeros(d.n))
             held = kg > 0
-            label = composition.element_label(symbol)
+            label = composition.alloy_title(symbol)   # 'Aluminium (Al) in the alloys' since E33
             label = label + ', inflow' if label + ', inflow' in panels else label   # copper since E25
             if held.mean() < composition.HELD_SHARE:   # nothing, or nearly: no panel
                 self.assertNotIn(label, panels)
@@ -667,7 +682,7 @@ class TestElementPages(unittest.TestCase):
             total = sum(kinds.values())
             figure, axes = composition.plt.subplots()
             composition.stacked_panel(axes, kinds, name, True)
-            texts = share = axes.get_title(loc='right')   # the numbers above the panel since 2026-11-02
+            texts = share = numbers_of(axes)   # the numbers above the panel since 2026-11-02
             composition.plt.close(figure)
             self.assertNotIn('median 0\u00a0', texts, msg=symbol)
             held = total > 0
@@ -738,7 +753,7 @@ class TestCentre(unittest.TestCase):
         self.assertAlmostEqual(solid[0].get_xdata()[0], np.median(self.VALUES))
         self.assertAlmostEqual(dotted[0].get_xdata()[0], self.VALUES.mean())
         # Their numbers above the panel, right, not over its bars (Matthias, 2026-11-02: "The figure is first").
-        above = axes.get_title(loc='right')
+        above = numbers_of(axes)
         self.assertTrue('median' in above and 'mean' in above, msg=above)
         self.assertEqual([t.get_text() for t in axes.texts], [])
         plt.close(figure)
@@ -838,7 +853,7 @@ class TestMaterialPages(unittest.TestCase):
         kg = sum(kinds.values())
         figure, axes = plt.subplots()
         composition.material_panel(axes, kg, title, True)
-        numbers = axes.get_title(loc='right')
+        numbers = numbers_of(axes)
         share = 100 * (kg > 0).mean()
         self.assertIn(f'in {composition.panel_number(share)} % of the draws', numbers)
         median = np.median(kg[kg > 0]) * 1000
@@ -895,15 +910,122 @@ class TestPagesByMaterial(unittest.TestCase):
             by_material = sum(kg for (_, e), kg in d.by_material.items() if e == element)
             np.testing.assert_allclose(by_material, by_kind, rtol=1e-12, atol=1e-18, err_msg=element)
         copper = {m for m, e in d.by_material if e == 'Cu'}
-        self.assertEqual(copper, {'Copper', 'Battery cells', 'Boards and components'})
+        # Since 2026-11-05 (E32) the electronics' copper by its components, the cables' among them.
+        self.assertTrue({'Copper', 'Battery cells', composition.component_label('circuit boards'),
+                         composition.component_label('cables')} <= copper, copper)
+        self.assertTrue(copper <= {'Copper', 'Battery cells'} | set(map(composition.component_label,
+                                                                        composition.ELECTRONICS_COMPONENTS)), copper)
+
+    def test_the_numbers_on_a_page_of_their_own(self):
+        # Matthias, 2026-11-05: "Do we really need all this text in the figure. It might be better to have it separate",
+        # "Yes" (EVIDENCE.md E34): no number written over a panel; after each page of panels a page of its numbers, one
+        # row per panel: in what share of the draws it is held, median, mean, the 95 % interval, beyond the axis; on the
+        # element and material pages and on the figures of where the critical elements sit.
+        d, c = self.drawn()
+        for pages, drawn_series in ((composition.taken_apart_pages(c, d, [], self.params), ('elements', 'materials')),
+                                    (composition.parts_figure_pages(d), ('elements',))):
+            names = [name for name, _ in pages]
+            figures = dict(pages)
+            drawn = [n for n in names if n.rsplit('_', 2)[-2] in drawn_series]
+            self.assertTrue(drawn)
+            for name in drawn:
+                following = names[names.index(name) + 1]
+                self.assertEqual(following.rsplit('_', 2)[-2], 'numbers', msg=name)
+                rows = composition.panel_rows(figures[name])
+                self.assertTrue(rows, msg=name)
+                words = ' '.join(t.get_text() for t in figures[following].texts).replace('\n', ' ')
+                for row in rows:
+                    for cell in row:
+                        self.assertIn(cell, words, msg=(name, row))
+                for axes in figures[name].axes:
+                    self.assertEqual(axes.get_title(loc='right'), '', msg=name)
+            for figure in figures.values():
+                composition.plt.close(figure)
+        # Lithium's row on the element pages: its median and mean as its draws give them.
+        kg = c.column('elements', 'Li')
+        per, unit = composition.panel_unit(kg[kg > 0])
+        figure, axes = composition.plt.subplots()
+        composition.centre_lines(axes, kg / per, '', float((kg / per).max()), unit, 'Lithium (Li)')
+        row = composition.panel_rows(figure)[0]
+        self.assertEqual(row[0], 'Lithium (Li)')
+        self.assertEqual(row[2], f'{composition.panel_number(float(np.median(kg / per)))}\u00a0{unit}')
+        self.assertEqual(row[3], f'{composition.panel_number(float((kg / per).mean()))}\u00a0{unit}')
+        composition.plt.close(figure)
+
+    def test_the_light_alloys_metals_drawn_as_their_alloy_alone(self):
+        # Matthias, 2026-11-05: "the aluminum alloy figure is shit. It is just the al in the alloy", "Ok three separate
+        # collections and then just one total, but there I do not need an additional figure, as the alloys is so
+        # dominate", "Yes", then "What are you showing, alloy total what???", "Yes, relabel", and "there is much to much
+        # text, which does not fit to the thitle. A figure is a figure and not text" (EVIDENCE.md E33): the panel of
+        # aluminium, magnesium or titanium the metal its alloys hold, titled so, nothing written beside it; the data's
+        # three collections and their total as before; every other element as before.
+        d, c = self.drawn()
+        for symbol, alloy in (('Al', composition.ALUMINIUM), ('Ti', 'Titanium alloy')):
+            parts = composition.materials_of(d, symbol)
+            drawn = composition.alloy_split(symbol, parts)
+            self.assertEqual(set(drawn), {alloy}, msg=symbol)
+            np.testing.assert_array_equal(drawn[alloy], parts[alloy])
+            self.assertGreater(len(parts), 1)   # the collections stay in the data
+            total = sum(kg for (_, e), kg in d.elements.items() if e == symbol)
+            np.testing.assert_allclose(sum(parts.values()), total, rtol=1e-12, atol=1e-18)
+        copper = composition.materials_of(d, 'Cu')
+        self.assertEqual(composition.alloy_split('Cu', copper), copper)
+        found = set()
+        for name, figure in composition.taken_apart_pages(c, d, [], self.params):
+            if '_elements_' in name:
+                for axes in figure.axes:
+                    left = axes.get_title(loc='left')
+                    if left.startswith(('Aluminium (Al)', 'Titanium (Ti)')):
+                        found.add(left)
+                        right = axes.get_title(loc='right')
+                        self.assertNotIn('outside', right, msg=left)
+                        self.assertNotIn('battery', right, msg=left)
+                # No legend entry of a light alloy: its panel's title names it (one colour, no legend).
+                legend = [t.get_text() for t in figure.legends[0].get_texts()] if figure.legends else []
+                self.assertFalse(set(legend) & set(composition.ALLOY_OF.values()), legend)
+            if '_notes_' in name:
+                words = ' '.join(t.get_text() for t in figure.texts).replace('\n', ' ')
+                if 'held in the alloys' in words:
+                    found.add('notes')
+            composition.plt.close(figure)
+        self.assertEqual(found, {'Aluminium (Al) in the alloys', 'Titanium (Ti) in the alloy', 'notes'})
+
+    def test_the_electronics_by_their_components(self):
+        # Matthias, 2026-11-05: "senors are par of the elctronics!!", "3 yes", "Yes, include them" (the cables, connectors
+        # and antennas), "yes do it" (EVIDENCE.md E32): an element of interest of the electronics by its component,
+        # never the electronics unsplit; the cables and connectors in the electronics, no longer in copper, brass and
+        # plastics; titanium the cameras' and the other sensors', never the circuit boards'; every sum as before (the
+        # test above, and the electronics' elements adding up to their mass, test_type_1s_electronics_wholly_drawn...).
+        d, c = self.drawn()
+        labels = {m for m, _ in d.by_material if m.startswith(composition.ELECTRONICS)}
+        self.assertEqual(composition.ELECTRONICS_COMPONENTS,
+                         ('circuit boards', 'cameras', 'other sensors', 'cables', 'connectors'))
+        self.assertTrue(labels <= set(map(composition.component_label, composition.ELECTRONICS_COMPONENTS)), labels)
+        self.assertNotIn(composition.ELECTRONICS, {m for m, _ in d.by_material})
+        titanium = {m for m, e in d.by_material if e == 'Ti'}
+        self.assertIn(composition.component_label('cameras'), titanium)
+        self.assertNotIn(composition.component_label('circuit boards'), titanium)
+        # The cables' kind of part holds the electronics only: its conductors, insulation, connectors and boards.
+        self.assertEqual({m for k, m in d.materials[0] if k == 'cables'}, {composition.ELECTRONICS})
+        # A connector's brass keeps its copper fixed in the alloy (E25), now booked in the electronics.
+        self.assertIn(('Brass', 'Cu'), d.fixed)
+        self.assertIn(('cables', 'Zn'), d.recipe_elements)
+        # The material pages: the electronics one material, as before (its detail whole).
+        self.assertFalse({x for _, m, x in d.details if m == composition.ELECTRONICS} - {''})
+        # A camera is a sensor whose elements hold an image sensor; a depth camera its laser diode with it.
+        self.assertEqual(composition.sensor_component([('laser diode array', 1), ('IR camera sensor', 2),
+                                                       ('CMOS image sensor', 1)]), 'cameras')
+        self.assertEqual(composition.sensor_component([('laser diode array', 1), ('photodetector array', 1),
+                                                       ('IMU', 1)]), 'other sensors')
+        self.assertEqual(composition.sensor_component([('angle sensor', 1)]), 'other sensors')
 
     def test_six_panels_a_page_with_the_legend_and_the_means_of_its_materials(self):
         d, c = self.drawn()
         pages = composition.taken_apart_pages(c, d, [], self.params)
         names = [name for name, _ in pages]
-        kinds = [name.rsplit('_', 2)[-2] for name in names]
+        kinds = [name.rsplit('_', 2)[-2] for name in names if '_numbers_' not in name]   # each with its numbers, E34
         self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'means', 'materials', 'alloys'].index))
-        seen = False
+        seen = means_seen = False
         for name, figure in pages:
             if '_elements_' in name:
                 panels = [axes for axes in figure.axes if axes.get_title(loc='left')]
@@ -914,15 +1036,25 @@ class TestPagesByMaterial(unittest.TestCase):
                     if axes.get_title(loc='left').startswith('Copper (Cu)'):   # ', inflow' since E25
                         seen = True
                         self.assertEqual([t.get_text() for t in axes.texts], [])   # no text over its bars
-                        for material in ('Copper', 'Battery cells', 'Boards and components'):
+                        for material in ('Copper', 'Battery cells', composition.component_label('circuit boards'),
+                                         composition.component_label('cables')):
                             self.assertIn(material, legend)
             if '_means_' in name:   # each element's mean by material, on pages of their own (2026-11-02)
                 words = ' '.join(t.get_text() for t in figure.texts)
                 if 'Copper (Cu), inflow' in words:
-                    for material in ('Copper', 'Battery cells', 'Boards and components'):
+                    means_seen = True
+                    for material in ('Copper', 'Battery cells'):
                         self.assertIn(f'{material} ', words)
+                    # The electronics' name once in copper's row, its components after it (E32).
+                    row = next(t.get_text().replace('\n', ' ') for t in figure.texts
+                               if 'Copper ' in t.get_text() and 'Battery cells ' in t.get_text())
+                    self.assertEqual(row.count(f'{composition.ELECTRONICS}: '), 1, row)
+                    electronics = row[row.index(f'{composition.ELECTRONICS}: '):].split(';')[0]
+                    for component in ('circuit boards ', 'cables '):
+                        self.assertIn(component, electronics)
             composition.plt.close(figure)
         self.assertTrue(seen)
+        self.assertTrue(means_seen)
 
     def test_each_alloy_and_grade_with_what_it_holds_and_its_kg(self):
         d, _ = self.drawn()
@@ -1436,7 +1568,7 @@ class TestAxisEnd(unittest.TestCase):
         composition.element_panel(axes, self.kg, 'Copper (Cu)', True)
         bars = self.bars(axes)
         right = max(p.get_x() + p.get_width() for p in bars)
-        numbers = axes.get_title(loc='right')
+        numbers = numbers_of(axes)
         limit = axes.get_xlim()[1]
         composition.plt.close(figure)
         self.assertEqual(len(bars), composition.APART_BINS)
@@ -1452,7 +1584,7 @@ class TestAxisEnd(unittest.TestCase):
         bars = self.bars(axes)
         right = max(p.get_x() + p.get_width() for p in bars)
         heights = sum(p.get_height() for p in bars)
-        numbers = axes.get_title(loc='right')
+        numbers = numbers_of(axes)
         limit = axes.get_xlim()[1]
         composition.plt.close(figure)
         self.assertAlmostEqual(right, self.end, places=9)
@@ -1483,7 +1615,7 @@ class TestAxisEnd(unittest.TestCase):
         kg = np.repeat([1.0, 2.0, 3.0], 1000)                     # its 99.5th percentile its largest draw
         figure, axes = composition.plt.subplots()
         composition.element_panel(axes, kg, 'Copper (Cu)', True)
-        numbers = axes.get_title(loc='right')
+        numbers = numbers_of(axes)
         composition.plt.close(figure)
         self.assertNotIn('beyond', numbers)
 
@@ -1496,13 +1628,12 @@ class TestAxisEnd(unittest.TestCase):
         composition.stacked_panel(axes, kinds, 'Neodymium and praseodymium (Nd+Pr)', True)
         figure.canvas.draw()
         renderer = figure.canvas.get_renderer()
-        left, right = axes._left_title, axes._right_title
-        overlap = left.get_window_extent(renderer).overlaps(right.get_window_extent(renderer))
-        text = right.get_text()
+        # Since E34 (2026-11-05) nothing is written beside the title: the numbers are kept for the page of numbers.
+        self.assertEqual(axes._right_title.get_text(), '')
+        text = numbers_of(axes)
         composition.plt.close(figure)
         self.assertIn('% of the draws', text)
         self.assertIn('beyond the axis', text)
-        self.assertFalse(overlap)
 
 
 class TestDrawsBelowZero(unittest.TestCase):

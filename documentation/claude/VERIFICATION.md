@@ -5,6 +5,128 @@ by Claude, newest first.
 
 ## 2026-11-05
 
+### V179. The numbers of the panels on pages of their own (E34)
+
+- **His words:** "Do we really need all this text in the figure. It might be better to have it separate", "Yes,
+  hopefully now it is OK" (2026-11-05).
+- **Tests first, seen to fail:** `test_the_numbers_on_a_page_of_their_own` (02, type 1: every element and material
+  page and every page of its figures of where the critical elements sit followed by a page of numbers, each panel's row
+  on it, nothing beside any panel's title; lithium's median and mean as its draws give them) failed "'elements' !=
+  'numbers'"; 03's of the same name failed "0 != 41" (no page of numbers).
+- **The older tests that read the numbers above a panel** (12 in the whole suite after the build: the share held, the
+  median and mean, the axis's end, a long title against its numbers, the order of the pages, the footnotes, 03's list
+  of pages and its panels): changed to read the numbers each panel keeps (`numbers_of`, the same as its row on the page
+  of numbers) and to take the pages of numbers in their place; what each checks unchanged.
+- **The whole suite:** 535 tests OK (502 s).
+- **The sandbox** (2,000 draws, 02 and 03 redrawn): 03 writes 84 pages (2 of notes, 41 of panels, 41 of numbers); looked
+  at 03's titanium page (titles, bars, lines, axes, the places of types 3 and 4, no number) and its page of numbers
+  (types 1, 2, 5, 6: held in 3.8, 3, 9.7, 19 %; medians 361 g, 941 g, 32 kg, 14 kg), and type 3's first material page
+  of 02 (nine panels, nothing written over them).
+- **Not covered:** his runs (200,000 draws); the overview pages of where the elements sit keep their labels at the right
+  of each row (not in the proposal).
+
+### V178. The light alloys' metals drawn as their alloy, the rest beside (E33)
+
+- **His words:** "Work out a pragmatic solution", "Yes" (2026-11-05).
+- **Tests first, seen to fail** (`AttributeError`: no `alloy_split`, `ALLOY_OF`):
+  `test_the_light_alloys_metals_drawn_as_their_alloy_the_rest_beside` (type 1: aluminium and titanium drawn as their
+  alloy alone, the alloy's draws unchanged, "beside it: battery cells …, electronics …", the collections adding up to
+  the element, copper as before, both panels' numbers with the line); `test_a_light_alloys_metal_its_alloy_drawn_the_rest_beside`
+  (03: every panel of aluminium and titanium with the line; type 4 without titanium alloy: its place "Titanium alloy:
+  none in this robot type" and the line). 03's test data now gives aluminium, magnesium and titanium their own alloys.
+- **The whole suite, first run:** 533 tests, 3 failures, all of this step: the older test of an element held in some
+  draws (type 1's titanium panel now "in 3.6 % of the draws", the alloy's, not 50 %: the test now takes the alloy's draws
+  for the three metals), and types 3 and 4's first element page (smallest text 16.7 px: the empty titanium place kept its
+  hidden axes' tick labels at 10 pt; now no ticks). Those three OK after the fix (98 s). The whole suite to be run again
+  after the labels below.
+- **The sandbox** (2,000 draws): 03's titanium page each type's alloy alone (type 1 in 3.8 % of the draws, median
+  361 g; type 5 median 32 kg; type 6 Nadia's two versions, 7.6 and 14 kg), the electronics beside (1.2 to 21 mg);
+  type 3's place "held in 0.5 %", type 4's "none". 03's aluminium page the alloys alone, "battery cells 60 to 186 g,
+  electronics 8.3 to 14 g" beside.
+- **Found by him and fixed in two steps:** (1) the labels misled ("What are you showing, alloy total what???"):
+  relabelled on "Yes, relabel", 03's title "Aluminium (Al) held in the aluminium alloys of one robot of each robot
+  type", no legend, 02's panel "Aluminium (Al) in the alloys"; (2) the line beside did not belong on the figure ("A
+  figure is a figure and not text"): taken off, the left-out amounts named once on the notes pages. Tests changed
+  first and seen to fail each time (the line still there; `alloy_split` still a pair), then OK; the older test of an
+  element held in some draws now reads the panels by their new titles.
+- **The whole suite, final:** 533 tests OK (480 s).
+- **The sandbox, final** (2,000 draws, 02 and 03 redrawn): 03's aluminium page the title, six panels of the alloys'
+  aluminium with their median, mean and axis note only; 02's element page of type 5: "Magnesium (Mg) in the alloys",
+  "Aluminium (Al) in the alloys", "Titanium (Ti) in the alloy", no legend entry for them.
+- **Not covered:** his runs (200,000 draws).
+
+### V177. The electronics by their components (E32), built
+
+- **His words:** "senors are par of the elctronics!!", "3 yes", "Yes, include them", "yes do it" (2026-11-05).
+- **Test first, seen to fail:** `test_the_electronics_by_their_components` (type 1, 1,000 draws; `AttributeError`: no
+  `ELECTRONICS_COMPONENTS`): the five components; no element of interest from the electronics unsplit; titanium from
+  the cameras, never the circuit boards; the kind of part Cables the electronics only; a connector's brass copper fixed
+  (('Brass', 'Cu') in the fixed copper) and its zinc in the cables' recipe elements; the electronics' detail whole;
+  `sensor_component` of a depth camera, a LiDAR, an encoder. Changed: the copper by material (the electronics' circuit
+  boards and cables among its sources), the legend and the means page of copper's element page.
+- **Found by the suite and fixed:** type 3's means page ran off the page (`test_every_page_is_readable_fit_to_a_screen`):
+  the electronics' name five times in a line. Now once, its components after it (`mean_words`); the test of the means
+  page made to look at copper's row (it had passed without reaching it).
+- **The whole suite:** 531 tests OK (474 s).
+- **The sandbox** (a copy of the project, 2,000 draws): 02 (1 min 23 s) and 03 (43 pages, they add up). Read back, means
+  over all draws: titanium from "cameras" and "other sensors" only (0.0001 to 0.01 g), the titanium alloy apart; gallium
+  from the magnets (0.52 to 0.91 g), the cameras and the other sensors; copper from the circuit boards (163 to 297 g) and
+  the cables (177 to 259 g) among its sources, brass's copper fixed (23 to 26 g); the kind Cables holding the electronics
+  only. Looked at: 03's titanium and aluminium pages, type 3's means page 1.
+- **Found, not of this step:** titanium's panels mix the alloy (hundreds of g to 32 kg, in 0.5 to 19 % of the draws) and
+  the sensors (below 3 mg, in about half): their numbers describe neither (types 1, 2, 3, 5, 6; the only element so,
+  checked over all elements of all types). Aluminium's panel is the alloys' alone. Matthias: "the titanium figures does
+  not make any sense", "the aluminum alloy figure is shit. It is just the al in the alloy". Proposal waiting.
+- **Not covered:** his runs (200,000 draws); the name (Electronics or Boards and components, his word).
+
+### V176. The research of E31 checked: the Phantom MK1's battery and seven camera findings re-read
+
+- **His words:** "Yes, research both" (2026-11-05).
+- **The Phantom MK1's battery,** read by me in the browser: foundation.bot (Phantom, Cortex, home; no battery, no sensor
+  named); bbc.com/news/articles/cedpxwe26l1o (8 June 2026, the sentence "Phantom MK-1, which I am shown, doesn't have a
+  battery" found in the page's text); militarnyi.com (31 May 2026, "lacks sufficient battery life"). A mirror of the BBC
+  article (bbctodays.pages.dev) answered 404, the BBC's own page was read instead.
+- **Seven of the agents' maker findings re-read** by me in the page's text (`innerText`, or the page's HTML where the
+  text sits in a hidden tab): Rainbow RB-Y1 ("The vision camera is not provided."), AgiBot A2 ("six high-definition
+  cameras"; the RGB-D and fisheye callouts are not in the text, likely images), DOBOT Atom Max ("a 60FPS Full HD vision
+  system, and Intel RealSense D455 depth sensing", in a hidden tab), Fourier N1 ("Stereo camera (Optional)"), Torobo
+  ("Wide-angle stereo camera x 1 Fisheye camera x 1 Depth camera x 1 Stereo microphone x 1", the optional head),
+  GENISOM NE01 ("Stereo Camera 1080p", "Microphone Standard", 1328 mm): each as the agent reported.
+- **The counts of E31's table** made by me from the six reports: 6 + 10 + 18 + 10 + 15 + 7 + 78 = 144 robots, the 145 of
+  V175 less the Neo1 (not drawn, not researched).
+- **Not covered:** the other findings not re-read by me (the agents' quotes from images, Chinese script text and third
+  parties as they reported them); class g's robots searched with fewer than four lookups.
+
+### V175. Nickel and titanium of the boards traced (types 3 and 6; all types)
+
+- **His words:** "I want to investigate nickel 06 with a very low value for borads same with 3, I do not understand, why
+  there is titanium on the boards. Where do you have the information. I want both investigated." Nothing changed.
+- **Nickel**, his run of 02 (200,000 draws, 05:08 to 05:10) and 03's page `comparison_elements_14.png` read: the olive
+  bar near 0 in type 6's panel is 40 % of its draws, the robots that carry no battery: the Phantom MK1 (20.1 %, 1.7 g at
+  the mean) and Nadia ISA v2 and v5 (10.0 and 9.95 %, 1.4 g), whose only nickel is that of their boards and sensors; in
+  type 3 the Phantom MK1 (0.63 %, 1.7 g). Every other robot 0.2 to 1.1 kg, from its battery cells and nickel strips. The
+  boards' and sensors' own nickel 1.3 to 3 g per robot in every type: the board's area times
+  RAWCLICVehicleElectronics' `Data/04_VehiclePCBComposition.xlsx` (sheet PCPComposition, mg per cm²: PE_HVS, the joints'
+  driver boards, 0.2 / 0.5 / 1; ITC 0.4 / 0.8 / 1.5; BMS 0.3 / 0.6 / 1.2; no source per value in the sheet), plus the
+  sensors'. "No battery": Nadia tethered (E27.7 point 4); the Phantom MK1 from "Phantom MK-1 … lacks a battery", the BBC
+  relayed by UNB (E15, E16.2: second-hand, class C), not read at Foundation's own pages.
+- **Titanium:** none in the board metals (`BOARD_METALS`; the PCB sheet has no Ti). It comes from the sensors, which 02
+  counts as "Boards and components": RAWCLICVehicleElectronics' `Data/07_VehicleSensorComposition.xlsx`, sheet Sensor
+  Details, Ti in mg per sensor element: CMOS image sensor 0.05 / 0.2 / 1, IR camera sensor 0.03 / 0.1 / 0.5, MEMS
+  microphone array 0.01 / 0.05 / 0.2, GNSS receiver 5 / 20 / 80 (its BaTiO₃ patch antenna), ultrasonic sensor and
+  transducer 10 / 40 / 120 (PZT ceramic). The sheet's Methodology: compositions "derived from known material formulas"
+  (PZT 6 % Ti), its sources named in general (datasheets, teardowns, IMDS/GADSL, papers), no source per value; its
+  Element Legend: Ti "PZT piezoelectrics, thin-film resistors". Per robot: median 1.0 to 1.8 mg.
+- **Why in about half the draws only** (held 49.9, 54.2, 47.8, 48.4, 90.0, 59.8 % in types 1 to 6): the robots of the
+  parts files without a camera or microphone among their sensors (only encoders, motion sensors, a LiDAR in the base):
+  type 1 15 of 31, type 2 46 of 102, type 3 55 of 99, type 4 37 of 85, type 5 none of 5, type 6 the Fuxi on legs and on
+  wheels.
+- **Seen in passing:** the titanium alloy of types 5 and 6 (10 and 20 % of their draws) is the hydraulic robots' Moog
+  ISA actuators (E27.7): Atlas HD ISA v2 32.3 kg, v5 knees 32.7 kg; Nadia ISA v2 7.6 kg, v5 14.0 kg; types 1 to 3 the
+  AgiBot X1 (0.36 kg) and the Unitree H2s (0.75 to 1.28 kg).
+- **Not covered:** whether the robots without a camera have one (their makers not read for it here); the Phantom MK1's
+  battery first-hand; the sibling's values against sources of their own.
+
 ### V173. The handover of 2026-11-04 against the code and the outputs on mac-mini
 
 - **His words:** "Get the the handover and check with the code here. icloud is still syching", then "Yes, align git".

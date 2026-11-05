@@ -86,7 +86,9 @@ def write_six(params: Params, rng: np.random.Generator) -> None:
         save(parts, 'materials', by_kind_columns, np.column_stack(by_kind))
         by_material_columns, by_material = [], []
         for k, e in enumerate(ELEMENTS):
-            for m, f in (('Aluminium alloys', share), ('Boards and components', 1 - share)):
+            # A light alloy's metal from its own alloy (E24, E33), every other element from the aluminium alloys.
+            for m, f in ((composition.ALLOY_OF.get(e, 'Aluminium alloys'), share),
+                         ('Boards and components', 1 - share)):
                 by_material_columns.append(f'{e}: {m}')
                 by_material.append(elements[:, k] * f)
         by_material_columns.append(f'Cu: Brass{composition.FIXED_MARK}')
@@ -137,6 +139,8 @@ class TestComparison(Compared):
                     + [f'comparison_elements_{k}.png' for k in range(1, len(ELEMENTS) + 1)]
                     + [f'comparison_materials_{k}.png' for k in range(1, len(materials) + 1)]
                     + ['comparison_part_groups_1.png', 'comparison_total_1.png'])
+        # Each page of panels followed by the page of its numbers (E34).
+        expected += [f'comparison_numbers_{k}.png' for k in range(1, len(expected) + 1)]
         notes = [w for w in written if w.startswith('comparison_notes_')]
         self.assertTrue(notes)
         self.assertEqual(sorted(set(written) - set(notes)), sorted(expected))
@@ -156,6 +160,52 @@ class TestComparison(Compared):
         self.assertNotIn('Neo1', scale)
         self.assertEqual([n for n in comparison.notes(comparison.read_draws(self.params), [], self.params)
                           if 'outlier' in n], [])
+
+    def test_the_numbers_on_a_page_of_their_own(self):
+        # Matthias, 2026-11-05: "Do we really need all this text in the figure. It might be better to have it separate",
+        # "Yes" (EVIDENCE.md E34): no number over a panel of 03; after each page of panels a page of its numbers.
+        pages = list(comparison.pages(comparison.read_draws(self.params), self.params))
+        names = [name for name, _ in pages]
+        figures = dict(pages)
+        drawn = [n for n in names if '_notes_' not in n and '_numbers_' not in n]
+        self.assertEqual(len([n for n in names if '_numbers_' in n]), len(drawn))
+        for name in drawn:
+            following = names[names.index(name) + 1]
+            self.assertIn('_numbers_', following, msg=name)
+            self.assertFalse([a.get_title(loc='right') for a in figures[name].axes if a.get_title(loc='right')],
+                             msg=name)
+            words = ' '.join(t.get_text() for t in figures[following].texts).replace('\n', ' ')
+            for row in composition.panel_rows(figures[name]):
+                self.assertIn(row[0], words, msg=(name, row))
+        for figure in figures.values():
+            composition.plt.close(figure)
+
+    def test_a_light_alloys_metal_its_alloy_drawn_alone(self):
+        # Matthias, 2026-11-05, "Work out a pragmatic solution", "Yes", "Yes, relabel", "A figure is a figure and not
+        # text" (EVIDENCE.md E33): on 03's pages of aluminium, magnesium and titanium each type's panel draws the metal
+        # its alloys hold, the page titled so, no legend, nothing written beside it; a type without the alloy has no
+        # panel, its place naming the alloy.
+        path = self.table_path(4, 'parts_dir', 'by_material')
+        columns = open(path[:-4] + '.txt').read().split('\n')
+        draws = np.load(path)
+        draws[:, columns.index('Ti: Titanium alloy')] = 0   # type 4 without titanium alloy
+        np.save(path, draws)
+        robots = comparison.read_draws(self.params)
+        pages = dict(comparison.pages(robots, self.params))
+        for symbol, words in (('Al', 'Aluminium (Al) held in the aluminium alloys of one robot of each robot type'),
+                              ('Ti', 'Titanium (Ti) held in the titanium alloy of one robot of each robot type')):
+            name = next(n for n, f in pages.items() if f._suptitle and f._suptitle.get_text() == words)
+            figure = pages[name]
+            self.assertEqual(figure.legends, [], msg=name)
+            rights = [a.get_title(loc='right') for a in figure.axes if a.axison]
+            self.assertTrue(rights and not any('outside' in r or 'electronics' in r for r in rights), (name, rights))
+            if symbol == 'Ti':
+                places = [t.get_text() for a in figure.axes if not a.axison for t in a.texts]
+                self.assertIn('Titanium alloy: none in this robot type', places)
+        notes = ' '.join(comparison.notes(robots, [], self.params))
+        self.assertIn('held in the alloys', notes)
+        for figure in pages.values():
+            composition.plt.close(figure)
 
     def test_the_element_pages_in_alphabetical_order_of_their_names(self):
         # Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only": comparison_elements_1.png Aluminium (Al)
@@ -181,7 +231,7 @@ class TestComparison(Compared):
         from matplotlib.text import Text
         robots = comparison.read_draws(self.params)
         for name, figure in comparison.pages(robots, self.params):
-            if '_notes_' in name:
+            if '_notes_' in name or '_numbers_' in name:   # a page of text (E34: the numbers apart)
                 composition.plt.close(figure)
                 continue
             charts = [a for a in figure.axes if a.axison]
@@ -215,7 +265,8 @@ class TestComparison(Compared):
         found = False
         for name, figure in comparison.pages(robots, self.params):
             titles = [a.get_title(loc='left') for a in figure.axes if a.axison]
-            if any('Terbium' in t for t in [figure._suptitle.get_text() if figure._suptitle else '']):
+            if '_numbers_' not in name and any('Terbium' in t for t in [figure._suptitle.get_text()
+                                                                        if figure._suptitle else '']):
                 found = True
                 self.assertEqual(len(titles), 5, msg=titles)
                 self.assertFalse(any(t.startswith('1 ') for t in titles), msg=titles)

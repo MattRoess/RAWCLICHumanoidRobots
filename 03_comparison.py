@@ -285,7 +285,7 @@ COPPER_COLOURS = {RECYCLED: composition.MATERIAL_COLOURS[composition.COPPER],
 
 PREFIX = 'comparison'
 # The numbered pages, one series each (comparison_<series>_<k>.png), in the order they are drawn.
-SERIES = ('notes', 'total', 'materials', 'elements', 'part_groups', 'body_regions', 'copper')
+SERIES = ('notes', 'total', 'materials', 'elements', 'part_groups', 'body_regions', 'copper', 'numbers')
 # The four pages of 03's old form (2026-10-26 to 2026-11-04: a bar of the mean and a line over 95 % per type), removed by
 # their exact names where an earlier run left them (E29).
 OLD_PAGES = ('materials.png', 'elements.png', 'part_groups.png', 'body_regions.png')
@@ -302,34 +302,32 @@ def legend_columns(names: list) -> int:
     return max(1, min(len(names), int(LEGEND_WIDTH // widest)))
 
 
-def not_drawn_words(total: np.ndarray) -> str:
-    """What a type's place on a page says where it has no panel: none, or held in fewer than 2.5 % of its draws."""
-    if not total.any():
-        return 'none in this robot type'
-    share = composition.panel_number(100 * float((total > 0).mean()))
-    return f'held in {share} % of its draws:\nfewer than 2.5 %, no panel'
-
-
-def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None):
+def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None, symbol: str = ''):
     """One page: each robot type a panel (three across, two down), the histogram of its draws of the item split into
     its contributions, `parts_of(robot)` ({contribution: its draws}), each in its colour of `colours`, as 02's panels;
     where `fixed_of` is given, the panel of 02's element pages (by_material_panel), the copper fixed in alloys
     (`fixed_of(robot)`, {'<alloy> (fixed)': its draws}) one pale grey part. A type holding the item in fewer than 2.5 %
     of its draws has no panel; its place says so. The first panel drawn in a row has the scale of the share of the
-    draws, as the first of a row on 02's pages. One legend of the contributions drawn, at the top."""
+    draws, as the first of a row on 02's pages. One legend of the contributions drawn, at the top. The metal of a light
+    alloy (`symbol` of 02's ALLOY_OF, E33): each panel the metal its alloys hold alone (02's alloy_split); a type without
+    the alloy in 2.5 % of its draws its place naming the alloy (02's alloy_place). The place of a type without the item:
+    02's not_drawn_words (one copy)."""
     figure, axes = plt.subplots(DOWN, ACROSS, figsize=composition.APART_PAGE, squeeze=False)
     panels, rows_labelled = [], set()
     for k, robot in enumerate(robots):
         here = axes[k // ACROSS, k % ACROSS]
         title = textwrap.fill(f'{robot.number} {robot.title}', PANEL_TITLE_WIDTH)
-        parts = parts_of(robot)
+        parts = composition.alloy_split(symbol, parts_of(robot))
         fixed = fixed_of(robot) if fixed_of else {}
         total = sum([*parts.values(), *fixed.values()], np.zeros(len(robot.tables['total'][1])))
+        if symbol in composition.ALLOY_OF and not composition.held(total):
+            composition.alloy_place(here, symbol, parts, title)
+            continue
         if not composition.held(total):
             here.axis('off')
             here.set_title(title, fontsize=composition.APART_TITLE, fontweight='bold', loc='left')
-            here.text(0, 0.85, not_drawn_words(total), transform=here.transAxes, fontsize=composition.APART_TEXT,
-                      va='top', color=composition.APART_INK)
+            here.text(0, 0.85, composition.not_drawn_words(total), transform=here.transAxes,
+                      fontsize=composition.APART_TEXT, va='top', color=composition.APART_INK)
             continue
         first_in_row = k // ACROSS not in rows_labelled
         rows_labelled.add(k // ACROSS)
@@ -345,7 +343,8 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
     for spare in axes.flatten()[len(robots):]:
         spare.axis('off')
     drawn = {m for _, (_, _, contributions) in panels for m in contributions}
-    shown = [m for m in colours if m in drawn]
+    # No legend for a light alloy's metal (E33, relabelled): one colour, its page's title naming the alloy.
+    shown = [m for m in colours if m in drawn] if symbol not in composition.ALLOY_OF else []
     columns = legend_columns(shown) if shown else 1
     rows = math.ceil(len(shown) / columns) if shown else 0
     figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
@@ -381,10 +380,11 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         'in the form of the pages of each robot type (figures/composition/).',
         'A panel: the bars the draws of one robot of the type, the height the share of the draws, each bar split into '
         'the kg its draws hold in each contribution, the one with the smaller mean lower, each in its colour (one '
-        'legend at the top of the page). Solid line: the median; dotted line: the mean; both written above the panel, '
-        'right. Dashed lines: the 2.5th and 97.5th percentile (95 % of the draws between them). Each axis ends at the '
-        '99.5th percentile of its draws: the 0.5 % beyond are not drawn, and the panel says so and names the largest.',
-        'Each panel on its own scale and unit (kg, g, mg): compare the numbers above the panels, not the widths of '
+        'legend at the top of the page). Solid line: the median; dotted line: the mean. Dashed lines: the 2.5th and '
+        '97.5th percentile (95 % of the draws between them). Each axis ends at the 99.5th percentile of its draws: the '
+        "0.5 % beyond are not drawn. Every panel's numbers (in what share of the draws it is held, its median, mean and "
+        '95 %, the draws beyond its axis) are on the page after its page.',
+        'Each panel on its own scale and unit (kg, g, mg): compare the numbers of the panels, not the widths of '
         'their bars. One scale shared by the six would be stretched by the type with the heaviest robots and press '
         'every other type into its first bars.',
         'A robot type that holds an item in some of its draws only (a robot or a version without it): its panel shows '
@@ -403,6 +403,7 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         'components their metals of interest. Copper: its inflow, the copper recycled as copper and, in pale grey, the '
         'copper fixed in alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not '
         'recovered as copper.',
+        composition.LIGHT_ALLOY_NOTE,   # what the light alloys' panels leave out (E33)
         "The part groups and body regions: each robot type's kinds of part placed whole; rough where a kind holds parts "
         "of another group: the head's joints are counted as sensors, the battery management board as battery; a "
         "hydraulic robot's power unit, oil and hoses as joint drives, in the torso.",
@@ -416,9 +417,19 @@ def notes(robots: list, outliers: list, params: Params) -> list:
 
 def pages(robots: list, params: Params, outliers: list = ()):
     """Every page, as (file name, figure), one at a time (each is saved and closed before the next is drawn); the
-    `outliers` named on the notes page."""
+    `outliers` named on the notes page; each page of panels followed by the page of its numbers (02's numbers_page,
+    E34), comparison_numbers_<k>.png."""
     yield from composition.notes_pages(PREFIX, 'Comparing the six robot types: how to read the pages',
                                        notes(robots, list(outliers), params))
+    for k, (name, figure) in enumerate(panel_pages(robots), 1):
+        numbers = composition.numbers_page(f'{PREFIX}_numbers_{k}.png', figure)   # read before the page is closed
+        yield name, figure
+        yield numbers
+
+
+def panel_pages(robots: list):
+    """Every page of panels, as (file name, figure), one at a time: the total by material, each material by kind of
+    part, each element by the material it comes from, the part groups, the body regions, copper three ways."""
     materials = material_names(robots)
     yield (f'{PREFIX}_total_1.png',
            compare_page('The mass of one robot of each robot type, by material', robots,
@@ -435,10 +446,14 @@ def pages(robots: list, params: Params, outliers: list = ()):
                               for r in robots)), key=composition.element_label)
     for k, symbol in enumerate(elements, 1):
         inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
+        # A light alloy's metal titled as what its panels draw, the metal its alloy holds (E33, "Yes, relabel").
+        heading = (f'{composition.element_label(symbol)} held in the {composition.ALLOY_OF[symbol].lower()} of one '
+                   'robot of each robot type' if symbol in composition.ALLOY_OF else
+                   f'{composition.element_label(symbol)} in one robot of each robot type{inflow}, by the material it '
+                   'comes from')
         yield (f'{PREFIX}_elements_{k}.png',
-               compare_page(f'{composition.element_label(symbol)} in one robot of each robot type{inflow}, by the '
-                            'material it comes from', robots, lambda r, e=symbol: recovered_from(r, e),
-                            composition.MATERIAL_COLOURS, lambda r, e=symbol: fixed_in(r, e)))
+               compare_page(heading, robots, lambda r, e=symbol: recovered_from(r, e),
+                            composition.MATERIAL_COLOURS, lambda r, e=symbol: fixed_in(r, e), symbol))
     for table, words in (('part_groups', 'part group'), ('body_regions', 'body region')):
         columns = robots[0].tables[table][0]
         yield (f'{PREFIX}_{table}_1.png',

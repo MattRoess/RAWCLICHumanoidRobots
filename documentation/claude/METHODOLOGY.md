@@ -435,7 +435,8 @@ g on 2026-10-26 (HANDOVER.md). In each draw:
    **What each element of interest counts, and what of it stays in another material** (audited on 2026-11-02, his
    words "I want this verified and documented. I need to have the accurate Cu element Nd etc."; the numbers in
    VERIFICATION.md V149): Li, Co, Nd, Pr, Dy, Tb, Nb, Ga, Pd, Ag, In, Ta and Au are counted wherever 02 draws them.
-   Cu is the copper of the material Copper, of the boards and components and of the battery cells' foils and tabs;
+   Cu is the copper of the material Copper, of the boards and components (since 2026-11-05 the cables' too, "The
+   electronics by their components") and of the battery cells' foils and tabs;
    the copper inside the aluminium alloys, brass, the steels, the magnets and the magnesium alloys is not counted
    (80 to 91 % of all the copper is counted). Ni: the battery cells, Nickel and the boards, not the nickel in the
    aluminium alloys and the steels. Mn: the battery cells, not the manganese in the steels and the aluminium alloys.
@@ -524,6 +525,56 @@ mass since 2026-11-01).
 it"): each alloy, grade and magnet class a robot type taken apart holds, what it holds by its recipe (each element from
 its least to its most share of its mass, its base metal the rest; a magnet class by the least and most of its drawn
 fractions, RAWCLICVehicleTractionMotor's own), and its kg in one robot, on the alloys pages after the material pages.
+
+## The electronics by their components (since 2026-11-05)
+
+Matthias, 2026-11-05, after titanium and gallium looked as if they sat on the circuit boards (VERIFICATION.md V175): "senors
+are par of the elctronics!!", "3 yes", the cables, connectors and antennas "Yes, include them", "yes do it" (EVIDENCE.md E32).
+
+1. **One material, five components.** The material Boards and components (the electronics; its name as E19 and
+   RAWCLICDataCenters give it) holds: the **circuit boards** (the joints' driver boards and every other board: the board's
+   copper by its mass, the car board metals by its area, tantalum by its mass, the laminate the rest); the **cameras** (a
+   sensor whose car sensor elements hold an image sensor, `IMAGE_SENSORS`; a depth camera's infrared chips and laser
+   diode with it); the **other sensors** (encoders, motion sensors, LiDARs, microphones, ultrasonic sensors, satellite
+   receivers and modems, their antennas inside them); the **cables** (their conductors and insulation, from the cable
+   length); the **connectors** (XT30, XT60, from the sheet Shares).
+2. **The cables and connectors moved in.** Until then copper, plastics and brass; now booked in the electronics, each
+   with the elements of what it is made of: a cable's copper whole (recycled as copper, as before), its insulation the
+   plastics' recipe, a connector's brass its recipe, its copper fixed in the alloy (E25, as before). So the materials
+   Copper, Brass and Plastics no longer hold the kind of part "Cables", which holds the electronics only.
+3. **Where an element comes from.** An element of interest of the electronics is recovered from its component: the
+   table `by_material` writes '<element>: Boards and components: <component>', 02's and 03's element pages split by it
+   (circuit boards in the electronics' olive, cameras purple, other sensors dark yellow, cables pale yellow, connectors
+   dark grey: Paul Tol's muted scheme and its published companions). Titanium so reads "cameras" and "other sensors",
+   never "circuit boards"; gallium "cameras" (laser diodes) and "other sensors" (LiDARs) beside the magnets.
+4. **Unchanged:** the materials pages and tables (the electronics one material), the sensors' housings (aluminium and
+   plastics, 2026-10-29 point 3c), the kinds of part and body regions, the copper three ways, every sum: the draws are the
+   same, only split.
+
+## The numbers of the panels on pages of their own (since 2026-11-05)
+
+Matthias, 2026-11-05: "Do we really need all this text in the figure. It might be better to have it separate. I can read
+such figure", "Yes" (EVIDENCE.md E34). On 02's element and material pages, on 02's figures of where the critical
+elements sit and on 03's pages, a panel shows its bars and its lines (median solid, mean dotted, 2.5th and 97.5th
+percentile dashed), its title and its axes, and nothing written over it. Each such page is followed by the page of its
+numbers (`numbers_page`; `<name>_numbers_<k>.png`, its title the page's with ": its numbers"): one row per panel, in what
+share of the draws it is held ("all draws" where in all), its median, mean and 95 % (over the draws that hold it), and
+the draws beyond its axis. The numbers are kept by `centre_lines` as it draws the lines (`panel_rows` reads them), so the
+table is the panel's own. The overview pages of where the elements sit keep their labels at the right of each row.
+
+## The light alloys' metals on the element pages (since 2026-11-05)
+
+Matthias, 2026-11-05: "Ok three separate collections and then just one total, but there I do not need an additional
+figure, as the alloys is so dominate. Work out a pragmatic solution", "Yes" (EVIDENCE.md E33). Aluminium, magnesium and
+titanium come from their alloys (E24), the battery cells' foils and tabs (aluminium) and the electronics. The draws keep
+the three collections and their total. On 02's and 03's element pages the panel of each draws the alloy's metal alone,
+its median, mean and 95 % over the draws that hold the alloy, titled as the metal the alloys hold ("Aluminium (Al) held
+in the aluminium alloys", "Aluminium (Al) in the alloys"; no legend entry, one colour), with the numbers every panel has
+and no other text ("A figure is a figure and not text"); the battery cells' and the electronics' amounts are in the draws
+and on 02's means pages, named once on the notes pages. A type
+holding the alloy in fewer than 2.5 % of its draws, or not at all, has no panel; its place names the alloy and what is
+beside it (type 4's titanium: its sensors' 2 mg). Every other element is drawn by all its materials, as before; the
+means pages list every source.
 
 ## The outliers, not drawn (since 2026-11-05)
 
@@ -802,7 +853,7 @@ robot is drawn part by part, with these changes:
    then each material with its mean over the draws that hold the element, a material whose copper is fixed in it
    marked "(fixed)"; since 2026-11-02, the means were in the panel before, over its bars); median solid and mean dotted with
    their numbers above the panel, right, over its title's line (since 2026-10-30, "Yes, fix it": a long title ran into
-   them), 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it on a separate one"; "can
+   them; since 2026-11-05 on a page of their own after each page of panels, E34), 95 % dashed, own scale (Matthias: "Do not repeat the comments on all slides have it on a separate one"; "can
    you better adust the hight"). An element held in fewer than 2.5 % of the draws has no panel; one that is 0 in some
    draws (titanium, indium: a robot or a version without it) shows the draws that hold it and says in what share of
    all the draws it is held, as the material pages (Matthias, 2026-10-29: "I told you I want to see the distribution
@@ -915,8 +966,8 @@ page the centre of a distribution is its median, a solid line, and its mean, a d
 "Both, median first"); the 2.5th and 97.5th percentile dashed. Every distribution panel's axis ends at the 99.5th
 percentile of its draws (`AXIS_END`; the overview's at the largest of its rows'), its bars up to there, their heights
 still the share of all the panel's draws; the draws beyond are not drawn, and the panel says how many and the largest
-("0.5 % beyond the axis, up to 13 kg": above the panel on the element and material pages, on the axis's label on the
-overview). Matthias, 2026-11-01: "The distribution figures show the distribution pressed to the left side. You give
+("0.5 % beyond the axis, up to 13 kg": on the page of numbers after the element and material pages since 2026-11-05,
+E34; on the axis's label on the overview). Matthias, 2026-11-01: "The distribution figures show the distribution pressed to the left side. You give
 away have of the x axis. This can be done much better", then "Yes, build it": up to the largest draw, type 2's 97.5th
 percentile sat at a third of the axis (V124).
 - `robot_type_1_elements_1.png` and `_2.png`, the element figure Matthias approved ("Yes, the element figure is right
@@ -1006,8 +1057,8 @@ down:
 Each panel is 02's (`stacked_bars`, `centre_lines`, `panel_axes`; on the element pages `by_material_panel`): the bars the
 draws of one robot of the type, the height the share of the draws, each bar split into the kg its draws hold in each
 contribution, the smaller lower; the median a solid line, the mean a dotted one, the 2.5th and 97.5th percentile dashed;
-the median, the mean, the share of the draws that hold it (where not all) and what lies beyond the axis written above
-the panel, never over its data (E26's rule, `texts_over_data`, tested on every page). Each panel on its own scale and unit
+the median, the mean, the 95 %, the share of the draws that hold it and what lies beyond the axis on the page of
+numbers after each page of panels (since 2026-11-05, E34; before, above the panel). Each panel on its own scale and unit
 (E29 question 3: one scale shared by the six would be stretched by the type with the heaviest robots; when it was
 decided, by the Neo1's 1,200 kg in types 3 and 5, not drawn since 2026-11-05, E30). A type that holds
 the item in fewer than 2.5 % of its draws has no panel, 02's rule, and its place says so ("none in this robot type", or
