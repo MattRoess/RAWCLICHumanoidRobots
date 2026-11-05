@@ -93,10 +93,13 @@ at (V186).
    (E36: the new page of the sensors' titanium, so every element page after the titanium alloy's moves one number on;
    E35: its check of outliers).
 
-**Open, for his word:** "Compariosn. We had this befor copper in copper does not make any sense": on the element pages
-of 02 and 03 the element copper's material "Copper" (and nickel's "Nickel"); proposed: there a label of what it is,
-"Copper metal: windings, busbars, heat pipes" and "Nickel metal: the battery's nickel strips", the materials pages
-unchanged. Not built. Two small things on the numbers pages, older than today, reported in V186, not
+**Agreed, not built (first thing tomorrow):** "Compariosn. We had this befor copper in copper does not make any
+sense", then "Yes, relabel": on the element pages the material named as its element by what it is, "Copper metal:
+windings, busbars, heat pipes" and "Nickel metal: the battery's nickel strips"; the materials pages, colours and data as
+they are. Where: 02's element-page legend and its means pages (`mean_words`), 03's element-page legend
+(`compare_page` where `symbol` is given; 03's page of the mass by material keeps "Copper"); one `element_page_name` in
+02. Test first: the two names in the legends and the means of type 1's pages, "Copper" and "Nickel" still the materials
+pages' titles (written once tonight, seen to fail, taken back unfinished at his "good bye"). Two small things on the numbers pages, older than today, reported in V186, not
 changed: a share rounded to "100 %" where not quite every draw holds it, and the "Held in" column a few pixels low.
 
 ## 2026-11-05, evening: where to start tomorrow
