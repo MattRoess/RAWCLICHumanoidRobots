@@ -5,6 +5,44 @@ by Claude, newest first.
 
 ## 2026-11-05
 
+### V180. His runs of 02 and 03 after E32, E33 and E34, read back
+
+- **His words:** "02 has run", "03 is done" (2026-11-05).
+- **The runs and the code:** the code of commit `b840133` (2026-11-05 11:12:17 +0100), byte for byte the sandbox's
+  (`02_composition.py`, `03_comparison.py`, `00_parameters.py`, compared with `cmp`). 02 wrote its four folders from
+  11:34:10 to 11:37:00, 03 `figures/comparison/` from 11:49:24 to 11:49:58; 200,000 draws in every robot type.
+- **Every file:** the names in `data/consolidated`, `data/parts_taken_apart`, `figures/composition`,
+  `figures/parts_taken_apart` and `figures/comparison` (84 pages) the same as the sandbox's; every one rewritten by
+  the runs, except the 28 iCloud copies "… 2" in `data/parts_taken_apart` of types 5 and 6 (untouched, his decision)
+  and `comparison_materials_6.png`.
+- **`comparison_materials_6.png` dated 05:22:47:** 03 writes its pages in order, and this one lies between
+  `comparison_numbers_6` and `_7`, both 11:49:30. Its content is the run's: nothing written over its panels (the code of
+  05:22, `53c5ae0`, wrote the numbers over every panel, `numbers_above`), bars of 200,000 draws, its lines as
+  `comparison_numbers_7` (11:49:30) gives them (type 1 median 399 g; type 6 median 8.9 kg, mean 12 kg, 95 % 8.2 to
+  16 kg). Only its date is off; the cause not established (iCloud likely).
+- **The draws, draw for draw, all six types** (`scratchpad/check_run_02.py`, read only): each element by material adds
+  up to the element by part, the largest relative gap 1.1 × 10⁻⁷ (float32), the copper fixed in alloys (E25) left out,
+  which the element by part does not count; with it only copper differs, as built.
+- **Titanium and gallium, all six types:** never on the circuit boards. Titanium in the titanium alloy (types 1, 2, 3, 5,
+  6) and in the cameras and the other sensors; gallium in the magnets, the cameras (not type 6) and the other sensors.
+  The components the elements show: circuit boards, cameras, other sensors, cables; the connectors carry no element of
+  their own (their brass's copper fixed in alloys and booked by that material, E25; their plastics no element), as E32
+  point 2 builds it.
+- **Against the sandbox (2,000 draws):** the shares held and the medians above 0 of titanium and gallium by source and of
+  the aluminium alloys' aluminium agree within the sandbox's spread (type 5's titanium alloy held in 10.1 % against
+  9.7 %, median 32.6 against 32.2 kg). The one exception, type 6's titanium alloy (median 8.0 against 13.5 kg): two
+  robots, the IHMC Nadia ISA v2 (7.6 kg, 20,019 draws) and v5 (13.9 kg, 19,903 draws), each within 0.3 % of the
+  sandbox; the median of the two lies where they meet and falls on the side holding a few more draws.
+- **Pages looked at:** 03's `comparison_elements_1` (aluminium in the aluminium alloys: one colour, no legend, nothing
+  written; medians 12.6, 31.3, 28.6, 36.3 kg for types 1, 2, 5, 6, as the draws), `_21` (tin, by component: nearly all
+  the circuit boards'), `_22` (titanium in the titanium alloy: 357 g, 860 g, 32.6 kg, 8.0 kg, as the draws; types 3 and
+  4 one line each), `comparison_materials_6` and `comparison_numbers_7`. 02's type 5: `robot_type_5_elements_1` and
+  `_2` with their pages of numbers (the critical elements by kind of part, titanium not among them; nothing over the
+  panels), `5_…_elements_1` with `5_…_numbers_1` (magnesium and aluminium "in the alloys", titanium "in the alloy",
+  33 kg held in 10 %).
+- **Not covered:** the other pages, not opened one by one; the means pages; the tests not run again (the code unchanged
+  since V179's 535 OK).
+
 ### V179. The numbers of the panels on pages of their own (E34)
 
 - **His words:** "Do we really need all this text in the figure. It might be better to have it separate", "Yes,
