@@ -65,7 +65,103 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-06, afternoon: the sensors by kind, gallium apart (start here)
+## 2026-11-06, late evening: all of today committed and pushed (start here)
+
+Matthias: "Write handover, commit and push. We will continue." One commit on `main` holds everything since 5594a1c
+(10:49), all built on his word and tested, the whole suite 630 tests OK (VERIFICATION V208):
+
+1. **E38, the sensors** (afternoon and late afternoon, V198 to V203): the sensors by kind and by where they sit; the head
+   joints a kind of their own (mark 6); the joints' temperature sensors and the force and torque sensors, tactile
+   sensors, touch screens, 4G/5G modems and satellite receivers their makers state; the ceramic capacitors of every
+   joint's driver board (barium titanate); three unused constants removed. His runs of the six builders, 01, 02 and 03
+   read back (V200 to V203).
+2. **The research for 04** (E39 to E43, V201, V204, V205, V207): runtimes, battery cycles, robot lifetimes,
+   infrastructure; ai-2040.com Plan A's robots read first-hand; the share of humanoids (replaced by his "Use the
+   numbers in the article"); the joints' rated lives.
+3. **Stage 04 rebuilt as RAWCLICDataCenters' 07** (E42, E43; V208, V209; the entry below): the robots, joint sets,
+   battery packs and their 22 elements, quarter by quarter, every page beside the world's production and reserves. His
+   runs of 00, 01 and 04 read back; the first 04's two files in the Trash on his word.
+4. **`.gitignore`**: 04's output folder `data/stock_and_flow/` ignored as 02's are (its `draws.txt` was not).
+
+**Every stage has run on today's code** (his runs: the builders, 01, 02 and 03 after E38; 00, 01 and 04 after the
+rebuild). Nothing waits on a run.
+
+**Noted, for his word only** (nothing asked of me is open):
+- type 2's runtime of 24 h in 2040 gives one battery pack a robot, which leaves no time to charge it;
+- the robots' own numbers in 04 have no band: the article fixes the stock and the lifetime is spread among the robots,
+  as 07 does; the bands come from 02's draws, the research share and the packs' threshold;
+- magnesium is held in 12 % of 02's draws, so 04's magnesium too;
+- `.gitignore`'s comment above `data/parts_taken_apart/` still names "04_parts_taken_apart.py" (02 writes that folder
+  since 2026-10-29); not changed.
+
+## 2026-11-06, evening: stage 04 rebuilt as RAWCLICDataCenters' 07
+
+Built and tested, **not committed** (on his word only): `04_stock_and_flow.py` as 07, on his "Yes, build it" and "Yes,
+replace joints" (EVIDENCE E42, E43; VERIFICATION V208; METHODOLOGY "The stock and flow of the humanoid robots and their
+elements"): the robots of ai-2040.com Plan A at each 1 January (10 M in 2025 to 70 B in 2040), quarter by quarter, each
+robot one unit with its lifetime 5 / 7 / 10 years spread among the robots; by type (type 1 10 % ± 5 % falling to half
+by 2040, types 2, 4, 5, 6 the workbook's shares, type 3 the remainder); the joint sets replaced after 7,000 / 10,000 /
+30,000 hours at 24 h a day; the battery packs one day's work over a pack's runtime, rounded up, charged once a day,
+replaced below 80 % ± 5 %; the 22 elements of 02, each robot 02's draw i of its type; 07's overview and one page per
+element beside the world's production and reserves. It replaces the first 04 of the afternoon (the article's formula;
+the setting `robot_depreciation` is gone). Sandbox at 1,000 draws: every page looked at; the hand check by another route
+agrees to 7 × 10⁻⁸.
+
+**Kept on his word** ("Yes, keep them"): the runtimes of 2025 for types 1, 3 and 5 (2 / 2 / 4 h, `runtime_2025_hours`)
+and the charges to 80 % (500 / 800 / 1,000, `battery_cycles_to_80`). Noted, not changed: type 2's runtime of 24 h in 2040 gives
+one pack a robot, so no time to charge it; the robots' own numbers have no band (the article fixes the stock).
+
+**His runs of 00, 01 and 04 read back** (VERIFICATION V209): all after the code's last change, 04 on his 200,000 draws
+of 02; the article's robots at every 1 January, the types adding up, the packs by hand; the 23 pages looked at.
+
+**Left behind by the first 04, removed on his word** ("Yes, remove them"; nothing read them: no code names
+`robots.csv` or `stock_and_flow.png`): `data/stock_and_flow/robots.csv` and `figures/stock_and_flow/stock_and_flow.png`,
+written by his run at 15:04, moved by their exact names into the Trash (`~/.Trash/`), not emptied.
+
+**His runs**, from `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`:
+`00_parameters.py` (its register: 04's nine settings and the two world files, `robot_depreciation` gone),
+`01_schemas.py` (the overview: 04's new words, the sibling box naming the world's production and reserves),
+`04_stock_and_flow.py` (new: reads his 200,000 draws of 02; writes about 3.1 GB into `data/stock_and_flow/`, the
+overview and 22 element pages into `figures/stock_and_flow/`; about a minute of counting, measured on one chunk, then the summary and the pages: not timed at 200,000). 02 and 03 are not changed by this.
+
+## 2026-11-06, late afternoon: every open item of the sensors built
+
+Built and tested, **not committed** (commit and push on his word only), on "Yes do it" (the four open items) and "Yes,
+all three" (the two tables and the obsolete code): the head joints a kind of their own, mark 6 (E38 point 6, V198);
+each sensor kind with where it sits, "Cameras, head", "Cameras, arms" (point 7, V198; the wrist and hand cameras of
+seven type 2 robots and the SwitchBot Onero's had stood in the head); the joints' temperature sensors in every robot
+with electric joints, and the makers' force and torque sensors, tactile sensors, touch screens, 4G/5G modems and
+satellite receivers robot by robot, an option drawn in half the draws (point 2, V199); the ceramic capacitors of every
+joint's driver board, their barium titanate in place of glass and epoxy (point 4, V199); 01's three constants no stage
+read, removed (V198, V199). The whole suite 604 tests, 5 failures, each reading his parts files on disk, which have
+none of the new rows until he runs the builders; the sandbox (the builders' files in the scratch folder, 02 and 03 at
+1,000 draws) passes with no page against his rules.
+
+**For his word before his runs:**
+- **Two estimates set to his rule** (01 stopped them: every estimate at least half to 1.5 times its mode): the
+  temperature sensors of a robot whose maker states none half to twice its joint motors, mode one a motor (proposed
+  1 / 1 / 2 a motor); the tactile arrays of a robot that states touch but not their number 2 / 6 / 10 (proposed 2 / 10 /
+  10).
+- **The capacitors' titanium** (median 8.6 g a type 2 robot, in every draw) has no panel on the element pages, which
+  show titanium in the alloy and in the sensors; it is on the pages of where it sits and the means pages. Barium (about
+  25 g) is no element of interest (E19): in the draws, not on the pages.
+- **The KEMET/YAGEO declaration** ("business confidential") gives the barium titanate per case size; its three numbers
+  are now in `tools/parts_taken_apart.py` and EVIDENCE E38, and this repository is public; asked before a push, he
+  answered "Yes, they may" (2026-11-06).
+- Most of the makers' sensors sit in one to three robots of a type: below 2.5 % of the draws, so in the draws, not as a
+  row of the pages (as every place); the temperature sensors and type 5's and 6's tactile sensors (about 18 %) show.
+
+**His runs then**, in this order (each from RAWCLICHumanoidRobots, `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`):
+the six builders `tools/1_compact_research_developer/make_parts_taken_apart.py`,
+`tools/2_full_scale_general_purpose_ai_research/make_parts_taken_apart.py`,
+`tools/3_industrial_logistics_warehousing/make_parts_taken_apart.py`, `tools/4_service_healthcare_interaction/make_parts_taken_apart.py`,
+`tools/5_heavy_duty_high_performance_hazardous_environment/make_parts_taken_apart.py`,
+`tools/6_defense_public_safety/make_parts_taken_apart.py`; then `01_schemas.py`, `02_composition.py` (200,000 draws),
+`03_comparison.py`. Then the five failing tests pass, and his runs are read back.
+
+**Then:** the stock and flow model (stage 04), starting from his specification written back as a checklist.
+
+## 2026-11-06, afternoon: the sensors by kind, gallium apart
 
 Built, tested (587 tests, the page check of the six types among them) and committed with this entry, on his word
 ("Yes, commit and push"): the sensors by kind on the pages of where the critical elements sit and in `places.npy`

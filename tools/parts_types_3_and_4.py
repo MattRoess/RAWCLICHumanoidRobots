@@ -1377,7 +1377,14 @@ SWITCHBOT_ONERO_H1 = wheeled(
                         'min (E15.2 point 1)'), WHEELED_JOINTS_MEDIAN,
     sources='HPO (humanoid.press: "Height: 174 cm (prototype spec) - Weight: 68 kg", "Wheeled humanoid base"), HG (four '
             'RealSense cameras); E15',
-    sensors=[depth_camera('HG "RealSense" in its head, arms, hands and abdomen (four, E)', 4), IMU_NOT_NAMED])
+    # Four depth cameras, one each where the catalogue names them: the head, the two arms with their hands (one each,
+    # E), the abdomen (2026-11-06, E38: all four had been in the head).
+    sensors=[depth_camera('HG "RealSense" in its head, arms, hands and abdomen (four, E): the head\'s'),
+             placed(depth_camera('HG "RealSense" in its head, arms, hands and abdomen (four, E): the arms\'', 2),
+                    'Arms', 'Arms', 'Depth camera, arms (not named)'),
+             placed(depth_camera('HG "RealSense" in its head, arms, hands and abdomen (four, E): the abdomen\'s'),
+                    'Boards', 'Torso', 'Depth camera, abdomen (not named)'),
+             IMU_NOT_NAMED])
 PINK_ROBOTICS_P0 = template(
     'Pink Robotics P0', 'Pink Robotics', 1.75, 82, makers(82, 'PNKp "Weight 82kg"'), 32 + 2,
     sources='PNKp (Pink Robotics: Height "1,75m", Weight "82kg", "Motion System 32 DoF", Payload "8kg"); E15',

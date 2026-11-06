@@ -18,6 +18,7 @@ Every setting is in `src/params_schema.py`.
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, each robot type's `data/researched/<n>_<name>/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, for each robot type taken apart (1 to 6) its robots' table and where its kinds of part sit, the same pages (type 2's since 2026-10-30: "Yes, as type 1's"; types 3 and 4's since 2026-10-30, EVIDENCE.md E11.7 open point B, each over its robots of every parts file); for a robot type with no parts file, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
 | `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
 | `03_comparison.py` | The draws of 02, in `data/consolidated/` and `data/parts_taken_apart/`; the names of the robot types from the workbook | `figures/comparison/` | The six robot types side by side, one item a page, each type a panel of 02's form, split into what contributes to it: the mass of one robot by material, each material by kind of part, each element of interest by the material it comes from, the mass by part group and by body region, copper recycled as copper or fixed in alloys (EVIDENCE.md E29, since 2026-11-04). Draws nothing at random itself. |
+| `04_stock_and_flow.py` | The draws of 02 (`data/parts_taken_apart/`, their elements by kind of part; the order of the elements in `data/consolidated/`); the workbook's shares, runtimes and energy densities; the settings `stock_and_flow.*`; RAWCLICDataCenters' sheet ElementReference and USGS's data file, where they lie | `data/stock_and_flow/`, `figures/stock_and_flow/` | The robots of ai-2040.com Plan A quarter by quarter as RAWCLICDataCenters' 07, their joint sets and battery packs replaced on their own, the 22 elements in them, each robot 02's draw i of its type (EVIDENCE.md E42, since 2026-11-06; "The stock and flow of the humanoid robots and their elements" below). |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
 them", and, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
@@ -540,8 +541,9 @@ are par of the elctronics!!", "3 yes", the cables, connectors and antennas "Yes,
    RAWCLICDataCenters give it) holds: the **circuit boards** (the joints' driver boards and every other board: the board's
    copper by its mass, the car board metals by its area, tantalum by its mass, the laminate the rest); the **cameras** (a
    sensor whose car sensor elements hold an image sensor, `IMAGE_SENSORS`; a depth camera's infrared chips and laser
-   diode with it); the **other sensors** (encoders, motion sensors, LiDARs, microphones, ultrasonic sensors, satellite
-   receivers and modems, their antennas inside them); the **cables** (their conductors and insulation, from the cable
+   diode with it); the **other sensors** (joint encoders, motion sensors, LiDARs and time-of-flight sensors,
+   microphones, ultrasonic sensors, the hydraulic actuators' position and pressure sensors; satellite receivers and
+   modems, named here until 2026-11-06, are held by no robot); the **cables** (their conductors and insulation, from the cable
    length); the **connectors** (XT30, XT60, from the sheet Shares).
 2. **The cables and connectors moved in.** Until then copper, plastics and brass; now booked in the electronics, each
    with the elements of what it is made of: a cable's copper whole (recycled as copper, as before), its insulation the
@@ -644,6 +646,48 @@ their columns of numbers apart by the widest number of each column (`text_width`
 ## The magnets' and the sensors' part of an element apart (since 2026-11-06)
 
 Matthias, 2026-11-06: "Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets" (EVIDENCE.md E38 point 5). An element that the NdFeB magnets and the sensors hold, each in at least 2.5 % of the draws, and nothing else (`magnets_split`) is drawn in two panels: "… in the magnets", the magnets alone, and "… in the sensors", the cameras and the other sensors, so that the magnets' grams are never stacked on the sensors' milligrams. On 02's element pages by material; on the pages of where the critical elements sit, where its magnets sit (the kinds of part) and its sensors by kind (`element_pages`, `place_view`); on 03 two pages, the magnets' in one colour without a legend. In his data: neodymium, dysprosium (the sensors' from the encoders' magnets), boron and gallium (the sensors' from the LiDARs' and cameras' laser diodes and photodetectors). The draws are as they were; the two panels add up to the element in every draw.
+
+## The head joints, and the sensors by where they sit (since 2026-11-06)
+
+Matthias, 2026-11-06: "Nd is in the head joint and not just in the head"; to the table of the open items, "Yes do it"
+(EVIDENCE.md E38 points 6 and 7). **The head joints** are a kind of part of their own, "Head joints", mark 6 on the
+robot (01's `KINDS`, `SPOTS`, `MARKS`): every joint named head or neck (`JOINT_KIND`), drawn as every joint is, in the
+part group Joint drives and the body region Head. The kind Head keeps the head's sensors, speakers, boards and housings.
+**The sensors by where they sit:** on the pages of where the critical elements sit, and in `places.npy` and
+`places_estimated.npy`, each sensor kind with the body region of its row: "Cameras, head", "Cameras, arms", "LiDARs,
+wheeled base" (`sensor_place`, `REGION_WORDS`: head, torso, arms, legs, wheeled base). The joint encoders and the
+hydraulic actuators' sensors sit in every joint and have no region (`IN_EVERY_JOINT`). A sensor outside the joints
+whose row names no region stops 02 (`check_parts`). The element pages by material and 03 show the kinds without their
+regions (`merge_regions`). The builders of types 2 and of 3 and 4 put the wrist and hand cameras of seven robots in the
+arms (they had stood in the head) and the SwitchBot Onero H1's four depth cameras one in the head, two in the arms and
+one in the abdomen; the parts files change when the builders are run.
+
+## The sensors the makers state, the joints' temperature sensors and capacitors (since 2026-11-06)
+
+Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "There are also
+capacitors at the joins, so that high energy needs can be fast achieved"; to the tables of EVIDENCE.md E38 points 2 and
+4, "Yes, all three". **The temperature sensors:** every robot with electric joints has them in its joints, like its
+encoders (their car sensor elements, an NTC thermistor each, their mass inside the driver board): two a joint motor
+where the maker's SDK gives two readings (Unitree's G1 family, H2 and R1), one where it gives one (Unitree's H1,
+Booster's); every other robot one a motor most often, half to twice as many, a whole number drawn from the robot's
+constant "Number: Temperature sensor" (E). **The other sensors** as their makers state them (`SENSORS_STATED` of
+`tools/parts_taken_apart.py`): six-axis force sensors at the wrists (and the Walker S1's ankles) and the AgiBot G2's
+joint torque sensors, of the car's strain-gauge force sensor; the tactile arrays of the hands and the tactile sensors
+of head and torso, of the car's thin-film and capacitive sensors; touch screens (a capacitive touch layer with its
+indium tin oxide, and its controller); 4G/5G modems; a satellite receiver. A number stated is entered; an option of
+the robot, or a reading that can mean either, is written "0 or 10" in the parts file and drawn one or the other, each
+as often (`sensor_count`; 01 checks the numbers: whole, from 0 up, one from 1 up); a sensor stated without its number
+has its number drawn from the robot's constant. Each is a sensor kind of its own on the pages of where the critical
+elements sit (`sensor_kind`: temperature sensors, force and torque sensors, tactile sensors, touch screens, 4G/5G
+modems, satellite receivers), with its region; the temperature sensors sit in every joint. **The capacitors:** every
+joint's driver board holds ceramic chip capacitors (MLCC): their number in a board of the G1's small joint (weighed
+12.8 g) 8 / 16 / 24, a whole number in every draw (E: Ben Katz's Cheetah driver 8, mjbots' moteus 16, TI's humanoid
+joint drive 17), each holding the barium titanate of the case sizes 0805 / 1206 / 1210 (KEMET/YAGEO's material
+declaration); every driver board, of any joint and robot, the same share of its mass in that draw
+(`titanate_share`). Their barium, titanium and oxygen by the formula BaTiO3 (`TITANATE`), booked in the circuit
+boards, are taken out of the board's glass and epoxy, its mass unchanged; their nickel, copper and tin are not added
+again, the car's populated boards' metals per cm2 holding them. Barium is no element of interest (E19): it is in the
+draws, not on the pages.
 
 ## The outliers, not drawn (since 2026-11-05)
 
@@ -1152,3 +1196,75 @@ the item in fewer than 2.5 % of its draws has no panel, 02's rule, and its place
 row has the scale of the share of the draws. One legend at the top of a page, of the contributions drawn, in as many rows
 as it needs to stay within the page (tested). A numbered page of an earlier run beyond those drawn is removed by its
 exact name, as 02 does.
+
+## The stock and flow of the humanoid robots and their elements, as RAWCLICDataCenters' 07 (04, since 2026-11-06)
+
+Matthias, 2026-11-06: "Get the article, which was already the bases for the work on the stock and flow modeling of the
+datacenters. Read it and use the stock numbers for the humanoid robots", "Use the numbers in the article", "Do exactly
+what has been done for the datacenter", "I want the same figures as for the datacenters, but expand them all the
+essential critcial and statigic elements. Also have real lifetimes not something fixed like this. I want to see
+uncerttainites", "Add also the limit in stock and production like for the data centers", to the table of 04 "Yes, build
+it"; then "No look at the robots as a unit with exception of the batteries", "Have at least so many battery packs ready
+for use as it is needed to have them for 1 day to switch. So they can recharge slowly", "Yes, replace joints"
+(EVIDENCE.md E39 to E43, VERIFICATION.md V208). The first 04 of the same day, the article's robots with its own formula
+of the robots built and nothing else (V206), is replaced.
+
+`04_stock_and_flow.py` follows RAWCLICDataCenters' 07 step by step, quarter by quarter from 2025 Q1 to 2039 Q4, in
+chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
+
+1. **The robots.** In use at the end of each quarter: the article's (AI Futures Project, *AI 2040: Plan A*, its economics
+   explorer's row Robots, `stock_and_flow.robots`) at each 1 January, 10 M in 2025 to 70 × 10⁹ in 2040, the quarters
+   between geometric, as 07's compute path. Each quarter's robots arrive in its middle and leave as the share of them
+   whose lifetime is shorter than their age: the triangle 5 / 7 / 10 years spread among them
+   (`stock_and_flow.robot_lifetime_years`; CRU, Agility and the article, E39.3), as 07 spreads its GPUs' lifetimes. A
+   quarter's inflow is the target less what the earlier quarters still hold, never below 0. The robots of 1 January
+   2025 were built in the quarters before at the article's own growth (11.6 M over 10 M a year), as many as hold its 10 M
+   with their survivals (E): the article states no ages.
+2. **The robot types.** The robots built in a quarter by type: the research robots (type 1) Matthias's "around 10% within
+   -+5%" in 2025, half of it in 2040 (E), a straight line between, the same point of both triangles in a draw
+   (`research_share_2025`, `research_share_2040`); types 2, 4, 5 and 6 his workbook's shares of the robots shipped
+   (sheet Market Units & Shares 2025-2040), a straight line between its years; type 3, the largest, the remainder, 1
+   minus the others (not normalised; a remainder below 0 stops 04). The robots of 1 January 2025 by the shares of 2025.
+3. **The joint sets.** A robot's joints, the kinds 01 numbers 1 to 6 (hip, knee, ankle, waist, arm and head joints), are
+   a stock of their own, as many as the robots in use of each type, each set worn out after 7,000 / 10,000 / 30,000
+   hours (`joint_life_hours`, the rated lives of strain-wave and planetary gears, E43) at 24 hours a day (the article:
+   robots "can work 24/7", `hours_a_day`), 0.8 / 1.1 / 3.4 years, spread among the sets, and replaced.
+4. **The battery packs.** A robot holds as many packs as a day's work needs, its hours a day over a pack's runtime,
+   rounded up (Matthias: "at least so many battery packs ready for use as it is needed to have them for 1 day to
+   switch"): types 2, 4 and 6 their runtimes in his workbook (sheet Material Trajectories 2025-2040, a straight line
+   between its years, type 6's 4 h of 2030 held after it), types 1, 3 and 5 2 / 2 / 4 h in 2025 (their anchor robots,
+   E39.1, `runtime_2025_hours`) times their energy density over that of 2025. In 2025: 12, 7, 12, 12, 6 and 24 packs a
+   robot of types 1 to 6; in 2040 5, 1, 4, 3, 3 and 6. Each pack is charged once a day and replaced when its capacity
+   falls below 80 % ± 5 % (`battery_replaced_below`, one value a draw): its charges to that capacity are its charges to
+   80 % (500 / 800 / 1,000, E39.2, `battery_cycles_to_80`, spread among the packs) times (1 − the capacity) / 0.2, a
+   straight-line fade (an approximation: cells fade faster at first and near their end). The packs in use follow the
+   robots in use times the packs a robot needs; where that need falls, the packs in use stay until they wear out, above
+   the need for a while.
+5. **The elements.** Every stock and flow of a type times one robot's kg of each of 02's 22 elements of interest in draw
+   i: a robot its body (every kind of part but the joints and the battery pack), a joint set the six joint kinds, a pack
+   the kind Battery pack (02 builds one pack a robot; its mass is kept as the runtime rises with the energy density).
+   Sums on the raw draws.
+
+07's approximation in steps 3 and 4: the joint sets and packs of a retired robot go on in a new robot until they wear
+out, which makes their inflow and outflow slightly low. Each chunk is checked before it is written (`check`): the stock
+before + inflow − outflow is the stock in every quarter, the outflow counted cohort by cohort apart from the stock; no
+flow below 0; the robots at each 1 January the article's; the types adding up to all robots; the joint sets as many as
+the robots; the packs never fewer than the need. The robots' own numbers have no band: the article fixes the stock and
+the lifetime is spread among the robots, as 07 does; the bands come from 02's draws, the research share and the packs'
+capacity.
+
+**What it writes.** `data/stock_and_flow/`: the draws, float32, by year (flows 2025 to 2039, stocks at 1 January 2025 to
+2040): `units_in`, `units_stock`, `units_out` (draw × year × robots, joint sets, battery packs × type) and
+`elements_in`, `elements_stock`, `elements_out` (draw × year × robots' bodies, joint sets, battery packs × element, kg),
+their axes in `draws.txt`; `summary.csv`, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above 0,
+and their share. About 3.1 GB at 200,000 draws. `figures/stock_and_flow/`, as 07's, A4 landscape with its print fonts:
+`overview.png` (robots in use; built and retired; in use by type; the joint sets; the battery packs in use; built and
+worn out) and `elements/<Element>.png` (its stock beside the world's reserves; its inflow and outflow beside the world's
+mine production in 2025, dashed, a range as a grey band, a value beyond the scale written in the panel). The world's
+numbers are RAWCLICDataCenters' sheet ElementReference, the ones 07 draws, and for magnesium, titanium and indium,
+which it does not hold, USGS's data file (Mineral Commodity Summaries 2026): magnesium metal from smelters and
+magnesite's magnesium by its formula (E), titanium sponge and ilmenite and rutile's titanium by its formula (E, at
+least), refined indium, no reserves; none for dysprosium and terbium, whose pages say so. Every line is the mean over
+the draws above 0, its band 95 % of them, with the share of the draws that hold it where it is not all of them ("A 0 is
+not part of a distribution"); a legend at the upper left unless a line or a written value lies under it there. An
+element 0 in every draw has no page.

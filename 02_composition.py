@@ -388,6 +388,20 @@ def whole_numbers(rng: np.random.Generator, low: float, mode: float, high: float
     return rng.choice(values, size=n, p=below(values + 0.5) - below(values - 0.5))
 
 
+def sensor_count(e, constants: dict, rng: np.random.Generator, n: int) -> np.ndarray | float:
+    """The number in the robot of one sensor row `e` (01's ApartPart), in each of its n draws: the number its row
+    gives; or one of the numbers it writes 'A or B' (EVIDENCE.md E38 point 2: an option of the robot, the Kuavo 5's
+    touch hand, or a maker's reading that can mean either, the Walker S1's six tactile arrays a hand or the robot),
+    each as often, a discrete state never blended; or, where it gives none, a whole number drawn from the robot's
+    constant NUMBER_OF + its name (whole_numbers: E31 point 3's cameras; E38's joint temperature sensors, one or two a
+    joint motor). 01 has checked each."""
+    if e.count is not None:
+        return e.count
+    if e.either:
+        return np.asarray(e.either, dtype=float)[rng.integers(len(e.either), size=n)]
+    return whole_numbers(rng, *constants[schemas.NUMBER_OF + e.name][1], n).astype(float)
+
+
 def shares_drawn(rng: np.random.Generator, pieces: list, n: int) -> list:
     """The shares of a group (a split row, or the rest of a battery row) in every draw, as (name, share): each piece
     given as (name, (minimum, mode, maximum), is the remainder); each share a triangle, the remainder 1 minus the
@@ -619,7 +633,10 @@ def sensor_kind(units: list) -> str | None:
     time-of-flight sensor too, made of the same: "time of flight and lidar are the same"); an image sensor, a camera
     (colour, stereo or depth, its infrared projector and chips with it: "combine all the cameras"); an angle sensor, a
     joint encoder; a position or pressure sensor, a hydraulic actuator's; MEMS microphones; an ultrasonic sensor; a
-    motion sensor (IMU) alone.
+    motion sensor (IMU) alone; since E38 point 2 a temperature sensor (a joint motor's thermistor); a force sensor (the
+    strain gauges of a six-axis force sensor or of a joint torque sensor); a pressure/force sensor or a capacitive
+    sensor (the tactile sensors of the hands, head and torso); a capacitive touch sensor (a touch screen); a cellular
+    modem (4G/5G); a GNSS receiver (satellite positioning).
     None for any other combination (02 stops on it, check_parts) and for a sensor of no car elements (a speaker: it
     holds no element of interest)."""
     held = {car_type for car_type, _ in units}
@@ -637,7 +654,48 @@ def sensor_kind(units: list) -> str | None:
         return 'ultrasonic sensors'
     if held == {'IMU'}:
         return 'motion sensors'
+    if 'temperature sensor' in held:
+        return 'temperature sensors'
+    if 'force sensor' in held:
+        return 'force and torque sensors'
+    if held & {'pressure/force sensor', 'capacitive sensor'}:
+        return 'tactile sensors'
+    if 'capacitive touch sensor' in held:
+        return 'touch screens'
+    if 'cellular modem' in held:
+        return '4G/5G modems'
+    if 'GNSS receiver' in held:
+        return 'satellite receivers'
     return None
+
+
+def sensor_place(kind: str, region: str) -> str:
+    """Where a sensor sits (E38 point 7): '<electronics>: <kind>, <region>' ('Boards and components: cameras, head'), or
+    its kind alone where it sits in every joint (IN_EVERY_JOINT) or its row names no region of REGION_WORDS."""
+    if kind in IN_EVERY_JOINT or region not in REGION_WORDS:
+        return component_label(kind)
+    return component_label(f'{kind}, {REGION_WORDS[region]}')
+
+
+def sensor_of_place(place: str) -> str | None:
+    """The sensor kind of a place ('Boards and components: cameras, head' -> 'cameras'), None for a place that is no
+    sensor's."""
+    head = f'{ELECTRONICS}: '
+    if not place.startswith(head):
+        return None
+    kind = place[len(head):].split(', ')[0]
+    return kind if kind in SENSOR_KINDS else None
+
+
+def merge_regions(places: dict) -> dict:
+    """The places of the element pages (E38 point 7): a sensor's places in every region together under its kind
+    ('Boards and components: cameras'), every other place as it is."""
+    out = {}
+    for place, kg in places.items():
+        kind = sensor_of_place(place)
+        key = component_label(kind) if kind else place
+        out[key] = out.get(key, 0) + kg
+    return out
 
 
 def declared(material: str, shares: dict, metal: dict) -> dict:
@@ -1026,8 +1084,10 @@ ALUMINIUM, MAGNESIUM, OTHER = 'Aluminium alloys', 'Magnesium alloys', 'Other'
 # The electronics by their components (Matthias, 2026-11-05: "senors are par of the elctronics!!", "3 yes", the cables,
 # connectors and antennas "Yes, include them", "yes do it"; EVIDENCE.md E32): the circuit boards (board(): a board's
 # area and mass), the cameras (a sensor whose elements hold an image sensor, a depth camera's infrared chips and laser
-# diode with it), the other sensors (encoders, motion sensors, LiDARs, microphones, ultrasonic sensors, satellite
-# receivers and modems with their antennas: sensor_component), the cables (their conductors and insulation) and the
+# diode with it), the other sensors (joint encoders, motion sensors, LiDARs and time-of-flight sensors, microphones,
+# ultrasonic sensors, the hydraulic actuators' position and pressure sensors, and since 2026-11-06 (E38 point 2) the
+# joints' temperature sensors, force and torque sensors, tactile sensors, touch screens, 4G/5G modems and satellite
+# receivers where the makers state them: sensor_component), the cables (their conductors and insulation) and the
 # connectors (XT30, XT60). The cables and connectors are booked in the electronics, no longer in copper, brass and
 # plastics, each with the elements of what it is made of (a cable's copper whole, a connector's brass its copper fixed
 # in the alloy, E25). An element of interest of the electronics is recovered from its component, '<electronics>:
@@ -1047,9 +1107,22 @@ IMAGE_SENSORS = ('CMOS image sensor', 'IR camera sensor')
 # cameras and time of flight and lidar are the same"). Each kind's colour on those pages is from Paul Tol's published
 # schemes (muted, vibrant, light, dark), chosen by colour difference (CIE Lab) to stand apart from the kinds of part, the
 # circuit boards, cables and connectors and from each other (V193), the cameras keeping their purple of E32.
+# Where a sensor sits, on the overview pages: its kind and the body region its row names, "Cameras, head" (Matthias,
+# 2026-11-06: "show me where they are located", to the proposal of kind and place together "Yes do it"; E38 point 7);
+# the element pages stack the sensors by kind alone (merge_regions), their colours the kinds'. The joint encoders and
+# the hydraulic actuators' sensors sit in every joint: one place each, no region.
+REGION_WORDS = {'Head': 'head', 'Torso': 'torso', 'Arms': 'arms', 'Legs': 'legs', 'Base': 'wheeled base'}
+IN_EVERY_JOINT = ('joint encoders', "hydraulic actuators' sensors", 'temperature sensors')
+# The kinds the makers' statements added (Matthias, 2026-11-06, "Yes, all three"; EVIDENCE.md E38 point 2), each by
+# the car sensor elements of its rows: the joints' temperature sensors (every joint motor's), the six-axis force sensors
+# and the joint torque sensors, the tactile sensors of the hands, head and torso, the touch screens, the 4G/5G modems
+# and the satellite receivers; their colours of Paul Tol's schemes as before (CIE Lab difference to the nearest other
+# colour of those pages: 30.4, 23.7, 24.9, 24.0, 30.4, 20.5; the joint encoders' since 23.7, to the force sensors').
 SENSOR_KINDS = {'LiDARs': '#332288', 'cameras': '#AA4499', 'joint encoders': '#666633',
                 "hydraulic actuators' sensors": '#222255', 'microphones': '#BBBBBB', 'ultrasonic sensors': '#EE8866',
-                'motion sensors': '#009988'}
+                'motion sensors': '#009988', 'temperature sensors': '#EE3377', 'force and torque sensors': '#225522',
+                'tactile sensors': '#FFAABB', 'touch screens': '#EECC66', '4G/5G modems': '#BB5566',
+                'satellite receivers': '#997700'}
 # The notes page's words on the cameras no source counts (EVIDENCE.md E31 point 3; Matthias, 2026-11-05, "Yes, all
 # ten", open item 6): their number drawn from the robot's constant NUMBER_OF, 1 / 3 / 12 (whole_numbers).
 ESTIMATED_CAMERAS_WORDS = ("where no source counts a robot's cameras, 1 to 12 colour image sensors, most often 3, a "
@@ -1080,8 +1153,8 @@ LIGHT_ALLOYS = {ALUMINIUM: 'Al', MAGNESIUM: 'Mg', 'Titanium alloy': 'Ti'}
 ALLOY_OF = {metal: alloy for alloy, metal in LIGHT_ALLOYS.items()}   # the alloy of each light alloy's metal (E33)
 # The one sentence of the notes pages (02's and 03's) on what the light alloys' panels leave out (E33).
 LIGHT_ALLOY_NOTE = ("Aluminium, magnesium and titanium: their panels show the metal held in the alloys alone; the "
-                    "battery cells' and the electronics' aluminium and the electronics' titanium, small beside it, are "
-                    "in the draws and on the pages of the means.")
+                    "battery cells' and the electronics' aluminium, small beside it, are in the draws and on the pages "
+                    "of the means; the sensors' titanium has a panel of its own, titanium in the sensors.")
 # The copper of a robot, three ways (Matthias, 2026-11-02: "So we have to add it to the inflow cupper, but we have to
 # destiguish, what is fixed in alloys like Al aalloysa nd brass", "and what can be recycled as elemental Cu", "Yes,
 # build it"; EVIDENCE.md E25): recycled as copper, the element Cu; fixed in alloys, the copper the materials of
@@ -1133,6 +1206,15 @@ ALLOYS = (ALUMINIUM, MAGNESIUM)
 
 # The quantities of the sheet Constants this stage uses, as the sheet writes them.
 ROBOT_MASS, = schemas.APART_ROBOT_CONSTANTS
+# The ceramic capacitors of a joint's driver board (Matthias, 2026-11-06, "Yes, all three"; EVIDENCE.md E38 point 4):
+# their number in a board of the G1's small joint (8 / 16 / 24, E: Ben Katz's Cheetah driver 8, mjbots' moteus 16, TI's
+# humanoid joint drive TIDA-010979 17), a whole number in every draw, and one capacitor's barium titanate (the case
+# sizes 0805 / 1206 / 1210 of KEMET/YAGEO's material declaration, mg).
+CAPACITORS, CAPACITOR_TITANATE = schemas.CAPACITORS, schemas.CAPACITOR_TITANATE
+# Barium titanate, BaTiO3, by its formula: the standard atomic weights of barium (137.327), titanium (47.867) and three
+# of oxygen (15.999 each), so barium 58.9 %, titanium 20.5 % and oxygen 20.6 % of its mass.
+TITANATE_ATOMS = {'Ba': 137.327, 'Ti': 47.867, 'O': 3 * 15.999}
+TITANATE = {element: weight / sum(TITANATE_ATOMS.values()) for element, weight in TITANATE_ATOMS.items()}
 # A robot's cables, by the conductors they hold: four (two for power, two for signals), or two for power and an Ethernet
 # line of eight (the Fourier robots of type 2, EVIDENCE.md E6.8 point 9).
 CABLE_FOUR, CABLE_ETHERNET, ETHERNET_CS = schemas.CABLE_FOUR, schemas.CABLE_ETHERNET, schemas.ETHERNET_CS
@@ -1332,6 +1414,10 @@ def check_parts(inputs: ApartInputs) -> list:
             faults.append(Fault(on + 'Sensors', p.row, f"{p.robot}, {p.name}: its car sensor elements "
                                                        f"({', '.join(sorted({t for t, _ in units}))}) are no kind of "
                                                        'sensor 02 names (SENSOR_KINDS).'))
+        elif (units and p.kind not in IN_THE_JOINTS and sensor_kind(units) not in IN_EVERY_JOINT
+              and p.region not in REGION_WORDS):
+            faults.append(Fault(on + 'Sensors', p.row, f"{p.robot}, {p.name}: its region '{p.region}' is none 02 "
+                                                       f"names ({', '.join(REGION_WORDS)}; E38 point 7)."))
     return faults
 
 
@@ -1449,7 +1535,7 @@ class Shared:
         self.shares = {item: shares_drawn(rng, group, n) for item, group in groups.items()}
         # The constants for all robots.
         self.constant = {q: triangle(rng, *values, n) for q, (_, values, _, _, _) in
-                         apart.constants.get(schemas.ALL_ROBOTS, {}).items()}
+                         apart.constants.get(schemas.ALL_ROBOTS, {}).items() if q != CAPACITORS}
         # The board metals per cm2 by car board category, the tantalum per kg of board, the sensor elements per unit.
         self.pcb = {(category, element): triangle(rng, *inputs.pcb[category][element], n)
                     for category in sorted({b.category for b in apart.boards})
@@ -1500,6 +1586,12 @@ class Shared:
         board = next(c for c in apart.joint_parts if c.name == DRIVER_BOARD)
         self.board_area = {'small': triangle(rng, *driver_area(apart), n)}
         self.board_area['large'] = self.board_area['small'] * self.joint['large'][DRIVER_BOARD] / (board.grams / 1000)
+        # The ceramic capacitors of a joint's driver board (E38 point 4): a whole number of them in the G1's small
+        # joint's board, each of the barium titanate drawn, over that board's weighed mass; every driver board, of any
+        # joint and robot, the same share of its mass in that draw.
+        capacitors = apart.constants[schemas.ALL_ROBOTS][CAPACITORS][1]
+        self.titanate_share = (whole_numbers(rng, *capacitors, n) * self.constant[CAPACITOR_TITANATE] / 1e6
+                               / (board.grams / 1000))
 
     def cell_draws(self, recipe: str) -> tuple:
         """The cells of `recipe` in every draw: their energy per kg (Wh/kg), their element shares and those of them as
@@ -1724,12 +1816,13 @@ class Robot:
         return sum((count * per_sensor * self.of(mg) / 1e6 for car_type, per_sensor in units
                     for (t, _), mg in self.shared.sensor.items() if t == car_type), np.zeros(self.n))
 
-    def sensor(self, kind: str, units: list, count: np.ndarray | float, estimate: bool) -> None:
+    def sensor(self, kind: str, units: list, count: np.ndarray | float, estimate: bool, region: str = '') -> None:
         """The elements of `count` sensors, each made of `units` (car sensor type, units in one sensor); those of
         interest declared (E19 point 3), recovered from the cameras or the other sensors (sensor_component, E32), and
-        placed by the sensor's kind on the pages of where the critical elements sit (sensor_kind, E38)."""
+        placed by the sensor's kind on the pages of where the critical elements sit (sensor_kind, E38), with the body
+        region of its row (`region`, REGION_WORDS) unless it sits in every joint (IN_EVERY_JOINT)."""
         on, kind_of_sensor = sensor_component(units), sensor_kind(units)
-        place = component_label(kind_of_sensor) if kind_of_sensor else ''
+        place = sensor_place(kind_of_sensor, region) if kind_of_sensor else ''
         for car_type, per_sensor in units:
             for (t, element), mg in self.shared.sensor.items():
                 if t == car_type:
@@ -1927,7 +2020,10 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
     # is drawn for the robot and split by each joint's share (nothing rescaled); else the G1's joint as weighed.
     drivers = {('small' if 'small' in b.name else 'large'): b for b in apart.boards
                if b.robot == name and b.kind in IN_THE_JOINTS}
+    # The sensors in the joints (the encoders; since E38 point 2 the temperature sensors): their number in the robot,
+    # drawn where their row gives none, spread over the joints by each joint kind's share of the joints.
     encoders = [p for p in apart.sensors if p.robot == name and p.kind in IN_THE_JOINTS]
+    in_joints = {e.name: sensor_count(e, constants, rng, n) for e in encoders}
     # The share of the template the robot takes: on legs or, for a robot on wheels, on wheels (E9.7 point 3).
     modules = (r.mass * r.of(s.constant[schemas.template_quantity(apart, name, JOINT_SHARE)])
                if any(j.share is not None for j in joints) else None)
@@ -1950,16 +2046,25 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             if component == DRIVER_BOARD:
                 r.material(part, kind, ELECTRONICS, kg_here, estimate)
                 area = r.of(s.board_area[j.module]) * scale * j.count
-                # The joint's encoders sit on its driver board: their elements are in its mass (point 3b).
+                # The joint's encoders and temperature sensors sit on its driver board: their elements are in its
+                # mass (point 3b).
                 inside = sum((r.sensor_kg([(t, u) for _, sensor, t, u in apart.elements if sensor == e.name],
-                                          e.count / in_robot * j.count) for e in encoders), np.zeros(n))
-                r.board(kind, drivers[j.module].category, kg_here, area, estimate, inside)
+                                          in_joints[e.name] / in_robot * j.count) for e in encoders), np.zeros(n))
+                # Its ceramic capacitors (E38 point 4): their barium titanate a share of the board's mass, its
+                # elements by the formula, the circuit boards'; taken out of the board's glass and epoxy, its mass
+                # unchanged. Their nickel electrodes, copper and tin are in the board's metals per cm2 (the car's
+                # populated boards), so not added again.
+                titanate = kg_here * r.of(s.titanate_share)
+                for element, share in TITANATE.items():
+                    r.element(kind, element, titanate * share, estimate, ELECTRONICS, element in INTEREST,
+                              CIRCUIT_BOARDS)
+                r.board(kind, drivers[j.module].category, kg_here, area, estimate, inside + titanate)
             else:
                 r.piece(part, kind, component, s.material[component], kg_here, estimate, j.heat_group,
                         s.grade[component])
         for e in encoders:   # their elements only: their mass is inside the joint's components
             units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
-            r.sensor(kind, units, e.count / in_robot * j.count, e.label.startswith('E'))
+            r.sensor(kind, units, in_joints[e.name] / in_robot * j.count, e.label.startswith('E'))
 
     # The parts: of one material or of shares, the cables from their length, the shell a share of the robot's mass, a
     # hydraulic robot's oil its volume times its density. The bodies of hydraulic actuators and the battery follow
@@ -2011,14 +2116,14 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
     # A sensor whose mass no source states is its elements at least (point 3b: the electronics wholly in the elements);
     # its housing, not known, stays in the frame's remainder. A sensor whose number no source states (E31 point 3: the
     # cameras of a robot whose sources count none) has its number drawn, a whole number in every draw, from the
-    # robot's own constant NUMBER_OF + its name (whole_numbers).
+    # robot's own constant NUMBER_OF + its name (whole_numbers); one whose number is written 'A or B' (E38 point 2: an
+    # option) one of them, each as often (sensor_count).
     for e in apart.sensors:
         if e.robot != name or e.kind in IN_THE_JOINTS:
             continue
         units = [(t, u) for _, sensor, t, u in apart.elements if sensor == e.name]
         estimate, column, kind = e.label.startswith('E'), f'{name}: {e.name}', KIND_OF[e.kind]
-        count = (e.count if e.count is not None else
-                 whole_numbers(rng, *constants[schemas.NUMBER_OF + e.name][1], n))
+        count = sensor_count(e, constants, rng, n)
         inside = r.sensor_kg(units, count)
         r.material(column, kind, ELECTRONICS, inside, estimate)
         if None not in e.bounds:
@@ -2026,7 +2131,7 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
             aluminium = (kg - inside) * r.of(s.constant[SENSOR_ALUMINIUM])
             r.material(column, kind, ALUMINIUM, aluminium, estimate)
             r.material(column, kind, 'Plastics', kg - inside - aluminium, estimate)
-        r.sensor(kind, units, count, estimate)
+        r.sensor(kind, units, count, estimate, e.region)
 
     # The hydraulic actuators (EVIDENCE.md E27.7 point 2): each place's actuators as weighed; their valves, boards and
     # sensors drawn above (the rows whose names end with the place); their bodies, rods and seals the remainder, as a
@@ -2259,15 +2364,18 @@ def write_taken_apart(d: Draws, folder: str) -> None:
 # The kinds of part of a robot type taken apart placed in the shared lists' part groups and body regions, so that its
 # tables have the columns of every other robot type (03 compares them): whole kinds, not part by part. Kept so
 # (2026-10-29, "Yes, build them", point 5): no repository reads these tables yet; rough where a kind holds parts of
-# another group (the head's joints in Sensors, the battery management board in Battery), as the notes page says.
+# another group (the battery management board in Battery), as the notes page says. The head joints since 2026-11-06 a
+# kind of their own in Joint drives (E38 point 6), until then in the kind Head, counted as Sensors.
 KIND_PART_GROUP = {'hips': 'Joint drives', 'knees': 'Joint drives', 'ankles': 'Joint drives', 'waist': 'Joint drives',
-                   'arms': 'Joint drives', 'battery': 'Battery', 'boards': 'Computer', 'head': 'Sensors',
+                   'arms': 'Joint drives', 'headjoints': 'Joint drives', 'battery': 'Battery', 'boards': 'Computer',
+                   'head': 'Sensors',
                    'cables': 'Cables', 'frame': 'Frame', 'base': 'Wheels and wheel drives', 'lift': 'Joint drives',
                    # A hydraulic robot's power unit, manifold, oil and hoses drive its joints, as a lift column's motor
                    # (EVIDENCE.md E27.7).
                    'hydraulics': 'Joint drives'}
 # The wheeled base in the body region Base, the lift column in the torso (2026-10-30, "Yes, agree E9.4", point 3).
 KIND_BODY_REGION = {'hips': 'Legs', 'knees': 'Legs', 'ankles': 'Legs', 'waist': 'Torso', 'arms': 'Arms',
+                    'headjoints': 'Head',
                     'battery': 'Torso', 'boards': 'Torso', 'head': 'Head', 'cables': 'Whole body',
                     'frame': 'Whole body', 'base': 'Base', 'lift': 'Torso',
                     'hydraulics': 'Torso'}   # a hydraulic robot's: where its power unit sits (EVIDENCE.md E27.7)
@@ -2927,15 +3035,19 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         'tabs; the boards and components (the electronics) their metals of interest, not the glass, epoxy and bromine '
         'of the board, each element by the component it comes from: the circuit boards, the cameras (their image '
         f"chips, a depth camera's infrared chips and laser diode; {ESTIMATED_CAMERAS_WORDS}), the other sensors "
-        "(encoders, motion sensors, LiDARs, "
-        'microphones, ultrasonic sensors, satellite receivers and modems with their antennas), the cables (their '
-        "conductors and insulation) and the connectors (whose brass keeps its copper fixed in the alloy). "
+        "(joint encoders, motion sensors, LiDARs and time-of-flight sensors, "
+        "microphones, ultrasonic sensors, the hydraulic actuators' position and pressure sensors; the joints' "
+        'temperature sensors, one or two a joint motor; the force and torque sensors, tactile sensors, touch screens, '
+        '4G/5G modems and satellite receivers where their makers state them, an option in half the draws), the cables '
+        "(their conductors and insulation) and the connectors (whose brass keeps its copper fixed in the alloy). "
+        "Each joint's driver board holds its ceramic capacitors, their barium titanate a share of its mass in place "
+        "of glass and epoxy (8 to 24 capacitors in a board of the size of the G1's small joint). "
         + LIGHT_ALLOY_NOTE + ' ' + MAGNETS_NOTE + ' '
         + (f"In part: {', '.join(partly)}. " if partly else '')
         + 'These stay materials: ' + (', '.join(missing) + '.' if missing else 'none.'),
         "The tables by part group and by body region (in the draws of the robot type): the type's kinds of part, each "
-        "placed whole; rough where a kind holds parts of another group: the head's joints are counted as sensors, the "
-        'battery management board as battery.',
+        "placed whole; rough where a kind holds parts of another group: the battery management board as battery; the "
+        'head joints in the joint drives.',
         'The material pages: each material in one robot; the steels and the aluminium alloys as their material only '
         f"(their grades on the pages of where each sits and in the alloys table; the aluminium by the type's recipe: "
         f"{d.aluminium}); the NdFeB magnets then by the grade class each joint's heat draws, the other materials by "
@@ -3133,12 +3245,12 @@ ELEMENT_PANELS = 6   # panels a page of the element figure, three across and two
 
 def place_view(places: dict, view: str) -> dict:
     """The places of one panel of the element figure (E38 point 5): all ('all'); the sensors' kinds alone ('sensors');
-    every other place, where the magnets sit ('magnets')."""
-    sensors = {component_label(k) for k in SENSOR_KINDS}
+    every other place, where the magnets sit ('magnets'); a sensor's place by kind or by kind and region alike
+    (sensor_of_place)."""
     if view == 'sensors':
-        return {p: kg for p, kg in places.items() if p in sensors}
+        return {p: kg for p, kg in places.items() if sensor_of_place(p)}
     if view == 'magnets':
-        return {p: kg for p, kg in places.items() if p not in sensors}
+        return {p: kg for p, kg in places.items() if not sensor_of_place(p)}
     return places
 
 
@@ -3209,7 +3321,9 @@ def places_order() -> list:
     """The places of the pages of where the critical elements sit, in their order: the kinds of part, then the
     electronics' components (E32), the sensors by their kind in place of the cameras and the other sensors (E38),
     each by its label."""
-    return (list(KINDS) + [component_label(CIRCUIT_BOARDS)] + [component_label(k) for k in SENSOR_KINDS]
+    return (list(KINDS) + [component_label(CIRCUIT_BOARDS)]
+            + [p for k in SENSOR_KINDS for p in [component_label(k)] + [component_label(f'{k}, {w}')
+                                                                       for w in REGION_WORDS.values()]]
             + [component_label(c) for c in (CABLE_PARTS, CONNECTORS)])
 
 
@@ -3224,8 +3338,8 @@ def place_colour(place: str) -> str:
     (MATERIAL_COLOURS), as on the element pages."""
     if place in KINDS:
         return KINDS[place][1]
-    sensor = place.replace(f'{ELECTRONICS}: ', '', 1)
-    return SENSOR_KINDS[sensor] if sensor in SENSOR_KINDS else MATERIAL_COLOURS[place]
+    sensor = sensor_of_place(place)   # its kind's colour in every region (E38 point 7)
+    return SENSOR_KINDS[sensor] if sensor else MATERIAL_COLOURS[place]
 
 
 def place_keys(d: Draws) -> list:
@@ -3348,7 +3462,7 @@ def element_page(d: Draws, page: list, number: int, of: int):
     figure, axes = plt.subplots(2, columns, figsize=APART_PAGE, squeeze=False)
     drawn = set()
     for k, (symbol, name, view) in enumerate(page):
-        places = place_view(by_place(d, symbol), view)
+        places = place_view(merge_regions(by_place(d, symbol)), view)   # the sensors by kind (E38 point 7)
         drawn |= set(places)
         words = f'{name} ({symbol})' + {'magnets': ' in the magnets', 'sensors': ' in the sensors'}.get(view, '')
         stacked_panel(axes[k // columns, k % columns], places, textwrap.fill(words, FIGURE_TITLE_WIDTH),

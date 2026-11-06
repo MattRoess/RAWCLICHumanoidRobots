@@ -33,7 +33,14 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
         'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'output.parts_dir',
-        'output.parts_figures_dir', 'output.robot_types_with_pages'}
+        'output.parts_figures_dir', 'output.robot_types_with_pages',
+        # 04's (2026-11-06, EVIDENCE.md E42, E43): the article's robots, the lifetimes, the hours, the battery packs,
+        # the research share, its folders; the world's production and reserves it draws, read where they lie.
+        'stock_and_flow.robots', 'stock_and_flow.robot_lifetime_years', 'stock_and_flow.hours_a_day',
+        'stock_and_flow.joint_life_hours', 'stock_and_flow.battery_cycles_to_80', 'stock_and_flow.battery_replaced_below',
+        'stock_and_flow.runtime_2025_hours', 'stock_and_flow.research_share_2025', 'stock_and_flow.research_share_2040',
+        'output.stock_and_flow_dir', 'output.stock_and_flow_figures_dir', 'data.data_center_scenarios',
+        'data.usgs_commodities'}
 
 
 class TestSettings(unittest.TestCase):

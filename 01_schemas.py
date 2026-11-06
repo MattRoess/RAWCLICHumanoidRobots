@@ -135,6 +135,11 @@ STAGES = [
     ('01_schemas.py', '01 Checks', '01_schemas.py: every input checked, these pages'),
     ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} draws, each robot taken apart from its own parts'),
     ('03_comparison.py', '03 Comparison', '03_comparison.py: the six robot types side by side, from the draws of 02'),
+    # Since 2026-11-06 (Matthias: "Use the numbers in the article", "Yes, build it", "Yes, replace joints";
+    # EVIDENCE.md E42, E43): the robots of ai-2040.com Plan A, their joint sets and battery packs, and the elements in
+    # them, each robot one of 02's draws of its type.
+    ('04_stock_and_flow.py', '04 Stock and flow', '04_stock_and_flow.py: the robots of ai-2040.com Plan A and their '
+                                                  'elements, from the draws of 02'),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -1536,18 +1541,23 @@ JOINT_SHARE = 'Joint modules, share of the robot mass'
 TEMPLATE_OUTSIDE = {'hand', 'gripper', 'wheel', 'steering', 'lift'}
 ENERGY_PER_KG = 'Battery energy per kg of robot'
 # A robot on wheels (it has a joint of the wheeled base) takes the template on wheels, type 2's own for its robots on
-# wheels (EVIDENCE.md E9.6 point 3, agreed 2026-10-30): its joint share, its energy per kg of robot; and a lift column
-# whose maker gives it no mass is a share of its mass (point 7).
+# wheels (EVIDENCE.md E9.6 point 3, agreed 2026-10-30): its joint share, its energy per kg of robot, their names the
+# template's with ON_WHEELS added where read (template_quantity); and a lift column whose maker gives it no mass is a
+# share of its mass (point 7).
 ON_WHEELS = ', on wheels'
-JOINT_SHARE_ON_WHEELS = JOINT_SHARE + ON_WHEELS
-ENERGY_PER_KG_ON_WHEELS = ENERGY_PER_KG + ON_WHEELS
 LIFT_SHARE = 'Lift column, share of the robot mass' + ON_WHEELS
 SHELL_SHARE = 'Shell, share of the robot mass'
+# The ceramic capacitors of a joint's driver board (Matthias, 2026-11-06, "Yes, all three"; EVIDENCE.md E38 point 4):
+# their number in the G1's small joint's board, weighed 12.8 g (a whole number in every draw), and the barium titanate
+# of one, mg; every other driver board the same share of its mass. tools/parts_taken_apart.py writes the same names.
+CAPACITORS = "Ceramic capacitors in a driver board (the G1's small joint's, weighed)"
+CAPACITOR_TITANATE = 'Ceramic capacitor, its barium titanate'
 APART_SHARED_CONSTANTS = ('Board mass per cm2 (boards not weighed)', "Copper share of a board's mass",
                           'Power conductor cross-section (2 conductors)',
                           'Signal conductor cross-section (2 conductors)', 'Copper density',
                           'Insulation and jackets, per mass of copper', 'Sensor housing, aluminium share',
-                          'Board rest, glass fibre share', 'Board rest, bromine share')
+                          'Board rest, glass fibre share', 'Board rest, bromine share', CAPACITORS,
+                          CAPACITOR_TITANATE)
 # The rest of a board beyond its metals (2026-10-29, "Yes, enter them", point 3b; EVIDENCE.md E5.21): glass fibre and
 # bromine each a share of it, epoxy their remainder, the glass and the epoxy by these recipes of the element recipes.
 BOARD_GLASS, BOARD_BROMINE = 'Board rest, glass fibre share', 'Board rest, bromine share'
@@ -1654,6 +1664,7 @@ class ApartPart:
     label: str
     sources: str
     grade: str = ''       # the grade of its material whose element recipe it follows (Parts only; '' where none)
+    either: tuple = ()    # a sensor's number written 'A or B' (E38 point 2): its numbers, each as often; () otherwise
 
 
 @dataclass
@@ -1785,7 +1796,8 @@ def read_parts_taken_apart(path: str) -> PartsTakenApart:
     boards = [ApartPart('Boards', r, text(v[0]), text(v[1]), number(v[2]), text(v[3]), text(v[4]), triple_of(v[5:8]),
                         '', text(v[8]), text(v[9]), text(v[10]), text(v[11])) for r, v in rows['Boards']]
     sensors = [ApartPart('Sensors', r, text(v[0]), text(v[1]), number(v[2]), text(v[3]), text(v[4]),
-                         triple_of(v[5:8]), '', '', '', text(v[8]), text(v[9])) for r, v in rows['Sensors']]
+                         triple_of(v[5:8]), '', '', '', text(v[8]), text(v[9]), either=either_of(v[2]))
+               for r, v in rows['Sensors']]
     shares = [ShareRow(row=r, item=text(v[0]), material=text(v[1]), grade=text(v[2]), share=triple_of(v[3:6]),
                        remainder=text(v[6]).lower() == 'yes', label=text(v[7])) for r, v in rows['Shares']]
     elements = [(r, text(v[0]), text(v[1]), number(v[2])) for r, v in rows['SensorElements']]
@@ -1801,6 +1813,14 @@ def read_parts_taken_apart(path: str) -> PartsTakenApart:
 def alternatives(value: str) -> list:
     """The materials or grades a cell names: 'A or B' is either (OR), each as often; one name otherwise."""
     return [piece.strip() for piece in value.split(OR)] if value else []
+
+
+def either_of(value) -> tuple:
+    """The numbers a sensor's cell 'Number in the robot' writes as 'A or B' (EVIDENCE.md E38 point 2: an option of
+    the robot, or a maker's reading that can mean either, '0 or 10'), each drawn as often by 02; () for a number or an
+    empty cell. A piece that is no number stays None, for the checks to name."""
+    written = text(value)
+    return tuple(number(piece) for piece in alternatives(written)) if OR in written else ()
 
 
 def on_wheels(apart: PartsTakenApart, robot: str) -> bool:
@@ -2066,7 +2086,17 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         faults += region_faults(on, p.row, what, p.region, lists)
         # A sensor's number drawn (E31 point 3): no number in its row, its constant NUMBER_OF + its name instead.
         drawn = p.sheet == 'Sensors' and NUMBER_OF + p.name in apart.constants.get(p.robot, {})
-        if p.count is None and p.sheet == 'Sensors' and not drawn:
+        if p.either:
+            # Its number written 'A or B' (E38 point 2): two numbers or more, each whole from 0 up, one from 1 up (a
+            # robot of that option holds the sensor); never with a constant to draw it from as well.
+            if drawn:
+                faults.append(Fault(on, p.row, f"{what}: its number written 'A or B' and its '{NUMBER_OF}{p.name}' "
+                                               'among its constants: give one.'))
+            if len(p.either) < 2 or any(v is None or v < 0 or v != int(v) for v in p.either) or max(
+                    v or 0 for v in p.either) < 1:
+                faults.append(Fault(on, p.row, f"{what}: a number in the robot written 'A or B' must name two whole "
+                                               'numbers or more from 0 up, one of them from 1 up.'))
+        elif p.count is None and p.sheet == 'Sensors' and not drawn:
             faults.append(Fault(on, p.row, f"{what}: no number in the robot, and no '{NUMBER_OF}{p.name}' among its "
                                            'constants to draw it from.'))
         elif p.count is not None and drawn:
@@ -2128,6 +2158,10 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         if quantity not in shared:
             faults.append(Fault(on, 0, f"'{quantity}' is missing (for {ALL_ROBOTS}); the stage that draws the file "
                                        'needs it.'))
+    # The capacitors of a driver board are counted: whole numbers from 1 up, drawn whole by 02 (E38 point 4).
+    if CAPACITORS in shared and any(v is None or v < 1 or v != int(v) for v in shared[CAPACITORS][1]):
+        faults.append(Fault(on, shared[CAPACITORS][0], f"'{CAPACITORS}': its min, mode and max must be whole numbers "
+                                                       f'from 1 up, not {shared[CAPACITORS][1]}.'))
     if BOARD_GLASS in shared and BOARD_BROMINE in shared:   # the epoxy, their remainder, above zero in every draw
         highest = (shared[BOARD_GLASS][1][2] or 0) + (shared[BOARD_BROMINE][1][2] or 0)
         if highest >= 1:
@@ -2188,7 +2222,9 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
     for robot, given in apart.constants.items():
         for quantity, (row, values, _, label, _) in given.items():
             faults += label_faults(on, row, f'{robot}, {quantity}', label)
-            faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E')
+            # A sensor's drawn number is cut at one, a stated limit: its row says the robot holds it (E38 point 2).
+            faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E',
+                                    floor=1.0 if quantity.startswith(NUMBER_OF) else None)
             # A sensor's drawn number (E31 point 3): of a sensor of the robot, whole numbers from 1 up, never 0 (a
             # robot with cameras holds one at least).
             if quantity.startswith(NUMBER_OF):
@@ -3397,6 +3433,10 @@ KINDS = {
     'ankles': ('Ankle joints', '#7BAFDE'),
     'waist': ('Waist joints', '#4EB265'),
     'arms': ('Arm joints and hands', '#CAE0AB'),
+    # The head joints a kind of their own (Matthias, 2026-11-06: "Nd is in the head joint and not just in the head",
+    # "Yes do it"; EVIDENCE.md E38 point 6), until then in the kind Head: in a colour of the same discrete rainbow not
+    # used before, the one that stands furthest (CIE Lab) from every colour of the pages of where the elements sit.
+    'headjoints': ('Head joints', '#A5170E'),
     'battery': ('Battery pack', '#72190E'),
     'boards': ('Boards and computers', '#F4A736'),
     'head': ('Head', '#E8601C'),
@@ -3418,14 +3458,15 @@ PART_KIND = {'Hips': 'hips', 'Knees': 'knees', 'Waist': 'waist', 'Arms': 'arms',
 # What each kind holds, in plain words, for 01's page of robot type 1.
 KIND_HOLDS = {
     'hips': 'each joint a motor (copper winding, electrical steel, magnets), gears, bearings, a housing, a driver '
-            'board and two encoders',
+            'board and its sensors (encoders, temperature sensors)',
     'knees': 'made as the hip joints',
     'ankles': 'made as the hip joints',
     'waist': 'made as the hip joints',
     'arms': 'the shoulder, elbow and wrist joints, made as the hip joints; the hands or grippers',
     'battery': 'the cells, their housing with nickel strips, busbars and wires, the battery management board',
     'boards': 'the computer and power boards, their fans and heat sinks, the motion sensors',
-    'head': 'the cameras, depth cameras, LiDAR, microphones and speaker, the head board, the head joints',
+    'headjoints': 'the joints of the head and neck, made as the hip joints',
+    'head': 'the cameras, depth cameras, LiDAR, microphones and speaker, the head board',
     'cables': 'the cables (copper and insulation), their connectors, the small boards in the legs',
     'frame': 'the frame (aluminium, steel, titanium), the shell (plastics), screws, pins and bearings',
     'base': 'the wheels with their hub motors, the steering motors (each made as a joint), the casters, the sensors '
@@ -3437,7 +3478,8 @@ KIND_HOLDS = {
 # The kind of a joint, by the first word of its name in the sheet Joints: the head and neck joints in the head, the
 # X1's grippers drawn as joints with the arms (2026-10-29, "Yes, build it").
 JOINT_KIND = {'hip': 'hips', 'knee': 'knees', 'ankle': 'ankles', 'waist': 'waist', 'shoulder': 'arms',
-              'elbow': 'arms', 'wrist': 'arms', 'gripper': 'arms', 'hand': 'arms', 'head': 'head', 'neck': 'head',
+              'elbow': 'arms', 'wrist': 'arms', 'gripper': 'arms', 'hand': 'arms', 'head': 'headjoints',
+              'neck': 'headjoints',
               'wheel': 'base', 'steering': 'base', 'lift': 'lift'}
 # The NdFeB grade classes for 150 °C and above (RAWCLICVehicleTractionMotor's sheet PermanentMagnetNdFeB): a joint
 # whose heat group draws one of them in most draws is ringed red on the robot.
@@ -3450,12 +3492,13 @@ KIND_INK = '#222222'                          # the marks' lines and letters
 SPOTS = {'hips': [(-0.06, 0.475), (0.06, 0.475)], 'knees': [(-0.065, 0.27), (0.065, 0.27)],
          'ankles': [(-0.065, 0.06), (0.065, 0.06)], 'waist': [(0.0, 0.565)],
          'arms': [(-0.16, 0.81), (-0.175, 0.64), (-0.185, 0.475), (0.16, 0.81), (0.175, 0.64), (0.185, 0.475)],
-         'battery': [(-0.07, 0.62)], 'boards': [(0.07, 0.75)], 'head': [(0.0, 0.925)],
+         'battery': [(-0.07, 0.62)], 'boards': [(0.07, 0.75)], 'head': [(0.0, 0.925)], 'headjoints': [(0.0, 0.855)],
          'cables': [(0.075, 0.62)], 'frame': [(-0.07, 0.75)],
          'base': [(0.225, 0.075)], 'lift': [(0.225, 0.24)], 'hydraulics': [(0.0, 0.685)]}
-MARKS = {'hips': '1', 'knees': '2', 'ankles': '3', 'waist': '4', 'arms': '5', 'battery': 'A', 'boards': 'B',
+MARKS = {'hips': '1', 'knees': '2', 'ankles': '3', 'waist': '4', 'arms': '5', 'headjoints': '6', 'battery': 'A',
+         'boards': 'B',
          'head': 'C', 'cables': 'D', 'frame': 'E', 'base': 'F', 'lift': 'G', 'hydraulics': 'H'}
-DARK = {'hips', 'knees', 'battery', 'cables', 'head', 'lift'}   # the kinds whose colour takes white text
+DARK = {'hips', 'knees', 'headjoints', 'battery', 'cables', 'head', 'lift'}   # the kinds whose colour takes white text
 # The base on wheels drawn beside the robot's feet for a type that has robots on wheels (E9.7 point 9, open point B), in
 # the body's units: the base (across from, to; up from, to), its two wheels (across; their radius), and the lift column
 # above it (across from, to; up to).
@@ -3818,12 +3861,14 @@ SCREEN_CHARS = 9.0                 # characters of 14-point text in an inch, for
 # Paul Tol's "light" scheme, as published: the inputs Matthias holds, the sibling projects' data, the stages, what
 # they write, what is not yet worked on.
 TOL_LIGHT = {'his': '#EEDD88', 'sibling': '#99DDFF', 'stage': '#77AADD', 'output': '#44BB99', 'later': '#DDDDDD'}
-SCREEN_INK, SCREEN_MUTED = '#222222', '#555555'
+SCREEN_INK = '#222222'
 # Words of the project no page of 01 or 02 may show (his figure rule: no code names, no project jargon): file names,
 # sections of EVIDENCE.md, the label of an estimate, the sibling files' numbers. The faults pages may name a sheet of
-# his files, as they say where a fault is (2026-10-29, "Yes, build them", point 7). The tests check every page.
-PROJECT_WORDS = ('.md', '.xlsx', 'EVIDENCE', 'SHARED_LISTS', 'point ', '(E)', 'E5.', 'E2.', 'E1.', 'sheet ', '04_',
-                 '07_', 'documentation/')
+# his files, as they say where a fault is (2026-10-29, "Yes, build them", point 7). The tests check every page. The
+# sibling files' numbers as they stand in the headings, "(RAWCLICVehicleElectronics 04_)" and "07_, sheet", since
+# 2026-11-06 the stage 04_stock_and_flow.py, whose name the overview shows as it shows 01's to 03's.
+PROJECT_WORDS = ('.md', '.xlsx', 'EVIDENCE', 'SHARED_LISTS', 'point ', '(E)', 'E5.', 'E2.', 'E1.', 'sheet ', '04_)',
+                 '07_,', 'documentation/')
 
 
 def screen_page():
@@ -3870,15 +3915,14 @@ def taken_count(n: int, register: list | None, apart) -> tuple:
 
 def open_words(register: list | None, aparts: dict | None) -> str:
     """overview_2's line of what is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"): the robot
-    types with robots with a mass not yet taken apart, each with how many (taken_count), then the stock-and-flow model,
-    04 (since 2026-11-05: 03 built; Matthias, 2026-11-04, "04 will then be the stock and flow model")."""
+    types with robots with a mass not yet taken apart, each with how many (taken_count). The stock-and-flow model, 04,
+    named here until it was built (2026-11-06, EVIDENCE.md E42)."""
     left = [f'{n} ({with_mass - taken})' for n in sorted(aparts or {})
             for taken, with_mass, _ in [taken_count(n, register, aparts[n])] if taken < with_mass]
     if not left:
-        return 'Open: the stock-and-flow model (04).'
+        return 'Open: nothing.'
     listed = left[0] if len(left) == 1 else ', '.join(left[:-1]) + ' and ' + left[-1]
-    return (f"Open: robots with a mass not yet taken apart in robot type{'s' if len(left) > 1 else ''} {listed}; then "
-            'the stock-and-flow model (04).')
+    return f"Open: robots with a mass not yet taken apart in robot type{'s' if len(left) > 1 else ''} {listed}."
 
 
 def template_shares(apart) -> tuple:
@@ -3966,30 +4010,33 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
         ('The robot types part by part', "each robot type's robots with a mass, each from its own parts; from the "
                                          "makers' sources, a builder per type", 'his'),
         ('The element recipes', 'what each material is made of, element by element', 'his'),
-        ('The sibling projects', 'car boards and sensors, data-centre tantalum, traction-motor magnets and steels',
-         'sibling'),
+        ('The sibling projects', 'car boards and sensors, data-centre tantalum, traction-motor magnets and steels; '
+                                 "the world's production and reserves", 'sibling'),
     ]
     stages = [(title, words.format(draws=f'{params.composition.draws:,}')) for _, title, words in STAGES]
-    # What each stage writes, by the stage that writes it (its place in STAGES): 02 the draws and its pages, 03 its.
+    # What each stage writes, by the stage that writes it (its place in STAGES): 02 the draws and its pages, 03 its,
+    # 04 its draws and pages.
     outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw', 2),
                ('The pages of the robot types taken apart', 'their elements and materials in one robot; where '
                                                             'their critical elements and each material sit', 2),
-               ('The comparison pages', 'the six robot types side by side, one item a page', 3)]
+               ('The comparison pages', 'the six robot types side by side, one item a page', 3),
+               ('The robots and their elements in the world', 'in use, built and out, 2025 to 2040, beside the '
+                                                              "world's production and reserves", 4)]
     left, middle, right, width = 0.4, 6.3, 11.2, 5.1
     tops = [1.1 + k * 1.42 for k in range(len(inputs))]
-    stage_tops = [1.1 + k * 1.75 for k in range(len(stages))]   # four stages in the height of five inputs
+    stage_tops = [1.1 + k * 1.42 for k in range(len(stages))]   # five stages beside the five inputs
     for k, ((title, text, colour), y) in enumerate(zip(inputs, tops)):
         screen_box(axes, left, y, width, title, text, TOL_LIGHT[colour], 1.3)
         # Each read by 01, then by 02: its arrow into 01's box.
         screen_arrow(axes, (left + width, y + 0.65), (middle, stage_tops[1] + 0.15 + k * 0.28))
     for k, ((title, text), y) in enumerate(zip(stages, stage_tops)):
-        screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], 1.45)
+        screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], 1.32)   # three lines of text
         if k:
-            screen_arrow(axes, (middle + 2.0, y - 0.3), (middle + 2.0, y))
+            screen_arrow(axes, (middle + 2.0, y - 0.1), (middle + 2.0, y))
     for k, (title, text, stage) in enumerate(outputs):
-        y = 2.5 + k * 1.95
+        y = 1.1 + k * 1.75
         screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT['output'], 1.55)
-        screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.72), (right, y + 0.78))
+        screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.6), (right, y + 0.78))
     legend = [('his', 'Matthias\'s inputs'), ('sibling', 'the sibling projects\' data'), ('stage', 'the stages, run '
               'by pressing Run'), ('output', 'what they write')]
     x = 0.4

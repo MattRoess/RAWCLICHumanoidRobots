@@ -427,6 +427,15 @@ SHARED_CONSTANTS_LAST = [
     ('all', 'Board rest, bromine share', 0.044, 0.088, 0.132, 'share', 'E',
      'about 15 % TBBPA in an FR-4 laminate (Danish EPA 1999), 58.8 % of it bromine; half to 1.5 times (EVIDENCE.md '
      'E5.21; point 3b)'),
+    # The ceramic capacitors of a joint's driver board (Matthias, 2026-11-06, "Yes, all three"; EVIDENCE.md E38 point
+    # 4): their number in the G1's small joint's board (weighed 12.8 g), a whole number 02 draws, every other driver
+    # board the same share of its mass; the barium titanate of one by its case size. 01_schemas.py reads the same names
+    # (CAPACITORS, CAPACITOR_TITANATE).
+    ('all', "Ceramic capacitors in a driver board (the G1's small joint's, weighed)", 8, 16, 24, 'capacitors', 'E',
+     "E38-BKZ, E38-MJB, E38-TI: Ben Katz's Cheetah driver 8 in 1206, mjbots' moteus 16 of 10 µF in 1206, TI's humanoid "
+     'joint drive "seventeen 10μF ceramic capacitors"; up to 1.5 times (EVIDENCE.md E38 point 4)'),
+    ('all', 'Ceramic capacitor, its barium titanate', 14.44, 39.67, 72.49, 'mg', 'S',
+     'E38-KEM: barium titanate of one MLCC by its case size, 0805 / 1206 / 1210 (EVIDENCE.md E38 point 4)'),
 ]
 
 # --- Sources: those the shared rows cite ---------------------------------------------------------------------
@@ -937,6 +946,203 @@ CAMERAS_ESTIMATED = {
 }
 
 
+# --- The sensors the makers state, robot by robot, and every robot's temperature sensors (EVIDENCE.md E38 point 2) ---
+# Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "It is cameras
+# LiDAR temperature and other sensor typoes. We have them all in the. car lectronic sensors"; to the table of E38
+# point 2, "Yes, all three". The makers' own pages, manuals and SDK files, read first-hand by a reading agent
+# (VERIFICATION.md V193). Each robot its own rows, added by robot_rows() whatever its type:
+#   TEMPERATURE: every robot with electric joints its temperature sensors in the joints, like the encoders (their car
+#     sensor elements only, their mass inside the driver board): two a joint motor where its maker's SDK gives two
+#     readings, one where it gives one (TEMPERATURE_PER_MOTOR, S); every other robot one a motor most often, half to
+#     twice as many (temperature_number), a whole number 02 draws from the robot's constant NUMBER_OF +
+#     TEMPERATURE_SENSOR (E: half, as every estimate, a drive that watches its power stage only; two, as Unitree's
+#     "surface and winding");
+#   SENSORS_STATED: the other sensors as their makers state them: a number stated, S; an option of the robot, or a
+#     reading that can mean either, written 'A or B' (02 draws one, each as often), S, E; a sensor stated without its
+#     number, a row without a number and the robot's constant (SENSORS_NUMBER), E.
+# No maker states a mass: their car sensor elements only, their housings in the frame's remainder. Each its car sensor
+# type of RAWCLICVehicleElectronics' 07_, the nearest where it is not the same kind (said beside it).
+TEMPERATURE_SENSOR = 'Temperature sensor'
+TEMPERATURE = [('temperature sensor', 1)]          # an NTC thermistor, the car's
+TEMPERATURE_SOURCE = ("E38 point 2: its maker states no number; one a joint motor most often, half to twice as many, a "
+                      'whole number drawn (E: half, as every estimate, a drive that watches its power stage only; two, '
+                      "as Unitree's, in the winding and on the surface)")
+UNITREE_TWO = ('E38-UNS "short temperature[2]; // Motor temperature (surface and winding)" (its SDK, the G1\'s family; '
+               'its H2 and R1 examples print both)')
+# (The G1 and the G1+ are written by type 1's builder, with UNITREE_TWO.)
+TEMPERATURE_PER_MOTOR = {
+    **{robot: (2, UNITREE_TWO) for robot in (
+        'Unitree G1-D Ultimate', 'Unitree H1-2', 'Unitree H2', 'Unitree H2 Plus',
+        'Unitree H2-D Flagship', 'Unitree H2-X Core i7', 'Unitree H2-X Orin NX', 'Unitree R1', 'Unitree R1-A5-D',
+        'Unitree R1-A7-D')},
+    'Unitree H1': (1, 'E38-UNH "int8 temperature" (its SDK\'s motor state, one a motor)'),
+    **{robot: (1, 'E38-BOS "uint8_t m_temperature" (its SDK\'s motor state, one a joint)') for robot in (
+        'Booster T1', 'Booster T2', 'Booster K1 2 Ah', 'Booster K1 5 Ah')},
+}
+FORCE_SIX_AXIS = [('force sensor', 6)]   # one strain-gauge element an axis (E: the car list has no six-axis sensor)
+FORCE_JOINT = [('force sensor', 1)]      # a joint torque sensor's strain gauges (E: the car's torque sensor is a
+                                         # steering column's Hall sensor, another kind)
+TACTILE_ARRAY = [('pressure/force sensor', 1)]   # a tactile array of a finger or a palm (E: the car's thin-film
+                                                 # haptic sensor, the nearest)
+TACTILE_PAD = [('capacitive sensor', 1)]         # a tactile sensor of the head or torso (E: the car's capacitive sensor)
+TOUCH_SCREEN = [('capacitive touch sensor', 1), ('touch controller', 1)]
+MODEM = [('cellular modem', 1)]
+SATELLITE = [('GNSS receiver', 1)]
+
+
+def temperature_number(motors: int) -> tuple:
+    """The min, mode and max of the temperature sensors of a robot of `motors` joint motors whose maker states none
+    (E): one a motor most often, half of them (whole) to two a motor."""
+    return motors // 2, motors, 2 * motors
+
+
+def wrists(count, label: str, source: str) -> tuple:
+    """Six-axis force sensors at the wrists."""
+    return ('Six-axis force sensor, wrists', count, 'Arms', 'Arms', None, label, source, FORCE_SIX_AXIS)
+
+
+def hands(count, label: str, source: str) -> tuple:
+    """The tactile arrays of the hands, one a finger (or a palm) as the makers that count them."""
+    return ('Tactile sensor array, hands', count, 'Arms', 'Arms', None, label, source, TACTILE_ARRAY)
+
+
+def torso(name: str, count, label: str, source: str, units: list) -> tuple:
+    """A sensor in the torso (kind Boards, as the motion sensors)."""
+    return (name, count, 'Boards', 'Torso', None, label, source, units)
+
+
+HANDS_NOT_COUNTED = ('its maker states touch in its hands, not how many: one array a hand to one a finger, the mode '
+                     'between (E)')
+SENSORS_STATED = {
+    'UBTECH Walker S1': [
+        wrists(2, 'S', 'E38-UBS1 "Six-axis Force Sensor*2" (its spec figure, at the wrists)'),
+        ('Six-axis force sensor, ankles', 2, 'Ankles', 'Legs', None, 'S',
+         'E38-UBS1 "Six-axis Force Sensor*2" (its spec figure a second time, at the ankles)', FORCE_SIX_AXIS),
+        hands('6 or 12', 'S, E', 'E38-UBS1 "6 Tactile Sensor Array for Pressure Sensing"; a hand or the robot not '
+                                 'stated: 6 or 12, each as often (E)')],
+    'UBTECH Walker S2': [wrists(2, 'S', 'E38-UBS2 "Six-axis Force Sensor*2" (its spec figure, at the wrists)')],
+    'Galbot G1': [wrists(2, 'S', 'E38-GAL "6-Axis Force Sensor ×2", "WRIST (LEFT + RIGHT COMBINED)"'),
+                  torso('Touch screen', 1, 'S', 'E38-GAL "5.5-inch Touchscreen"; its place not stated: the torso (E)',
+                        TOUCH_SCREEN)],
+    'Kepler K2': [wrists('0 or 2', 'S, E', 'E38-KPK "Six-axis force sensor per wrist", "Six-Axis Force: - / 2 / 2" (none '
+                                           'on its basic version): 0 or 2, each as often (E)'),
+                  hands(10, 'S', 'E38-KPK "25 high-resolution tactors per finger": an array a finger, two hands')],
+    'EngineAI SE01': [wrists(None, 'E', 'E38-EAS "High-Precision Force Control Sensor": its number and place not '
+                                        'stated; at the wrists as the makers that place theirs (E)')],
+    'AgiBot G2': [('Joint torque sensor, arms', 14, 'Arms', 'Arms', None, 'S',
+                   'E38-AGM "每个关节都配备有关节力矩传感器" (each joint a joint torque sensor), 7 joints an arm',
+                   FORCE_JOINT),
+                  torso('4G/5G modem', '0 or 1', 'S, E', 'E38-AGM "4G/5G 选配" (an option), its SIM slot on the back '
+                                                         'panel: 0 or 1, each as often (E)', MODEM)],
+    'Figure AI Figure 03': [hands(10, 'S', 'E38-F03 "Each fingertip sensor can detect forces as small as three grams": '
+                                           'one a fingertip')],
+    'Leju Kuavo 5': [hands('0 or 10', 'S, E', 'E38-LJK "一共5个，每个手指一个" (five a hand, one a finger) with its touch '
+                                              'hand, an option: 0 or 10, each as often (E)')],
+    'Unitree H1-2': [hands('0 or 12', 'S, E', 'E38-UND "94 tactile sensors per hand" (palm, pads, tips and roots) of '
+                                              'its Dex5-1 hand, an option: an array a finger and the palm, 0 or 12, '
+                                              'each as often (E)')],
+    'EngineAI T800 Dev': [hands(None, 'E', 'E38-EAT "integrated tactile sensing"; ' + HANDS_NOT_COUNTED)],
+    'EngineAI T800 PRO': [hands(None, 'E', 'E38-EAT "integrated tactile sensing"; ' + HANDS_NOT_COUNTED)],
+    'Sanctuary Phoenix': [hands(None, 'E', 'E38-SAP "haptic technology that mimics the sense of touch"; '
+                                           + HANDS_NOT_COUNTED)],
+    'Sanctuary Phoenix Gen 8': [hands(None, 'E', 'E38-SAP "haptic technology that mimics the sense of touch"; '
+                                                 + HANDS_NOT_COUNTED)],
+    'Boston Dynamics Atlas': [hands(None, 'E', 'E38-BDA "Tactile and 360° camera view"; ' + HANDS_NOT_COUNTED)],
+    'Fourier GR-3': [('Tactile sensor, head', 16, 'Head', 'Head', None, 'S',
+                      'E38-FGR "GR-3头部与躯干共分布31个触觉传感器" (31 in head and torso), 16 in the head', TACTILE_PAD),
+                     torso('Tactile sensor, torso', 15, 'S', 'E38-FGR "31个触觉传感器" in head and torso, 15 in the '
+                                                             'torso', TACTILE_PAD)],
+    'MagicLab MagicBot Z1': [('Tactile sensor, head', None, 'Head', 'Head', None, 'E',
+                              'E38-MLZ "Head Tactile Sensor", its number not stated (E)', TACTILE_PAD)],
+    'EngineAI PM01': [torso('Touch screen', '0 or 1', 'S, E', 'E38-EAP "Touch Screen (Chest)": √ in its Education '
+                                                              'edition, "/" in another: 0 or 1, each as often (E)',
+                            TOUCH_SCREEN)],
+    'MagicLab MagicBot Gen1': [torso('4G/5G modem', 1, 'S', 'E38-MLG "4G/5G Module: 5G"', MODEM)],
+    'PNDbotics Adam Lite': [torso('4G/5G modem', '0 or 1', 'S, E', 'E38-PND "兼容 5G" (compatible with 5G): 0 or 1, each '
+                                                                   'as often (E)', MODEM)],
+    'PNDbotics Adam SP': [torso('4G/5G modem', '0 or 1', 'S, E', 'E38-PND "兼容 5G" (compatible with 5G): 0 or 1, each '
+                                                                 'as often (E)', MODEM)],
+    'Xiaomi CyberOne': [torso('Satellite receiver', 1, 'S', 'E38-XMC "Supports real-time GPS synchronization"; its place '
+                                                           'not stated: the torso (E)', SATELLITE)],
+}
+# The numbers 02 draws, a whole number in every draw, of the sensors stated without one (E).
+SENSORS_NUMBER = {
+    ('EngineAI SE01', 'Six-axis force sensor, wrists'): (1, 2, 4),
+    **{(robot, 'Tactile sensor array, hands'): (2, 6, 10) for robot in (
+        'EngineAI T800 Dev', 'EngineAI T800 PRO', 'Sanctuary Phoenix', 'Sanctuary Phoenix Gen 8',
+        'Boston Dynamics Atlas')},
+    ('MagicLab MagicBot Z1', 'Tactile sensor, head'): (1, 1, 2),
+}
+# The sources E38's rows cite, each a row of the sheet Sources of every file whose rows cite it (sheets()).
+E38_SOURCES = {
+    'E38-UNS': ('E38-UNS', 'Unitree, G1 developer guide, basic services interface (LowState, MotorState: "short '
+                           'temperature[2]; // Motor temperature (surface and winding)"); its SDK examples of the H2 '
+                           'and R1', 'https://support.unitree.com/home/en/G1_developer/basic_services_interface',
+                "Manufacturer's SDK documentation"),
+    'E38-UNH': ('E38-UNH', 'Unitree, unitree_ros2, MotorState.msg of its go family, which the H1 uses ("int8 '
+                           'temperature")', 'https://github.com/unitreerobotics/unitree_ros2/blob/master/cyclonedds_ws/'
+                                            'src/unitree/unitree_go/msg/MotorState.msg', "Manufacturer's SDK file"),
+    'E38-BOS': ('E38-BOS', 'Booster Robotics, booster_robotics_sdk, MotorState.h ("uint8_t m_temperature{0};")',
+                'https://raw.githubusercontent.com/BoosterRobotics/booster_robotics_sdk/main/include/booster/idl/b1/'
+                'MotorState.h', "Manufacturer's SDK file"),
+    'E38-UBS1': ('E38-UBS1', 'UBTECH, Walker S1 page, its spec figures ("Six-axis Force Sensor*2" twice, "6 Tactile '
+                             'Sensor Array for Pressure Sensing")',
+                 'https://www.ubtrobot.com/en/humanoid/products/walker-s1', "Manufacturer's specification"),
+    'E38-UBS2': ('E38-UBS2', 'UBTECH, Walker S2 page, its spec figure ("Six-axis Force Sensor*2")',
+                 'https://www.ubtrobot.com/en/humanoid/products/walker-s2', "Manufacturer's specification"),
+    'E38-GAL': ('E38-GAL', 'Galbot, G1 page ("6-Axis Force Sensor ×2", "5.5-inch Touchscreen")',
+                'https://www.galbot.com/g1', "Manufacturer's specification"),
+    'E38-KPK': ('E38-KPK', 'Kepler, K2 page ("Six-axis force sensor per wrist", "Six-Axis Force: - / 2 / 2", "25 '
+                           'high-resolution tactors per finger")', 'https://www.gotokepler.com/productDetailK2?id=3',
+                "Manufacturer's specification"),
+    'E38-EAS': ('E38-EAS', 'EngineAI, SE01 page ("High-Precision Force Control Sensor")',
+                'https://en.engineai.com.cn/product-se01.html', "Manufacturer's specification"),
+    'E38-AGM': ('E38-AGM', 'AgiBot, G2 user manual ("每个关节都配备有关节力矩传感器", "4G/5G 选配")',
+                'https://www.agibot.com.cn/filepage/362.html', "Manufacturer's manual"),
+    'E38-F03': ('E38-F03', 'Figure AI, "Introducing Figure 03" ("Each fingertip sensor can detect forces as small as '
+                           'three grams")', 'https://www.figure.ai/news/introducing-figure-03', "Manufacturer's news"),
+    'E38-LJK': ('E38-LJK', 'Leju, Kuavo developer interface ("左手触觉传感器数据，一共5个，每个手指一个")',
+                'https://kuavo.lejurobot.com/manual/basic_usage/kuavo-ros-control/docs/4开发接口/接口使用文档/',
+                "Manufacturer's SDK documentation"),
+    'E38-UND': ('E38-UND', 'Unitree, Dex5-1 page ("94 tactile sensors per hand"), the H1-2\'s optional hand',
+                'https://www.unitree.com/Dex5-1', "Manufacturer's specification"),
+    'E38-EAT': ('E38-EAT', 'EngineAI, T800 page ("integrated tactile sensing")',
+                'https://en.engineai.com.cn/product-t800.html', "Manufacturer's specification"),
+    'E38-SAP': ('E38-SAP', 'Sanctuary AI, "Sanctuary AI Unveils Phoenix" ("haptic technology that mimics the sense of '
+                           'touch")', 'https://sanctuary.ai/news/sanctuary-ai-unveils-phoenix-a-humanoid-general-'
+                                      'purpose-robot-designed-for-work/', "Manufacturer's press release"),
+    'E38-BDA': ('E38-BDA', 'Boston Dynamics, Atlas page ("Tactile and 360° camera view")',
+                'https://bostondynamics.com/atlas/', "Manufacturer's page"),
+    'E38-FGR': ('E38-FGR', 'Fourier, GR-3 page ("GR-3头部与躯干共分布31个触觉传感器"; head 16, torso 15)',
+                'https://www.fftai.com/grx/gr3', "Manufacturer's specification"),
+    'E38-MLZ': ('E38-MLZ', 'MagicLab, MagicBot Z1 page ("Head Tactile Sensor")', 'https://www.magiclab.top/en/z1',
+                "Manufacturer's specification"),
+    'E38-EAP': ('E38-EAP', 'EngineAI, PM01 page ("Touch Screen (Chest)": √ in the 2026 Education Edition, "/" in the '
+                           'Navigation Edition)', 'https://en.engineai.com.cn/product-pm01.html',
+                "Manufacturer's specification"),
+    'E38-MLG': ('E38-MLG', 'MagicLab, MagicBot Gen1 page ("4G/5G Module: 5G")', 'https://www.magiclab.top/en/human',
+                "Manufacturer's specification"),
+    'E38-PND': ('E38-PND', 'PNDbotics, humanoid robot wiki ("兼容 5G、Wi-Fi 6、蓝牙 5.0 协议")',
+                'https://wiki.pndbotics.com/robot/humanoid_robot/', "Manufacturer's documentation"),
+    'E38-XMC': ('E38-XMC', 'Xiaomi, CyberOne page ("Supports real-time GPS synchronization")',
+                'https://www.mi.com/tr/product/xiaomi-cyberone/', "Manufacturer's page"),
+    # The capacitors of a joint's driver board (E38 point 4).
+    'E38-TI': ('E38-TI', 'Texas Instruments, TIDA-010979, 48-V 1-kW humanoid robot joint drive, design guide TIDUFF7A, '
+                         'p. 13 ("seventeen 10μF ceramic capacitors")', 'https://www.ti.com/lit/pdf/tiduff7',
+               "Chip maker's reference design"),
+    'E38-MJB': ('E38-MJB', 'mjbots, moteus r4.11 controller schematic (16 of 10 µF 50 V in 1206 on its supply)',
+                'https://raw.githubusercontent.com/mjbots/moteus/main/hw/controller/r4.11/controller.sch',
+                "Maker's open schematic"),
+    'E38-BKZ': ('E38-BKZ', "Ben Katz, Cheetah Driver Integrated V4 schematic (8 of 1206 on its supply)",
+                'https://raw.githubusercontent.com/bgkatz/3phase_integrated/master/New%20Version/'
+                'Cheetah%20Driver%20Integrated%20V4/HKCV4.sch', "Designer's open schematic"),
+    'E38-KEM': ('E38-KEM', 'KEMET/YAGEO, material declaration of its surface-mount MLCCs with nickel electrodes, '
+                           'Annex 1, June 2026 (barium titanate by case size)',
+                'https://yageogroup.com/content/Resource%20Library/Material%20Declaration/MCD-Ceramic.pdf',
+                "Manufacturer's material declaration (engineering calculations)"),
+}
+
+
 def size_of(torque: float) -> str:
     """A joint's class by its actuator's peak torque (E5.12 point 1)."""
     return 'large' if torque >= LARGE_FROM_NM else 'small'
@@ -1160,6 +1366,17 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
                                label, f'{source}; elements only'))
         for car_type, per_sensor in ENCODER:
             out['SensorElements'].append(('Encoder', car_type, per_sensor))
+        # Its temperature sensors in the joints (E38 point 2): as its maker's SDK counts them, or drawn (its constant
+        # below).
+        per_motor = TEMPERATURE_PER_MOTOR.get(name)
+        if per_motor:
+            out['Sensors'].append((name, TEMPERATURE_SENSOR, per_motor[0] * in_robot, 'In the joints',
+                                   'as their joints', None, None, None, 'S', f'{per_motor[1]}; elements only'))
+        else:
+            out['Sensors'].append((name, TEMPERATURE_SENSOR, None, 'In the joints', 'as their joints', None, None,
+                                   None, 'E', f'{TEMPERATURE_SOURCE}; elements only'))
+        for car_type, per_sensor in TEMPERATURE:
+            out['SensorElements'].append((TEMPERATURE_SENSOR, car_type, per_sensor))
 
     # Its battery: the pack, its cells from their energy, its housing the pack's remainder (a pack no source weighs: a
     # share of its cells, E20), its management board; in its torso, or for a robot on wheels in its base; its cells NMC
@@ -1208,7 +1425,7 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         if CAMERAS_ESTIMATED[name]:
             estimated.append(microphones(f'E31 point 3: its sources name {CAMERAS_ESTIMATED[name]}'))
     for sensor, count, kind, region, grams, label, source, units in (b['sensors'] + CAMERAS_STATED.get(name, [])
-                                                                     + estimated):
+                                                                     + estimated + SENSORS_STATED.get(name, [])):
         out['Sensors'].append((name, sensor, count, kind, region, *(grams or (None, None, None)), label, source))
         for car_type, per_sensor in units or []:
             out['SensorElements'].append((sensor, car_type, per_sensor))
@@ -1259,6 +1476,15 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
     if name in CAMERAS_ESTIMATED:   # E31 point 3: the number of its cameras, drawn by 02 as a whole number
         out['Constants'].append((name, NUMBER_OF + ESTIMATED_CAMERAS, *CAMERAS_NUMBER, 'image sensors', 'E',
                                  CAMERAS_NUMBER_SOURCE))
+    # E38 point 2: the numbers 02 draws, whole, of its temperature sensors (one or two a joint motor) where its maker's
+    # SDK gives none, and of the sensors its maker states without their number.
+    if in_robot and name not in TEMPERATURE_PER_MOTOR:
+        out['Constants'].append((name, NUMBER_OF + TEMPERATURE_SENSOR, *temperature_number(in_robot), 'sensors',
+                                 'E', TEMPERATURE_SOURCE))
+    for sensor, *_ in SENSORS_STATED.get(name, []):
+        if (name, sensor) in SENSORS_NUMBER:
+            out['Constants'].append((name, NUMBER_OF + sensor, *SENSORS_NUMBER[(name, sensor)], 'sensors', 'E',
+                                     'E38 point 2: its maker states it, not its number (E)'))
     return out
 
 
@@ -1300,11 +1526,11 @@ def sheets(robots: list, joints: list, parts: list, boards: list, sensors: list,
     """Every sheet after About, in the order of the file: its name, first row, rows and column widths. The robots' own
     rows are a builder's; MagnetGrades, JointParts and Shares are the one set for all, Shares only the rows of a
     component of JointParts or a part of `parts` (01 faults a share of a part the file does not have). The sources of
-    E31 (E31_SOURCES) that the file's rows cite follow the builder's own `sources`, each once."""
+    E31 and E38 (E31_SOURCES, E38_SOURCES) that the file's rows cite follow the builder's own `sources`, each once."""
     named = {r[0] for r in JOINTPARTS_ROWS} | {r[1] for r in parts}
     cited = ' '.join(str(cell) for rows in (robots, parts, boards, sensors, constants) for row in rows for cell in row
                      if cell)
-    sources = list(sources) + [row for code, row in E31_SOURCES.items()
+    sources = list(sources) + [row for code, row in {**E31_SOURCES, **E38_SOURCES}.items()
                                if re.search(rf'(?<![\w-]){re.escape(code)}(?![\w-])', cited)]
     return [
         ('Robots', ROBOTS_HEADINGS, robots, ROBOTS_WIDTHS),

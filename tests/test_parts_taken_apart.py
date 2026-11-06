@@ -23,6 +23,7 @@ and give the magnets fixed element fractions, so that one robot can be added up 
 """
 
 import csv
+import dataclasses
 import importlib.util
 import os
 import re
@@ -750,7 +751,7 @@ class TestElementPages(unittest.TestCase):
                     partly.append((symbol, kind))
         # Indium in the cameras, held in some draws only (its row by place since 2026-11-05, before: the head); the
         # torso boards' aluminium in every draw since point 3a.
-        self.assertIn(('In', composition.component_label('cameras')), partly)   # by the sensors' kind since E38
+        self.assertIn(('In', composition.component_label('cameras, head')), partly)   # by kind and region since E38
 
 
 class TestCentre(unittest.TestCase):
@@ -1021,8 +1022,9 @@ class TestPagesByMaterial(unittest.TestCase):
         # Matthias, 2026-11-05: "senors are par of the elctronics!!", "3 yes", "Yes, include them" (the cables, connectors
         # and antennas), "yes do it" (EVIDENCE.md E32): an element of interest of the electronics by its component,
         # never the electronics unsplit; the cables and connectors in the electronics, no longer in copper, brass and
-        # plastics; titanium the cameras' and the other sensors', never the circuit boards'; every sum as before (the
-        # test above, and the electronics' elements adding up to their mass, test_type_1s_electronics_wholly_drawn...).
+        # plastics; titanium the cameras' and the other sensors', and since 2026-11-06 (E38 point 4) the circuit boards'
+        # too, the barium titanate of the joints' ceramic capacitors; every sum as before (the test above, and the
+        # electronics' elements adding up to their mass, test_type_1s_electronics_wholly_drawn...).
         d, c = self.drawn()
         labels = {m for m, _ in d.by_material if m.startswith(composition.ELECTRONICS)}
         self.assertEqual(composition.ELECTRONICS_COMPONENTS,
@@ -1031,7 +1033,7 @@ class TestPagesByMaterial(unittest.TestCase):
         self.assertNotIn(composition.ELECTRONICS, {m for m, _ in d.by_material})
         titanium = {m for m, e in d.by_material if e == 'Ti'}
         self.assertIn(composition.component_label('cameras'), titanium)
-        self.assertNotIn(composition.component_label('circuit boards'), titanium)
+        self.assertIn(composition.component_label('circuit boards'), titanium)   # the capacitors' (E38 point 4)
         # The cables' kind of part holds the electronics only: its conductors, insulation, connectors and boards.
         self.assertEqual({m for k, m in d.materials[0] if k == 'cables'}, {composition.ELECTRONICS})
         # A connector's brass keeps its copper fixed in the alloy (E25), now booked in the electronics.
@@ -2184,8 +2186,8 @@ class TestLegendsAndPlaces(unittest.TestCase):
         d, _, _ = self.drawn()
         places = composition.by_place(d, 'In')
         self.assertTrue(places)
-        # Since 2026-11-06 by the sensors' kind (E38): the LiDARs' and the cameras'.
-        self.assertTrue(set(places) <= {composition.component_label(k) for k in composition.SENSOR_KINDS}, set(places))
+        # Since 2026-11-06 by the sensors' kind (E38) and their region (E38 point 7): the LiDARs' and the cameras'.
+        self.assertTrue(all(composition.sensor_of_place(p) for p in places), set(places))
         self.assertIn('hips', composition.by_place(d, 'Cu'))   # the windings: their kind of part as before
         self.assertEqual(composition.place_label('hips'), 'Hip joints')
 
@@ -2363,6 +2365,14 @@ class TestSensorsByKind(unittest.TestCase):
         ('position sensor',): "hydraulic actuators' sensors",
         ('pressure sensor',): "hydraulic actuators' sensors",
         ('ultrasonic sensor',): 'ultrasonic sensors',
+        # Since 2026-11-06 the makers' sensors and the joints' temperature sensors (E38 point 2).
+        ('temperature sensor',): 'temperature sensors',
+        ('force sensor',): 'force and torque sensors',
+        ('pressure/force sensor',): 'tactile sensors',
+        ('capacitive sensor',): 'tactile sensors',
+        ('capacitive touch sensor', 'touch controller'): 'touch screens',
+        ('cellular modem',): '4G/5G modems',
+        ('GNSS receiver',): 'satellite receivers',
     }
 
     @classmethod
@@ -2409,29 +2419,60 @@ class TestSensorsByKind(unittest.TestCase):
 
     def test_indium_and_gallium_in_the_lidars_and_cameras(self):
         d, _ = self.drawn()
-        indium = composition.by_place(d, 'In')
+        indium = composition.merge_regions(composition.by_place(d, 'In'))   # the regions together (E38 point 7)
         label = composition.component_label
-        self.assertTrue(set(indium) <= {label(self.LIDARS), label(self.CAMERAS)}, sorted(indium))
+        # Since 2026-11-06 (E38 point 2) also the touch screens' indium tin oxide (the EngineAI PM01's, an option).
+        self.assertTrue(set(indium) <= {label(self.LIDARS), label(self.CAMERAS), label('touch screens')},
+                        sorted(indium))
         self.assertIn(label(self.CAMERAS), indium)
         # The test's magnets (FIXED_MAGNET) hold no gallium: here its gallium is the sensors' alone.
-        gallium = composition.by_place(d, 'Ga')
+        gallium = composition.merge_regions(composition.by_place(d, 'Ga'))
         self.assertEqual(set(gallium), {label(self.LIDARS), label(self.CAMERAS)})
 
     def test_the_kinds_add_up_to_the_cameras_and_the_other_sensors(self):
         # Each element: its kinds of camera to the element pages' cameras, its other kinds to their other sensors.
         d, _ = self.drawn()
         label = composition.component_label
-        cameras = {label(self.CAMERAS)}
-        others = {label(k) for k in composition.SENSOR_KINDS} - cameras
+        cameras = {self.CAMERAS}
+        others = set(composition.SENSOR_KINDS) - cameras
         for element in {e for _, e in d.elements}:
             for component, kinds in ((composition.CAMERAS, cameras), (composition.OTHER_SENSORS, others)):
                 by_material = d.by_material.get((label(component), element), np.zeros(d.n))
-                by_place = sum((v for (p, e), v in d.places.items() if e == element and p in kinds), np.zeros(d.n))
+                by_place = sum((v for (p, e), v in d.places.items()
+                                if e == element and composition.sensor_of_place(p) in kinds), np.zeros(d.n))
                 np.testing.assert_allclose(by_place, by_material, rtol=1e-9, atol=1e-18, err_msg=(element, component))
 
     def test_every_place_its_own_colour(self):
-        colours = [composition.place_colour(p) for p in composition.places_order()]
+        # Every place of the element pages (a sensor by its kind, its regions together: merge_regions) its own colour.
+        places = [p for p in composition.places_order() if composition.merge_regions({p: 0}) == {p: 0}]
+        colours = [composition.place_colour(p) for p in places]
         self.assertEqual(len(colours), len(set(colours)), colours)
+
+    def test_a_sensors_place_its_kind_and_region(self):
+        # Matthias, 2026-11-06: "show me where they are located", "Yes do it" (E38 point 7): on the overview each
+        # sensor by its kind and the body region its row names; the joint encoders and the hydraulic actuators'
+        # sensors, in every joint, by their kind alone.
+        label = composition.component_label
+        self.assertEqual(composition.sensor_place('cameras', 'Head'), label('cameras, head'))
+        self.assertEqual(composition.sensor_place('LiDARs', 'Base'), label('LiDARs, wheeled base'))
+        self.assertEqual(composition.sensor_place('joint encoders', 'Legs'), label('joint encoders'))
+        self.assertEqual(composition.sensor_of_place(label('cameras, arms')), 'cameras')
+        self.assertIsNone(composition.sensor_of_place('hips'))
+        self.assertEqual(composition.place_label(label('cameras, head')), 'Cameras, head (boards and components)')
+        self.assertEqual(composition.place_colour(label('cameras, arms')), composition.SENSOR_KINDS['cameras'])
+        d, _ = self.drawn()
+        indium = composition.by_place(d, 'In')
+        self.assertIn(label('cameras, head'), indium)
+        self.assertTrue(all(', ' in p for p in indium), sorted(indium))   # every indium sensor with its region
+
+    def test_a_sensor_of_no_region_is_a_fault(self):
+        inputs = inputs_or_skip(self, self.params)
+        camera = next(s for s in inputs.apart.sensors if s.region == 'Head'
+                      and composition.sensor_kind([(t, u) for _, n, t, u in inputs.apart.elements if n == s.name])
+                      == self.CAMERAS)
+        inputs.apart.sensors[inputs.apart.sensors.index(camera)] = dataclasses.replace(camera, region='Neck')
+        faults = composition.check_parts(inputs)
+        self.assertTrue(any("its region 'Neck'" in f.text for f in faults), [f.text for f in faults])
 
     def test_the_overview_two_elements_a_page_where_their_rows_fit(self):
         # Since E38 copper and aluminium hold up to 17 rows each: two such panels on one page overlapped (V193).
@@ -2540,3 +2581,113 @@ class TestMagnetsAndSensorsApart(unittest.TestCase):
         places = composition.by_place(d, 'Nd+Pr')
         self.assertTrue(set(composition.place_view(places, 'sensors')) <= sensor_places)
         self.assertFalse(set(composition.place_view(places, 'magnets')) & sensor_places)
+
+
+class TestHeadJoints(unittest.TestCase):
+    """Matthias, 2026-11-06: "Nd is in the head joint and not just in the head", to the proposal of a kind of their own
+    "Yes do it" (EVIDENCE.md E38 point 6): the head joints a kind of part of their own, 'Head joints', numbered 6 on the
+    robot, in the part group Joint drives and the body region Head; the kind Head keeps the head's other parts."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def test_the_kind_and_its_mark(self):
+        self.assertEqual(schemas.KINDS['headjoints'][0], 'Head joints')
+        self.assertEqual(schemas.MARKS['headjoints'], '6')
+        self.assertEqual(schemas.JOINT_KIND['head'], 'headjoints')
+        self.assertEqual(schemas.JOINT_KIND['neck'], 'headjoints')
+        self.assertEqual(composition.KIND_PART_GROUP['headjoints'], 'Joint drives')
+        self.assertEqual(composition.KIND_BODY_REGION['headjoints'], 'Head')
+        self.assertIn('headjoints', schemas.SPOTS)
+        colours = [c for _, c in schemas.KINDS.values()]
+        self.assertEqual(len(colours), len(set(colours)))
+
+    def test_the_head_joints_hold_the_heads_neodymium(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        nd = composition.by_kind(d, 'Nd')
+        self.assertIn('headjoints', nd)                      # the G1's head joints' magnets
+        self.assertTrue(composition.held(nd['headjoints']))
+        self.assertNotIn('head', nd)                         # the head's other parts hold no magnets
+
+
+class TestNewSensorsAndCapacitors(unittest.TestCase):
+    """Matthias, 2026-11-06, to the tables of the missing sensor kinds and of the joints' capacitors (EVIDENCE.md E38
+    points 2 and 4): "Yes, all three". The new kinds by their car sensor elements; a sensor's number fixed, one of
+    'A or B' each as often, or drawn whole from the robot's constant; the temperature sensors in every joint; the
+    capacitors' barium titanate in every joint's driver board, taken out of its glass and epoxy."""
+
+    NEW = {('temperature sensor',): 'temperature sensors', ('force sensor',): 'force and torque sensors',
+           ('pressure/force sensor',): 'tactile sensors', ('capacitive sensor',): 'tactile sensors',
+           ('capacitive touch sensor', 'touch controller'): 'touch screens', ('cellular modem',): '4G/5G modems',
+           ('GNSS receiver',): 'satellite receivers'}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def test_the_new_kinds_by_their_car_sensor_elements(self):
+        for held, kind in self.NEW.items():
+            self.assertEqual(composition.sensor_kind([(t, 1) for t in held]), kind, msg=held)
+            self.assertIn(kind, composition.SENSOR_KINDS)
+        # The kinds before them unchanged: a pressure sensor alone is still a hydraulic actuator's.
+        self.assertEqual(composition.sensor_kind([('pressure sensor', 1)]), "hydraulic actuators' sensors")
+
+    def test_the_temperature_sensors_sit_in_every_joint(self):
+        self.assertIn('temperature sensors', composition.IN_EVERY_JOINT)
+        self.assertEqual(composition.sensor_place('temperature sensors', 'Arms'),
+                         composition.component_label('temperature sensors'))
+
+    def test_every_kind_its_own_colour(self):
+        colours = [c.upper() for c in composition.SENSOR_KINDS.values()]
+        self.assertEqual(len(colours), len(set(colours)))
+        self.assertFalse(set(colours) & {c.upper() for _, c in schemas.KINDS.values()})
+
+    def test_a_sensors_number_fixed_either_or_drawn(self):
+        rng = np.random.default_rng(1)
+
+        def part(count, either=()):
+            return schemas.ApartPart('Sensors', 2, 'R', 'S', count, 'Head', 'Head', (None, None, None), '', '', '',
+                                     'E', '', either=either)
+
+        self.assertEqual(composition.sensor_count(part(4.0), {}, rng, 10), 4.0)
+        either = composition.sensor_count(part(None, (0.0, 10.0)), {}, rng, 20000)
+        self.assertEqual(set(np.unique(either)), {0.0, 10.0})               # one or the other, never blended
+        self.assertAlmostEqual(float((either == 10).mean()), 0.5, delta=0.02)
+        constants = {schemas.NUMBER_OF + 'S': (5, (23.0, 23.0, 46.0), 'sensors', 'E', '')}
+        drawn = composition.sensor_count(part(None), constants, rng, 20000)
+        self.assertTrue(np.all(drawn == np.round(drawn)))                    # whole in every draw
+        self.assertEqual((drawn.min(), drawn.max()), (23, 46))
+        self.assertAlmostEqual(float(drawn.mean()), (23 + 23 + 46) / 3, delta=0.3)
+
+    def test_barium_titanate_by_its_formula(self):
+        shares = composition.TITANATE
+        self.assertEqual(set(shares), {'Ba', 'Ti', 'O'})
+        self.assertAlmostEqual(sum(shares.values()), 1.0, places=12)
+        self.assertAlmostEqual(shares['Ba'], 137.327 / 233.191, places=6)
+        self.assertAlmostEqual(shares['Ti'], 47.867 / 233.191, places=6)
+
+    def test_type_1_its_temperature_sensors_and_capacitors(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        # Every robot of type 1 has electric joints: the temperature sensors' cobalt in every draw, in every joint.
+        cobalt = d.places.get((composition.component_label('temperature sensors'), 'Co'))
+        self.assertIsNotNone(cobalt)
+        self.assertTrue(bool((cobalt > 0).all()))
+        # The capacitors: barium in the joints of every draw (no other part of type 1 holds barium), titanium of the
+        # circuit boards in every draw (their glass and epoxy hold none of interest).
+        barium = sum((kg for (kind, e), kg in d.recipe_elements.items() if e == 'Ba'), np.zeros(d.n))
+        joints = sum((kg for (kind, e), kg in d.recipe_elements.items()
+                      if e == 'Ba' and kind in ('hips', 'knees', 'ankles', 'waist', 'arms', 'headjoints')),
+                     np.zeros(d.n))
+        self.assertTrue(bool((barium > 0).all()))
+        np.testing.assert_allclose(joints, barium, rtol=1e-12)
+        titanium = d.places.get((composition.component_label(composition.CIRCUIT_BOARDS), 'Ti'))
+        self.assertIsNotNone(titanium)
+        self.assertTrue(bool((titanium > 0).all()))
+        # Barium and titanium by the formula, draw by draw: the boards' titanium is the capacitors' alone.
+        np.testing.assert_allclose(titanium / barium, composition.TITANATE['Ti'] / composition.TITANATE['Ba'],
+                                   rtol=1e-9)

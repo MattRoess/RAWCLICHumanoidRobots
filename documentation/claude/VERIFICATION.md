@@ -5,6 +5,316 @@ by Claude, newest first.
 
 ## 2026-11-06
 
+### V209. His runs of 00, 01 and 04 read back (04 on his 200,000 draws of 02)
+
+- **His words:** "04 has run".
+- **The times:** `params.xlsx` 16:31:36 (00), `figures/schemas/overview_1.png` and `_2.png` 16:31:49 to 16:31:50 (01),
+  04's draws 16:32:56 to 16:32:57, `summary.csv` 16:33:08, its 23 pages 16:33:09 to 16:33:17: each after the last change
+  of the code (`04_stock_and_flow.py` 15:57:51, `01_schemas.py` 15:58:17, `src/params_schema.py` 15:52:47). It read 02's
+  draws of his run of 13:35 to 13:37 (V202). None of 04's files evicted by iCloud (`stat`: not dataless).
+- **The files:** sizes as 200,000 draws give them (`units_in.npy` 216,000,128 bytes = 200,000 × 15 × 3 × 6 × 4 + its
+  header; `elements_stock.npy` 844,800,128); 3.09 GB in all.
+- **The numbers, by hand:** the robots in use the article's at every 1 January (10 M, 23 M in 2030, 1.0 B in 2035, 70 B
+  in 2040); the six types adding up to 70.0 B in 2040 (3.77, 17.98, 22.03, 19.39, 3.50, 3.34 B); the packs in use at 1
+  January 2025 113 M = 10 M × (10 % × 12 + 20 % × 7 + 50 % × 12 + 10 % × 12 + 5 % × 6 + 5 % × 24), the same in every
+  draw (types 1 and 3 both 12 packs a robot, so the research share does not move it); in 2040 223.9 B, above the need of
+  213.6 B (the robots of each type × 5, 1, 4, 3, 3, 6), the packs of the years when more were needed still in use; built
+  in 2025 2.43 M robots, 0.83 M retired, as the sandbox (V208). Magnesium held in 12.1 % of the draws, indium 98.5 %,
+  every other element 100 %.
+- **Looked at:** the overview and all 22 element pages: every text within its page, no legend over a line or a written
+  value, the world's values dashed or written in the panel, dysprosium's and terbium's pages saying they have none.
+- **What the pages show** (the mean over the draws above 0 against the world's 2025 value): the inflow above the world's
+  production in a year from 2033 (neodymium, praseodymium), 2034 (lithium, magnesium), 2035 (titanium, cobalt, nickel,
+  gallium), 2036 (aluminium), 2037 (copper, palladium), 2038 (tantalum), 2039 (boron, silver, gold, niobium); never for
+  manganese, tin, lead, indium; the stock above the world's reserves from 2039 (neodymium) and 2040 (cobalt, nickel,
+  praseodymium). Dysprosium 6.0 Mt and terbium 278 kt in use in 2040, with no world numbers to set beside them.
+- **Removed on his word** ("Yes, remove them"): the first 04's `data/stock_and_flow/robots.csv` and
+  `figures/stock_and_flow/stock_and_flow.png` (15:04), no code naming either, moved by exact name into the Trash; the
+  folders hold only the new 04's files.
+- **Not covered:** his pages checked by eye, not by `page_problems` (that ran on the sandbox's pages, V208).
+
+### V208. Stage 04 rebuilt as RAWCLICDataCenters' 07: robots, joint sets, battery packs and their elements (EVIDENCE.md E42, E43)
+
+- **His words:** "I want the same figures as for the datacenters, but expand them all the essential critcial and
+  statigic elements. Also have real lifetimes not something fixed like this. I want to see uncerttainites", "Add also the
+  limit in stock and production like for the data centers", "Yes, build it", "No look at the robots as a unit with
+  exception of the batteries", "Have at least so many battery packs ready for use as it is needed to have them for 1 day
+  to switch. So they can recharge slowly", "Yes, replace joints".
+- **07 read again myself** for its method and its pages (RAWCLICDataCenters `07_data_center_stock_and_flow.py`:
+  `follow_target`, `check_balance`, `to_years`, `log_panel`, `world_reference`, `mass_label`, `mass_text`,
+  `save_figure`, `plot_scenario`, its sheet ElementReference as `parse_scenarios` reads it); USGS's data file read for
+  the world rows of magnesium, titanium and indium, their units and notes ("Gross weight of magnesite (magnesium
+  carbonate)", "titanium dioxide (TiO2) content").
+- **Tests:** `tests/test_stock_and_flow.py`, 26 tests, written after the code (not first), so each was made to fail by
+  a deliberate fault instead (below). By hand: a lifetime's survival at 4.9, 7, 8.5 and 10 years (1, 0.6, 0.15, 0); a
+  triangle's value at 0.1 and 0.4 (6 and 7 years); a joint set at 10,000 hours (0.870 left) and a pack at 800 charges
+  at 80 % and at 1,000 charges at 75 % (0.4 left each); the quarters between the article's years (2025 Q2 √(10 M × 11.6
+  M)); units living one year, 100 in use (25 in and 25 out every quarter); a falling target (inflow 0, the stock 75 above
+  the target 40, back on it three quarters later); the robots of 1 January 2025 adding up to 10 M, built at the article's
+  16 % a year; his workbook's shares, runtimes and energy densities as he wrote them; the types' shares at 2025, 2032.5
+  and 2040 (type 3 50 %, 41.5 %, 30 %), adding up to 1 at every point; the packs a robot holds in 2025 (12, 7, 12, 12,
+  6, 24) and 2040 (5, 1, 4, 3, 3, 6); one chunk of 30 draws with the settings in force adding up (the article at every
+  1 January to 10⁻¹², the joint sets as the robots, the packs at least the need; 2025's retired between 0.5 and 1.2 M);
+  the statistics over the draws above 0 ("held in"); the masses written as 07's; the legend moved off a line and a
+  written value; the world's numbers read (copper 23 Mt, palladium "at least", magnesium 1,100 kt and its reserves by
+  its formula, titanium at least, indium no reserves, no dysprosium or terbium); 04 run on made-up draws of 02 (40
+  draws, four elements): every kg by hand, draw i paired (aluminium t × (1 + i / 40) kg a robot of type t), the joint
+  sets' copper, the packs' lithium, nothing else in them, neodymium 0 in every draw and no page, the summary's "–", the
+  four pages within his figure rules and no legend over a line or a value; without 02's draws it stops; a column of 02
+  that is no kind of part stops it. The settings' tests with 04's nine settings and the two world files, and the
+  settings refused (a year missing, out of order, 0, a single number, a capacity of 100 %, a share above 1, 25 or 0
+  hours, a runtime missing or 0).
+- **Deliberate faults in a scratch copy of 04, each caught** (the project's file not touched): draw i not paired (the
+  made-up draws reversed); the outflow without what the cohorts lose (04 stops); the packs rounded instead of rounded up;
+  type 3 the workbook's share instead of the remainder; the joints counted in the body; the packs' fade ignored; the
+  zeros kept in the statistics. In `check`, on one chunk: an outflow, a stock of all robots, of one type, of the joint
+  sets 0.1 % off; packs 1 % below the need; an inflow below 0: each named.
+- **Hand check by another route** (the sandbox run, draws 1 and 2): each of the 22 elements at 1 January 2025 from 02's
+  whole-robot table plus the extra packs (packs a robot holds − 1 times the columns "Battery pack: …"), the robots of
+  each type from the shares written out: 04's files agree to 7.2 × 10⁻⁸ (float32); neodymium 4,183,052 kg and 3,039,812
+  kg both ways.
+- **Sandbox run** on the scratch copy of 02's draws (1,000 draws of the six types, built from his builders' parts
+  files): 9 s; 22 element pages; "no world production or reserves for Dysprosium, Terbium". One chunk of 20,000 draws
+  counted in 4.5 s, checked in 0.1 s: about a minute of counting at 200,000 draws (an estimate, not run); its files about
+  3.1 GB (arithmetic).
+- **Looked at:** the overview and all 22 element pages. Fixed on looking: indium's dashed world production ran under
+  the legend (now the legend moves to the first corner where no line or written value lies under it, tested); a single
+  line held in fewer than all draws had no legend to say so (now it has one, "stock, held in 99 % of the draws"). Every
+  page then within his figure rules (`page_problems`) and no legend over a line or a value, all 23 checked as saved.
+- **The whole suite:** 630 tests (762 s), all OK, on the final code (01's overview box of 04 first ran one line past its foot; seen on the page, its words shortened, `TestOverviewBoxes` then OK).
+- **Not covered:** his run on his 200,000 draws of 02; the robots' own numbers have no band (the article fixes the
+  stock, the lifetime is spread among the robots, as 07); the runtimes of types 1, 3 and 5 (2 / 2 / 4 h) and the
+  charges to 80 % (500 / 800 / 1,000) kept on his word ("Yes, keep them"); type 2's runtime of 24 h in 2040 gives one pack a robot, which
+  leaves it no time to charge; the joint sets and packs of a retired robot go on in a new one (07's approximation,
+  their flows slightly low); dysprosium and terbium without world numbers, indium without reserves, magnesium's
+  reserves and titanium's by their formulas (E).
+
+### V207. The joint actuators' rated lives researched (EVIDENCE.md E43)
+
+- **His words:** "How is it with the joint motors. How do the limit".
+- **How:** a reading agent read reducer, screw, motor and robot makers' pages (no PDF); I read again myself
+  Nabtesco's press release ("market standard of 7,000 hours to 10,000 h", for humanoid robots and cobots), Harmonic
+  Drive's CSG page ("L10 of 10,000 hours", "42% longer" than CSF) and AgiBot's A3 page ("a designed lifespan of up to 3
+  years").
+- **Found:** E43. No humanoid maker publishes a joint life; strain-wave gears 7,000 to 10,000 h, planetary and
+  robot-arm gearboxes 30,000 to 40,000 h, at rated torque.
+- **Not covered:** the reducer makers' PDF catalogues (the life formula, the CSF and CSD figures); the joints' real
+  torques in use; nothing entered.
+
+### V206. Stage 04 built: the article's robots in use, built and retired (EVIDENCE.md E42)
+
+- **His words:** "Use the numbers in the article and not what you have research", "Do exactly what has been done for
+  the datacenter", "It gives 70x10E9", "We have damit to implement what is in this artcle and nothing else!".
+- **The article read again myself:** the economics explorer with its preset "AI 2040 Plan A Scenario" active, its
+  inputs `cs_delta_robot` 0.20 ("Robot depreciation (δR) 5-year robot life") and `delta_R` 0.10 ("δR (robot capital
+  depreciation)"); its model/costSide.js: "new(t) = S(t+1) − S(t)·(1−δ)" booked forward, the stocks "Jan-1
+  (start-of-year)", "delta_robot: 0.20, // 5-year robot life", its stock in the formula `R_phys`, "human-equiv physical
+  workers"; the main page: "AIs and robots can work 24/7".
+- **Tests first, seen to fail** (04 missing), then passing: `tests/test_stock_and_flow.py`, 9 tests: the settings hold
+  the article's 16 values and 0.20 and are checked (a year missing, no robots, one year only, 0 and 1 as the
+  depreciation); by hand, 2025 built 11.6 M − 0.8 × 10 M = 3.6 M, retired 2.0 M; 2039 built 70 B − 0.8 × 29.7 B =
+  46.24 B; every year in use + built − retired = the next 1 January; never below 0 on a made-up falling path, as the
+  article's max(0, …); without depreciation built = the growth; 04 run into a temporary folder: 0, its table 2025 to
+  2040 (2040 without flows), its page within his figure rules (`page_problems`). 01: the overview names every stage
+  (now five), its fifth stage box and output box, "Open: nothing."; its list of words no page may show takes the sibling
+  files' numbers as they stand in the headings ("04_)", "07_,"), so that it no longer catches 04's own name. The
+  settings' tests with 04's four settings.
+- **Deliberate faults, each caught** (the file restored, its hash compared): built without the article's 80 % ("1600000.0
+  != 3600000.0"; the balance fails in 2025); nothing retired (the balance fails, and 04 stops: 1 != 0).
+- **Looked at** (drawn into the scratch folder): 04's page (the three series on one logarithmic axis from 10⁶ to 10¹¹,
+  every year a tick, the legend and the source within the page); 01's overview page 1 (five stages, each text within its
+  box; 04's output box).
+- **The whole suite:** 613 tests (775 s), all OK.
+- **Not covered:** his runs of 00 (the register of the settings), 01 (the overview) and 04.
+
+### V205. The share of humanoids in ai-2040.com's robots researched (EVIDENCE.md E41)
+
+- **His words:** "Yes, a share".
+- **How:** a reading agent read market researchers', makers' and banks' pages (no PDF); I read again myself IDC's
+  2025 shipments (about 18,000, about 508 % up; its definition with wheeled forms), Barclays' installations (about
+  2,000 in 2024, 15,000 in 2025, 60,000 projected for 2026), Morgan Stanley's article (more than 1 B in use by 2050;
+  China 302.3 M, US 77.7 M) and podcast (US 40,000 by 2030, 8 M by 2040, 63 M by 2050). The share computed by a
+  scratch script (installations summed, flows geometric between the sources' years, the article's robots of E40).
+- **Found:** the share rises from 0.17 % (start of 2026) to about 3.5 % (2030) and falls to about 0.15 % (2040).
+- **Not covered:** retirements before 2030 (none assumed; with a 5-year life the 2025 robots leave in 2030, a few
+  percent of the 2030 stock); the PDFs (Goldman Sachs, BofA, Citi GPS, Morgan Stanley's fact card); nothing entered.
+
+### V204. ai-2040.com's robots read first-hand (EVIDENCE.md E40)
+
+- **His words:** "Get the article, which was already the bases for the work on the stock and flow modeling of the
+  datacenters. Read it and use the stock numbers for the humanoid robots".
+- **How:** RAWCLICDataCenters' METHODOLOGY § 11 and EVIDENCE § 23 read for which article and which data; in the browser
+  pane the economics explorer (its preset "AI 2040 Plan A Scenario" checked active, the Input Table's rows Robots,
+  Human-equivs per Robot, the shares by country), the main page's source (searched for robots, humanoid, form factor,
+  the footnotes 103, 146, 174) and the authors' spreadsheet's sheet `plan-a-side-panel` (every row label: no robot
+  count). Nothing downloaded.
+- **Found:** E40. The article's robots are all robots, of every form; 10 M in 2025, 70 B in 2040; no humanoid share.
+- **Not covered:** the article's PDF and supplements other than the economics one; nothing entered.
+
+### V203. His run of 03 after E38 points 2 and 4 read back
+
+- **His words:** "03 is done".
+- **03:** 94 pages in `figures/comparison/`, 13:41:31 to 13:42:10, all after 02's draws (13:37:57); as many as before
+  (V197); no iCloud copy "… 2".
+- **Looked at:** comparison_elements_9, gallium in the sensors of the six types (cameras and other sensors stacked,
+  the median, the mean and the 95 % interval in every panel, type 6's the LiDARs' alone, every text within its panel).
+- **With V200 to V202 his runs of today are read back.** The five tests that read his parts files on disk and failed in
+  V199 pass on his new files: the two builders' comparisons and 01's "the real file holds together" (V200), and the
+  page check of the six types, 02 and 03 (2 tests, 102 s, OK). Nothing committed.
+
+### V202. His run of 02 after E38 points 2 and 4 read back
+
+- **His words:** "02 run complet, run 03".
+- **02:** the draws of the six types 13:35:02 to 13:37:57 (`data/consolidated/`, `data/parts_taken_apart/`, 20 files a
+  type, none older than his six parts files of 13:02 to 13:03); 138 pages in `figures/composition/` and 156 files in
+  `figures/parts_taken_apart/`, all of his run; no iCloud copy "… 2".
+- **The new places in his 200,000 draws** (each kind over all its regions): the temperature sensors 100 % of the draws
+  (type 5 89.9 %: its hydraulic robots); the force and torque sensors 2.6 / 2.1 / 0.8 % (types 2 to 4), the tactile
+  sensors 5.2 / 3.3 / 2.4 / 19.9 / 19.9 % (types 2 to 6), the touch screens 1.7 % (type 1) and 0.6 % (type 3), the 4G/5G
+  modems 1.5 / 1.5 / 0.8 % (types 2 to 4), the satellite receiver 1.0 % (type 2); the circuit boards' titanium, the
+  joints' capacitors', in every draw (type 5 90 %), median 6.2 / 9.1 / 10.0 / 7.6 / 13.4 / 11.1 g (types 1 to 6).
+- **The places against the elements**, every element of every type, draw by draw: the largest difference 3.0e-7 of the
+  element's largest draw (the stored numbers' rounding).
+- **Looked at:** type 2's page 1 of where the critical elements sit (copper): the rows "temperature sensors" (100 %),
+  "force and torque sensors, arms" (2.6 %: above 2.5 %, so a row in his run, none in the sandbox's 1,000 draws at
+  2.0 %), "tactile sensors, arms" (5.2 %), in their colours, every number apart.
+- **Not covered yet:** his run of 03 (running).
+
+### V201. The numbers for the stock and flow model researched (EVIDENCE.md E39): runtime, battery exchange, lifetime, infrastructure
+
+- **His words:** "While 02 and 03 run, can you investigate some numbers for the stock and flow model …" (E39).
+- **How:** his sources and workbook searched first (report 03; the sheets Material Trajectories and Market Units);
+  RAWCLICDataCenters' EVIDENCE § 23 (ai-2040.com) and RAWCLICStockAndFlow's MODEL_DESCRIPTION read for how they treat
+  lifetimes; three reading agents read the makers', users' and analysts' pages (no PDF, no download, no sign-in); I read
+  again myself in the browser pane: Agility's investor exhibit at sec.gov (the 5-year useful life, 31,000 h, 120 h a
+  week; Digit 4's 4 h and its charge ratios), Agility's FAQ (dock 208–240 VAC 25 A, Wi-Fi, workcell), CRU (7 years, 5
+  to 10), ai-2040.com's economics explorer ("5-year robot life", "3-year chip life"), the Strange Review (200–500
+  cycles, 3 to 5 months, and what it rests on), Fourier's GR-3 and N1 manuals (≥500 cycles at 80 % DOD; ≥800 cycles to
+  80 % SOH), Figure 03's pages (2.3 kWh, 5 h, 2 kW, inductive stand). Wood Mackenzie's page not found again by me.
+- **Found:** E39's four tables. Only Fourier states a cycle life; no maker states a lifetime in years (Agility's 5
+  years an illustrative assumption); his report 03's 200 to 500 cycles and 3 to 5 months rest on the newsletter alone;
+  no source gives a dock's or station's mass, robots per dock, or spare packs per robot.
+- **Not covered:** the PDFs (IFR's World Robotics method, Goldman Sachs, Morgan Stanley's Humanoid 100, the Atlas spec
+  sheet, AgiBot G2's datasheet); nothing entered in any file or code.
+
+### V200. His runs of the six builders and of 01 after E38 points 2 and 4 read back
+
+- **His words:** "I have run make 1 to 6 and now 01 runs", then "I am runing 02".
+- **The six parts files:** written 13:02:27 to 13:03:38, all after the last change to the code (12:44:58, the
+  deliberate faults' restoring, the hashes the same); no iCloud copy "… 2". Each equal, sheet by sheet and cell by cell,
+  to what its builder writes into a temporary folder (types 1 to 6; types 1 and 2 also by their tests
+  `test_what_it_writes_equals_the_data_file_on_disk`, now passing, and 01's `test_the_real_file_holds_together`).
+  Their temperature sensors: every robot of the six files but type 5's two hydraulic Atlas versions (31, 102, 99, 85,
+  3 of 5, 5); the makers' sensors 27 rows as E38's table (1, 12, 6, 6, 2, 0; 8 written 'A or B'); the two capacitor
+  numbers in every file.
+- **01:** 45 pages 13:04:03 to 13:04:11, all after the six files; "No fault found in the inputs". Looked at: type 3's
+  page of where its kinds of part sit (mark 6, "Head joints"; the hip joints "a driver board and its sensors (encoders,
+  temperature sensors)"; every text within the page) and the faults page 1.
+- **The two estimates set to his rule** (V199) are in his files by his run of the builders; his word on them not yet
+  given.
+- **Not covered yet:** his run of 02 (200,000 draws, running) and of 03.
+
+### V199. The missing sensor kinds and the joints' capacitors built (EVIDENCE.md E38 points 2 and 4); the three constants removed
+
+- **His words:** to "Go ahead with points 1 to 3 as proposed?" (the table of the sensors robot by robot, the table of the
+  capacitors with the KEMET/YAGEO declaration's flag, the three constants no stage reads): "Yes, all three".
+- **Point 3:** 01's `JOINT_SHARE_ON_WHEELS`, `ENERGY_PER_KG_ON_WHEELS` and `SCREEN_MUTED` removed by exact name; `grep`
+  over every `.py` afterwards: no reader.
+- **Tests first, seen to fail** (10 of 13: `sensor_count`, `TITANATE`, `E38_SOURCES`, `CAPACITORS` missing; the new
+  kinds None; no temperature sensors in the builders' files), passing after the build: `TestNewSensorsAndCapacitors`
+  (02: the kinds by their car elements; the temperature sensors in every joint; every kind its own colour; a number
+  fixed, 'A or B' one or the other about half the draws each (20,000 draws), drawn whole from a constant with the
+  triangle's mean; barium titanate by the formula; type 1's temperature sensors' cobalt in every draw, its barium in
+  the joints alone, the circuit boards' titanium to its barium as the formula, draw by draw, 1e-9) and
+  `TestE38SensorsAndCapacitors` (the six builders: every robot with electric joints its temperature sensors, two or
+  one a motor where the SDKs say so, else drawn; the makers' sensors robot by robot with their numbers, kinds and
+  regions; no other robot holds them; their car elements; the capacitors' two shared numbers in every file; every E38
+  source code cited on the sheet Sources; 01's check of a number written 'A or B').
+- **01 stopped two of my proposed estimates** (his rule, every estimate at least half to 1.5 times its mode): the
+  temperature sensors 1 / 1 / 2 a motor, set to half to twice the joint motors, mode one a motor; the tactile arrays
+  not counted 2 / 10 / 10, set to 2 / 6 / 10. The MagicBot Z1's 1 / 1 / 2 kept: a drawn number of a sensor its maker
+  states is cut at one, a stated limit (01's `floor` for 'Number: …'). Both changes to be confirmed by him. **Found
+  by 01 in the test too:** type 1's Asimov 2, copied from the Asimov 1, dropped its drawn number; its builder copies it
+  now.
+- **Deliberate faults, each caught** (each file restored, its hash compared): the temperature sensors' kind left out
+  (no kind: "None != 'temperature sensors'"; 02 stops: "its car sensor elements (temperature sensor) are no kind of
+  sensor"); 'A or B' blended to its mean ("Items in the first set but not the second"); the capacitors added on top of
+  the board instead of out of its glass and epoxy (`TestHandCalculations`' electronics wholly drawn: 300 of 300 draws
+  mismatched); 01's whole-number condition of 'A or B' removed ("[] is not true"); the Unitree H1 set to two a motor
+  ("38.0 != 19.0").
+- **Older tests set to it:** the two of type 2's robots whose makers name no sensor (their E38 rows apart, as E31's);
+  titanium now also the circuit boards' (the capacitors); the combinations of car elements with the new ones; indium
+  also the touch screens'; 01's small test file with the two capacitor numbers; the words of what the hip joints hold
+  kept as short as before ("a driver board and its sensors (encoders, temperature sensors)": longer, they pushed type
+  3's last text off its page).
+- **The sandbox** (scratch folder): the six builders wrote their files there, 02 drew the six types at 1,000 draws on
+  them and 03 compared them: both 0 (no fault), 294 and 94 pages, no page against his figure rules (`page_problems`).
+  Held, of the draws: the temperature sensors 100 % (type 5 90.9 %: its hydraulic robots have no electric joints); the
+  force and torque sensors 2.0 / 1.4 / 1.1 % (types 2 to 4), the 4G/5G modems 1.7 / 1.9 / 0.3 %, the touch screens 2.0 %
+  (type 1) and 0.3 % (type 3), the satellite receiver 1.5 % (type 2), the tactile sensors 4.1 / 3.3 / 2.9 / 17.8 / 17.7 %
+  (types 2 to 6; each kind over all its regions, measured from the draws). Below 2.5 % a place draws no row, as every place (HELD_SHARE): those are in the draws, not on the
+  pages. The circuit boards' titanium, the capacitors', in every draw, median 8.6 g a type 2 robot (its barium about 25
+  g by the formula, not an element of interest).
+- **Looked at:** type 2's pages of where the critical elements sit 1 to 3 (copper, aluminium, silver, gold: the rows
+  "temperature sensors", "tactile sensors, arms" in their colours, the numbers apart), type 2's element page 1
+  (titanium in the alloy and in the sensors: **the capacitors' titanium has no panel there**, it shows on the pages of
+  where it sits and the means pages; for him to decide).
+- **The colours** (CIE Lab difference to the nearest other colour of those pages, computed with all chosen):
+  temperature sensors `#EE3377` 30.4, force and torque sensors `#225522` 23.7, tactile sensors `#FFAABB` 24.9, touch
+  screens `#EECC66` 24.0, 4G/5G modems `#BB5566` 30.4, satellite receivers `#997700` 20.5; the joint encoders' since 23.7.
+- **The whole suite:** 604 tests (749 s), 5 failures, each reading his parts files on disk, which have none of the new
+  rows until he runs the builders: the page check of the six types (02 and 03: 02 stops on the missing capacitor
+  numbers), type 1's and type 2's builders against their files, 01's "the real file holds together".
+- **Not covered:** his runs (the builders, 01, 02 at 200,000 draws, 03: read back in V200 to V203); the KEMET/YAGEO
+  declaration's numbers in this public repository's builder: asked again, "Yes, they may" (2026-11-06).
+
+### V198. The head joints a kind of their own, the sensors by where they sit (EVIDENCE.md E38 points 6 and 7)
+
+- **His words:** "I want thigs resolved. Gallium stays with the magnets, as it is more than for the sensors"; to the
+  table of four open items, "Yes do it and if all open items are solve check also for obsolete code".
+- **Tests:** `TestHeadJoints` written first and seen to fail ("KeyError: 'headjoints'"; "'headjoints' not found" among
+  neodymium's kinds), passing after the build: the kind "Head joints" with mark 6, a spot and a colour of its own; the
+  joints named head or neck in it; part group Joint drives, body region Head; type 1's head neodymium in the head joints
+  and none in the kind Head. Written with the build: `TestSensorsByKind`'s `test_a_sensors_place_its_kind_and_region`
+  (type 1's cameras and LiDARs placed with the head, the encoders without a region) and
+  `test_a_sensor_of_no_region_is_a_fault` (a camera's region set to 'Neck': `check_parts` names it); the older place
+  tests set to kind and region; `test_schemas`' list of kinds with "Head joints".
+- **Deliberate faults, each caught** (each file restored after, its hash compared): the head joint sent back to the kind
+  Head in 01 (`TestHeadJoints`: "'head' != 'headjoints'", "'head' unexpectedly found" among neodymium's kinds); the region
+  left off a sensor's place in 02 ("'Boards and components: cameras' != 'Boards and components: cameras, head'").
+- **The whole suite:** 591 tests (732 s), one failure, the one expected: the type 2 builder's output against its file on
+  disk (`TestTypeTwo.test_what_it_writes_equals_the_data_file_on_disk`: KIT ARMAR-7's hand camera 'Arms' in the
+  builder, 'Head' on disk; one row more, AgiBot G2's depth cameras in the head and in the wrists). It passes once he
+  runs the type 2 builder. The type 3 and 4 builder has no such test; its file changes too (the Onero's cameras).
+- **The builders read:** every sensor's region in the six parts files; the wrist and hand cameras of seven robots stood
+  in the head (E38 point 7), set by the words already in the builders. Not yet in the parts files: they change when he
+  runs the builders; until then the type 2, 3 and 4 files hold the old regions.
+- **Looked at** (drawn at 1,000 draws into the scratch folder): type 2's overview page 1 ("6 Head joints" on the robot,
+  the rows "LiDARs, head", "LiDARs, wheeled base", "Cameras, head", "Cameras, torso", "Cameras, arms", "Cameras, wheeled
+  base", "Microphones, head", "Ultrasonic sensors, wheeled base", "Motion sensors, torso").
+- **Code no stage reads** (the scan "check also for obsolete code"): 01's `JOINT_SHARE_ON_WHEELS` (line 1542),
+  `ENERGY_PER_KG_ON_WHEELS` (1543) and `SCREEN_MUTED` (3828): `grep` over every `.py` and `.md` of the repository finds
+  only their definitions (the names of the template's quantities are built from `JOINT_SHARE` and `ON_WHEELS` where
+  read). Read by tests only, kept as decided (E28 point 3, V156): 01's `PROJECT_WORDS` and 02's `texts_over_data`, the checks
+  of his rules on plain words and on text over a chart. All 36 settings of `src/params_schema.py` are read by a stage.
+  Nothing removed: asked once.
+
+### V197. His runs of 02 and 03 after E38 read back
+
+- **His words:** "02 is done I run 03".
+- **02:** its draws of the six types 11:06:56 to 11:07:35, 200,000 each; `places.npy` and `places_estimated.npy` 11:07:46
+  to 11:09:51; all after the commit `5594a1c` (10:49:59). 138 pages in `figures/composition/` (126 before E38), 156 files
+  in `figures/parts_taken_apart/` (138); no iCloud copy "… 2". The places' columns written by the pages' names, "LiDARs
+  (boards and components): Al" (no stage reads `places.npy`); `by_material`'s columns, which 03 reads, as before
+  ("Boards and components: cameras: …"). The places against the elements and the estimated places against the
+  estimated kinds, every element of every type, draw by draw: the largest difference 8.7e-8 of the element's largest draw.
+- **03:** 94 pages, 11:10:27 to 11:11:05 (86 before: one page and its numbers more for each of gallium, neodymium,
+  dysprosium and boron).
+- **Looked at:** type 2's page 2 of where the critical elements sit (Nd+Pr, Dy and Ga each in the magnets, by joint, and
+  in the sensors, by kind; gallium in the sensors median about 125 mg, in the magnets about 650 mg, over the draws that
+  hold it), type 2's element page 3 by material (Dy and Ga in two panels each), comparison_elements_9 (gallium in the
+  sensors, the six types; type 6 the LiDARs' alone).
+
 ### V196. The magnets' and the sensors' part of an element apart (EVIDENCE.md E38 point 5)
 
 - **His words:** "Gallium apart"; to the proposal of three points, "Yes do it like this. Nd etc. are then similar as Ga

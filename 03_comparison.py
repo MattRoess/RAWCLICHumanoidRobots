@@ -61,7 +61,7 @@ first 5 % of its axis, on a logarithmic mass axis (02's LOG_BELOW, E36). A type 
 numbered page of an earlier run beyond those drawn is removed by its exact name, and so are the four pages of 03's old
 form (OLD_PAGES); nothing else in the folder is touched.
 
-Where it sits: after 02_composition.py. 04, the stock-and-flow model, is to come after it.
+Where it sits: after 02_composition.py; 04_stock_and_flow.py comes after it and reads nothing of 03.
 """
 
 from __future__ import annotations

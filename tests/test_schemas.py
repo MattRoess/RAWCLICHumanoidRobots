@@ -444,7 +444,9 @@ class TestPages(Small):
         self.assertIn('03 Comparison', words)
         self.assertIn('The comparison pages', words)
         self.assertNotIn('later', words)
-        self.assertEqual(schemas.open_words(None, None), 'Open: the stock-and-flow model (04).')
+        self.assertEqual(schemas.open_words(None, None), 'Open: nothing.')   # 04 built on 2026-11-06 (E42)
+        self.assertIn('04 Stock and flow', words)
+        self.assertIn('The robots and their elements in the world', ' '.join(words).replace('\n', ' '))   # it wraps
 
 
 class TestScreenPages(unittest.TestCase):
@@ -706,8 +708,9 @@ class TestTypeTwoPages(unittest.TestCase):
         # that has them; type 1's drawing unchanged. "Boards and computers" since E19 point 6 (one parts vocabulary).
         self.assertEqual([name for name, _ in schemas.KINDS.values()],
                          ['Hip joints', 'Knee joints', 'Ankle joints', 'Waist joints', 'Arm joints and hands',
-                          'Battery pack', 'Boards and computers', 'Head', 'Cables', 'Frame and shell', 'Wheeled base',
-                          'Lift column', 'Hydraulic power unit, oil and hoses'])   # the last since E27.7
+                          'Head joints', 'Battery pack', 'Boards and computers', 'Head', 'Cables', 'Frame and shell',
+                          'Wheeled base', 'Lift column',
+                          'Hydraulic power unit, oil and hoses'])   # the last since E27.7; head joints since E38
         self.assertEqual({schemas.JOINT_KIND[w] for w in ('wheel', 'steering', 'lift')}, {'base', 'lift'})
         self.assertTrue({'wheel', 'steering', 'lift', 'hand', 'gripper'} <= schemas.TEMPLATE_OUTSIDE)
         self.assertEqual(set(schemas.kinds_of(self.apart)), set(schemas.KINDS) - {'hydraulics'})   # no hydraulic robot
@@ -1678,7 +1681,11 @@ SMALL_APART = {
                   # Last, so that the rows the tests change by their number stay where they were (points 3c, 3b).
                   ('all', 'Sensor housing, aluminium share', 0.25, 0.5, 0.75, 'share', 'E', 'point 3c'),
                   ('all', 'Board rest, glass fibre share', 0.4, 0.55, 0.7, 'share', 'S, E', 'E5.21'),
-                  ('all', 'Board rest, bromine share', 0.044, 0.088, 0.132, 'share', 'E', 'E5.21')],
+                  ('all', 'Board rest, bromine share', 0.044, 0.088, 0.132, 'share', 'E', 'E5.21'),
+                  # The joints' ceramic capacitors (E38 point 4), last too.
+                  ('all', "Ceramic capacitors in a driver board (the G1's small joint's, weighed)", 8, 16, 24,
+                   'capacitors', 'E', 'E38 point 4'),
+                  ('all', 'Ceramic capacitor, its barium titanate', 14.44, 39.67, 72.49, 'mg', 'S', 'E38 point 4')],
     'Sources': [('T1', 'China Post Securities, teardown', 'https://example.org', 'A teardown')],
 }
 APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),

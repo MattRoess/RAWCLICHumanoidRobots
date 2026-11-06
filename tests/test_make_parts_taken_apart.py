@@ -15,6 +15,7 @@ and, while nobody has changed it, equal the file on disk cell by cell. Type 2's 
 writes its batch 1 as agreed in EVIDENCE.md E6.8. Everything is written into temporary folders: press Run, nothing in
 the project is changed.
 """
+import dataclasses
 import importlib.util
 import os
 import re
@@ -687,11 +688,12 @@ class TestTypeTwoBatchTwo(unittest.TestCase):
 
     def test_one_motion_sensor_where_the_maker_names_no_sensor(self):
         # E7.5 point 8. The block's own sensors: since 2026-11-05 the cameras of E31 beside them (their sources E31's),
-        # TestCamerasE31.
+        # TestCamerasE31; since 2026-11-06 the temperature sensors and the makers' sensors of E38 (their sources E38's),
+        # TestE38SensorsAndCapacitors.
         for robot in ('DOBOT Atom', 'MirrorMe Bolt', 'Deep Robotics DR01', 'HONOR D1', 'Simplexity I-Series',
                       'KAIST Humanoid', 'LimX CL', 'VinMotion Motion 2', 'Zhejiang NAVAI-I3', 'Digit Nezha P01'):
             sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder'
-                       and not p.sources.startswith('E31')]
+                       and not p.sources.startswith(('E31', 'E38'))]
             self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
 
     def test_a_compute_module_where_the_maker_names_only_its_power(self):
@@ -808,13 +810,14 @@ class TestTypeTwoBatchTwoB(unittest.TestCase):
             self.assertEqual(modules, [(43.5, 87, 130.5)], msg=robot)
 
     def test_one_motion_sensor_where_the_maker_names_none(self):
-        # The block's own sensors: since 2026-11-05 the cameras of E31 beside them (their sources E31's), TestCamerasE31.
+        # The block's own sensors: since 2026-11-05 the cameras of E31 beside them (their sources E31's), TestCamerasE31;
+        # since 2026-11-06 the temperature sensors and the makers' sensors of E38 (their sources E38's).
         for robot in ('Tesla Optimus Gen 3', 'Cyan Robotics Orca', 'Sanctuary Phoenix', 'PHYBOT M1', 'PAL REEM-C',
                       'Zeroth Sean', 'Siasun Songxing', 'Unitree Superman',   # THEMIS: its brochure's, since E14
                       'X-Humanoid TianGong Ultra', 'Tlibot Tianzhen Z1', 'Tlibot T1', 'OpenLoong Qinglong',
                       'X-Humanoid Tien Kung 2.0'):
             sensors = [(p.name, p.count) for p in self.apart.sensors if p.robot == robot and p.name != 'Encoder'
-                       and not p.sources.startswith('E31')]
+                       and not p.sources.startswith(('E31', 'E38'))]
             self.assertEqual(sensors, [('Motion sensor (IMU)', 1)], msg=robot)
 
 # Type 2's robots on wheels (EVIDENCE.md E9.6, agreed 2026-10-30, "Yes, agree E9.6"; entered on "Yes, build it", E9.7):
@@ -2292,3 +2295,169 @@ class TestSourcesOfTheShares(unittest.TestCase):
                                            if r[0] == 'Motor stator' and r[1] == 'Copper')[8])
         self.assertIn('Bizzo 2014', next(r for r in sys.modules['parts_taken_apart'].SHARED_CONSTANTS_FIRST
                                          if r[1] == "Copper share of a board's mass")[7])
+
+
+class TestE38SensorsAndCapacitors(unittest.TestCase):
+    """Matthias, 2026-11-06, to the tables of the missing sensor kinds and of the joints' capacitors (EVIDENCE.md E38
+    points 2 and 4): "Yes, all three". Every robot with electric joints its temperature sensors in the joints (Unitree's
+    two a motor, its H1's and Booster's one, as their SDKs; every other robot one or two a motor, drawn); the sensors
+    the makers state, robot by robot, an option or a reading that can mean either written 'A or B'; the capacitors of
+    a joint's driver board two shared numbers of every file."""
+
+    # The robots whose makers' SDKs give two temperature readings a joint motor (Unitree's hg family, its H2 and R1),
+    # and one (Unitree's H1, Booster's).
+    TWO = ('Unitree G1', 'Unitree G1+', 'Unitree G1-D Ultimate', 'Unitree H1-2', 'Unitree H2', 'Unitree H2 Plus',
+           'Unitree H2-D Flagship', 'Unitree H2-X Core i7', 'Unitree H2-X Orin NX', 'Unitree R1', 'Unitree R1-A5-D',
+           'Unitree R1-A7-D')
+    ONE = ('Unitree H1', 'Booster T1', 'Booster T2', 'Booster K1 2 Ah', 'Booster K1 5 Ah')
+    # Robot -> its sensor -> its number: a number, 'A or B' (a tuple), or the robot's constant to draw it from (a list).
+    NOT_STATED = [2, 6, 10]
+    STATED = {
+        'UBTECH Walker S1': {'Six-axis force sensor, wrists': 2, 'Six-axis force sensor, ankles': 2,
+                             'Tactile sensor array, hands': (6, 12)},
+        'UBTECH Walker S2': {'Six-axis force sensor, wrists': 2},
+        'Galbot G1': {'Six-axis force sensor, wrists': 2, 'Touch screen': 1},
+        'Kepler K2': {'Six-axis force sensor, wrists': (0, 2), 'Tactile sensor array, hands': 10},
+        'EngineAI SE01': {'Six-axis force sensor, wrists': [1, 2, 4]},
+        'AgiBot G2': {'Joint torque sensor, arms': 14, '4G/5G modem': (0, 1)},
+        'Figure AI Figure 03': {'Tactile sensor array, hands': 10},
+        'Leju Kuavo 5': {'Tactile sensor array, hands': (0, 10)},
+        'Unitree H1-2': {'Tactile sensor array, hands': (0, 12)},
+        'EngineAI T800 Dev': {'Tactile sensor array, hands': NOT_STATED},
+        'EngineAI T800 PRO': {'Tactile sensor array, hands': NOT_STATED},
+        'Sanctuary Phoenix': {'Tactile sensor array, hands': NOT_STATED},
+        'Sanctuary Phoenix Gen 8': {'Tactile sensor array, hands': NOT_STATED},
+        'Boston Dynamics Atlas': {'Tactile sensor array, hands': NOT_STATED},
+        'Fourier GR-3': {'Tactile sensor, head': 16, 'Tactile sensor, torso': 15},
+        'MagicLab MagicBot Z1': {'Tactile sensor, head': [1, 1, 2]},
+        'EngineAI PM01': {'Touch screen': (0, 1)},
+        'MagicLab MagicBot Gen1': {'4G/5G modem': 1},
+        'PNDbotics Adam Lite': {'4G/5G modem': (0, 1)},
+        'PNDbotics Adam SP': {'4G/5G modem': (0, 1)},
+        'Xiaomi CyberOne': {'Satellite receiver': 1},
+    }
+    # Each new sensor: its kind of part and body region, and its car sensor elements (units in one sensor).
+    WHERE = {'wrists': ('Arms', 'Arms'), 'ankles': ('Ankles', 'Legs'), 'hands': ('Arms', 'Arms'), 'arms': ('Arms', 'Arms'),
+             'head': ('Head', 'Head'), 'torso': ('Boards', 'Torso'), 'screen': ('Boards', 'Torso'),
+             'modem': ('Boards', 'Torso'), 'receiver': ('Boards', 'Torso')}
+    UNITS = {'Temperature sensor': [('temperature sensor', 1)],
+             'Six-axis force sensor, wrists': [('force sensor', 6)],
+             'Six-axis force sensor, ankles': [('force sensor', 6)],
+             'Joint torque sensor, arms': [('force sensor', 1)],
+             'Tactile sensor array, hands': [('pressure/force sensor', 1)],
+             'Tactile sensor, head': [('capacitive sensor', 1)],
+             'Tactile sensor, torso': [('capacitive sensor', 1)],
+             'Touch screen': [('capacitive touch sensor', 1), ('touch controller', 1)],
+             '4G/5G modem': [('cellular modem', 1)],
+             'Satellite receiver': [('GNSS receiver', 1)]}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {t: written(b)[0] for t, b in enumerate((builder, builder_two, builder_three, builder_four,
+                                                             builder_five, builder_six), start=1)}
+
+    def file_of(self, robot: str):
+        found = [a for a in self.files.values() if robot in a.robots]
+        self.assertEqual(len(found), 1, msg=robot)
+        return found[0]
+
+    def test_every_robot_with_electric_joints_its_temperature_sensors(self):
+        temperature = schemas.NUMBER_OF + 'Temperature sensor'
+        checked = set()
+        for apart in self.files.values():
+            for robot in apart.robots:
+                encoders = [s.count for s in apart.sensors if s.robot == robot and s.name == 'Encoder']
+                rows = [s for s in apart.sensors if s.robot == robot and s.name == 'Temperature sensor']
+                if not encoders:          # no electric joint (the Atlas (old), the Nadia): none
+                    self.assertEqual(rows, [], msg=robot)
+                    continue
+                motors = encoders[0] / 2  # two encoders a joint
+                self.assertEqual(len(rows), 1, msg=robot)
+                row = rows[0]
+                self.assertEqual((row.kind, row.region), ('In the joints', 'as their joints'), msg=robot)
+                if robot in self.TWO or robot in self.ONE:
+                    self.assertEqual(row.count, motors * (2 if robot in self.TWO else 1), msg=robot)
+                    self.assertEqual(row.label, 'S', msg=robot)
+                    self.assertNotIn(temperature, apart.constants.get(robot, {}), msg=robot)
+                else:
+                    self.assertIsNone(row.count, msg=robot)
+                    _, values, _, label, _ = apart.constants[robot][temperature]
+                    self.assertEqual(values, (motors // 2, motors, 2 * motors), msg=robot)
+                    self.assertEqual((row.label, label), ('E', 'E'), msg=robot)
+                checked.add(robot)
+        self.assertTrue(set(self.TWO) | set(self.ONE) <= checked, set(self.TWO) | set(self.ONE) - checked)
+
+    def test_the_makers_sensors_as_stated(self):
+        for robot, sensors in self.STATED.items():
+            apart = self.file_of(robot)
+            for name, number in sensors.items():
+                rows = [s for s in apart.sensors if s.robot == robot and s.name == name]
+                self.assertEqual(len(rows), 1, msg=(robot, name))
+                row = rows[0]
+                self.assertEqual((row.kind, row.region), self.WHERE[name.rsplit(' ', 1)[-1]], msg=(robot, name))
+                constant = apart.constants.get(robot, {}).get(schemas.NUMBER_OF + name)
+                if isinstance(number, tuple):     # an option, or a reading that can mean either: each as often
+                    self.assertIsNone(row.count, msg=(robot, name))
+                    self.assertEqual(row.either, tuple(float(v) for v in number), msg=(robot, name))
+                    self.assertIsNone(constant, msg=(robot, name))
+                elif isinstance(number, list):    # stated, its number not: drawn from the robot's constant
+                    self.assertIsNone(row.count, msg=(robot, name))
+                    self.assertEqual(row.either, (), msg=(robot, name))
+                    self.assertEqual(constant[1], tuple(number), msg=(robot, name))
+                    self.assertEqual((row.label, constant[3]), ('E', 'E'), msg=(robot, name))
+                else:
+                    self.assertEqual(row.count, number, msg=(robot, name))
+                    self.assertEqual(row.either, (), msg=(robot, name))
+                    self.assertEqual(row.label, 'S', msg=(robot, name))
+
+    def test_no_other_robot_holds_them(self):
+        names = {name for sensors in self.STATED.values() for name in sensors}
+        for apart in self.files.values():
+            for s in apart.sensors:
+                if s.name in names:
+                    self.assertIn(s.name, self.STATED.get(s.robot, {}), msg=(s.robot, s.name))
+
+    def test_their_car_sensor_elements(self):
+        for t, apart in self.files.items():
+            for name, units in self.UNITS.items():
+                if any(s.name == name for s in apart.sensors):
+                    self.assertEqual(sorted((c, u) for _, n, c, u in apart.elements if n == name), sorted(units),
+                                     msg=(t, name))
+
+    def test_the_capacitors_two_shared_numbers_of_every_file(self):
+        for t, apart in self.files.items():
+            shared = apart.constants[schemas.ALL_ROBOTS]
+            _, values, unit, label, _ = shared[schemas.CAPACITORS]
+            self.assertEqual((values, unit, label), ((8, 16, 24), 'capacitors', 'E'), msg=t)
+            _, values, unit, label, _ = shared[schemas.CAPACITOR_TITANATE]
+            self.assertEqual((values, unit, label), ((14.44, 39.67, 72.49), 'mg', 'S'), msg=t)
+
+    def test_every_code_they_cite_on_the_sheet_sources(self):
+        shared = sys.modules['parts_taken_apart']
+        for t, apart in self.files.items():
+            cited = ' '.join(f'{s.sources} {s.label}' for s in apart.sensors) + ' '.join(
+                str(v[4]) for given in apart.constants.values() for v in given.values())
+            for code in shared.E38_SOURCES:
+                if re.search(rf'(?<![\w-]){re.escape(code)}(?![\w-])', cited):
+                    self.assertIn(code, apart.sources, msg=(t, code))
+
+    def test_an_either_number_checked_by_01(self):
+        params = Params()
+        lists_path = absolute(params.data.shared_lists)
+        if not os.path.exists(lists_path):
+            self.skipTest('the shared lists are not on disk')
+        lists = schemas.read_shared_lists(lists_path)
+        apart = self.files[1]
+        row = next(s for s in apart.sensors if s.robot == 'EngineAI PM01' and s.name == 'Touch screen')
+        at = apart.sensors.index(row)
+
+        def faults(**changed):
+            sensors = list(apart.sensors)
+            sensors[at] = dataclasses.replace(row, **changed)
+            return [f.text for f in schemas.check_parts_taken_apart(
+                dataclasses.replace(apart, sensors=sensors), lists, params) if 'Touch screen' in f.text]
+
+        self.assertEqual(faults(), [])
+        self.assertTrue(faults(either=(0.5, 1.0)))                 # not whole numbers
+        self.assertTrue(faults(either=(0.0, 0.0)))                 # never held
+        self.assertTrue(faults(either=(1.0,)))                     # one number is no 'A or B'

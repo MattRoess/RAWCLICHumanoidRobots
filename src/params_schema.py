@@ -200,6 +200,21 @@ class DataParams:
                  'RAWCLICVehicleTractionMotor/data/raw/10_MaterialElementDefinitions.xlsx'),
         metadata={'doc': "RAWCLICVehicleTractionMotor's electrical steels and stainless steel 304; read where they "
                          'lie.'})
+    # The world's mine production in 2025 and reserves of each element, for 04's figures (Matthias, 2026-11-06: "Add
+    # also the limit in stock and production like for the data centers"): RAWCLICDataCenters' sheet ElementReference
+    # (U.S. Geological Survey, Mineral Commodity Summaries 2026, its EVIDENCE.md § 24), read where it lies; and for the
+    # elements that sheet does not hold (magnesium, titanium, indium) the USGS data file in RAWCLICDataCenters' sources.
+    # SAFE TO CHANGE: only if the files move.
+    data_center_scenarios: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICDataCenters/data/researched/05_DataCenterScenarios.xlsx'),
+        metadata={'doc': "RAWCLICDataCenters' scenario workbook: its sheet ElementReference, the world's production "
+                         'and reserves of each element; read where it lies.'})
+    usgs_commodities: str = field(
+        default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
+                 'RAWCLICDataCenters/documentation/sources/MCS2026_Commodities_Data.csv'),
+        metadata={'doc': "USGS Mineral Commodity Summaries 2026, its data file, in RAWCLICDataCenters' sources: "
+                         'magnesium, titanium and indium; read where it lies.'})
     traction_motor_dir: str = field(
         default='/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICVehicleTractionMotor',
         metadata={'doc': "RAWCLICVehicleTractionMotor, whose own code draws the NdFeB elements of a grade class."})
@@ -279,6 +294,99 @@ class CompositionParams:
 
 
 @dataclass
+class StockFlowParams:
+    """How 04_stock_and_flow.py counts the robots, their joint sets and battery packs, and the elements in them: the
+    robots in use as ai-2040.com Plan A states them ("Use the numbers in the article"), each robot one unit with its
+    lifetime, its joints and battery packs replaced on their own (Matthias, 2026-11-06: "Yes, build it", "Yes, replace
+    joints"; documentation/claude/EVIDENCE.md E39 to E43)."""
+
+    # The robots in the world at 1 January of each year, as the article states them: AI Futures Project, AI 2040: Plan
+    # A (https://ai-2040.com/?choices=plan-a-root), its economics explorer (https://ai-2040.com/econ-explorer/), preset
+    # "AI 2040 Plan A Scenario", Input Table, row "Robots", read on 2026-11-06 (EVIDENCE.md E40). The article's robots
+    # are of every form, "some mixture of humanoid and other specialized form factors"; on Matthias's word they are the
+    # humanoid robots of 04 ("Use the numbers in the article", "It gives 70x10E9"). Its model takes them as stocks at
+    # 1 January (model/costSide.js: "scenario H100e / Q_robot are Jan-1 (start-of-year) stocks").
+    # SAFE TO CHANGE: only with the article; one value a year, the years without a gap.
+    robots: tuple = field(
+        default=((2025, 10e6), (2026, 11.6e6), (2027, 13.3e6), (2028, 15.3e6), (2029, 18.2e6), (2030, 23e6),
+                 (2031, 35.7e6), (2032, 72e6), (2033, 170e6), (2034, 423e6), (2035, 1.0e9), (2036, 2.26e9),
+                 (2037, 5.28e9), (2038, 12.5e9), (2039, 29.7e9), (2040, 70e9)),
+        metadata={'doc': "The robots in the world at 1 January, ai-2040.com Plan A (its economics explorer's row "
+                         "Robots; EVIDENCE.md E40), as the humanoid robots of 04."})
+
+    # A robot's lifetime, years, spread among the robots of each quarter as RAWCLICDataCenters' 07 spreads its GPUs'
+    # (min, mode, max of a triangle; Matthias, 2026-11-06: "have real lifetimes not something fixed like this", to the
+    # table of 04, "Yes, build it"): CRU's "average of seven years (five to ten-year) life expectancy for humanoid
+    # robots", Agility's assumed 5-year useful life of Digit and the article's "5-year robot life" (EVIDENCE.md E39.3).
+    # The robot as one unit, its joints and battery packs apart ("No look at the robots as a unit with exception of the
+    # batteries", "Yes, replace joints").
+    # SAFE TO CHANGE: only with new sources; in order, above 0.
+    robot_lifetime_years: tuple = field(
+        default=(5.0, 7.0, 10.0),
+        metadata={'doc': "A robot's lifetime, years (min, mode, max), spread among the robots of each quarter "
+                         '(EVIDENCE.md E39.3, E42).'})
+
+    # The hours a day a robot works: the article's "AIs and robots can work 24/7" (its main page, read 2026-11-06).
+    # SAFE TO CHANGE: only with the article; above 0, at most 24.
+    hours_a_day: float = field(
+        default=24.0,
+        metadata={'doc': "The hours a day a robot works: ai-2040.com Plan A, robots 'can work 24/7'."})
+
+    # A joint's life, operating hours, spread among the joints (min, mode, max): the rated life of the strain-wave
+    # gears in humanoid joints, Nabtesco's "market standard of 7,000 hours" and Harmonic Drive's "L10 of 10,000 hours",
+    # and planetary gearboxes "up to 30,000 hours" (Wittenstein; EVIDENCE.md E43). A robot's joints are replaced
+    # whenever they wear out (Matthias, 2026-11-06: "Yes, replace joints"), the joint kinds 01 numbers 1 to 6.
+    # SAFE TO CHANGE: only with new sources; in order, above 0.
+    joint_life_hours: tuple = field(
+        default=(7000.0, 10000.0, 30000.0),
+        metadata={'doc': "A joint's life, operating hours (min, mode, max), spread among the joints (EVIDENCE.md "
+                         'E43).'})
+
+    # A battery pack's charges until it holds 80 % of its capacity (min, mode, max), spread among the packs: Fourier's
+    # GR-3 "Cycle Life ≥500 (80%DOD)" and N1 "≥800 cycles, SOH 80%", a cell maker's "more than 80% after 1000 cycles"
+    # (EVIDENCE.md E39.2). A pack is replaced when its capacity falls below `battery_replaced_below`; the charges to that
+    # share by a straight-line fade from 100 % to 80 % (an approximation: real cells fade faster at first and near
+    # their end). Each pack is charged once a day: a robot holds as many packs as a day's work needs (Matthias,
+    # 2026-11-06: "Have at least so many battery packs ready for use as it is needed to have them for 1 day to switch.
+    # So they can recharge slowly").
+    # SAFE TO CHANGE: only with new sources; in order, above 0.
+    battery_cycles_to_80: tuple = field(
+        default=(500.0, 800.0, 1000.0),
+        metadata={'doc': "A battery pack's charges until 80 % of its capacity (min, mode, max), spread among the packs "
+                         '(EVIDENCE.md E39.2).'})
+
+    # The capacity below which a pack is replaced (min, mode, max), one value a draw: Matthias, 2026-11-06, "battery
+    # packs will be repalce as soon as the capacity go below 80% +-5%".
+    # SAFE TO CHANGE: only on Matthias's word; in order, between 0 and 1.
+    battery_replaced_below: tuple = field(
+        default=(0.75, 0.80, 0.85),
+        metadata={'doc': "The capacity below which a battery pack is replaced (min, mode, max): Matthias's 80 % ± 5 %."})
+
+    # A pack's runtime in 2025, hours, for the robot types whose rows of the workbook give energy density, not runtime
+    # (types 1, 3 and 5): each its anchor robot's maker, the Unitree G1 "About 2h", the Atlas "4 hours"; the Walker S2's
+    # maker states none, 2 h walking as a press report relays it (E) (EVIDENCE.md E39.1). Later years rise with the
+    # workbook's energy density of the type; types 2, 4 and 6 take the workbook's runtimes (sheet Material Trajectories
+    # 2025-2040).
+    # SAFE TO CHANGE: only with new sources; hours above 0, one per type 1, 3 and 5.
+    runtime_2025_hours: tuple = field(
+        default=((1, 2.0), (3, 2.0), (5, 4.0)),
+        metadata={'doc': "A battery pack's runtime in 2025, hours, of robot types 1, 3 and 5, their anchor robots' "
+                         '(EVIDENCE.md E39.1).'})
+
+    # The share of research robots, robot type 1, among the robots built (min, mode, max), in 2025 and in 2040, a straight
+    # line between, one random number a draw for the whole path: Matthias, 2026-11-06, "I assume reseach wil be around
+    # 10% within -+5% and over time this will decrease"; to 2040 half of it (E). The other types take the workbook's
+    # shares of the robots shipped (sheet Market Units & Shares 2025-2040), type 3, the largest, the remainder.
+    # SAFE TO CHANGE: only on Matthias's word; in order, between 0 and 1.
+    research_share_2025: tuple = field(
+        default=(0.05, 0.10, 0.15),
+        metadata={'doc': 'The share of robot type 1 among the robots built in 2025 (min, mode, max; Matthias).'})
+    research_share_2040: tuple = field(
+        default=(0.025, 0.05, 0.075),
+        metadata={'doc': 'The share of robot type 1 among the robots built in 2040 (min, mode, max; half of 2025, E).'})
+
+
+@dataclass
 class OutputParams:
     """Where the stages write. Paths are relative to the project root."""
 
@@ -331,6 +439,18 @@ class OutputParams:
         default=(1, 2, 3, 4, 5, 6),
         metadata={'doc': 'The robot types whose pages 01 and 02 draw; 02 writes the draws of all six.'})
 
+    # What 04_stock_and_flow.py writes: the draws of the robots, joint sets and battery packs of each type and of the
+    # elements in them, year by year, and their summary. Outputs: not in git.
+    stock_and_flow_dir: str = field(
+        default=os.path.join('data', 'stock_and_flow'),
+        metadata={'doc': 'Where 04_stock_and_flow.py writes the draws of the robots, joint sets, battery packs and '
+                         'elements, year by year, and their summary.'})
+
+    # The pages of 04_stock_and_flow.py: overview.png and elements/<Element>.png.
+    stock_and_flow_figures_dir: str = field(
+        default=os.path.join('figures', 'stock_and_flow'),
+        metadata={'doc': 'Where 04_stock_and_flow.py draws its overview and its page of each element.'})
+
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
     # and a page small enough to open quickly.
     dpi: int = field(
@@ -345,6 +465,7 @@ class Params:
     data: DataParams = field(default_factory=DataParams)
     checks: CheckParams = field(default_factory=CheckParams)
     composition: CompositionParams = field(default_factory=CompositionParams)
+    stock_and_flow: StockFlowParams = field(default_factory=StockFlowParams)
     output: OutputParams = field(default_factory=OutputParams)
 
 
@@ -396,14 +517,43 @@ def validate(params: Params) -> None:
 
     # The sibling projects' files: absolute, .xlsx where a file is named.
     for name in ('vehicle_pcb_composition', 'vehicle_sensor_composition', 'data_center_element_composition',
-                 'traction_motor_magnets', 'traction_motor_steels', 'traction_motor_dir'):
+                 'traction_motor_magnets', 'traction_motor_steels', 'traction_motor_dir', 'data_center_scenarios'):
         value = getattr(data, name)
         if not os.path.isabs(value) or (name != 'traction_motor_dir' and not value.lower().endswith('.xlsx')):
             raise ParameterError(f'data.{name} must be an absolute path' + ('' if name == 'traction_motor_dir' else
                                  ' to an .xlsx workbook') + f', not {value!r}.')
 
+    # 04's robots: one value a year from 0 up, the years without a gap, two at least (a year's flow needs the next 1
+    # January). Its triangles in order, their min below their max (a triangle, never a single number); the shares and
+    # the capacity below 1; the hours a day at most 24; a runtime of 2025 for each of robot types 1, 3 and 5.
+    robots = params.stock_and_flow.robots
+    years = [y for y, _ in robots] if isinstance(robots, tuple) else []
+    if (len(years) < 2 or years != list(range(years[0], years[0] + len(years)))
+            or not all(isinstance(v, (int, float)) and v > 0 for _, v in robots)):
+        raise ParameterError('stock_and_flow.robots must be (year, robots) pairs, one a year without a gap, two at '
+                             f'least, each above 0, not {robots!r}.')
+    flow = params.stock_and_flow
+    for name in ('robot_lifetime_years', 'joint_life_hours', 'battery_cycles_to_80', 'battery_replaced_below',
+                 'research_share_2025', 'research_share_2040'):
+        low, mode, high = getattr(flow, name)
+        if not (0 < low <= mode <= high and low < high):
+            raise ParameterError(f'stock_and_flow.{name} must be a min, mode and max above 0, in order, the min below '
+                                 f'the max, not {getattr(flow, name)!r}.')
+    for name in ('battery_replaced_below', 'research_share_2025', 'research_share_2040'):
+        if getattr(flow, name)[2] >= 1:
+            raise ParameterError(f'stock_and_flow.{name} must stay below 1, not {getattr(flow, name)!r}.')
+    if not 0 < flow.hours_a_day <= 24:
+        raise ParameterError(f'stock_and_flow.hours_a_day must be above 0 and at most 24, not {flow.hours_a_day}.')
+    if sorted(t for t, _ in flow.runtime_2025_hours) != [1, 3, 5] or any(h <= 0 for _, h in flow.runtime_2025_hours):
+        raise ParameterError('stock_and_flow.runtime_2025_hours must give hours above 0 for robot types 1, 3 and 5, '
+                             f'not {flow.runtime_2025_hours!r}.')
+
+    if not os.path.isabs(data.usgs_commodities) or not data.usgs_commodities.lower().endswith('.csv'):
+        raise ParameterError(f'data.usgs_commodities must be an absolute path to a .csv file, not '
+                             f'{data.usgs_commodities!r}.')
+
     for name in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir', 'parts_dir',
-                 'parts_figures_dir'):
+                 'parts_figures_dir', 'stock_and_flow_dir', 'stock_and_flow_figures_dir'):
         if not str(getattr(params.output, name)).strip():
             raise ParameterError(f'output.{name} is empty.')
     # The robot types whose pages are drawn: whole numbers from 1 to 6, each once, at least one.

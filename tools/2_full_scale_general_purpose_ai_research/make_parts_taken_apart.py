@@ -1616,7 +1616,7 @@ KIT_ARMAR_7 = wheeled(
                                                              'states none (E9.2 point 5)'), 21,
     sources='KIT (arms 8 × 2, head 3, torso 2, hands of four, "three omni-wheels"), HG; E9.1', driven=3,
     added=(hands(4),),
-    sensors=[camera('Camera, hand', 2, 'Head', 'KIT "A RGB camera is integrated in each of these hands"'),
+    sensors=[camera('Camera, hand', 2, 'Arms', 'KIT "A RGB camera is integrated in each of these hands"'),
              binocular('KIT "several integrated camera systems" (E: one binocular)'), IMU_NOT_NAMED])
 ASTRIBOT_S1 = wheeled('Astribot S1', 'Astribot', 1.70, 80, ((79, 80, 81), 'S', 'ASTp "80kg"; ± 1 kg'), 14,
                       sources='ASTp (Astribot: arms of 7 DoF); E9.1', driven=2, caster_count=2)
@@ -1665,7 +1665,7 @@ UNITREE_G1_D = wheeled(
                        'UNG1D "Upper Body Battery(Quick-release): 9Ah", "Chassis Battery (Built-in): 30Ah"',
                        label='S, E'),
     computer='Computer board, 8-core',
-    sensors=[binocular('UNG1D "Head HD Binocular Camera *1"'), camera('Camera, wrist', 2, 'Head',
+    sensors=[binocular('UNG1D "Head HD Binocular Camera *1"'), camera('Camera, wrist', 2, 'Arms',
                                                                        'UNG1D "Wrist HD Camera *2"'),
              base_lidar('UNG1D "LiDAR *1"'), base_depth_camera('UNG1D "Depth Camera *2"', 2), IMU_NOT_NAMED])
 AGIBOT_G2 = wheeled(
@@ -1680,7 +1680,9 @@ AGIBOT_G2 = wheeled(
              "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
     cooler=[fans(2, 'its two modules'), arm_sinks(2)],
     sensors=[binocular('AGG2m "头部双目 1"'), camera('Camera, fisheye', 3, 'Head', 'AGG2m "头部鱼眼 3"'),
-             depth_camera('AGG2m "头部RGBD 1", "腕部RGBD 2"', 3), base_lidar('AGG2m "底盘激光雷达 2"', 2),
+             depth_camera('AGG2m "头部RGBD 1"'),
+             placed(depth_camera('AGG2m "腕部RGBD 2"', 2), 'Arms', 'Arms', 'Depth camera, wrists (not named)'),
+             base_lidar('AGG2m "底盘激光雷达 2"', 2),
              ultrasonic('AGG2m "底盘超声波雷达 8"', 8), imu('AGG2m "底盘IMU"'), microphones('AGG2m "4麦克风阵列"'),
              speaker('AGG2m "头部扬声器 1"')])
 UNITREE_H2_D = wheeled(
@@ -1690,7 +1692,7 @@ UNITREE_H2_D = wheeled(
     boards=[intel('Intel Core i5 (PC1)', 'UNH2D "PC1: Intel Core i5"'),
             intel('Intel Core i7 (PC2)', 'UNH2D "PC2: Intel Core i7"'), POWER_BOARD],
     cooler=[fans(2, 'its two Intel computers'), x86_sinks(2)],
-    sensors=[binocular('UNH2D "Humanoid Binocular Camera"'), camera('Camera, wrist', 2, 'Head',
+    sensors=[binocular('UNH2D "Humanoid Binocular Camera"'), camera('Camera, wrist', 2, 'Arms',
                                                                      'UNH2D "Wrist HD Camera ×2"'),
              microphones('UNH2D "Microphone Array"'), speaker('UNH2D "High-Power Speaker"'),
              base_lidar('UNH2D "LiDAR ×1"'), base_depth_camera('UNH2D "Depth Camera ×1"'),
@@ -1709,7 +1711,8 @@ MAGICLAB_MAGICBOT_D1 = wheeled(
              "as the X1's and N1's computer boards (E9.6 point 9)"), POWER_BOARD],
     sensors=[camera('Camera, head', 1, 'Head', 'MGD1 "Head RGB Camera ×1"'), binocular('MGD1 "Head Stereo Camera ×1"'),
              camera('Camera, fisheye', 3, 'Head', 'MGD1 "Head Fisheye Camera ×3"'),
-             depth_camera('MGD1 "Wrist RGBD Camera ×2"', 2), base_lidar('MGD1 "Chassis 3D LiDAR ×2"', 2),
+             placed(depth_camera('MGD1 "Wrist RGBD Camera ×2"', 2), 'Arms', 'Arms', 'Depth camera, wrists (not named)'),
+             base_lidar('MGD1 "Chassis 3D LiDAR ×2"', 2),
              ultrasonic('MGD1 "Chassis Ultrasonic Sensor ×3" (its text: 8)', 3), microphones('MGD1 "Microphone Array"'),
              ('Speaker', 2, 'Head', 'Head', SPEAKER_G, 'E', "MGD1 \"Hi‑Fi driver ×2\"; as the G1's (E9.6 point 10)", []),
              IMU_NOT_NAMED])
@@ -1758,14 +1761,17 @@ REALMAN_REALBOT_L2 = wheeled(
     sources='RML2 (RealMan: "17 DoF", "Dual-wheel differential drive", "Lifting stroke 0.3 m"); E9.1', driven=2,
     caster_count=2, lift=True, **voltage_capacity(48, 'RML2 "48V 20Ah"', 20, 'RML2 "20Ah"'),
     boards=agx_orin('RML2 "Jetson AGX Orin 64G"') + [POWER_BOARD],
-    sensors=[binocular('RML2 "Stereo RGB"'), depth_camera('RML2 hand "RGBD"', 2), IMU_NOT_NAMED])
+    sensors=[binocular('RML2 "Stereo RGB"'),
+             placed(depth_camera('RML2 hand "RGBD"', 2), 'Arms', 'Arms', 'Depth camera, hands (not named)'),
+             IMU_NOT_NAMED])
 REALMAN_REALBOT_S2 = wheeled(
     'RealMan RealBot-S2', 'RealMan', 1.70, 125, ((124, 125, 126), 'S', 'RMS2 "≈ 125 kg"; ± 1 kg'), 20,
     sources='RMS2 (RealMan: "20 DoF", "Four-wheel steering, four-wheel drive"); E9.1', driven=4, steered=4,
     **voltage_capacity(48, 'RMS2 "48V 20Ah"', 20, 'RMS2 "20Ah"'),
     boards=agx_orin('RMS2 "Nvidia Jetson AGX Orin 64G"') + [POWER_BOARD],
     sensors=[binocular('RMS2 "Stereo RGB ×1"'), camera('Camera, fisheye', 2, 'Head', 'RMS2 "fisheye ×2"'),
-             depth_camera('RMS2 hand "RGBD"', 2), base_lidar('RMS2 "dual LiDAR"', 2), IMU_NOT_NAMED])
+             placed(depth_camera('RMS2 hand "RGBD"', 2), 'Arms', 'Arms', 'Depth camera, hands (not named)'),
+             base_lidar('RMS2 "dual LiDAR"', 2), IMU_NOT_NAMED])
 PAL_TIAGO_PRO = wheeled(
     'PAL TIAGo Pro', 'PAL Robotics', 1.55, 80, ((79, 80, 95), 'S', 'TPs "Weight 80 kg" the mode, TPd "Weight 95 Kg" '
                                                                   'the max, 1 kg below (decided, E9.3)'), 16,

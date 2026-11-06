@@ -8,7 +8,289 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
-## E38. The sensors by kind on the pages of where the critical elements sit (2026-11-06). Built (points 1 and 5); open (points 2 to 4)
+## E43. Do the joint actuators last the robot's life? (2026-11-06). Entered: the joints replaced (04)
+
+Matthias, 2026-11-06: "No look at the robots as a unit with exception of the batteries. How is it with the joint
+motors. How do the limit" (VERIFICATION.md V207). A reading agent read the makers' pages (no PDF); I read again myself
+Nabtesco, Harmonic Drive and AgiBot (**read myself**).
+
+| Part | Rated life | Source, kind |
+|---|---|---|
+| Strain-wave gears, short build (humanoids, cobots) | "the market standard of 7,000 hours", Nabtesco's new ones 10,000 h | Nabtesco press release, 24 February 2026 (**read myself**) |
+| Strain-wave gears, CSG series | "L10 of 10,000 hours", "42% longer" than the CSF series (CSF about 7,000 h, my arithmetic) | Harmonic Drive LLC product page (**read myself**) |
+| Strain-wave gears, model Y | design life 10,000 h at 2,000 /min | Leaderdrive product page |
+| Planetary gearboxes, SP+ HIGH SPEED | "up to 30,000 hours" | Wittenstein product page |
+| Robot-arm gearboxes | 30,000 h (IRB 1300), 40,000 h (IRB 390, IRB 6640), "Expected life depends on usage" | ABB product manuals, read on a host site |
+| Frameless joint motors | no bearings of their own: the joint's bearings are the motor's | Allient, CubeMars |
+| Roller and ball screws | L10 in revolutions, from the load and the lead; no humanoid actuator's figure stated | THK; trade press |
+| Humanoid makers | no joint life published; AgiBot A3 "a designed lifespan of up to 3 years" (the whole robot); AgiBot A2 Ultra 1,300 h of continuous walking, "equivalent to an average of 21 months in typical scenarios"; 1X NEO's wrist joints "well beyond 2 million cycles", its tendon drive replaced in a day of service; Figure 02 at BMW, the forearm the top failure point (its wrist electronics) | makers' pages (A3 **read myself**) |
+| Cobots in use | a Universal Robots arm at 14 h a day, two joint replacements in six years; another at 6 h a day, one in five | Universal Robots blog, its users' words |
+| Study | wear between wave generator and flexspline the highest-scored failure mode of a cobot joint | Guida et al., Machines 12 (2024) 776 |
+
+**What it shows:** the rated lives hold at rated torque; a joint run below it lasts longer (by the cube of the torques,
+the reducers' and bearings' life law, Harmonic Drive's formula in its PDF catalogues, not opened). At the article's 24
+hours a day ("AIs and robots can work 24/7"), 7,000 to 10,000 hours are 0.8 to 1.1 years, 30,000 to 40,000 hours 3.4 to
+4.6 years (my arithmetic): within the robot's 5 / 7 / 10 years, unless the joints run well below their rated torque.
+Users of cobots replace joints; 1X builds its drive to be replaced in a day. For his word: the joints replaced during
+the robot's life, or the robot's life ending with its joints.
+
+**Entered** (Matthias, 2026-11-06: "Yes, replace joints"; VERIFICATION.md V208): the joints replaced during the robot's
+life, a joint set (the six joint kinds of a robot) worn out after 7,000 / 10,000 / 30,000 hours, spread among the sets
+(`stock_and_flow.joint_life_hours`; 04's `joint_survival`): Nabtesco's market standard, Harmonic Drive's L10 and
+Wittenstein's planetary gearboxes. At rated torque; the life law that would lengthen it below rated torque is not
+applied.
+
+## E42. Stage 04 as RAWCLICDataCenters' 07: the specification (2026-11-06). Built: first the article only, then with elements, lifetimes and uncertainty
+
+Matthias, 2026-11-06, to the rows B to J of E40: "No No NO. Use the numbers in the article and not what you have
+research", then "Damit I told you. Do exactly what has been done for the datacenter damit!!". **This replaces** the share
+of E40 ("Yes, a share") and the anchors of E41 ("Yes, these anchors"): the humanoids of 04 are the article's robots as
+it states them, as 07 takes the article's world compute as it states it. Each step of 07 (its METHODOLOGY § 11) and
+what 04 takes in its place:
+
+| 07 (RAWCLICDataCenters) | 04 (this project) | From |
+|---|---|---|
+| The stock target: ai-2040's world compute at each 1 January | ai-2040's robots of each year: 10 M (2025), 11.6 M, 13.3 M, 15.3 M, 18.2 M, 23 M (2030), 35.7 M, 72 M, 170 M, 423 M, 1.0 B (2035), 2.26 B, 5.28 B, 12.5 B, 29.7 B, 70 B (2040) | the article (E40) |
+| The kinds' shares: ai-2040's inference share, a straight line between its years; a kind's inflow its target less what its cohorts still hold | the six types' shares: research (type 1) "around 10% within -+5%" and "over time this will decrease"; the other types his workbook's shares (sheet Market Units & Shares 2025-2040), the largest the remainder; a straight line between the years | his words; his workbook |
+| Cohorts by quarter, each leaving by its lifetime spread among its units; inflow = target − what the cohorts hold | the same, quarter by quarter to 2040 | 07 |
+| The lifetime: the sheet Lifetimes | "5-year robot life" (the article's economics explorer) | the article |
+| The load: running time × power | the hours a day: "AIs and robots can work 24/7" | the article |
+| The stock of 1 January 2022 by vintage (the article's chart) | the stock of 2025 by vintage: the article gives no vintages of robots; open | – |
+| The units' materials: 05's kg per unit, draw i | a robot's materials: 02's draws of its type, draw i | 02 |
+| – | the battery packs: replaced "as soon as the capacity go below 80% +-5%"; the packs a robot needs from its hours, its runtime (his workbook's trajectories) and its charging time; the charging time and the cycles to 80 %: neither the article nor his data give them; open | his words; his workbook |
+
+**Then built as the article only** (Matthias, 2026-11-06: "We have damit to implement what is in this artcle and nothing
+else!"; VERIFICATION.md V206): the rows of the table above that come from the article, and nothing else. The article's
+robots at 1 January (`stock_and_flow.robots`); its formula of the robots built, read in its model/costSide.js:
+"new(t) = S(t+1) − S(t)·(1−δ)", "delta_robot: 0.20, // 5-year robot life", the stocks "Jan-1 (start-of-year) stocks"
+(`stock_and_flow.robot_depreciation`); year by year, as the article counts, not by quarter as 07. Its explorer also holds
+"δR (robot capital depreciation)" 0.10 for its growth model's robot capital; 04 takes the 0.20, the one the article
+calls the robot's life and books production with. The article applies the formula to its robots counted as human
+equivalents (its R_phys); 04 to its robots as it counts them (its row Robots). Not built, the article stating none of
+them for robots: the six types and their ratios, the materials, the hours a day, the battery packs, their charging and
+their replacement.
+
+**Then, for the version with elements, lifetimes and uncertainty** (Matthias, 2026-11-06: "I want the same figures as for
+the datacenters, but expand them all the essential critcial and statigic elements. Also have real lifetimes not
+something fixed like this. I want to see uncerttainites", "Add also the limit in stock and production like for the data
+centers"; to the table of 04 as 07, "Yes, build it"; during the build: "No look at the robots as a unit with exception
+of the batteries. How is it with the joint motors. How do the limit", "Have at least so many battery packs ready for use
+as it is needed to have them for 1 day to switch. So they can recharge slowly"): a robot is one unit with one lifetime
+(5 / 7 / 10 years, spread among the robots of each quarter); its battery packs the exception: as many packs a robot as
+one day's work needs (its hours a day over a pack's runtime), each used once a day and recharged slowly, each replaced
+when its capacity falls below 80 % ± 5 %; whether the joint actuators last the robot's life, researched (open).
+
+**Built** (VERIFICATION.md V208), each outcome and where it lands; the first 04 (the article's formula,
+`robot_depreciation`) replaced:
+
+| What | Value | Where it lands |
+|---|---|---|
+| The robots in use at each 1 January | the article's, 10 M (2025) to 70 B (2040); the quarters between geometric, as 07 | `stock_and_flow.robots`; `targets` |
+| A robot's lifetime, spread among each quarter's robots | 5 / 7 / 10 years (CRU, Agility, the article; E39.3) | `robot_lifetime_years`; `survival`, `cohorts` |
+| The robots of 1 January 2025 by age | built before 2025 at the article's growth, 11.6 M / 10 M a year, as many as hold its 10 M (E: the article states no ages) | `cohorts`, its quarters before 2025 |
+| The hours a day | 24 (the article: "AIs and robots can work 24/7") | `hours_a_day` |
+| Robot type 1's share of the robots built | 5 / 10 / 15 % in 2025 (his words), 2.5 / 5 / 7.5 % in 2040 (half, E), a straight line between, one point a draw | `research_share_2025`, `research_share_2040`; `type_shares` |
+| Robot types 2, 4, 5, 6; type 3 | his workbook's shares of the robots shipped, a straight line between its years; type 3 the remainder | `workbook_rows`, `type_shares` |
+| The joints replaced | 7,000 / 10,000 / 30,000 hours (E43) | `joint_life_hours`; `joint_survival` |
+| The packs a robot holds | its hours a day over a pack's runtime, rounded up | `packs_per_robot` |
+| A pack's runtime | types 2, 4, 6 the workbook's; types 1, 3, 5 2 / 2 / 4 h in 2025 (E39.1) times their energy density over 2025's | `runtime_2025_hours`; `runtimes` |
+| A pack's charges until 80 % | 500 / 800 / 1,000 (E39.2), one charge a day, a straight-line fade below 80 % | `battery_cycles_to_80`; `pack_survival` |
+| The capacity a pack is replaced below | 75 / 80 / 85 % (his words), one value a draw | `battery_replaced_below` |
+| The elements | 02's 22 elements of interest, draw i of each type: the body, the joint set, the pack | `robot_parts`, `run` |
+| The world's production in 2025 and reserves | RAWCLICDataCenters' sheet ElementReference (the values 07 draws); USGS's data file for Mg (smelter metal; magnesite × 24.305 / 84.313, E), Ti (sponge; ilmenite and rutile's TiO2 × 47.867 / 79.866, at least, E), In (refined; no reserves); none for Dy and Tb | `data_center_scenarios`, `usgs_commodities`; `references` |
+| The pages | 07's overview and element pages, A4 landscape | `overview_page`, `element_page` |
+
+The runtimes of 2025 for types 1, 3 and 5 (2 / 2 / 4 h) and the charges to 80 % (500 / 800 / 1,000), to "Keep the
+runtimes 2/2/4 h and the 500/800/1,000 charges for your 04 run?": "Yes, keep them" (Matthias, 2026-11-06).
+
+## E41. The share of humanoids in ai-2040.com's robots: the sources and the share (2026-11-06). Agreed; not yet built
+
+Matthias, 2026-11-06: "Yes, a share" (E40). A reading agent read the market researchers', makers' and banks' own
+pages; I read again myself IDC, Barclays and Morgan Stanley (article and podcast), and CRU before (E39.3) (**read
+myself**). No PDF was opened.
+
+**Humanoids installed or shipped, by year (flows):**
+
+| Source | 2024 | 2025 | 2026 | Scope, kind |
+|---|---|---|---|---|
+| IDC, 9 February 2026 | about 3,000 (my arithmetic: 2025 "about 508 %" up) | about 18,000 shipped | – | torso, head and two arms, wheeled forms counted; market research (**read myself**) |
+| IDC, 29 September 2026 | – | – | about 25,000 in the first half | market research |
+| Barclays, 18 June 2026 | about 2,000 installed | 15,000 | 60,000 projected | bank (**read myself**) |
+| Counterpoint, January and August 2026 | – | about 16,000 installed | over 22,000 in the first half; over 50,000 for the year | market research (read by the agent) |
+| Omdia, relayed by AgiBot, January 2026 | – | about 13,000 | – | second-hand relay |
+| IFR, 30 September 2026 | – | about 7,000 sold | – | full-size (above 140 cm) only, beyond research and entertainment; association |
+| Unitree, January 2026 | – | over 5,500 shipped, 6,500 produced | – | its humanoids only; maker |
+| His workbook | – | 40,000 | – | shipments, Estimate |
+
+**Humanoids forecast:**
+
+| Source | 2030 | 2035 | 2040 | 2050 | Kind |
+|---|---|---|---|---|---|
+| Goldman Sachs, February 2024 | over 250,000 shipped | 1.4 M shipped | – | – | bank (read by the agent); its September 2026 update, 890,000 (2030) and 6.5 M (2035), only second-hand |
+| IDC, September 2026 | over 750,000 shipped | – | – | – | market research |
+| Omdia, September 2026; January 2026 relayed | over 700,000 shipped | 2.6 M shipped | – | – | market research |
+| Interact Analysis, May 2026 | – | over 700,000 shipped | – | – | market research |
+| Bank of America, relayed by Fortune | 1.2 M shipped | – | – | 3 B in use (2060, its own page) | bank |
+| Barclays, May 2026 | – | up to 24 M (China) and 3.7 M (US) in the workforce | – | – | bank, upper scenario |
+| Morgan Stanley, podcast July 2024; article May 2025 | US 40,000 | – | US 8 M | more than 1 B in use (China 302.3 M, US 77.7 M) | bank (**read myself**) |
+| CRU, October 2025 | – | – | 100 M produced a year | 400 M produced a year | analyst (**read myself**, E39.3) |
+| Citi, November 2024 | – | – | – | almost 650 M working | bank |
+| His workbook | 900,000 shipped | 6.5 M shipped | 25 M shipped | – | Estimate |
+
+**The share, my arithmetic** (humanoids in use at the start of a year: the installations summed, the flows geometric
+between the sources' years, none retired before 2030; over the article's robots of that year, E40):
+
+| At the start of | Humanoids in use, min / mode / max | Basis | Robots (ai-2040) | Share, min / mode / max |
+|---|---|---|---|---|
+| 2026 | 17,000 / 20,000 / 23,000 | Barclays' installations 2024 and 2025; IDC's shipments 2024 and 2025; up to 2,000 before 2024 | 11.6 M | 0.15 / 0.17 / 0.20 % |
+| 2030 | 0.46 / 0.80 / 1.04 M | 60,000 in 2026 (Barclays), then to Goldman's 250,000 / IDC's 750,000 / BofA's 1.2 M in 2030 | 23 M | 2.0 / 3.5 / 4.5 % |
+| 2035 | 2.4 / 7.3 / 28 M | from 2030 to Interact's 0.7 M / Omdia's 2.6 M a year in 2035; the max Barclays' upper scenario | 1.0 B | 0.24 / 0.73 / 2.8 % |
+| 2040 | 70 / 103 / 350 M | the workbook's shipments 2035 to 2039 summed / Morgan Stanley's US 8 M over the US's 7.8 % of its 2050 world / CRU's 100 M produced a year (a stock of several hundred million) | 70 B | 0.10 / 0.15 / 0.5 % |
+
+**What it shows:** the share rises from 0.17 % to about 3.5 % in 2030 and falls to about 0.15 % in 2040: the article's
+robots grow 2.3 times from 2025 to 2030 and about 3,000 times from 2030 to 2040, the humanoids of the sources about 40
+times and about 130 times. A share the same in every year would give 0.04 M humanoids in 2030 against the sources'
+0.5 to 1 M. With the share above, the humanoids of 04 follow the sources' humanoids year by year, the article's robots
+the frame. Proposed (E, the anchors' bounds the sources' spread): the four anchors as in the table, a straight line
+between them, one random number per draw for the whole path (as RAWCLICDataCenters draws its compute path); the
+article's robots as it states them. **Agreed** (Matthias, 2026-11-06, to "Use these four anchors for the humanoid share?"): "Yes, these anchors".
+
+## E40. The stock of robots in ai-2040.com Plan A, read first-hand (2026-11-06). Nothing entered
+
+Matthias, 2026-11-06: "Get the article, which was already the bases for the work on the stock and flow modeling of the
+datacenters. Read it and use the stock numbers for the humanoid robots" (VERIFICATION.md V204). The article is the one
+RAWCLICDataCenters' 07 follows (its EVIDENCE § 23, METHODOLOGY § 11): AI Futures Project, *AI 2040: Plan A*,
+https://ai-2040.com/?choices=plan-a-root, "primarily a recommendation, not a prediction", its effects "predictions".
+Read myself in the browser pane: the main page, the economics explorer and the authors' spreadsheet.
+
+**The robots in the world, Plan A** (the economics explorer, preset "AI 2040 Plan A Scenario" active, its Input Table,
+row "Robots"; https://ai-2040.com/econ-explorer/):
+
+| 2025 | 2026 | 2027 | 2028 | 2029 | 2030 | 2031 | 2032 | 2033 | 2034 | 2035 | 2036 | 2037 | 2038 | 2039 | 2040 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 10M | 11.6M | 13.3M | 15.3M | 18.2M | 23M | 35.7M | 72M | 170M | 423M | 1.0B | 2.26B | 5.28B | 12.5B | 29.7B | 70B |
+
+The same table: "Human-equivs per Robot" 1 (2025) to 4 (2040); "Human Equiv. Robotic Physical Workforce" 10M (2025)
+to 280B (2040); "US Share of Robots" 15 % to 35 %, "China Share of Robots" 70 % to 20 %; the cost side, "Robot
+depreciation (δR) 5-year robot life" (E39.3).
+
+**What the robots are**, the main text: "2 billion robots with some mixture of humanoid and other specialized form
+factors" (2036); footnote 146, "The lines between robot, vehicle, appliance, and machine tool are already blurry but
+become much blurrier during the 2030s"; footnote 103, caps "across a wide range of form factors which blur the lines
+between robots and more traditional machines"; "There are 400M robots in the world" (2034); footnote 174, "Robots have
+been growing 4x per year". Its 2025 figure, 10 M, counts every robot of today (the IFR's industrial robots in operation
+alone are about five million, its press release of 24 September 2026 as the reading agent read it); no share of
+humanoids is stated anywhere read.
+
+**The authors' spreadsheet** *Plan A side panel data* (sheet `plan-a-side-panel`, the compute path of RAWCLICDataCenters'
+07): robot output in dollars ("Output $ (robots, US)", $100B to $939B in the years it holds) and the "Cap and Trade for
+robots and compute" switch; no count of robots.
+
+**Against the project's own numbers:** his workbook ships 40,000 humanoids in 2025 and 25 M in 2040 (E39); CRU expects
+100 M humanoids produced in 2040 (E39.3). The article's 10 M robots in 2025 are about 250 times the workbook's humanoids
+shipped that year, and its 70 B in 2040 about eight robots for every person (my arithmetic, at about 9 B people).
+
+**Decided** (Matthias, 2026-11-06, to "Take the stock as a humanoid share of ai-2040's robots, as recommended?"): "Yes, a
+share". The humanoids of 04 are the article's robots times a share of humanoids, an estimate (E): for 2025 today's
+humanoids over the article's 10 M; to 2040 from the forecasts of humanoids; a source table first, then the share for
+his word. Rows B to J of the specification (the research types, their share to 2040, the other types' ratios, the hours
+a day, the packs a robot needs, the cycles to 80 %, the battery's ageing, the robot's lifetime, its materials) wait
+for his word.
+
+## E39. Numbers for the stock and flow model (04): runtime, battery exchange, robot lifetime, infrastructure (2026-11-06). Runtimes, cycles and lifetime entered in 04 (E42)
+
+Matthias, 2026-11-06: "While 02 and 03 run, can you investigate some numbers for the stock and flow model. How long does
+a battery load last. How often has the battery to be exchanged. Are there any know lifetime numbers of the robots
+known. Whats about infrastructer, which is required to run the robots. It is all for 04 stock and flow model. You can
+check datacenters as we use the same articles as the bases" (VERIFICATION.md V201). Three reading agents read the
+makers', users' and analysts' own pages; I read the key ones again myself (marked **read myself**). Every row: what it
+is (claim, design value, assumption, measured), first-hand or second-hand. No PDF was opened, nothing downloaded.
+
+**Already in the projects.** His workbook (`data/raw/humanoid_robots_2040_workbook.xlsx`): annual shipments by
+category, 40,000 (2025), 900,000 (2030), 6.5 M (2035), 25 M (2040) (sheet Market Units & Shares 2025-2040, labelled
+Estimate); runtime trajectories by category (sheet Material Trajectories 2025-2040): type 2 3.5 / 9 / 14 / 24 h (2025 /
+2030 / 2035 / 2040), type 4 2 / 4 / 6 / 8 h, type 6 1 / 4 h (Estimate); "≥18 h/day target" for type 3 (Taxonomy). His
+report 03 (`documentation/sources/03_batteries_controllers_sensors_lifetime.md`): runtime 1.5 to 4 h; NMC rated 800 to
+1,500 cycles, in robots 200 to 500; "a battery pack may need replacement every 3-5 months"; its references are battery
+makers' blogs and a venture fund's newsletter (below). No source of his states a robot's lifetime. RAWCLICStockAndFlow
+draws a Weibull lifetime over yearly cohorts (`documentation/MODEL_DESCRIPTION.md`); RAWCLICDataCenters a min / mode /
+max lifetime per unit and ai-2040.com's compute path (its EVIDENCE § 23).
+
+### E39.1 Runtime per charge, charging, swapping (the makers' own pages; claims under their own conditions)
+
+| Robot | Runtime | Charge or swap | Pack | Source, kind |
+|---|---|---|---|---|
+| Unitree G1 | "About 2h" | charger 54 V 5 A (9 Ah: at least 1.8 h, my arithmetic) | 9,000 mAh, quick release | unitree.com/g1, product page |
+| Unitree H2 / R1 | about 3 h / about 1 h | – | H2 15 Ah (0.972 kWh) | unitree.com/H2, /R1 |
+| UBTECH Walker S2 | not stated | "swap battery autonomously within 3 minutes", two packs | – | ubtrobot.com, product page |
+| AgiBot A2 / X2 | 2 h / about 2 h | swappable / "≤1.5 hours" | 700 Wh / about 500 Wh | agibot.com, product pages |
+| Fourier GR-1 / GR-2 / GR-3 / N1 | ≈60 min / ≈2 h / ≈3 h / ≈2 h | 315 min / ≈2 h / ≈1.5 h / ≈3.5 h; GR-3 hot swap | 483 / ≈950 / 702 + 234 / 475 Wh | support-old.fftai.com, manuals (GR-3, N1 **read myself**) |
+| Booster T2 / K1 | 2 h walking / up to 70 min | – | 48 V 10 Ah / 5 Ah | booster.tech |
+| EngineAI PM01 / T800 | about 2 h / 3 to 5 h | about 2 h / quick release | 10 Ah | engineai.com.cn |
+| Figure 03 | "5 hours of run time at peak performance" | "2 kW fast charge", inductive stand (at least 1.15 h, my arithmetic) | 2.3 kWh | figure.ai/news/f-03-battery-development, /introducing-figure-03 (**read myself**) |
+| Agility Digit 4 / Digit 5 | 4 h / 90 min (planned) | docks itself; Digit 5 charges in 9 min; work to charge 2:1 / 10:1; 16 / 22 h of 24 | – | Agility's investor exhibit at sec.gov (**read myself**), press releases |
+| Apptronik Apollo | 4 h a pack | swappable packs, "7x22 operation" | – | apptronik.com |
+| 1X NEO | 4 h | "6min per hour runtime", plugs itself in | 842 Wh | 1x.tech/neo |
+| Boston Dynamics Atlas | 4 hours | swaps its own battery at a station | – | bostondynamics.com/atlas |
+| Kepler K2 / Galbot G1 / MagicLab Gen1 | 8 h / 8 h / 3 to 5 h | 1 h / 3.5 h / 3 h | – / 1,440 Wh / 1.35 kWh | makers' pages |
+
+Nothing stated: AgiBot G2, UBTECH Walker S1, Figure 02 (its page now Figure 03's), Tesla Optimus, Leju Kuavo, Xiaomi
+CyberOne, Sanctuary Phoenix, EngineAI SE01, PNDbotics Adam (capacity only), Unitree H1 (capacity only). The workbook's
+2025 runtimes agree with the anchors' makers: type 2 3.5 h against the H2's "About 3h"; type 4 2 h against the A2's 2 h.
+
+### E39.2 Battery cycle life and exchange
+
+| Source | What it states | Kind | Its basis |
+|---|---|---|---|
+| Fourier N1 manual | "25℃, 10A discharge, ≥800 cycles, SOH 80%" | maker, design or test value (**read myself**) | its test conditions given |
+| Fourier GR-2, GR-3 manuals | "Cycle Life ≥500 (80%DOD)" | maker (GR-3 **read myself**) | – |
+| Every other maker | no cycle number; warranties for the whole robot: Unitree G1 8 months (EDU 18), H2 8 (EDU 12), R1 6 to 12; Booster T2 1 year; 1X NEO 3 years (bought outright) | makers | commercial terms |
+| The Strange Review (a venture fund's newsletter, 25 March 2026), his report 03's reference [6] | lab 800 to 1,500 cycles; "under real humanoid conditions, that falls to 200–500"; "replacement frequency jumps to every 3 to 5 months"; "roughly 500 cycles a year" at two shifts; 8 to 9 batteries over five years | second-hand estimate (**read myself**) | an IOP Science comparison of NMC and LFP and an interview with one battery engineer; no humanoid measured |
+| PAC Battery, Ufine Battery (battery vendors), his report 03's [31] and [3] | about 200 cycles at 3C to 5C (PAC); no cycle number (Ufine) | vendor marketing | none given |
+| Grepow (cell vendor) | "more than 80% after 1000 cycles", NMC 811 semi-solid cells for humanoids | vendor, cell level | no test conditions |
+
+**How the exchange follows** (no number set): packs a robot uses over its life = its working hours a year × its life ÷
+(its runtime per charge × the cycles its pack lasts), a swapped robot's packs sharing the cycles. Working hours a year
+found: Agility's assumption 6,240 h (two 10-hour shifts, 120 h a week, 52 weeks; **read myself**); ARK Invest 4,000 h (80
+h a week, 50 weeks); Figure 02 at BMW measured 1,250+ operational hours in 11 months, 10-hour shifts Monday to Friday
+(about 1,360 h a year, my arithmetic). For example (my arithmetic only): 1,360 h a year at Figure's 5 h a charge is
+about 270 charges a year, a 500-cycle pack about 1.8 years; 6,240 h a year at 2 h is 3,120 charges a year, an 800-cycle
+pack about 3 months.
+
+### E39.3 The robot's lifetime
+
+| Source | What it states | Kind |
+|---|---|---|
+| Agility Robotics, investor exhibit (Form 8-K, June 2026) | "the assumed 5-year useful life of Digit"; "~31,000 Digit Service Life in Hours" (120 h a week, 52 weeks, 5 years) | maker, assumption, "illustrative" (**read myself**) |
+| CRU Group, 16 October 2025 | "an average of seven years (five to ten-year) life expectancy for humanoid robots"; 100 M produced in 2040 (moderate scenario) | analyst, assumption (**read myself**) |
+| ai-2040.com, economics explorer, Plan A | "Robot depreciation (δR) 5-year robot life" (beside "3-year chip life"); robots of every form, 10 M (2025) to 400 M (2034) in the world | scenario, economic depreciation (**read myself**); the compute stock RAWCLICDataCenters takes from the same site uses a 15-year half-life |
+| Princeton press release (EurekAlert, 1 May 2026) on Ku and Greig, Chem Circularity | "5-10 years for humanoid robots" | the authors' institution, estimate, no basis given |
+| IFR, as relayed by Our World in Data | industrial robots "withdrawn after 12 years of service" | association, second-hand (its own document a PDF, not opened) |
+| Wyatt et al., Machines 5 (2017), LCA of robot arms | "expected service life … is assumed to be eight years" at 20 h a day | journal, assumption |
+| Figure AI, BMW (19 November 2025) | 11 months, 1,250+ h; Figure 02 retired fleet-wide when Figure 03 came | maker, measured; a change of model, not wear |
+| 1X NEO | tendon drive "2.000.000 (1 day service replacement)" load cycles; 3-year warranty | maker, design value of a part |
+| Goldman Sachs (January 2024, PDF) | "We assume a 5-year life cycle" (seen only as a search snippet) | second-hand, not used |
+
+No maker states a design or service life in years. Banks' and consultancies' open pages (Morgan Stanley, Goldman Sachs,
+ARK, Bain) state none.
+
+### E39.4 The infrastructure to run them
+
+| Item | What is stated | Source, kind |
+|---|---|---|
+| Charging dock | "A single charging dock requires a 208–240VAC (25A) electrical connection"; Digit docks itself | Agility FAQ (**read myself**) |
+| Wireless charging | coils in the feet, "step onto a wireless stand and charge at 2 kW"; data offload at the dock, 10 Gbps | Figure 03 (**read myself**); BMW Spartanburg plans it |
+| Swap stations | Walker S2 swaps its own pack at stations "within 3 minutes"; Atlas goes to a station and swaps its own batteries; AgiBot A3 10-second hot swap; Galbot S1, Apollo 2 swappable packs | makers' pages, claims |
+| Chargers | Unitree G1 54 V 5 A; AgiBot A2 54.6 V 8 A; Galbot G1 54.6 V 10 A; Fourier N1 46 V 4 A | makers' spec sheets |
+| Site | "A robust industrial Wi-Fi network with access to the internet is required"; a workcell with "physical perimeter barriers and safety interlocks"; a safety monitor on a 120 V outlet | Agility FAQ (**read myself**); BMW: added barriers, improved 5G |
+| Compute | the AI on board (Figure's two embedded GPUs; Jetson Thor or Orin at 1X, Booster, Agility, AgiBot, Galbot); cloud fleet software (Agility Arc); remote supervision (1X); teleoperated training centres (Hyundai, UBTECH) | makers; no maker states data-centre compute per robot |
+| Studies | one data-centre GPU serving about 7 to 12 robots (SemiAnalysis, a model); about 586 kWh a year for a G1 at 8 h a day (Wood Mackenzie); 10 kWh a day (RethinkX, assumption) | analysts, not read myself |
+
+**What no source states:** the mass, size or materials of a dock or swap station; robots per dock or station; spare
+packs per station or per robot in a fleet (AgiBot X2: one battery in the box); a station's power. These would need
+estimates (E), shown to him first.
+
+## E38. The sensors by kind on the pages of where the critical elements sit (2026-11-06). Built (points 1 to 7); two estimates of point 2 to be confirmed by him
 
 Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses sensors are
 the location for cirticial raw materials such as indium galium etc.", "I would like to continue with the sensor work.
@@ -22,21 +304,57 @@ components" (VERIFICATION.md V192, V193).
 | 1 | The sensors by kind on each type's pages of where its critical elements sit and in `places.npy`, `places_estimated.npy` | **Built.** `SENSOR_KINDS`, `sensor_kind`: a sensor's kind from its car sensor elements, the first rule that holds: a laser diode array with a photodetector array, LiDARs (the time-of-flight sensors with them, "time of flight and lidar are the same"); an image sensor, cameras (colour, stereo and depth together, "combine all the cameras"); an angle sensor, joint encoders; a position or pressure sensor, the hydraulic actuators' sensors; MEMS microphones; an ultrasonic sensor; an IMU alone, motion sensors. A combination of no kind stops 02 (`check_parts`). The circuit boards, cables and connectors as before; the element pages by material and 03 keep the cameras and the other sensors (E32) |
 | 1a | The names | **Built.** Every component of the electronics written its component first, the electronics in brackets: "LiDARs (boards and components)", "Cameras (boards and components)" (`shown_name`), in the legends of 02's and 03's pages and on the means pages ("Circuit boards 6.9 g, other sensors 1.3 g, cameras 88 mg (boards and components)"); the draws' columns keep "Boards and components: …" (`component_label`), so 03 reads 02's files as before |
 | 1b | The overview pages | **Built.** Two elements a page while their rows fit (`OVERVIEW_ROWS` = 24), else one (`overview_pages`); the columns of numbers moved right where a column's numbers are long (`text_width`); the headings 2 points above the panel. With the sensors by kind, copper's and aluminium's panels hold up to 18 rows; two on a page overlapped (V193) |
-| 2 | The missing sensor kinds, all from the car list | **Open, research running.** Temperature sensors, the cameras' infrared illuminators, touch screens and skins, Wi-Fi and 5G modems, satellite receivers, force or torque sensors; robot by robot from the makers' data, a source table first, a count no source states an estimate shown to him before entry |
-| 3 | The documents' fault (modems and satellite receivers named, none in any robot) | **Open,** with point 2 |
+| 2 | The missing sensor kinds, all from the car list ("Yes do it", row 3: the source table and the estimates shown before anything is entered; to the table, "Yes, all three") | **Built (V199)** as the table below, in the builders: `TEMPERATURE_PER_MOTOR`, `temperature_number`, `SENSORS_STATED`, `SENSORS_NUMBER`, `E38_SOURCES` (`tools/parts_taken_apart.py`), the G1's, X1's and N1's in type 1's builder; 02's six new kinds (`sensor_kind`, `SENSOR_KINDS`; the temperature sensors in every joint, `IN_EVERY_JOINT`); a number written 'A or B' drawn one or the other, each as often (`sensor_count`; 01's `either_of` and its check). **Two estimates set to his rule** that every estimate spans at least half to 1.5 times its mode (01's check stopped the proposed ones): the temperature sensors of a robot whose maker states none half to twice its joint motors, mode one a motor (proposed 1 / 1 / 2 a motor); the tactile arrays of a robot that states touch but no number 2 / 6 / 10 (proposed 2 / 10 / 10). The MagicBot Z1's head sensor 1 / 1 / 2 as proposed: a drawn number of a sensor its maker states is cut at one, a stated limit (01). Entered in his files when he runs the builders |
+| 3 | The documents' fault (modems and satellite receivers named, none in any robot) | **Built.** The lists of the other sensors in 02's notes and METHODOLOGY no longer name them (V192) |
 | 5 | The magnets' and the sensors' part of an element apart ("Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets") | **Built.** `magnets_split`: an element the NdFeB magnets and the sensors hold, each in at least 2.5 % of the draws, and nothing else, in two panels: "… in the magnets" (the magnets alone) and "… in the sensors" (cameras and other sensors), on 02's element pages; on the pages of where the critical elements sit where its magnets sit and its sensors by kind (`element_pages`, `place_view`; Nd+Pr, Dy and Ga in his data); on 03 two pages, the magnets' without a legend (`magnets_and_sensors`). In type 2: neodymium, dysprosium, boron and gallium. Every other element as before; titanium's alloy and sensors as E36 |
-| 4 | The joints' capacitors | **Open, researched (V193):** no first-hand source names the capacitors of a commercial humanoid's joints; open designs and a chip maker's humanoid joint reference design use ceramic capacitors (MLCC), one open design aluminium electrolytics; the makers' composition sheets of MLCCs (KEMET/YAGEO), tantalum capacitors (KEMET/YAGEO) and aluminium electrolytic and hybrid polymer capacitors (TDK EPCOS, Panasonic) read. Nothing entered |
+| 6 | The head joints a kind of their own ("Nd is in the head joint and not just in the head"; "Yes do it", 2026-11-06, row 1) | **Built.** `headjoints`, "Head joints", mark 6 on the robot (01's `KINDS`, `SPOTS`, `MARKS`; colour `#A5170E`, Paul Tol's), the joints named head or neck (`JOINT_KIND`); part group Joint drives, body region Head. The kind Head keeps the head's sensors, speakers, boards and housings; the notes' sentence that counted the head's joints with the sensors corrected |
+| 7 | The sensors by where they sit ("Yes do it", row 2: kind and place together) | **Built.** Each sensor kind with its body region on the pages of where the critical elements sit: "Cameras, head", "Cameras, arms", "LiDARs, wheeled base" (`sensor_place`, `REGION_WORDS`); the joint encoders and the hydraulic actuators' sensors, in every joint, without one (`IN_EVERY_JOINT`); a sensor outside the joints with no region stops 02 (`check_parts`). The element pages by material and 03 keep the kinds without regions (`merge_regions`). Found while building: the wrist and hand cameras of seven type 2 robots stood in the head (KIT ARMAR-7, Unitree G1-D and H2-D, AgiBot G2, MagicLab MagicBot D1, RealMan RealBot-L2 and -S2) and the SwitchBot Onero H1's four depth cameras all in the head; set to the arms by the makers' words already in the builders ("Wrist HD Camera *2", "腕部RGBD 2", "hand"), and the Onero's to head 1, arms 2, abdomen 1 by the catalogue's words in its builder ("in its head, arms, hands and abdomen", one each in the arms E). The parts files change when he runs the builders |
+| 4 | The joints' capacitors ("Yes do it", row 4: taken out of the driver boards, the estimates shown first; "Yes, all three", the declaration's numbers used as proposed) | **Built (V199)** as the table below: two shared numbers of every parts file (`CAPACITORS`, `CAPACITOR_TITANATE`), 02's `titanate_share` and `TITANATE` in the joints' driver boards. Barium is not among the elements of interest (E19), so it is in the draws (by every element) and not on the pages; the titanium is. Before: Researched (V193): no first-hand source names the capacitors of a commercial humanoid's joints; open designs and a chip maker's humanoid joint reference design use ceramic capacitors (MLCC), one open design aluminium electrolytics; the makers' composition sheets of MLCCs (KEMET/YAGEO), tantalum capacitors (KEMET/YAGEO) and aluminium electrolytic and hybrid polymer capacitors (TDK EPCOS, Panasonic) read. Nothing entered |
 
 **The colours of the kinds** (Paul Tol's published schemes; CIE Lab difference to the nearest other colour of those
 pages): LiDARs `#332288` (31.6), cameras `#AA4499` (14.1 from the hip joints', the cameras' purple of E32 kept),
 joint encoders `#666633` (30.3), hydraulic actuators' sensors `#222255` (31.6), microphones `#BBBBBB` (29.8), ultrasonic
 sensors `#EE8866` (30.3), motion sensors `#009988` (33.6).
 
+**Point 2 as proposed and built** (2026-11-06; the two estimates set to his rule as the row above says). The makers' words as a reading agent read them first-hand (V193),
+S; an estimate E with its basis. A robot's option, or one of its editions, held in half the draws, as a robot's two
+versions are drawn each as often (decision B); a reading that can mean two numbers drawn as one or the other, never
+blended. The car sensor type is the nearest row of RAWCLICVehicleElectronics' `07_` (sheet Sensor Details); where it is
+not the same kind, the row says so.
+
+| Kind | Car sensor type, units in one | Robots: number in the robot | Label, basis | Where |
+|---|---|---|---|---|
+| Temperature sensors | temperature sensor (NTC), 1 | every robot with electric joints, per joint motor: Unitree's G1, G1+, G1-D, H1-2, H2 and R1 versions 2; the Unitree H1 and the Booster T1, K1 and T2 1; every other robot half to twice its joint motors, mode one a motor, whole (proposed 1 / 1 / 2 a motor) | S: Unitree's SDK "Motor temperature (surface and winding)", two readings a motor (its H1 one); Booster's SDK one a joint. E for the rest: one in the winding, a second where the drive watches its power stage too | in every joint as the encoders: their elements, their mass inside the joint's driver board |
+| Force and torque sensors | force sensor (strain gauge on a steel beam): 6 in a six-axis sensor, one per axis (E: the car list has no six-axis sensor); 1 in a joint torque sensor (the car's torque sensor is a steering column's Hall sensor, another kind) | UBTECH Walker S1 4, Walker S2 2, Galbot G1 2 (six-axis); Kepler K2 2 in two of its three versions (0 or 2); Engine AI SE01 1 / 2 / 4; AgiBot G2 14 joint torque sensors | S: "Six-axis Force Sensor*2" (twice on the S1: wrists and ankles), "6-Axis Force Sensor ×2", "Six-Axis Force: - / 2 / 2", "每个关节都配备有关节力矩传感器" (7 joints an arm). E: SE01's "High-Precision Force Control Sensor", number and place not stated, at the wrists as the makers that place theirs | arms (S1's ankles: legs) |
+| Tactile sensors | pressure/force sensor (thin-film haptic sensor), 1 an array (E, the nearest) in the hands; capacitive sensor (copper on polyimide), 1 (E) in head and torso | Kepler K2 10; Figure 03 10; Leju Kuavo 5 with its touch hand, an option (0 or 10); Unitree H1-2 with the Dex5-1 hand, an option (0 or 12); UBTECH Walker S1 6 or 12; Engine AI T800 Dev and PRO, Sanctuary Phoenix and Phoenix Gen 8, Boston Dynamics Atlas 2 / 6 / 10 (proposed 2 / 10 / 10); Fourier GR-3 16 in the head, 15 in the torso; MagicLab MagicBot Z1 1 / 1 / 2 in the head | S: "25 high-resolution tactors per finger" (an array a finger), "Each fingertip sensor", "一共5个，每个手指一个" (5 a hand), "94 tactile sensors per hand" (five fingers and the palm), "6 Tactile Sensor Array" (a hand or the robot not stated), "31个触觉传感器" in head and torso, "Head Tactile Sensor". E: the makers who state touch but no number, an array a finger | arms; head, torso |
+| Touch screens | capacitive touch sensor (indium tin oxide) 1 and touch controller 1 | Galbot G1 1; Engine AI PM01 in its Education edition (0 or 1) | S: "5.5-inch Touchscreen"; "Touch Screen (Chest)" √ in one edition, "/" in the other. E: the G1's place, not stated | torso |
+| 4G/5G modems | cellular modem (gallium and arsenic in its amplifier), 1 | MagicLab MagicBot Gen1 1; AgiBot G2 (0 or 1, "4G/5G 选配", an option); PNDbotics Adam Lite and SP (0 or 1, "兼容 5G", compatible) | S; the options E | torso |
+| Satellite receivers | GNSS receiver, 1 | Xiaomi CyberOne 1 | S: "Supports real-time GPS synchronization". E: its place, not stated | torso |
+
+Left out, with the reason: Wi-Fi and Bluetooth (most makers): radios on the computer boards, drawn as boards; the Unitree
+G1's Dex3-1 tactile hand: the files' G1 and G1+ have fixed plastic hands; AgiBot G2's "TCP 六维力": measured or computed
+not stated; Engine AI SE01's infrared camera: in its file already; the 1X NEO's 5G: an outlier, not drawn; Engine AI
+T800's 5G: its Max edition only, the files hold the Dev and PRO; Kepler K2's "built-in temperature sensors": in the
+joints' row. The six kinds would get colours of Paul Tol's schemes, chosen by their distance to every colour of those
+pages, as before.
+
+**Point 4 as proposed and built** (2026-11-06):
+
+| What | Value | Label | Basis |
+|---|---|---|---|
+| The capacitors in a joint's driver board | ceramic chip capacitors (MLCC, barium titanate) | S | TI's humanoid joint drive TIDA-010979, "seventeen 10μF ceramic capacitors"; mjbots moteus, 16 of 10 µF in 1206; Ben Katz's Cheetah driver, 8 in 1206. Left out: ODrive's electrolytics (a board of two motors, not a robot's joint) and YMIN's 40 to 48 in 1210 (a capacitor maker's marketing, no robot named) |
+| Number in a driver board of the G1's small joint (weighed 12.8 g) | 8 / 16 / 24, whole | E | 8 (Katz), 16 (moteus), 17 (TI); up to 1.5 times |
+| Barium titanate in one | 14.44 / 39.67 / 72.49 mg, the case sizes 0805 / 1206 / 1210 | S | KEMET/YAGEO's material declaration by case size ("engineering calculations"); it calls itself "business confidential", and this repository is public: used on his word, "Yes, all three"; asked again before a push, Matthias, 2026-11-06: "Yes, they may" (go into the public repository) |
+| Every other joint's driver board | the same share of its board's mass | E | as the board itself is scaled from the G1's |
+| Its elements | barium 58.9 %, titanium 20.5 %, oxygen 20.6 % | formula | BaTiO3 (my arithmetic) |
+| Where it lands | taken out of the board's glass and epoxy; the board's mass unchanged. Its nickel, copper and tin not added: the car's populated boards' metals per cm² hold them | – | closes E5.19's approximation ("barium and titanium are missing") for the joints' boards; every other board as before |
+
 **Gallium in the magnets** (his doubt, V192 and V193): the model's is his traction-motor workbook's (0 to 0.1 % of the
 magnet's mass); the first-hand sources read so far: Proterial's patent US 11174537 B2, claim 1 requiring "Ga: not less
 than 0.05 mass % and not more than 1.0 mass %", its purpose "an R-T-Ga phase" in the grain boundary "whereby high HcJ
-can be obtained"; the MRI scrap magnets of Schönfeldt et al. 2023, Ga 0.22 wt %. Who found it and why: research
-running. Nothing in the model changed for it.
+can be obtained"; the MRI scrap magnets of Schönfeldt et al. 2023, Ga 0.22 wt %. Who found it and why: V194 (Hitachi
+Metals, 1986, for thermal stability with cobalt). Matthias, 2026-11-06: "Gallium stays with the magnets, as it is more
+than for the sensors". Nothing in the model changed for it.
 
 ## E37. Copper and nickel by what they are; every page checked by a test (2026-11-06). Built
 

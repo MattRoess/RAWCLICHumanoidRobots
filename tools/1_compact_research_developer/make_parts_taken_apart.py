@@ -443,14 +443,21 @@ SENSORS_G1_X1_N1 = [
     ('Unitree G1', 'Motion sensor (IMU), torso and pelvis', 2, 'Boards', 'Torso', 1, 2, 5, 'E',
      'U3 (imu_in_torso, imu_in_pelvis)'),
     ('Unitree G1', 'Encoder', 46, 'In the joints', 'as their joints', None, None, None, 'S', 'U1, U2; elements only'),
+    # Its temperature sensors in the joints, two a joint motor as its SDK reads them (EVIDENCE.md E38 point 2).
+    ('Unitree G1', TEMPERATURE_SENSOR, 46, 'In the joints', 'as their joints', None, None, None, 'S',
+     f'{UNITREE_TWO}; elements only'),
     ('AgiBot X1', 'Depth camera, Intel RealSense D435', 1, 'Head', 'Head', 72, 75, 80, 'S',
      'X1a; Intel D400 datasheet, D435 75 g (second-hand), as the G1'),
     ('AgiBot X1', 'Motion sensor, YIS320', 2, 'Boards', 'Torso', 1, 2, 5, 'E', "X1a; as the G1's IMU"),
     ('AgiBot X1', 'Encoder', 62, 'In the joints', 'as their joints', None, None, None, 'E',
      'two per joint (E2.8e), the grippers with them; elements only'),
+    ('AgiBot X1', TEMPERATURE_SENSOR, None, 'In the joints', 'as their joints', None, None, None, 'E',
+     f'{TEMPERATURE_SOURCE}; elements only'),
     ('Fourier N1', 'Motion sensor (IMU), 6-axis', 1, 'Boards', 'Torso', 1, 2, 5, 'E', 'N1a "6轴"; N1b imu_link'),
     ('Fourier N1', 'Encoder', 46, 'In the joints', 'as their joints', None, None, None, 'S',
      'N1a "双编码器"; elements only'),
+    ('Fourier N1', TEMPERATURE_SENSOR, None, 'In the joints', 'as their joints', None, None, None, 'E',
+     f'{TEMPERATURE_SOURCE}; elements only'),
 ]
 # --- SensorElements -------------------------------------------------------------------------------------------------
 # The car sensor elements each sensor is made of (RAWCLICVehicleElectronics 07_, read where it lies);
@@ -466,6 +473,7 @@ SENSORELEMENTS_G1_X1_N1 = [
     ('Microphone array (4 microphones)', 'MEMS microphone array', 4),
     ('Motion sensor (IMU), torso and pelvis', 'IMU', 1),
     ('Encoder', 'angle sensor', 1),
+    (TEMPERATURE_SENSOR, 'temperature sensor', 1),
     ('Depth camera, Intel RealSense D435', 'laser diode array', 1),
     ('Depth camera, Intel RealSense D435', 'IR camera sensor', 2),
     ('Depth camera, Intel RealSense D435', 'CMOS image sensor', 1),
@@ -501,6 +509,9 @@ CONSTANTS_G1_X1_N1 = SHARED_CONSTANTS_FIRST + [
      'N1a "475WH" at 39.6 V; 451 / 475 / 499 Wh, ± 5 % production tolerance (E2.8e, accepted)'),
     ('Fourier N1', 'Cable length (four conductors)', 5, 10, 15, 'm', 'E',
      "between the G1's 6 m and the X1's 11 m, wider (E2.8e)"),
+    # The X1's and the N1's temperature sensors, drawn (E38 point 2): 31 and 23 joint motors.
+    ('AgiBot X1', NUMBER_OF + TEMPERATURE_SENSOR, *temperature_number(31), 'sensors', 'E', TEMPERATURE_SOURCE),
+    ('Fourier N1', NUMBER_OF + TEMPERATURE_SENSOR, *temperature_number(23), 'sensors', 'E', TEMPERATURE_SOURCE),
 ]
 # --- Sources --------------------------------------------------------------------------------------------------------
 # Every source code used in this file, with its link and what it is (EVIDENCE.md E2.1, E2.8e).
@@ -1243,7 +1254,7 @@ def g1_plus_rows() -> dict:
             r = r[:2] + (r[2] + head, r[3], f'{r[4]}, Head {head}') + r[5:11] + (r[11] + note,)
         out['Boards'].append(r)
     for r in copy(SENSORS_G1_X1_N1):
-        if r[1] == 'Encoder':
+        if r[1] in ('Encoder', TEMPERATURE_SENSOR):   # two of each a joint, its head joints' too
             r = r[:2] + (r[2] + 2 * head,) + r[3:9] + (r[9] + note,)
         out['Sensors'].append(r)
     return out
@@ -1281,7 +1292,7 @@ def asimov_two_rows(asimov_one: dict) -> dict:
     for r in asimov_one['Constants']:
         if r[1] in ('Battery capacity', 'Cable length (four conductors)'):
             out['Constants'].append((two, r[1]) + scaled(r[2:5], f) + (r[5], with_estimate(r[6]), note + r[7]))
-        elif r[1] == 'Battery voltage':
+        elif r[1] == 'Battery voltage' or r[1].startswith(NUMBER_OF):   # its joints' sensors drawn as the Asimov 1's
             out['Constants'].append((two,) + r[1:])
     return out
 
