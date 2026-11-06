@@ -65,7 +65,74 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-06: checked (V187); relabel and page check built (E37, V188); the sensors (start here)
+## 2026-11-06, afternoon: the sensors by kind, gallium apart (start here)
+
+Built, tested (587 tests, the page check of the six types among them) and committed with this entry, on his word
+("Yes, commit and push"): the sensors by kind on the pages of where the critical elements sit and in `places.npy`
+(E38 point 1; "combine all the cameras and time of flight and lidar are the same"), the components written "LiDARs
+(boards and components)" ("Have LIDAR etc. first and then just in brackets boards and components"), the overview two
+elements a page where their rows fit, and an element the magnets and the sensors hold alone in two panels, "… in the
+magnets" and "… in the sensors" ("Gallium apart", "Nd etc. are then similar as Ga"; E38 point 5): gallium, neodymium,
+dysprosium, boron. VERIFICATION V192 to V196; the research of the day there too: the makers' sensors (V193), the
+joints' capacitors (V193), who added gallium to NdFeB and why (V194: Hitachi Metals 1986, for thermal stability; later
+for Dy-free magnets), GaN in joint drives (V195: chip makers' 48 V reference designs, no robot maker, about 0.12 to 0.17
+mg of gallium a joint).
+
+**His runs** (the pages of today drawn only by them): `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py`
+at 200,000 draws, then `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py`;
+then read them back (times, counts, the changed pages looked at).
+
+**Open for his word:** the head joints a kind of their own, numbered 6 ("Nd is in the head joint and not just in the
+head"; the kind Head also holds the sensors' housings, speakers and boards); the sensors by where they sit (head, base,
+arms, torso); the missing sensor kinds from the car list (temperature, force or torque, touch, modems, satellite
+receivers: researched, a source table and estimates for his yes); the modems and satellite receivers the notes name and
+no robot holds (with the missing kinds); the joints' capacitors (researched). Reported, not changed: his traction-motor
+workbook's gallium (0 to 0.1 %) lies at or below the sources (0.05 to 1.0 %, measured 0.16 %); `estimated.npy`'s 0 kg
+for the elements 02 does not follow.
+
+## 2026-11-06, morning: where to continue after his break
+
+Matthias, about 07:30: "Write handover so that we can continue in about 1.5 hours". Nothing waits on a run of his.
+
+**Where it stands:**
+- **Committed and pushed:** `5ca4702` on `main` (= `origin/main`), with the relabel of copper and nickel and the page
+  check of the six types (E37, V188), the check of the morning (V187) and his runs read back (V189 to V191). After it,
+  only VERIFICATION.md (V192) and this file were written: **not committed** (commit and push on his word).
+- **His runs all done and read back:** the six builders 06:19 to 06:20, 01 06:20, 02 06:21 to 06:44 at 200,000 draws,
+  03 06:44. The outputs on disk are of the code; the whole suite passes (574 tests, V188 and V189). He deletes the figure
+  folders himself before his runs, so that only new figures are there ("I have very high quality standards"): a missing
+  figures folder is his doing, not a fault.
+
+**Open for his word: the sensors** (VERIFICATION V187 and V192). His words: "What I miss at the moment are the sensors.
+Temperature LIDAR, Cameras etc.", "Theses sensors are the location for cirticial raw materials such as indium galium
+etc.", "Yes sensors", "I have a hard time believing Galium is directly in NdFeB magnets. It soulds much more like other
+sonsor types check the internet. Gold and Neodyn are not interesting for me. It is cameras LiDAR temperature and other
+sensor typoes. We have them all in the. car lectronic sensors". The proposal put to him (not answered, nothing built):
+1. **The sensors by kind** on each type's pages of where its critical elements sit, and in `places.npy`: cameras
+   (colour or stereo, depth), LiDARs, temperature sensors, touch sensors, infrared illuminators, modems and satellite
+   receivers, motion sensors, microphones, ultrasonic and force or torque sensors; each sensor's kind from its own car
+   list elements, never its name.
+2. **The missing sensor kinds, all from the car list** (his "We have them all"), robot by robot from the makers' data,
+   a source table first, a count no source states an estimate (min / mode / max, E) shown to him before entry:
+   temperature sensors (each joint, the battery: car "temperature sensor", Co 0.1/2/15 mg), the cameras' infrared
+   illuminators ("IR LED array", Ga 2/8/30, In 0.5/2/8), touch screens and skins ("capacitive touch sensor", In 2/15/80),
+   Wi-Fi and 5G modems ("cellular modem", Ga 1/5/20), satellite receivers ("GNSS receiver", Ge, Ta), force or torque
+   sensors ("force sensor", "torque sensor", "pressure/force sensor").
+3. **The documents' fault:** 02's notes page, its comment and METHODOLOGY name "satellite receivers and modems with
+   their antennas" among the other sensors, but no robot holds one; named there only once point 2 enters them.
+
+**The gallium he doubts** (V192): the magnets' gallium is his traction-motor workbook's (`10_MaterialElementDefinitions.xlsx`,
+sheet PermanentMagnetNdFeB: 0 to 0.1 % of the magnet's mass in every grade, no source named for it); the one source read
+first-hand (Schönfeldt et al. 2023, MRI scrap magnets) gives Ga 0.22 wt %, above that range. Not opened: Frenzel et al.
+2016 (ACS, HTTP 403; he could open it through Empa's access in the browser pane) and two Fraunhofer records (a
+bot-protection page). Nothing in his workbook was changed.
+
+**Also reported, not changed** (V187, V188): `estimated.npy` holds 0 kg for the elements 02 does not follow for
+estimates (lithium, cobalt, nickel …), which reads as "nothing estimated"; at 1,000 draws 02 warns "Mean of empty slice"
+for a robot no draw picked; types 2 to 4 rest mostly on the templates (joints 66 to 80 %, battery 62 to 72 %; E13 rule
+4, said on their notes pages).
+
+## 2026-11-06: checked (V187); relabel and page check built (E37, V188); the sensors
 
 Matthias: "read the handover and check the code … I want that everything is verifyed and based on solid data or solid
 data model" (V187: nothing changed; the state, the suite, how solid the data are, the scratch page check lost), then

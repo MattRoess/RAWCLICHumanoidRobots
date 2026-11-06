@@ -315,7 +315,19 @@ PANEL_TITLE_WIDTH = 34        # characters in a line of a panel's title, the typ
 # The legend of a page in as many rows as it needs: 02's legend_columns, LEGEND_ROW (one copy, since 2026-11-05).
 
 
-def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None, symbol: str = ''):
+def magnets_and_sensors(robots: list, symbol: str) -> bool:
+    """Whether an element is shown on two pages, its magnets' and its sensors' (E38 point 5): the magnets and the sensors
+    hold it in some robot type (02's magnets_split), and in no robot type does anything else hold it in at least 02's
+    HELD_SHARE of the draws."""
+    parts = [recovered_from(r, symbol) for r in robots]
+    sensors = {composition.component_label(c) for c in (composition.CAMERAS, composition.OTHER_SENSORS)}
+    others = any(composition.held(kg) for p in parts for m, kg in p.items()
+                 if m != composition.MAGNETS and m not in sensors)
+    return not others and any(composition.magnets_split(p) for p in parts)
+
+
+def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=None, symbol: str = '',
+                 legend: bool = True):
     """One page: each robot type a panel (three across, two down), the histogram of its draws of the item split into
     its contributions, `parts_of(robot)` ({contribution: its draws}), each in its colour of `colours`, as 02's panels;
     where `fixed_of` is given, the panel of 02's element pages (by_material_panel), the copper fixed in alloys
@@ -356,11 +368,12 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
     for spare in axes.flatten()[len(robots):]:
         spare.axis('off')
     drawn = {m for _, (_, _, contributions) in panels for m in contributions}
-    # No legend for a light alloy's metal (E33, relabelled): one colour, its page's title naming the alloy.
-    shown = [m for m in colours if m in drawn] if symbol not in composition.ALLOY_OF else []
-    # On an element page (`symbol`) copper and nickel by what they are (02's element_page_name, E37); the total by
-    # material and the other pages by the names of their contributions.
-    names = {m: composition.element_page_name(m) if symbol else m for m in shown}
+    # No legend for a light alloy's metal (E33, relabelled) nor for the magnets' part of an element (E38 point 5, no
+    # `legend`): one colour, its page's title naming what it is.
+    shown = [m for m in colours if m in drawn] if legend and symbol not in composition.ALLOY_OF else []
+    # On an element page (`symbol`) copper and nickel by what they are (02's element_page_name, E37); every page a
+    # component of the electronics its component first, the electronics in brackets (02's shown_name, E38).
+    names = {m: composition.element_page_name(m) if symbol else composition.shown_name(m) for m in shown}
     columns = composition.legend_columns(list(names.values())) if shown else 1
     rows = math.ceil(len(shown) / columns) if shown else 0
     figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
@@ -421,6 +434,7 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         'copper fixed in alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not '
         'recovered as copper.',
         composition.LIGHT_ALLOY_NOTE,   # what the light alloys' panels leave out (E33)
+        composition.MAGNETS_NOTE,   # the magnets' and the sensors' part of an element apart (E38 point 5)
         "The part groups and body regions: each robot type's kinds of part placed whole; rough where a kind holds parts "
         "of another group: the head's joints are counted as sensors, the battery management board as battery; a "
         "hydraulic robot's power unit, oil and hoses as joint drives, in the torso.",
@@ -463,6 +477,23 @@ def panel_pages(robots: list):
                               for r in robots)), key=composition.element_label)
     k = 0
     for symbol in elements:
+        # An element the magnets and the sensors hold alone (02's magnets_split, E38 point 5; Matthias, 2026-11-06:
+        # "Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets"): two pages,
+        # the magnets' and the sensors', in place of the one by material.
+        if magnets_and_sensors(robots, symbol):
+            label = composition.element_label(symbol)
+            k += 1
+            yield (f'{PREFIX}_elements_{k}.png',
+                   compare_page(f'{label} in the magnets of one robot of each robot type', robots,
+                                lambda r, e=symbol: {m: kg for m, kg in recovered_from(r, e).items()
+                                                     if m == composition.MAGNETS},
+                                composition.MATERIAL_COLOURS, legend=False))
+            k += 1
+            yield (f'{PREFIX}_elements_{k}.png',
+                   compare_page(f'{label} in the sensors of one robot of each robot type', robots,
+                                lambda r, e=symbol: composition.sensors_split(e, recovered_from(r, e)),
+                                composition.MATERIAL_COLOURS))
+            continue
         inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
         # A light alloy's metal titled as what its panels draw, the metal its alloy holds (E33, "Yes, relabel").
         heading = (f'{composition.element_label(symbol)} held in the {composition.ALLOY_OF[symbol].lower()} of one '

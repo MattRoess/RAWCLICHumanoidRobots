@@ -5,6 +5,189 @@ by Claude, newest first.
 
 ## 2026-11-06
 
+### V196. The magnets' and the sensors' part of an element apart (EVIDENCE.md E38 point 5)
+
+- **His words:** "Gallium apart"; to the proposal of three points, "Yes do it like this. Nd etc. are then similar as Ga
+  in elements in Magnets" (read as: every element the magnets and the sensors both hold, and nothing else; cobalt, of the
+  magnets and the battery cells, keeps its one panel; said to him before building).
+- **Tests first, seen to fail** (`magnets_split`, `element_pages` missing): `TestMagnetsAndSensorsApart` (four): the
+  rule on made-up draws (magnets and sensors: two panels; magnets alone, sensors alone, or a third holder in 2.5 % of the
+  draws or more: one; a third holder below 2.5 %: two); type 1's element pages, every element of the rule with "… in the
+  magnets" and "… in the sensors" and no panel of its plain name (neodymium among them), cobalt one panel; the two
+  panels and anything not drawn adding up to the element in every draw (1e-9), nothing else held; the pages of where the
+  critical elements sit, every figure element once in order, Nd+Pr in two panels, the sensors' panel of sensor kinds
+  only, the magnets' of none. 03's `test_the_magnets_and_the_sensors_apart`, its test draws now giving dysprosium,
+  gallium and neodymium from the magnets and the sensors as 02's draws do: two pages each, the magnets' without a
+  legend, the sensors' with the cameras and the other sensors; cobalt one page. All pass after the build.
+- **Deliberate faults, each caught:** 02's split switched off ("'Nd' not found in []"; "('Nd+Pr', 'magnets') not
+  found"); 03's switched off ("KeyError: 'Dysprosium (Dy) in the magnets of one robot of each robot type'").
+- **An older test set to it:** `test_an_element_held_in_some_draws_shows_the_draws_that_hold_it` sought a panel of
+  boron's plain name; it now checks each of an element's panels with its own draws (KeyError 'Boron (B)' before).
+- **Looked at** (02 for the six types and 03 at 1,000 draws, the scratch folder): type 2's page 2 of where the critical
+  elements sit (Nd+Pr, Dy and Ga each in the magnets, by joint, and in the sensors, by kind: the encoders' Nd+Pr about 2
+  g, Dy about 80 mg; the cameras' and LiDARs' Ga median about 130 mg over the draws that hold it), type 2's element page
+  3 by material (dysprosium and gallium in two panels each), 03's comparison_elements_8 and 9 (gallium in the magnets,
+  one colour and no legend; in the sensors, cameras and other sensors).
+- **The page check of the six types:** 2 tests, 100 s, OK. **The whole suite:** first run 587 tests, 1 error (the
+  older test above); after it was set, 587 tests (726 s), all OK.
+- **Not covered:** his runs at 200,000 draws.
+
+### V195. GaN power transistors in humanoid joint drives ("Yes, research GaN", "Let it finish")
+
+- **His words:** "Essential for sensors and GaN high voltage electronics", "Yes, research GaN", "I do not think GaN is
+  essential for robots, as they have no high voltage motors and batteries", "Let it finish". A reading agent read the
+  makers' guides, datasheets, declarations and filings (not read again by me). Nothing entered.
+- **Robot makers:** none of Unitree, UBTech, Fourier, AgiBot, Tesla, Figure, 1X, Boston Dynamics or Agility states GaN
+  in a document of its own; no charger stated with GaN. Second-hand only: AgiBot with Innoscience GaN, "three chips per
+  motor" (trade press, 2025).
+- **Chip makers' humanoid joint drives, all at 48 V with 100 V GaN:** TI TIDA-010979 (three DRV7167A half-bridges, two
+  GaN FETs each, 1 kW, "to drive a humanoid robot joint"), TI TIDA-010936 (three LMG2100R044); EPC91118 and EPC91120
+  (three EPC23104 or EPC23102 each, "intended for humanoid robot joints motors"; the guides name the Unitree A1 motor's
+  size), EPC91122 and EPC91132 (one EPC33110 module of three half-bridges); Infineon REF_HUMA_MTR_48V_25A (GaN) beside a
+  silicon twin of the same ratings; Innoscience INNDMD48V25A1 (six INN100EA035A) and INNDMD48V22A1 (three ISG3204LA).
+  Innoscience's FY2025 results (HKEX): GaN shipped "in the robotics field", sales of RMB 1.26 million, no robot named.
+- **Gallium nitride per device** (EPC's material composition declarations, "approximate … based on engineering
+  calculation"): EPC23104 0.0474 mg of a 34.5 mg part; EPC23102 0.0661 mg of 35.1 mg; EPC2619 0.0181 mg of 5.4 mg. No
+  declaration found for TI's, Infineon's or Innoscience's parts. Gallium is 83 % of GaN's mass (69.72 of 83.73 g/mol, my
+  arithmetic): about 0.04 to 0.055 mg Ga per EPC half-bridge part, so about 0.12 to 0.17 mg per joint of three.
+- **Silicon for the same job:** TI's own MOSFET design TIDA-01629 (six 100 V NexFET MOSFETs) beside its GaN design,
+  "720mm2" against "320mm2"; Infineon's silicon twin; no source states what share of humanoid joint drives use GaN.
+- **Not opened:** epc-co.com's web pages (403), TI's material-content pages (sign-in), Infineon's humanoid pages (only
+  their navigation loaded).
+
+### V194. Gallium in NdFeB magnets: who found it, why, how much, and when hot ("I need to understand it")
+
+- **His words:** "I want investigation on the Gallium in the magnets. Check the internet to tell me, who found it and
+  why it is there. I need to understand it", "But is the gallium suited for the high performance magnets in the joints,
+  which get sometimes really hot", "I just want very good argument". A reading agent read the sources (patents in full,
+  journal abstracts on the publishers' pages, open-access papers); I read again myself, in the browser pane, the two
+  that carry the answer: EP 0258609 A2 and the Scientific Reports table. Nothing in the model or his data changed.
+- **Who:** Hitachi Metals, EP 0258609 A2 "Permanent magnet with good thermal stability", priority 23 July 1986 (JP
+  172987/86), inventors M. Tokunaga, M. Endoh and others (read myself): "The addition of Ga leads to remarkable
+  improvement of coercive force", z (Ga in the formula) 0.001 to 0.15, "the most preferred amount of Ga is 0.005-0.05".
+  The first papers: Endoh, Tokunaga, Harada (Hitachi Metals), IEEE Trans. Magn. 23 (1987) 2290 (of 20 elements Ga raised
+  the coercivity most); Tokunaga et al., IEEE Trans. Magn. 23 (1987) 2287 (Nd-Dy-Fe-Co-B with Ga, for starter motors);
+  independently Inomata et al. 1987 and Hu et al. (Beijing) 1989. Mitsubishi Materials for HDDR powder: US 5,228,930
+  (priority 1989) and the paper he sent (Takeshita & Nakayama 1994).
+- **Why:** first (1986 to 1990) with cobalt for thermal stability: the patent, "The addition of Ga serves to raise the
+  Curie temperature of the BCC phase, effective for improving the temperature characteristics" (read myself); later
+  explained by new Nd-(Ga,Fe,Co) grain-boundary phases and better wetting (Fidler, Groiss, Tokunaga 1990); since about
+  2011 to 2016 in low-boron magnets with little or no Dy and Tb: an R6T13Ga (Nd6Fe13Ga) grain-boundary phase that is not
+  ferromagnetic keeps the coercivity high (Showa Denko WO 2013/008756; Sasaki, Ohkubo, Hono et al., NIMS and Toyota,
+  2016; Proterial US 11174537); Vacuumschmelze 2001: with Co, Cu and Al, corrosion resistance and the coercivity Co
+  takes away. Its cost: Ga in the main phase lowers the remanence (Proterial), may lower the squareness (EP 3261101).
+- **How much:** the makers' patents 0.05 to 1.0 mass % (Proterial), 0.08 to 0.30 (TDK, with Tb diffusion), 0.5 to 1.0
+  wt % (Yantai Shougang, free of heavy rare earths); the 1987 magnets about 0.9 to 1.8 mass % (the agent's conversion of
+  the published formulas); measured by ICP-OES in end-of-life magnets (Rathfelder et al., Sci. Rep. 2025, Table 2, read
+  myself): M2 Ga 0.16 wt % (with Co 2.45, Dy 3.48, Tb 0.47), M1 (a wind turbine's) none stated ("–"). Not in every
+  grade; no maker's grade sheet stating Ga per grade was found.
+- **When hot:** the reason it was introduced: with Co, below 5 % irreversible loss after 140 °C without Dy, after 260 °C
+  with Dy (Hitachi Metals 1987, abstracts); Ga added to Dy and Co, not in place of them, in the hot grades
+  (Vacuumschmelze 2001); in place of Dy and Tb only in the Dy-free low-boron magnets. Not found first-hand: a
+  temperature coefficient of coercivity with and without Ga; Ga per SH, UH, EH or AH grade.
+- **Against the model:** his workbook's 0 to 0.1 % of the magnet's mass in every grade lies at or below these sources
+  (most at 0.05 to 1.0 %, the one measured magnet 0.16 %). Reported, not changed.
+- **Not opened:** ScienceDirect (Sasaki et al. 2016; Huang et al. 2022: 403), AIP (bot check), IEEE full texts (sign-in;
+  abstracts read). The agent's browser attempt at the MRS-J PDF opened a file-save dialog in the browser pane; nothing
+  was saved.
+
+### V193. The sensors by kind built (EVIDENCE.md E38 point 1); the research of points 2 and 4; the gallium's sources
+
+- **His words:** see E38; then "combine all the cameras and time of flight and lidar are the same", "Have LIDAR etc.
+  first and then just in brackets boards and components", "Nd is in the head joint and not just in the head", "I just
+  want very good argument, as the galium in NdFeB is most likely lost and Gallium is stategigc. Essential for sensors and
+  GaN high voltage electronics", "Yes, research GaN".
+- **Every combination of car sensor elements** in the six parts files (11, read from the files): each a kind
+  (`sensor_kind`); the speakers hold none and no element of interest. `TestSensorsByKind` (nine): the eleven
+  combinations, the kinds of camera the element pages' cameras; every sensor of the six files a kind (over 500 rows); a
+  combination of no kind a fault of `check_parts`; type 1's indium in the LiDARs and the cameras only, its gallium the
+  sensors' alone in the test's draws (the test's fixed magnets hold none: my first assertion of gallium in the hips was
+  wrong for them and corrected); the kinds adding up to the cameras and the other sensors of the element pages, draw by
+  draw (1e-9); every place its own colour; the overview two elements a page where their rows fit; the names "LiDARs
+  (boards and components)" on every page. Seen failing before the build (`sensor_kind`, `SENSOR_KINDS`, `shown_name`
+  missing; indium "Boards and components: cameras", "… other sensors"), passing after.
+- **Deliberate faults, each caught:** the LiDARs left with no kind (the six files' test and the combinations' test
+  fail); no kind carried to the places (02 stops: "Sensors 2: Unitree G1, LiDAR, Livox Mid-360: its car sensor elements
+  … are no kind of sensor"); the overview always two elements a page ("Cu: 0.000023 on 0.17": two numbers on one another;
+  "34 not less than or equal to 24").
+- **The overview:** with the kinds, copper's and aluminium's panels hold up to 18 rows; two on a page gave rows of 13
+  points under 14-point labels, the numbers on one another (found by `test_an_overview_row_held_in_some_draws…`); built:
+  two elements a page while 24 rows fit, else one (type 1: copper alone, aluminium with silver, gold with palladium,
+  tantalum with neodymium and praseodymium, dysprosium with gallium, indium: six pages, five before); the columns of
+  numbers set apart by each column's widest number (`text_width`, from the font's outlines); the headings 2 points
+  above the panel (on indium's page of one short panel they had stood above its title). The test reads each row's
+  numbers left to right since the columns may move.
+- **The colours** (CIE Lab difference to the nearest other colour of those pages, computed): LiDARs 31.6, cameras 14.1
+  (to the hip joints'; the cameras' purple of E32 kept), joint encoders 30.3, hydraulic actuators' sensors 31.6,
+  microphones 29.8, ultrasonic sensors 30.3, motion sensors 33.6.
+- **Looked at** (drawn at 1,000 draws into the scratch folder): type 1's overview pages 1 and 2, type 2's overview pages
+  1 and 6, type 2's and type 5's pages of where the critical elements sit (page 2: indium in the LiDARs and the cameras,
+  gallium in the joints and the sensors), type 2's element page 1 and type 1's means page 1 (the names "… (boards and
+  components)"), type 2's notes page (the kinds named).
+- **The page check of the six types** (`TestEveryPageOfTheSixTypes`): passing after each change. **The whole suite:** 582
+  tests (693 s), all OK.
+- **Where the sensors' gallium and indium sit** (the parts files, the car list's modes times each sensor's count, not
+  drawn): the head 72 to 100 % of the sensors' gallium, the wheeled base 5 to 26 % (types 2 to 5), the arms 1 to 3 %, the
+  torso up to 1 %. **The kind Head's neodymium** (his run): 4.7 to 15.5 g a robot (1.8 to 3.7 % of the robot's), all in
+  the head joints' motor magnets; the kind Head also holds the sensors' housings, the speakers, the head boards' laminate
+  and two robots' hydraulic head actuators.
+- **The gallium in the magnets, first-hand:** the paper he sent, Takeshita & Nakayama (Mitsubishi Materials), "HDDR
+  process and Nd-Fe-B magnet powders", Trans. MRS Japan 14B (1994) 955–960: Ga, Zr and Hf added "in a small amount" make
+  the HDDR powder anisotropic; 0.5 to 2.0 at % Ga gives the largest remanence and a coercivity of 13 kOe; the mechanism
+  "we are now studying". Proterial's US 11174537 B2, claim 1 read in the browser pane: Ga 0.05 to 1.0 mass % required, an
+  R-T-Ga phase in the grain boundary "whereby high HcJ can be obtained". Schönfeldt et al. 2023: MRI scrap magnets Ga
+  0.22 wt %. The model's: his traction-motor workbook, 0 to 0.1 % in every grade.
+- **The research of point 2** (a reading agent, every row from the maker's own page, SDK file or manual, 30 robots of 20
+  makers): temperature readings per joint motor in the SDKs of Unitree (two per motor) and Booster (one per joint) and
+  in their batteries' states (a field shows a reading, not a count of sensors); Wi-Fi on most makers' pages, 4G or 5G as
+  an option on AgiBot's G2 and X2 Ultra, MagicLab's Gen1, Engine AI's T800 Max, 1X's NEO and PNDbotics' Adam; six-axis
+  force sensors at the wrists stated by UBTech (Walker S1, S2), Galbot (G1) and Kepler (K2); tactile sensors in the hands
+  (Unitree Dex3-1: 33 per hand; Dex5-1: 94; Kepler K2: 25 per finger; Leju: 5 per hand), touch screens and touch sensors
+  in heads and chests (Galbot, Engine AI PM01, AgiBot X2, MagicLab Z1, Fourier GR-3: 31 tactile sensors in head and
+  torso); an infrared camera once (Engine AI SE01), no infrared illuminator stated; satellite positioning once (Xiaomi
+  CyberOne). Nothing entered.
+- **The research of point 4** (a reading agent): no first-hand source names the capacitors of a commercial humanoid's
+  joints; mjbots' moteus (16 × 10 µF 50 V MLCC 1206), Ben Katz's Cheetah driver (ceramic), TI's humanoid joint drive
+  TIDA-010979 (17 × 10 µF ceramic), ODrive v3.5 (8 × 470 µF aluminium electrolytic); the compositions of KEMET/YAGEO
+  MLCCs and tantalum capacitors, TDK EPCOS aluminium electrolytic and hybrid polymer capacitors and Panasonic's
+  aluminium electrolytics read. Nothing entered.
+- **Not covered:** points 2 to 4 entered (they wait for his word and for the research on GaN and on the gallium of the
+  magnets, running); his runs.
+
+### V192. The sensors and the gallium checked ("Yes sensors"; "I have a hard time believing Galium is directly in NdFeB magnets")
+
+- **His words:** "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses sensors are the
+  location for cirticial raw materials such as indium galium etc.", "Yes sensors", then "I have a hard time believing
+  Galium is directly in NdFeB magnets. It soulds much more like other sonsor types check the internet. Gold and Neodyn
+  are not interesting for me. It is cameras LiDAR temperature and other sensor typoes. We have them all in the. car
+  lectronic sensors". Nothing changed in code or data.
+- **The sensors' share of each element** (his run of 2026-11-06, `places.npy`, means): indium 100 % in the sensors
+  (7 to 19 mg a robot); gallium 3 to 10 % in the sensors, 90 to 97 % in the joints' NdFeB magnets; gold 11 to 14 % in
+  the sensors, the rest the boards'; neodymium about 1 % in the sensors (the encoders' magnets). At the modes (parts
+  files, not drawn) the sensors' indium and gallium come from the depth cameras and the LiDARs about half each. The car
+  list's indium of a laser diode array is 0 / 3 / 30 mg, so the drawn mean is about 3.7 times the mode.
+- **The magnets' gallium:** from RAWCLICVehicleTractionMotor's `data/raw/10_MaterialElementDefinitions.xlsx`, sheet
+  PermanentMagnetNdFeB (`traction_motor_magnets`): every one of its 28 grades Ga 0 (row "min") to 0.001 of the
+  magnet's mass (row "max"); the sheet names no source for its composition columns (its one source column is of the
+  temperatures). Read first-hand on the internet: the TU Darmstadt news page of Schönfeldt et al. 2023 (J. Alloys
+  Compd. 939, 168709): the "nominal composition" of scrap magnets of MRI scanners, Ga 0.22 wt % (Nd 28.04, Dy 0.80,
+  Tb 0.44, B 1.06, Co 1.65, Al 0.34, Cu 0.18, Fe the balance), no method of measurement named. Not opened: Frenzel et
+  al. 2016, "The Global Anthropogenic Gallium System" (ACS and its supplement: HTTP 403); two Fraunhofer records
+  (publica.fraunhofer.de 451801 and 503725: a bot-protection page, not passed). A search summary's statements (magnets
+  22 to 37 % of the world's primary gallium; 0.1 to 0.5 wt % Ga added for coercivity in research alloys) are not read
+  first-hand and are not passed on as content.
+- **The car list's sensor types holding Ga, In, Ge, As, Ta or Co** (`07_VehicleSensorComposition.xlsx`, sheet Sensor
+  Details, min / mode / max mg): laser diode array Ga 5/30/150, In 0/3/30; photodetector array Ga 0/1/10, In 0/2/20 (both
+  in the model); IR LED array Ga 2/8/30, In 0.5/2/8; cellular modem Ga 1/5/20, Ta 1/5/20; capacitive touch sensor In
+  2/15/80; GNSS receiver Ge 0.1/0.5/2, Ta 2/8/30; RF transceiver Ge 0/0.2/2; temperature sensor Co 0.1/2/15; force,
+  torque and pressure/force sensors Ni, Mn; and car-only types (PM2.5, rain/light, isolation monitoring, wheel speed).
+  None of the second group is in any robot's parts.
+- **A fault in the documents:** 02's notes page (`02_composition.py`, the sentence on the electronics), its comment on
+  the components and METHODOLOGY name "satellite receivers and modems with their antennas" among the other sensors; no
+  robot in any parts file holds a satellite receiver or a modem (`grep` of the builders: none).
+- **Not covered:** the proposal of points 1 to 3 (the sensors by kind; the missing kinds from the car list; the
+  documents' fault) waits for his word.
+
 ### V191. His run of 03 read back
 
 - **03:** 86 pages in `figures/comparison/`, written 06:44:09 to 06:44:45, every one after 02's draws (none older); no

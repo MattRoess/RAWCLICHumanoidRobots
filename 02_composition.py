@@ -163,8 +163,8 @@ materials.npy, grades.npy, elements.npy and estimated.npy (every element of inte
 resting on masses labelled E), by_material.npy (every element of interest by the material it comes from, as the element
 pages split it, '<element>: <material>', and the copper fixed in an alloy, '<element>: <material> (fixed in alloys)';
 03_comparison.py draws it: EVIDENCE.md E29), places.npy and places_estimated.npy (every element of interest by its place: each
-kind of part, the electronics by their components wherever they sit; the pages of where the critical elements sit, since
-2026-11-05), each with its columns in the .txt of the same name; register.txt (the robots of the register
+kind of part, the electronics by their components wherever they sit, the sensors by their kind since 2026-11-06; the
+pages of where the critical elements sit, since 2026-11-05), each with its columns in the .txt of the same name; register.txt (the robots of the register
 drawn) and summary.csv (each element in all and in each kind of part: its mean, median and 95 % interval over the
 draws that hold it, and the share of the draws that hold it).
 
@@ -248,7 +248,8 @@ def load_schemas():
 schemas = load_schemas()
 import matplotlib.pyplot as plt  # noqa: E402  (after 01, which sets matplotlib to draw into files only)
 from matplotlib.patches import Patch  # noqa: E402
-from matplotlib.transforms import blended_transform_factory  # noqa: E402
+from matplotlib.textpath import TextPath  # noqa: E402
+from matplotlib.transforms import blended_transform_factory, offset_copy  # noqa: E402
 
 Fault = schemas.Fault
 NOT_ALLOCATED, BATTERY, SPLIT = schemas.NOT_ALLOCATED, schemas.BATTERY, schemas.SPLIT
@@ -552,6 +553,37 @@ def sensors_title(symbol: str) -> str:
     return f'{element_label(symbol)} in the sensors'
 
 
+# An element the NdFeB magnets and the sensors hold, and nothing else, in two panels: the magnets' and the sensors'
+# (Matthias, 2026-11-06: "Gallium apart", to the proposal of its two panels, "Yes do it like this. Nd etc. are then
+# similar as Ga in elements in Magnets"; EVIDENCE.md E38 point 5): in his run gallium (the magnets' from his
+# traction-motor workbook, the sensors' from the LiDARs' and cameras' laser diodes and photodetectors), neodymium and
+# dysprosium (the sensors' from the encoders' magnets) and boron. The magnets' grams never stack on the sensors'
+# milligrams; on the element pages, the pages of where the critical elements sit and on 03.
+def magnets_split(parts: dict) -> dict | None:
+    """An element's draws by what it is recovered from (`parts`: {material or component: draws}) in two panels,
+    {'magnets': {MAGNETS: draws}, 'sensors': {component: draws}}, where the NdFeB magnets and the sensors (the cameras
+    and the other sensors, E32) each hold it in at least HELD_SHARE of the draws and nothing else does; else None (one
+    panel, as before). A holder in fewer than HELD_SHARE of the draws is not drawn, as on every page."""
+    sensors = sensors_split('', parts)
+    magnets = parts.get(MAGNETS)
+    if magnets is None or not held(magnets) or not sensors or not held(sum(sensors.values(), np.zeros_like(magnets))):
+        return None
+    if any(held(kg) for m, kg in parts.items() if m != MAGNETS and m not in sensors):
+        return None
+    return {'magnets': {MAGNETS: magnets}, 'sensors': sensors}
+
+
+# What the notes pages of 02 and 03 say of it.
+MAGNETS_NOTE = ("An element the NdFeB magnets and the sensors hold, and nothing else (such as gallium, neodymium and "
+                "dysprosium), in two panels: in the magnets, and in the sensors (cameras and other sensors), so that "
+                "the magnets' grams are never stacked on the sensors' milligrams.")
+
+
+def magnets_title(symbol: str) -> str:
+    """The panel title of an element's magnets: 'Gallium (Ga) in the magnets'."""
+    return f'{element_label(symbol)} in the magnets'
+
+
 # A page's legend in as many rows as it needs (Matthias, 2026-11-05: "1_elements_2 has text for the legend cut"; in 03
 # until then, here since, one copy for 02's and 03's pages).
 LEGEND_WIDTH = 15.0           # inches of the page's width a legend may take
@@ -579,6 +611,33 @@ def sensor_component(units: list) -> str:
     units in one sensor)): a camera where they hold an image sensor (IMAGE_SENSORS; a depth camera's infrared chips and
     laser diode with it), else another sensor."""
     return CAMERAS if any(car_type in IMAGE_SENSORS for car_type, _ in units) else OTHER_SENSORS
+
+
+def sensor_kind(units: list) -> str | None:
+    """The kind of a sensor (SENSOR_KINDS, E38 point 1) by its car sensor elements (`units`, (car sensor type, units in
+    one sensor)), the first of these that holds: a laser diode array and a photodetector array, a LiDAR (a
+    time-of-flight sensor too, made of the same: "time of flight and lidar are the same"); an image sensor, a camera
+    (colour, stereo or depth, its infrared projector and chips with it: "combine all the cameras"); an angle sensor, a
+    joint encoder; a position or pressure sensor, a hydraulic actuator's; MEMS microphones; an ultrasonic sensor; a
+    motion sensor (IMU) alone.
+    None for any other combination (02 stops on it, check_parts) and for a sensor of no car elements (a speaker: it
+    holds no element of interest)."""
+    held = {car_type for car_type, _ in units}
+    if {'laser diode array', 'photodetector array'} <= held:
+        return 'LiDARs'
+    if held & set(IMAGE_SENSORS):
+        return CAMERAS
+    if 'angle sensor' in held:
+        return 'joint encoders'
+    if held & {'position sensor', 'pressure sensor'}:
+        return "hydraulic actuators' sensors"
+    if 'MEMS microphone array' in held:
+        return 'microphones'
+    if 'ultrasonic sensor' in held:
+        return 'ultrasonic sensors'
+    if held == {'IMU'}:
+        return 'motion sensors'
+    return None
 
 
 def declared(material: str, shares: dict, metal: dict) -> dict:
@@ -610,10 +669,23 @@ def element_names(recipes) -> list:
     return [element for element in schemas.ATOMIC_MASS if element in found]
 
 
+def shown_name(name: str) -> str:
+    """A name as the pages write it: a component of the electronics (component_label, '<electronics>: <component>') its
+    component first and the electronics in brackets, 'LiDARs (boards and components)' (Matthias, 2026-11-06: "Have
+    LIDAR etc. first and then just in brackets boards and components"; E38); every other name as it is. The draws'
+    columns keep component_label."""
+    head = f'{ELECTRONICS}: '
+    if not name.startswith(head):
+        return name
+    component = name[len(head):]
+    return f'{component[0].upper()}{component[1:]} ({ELECTRONICS.lower()})'
+
+
 def element_page_name(material: str) -> str:
     """A material's name on the element pages and their means pages (ELEMENT_PAGE_NAMES, E37): a metal recovered whole
-    as its own element by what it is ('Copper metal: windings, busbars, heat pipes'), every other material by its name."""
-    return ELEMENT_PAGE_NAMES.get(material, material)
+    as its own element by what it is ('Copper metal: windings, busbars, heat pipes'), a component of the electronics
+    its component first (shown_name, E38), every other material by its name."""
+    return ELEMENT_PAGE_NAMES.get(material) or shown_name(material)
 
 
 def folder_name(category) -> str:
@@ -966,6 +1038,18 @@ CIRCUIT_BOARDS, CAMERAS, OTHER_SENSORS, CABLE_PARTS, CONNECTORS = ELECTRONICS_CO
 # The car sensor types (RAWCLICVehicleElectronics' 07_, sheet Sensor Details) that are an image sensor: a sensor of the
 # parts file whose elements hold one is a camera.
 IMAGE_SENSORS = ('CMOS image sensor', 'IR camera sensor')
+# The sensors by their kind on the pages of where the critical elements sit, and in places.npy (Matthias, 2026-11-06:
+# "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses sensors are the location for
+# cirticial raw materials such as indium galium etc.", "I would like to continue with the sensor work. This has to be
+# resolved now"; EVIDENCE.md E38 point 1). A sensor's kind comes from its car sensor elements (sensor_kind), never from
+# its name; the element pages by material keep the cameras and the other sensors (E32). All cameras one kind, colour,
+# stereo and depth cameras, and the time-of-flight sensors with the LiDARs (Matthias, 2026-11-06: "combine all the
+# cameras and time of flight and lidar are the same"). Each kind's colour on those pages is from Paul Tol's published
+# schemes (muted, vibrant, light, dark), chosen by colour difference (CIE Lab) to stand apart from the kinds of part, the
+# circuit boards, cables and connectors and from each other (V193), the cameras keeping their purple of E32.
+SENSOR_KINDS = {'LiDARs': '#332288', 'cameras': '#AA4499', 'joint encoders': '#666633',
+                "hydraulic actuators' sensors": '#222255', 'microphones': '#BBBBBB', 'ultrasonic sensors': '#EE8866',
+                'motion sensors': '#009988'}
 # The notes page's words on the cameras no source counts (EVIDENCE.md E31 point 3; Matthias, 2026-11-05, "Yes, all
 # ten", open item 6): their number drawn from the robot's constant NUMBER_OF, 1 / 3 / 12 (whole_numbers).
 ESTIMATED_CAMERAS_WORDS = ("where no source counts a robot's cameras, 1 to 12 colour image sensors, most often 3, a "
@@ -1240,6 +1324,14 @@ def check_parts(inputs: ApartInputs) -> list:
                                                                  f"('{family}')."))
     if None in inputs.tantalum:
         faults.append(Fault('data.data_center_element_composition', 0, 'no Ta row with min, mode and max.'))
+    # Every sensor of car sensor elements a kind (sensor_kind, E38 point 1): a new combination stops 02 here, loudly,
+    # until its kind is named, rather than falling into a kind it is not.
+    for p in apart.sensors:
+        units = [(t, u) for _, sensor, t, u in apart.elements if sensor == p.name]
+        if units and sensor_kind(units) is None:
+            faults.append(Fault(on + 'Sensors', p.row, f"{p.robot}, {p.name}: its car sensor elements "
+                                                       f"({', '.join(sorted({t for t, _ in units}))}) are no kind of "
+                                                       'sensor 02 names (SENSOR_KINDS).'))
     return faults
 
 
@@ -1485,21 +1577,22 @@ class Robot:
         return values[self.rows]
 
     def element(self, kind: str, element: str, kg: np.ndarray, estimate: bool, material: str,
-                of_interest: bool = False, component: str = '') -> None:
+                of_interest: bool = False, component: str = '', place: str = '') -> None:
         """kg of one element in a kind of part, held by `material`, by its recipe, fractions or sibling file
         (recipe_elements, which add up to the material); where `of_interest`, also an element of interest it is
         recovered as (declare()). A `component` of the electronics (E32) books it in the electronics, whatever it is
-        made of; the copper of a connector's brass stays fixed in the alloy (FIXED_IN_ALLOYS by what it is made of)."""
+        made of; the copper of a connector's brass stays fixed in the alloy (FIXED_IN_ALLOYS by what it is made of). A
+        `place` (a sensor's kind, E38) is where the pages of where the critical elements sit show it."""
         self.recipe_elements[(kind, element)] = self.recipe_elements.get((kind, element), 0) + kg
         booked = ELECTRONICS if component else material
         self.in_recipes[booked] = self.in_recipes.get(booked, 0) + kg
         if material in FIXED_IN_ALLOYS.get(element, ()):
             self.fixed[(material, element)] = self.fixed.get((material, element), 0) + kg
         if of_interest:
-            self.declare(kind, element, kg, estimate, material, component)
+            self.declare(kind, element, kg, estimate, material, component, place)
 
     def declare(self, kind: str, element: str, kg: np.ndarray, estimate: bool, material: str,
-                component: str = '') -> None:
+                component: str = '', place: str = '') -> None:
         """kg of one element of interest in a kind of part, recovered from `material` (E19 point 3; 02's "in the
         elements" of that material), or from the `component` of the electronics it sits in (E32: '<electronics>:
         <component>', the electronics' own "in the elements")."""
@@ -1508,8 +1601,9 @@ class Robot:
         self.followed[booked] = self.followed.get(booked, 0) + kg
         source = component_label(component) if component else material
         self.by_material[(source, element)] = self.by_material.get((source, element), 0) + kg
-        # Its place: the electronics' component wherever it sits, every other part its kind of part (PLACES).
-        place = component_label(component) if component else kind
+        # Its place: a sensor's kind (E38), else the electronics' component wherever it sits, every other part its
+        # kind of part.
+        place = place or (component_label(component) if component else kind)
         self.places[(place, element)] = self.places.get((place, element), 0) + kg
         if estimate and element in TRACKED:
             self.estimated[(kind, element)] = self.estimated.get((kind, element), 0) + kg
@@ -1632,13 +1726,15 @@ class Robot:
 
     def sensor(self, kind: str, units: list, count: np.ndarray | float, estimate: bool) -> None:
         """The elements of `count` sensors, each made of `units` (car sensor type, units in one sensor); those of
-        interest declared (E19 point 3), recovered from the cameras or the other sensors (sensor_component, E32)."""
-        on = sensor_component(units)
+        interest declared (E19 point 3), recovered from the cameras or the other sensors (sensor_component, E32), and
+        placed by the sensor's kind on the pages of where the critical elements sit (sensor_kind, E38)."""
+        on, kind_of_sensor = sensor_component(units), sensor_kind(units)
+        place = component_label(kind_of_sensor) if kind_of_sensor else ''
         for car_type, per_sensor in units:
             for (t, element), mg in self.shared.sensor.items():
                 if t == car_type:
                     self.element(kind, element, count * per_sensor * self.of(mg) / 1e6, estimate, ELECTRONICS,
-                                 element in INTEREST, on)
+                                 element in INTEREST, on, place)
 
 
 def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=None) -> Draws:
@@ -2478,6 +2574,12 @@ def beyond_words(values: np.ndarray, end: float, unit: str) -> str:
     return f'{panel_number(100 * over.mean())} % beyond the axis, up to {panel_number(float(values.max()))}\u00a0{unit}'
 
 
+def text_width(text: str) -> float:
+    """The width of `text` written at APART_TEXT points, in points, from the outlines of the page's font (matplotlib's
+    TextPath): to set columns of numbers apart by what they hold (ridge_panel, E38)."""
+    return float(TextPath((0, 0), text, size=APART_TEXT).get_extents().width)
+
+
 def panel_unit(values_kg: np.ndarray) -> tuple:
     """The unit a panel is drawn in, by the mean of its draws: kg from 1 kg, g from 1 g, mg below. Returns the kg in
     one unit and its symbol."""
@@ -2690,8 +2792,8 @@ def means_pages(c: Composition, d: Draws) -> list:
 
 def mean_words(d: Draws, symbol: str) -> str:
     """One element's means by the material it comes from, '<material> <mean>' each, '; ' between; the components of
-    the electronics (E32) after the electronics' name once, ', ' between them ('Boards and components: circuit boards
-    65 mg, cameras 1 mg'), at the place of the first."""
+    the electronics (E32) together, ', ' between them, the electronics' name once after them in brackets ('Circuit
+    boards 65 mg, cameras 1 mg (boards and components)', E38), at the place of the first."""
     words, parts, at = [], [], None
     for m, kg in material_means(d, symbol):
         if m.startswith(ELECTRONICS + ': '):
@@ -2700,7 +2802,8 @@ def mean_words(d: Draws, symbol: str) -> str:
         else:
             words.append(f'{element_page_name(m)} {mass_in_unit(kg)}')   # copper and nickel by what they are (E37)
     if parts:
-        words.insert(at, f"{ELECTRONICS}: {', '.join(parts)}")
+        listed = ', '.join(parts)
+        words.insert(at, f'{listed[0].upper()}{listed[1:]} ({ELECTRONICS.lower()})')
     return '; '.join(words)
 
 
@@ -2827,7 +2930,7 @@ def taken_apart_notes(c: Composition, d: Draws, left_out: list, params: Params, 
         "(encoders, motion sensors, LiDARs, "
         'microphones, ultrasonic sensors, satellite receivers and modems with their antennas), the cables (their '
         "conductors and insulation) and the connectors (whose brass keeps its copper fixed in the alloy). "
-        + LIGHT_ALLOY_NOTE + ' '
+        + LIGHT_ALLOY_NOTE + ' ' + MAGNETS_NOTE + ' '
         + (f"In part: {', '.join(partly)}. " if partly else '')
         + 'These stay materials: ' + (', '.join(missing) + '.' if missing else 'none.'),
         "The tables by part group and by body region (in the draws of the robot type): the type's kinds of part, each "
@@ -2890,11 +2993,18 @@ def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, 
     materials at the top; its materials nine a page (material_page_panels); its alloys and grades in a table
     (EVIDENCE.md E19 points 4 and 7; the preview of type 5, "Yes, build them", 2026-11-02)."""
     # Each element of interest held in at least HELD_SHARE of the draws, as a material; the titanium also its sensors'
-    # (SENSORS_OF), a panel of its own after its alloy's, where the sensors hold it in HELD_SHARE of the draws.
+    # (SENSORS_OF), a panel of its own after its alloy's, where the sensors hold it in HELD_SHARE of the draws; an
+    # element of the magnets and the sensors alone (magnets_split, E38 point 5) in two panels, the magnets' and the
+    # sensors'. Each entry (element, its view: 'all', 'magnets' or 'sensors').
     shown = [e for e in c.tables['elements'][0] if held(c.column('elements', e))]
-    entries = [(e, sensors) for e in shown for sensors in (False, True)
-               if not sensors or e in SENSORS_OF and held(sum(sensors_split(e, materials_of(d, e)).values(),
-                                                              np.zeros(d.n)))]
+    entries = []
+    for e in shown:
+        if magnets_split(materials_of(d, e)):
+            entries += [(e, 'magnets'), (e, 'sensors')]
+            continue
+        entries.append((e, 'all'))
+        if e in SENSORS_OF and held(sum(sensors_split(e, materials_of(d, e)).values(), np.zeros(d.n))):
+            entries.append((e, 'sensors'))
     per_page = APART_ACROSS * ELEMENT_DOWN
     pages = [entries[k:k + per_page] for k in range(0, len(entries), per_page)]
     notes = notes_pages(c.name, f'Robot type {d.robot_type}, {c.title}: how to read its pages',
@@ -2903,11 +3013,15 @@ def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, 
     for p, page in enumerate(pages, 1):
         figure, axes = plt.subplots(ELEMENT_DOWN, APART_ACROSS, figsize=APART_PAGE, squeeze=False)
         panels = []
-        for k, (symbol, sensors) in enumerate(page):
+        for k, (symbol, view) in enumerate(page):
             here = axes[k // APART_ACROSS, k % APART_ACROSS]
-            if sensors:   # the sensors' titanium, a panel of its own (SENSORS_OF)
+            if view == 'sensors':   # the sensors' part, a panel of its own (SENSORS_OF, magnets_split)
                 panels.append((here, by_material_panel(here, sensors_split(symbol, materials_of(d, symbol)),
                                                        sensors_title(symbol), k % APART_ACROSS == 0, ())))
+                continue
+            if view == 'magnets':   # the magnets' part, a panel of its own (magnets_split, E38 point 5)
+                panels.append((here, by_material_panel(here, {MAGNETS: materials_of(d, symbol)[MAGNETS]},
+                                                       magnets_title(symbol), k % APART_ACROSS == 0, ())))
                 continue
             # Copper: the inflow, its copper recycled as copper and, marked (fixed), that fixed in alloys (E25).
             fixed = {m: kg for (m, e), kg in (d.fixed or {}).items() if e == symbol and kg.any()}
@@ -3011,18 +3125,74 @@ FIGURE_TITLE_WIDTH = 30   # characters in a line of an element page's panel titl
 # distribution"), their axes SOURCES_WIDTH of the page (0.6 before, with two).
 PANEL_WIDTH = 0.38
 OVERVIEW_COLUMNS = (1.01, 1.18, 1.35)
+COLUMN_GAP = 10.0   # points between a column's widest number and the next column (E38)
 SOURCES_WIDTH = 0.52
 NUMBER_COLUMNS = (1.02, 1.21, 1.40)
-ELEMENT_PAGES = [FIGURE_ELEMENTS[:6], FIGURE_ELEMENTS[6:]]                                # three panels across
-OVERVIEW_PAGES = [FIGURE_ELEMENTS[k:k + 2] for k in range(0, len(FIGURE_ELEMENTS), 2)]    # two elements a page
+ELEMENT_PANELS = 6   # panels a page of the element figure, three across and two down
 
 
-def parts_figures(robot_type: int) -> tuple:
-    """The file names of a robot type's two figures, page by page: robot_type_<n>_elements_<k>.png, each followed by
-    the page of its numbers robot_type_<n>_numbers_<k>.png (E34), then robot_type_<n>_overview_<k>.png."""
-    return tuple([name for k in range(1, len(ELEMENT_PAGES) + 1) for name in
+def place_view(places: dict, view: str) -> dict:
+    """The places of one panel of the element figure (E38 point 5): all ('all'); the sensors' kinds alone ('sensors');
+    every other place, where the magnets sit ('magnets')."""
+    sensors = {component_label(k) for k in SENSOR_KINDS}
+    if view == 'sensors':
+        return {p: kg for p, kg in places.items() if p in sensors}
+    if view == 'magnets':
+        return {p: kg for p, kg in places.items() if p not in sensors}
+    return places
+
+
+def element_pages(d: 'Draws') -> list:
+    """The pages of the element figure of a robot type (V49; since 2026-11-06, E38 point 5): the figure elements in
+    their order, ELEMENT_PANELS a page, each entry (symbol, name, view); an element the magnets and the sensors hold
+    alone (magnets_split of its elements' parts together, 'Nd+Pr' the two) in two panels, where its magnets sit and its
+    sensors by kind."""
+    entries = []
+    for symbol, name in FIGURE_ELEMENTS:
+        parts = {}
+        for e in symbol.split('+'):
+            for m, kg in materials_of(d, e).items():
+                parts[m] = parts.get(m, 0) + kg
+        entries += ([(symbol, name, 'magnets'), (symbol, name, 'sensors')] if magnets_split(parts)
+                    else [(symbol, name, 'all')])
+    return [entries[k:k + ELEMENT_PANELS] for k in range(0, len(entries), ELEMENT_PANELS)]
+# The overview's pages: two elements a page, one above the other, while the rows of both fit at the page's text size,
+# else one element a page (since 2026-11-06, EVIDENCE.md E38: with the sensors by kind, copper's and aluminium's panels
+# hold up to 17 rows each, and the two on one page gave a row 13 points, less than its 14-point label needs; V193).
+# OVERVIEW_ROWS: the two panels share 0.675 of the 9-inch page's height (overview_page: from 0.09 to 0.875, less the
+# gap of 0.11), 437 points; a row needs about 18 points (a 14-point label with its spacing): 24 rows, their headings
+# counted.
+OVERVIEW_ROWS = 24
+
+
+def overview_rows(d: 'Draws', symbol: str) -> int:
+    """The rows of one element's overview panel: a row per place holding it in at least HELD_SHARE of the draws, and
+    its line of headings (median, mean, held in), as overview_page counts them."""
+    return sum(held(v) for v in by_place(d, symbol).values()) + 1
+
+
+def overview_pages(d: 'Draws') -> list:
+    """The overview's pages of a robot type, the figure elements in their order (FIGURE_ELEMENTS): two a page where
+    their rows together fit (OVERVIEW_ROWS), else one."""
+    pages, k = [], 0
+    while k < len(FIGURE_ELEMENTS):
+        pair = FIGURE_ELEMENTS[k:k + 2]
+        if len(pair) == 2 and sum(overview_rows(d, symbol) for symbol, _ in pair) <= OVERVIEW_ROWS:
+            pages.append(pair)
+        else:
+            pair = pair[:1]
+            pages.append(pair)
+        k += len(pair)
+    return pages
+
+
+def parts_figures(robot_type: int, elements: int, overviews: int) -> tuple:
+    """The file names of a robot type's two figures, page by page: its `elements` pages robot_type_<n>_elements_<k>.png
+    (element_pages), each followed by the page of its numbers robot_type_<n>_numbers_<k>.png (E34), then its
+    `overviews` pages robot_type_<n>_overview_<k>.png (overview_pages)."""
+    return tuple([name for k in range(1, elements + 1) for name in
                   (f'robot_type_{robot_type}_elements_{k}.png', f'robot_type_{robot_type}_numbers_{k}.png')]
-                 + [f'robot_type_{robot_type}_overview_{k}.png' for k in range(1, len(OVERVIEW_PAGES) + 1)])
+                 + [f'robot_type_{robot_type}_overview_{k}.png' for k in range(1, overviews + 1)])
 
 # Where each kind sits on the robot, its mark and the kinds whose colour takes white text: 01's (one copy).
 MARKS, DARK = schemas.MARKS, schemas.DARK
@@ -3037,18 +3207,25 @@ def save_figure(figure, path: str, dpi: int) -> None:
 
 def places_order() -> list:
     """The places of the pages of where the critical elements sit, in their order: the kinds of part, then the
-    electronics' components (E32), each by its label."""
-    return list(KINDS) + [component_label(c) for c in ELECTRONICS_COMPONENTS]
+    electronics' components (E32), the sensors by their kind in place of the cameras and the other sensors (E38),
+    each by its label."""
+    return (list(KINDS) + [component_label(CIRCUIT_BOARDS)] + [component_label(k) for k in SENSOR_KINDS]
+            + [component_label(c) for c in (CABLE_PARTS, CONNECTORS)])
 
 
 def place_label(place: str) -> str:
-    """A place's name on the pages: a kind of part's, or the component's label ('Boards and components: cameras')."""
-    return KINDS[place][0] if place in KINDS else place
+    """A place's name on the pages: a kind of part's, or the component's, its component first ('Cameras (boards and
+    components)', shown_name, E38)."""
+    return KINDS[place][0] if place in KINDS else shown_name(place)
 
 
 def place_colour(place: str) -> str:
-    """A place's colour: a kind of part's (KINDS), or the component's (MATERIAL_COLOURS), as on the element pages."""
-    return KINDS[place][1] if place in KINDS else MATERIAL_COLOURS[place]
+    """A place's colour: a kind of part's (KINDS), a sensor kind's (SENSOR_KINDS, E38), or the component's
+    (MATERIAL_COLOURS), as on the element pages."""
+    if place in KINDS:
+        return KINDS[place][1]
+    sensor = place.replace(f'{ELECTRONICS}: ', '', 1)
+    return SENSOR_KINDS[sensor] if sensor in SENSOR_KINDS else MATERIAL_COLOURS[place]
 
 
 def place_keys(d: Draws) -> list:
@@ -3161,22 +3338,25 @@ def stacked_panel(axes, kinds: dict, title: str, share_label: bool) -> None:
     axes.grid(axis='x', alpha=0.3)
 
 
-def element_page(d: Draws, page: list, number: int):
+def element_page(d: Draws, page: list, number: int, of: int):
     """One page of the element figure Matthias approved (V49), for the three robots: its elements three across, each
     the stacked distribution of the robot's total by place (by_place: each kind of part, the electronics by their
-    components, since 2026-11-05); the legend of the places the page draws at the top, in as many rows as it needs."""
+    components, since 2026-11-05, the sensors by kind since 2026-11-06); an element of the magnets and the sensors alone
+    in two panels, '… in the magnets' and '… in the sensors' (place_view, E38 point 5); the legend of the places the
+    page draws at the top, in as many rows as it needs; page `number` of `of`."""
     columns = 3
     figure, axes = plt.subplots(2, columns, figsize=APART_PAGE, squeeze=False)
     drawn = set()
-    for k, (symbol, name) in enumerate(page):
-        places = by_place(d, symbol)
+    for k, (symbol, name, view) in enumerate(page):
+        places = place_view(by_place(d, symbol), view)
         drawn |= set(places)
-        stacked_panel(axes[k // columns, k % columns], places,
-                      textwrap.fill(f'{name} ({symbol})', FIGURE_TITLE_WIDTH), k % columns == 0)
+        words = f'{name} ({symbol})' + {'magnets': ' in the magnets', 'sensors': ' in the sensors'}.get(view, '')
+        stacked_panel(axes[k // columns, k % columns], places, textwrap.fill(words, FIGURE_TITLE_WIDTH),
+                      k % columns == 0)
     for spare in axes.flatten()[len(page):]:
         spare.axis('off')
-    figure.suptitle(f'{lead(d)}: critical elements in one robot ({number} of {len(ELEMENT_PAGES)})',
-                    fontsize=APART_HEADING, y=0.985)
+    figure.suptitle(f'{lead(d)}: critical elements in one robot ({number} of {of})', fontsize=APART_HEADING,
+                    y=0.985)
     shown = [p for p in places_order() if p in drawn]
     names = [place_label(p) for p in shown]
     ncol = legend_columns(names) if names else 1
@@ -3210,6 +3390,7 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
     top = max(axis_end(holding[k]) for k in shown) / per
     edges = np.linspace(0, top if top > 0 else 1, 51)
     right = blended_transform_factory(axes.transAxes, axes.transData)
+    cells = []   # (row, its median, mean and share held, as written)
     for row, kind in enumerate(reversed(shown)):
         values = holding[kind] / per
         counts, _ = np.histogram(values[values <= edges[-1]], bins=edges)
@@ -3223,13 +3404,26 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str) -> None:
         for bound in np.percentile(values, [2.5, 97.5]):
             axes.plot([bound, bound], [row + 0.05, row + 0.9], color=APART_INK, linewidth=1.2, linestyle='--')
         share = holding[kind].size / kinds[kind].size
-        for column, number in zip(OVERVIEW_COLUMNS, (panel_number(median), panel_number(mean),
-                                                     f'{panel_number(100 * share)} %')):
+        cells.append((row, (panel_number(median), panel_number(mean), f'{panel_number(100 * share)} %')))
+    # The three columns of numbers, each at its place of OVERVIEW_COLUMNS, or further right where the widest number of
+    # the column before would reach it (since 2026-11-06, E38: a sensor's milligrams in a panel in kg are numbers of up
+    # to ten characters, such as 0.0000066); measured in points from the font's outlines (text_width), the panel's width
+    # fixed on the page.
+    heads = ('median', 'mean', 'held in')
+    panel_points = axes.get_position().width * axes.figure.get_figwidth() * 72
+    columns = [OVERVIEW_COLUMNS[0]]
+    for k in range(1, len(OVERVIEW_COLUMNS)):
+        widest = max(text_width(t) for t in [heads[k - 1]] + [numbers[k - 1] for _, numbers in cells])
+        columns.append(max(OVERVIEW_COLUMNS[k], columns[-1] + (widest + COLUMN_GAP) / panel_points))
+    for row, numbers in cells:
+        for column, number in zip(columns, numbers):
             axes.text(column, row + 0.45, number, transform=right, ha='left', va='center', fontsize=APART_TEXT,
                       color=APART_INK)
-    for column, what in zip(OVERVIEW_COLUMNS, ('median', 'mean', 'held in')):
-        axes.text(column, len(shown) + 0.1, what, transform=right, ha='left', va='bottom', fontsize=APART_TEXT,
-                  color=APART_INK)
+    # The headings 2 points above the panel, whatever its rows' height (since 2026-11-06: a page of one short panel,
+    # indium's two rows, had them a tenth of a tall row up, above the panel's title; E38).
+    above = offset_copy(axes.transAxes, fig=axes.figure, y=2, units='points')
+    for column, what in zip(columns, heads):
+        axes.text(column, 1.0, what, transform=above, ha='left', va='bottom', fontsize=APART_TEXT, color=APART_INK)
     axes.set_title(f'{title}, in {unit}', fontsize=APART_TITLE, fontweight='bold', loc='left')
     axes.set_ylim(0, len(shown))
     axes.set_yticks([row + 0.45 for row in range(len(shown))])
@@ -3256,10 +3450,11 @@ def draw_schema(axes, d: Draws) -> None:
     schemas.draw_kinds(axes, d.hot, APART_TEXT, {k for k, _ in d.materials[0]})
 
 
-def overview_page(d: Draws, page: list, number: int):
+def overview_page(d: Draws, page: list, number: int, of: int):
     """One page of the overview Matthias approved ("Looks good to me", 2026-10-27), for three robots (answer E,
     "Groups, histograms"): left the robot with its joint groups numbered and its other kinds lettered; right two
-    critical elements, one above the other, one row per kind of part holding them."""
+    critical elements, one above the other (or one, overview_pages), one row per place holding them; page `number`
+    of `of`."""
     figure = plt.figure(figsize=APART_PAGE)
     figure.add_axes((0.01, 0.04, 0.22, 0.85))
     draw_schema(figure.axes[0], d)
@@ -3274,7 +3469,7 @@ def overview_page(d: Draws, page: list, number: int):
                                  if (place, e) in d.places_estimated), np.zeros(d.n)) for place in kinds}
         ridge_panel(figure.add_axes((0.43, y, PANEL_WIDTH, tall)), kinds, estimated, f'{name} ({symbol})')
     figure.suptitle(f'Robot type {d.robot_type} taken apart: where the critical materials sit, and how sure we are '
-                    f'({number} of {len(OVERVIEW_PAGES)})', fontsize=APART_HEADING, y=0.975)
+                    f'({number} of {of})', fontsize=APART_HEADING, y=0.975)
     return figure
 
 
@@ -3284,19 +3479,22 @@ def parts_notes(d: Draws) -> list:
     return [
         'The element pages: one panel per critical element, its bars the draws of the element in one robot, the '
         'height the share of the draws, each bar split into the weight its draws hold in each kind of part, the '
-        'electronics by their components wherever they sit (circuit boards, cameras, other sensors, cables, '
-        'connectors), the smaller lower. Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
+        'electronics by their components wherever they sit (circuit boards, cables, connectors) and its sensors by '
+        f"their kind ({', '.join(SENSOR_KINDS)}; a sensor's kind from the elements it is made of), the smaller lower. "
+        'Solid line: the median; dotted line: the mean; dashed lines: the 2.5th and 97.5th percentile '
         '(95 % of the draws between them). Each panel on its own scale and unit; its numbers (in what share of the '
         'draws it is held, its median, mean and 95 %, the draws beyond its axis) on the page after its page. An '
         'element that is 0 in some draws: its panel shows the draws that hold it. Each axis ends at the 99.5th '
         'percentile of its draws: those beyond are not drawn. ' + LOG_WORDS,
-        "The overview pages: each row the element's weight in one kind of part, or in one component of the "
-        "electronics, over the draws that hold it, the "
+        "The overview pages: each row the element's weight in one kind of part, in one component of the electronics "
+        "or in one kind of sensor, over the draws that hold it, two elements a page where their rows fit, else one; the "
         'height the share of those draws scaled to the row, the lines as on the element pages, of those draws; at the '
         "right their median and mean, and 'held in': in what share of all the draws the kind of part holds the "
         'element. Hatched: more than half of the mean rests on parts whose mass is an estimate. Each axis ends at the '
         "largest of its rows' 99.5th percentiles; the draws beyond are not drawn, and its label says how many.",
-        'On both: a kind of part holding the element in fewer than 2.5 % of the draws is not drawn.',
+        'On both: a kind of part holding the element in fewer than 2.5 % of the draws is not drawn. On the element '
+        "pages an element the magnets and the sensors hold alone stands in two panels, where its magnets sit ('… in "
+        "the magnets') and its sensors by kind ('… in the sensors').",
         robots_note(d),
         "The joints with their driver boards and encoders; the magnets' grade class (with it their dysprosium) drawn "
         "by each joint's heat, the knees hottest, the arms coolest, one draw deciding for every joint; the NdFeB "
@@ -3308,11 +3506,14 @@ def parts_figure_pages(d: Draws) -> list:
     """Every page of both figures, as (file name, figure): their notes pages first, then the figures in the order of
     parts_figures()."""
     prefix = f'robot_type_{d.robot_type}'
-    elements = [(f'{prefix}_elements_{k + 1}.png', element_page(d, page, k + 1)) for k, page in enumerate(ELEMENT_PAGES)]
-    overviews = [(f'{prefix}_overview_{k + 1}.png', overview_page(d, page, k + 1))
-                 for k, page in enumerate(OVERVIEW_PAGES)]
+    pages_of = element_pages(d)   # an element of the magnets and the sensors alone in two panels (E38 point 5)
+    elements = [(f'{prefix}_elements_{k + 1}.png', element_page(d, page, k + 1, len(pages_of)))
+                for k, page in enumerate(pages_of)]
+    layout = overview_pages(d)   # two elements a page where their rows fit, else one (E38)
+    overviews = [(f'{prefix}_overview_{k + 1}.png', overview_page(d, page, k + 1, len(layout)))
+                 for k, page in enumerate(layout)]
     pages = with_numbers(elements, prefix) + overviews   # each element page followed by its numbers (E34)
-    assert [name for name, _ in pages] == list(parts_figures(d.robot_type))
+    assert [name for name, _ in pages] == list(parts_figures(d.robot_type, len(pages_of), len(layout)))
     return notes_pages(prefix, f'{lead(d)}: how to read the pages of where its critical elements sit',
                        parts_notes(d)) + pages
 

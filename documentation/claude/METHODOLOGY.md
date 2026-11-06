@@ -625,6 +625,26 @@ test fails on a legend beyond its page, a colour drawn that the page's legend do
 page, and a panel whose median lies in the first 5 % of its bars (`LOG_BELOW`). In V188's run: 263 pages of 02 and 86 of
 03, none failing; each of the five failures made on purpose was caught.
 
+## The sensors by kind on the pages of where the critical elements sit (since 2026-11-06)
+
+Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses sensors are
+the location for cirticial raw materials such as indium galium etc.", "combine all the cameras and time of flight and
+lidar are the same", "Have LIDAR etc. first and then just in brackets boards and components" (EVIDENCE.md E38). On each
+robot type's pages of where its critical elements sit, and in `places.npy` and `places_estimated.npy`, the sensors stand
+by their kind in place of "cameras" and "other sensors": LiDARs (the time-of-flight sensors with them), cameras (colour,
+stereo and depth), joint encoders, the hydraulic actuators' sensors, microphones, ultrasonic sensors and motion sensors.
+A sensor's kind comes from the car sensor elements it is made of (`sensor_kind`), never from its name; a combination of
+elements that is no kind stops 02 before it draws (`check_parts`). Each kind has its own colour (`SENSOR_KINDS`). The
+places still add up to the elements in every draw, and the kinds of camera and the other kinds to the element pages'
+cameras and other sensors. A component of the electronics is written its component first, the electronics in brackets,
+"LiDARs (boards and components)" (`shown_name`), on every page; the draws' columns keep "Boards and components: …". The
+overview pages hold two elements a page while their rows fit (`OVERVIEW_ROWS`), else one (`overview_pages`), and set
+their columns of numbers apart by the widest number of each column (`text_width`).
+
+## The magnets' and the sensors' part of an element apart (since 2026-11-06)
+
+Matthias, 2026-11-06: "Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets" (EVIDENCE.md E38 point 5). An element that the NdFeB magnets and the sensors hold, each in at least 2.5 % of the draws, and nothing else (`magnets_split`) is drawn in two panels: "… in the magnets", the magnets alone, and "… in the sensors", the cameras and the other sensors, so that the magnets' grams are never stacked on the sensors' milligrams. On 02's element pages by material; on the pages of where the critical elements sit, where its magnets sit (the kinds of part) and its sensors by kind (`element_pages`, `place_view`); on 03 two pages, the magnets' in one colour without a legend. In his data: neodymium, dysprosium (the sensors' from the encoders' magnets), boron and gallium (the sensors' from the LiDARs' and cameras' laser diodes and photodetectors). The draws are as they were; the two panels add up to the element in every draw.
+
 ## The outliers, not drawn (since 2026-11-05)
 
 Matthias, 2026-11-04, of the NeodraDynamics Neo1 (208; about 4 m, 1,200 kg, hydraulic, a prototype, of types 5 and 3):

@@ -495,7 +495,8 @@ class TestReadable(unittest.TestCase):
             params.output.parts_dir = os.path.join(folder, 'data')
             pages = composition.parts_figure_pages(d)
             self.assertEqual([name for name, _ in pages if '_notes_' not in name],
-                             list(composition.parts_figures(robot_type)))
+                             list(composition.parts_figures(robot_type, len(composition.element_pages(d)),
+                                                           len(composition.overview_pages(d)))))
             # 02's pages of the robot type: its notes, its elements and its materials nine a page; where each material
             # sits.
             pages += composition.taken_apart_pages(c, d, [], params) + composition.sources_pages(d)
@@ -651,25 +652,33 @@ class TestElementPages(unittest.TestCase):
             composition.plt.close(figure)
         partly = []
         for symbol in c.tables['elements'][0]:
-            kg = c.column('elements', symbol)
-            if symbol in composition.ALLOY_OF:   # E33: a light alloy's metal, its panel the alloy's draws alone
-                kg = composition.alloy_split(symbol, composition.materials_of(d, symbol)).get(
-                    composition.ALLOY_OF[symbol], np.zeros(d.n))
-            held = kg > 0
-            label = composition.alloy_title(symbol)   # 'Aluminium (Al) in the alloys' since E33
-            label = label + ', inflow' if label + ', inflow' in panels else label   # copper since E25
-            if held.mean() < composition.HELD_SHARE:   # nothing, or nearly: no panel
-                self.assertNotIn(label, panels)
-                continue
-            numbers = panels[label]
-            self.assertNotIn('median 0 ', numbers, msg=symbol)
-            if held.all():
-                self.assertNotIn('of the draws', numbers, msg=symbol)
-                continue
-            partly.append(symbol)
-            per, unit = composition.panel_unit(kg[held])
-            self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
-            self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
+            # Each panel of the element (label, its draws): one, or since E38 point 5 the magnets' and the sensors'.
+            split = composition.magnets_split(composition.materials_of(d, symbol))
+            if split:
+                shown = [(f'{composition.element_label(symbol)} in the {view}', sum(part.values()))
+                         for view, part in split.items()]
+            else:
+                kg = c.column('elements', symbol)
+                if symbol in composition.ALLOY_OF:   # E33: a light alloy's metal, its panel the alloy's draws alone
+                    kg = composition.alloy_split(symbol, composition.materials_of(d, symbol)).get(
+                        composition.ALLOY_OF[symbol], np.zeros(d.n))
+                label = composition.alloy_title(symbol)   # 'Aluminium (Al) in the alloys' since E33
+                label = label + ', inflow' if label + ', inflow' in panels else label   # copper since E25
+                shown = [(label, kg)]
+            for label, kg in shown:
+                held = kg > 0
+                if held.mean() < composition.HELD_SHARE:   # nothing, or nearly: no panel
+                    self.assertNotIn(label, panels)
+                    continue
+                numbers = panels[label]
+                self.assertNotIn('median 0 ', numbers, msg=symbol)
+                if held.all():
+                    self.assertNotIn('of the draws', numbers, msg=symbol)
+                    continue
+                partly.append(symbol)
+                per, unit = composition.panel_unit(kg[held])
+                self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
+                self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
         self.assertIn('Ti', partly)      # the titanium alloy, in some robots only (E19 point 3: Ti whole)
         self.assertNotIn('Pb', partly)   # since point 3a in every robot's boards, so in every draw
 
@@ -703,8 +712,9 @@ class TestElementPages(unittest.TestCase):
         inputs = inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         partly, panels = [], []
-        for number, elements in enumerate(composition.OVERVIEW_PAGES, 1):   # the pages as 02 draws them
-            figure = composition.overview_page(d, elements, number)
+        layout = composition.overview_pages(d)   # the pages as 02 draws them (E38: two a page where they fit)
+        for number, elements in enumerate(layout, 1):
+            figure = composition.overview_page(d, elements, number, len(layout))
             figure.canvas.draw()
             page = figure.bbox
             for (symbol, _), axes in zip(elements, figure.axes[1:]):       # the robot first, then the panels
@@ -715,8 +725,13 @@ class TestElementPages(unittest.TestCase):
                     for other, seen in boxes:
                         self.assertFalse(box.overlaps(seen), msg=f'{symbol}: {t.get_text()} on {other}')
                     boxes.append((t.get_text(), box))
-                panels.append((symbol, {(round(t.get_position()[0], 3), round(t.get_position()[1], 2)): t.get_text()
-                                        for t in axes.texts}))
+                # Each row's texts left to right: its median, mean and share held (the columns may stand further right
+                # than OVERVIEW_COLUMNS where a column's numbers are long, E38).
+                rows_of = {}
+                for t in axes.texts:
+                    rows_of.setdefault(round(t.get_position()[1], 2), []).append(t)
+                panels.append((symbol, {y: [t.get_text() for t in sorted(texts, key=lambda t: t.get_position()[0])]
+                                        for y, texts in rows_of.items()}))
             composition.plt.close(figure)
         for symbol, at in panels:
             # Its rows by place since 2026-11-05 ("Yes, fix all three"): each kind of part, the electronics by their
@@ -726,17 +741,16 @@ class TestElementPages(unittest.TestCase):
             if not shown:
                 continue
             per, _ = composition.panel_unit(sum(kinds[k] for k in shown))
-            median_x, mean_x, share_x = (round(x, 3) for x in composition.OVERVIEW_COLUMNS)
             for row, kind in enumerate(reversed(shown)):
                 held = kinds[kind] > 0
-                y = round(row + 0.45, 2)
-                self.assertEqual(at[(share_x, y)], f'{composition.panel_number(100 * held.mean())} %')
-                self.assertEqual(at[(median_x, y)], composition.panel_number(np.median(kinds[kind][held]) / per))
+                median, _, share = at[round(row + 0.45, 2)]
+                self.assertEqual(share, f'{composition.panel_number(100 * held.mean())} %')
+                self.assertEqual(median, composition.panel_number(np.median(kinds[kind][held]) / per))
                 if not held.all():
                     partly.append((symbol, kind))
         # Indium in the cameras, held in some draws only (its row by place since 2026-11-05, before: the head); the
         # torso boards' aluminium in every draw since point 3a.
-        self.assertIn(('In', composition.component_label(composition.CAMERAS)), partly)
+        self.assertIn(('In', composition.component_label('cameras')), partly)   # by the sensors' kind since E38
 
 
 class TestCentre(unittest.TestCase):
@@ -1052,8 +1066,8 @@ class TestPagesByMaterial(unittest.TestCase):
                         seen = True
                         self.assertEqual([t.get_text() for t in axes.texts], [])   # no text over its bars
                         for material in (composition.element_page_name(composition.COPPER), 'Battery cells',
-                                         composition.component_label('circuit boards'),
-                                         composition.component_label('cables')):
+                                         composition.shown_name(composition.component_label('circuit boards')),
+                                         composition.shown_name(composition.component_label('cables'))):
                             self.assertIn(material, legend)
             if '_means_' in name:   # each element's mean by material, on pages of their own (2026-11-02)
                 words = ' '.join(t.get_text() for t in figure.texts)
@@ -1061,13 +1075,17 @@ class TestPagesByMaterial(unittest.TestCase):
                     means_seen = True
                     for material in ('Copper', 'Battery cells'):
                         self.assertIn(f'{material} ', words)
-                    # The electronics' name once in copper's row, its components after it (E32).
+                    # The electronics' components together in copper's row, the electronics' name once after them in
+                    # brackets (E32; since 2026-11-06, E38: "Have LIDAR etc. first and then just in brackets boards and
+                    # components").
                     row = next(t.get_text().replace('\n', ' ') for t in figure.texts
                                if 'Copper ' in t.get_text() and 'Battery cells ' in t.get_text())
-                    self.assertEqual(row.count(f'{composition.ELECTRONICS}: '), 1, row)
-                    electronics = row[row.index(f'{composition.ELECTRONICS}: '):].split(';')[0]
+                    tail = f'({composition.ELECTRONICS.lower()})'
+                    self.assertEqual(row.count(tail), 1, row)
+                    self.assertNotIn(f'{composition.ELECTRONICS}: ', row)
+                    electronics = next(part for part in row.split('; ') if part.endswith(tail))
                     for component in ('circuit boards ', 'cables '):
-                        self.assertIn(component, electronics)
+                        self.assertIn(component, electronics.lower())
             composition.plt.close(figure)
         self.assertTrue(seen)
         self.assertTrue(means_seen)
@@ -1137,7 +1155,9 @@ class TestRun(unittest.TestCase):
                     columns = file.read().splitlines()
                 self.assertEqual(draws.shape, (300, len(columns)), msg=table)
             self.assertTrue(os.path.exists(os.path.join(params.output.parts_dir, 'summary.csv')))
-            for name in list(composition.parts_figures(1)) + [n for n, _ in composition.sources_pages(d)]:
+            for name in (list(composition.parts_figures(1, len(composition.element_pages(d)),
+                                                        len(composition.overview_pages(d))))
+                         + [n for n, _ in composition.sources_pages(d)]):
                 self.assertGreater(os.path.getsize(os.path.join(params.output.parts_figures_dir, name)), 10_000,
                                    msg=name)
 
@@ -2164,8 +2184,8 @@ class TestLegendsAndPlaces(unittest.TestCase):
         d, _, _ = self.drawn()
         places = composition.by_place(d, 'In')
         self.assertTrue(places)
-        self.assertTrue(set(places) <= {composition.component_label(c) for c in composition.ELECTRONICS_COMPONENTS},
-                        set(places))
+        # Since 2026-11-06 by the sensors' kind (E38): the LiDARs' and the cameras'.
+        self.assertTrue(set(places) <= {composition.component_label(k) for k in composition.SENSOR_KINDS}, set(places))
         self.assertIn('hips', composition.by_place(d, 'Cu'))   # the windings: their kind of part as before
         self.assertEqual(composition.place_label('hips'), 'Hip joints')
 
@@ -2181,7 +2201,7 @@ class TestLegendsAndPlaces(unittest.TestCase):
         self.assertEqual(sensors.panel_numbers[6], 'mg')
         page = next(f for _, f in pages if sensors in f.axes)
         labels = {t.get_text() for legend in page.legends for t in legend.get_texts()}
-        self.assertIn(composition.component_label(composition.CAMERAS), labels)
+        self.assertIn(composition.shown_name(composition.component_label(composition.CAMERAS)), labels)
         for _, figure in pages:
             composition.plt.close(figure)
 
@@ -2319,3 +2339,204 @@ class TestCopperAndNickelNamed(unittest.TestCase):
         self.assertIn(composition.COPPER, materials)
         self.assertTrue(any(t.startswith('Nickel') for t in materials), sorted(materials))
         self.assertFalse({self.COPPER_NAME, self.NICKEL_NAME} & materials)
+
+
+class TestSensorsByKind(unittest.TestCase):
+    """Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses
+    sensors are the location for cirticial raw materials such as indium galium etc.", "I would like to continue with
+    the sensor work. This has to be resolved now" (EVIDENCE.md E38 point 1): on the pages of where the critical elements
+    sit, and in places.npy, the sensors by their kind, each sensor's kind from its car sensor elements, never its name;
+    the element pages by material keep the cameras and the other sensors (E32)."""
+
+    # "combine all the cameras and time of flight and lidar are the same" (2026-11-06).
+    LIDARS, CAMERAS = 'LiDARs', 'cameras'
+    # Every combination of car sensor elements the six parts files hold (V193), and its kind.
+    COMBINATIONS = {
+        ('CMOS image sensor',): CAMERAS,
+        ('CMOS image sensor', 'IMU', 'IR camera sensor', 'laser diode array'): CAMERAS,
+        ('CMOS image sensor', 'IR camera sensor', 'laser diode array'): CAMERAS,
+        ('IMU',): 'motion sensors',
+        ('IMU', 'laser diode array', 'photodetector array'): LIDARS,
+        ('laser diode array', 'photodetector array'): LIDARS,     # the time-of-flight sensors: a LiDAR's elements
+        ('MEMS microphone array',): 'microphones',
+        ('angle sensor',): 'joint encoders',
+        ('position sensor',): "hydraulic actuators' sensors",
+        ('pressure sensor',): "hydraulic actuators' sensors",
+        ('ultrasonic sensor',): 'ultrasonic sensors',
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self):
+        inputs = inputs_or_skip(self, self.params)
+        return draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws)), inputs
+
+    def test_each_combination_of_car_elements_its_kind(self):
+        for combination, kind in self.COMBINATIONS.items():
+            units = [(t, 1) for t in combination]
+            self.assertEqual(composition.sensor_kind(units), kind, combination)
+            # A kind of camera is the component cameras of the element pages (E32), every other kind other sensors.
+            self.assertEqual(composition.sensor_component(units) == composition.CAMERAS, kind == self.CAMERAS,
+                             combination)
+        self.assertIsNone(composition.sensor_kind([('IMU', 1), ('rain/light sensor', 1)]))   # no kind: a fault
+        self.assertEqual(set(self.COMBINATIONS.values()), set(composition.SENSOR_KINDS))      # every kind used
+
+    def test_every_sensor_of_the_six_files_has_its_kind(self):
+        book = schemas.read_workbook(absolute(self.params.data.workbook), self.params)
+        checked = 0
+        for category in book.categories:
+            path = schemas.parts_path(self.params, category)
+            if not os.path.exists(path):
+                continue
+            apart = schemas.read_parts_taken_apart(path)
+            for s in apart.sensors:
+                units = [(t, u) for _, sensor, t, u in apart.elements if sensor == s.name]
+                if units:   # a speaker holds no car sensor elements, and no element of interest
+                    checked += 1
+                    self.assertIsNotNone(composition.sensor_kind(units), (category.number, s.robot, s.name, units))
+        self.assertGreater(checked, 500)
+
+    def test_a_sensor_of_no_kind_is_a_fault(self):
+        inputs = inputs_or_skip(self, self.params)
+        imu = next(sensor for _, sensor, t, _ in inputs.apart.elements if t == 'IMU'
+                   and {x for _, s, x, _ in inputs.apart.elements if s == sensor} == {'IMU'})
+        inputs.apart.elements.append((0, imu, 'rain/light sensor', 1.0))
+        faults = composition.check_parts(inputs)
+        self.assertTrue(any('no kind of sensor' in f.text and imu in f.text for f in faults), [f.text for f in faults])
+
+    def test_indium_and_gallium_in_the_lidars_and_cameras(self):
+        d, _ = self.drawn()
+        indium = composition.by_place(d, 'In')
+        label = composition.component_label
+        self.assertTrue(set(indium) <= {label(self.LIDARS), label(self.CAMERAS)}, sorted(indium))
+        self.assertIn(label(self.CAMERAS), indium)
+        # The test's magnets (FIXED_MAGNET) hold no gallium: here its gallium is the sensors' alone.
+        gallium = composition.by_place(d, 'Ga')
+        self.assertEqual(set(gallium), {label(self.LIDARS), label(self.CAMERAS)})
+
+    def test_the_kinds_add_up_to_the_cameras_and_the_other_sensors(self):
+        # Each element: its kinds of camera to the element pages' cameras, its other kinds to their other sensors.
+        d, _ = self.drawn()
+        label = composition.component_label
+        cameras = {label(self.CAMERAS)}
+        others = {label(k) for k in composition.SENSOR_KINDS} - cameras
+        for element in {e for _, e in d.elements}:
+            for component, kinds in ((composition.CAMERAS, cameras), (composition.OTHER_SENSORS, others)):
+                by_material = d.by_material.get((label(component), element), np.zeros(d.n))
+                by_place = sum((v for (p, e), v in d.places.items() if e == element and p in kinds), np.zeros(d.n))
+                np.testing.assert_allclose(by_place, by_material, rtol=1e-9, atol=1e-18, err_msg=(element, component))
+
+    def test_every_place_its_own_colour(self):
+        colours = [composition.place_colour(p) for p in composition.places_order()]
+        self.assertEqual(len(colours), len(set(colours)), colours)
+
+    def test_the_overview_two_elements_a_page_where_their_rows_fit(self):
+        # Since E38 copper and aluminium hold up to 17 rows each: two such panels on one page overlapped (V193).
+        d, _ = self.drawn()
+        layout = composition.overview_pages(d)
+        self.assertEqual([e for page in layout for e in page], composition.FIGURE_ELEMENTS)   # each once, in order
+        for page in layout:
+            self.assertIn(len(page), (1, 2))
+            if len(page) == 2:
+                self.assertLessEqual(sum(composition.overview_rows(d, s) for s, _ in page), composition.OVERVIEW_ROWS)
+        self.assertTrue(any(len(page) == 1 for page in layout))   # type 1's copper and aluminium each a page
+
+    def test_the_kind_first_and_the_electronics_in_brackets(self):
+        # Matthias, 2026-11-06: "Have LIDAR etc. first and then just in brackets boards and components".
+        label = composition.component_label
+        self.assertEqual(composition.shown_name(label('LiDARs')), 'LiDARs (boards and components)')
+        self.assertEqual(composition.shown_name(label('cameras')), 'Cameras (boards and components)')
+        self.assertEqual(composition.shown_name(label('circuit boards')), 'Circuit boards (boards and components)')
+        self.assertEqual(composition.shown_name('Battery cells'), 'Battery cells')
+        self.assertEqual(composition.element_page_name(label('cameras')), 'Cameras (boards and components)')
+        d, _ = self.drawn()
+        for name, figure in composition.parts_figure_pages(d):
+            texts = [t.get_text() for g in figure.legends for t in g.get_texts()]
+            texts += [t.get_text() for a in figure.axes for t in a.get_yticklabels()]
+            self.assertFalse([t for t in texts if t.startswith(f'{composition.ELECTRONICS}: ')], name)
+            composition.plt.close(figure)
+
+
+class TestMagnetsAndSensorsApart(unittest.TestCase):
+    """Matthias, 2026-11-06: "Gallium apart" (the proposal: the gallium of the magnets and of the sensors each a panel of
+    its own), "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets" (EVIDENCE.md E38 point 5): an
+    element the NdFeB magnets and the sensors hold, and nothing else, in two panels on the element pages, on the pages of
+    where the critical elements sit and on 03: '… in the magnets' and '… in the sensors'. Every other element as before."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        return d, composition.compose_taken_apart(category, d, inputs.base.lists), inputs
+
+    def test_the_rule(self):
+        n = 400
+        rng = np.random.default_rng(1)
+        some = lambda share: np.where(rng.random(n) < share, rng.uniform(1, 2, n), 0.0)   # noqa: E731
+        cameras = composition.component_label(composition.CAMERAS)
+        magnets = composition.MAGNETS
+        self.assertEqual(set(composition.magnets_split({magnets: some(1), cameras: some(0.5)})), {'magnets', 'sensors'})
+        self.assertIsNone(composition.magnets_split({magnets: some(1)}))                        # no sensors: one panel
+        self.assertIsNone(composition.magnets_split({cameras: some(1)}))                        # no magnets: one panel
+        self.assertIsNone(composition.magnets_split({magnets: some(1), cameras: some(1),
+                                                     composition.CELL_MATERIAL: some(1)}))       # a third holder
+        # A third holder in fewer than HELD_SHARE of the draws is not drawn, as on every page: the split stands.
+        self.assertIsNotNone(composition.magnets_split({magnets: some(1), cameras: some(1),
+                                                        composition.CELL_MATERIAL: some(0.01)}))
+
+    def test_the_element_pages_two_panels_where_the_rule_holds(self):
+        d, c, inputs = self.drawn()
+        titles = set()
+        for name, figure in composition.taken_apart_pages(c, d, inputs.left_out, self.params):
+            if '_elements_' in name:
+                titles |= {a.get_title(loc='left') for a in figure.axes}
+            composition.plt.close(figure)
+        split = [e for e in {e for _, e in d.elements} if composition.magnets_split(composition.materials_of(d, e))]
+        self.assertIn('Nd', split)   # the joints' magnets and the encoders' (type 1)
+        for e in split:
+            label = composition.element_label(e)
+            self.assertIn(f'{label} in the magnets', titles)
+            self.assertIn(f'{label} in the sensors', titles)
+            self.assertNotIn(label, titles)
+        self.assertIn(composition.element_label('Co'), titles)   # the magnets' and the battery cells': one panel
+
+    def test_the_two_panels_add_up_to_the_element(self):
+        d, _, _ = self.drawn()
+        for e in {e for _, e in d.elements}:
+            parts = composition.materials_of(d, e)
+            split = composition.magnets_split(parts)
+            if split is None:
+                continue
+            total = sum(kg for (_, x), kg in d.elements.items() if x == e)
+            shown = sum(split['magnets'].values()) + sum(split['sensors'].values())
+            unshown = sum((kg for m, kg in parts.items() if m != composition.MAGNETS and m not in split['sensors']),
+                          np.zeros(d.n))
+            np.testing.assert_allclose(shown + unshown, total, rtol=1e-9, atol=1e-18, err_msg=e)
+            self.assertFalse(composition.held(unshown), e)   # nothing held beside them
+
+    def test_the_pages_of_where_they_sit_two_panels(self):
+        d, _, _ = self.drawn()
+        sensor_places = {composition.component_label(k) for k in composition.SENSOR_KINDS}
+        layout = composition.element_pages(d)
+        self.assertEqual([s for s, _ in composition.FIGURE_ELEMENTS], list(dict.fromkeys(s for p in layout for s, _, _ in p)))
+        views = {(s, v) for p in layout for s, _, v in p}
+        self.assertIn(('Nd+Pr', 'magnets'), views)
+        self.assertIn(('Nd+Pr', 'sensors'), views)
+        for name, figure in composition.parts_figure_pages(d):
+            if '_elements_' in name:
+                for a in figure.axes:
+                    title = a.get_title(loc='left').replace('\n', ' ')
+                    if title.endswith('in the sensors'):
+                        self.assertTrue(title.startswith(('Neodymium', 'Dysprosium', 'Gallium')), title)
+            composition.plt.close(figure)
+        places = composition.by_place(d, 'Nd+Pr')
+        self.assertTrue(set(composition.place_view(places, 'sensors')) <= sensor_places)
+        self.assertFalse(set(composition.place_view(places, 'magnets')) & sensor_places)

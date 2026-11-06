@@ -47,6 +47,9 @@ BODY_REGIONS = ['Legs', 'Arms', 'Hands', 'Torso', 'Head', 'Base', 'Whole body']
 MATERIALS = list(composition.MATERIAL_ORDER) + [composition.NOT_ALLOCATED]
 NOT_HELD = 'Ceramics'          # held by no robot type: no page
 LACKING = (1, 'Tb')            # robot type 1 holds no terbium: no panel on its page
+# The elements of the magnets the sensors hold too, as in 02's draws (E38 point 5): from the NdFeB magnets and the
+# cameras and other sensors alone.
+MAGNETS_AND_SENSORS = ('Dy', 'Ga', 'Nd')
 
 
 def save(folder: str, table: str, columns: list, draws: np.ndarray) -> None:
@@ -107,10 +110,13 @@ def write_six(params: Params, rng: np.random.Generator) -> None:
             # titanium beside its alloy in the sensors, the cameras and the other sensors (02's components, E32).
             electronics = ([(composition.component_label(composition.CAMERAS), 0.7 * (1 - share)),
                             (composition.component_label(composition.OTHER_SENSORS), 0.3 * (1 - share))]
-                           if e in composition.SENSORS_OF else [('Boards and components', 1 - share)])
+                           if e in composition.SENSORS_OF or e in MAGNETS_AND_SENSORS
+                           else [('Boards and components', 1 - share)])
             # Copper and nickel from their own metal (02's WHOLE), as 02's draws give them.
             own = {element: material for material, element in composition.WHOLE.items()}
-            for m, f in [(composition.ALLOY_OF.get(e) or own.get(e, 'Aluminium alloys'), share), *electronics]:
+            holder = (composition.MAGNETS if e in MAGNETS_AND_SENSORS
+                      else composition.ALLOY_OF.get(e) or own.get(e, 'Aluminium alloys'))
+            for m, f in [(holder, share), *electronics]:
                 by_material_columns.append(f'{e}: {m}')
                 by_material.append(elements[:, k] * f)
         by_material_columns.append(f'Cu: Brass{composition.FIXED_MARK}')
@@ -161,7 +167,8 @@ class TestComparison(Compared):
         written = sorted(os.listdir(self.params.output.comparison_dir))
         materials = [m for m in MATERIALS if m not in (NOT_HELD, composition.NOT_ALLOCATED)]
         # Each element a page, the titanium also its sensors' (2026-11-05, "Yes, add it").
-        pages_of_elements = len(ELEMENTS) + len([e for e in ELEMENTS if e in composition.SENSORS_OF])
+        pages_of_elements = len(ELEMENTS) + len([e for e in ELEMENTS if e in composition.SENSORS_OF
+                                                 or e in MAGNETS_AND_SENSORS])
         expected = (['comparison_body_regions_1.png', 'comparison_copper_1.png']
                     + [f'comparison_elements_{k}.png' for k in range(1, pages_of_elements + 1)]
                     + [f'comparison_materials_{k}.png' for k in range(1, len(materials) + 1)]
@@ -181,8 +188,8 @@ class TestComparison(Compared):
         titles = {n: f._suptitle.get_text() for n, f in pages.items() if f._suptitle}
         name = next(n for n, t in titles.items() if t == 'Titanium (Ti) in the sensors of one robot of each robot type')
         labels = {t.get_text() for legend in pages[name].legends for t in legend.get_texts()}
-        self.assertEqual(labels, {composition.component_label(composition.CAMERAS),
-                                  composition.component_label(composition.OTHER_SENSORS)})
+        self.assertEqual(labels, {composition.shown_name(composition.component_label(composition.CAMERAS)),
+                                  composition.shown_name(composition.component_label(composition.OTHER_SENSORS))})
         self.assertIn('Titanium (Ti) held in the titanium alloy of one robot of each robot type', titles.values())
         for figure in pages.values():
             composition.plt.close(figure)
@@ -204,6 +211,25 @@ class TestComparison(Compared):
         total = legends['The mass of one robot of each robot type, by material']
         self.assertTrue({composition.COPPER, 'Nickel'} <= total, sorted(total))
         self.assertFalse(set(composition.ELEMENT_PAGE_NAMES.values()) & total)
+
+    def test_the_magnets_and_the_sensors_apart(self):
+        # Matthias, 2026-11-06: "Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in
+        # Magnets" (E38 point 5): an element of the magnets and the sensors alone on two pages, the magnets' without a
+        # legend (one colour, the title naming it), the sensors' with the cameras and the other sensors.
+        robots = comparison.read_draws(self.params)
+        titles = {}
+        for name, figure in comparison.pages(robots, self.params):
+            if figure._suptitle:
+                titles[figure._suptitle.get_text()] = {t.get_text() for g in figure.legends for t in g.get_texts()}
+            composition.plt.close(figure)
+        for e in MAGNETS_AND_SENSORS:
+            label = composition.element_label(e)
+            self.assertEqual(titles[f'{label} in the magnets of one robot of each robot type'], set())
+            self.assertEqual(titles[f'{label} in the sensors of one robot of each robot type'],
+                             {composition.shown_name(composition.component_label(c))
+                              for c in (composition.CAMERAS, composition.OTHER_SENSORS)})
+            self.assertFalse([t for t in titles if t.startswith(f'{label} in one robot')], label)
+        self.assertTrue([t for t in titles if t.startswith('Cobalt (Co) in one robot')])   # one page, as before
 
     def test_no_median_in_the_first_part_of_its_axis(self):
         # Matthias, 2026-11-05: "Titanium in sensors the x axis is not good, You know this", then "Yes, build it" (E36,
@@ -332,7 +358,8 @@ class TestComparison(Compared):
         names = [n for _, n in sorted(elements)]
         # Titanium twice since 2026-11-05 ("Yes, add it"): its alloy's page, then its sensors' right after it.
         expected = [name for name in sorted(composition.ELEMENT_NAMES[e] for e in ELEMENTS)
-                    for _ in range(2 if name in {composition.ELEMENT_NAMES[e] for e in composition.SENSORS_OF} else 1)]
+                    for _ in range(2 if name in {composition.ELEMENT_NAMES[e] for e in
+                                                 (*composition.SENSORS_OF, *MAGNETS_AND_SENSORS)} else 1)]
         self.assertEqual(names, expected)
         self.assertEqual(names[0], 'Aluminium')
         self.assertEqual(names[-1], 'Titanium')

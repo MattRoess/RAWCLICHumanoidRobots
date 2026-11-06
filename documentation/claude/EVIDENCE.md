@@ -8,6 +8,36 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E38. The sensors by kind on the pages of where the critical elements sit (2026-11-06). Built (points 1 and 5); open (points 2 to 4)
+
+Matthias, 2026-11-06: "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses sensors are
+the location for cirticial raw materials such as indium galium etc.", "I would like to continue with the sensor work.
+This has to be resolved now", "It is cameras LiDAR temperature and other sensor typoes. We have them all in the. car
+lectronic sensors", "There are also capacitors at the joins, so that high energy needs can be fast achieved", "combine
+all the cameras and time of flight and lidar are the same", "Have LIDAR etc. first and then just in brackets boards and
+components" (VERIFICATION.md V192, V193).
+
+| # | Point | State |
+|---|---|---|
+| 1 | The sensors by kind on each type's pages of where its critical elements sit and in `places.npy`, `places_estimated.npy` | **Built.** `SENSOR_KINDS`, `sensor_kind`: a sensor's kind from its car sensor elements, the first rule that holds: a laser diode array with a photodetector array, LiDARs (the time-of-flight sensors with them, "time of flight and lidar are the same"); an image sensor, cameras (colour, stereo and depth together, "combine all the cameras"); an angle sensor, joint encoders; a position or pressure sensor, the hydraulic actuators' sensors; MEMS microphones; an ultrasonic sensor; an IMU alone, motion sensors. A combination of no kind stops 02 (`check_parts`). The circuit boards, cables and connectors as before; the element pages by material and 03 keep the cameras and the other sensors (E32) |
+| 1a | The names | **Built.** Every component of the electronics written its component first, the electronics in brackets: "LiDARs (boards and components)", "Cameras (boards and components)" (`shown_name`), in the legends of 02's and 03's pages and on the means pages ("Circuit boards 6.9 g, other sensors 1.3 g, cameras 88 mg (boards and components)"); the draws' columns keep "Boards and components: …" (`component_label`), so 03 reads 02's files as before |
+| 1b | The overview pages | **Built.** Two elements a page while their rows fit (`OVERVIEW_ROWS` = 24), else one (`overview_pages`); the columns of numbers moved right where a column's numbers are long (`text_width`); the headings 2 points above the panel. With the sensors by kind, copper's and aluminium's panels hold up to 18 rows; two on a page overlapped (V193) |
+| 2 | The missing sensor kinds, all from the car list | **Open, research running.** Temperature sensors, the cameras' infrared illuminators, touch screens and skins, Wi-Fi and 5G modems, satellite receivers, force or torque sensors; robot by robot from the makers' data, a source table first, a count no source states an estimate shown to him before entry |
+| 3 | The documents' fault (modems and satellite receivers named, none in any robot) | **Open,** with point 2 |
+| 5 | The magnets' and the sensors' part of an element apart ("Gallium apart", "Yes do it like this. Nd etc. are then similar as Ga in elements in Magnets") | **Built.** `magnets_split`: an element the NdFeB magnets and the sensors hold, each in at least 2.5 % of the draws, and nothing else, in two panels: "… in the magnets" (the magnets alone) and "… in the sensors" (cameras and other sensors), on 02's element pages; on the pages of where the critical elements sit where its magnets sit and its sensors by kind (`element_pages`, `place_view`; Nd+Pr, Dy and Ga in his data); on 03 two pages, the magnets' without a legend (`magnets_and_sensors`). In type 2: neodymium, dysprosium, boron and gallium. Every other element as before; titanium's alloy and sensors as E36 |
+| 4 | The joints' capacitors | **Open, researched (V193):** no first-hand source names the capacitors of a commercial humanoid's joints; open designs and a chip maker's humanoid joint reference design use ceramic capacitors (MLCC), one open design aluminium electrolytics; the makers' composition sheets of MLCCs (KEMET/YAGEO), tantalum capacitors (KEMET/YAGEO) and aluminium electrolytic and hybrid polymer capacitors (TDK EPCOS, Panasonic) read. Nothing entered |
+
+**The colours of the kinds** (Paul Tol's published schemes; CIE Lab difference to the nearest other colour of those
+pages): LiDARs `#332288` (31.6), cameras `#AA4499` (14.1 from the hip joints', the cameras' purple of E32 kept),
+joint encoders `#666633` (30.3), hydraulic actuators' sensors `#222255` (31.6), microphones `#BBBBBB` (29.8), ultrasonic
+sensors `#EE8866` (30.3), motion sensors `#009988` (33.6).
+
+**Gallium in the magnets** (his doubt, V192 and V193): the model's is his traction-motor workbook's (0 to 0.1 % of the
+magnet's mass); the first-hand sources read so far: Proterial's patent US 11174537 B2, claim 1 requiring "Ga: not less
+than 0.05 mass % and not more than 1.0 mass %", its purpose "an R-T-Ga phase" in the grain boundary "whereby high HcJ
+can be obtained"; the MRI scrap magnets of Schönfeldt et al. 2023, Ga 0.22 wt %. Who found it and why: research
+running. Nothing in the model changed for it.
+
 ## E37. Copper and nickel by what they are; every page checked by a test (2026-11-06). Built
 
 Matthias, 2026-11-05: "Compariosn. We had this befor copper in copper does not make any sense", to the proposal "Yes,
