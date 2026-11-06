@@ -65,7 +65,23 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-05, late evening: his figures fixed (E36); his runs (start here)
+## 2026-11-06: checked (V187); relabel and page check built (E37, V188); the sensors (start here)
+
+Matthias: "read the handover and check the code … I want that everything is verifyed and based on solid data or solid
+data model" (V187: nothing changed; the state, the suite, how solid the data are, the scratch page check lost), then
+"Relabel and page check": built, not committed (E37, V188). The page check is now a test of the repository
+(`TestEveryPageOfTheSixTypes`): 02 for the six types and 03, every page by his figure rules.
+
+**His runs done and read back:** the six builders 06:19 to 06:20 (their tests pass, V189), 01 06:20, 02 06:21 to 06:44
+at 200,000 draws, 03 06:44 (V190, V191). The outputs on disk are now of the code. Commit and push on his word.
+
+**The sensors, his words:** "What I miss at the moment are the sensors. Temperature LIDAR, Cameras etc.", "Theses
+sensors are the location for cirticial raw materials such as indium galium etc." What the model holds and lacks is in
+V187 (no temperature, force or torque, tactile or current sensor in any robot; the indium and gallium only from the
+LiDARs' and depth cameras' laser diode and photodetector arrays, shown on the pages only as "cameras" and "other
+sensors"). Nothing specified or built: what he wants shown and added is his to say.
+
+## 2026-11-05, late evening: his figures fixed (E36); his runs
 
 Going through his figures he found: the legend of 1_elements_2 cut, legend colours missing (2 element_1), indium on
 the parts pages in the head, not the cameras, the sensors' titanium nowhere ("where the hell is titanium in the

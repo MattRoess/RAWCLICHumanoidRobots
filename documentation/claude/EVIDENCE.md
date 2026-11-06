@@ -8,6 +8,25 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E37. Copper and nickel by what they are; every page checked by a test (2026-11-06). Built
+
+Matthias, 2026-11-05: "Compariosn. We had this befor copper in copper does not make any sense", to the proposal "Yes,
+relabel"; 2026-11-06, after the check of V187: "I want that everything is verifyed and based on solid data or solid data
+model", then "Relabel and page check" (VERIFICATION.md V188).
+
+| # | Point | Built |
+|---|---|---|
+| 1 | The material named as its own element | `ELEMENT_PAGE_NAMES` beside `WHOLE` in 02 (every metal recovered whole, and no other material, a test says): "Copper metal: windings, busbars, heat pipes", "Nickel metal: the battery's nickel strips"; `element_page_name` in the legend of 02's element pages, on 02's means pages (`mean_words`) and in the legend of 03's element pages (`compare_page` where an element is given) |
+| 2 | Not changed | the materials pages ("Copper", "Nickel: strips of the battery"), 03's page of the mass by material ("Copper", "Nickel"), the colours, the draws |
+| 3 | The page check | `TestEveryPageOfTheSixTypes` in `tests/test_comparison.py`: 02 for the six types at 1,000 draws, then 03, into a temporary folder; every page checked as it is saved (`page_problems`): legends within the page, every colour drawn in the legend, panels and texts within the page, no median in the first 5 % of its bars. It replaces the scratch script of V186, lost when the scratch folder was emptied overnight |
+
+**What the material Copper is** (his run of 2026-11-05, 200,000 draws, the mean over each type's draws, read
+2026-11-06): the joints 71 to 91 % (their motors' windings), the wheeled base 2 to 13 % (its drive motors' windings),
+the battery pack's busbars and wires 6 to 11 %, the head 2 to 3 %, the boards and computers 0.6 to 1.8 % (their heat
+pipes); the rows "Motor stator" (copper share 0.23 / 0.36
+/ 0.45), the fans' windings, "Battery housing, busbars and wires", the heat pipes and vapour chambers, the copper
+strips, the servo valves' coils. **The material Nickel** is the rows "Nickel strip" of the battery housings alone.
+
 ## E36. His figures: the legends, where the elements sit, the sensors' titanium and its axis (2026-11-05). Built
 
 Matthias, 2026-11-05, going through his figures: "1_elements_2 has text for the legend cut", "There are also legend

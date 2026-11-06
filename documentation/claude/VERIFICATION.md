@@ -3,6 +3,118 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-06
+
+### V191. His run of 03 read back
+
+- **03:** 86 pages in `figures/comparison/`, written 06:44:09 to 06:44:45, every one after 02's draws (none older); no
+  iCloud copy "… 2"; as many pages as the page check of V188.
+- **Looked at:** `comparison_elements_23.png`, the sensors' titanium (types 2 and 3 on their logarithmic axes, the
+  cameras' 0.1 to 10 mg and the ultrasonic sensors' 50 to 470 mg both visible; types 1, 4, 5, 6 linear);
+  `comparison_elements_4.png`, copper ("Copper metal: windings, busbars, heat pipes" in the legend, within the page).
+- **His runs of E35, E36 and E37:** all done and read back (V189 to V191).
+
+### V190. His runs of 01 and 02 read back
+
+- **His words:** "01 has run already only 03 is missing", "02 is done and 03 running".
+- **01:** `figures/schemas/overview_1.png` and `_2.png` written 06:20:35, after the builders (06:19 to 06:20); the
+  overview looked at: four stages from `STAGES`, 03 writing "The comparison pages", no "later" (E35).
+- **02:** its process from 06:21 to 06:44; every type's draws in `data/consolidated/` 06:41:10 to 06:41:44, 200,000 each;
+  the new `places.npy` and `places_estimated.npy` of every type 06:41:55 to 06:43:40; 126 pages in
+  `figures/composition/`, 138 files in `figures/parts_taken_apart/` (its sources figures included); no iCloud copy
+  "… 2". The places against the elements, and the estimated places against the estimated kinds, draw by draw, every
+  element of every type: the largest difference 8.7e-8 of the element's largest draw (float32's rounding).
+- **Looked at:** type 2's and type 3's element pages 1 (the sensors' titanium on its logarithmic axis, the cameras'
+  0.1 to 10 mg and the ultrasonic sensors' 50 to 470 mg both visible; every other panel linear), type 1's and type 2's
+  element pages 2 ("Copper metal: windings, busbars, heat pipes", "Nickel metal: the battery's nickel strips" in the
+  legend, within the page), type 5's parts page of elements 2 (indium in the cameras and the other sensors, gallium in
+  the joints' magnets and the sensors).
+- **Seen before his run, not by any code:** `figures/composition/`, `figures/parts_taken_apart/` and
+  `figures/comparison/` were gone at 06:30 (`figures/` changed 06:20); the code removes no folder (02 and 03 remove only
+  numbered pages beyond those drawn, by exact name). 02 wrote its two again; 03 its own.
+- **Not covered:** 03 (running at the time of writing).
+
+### V189. His runs of the six builders read back
+
+- **His words:** "I have run make 1 to 6", then "02 is runing".
+- **The files:** the six `data/researched/<n>_<name>/parts_taken_apart.xlsx` written 2026-11-06 06:19:08 to 06:20:11,
+  after the builders' last change (`aa9a1c5`, 2026-11-05 17:20); no iCloud copy "… 2" in `data/` or `figures/`.
+- **Against the code:** `tests/test_make_parts_taken_apart.py`, 136 tests (125 s), all pass; the two
+  `test_what_it_writes_equals_the_data_file_on_disk` of types 1 and 2, failing since E35, now pass: each file is what
+  its builder writes.
+- **Not covered:** 01, 02 and 03 on these files (02 running at the time of writing).
+
+### V188. Copper and nickel by what they are; every page of the six types checked by a test (EVIDENCE.md E37)
+
+- **His words:** "Yes, relabel" (2026-11-05); "Relabel and page check" (2026-11-06).
+- **Tests first, seen to fail:** `TestCopperAndNickelNamed` (02, two: every metal of `WHOLE` named and no other, the
+  colour of copper as it was; type 1's element pages' legends and means pages with the two names and never a bare
+  "Copper 1.4 kg", its materials pages with "Copper" and "Nickel: strips of the battery"), failing on
+  `ELEMENT_PAGE_NAMES` missing and "'Copper metal: …' not found"; 03's
+  `test_copper_and_nickel_by_what_they_are_on_the_element_pages` (its test draws now give copper and nickel from their
+  own metals, as 02's). My first test expected a materials page titled "Nickel": it is "Nickel: strips of the battery",
+  as it was; the test was wrong, not the code, and was corrected. After the build all pass, 03's fifteen too.
+- **The page check:** `TestEveryPageOfTheSixTypes` (02 for the six types at 1,000 draws, then 03, in a temporary
+  folder, every page checked as it is saved): 263 pages of 02 and 86 of 03, as many as V186's scratch check, no
+  problem; 88 s.
+- **Deliberate faults, each caught:** the relabel switched off (both relabel tests fail); the logarithmic axis switched
+  off (the four panels of the sensors' titanium, types 2 and 3 on 02's and 03's pages, medians at 0.2 % and 0.7 % of
+  their bars); every legend in one row (22 legends of 02 and 12 of 03 beyond the page); every legend without its last
+  colour (88 panels of 02, 100 of 03); every page's title above the page (every page).
+- **The shares of the material Copper** written in E37, the code's comment and METHODOLOGY computed from his run of
+  2026-11-05 (200,000 draws): the joints 71 to 91 %, the wheeled base 2 to 13 %, the battery pack 6 to 11 %, the head 2
+  to 3 %, the boards and computers 0.6 to 1.8 %; the material Nickel the battery pack's alone (26 to 88 g). I had first
+  written "79 to 91 %" from yesterday's sandbox; corrected before anything was committed.
+- **Seen, not changed (reported):** at 1,000 draws 02 warns "Mean of empty slice" (`02_composition.py`, the share of a
+  robot's draws below zero, for a robot no draw picked: 172 robots and versions in 1,000 draws); and matplotlib warns
+  that more than 20 pages are open at once (02 keeps a type's pages open until it saves them).
+- **Looked at** (drawn once more at 1,000 draws into the scratch folder): type 1's and type 2's element pages 1 and 2
+  (the legend in two columns within the page, "Copper metal: …" and "Nickel metal: …" among the materials), type 1's
+  means page 1 ("Nickel metal: the battery's nickel strips 26 g", "Copper metal: windings, busbars, heat pipes 1.4
+  kg"), 03's copper page (the new name) and its page of the mass by material ("Copper").
+- **The whole suite:** first run 574 tests (651 s), 3 failed: the two builder tests waiting for his runs, and
+  `test_six_panels_a_page_with_the_legend_and_the_means_of_its_materials`, which expected the bare "Copper" in the
+  element pages' legend; set to the new names in the materials' order. Rerun: 574 tests (658 s), only the two builder
+  tests failing.
+- **Not covered:** his runs at 200,000 draws; 01's pages (their own tests).
+
+### V187. The handover read, the code and the data checked ("read the handover and check the code")
+
+- **His words:** "read the handover and check the code. Furthermore check the lessons learened and how we work
+  together. I want that everything is verifyed and based on solid data or solid data model". Nothing changed.
+- **The repository:** clean, `main` = `origin/main` = `9aef9dd`. **His runs not yet done:** 01's pages written
+  2026-11-05 04:55, the builders' files 14:23 to 15:24, 02 15:09 to 15:18, 03 15:23; the code last changed 17:20
+  (`aa9a1c5`). **The whole suite:** 569 tests (550 s), the 2 `test_what_it_writes_equals_the_data_file_on_disk` failing
+  until his builders run, as at V186. 01's overview against the stages: as the code. No function of E35 and E36 unused.
+- **The scratch page checker of V186** was gone with the scratch folder (emptied overnight): the six types' pages were
+  checked by no test (the repository's tests: type 1's pages and 03's test draws). Built as a test in V188.
+- **How solid the data are** (01's `template_shares` over his parts files; 02's `elements` and `estimated` of his run):
+
+  | Type | Robots and versions | Mass stated by a source | Joints on the template | Battery on the template | Cu on parts labelled E | Nd+Pr | Au |
+  |---|---|---|---|---|---|---|---|
+  | 1 | 31 | all (12 "S, E") | 42 % | 39 % | 80 % | 76 % | 83 % |
+  | 2 | 102 | all (11) | 66 % | 62 % | 95 % | 93 % | 94 % |
+  | 3 | 172 | all (5) | 80 % | 72 % | 97 % | 97 % | 96 % |
+  | 4 | 137 | all (3) | 75 % | 72 % | 98 % | 98 % | 96 % |
+  | 5 | 14 | all | 29 % | 36 % | 88 % | 88 % | 87 % |
+  | 6 | 8 | all | 38 % | 38 % | 78 % | 77 % | 77 % |
+
+  Types 2 to 4 above E13's half on both templates after E14's research pass: E13 rule 4, said on their notes pages.
+  The board copper from 14 university analyses of whole PC boards (E2.8b; Bizzo 2014's own XT, 486 and Pentium
+  boards), the boards' precious metals and the sensors' elements from car electronics (RAWCLICVehicleElectronics, the
+  sensor elements only); E2.8b records the car and data-centre board data about 20 times apart on copper per cm².
+- **`estimated.npy` misleads:** 02 follows the kilograms on parts labelled E for the eleven elements of the overview
+  pages only (`TRACKED`); the table's columns of lithium, cobalt, nickel, manganese, titanium and the rest are 0 kg
+  always, which reads "nothing estimated". The overview's hatching is right. Reported, not changed.
+- **The sensors** (his question during the build: "What I miss at the moment are the sensors. Temperature LIDAR,
+  Cameras etc.", "Theses sensors are the location for cirticial raw materials such as indium galium etc."): the parts
+  files hold joint encoders, cameras, motion sensors, LiDARs, microphones, speakers, ultrasonic and time-of-flight
+  sensors and the hydraulic actuators' position and pressure sensors; no temperature, force or torque, tactile or
+  current sensor in any robot. The car list holds rows for them ("temperature sensor": NTC, Co 2, Ni 5, Mn 8 mg;
+  "capacitive touch sensor": In 15 mg). The indium and gallium drawn today: the laser diode arrays (LiDARs, the depth
+  cameras' projectors: In 3, Ga 30 mg each) and the photodetector arrays (LiDARs: In 2, Ga 1 mg); the CMOS and IR image
+  sensors hold neither in the car list. On the pages they show only as "cameras" and "other sensors".
+
 ## 2026-11-05
 
 ### V186. His figures fixed: the legends, the places, the sensors' titanium and its axis (EVIDENCE.md E36)

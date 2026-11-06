@@ -607,6 +607,24 @@ holding the alloy in fewer than 2.5 % of its draws, or not at all, has no panel;
 beside it (type 4's titanium: its sensors' 2 mg). Every other element is drawn by all its materials, as before; the
 means pages list every source.
 
+## Copper and nickel by what they are; every page checked by a test (since 2026-11-06)
+
+Matthias, 2026-11-05: "Compariosn. We had this befor copper in copper does not make any sense", "Yes, relabel";
+2026-11-06: "Relabel and page check" (EVIDENCE.md E37). A metal recovered whole as its own element (`WHOLE`: copper,
+nickel) is named on the element pages of 02 and 03 and on 02's means pages by what it is (`ELEMENT_PAGE_NAMES`,
+`element_page_name`): "Copper metal: windings, busbars, heat pipes" (the material Copper: the windings of the joints
+and wheel drives, 84 to 93 % of it, the battery's busbars and wires, 6 to 11 %, the heat pipes, vapour chambers and
+copper strips) and
+"Nickel metal: the battery's nickel strips". The materials pages and 03's page of the mass by material keep the
+material's name; the colours and the draws are as they were.
+
+Every page 02 draws for the six robot types and every page 03 draws is checked by a test as it is saved
+(`tests/test_comparison.py`, `TestEveryPageOfTheSixTypes`, `page_problems`): 02 runs with 1,000 draws a type from the
+project's own inputs into a temporary folder, then 03 on those draws; nothing is written into `data/` or `figures/`. The
+test fails on a legend beyond its page, a colour drawn that the page's legend does not name, a panel or a text beyond the
+page, and a panel whose median lies in the first 5 % of its bars (`LOG_BELOW`). In V188's run: 263 pages of 02 and 86 of
+03, none failing; each of the five failures made on purpose was caught.
+
 ## The outliers, not drawn (since 2026-11-05)
 
 Matthias, 2026-11-04, of the NeodraDynamics Neo1 (208; about 4 m, 1,200 kg, hydraulic, a prototype, of types 5 and 3):

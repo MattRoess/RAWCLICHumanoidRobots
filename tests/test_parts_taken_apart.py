@@ -25,6 +25,7 @@ and give the magnets fixed element fractions, so that one robot can be added up 
 import csv
 import importlib.util
 import os
+import re
 import sys
 import tempfile
 import types
@@ -1043,12 +1044,15 @@ class TestPagesByMaterial(unittest.TestCase):
                 panels = [axes for axes in figure.axes if axes.get_title(loc='left')]
                 self.assertLessEqual(len(panels), 6, msg=name)
                 legend = [t.get_text() for t in figure.legends[0].get_texts()]
-                self.assertEqual(legend, [m for m in composition.MATERIAL_COLOURS if m in legend], msg=name)
+                # In the materials' order, copper and nickel by what they are (E37, "Yes, relabel").
+                ordered = [composition.element_page_name(m) for m in composition.MATERIAL_COLOURS]
+                self.assertEqual(legend, [m for m in ordered if m in legend], msg=name)
                 for axes in panels:
                     if axes.get_title(loc='left').startswith('Copper (Cu)'):   # ', inflow' since E25
                         seen = True
                         self.assertEqual([t.get_text() for t in axes.texts], [])   # no text over its bars
-                        for material in ('Copper', 'Battery cells', composition.component_label('circuit boards'),
+                        for material in (composition.element_page_name(composition.COPPER), 'Battery cells',
+                                         composition.component_label('circuit boards'),
                                          composition.component_label('cables')):
                             self.assertIn(material, legend)
             if '_means_' in name:   # each element's mean by material, on pages of their own (2026-11-02)
@@ -2260,3 +2264,58 @@ class TestAxisNotPressedLeft(unittest.TestCase):
                                         msg=(name, axes.panel_numbers[0]))
             composition.plt.close(figure)
         self.assertGreater(checked, 20)
+
+
+class TestCopperAndNickelNamed(unittest.TestCase):
+    """Matthias, 2026-11-05: "Compariosn. We had this befor copper in copper does not make any sense", to the proposal
+    "Yes, relabel"; 2026-11-06: "Relabel and page check" (EVIDENCE.md E37): on the element pages and their means pages
+    the material named as its own element (02's WHOLE: copper, nickel) by what it is, "Copper metal: windings, busbars,
+    heat pipes" and "Nickel metal: the battery's nickel strips"; the materials pages keep "Copper" and "Nickel"; the
+    colours and the data as they were."""
+
+    COPPER_NAME = 'Copper metal: windings, busbars, heat pipes'
+    NICKEL_NAME = "Nickel metal: the battery's nickel strips"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def pages(self):
+        inputs = inputs_or_skip(self, self.params)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        return composition.taken_apart_pages(c, d, inputs.left_out, self.params)
+
+    def test_every_metal_recovered_whole_has_its_name(self):
+        # Every material that is its own element's metal (WHOLE) has its name, and no other material.
+        self.assertEqual(set(composition.ELEMENT_PAGE_NAMES), set(composition.WHOLE))
+        self.assertEqual(composition.element_page_name(composition.COPPER), self.COPPER_NAME)
+        self.assertEqual(composition.element_page_name('Nickel'), self.NICKEL_NAME)
+        self.assertEqual(composition.element_page_name(composition.MAGNETS), composition.MAGNETS)
+        self.assertEqual(composition.MATERIAL_COLOURS[composition.COPPER], '#CC6677')   # the colour as it was
+
+    def test_the_names_on_the_element_and_means_pages_not_on_the_materials_pages(self):
+        legends, means, materials = set(), [], set()
+        for name, figure in self.pages():
+            if '_elements_' in name:
+                legends |= {t.get_text() for legend in figure.legends for t in legend.get_texts()}
+            if '_means_' in name:
+                means += [t.get_text().replace('\n', ' ') for t in figure.texts]
+            if '_materials_' in name:
+                materials |= {axes.get_title(loc='left') for axes in figure.axes}
+            composition.plt.close(figure)
+        self.assertIn(self.COPPER_NAME, legends)
+        self.assertIn(self.NICKEL_NAME, legends)
+        self.assertFalse({composition.COPPER, 'Nickel'} & legends, sorted(legends))
+        words = ' '.join(means)
+        self.assertIn(self.COPPER_NAME, words)
+        self.assertIn(self.NICKEL_NAME, words)
+        # No mean of the bare material: 'Copper 1.4 kg' at the start of a cell or after '; '.
+        bare = [t for t in means if re.search(r'(^|; )(Copper|Nickel) \d', t)]
+        self.assertFalse(bare, bare)
+        # The materials pages as they were: 'Copper', 'Nickel: strips of the battery', none of the new names.
+        self.assertIn(composition.COPPER, materials)
+        self.assertTrue(any(t.startswith('Nickel') for t in materials), sorted(materials))
+        self.assertFalse({self.COPPER_NAME, self.NICKEL_NAME} & materials)

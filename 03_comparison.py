@@ -358,11 +358,14 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
     drawn = {m for _, (_, _, contributions) in panels for m in contributions}
     # No legend for a light alloy's metal (E33, relabelled): one colour, its page's title naming the alloy.
     shown = [m for m in colours if m in drawn] if symbol not in composition.ALLOY_OF else []
-    columns = composition.legend_columns(shown) if shown else 1
+    # On an element page (`symbol`) copper and nickel by what they are (02's element_page_name, E37); the total by
+    # material and the other pages by the names of their contributions.
+    names = {m: composition.element_page_name(m) if symbol else m for m in shown}
+    columns = composition.legend_columns(list(names.values())) if shown else 1
     rows = math.ceil(len(shown) / columns) if shown else 0
     figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
     if shown:
-        figure.legend(handles=[Patch(color=colours[m], label=m) for m in shown], loc='upper center',
+        figure.legend(handles=[Patch(color=colours[m], label=names[m]) for m in shown], loc='upper center',
                       bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=composition.APART_TEXT)
     figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * composition.LEGEND_ROW), h_pad=0.4, w_pad=2.5)
     composition.make_room(figure, panels)

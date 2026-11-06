@@ -610,6 +610,12 @@ def element_names(recipes) -> list:
     return [element for element in schemas.ATOMIC_MASS if element in found]
 
 
+def element_page_name(material: str) -> str:
+    """A material's name on the element pages and their means pages (ELEMENT_PAGE_NAMES, E37): a metal recovered whole
+    as its own element by what it is ('Copper metal: windings, busbars, heat pipes'), every other material by its name."""
+    return ELEMENT_PAGE_NAMES.get(material, material)
+
+
 def folder_name(category) -> str:
     """The folder of a robot type: '1_compact_research_developer', the name of its pages in 01."""
     return schemas.file_name(category)[:-len('.png')]
@@ -979,6 +985,13 @@ CABLE_KIND = 'Cables'   # the sheets' kind of the cables and connectors (Kind (t
 INTEREST = ('Li', 'B', 'Mg', 'Al', 'Ti', 'Mn', 'Co', 'Ni', 'Cu', 'Ga', 'Sr', 'Nb', 'Pd', 'Ag', 'In', 'Sn', 'Ta', 'Au',
             'Pb', 'Nd', 'Pr', 'Dy', 'Tb')
 WHOLE = {COPPER: 'Cu', 'Nickel': 'Ni'}
+# Each of them on the element pages and their means pages by what it is, not by its element's name (Matthias,
+# 2026-11-05: "Compariosn. We had this befor copper in copper does not make any sense", to the proposal "Yes,
+# relabel"; 2026-11-06: "Relabel and page check"; EVIDENCE.md E37): the material Copper is the windings of the joints
+# and wheel drives (84 to 93 % of it in his run of 2026-11-05), the battery's busbars and wires (6 to 11 %), the head's
+# and the boards' heat pipes, vapour chambers and copper strips; the material Nickel the battery's nickel strips. The materials pages keep the material's name; colours and data as they are.
+ELEMENT_PAGE_NAMES = {COPPER: 'Copper metal: windings, busbars, heat pipes',
+                      'Nickel': "Nickel metal: the battery's nickel strips"}
 LIGHT_ALLOYS = {ALUMINIUM: 'Al', MAGNESIUM: 'Mg', 'Titanium alloy': 'Ti'}
 ALLOY_OF = {metal: alloy for alloy, metal in LIGHT_ALLOYS.items()}   # the alloy of each light alloy's metal (E33)
 # The one sentence of the notes pages (02's and 03's) on what the light alloys' panels leave out (E33).
@@ -2685,7 +2698,7 @@ def mean_words(d: Draws, symbol: str) -> str:
             at = len(words) if at is None else at
             parts.append(f'{m[len(ELECTRONICS) + 2:]} {mass_in_unit(kg)}')
         else:
-            words.append(f'{m} {mass_in_unit(kg)}')
+            words.append(f'{element_page_name(m)} {mass_in_unit(kg)}')   # copper and nickel by what they are (E37)
     if parts:
         words.insert(at, f"{ELECTRONICS}: {', '.join(parts)}")
     return '; '.join(words)
@@ -2912,13 +2925,14 @@ def taken_apart_pages(c: Composition, d: Draws, left_out: list, params: Params, 
         # legend colors missing"; from E33's relabelling until then without them), in as many rows as it needs.
         drawn = {m for _, (_, _, materials) in panels for m in materials}
         shown = [m for m in MATERIAL_COLOURS if m in drawn]
-        columns = legend_columns(shown) if shown else 1
+        columns = legend_columns([element_page_name(m) for m in shown]) if shown else 1   # its names (E37)
         rows = math.ceil(len(shown) / columns) if shown else 0
         figure.suptitle(f'{lead(d)}: each element in one robot, by the material it comes from ({p} of {len(pages)})',
                         fontsize=APART_HEADING, y=0.985)
         if shown:
-            figure.legend(handles=[Patch(color=MATERIAL_COLOURS[m], label=m) for m in shown], loc='upper center',
-                          bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=APART_TEXT)
+            figure.legend(handles=[Patch(color=MATERIAL_COLOURS[m], label=element_page_name(m)) for m in shown],
+                          loc='upper center', bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False,
+                          fontsize=APART_TEXT)
         figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * LEGEND_ROW), h_pad=0.4, w_pad=2.5)
         make_room(figure, panels)
         out.append((f'{c.name}_elements_{p}.png', figure))

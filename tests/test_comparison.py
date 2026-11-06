@@ -10,6 +10,11 @@ Matthias, 2026-11-04: "Yes, agree E29" (documentation/claude/EVIDENCE.md E29: th
 contributions to the overall", each item a page) and "Yes, build 03". The tests write six robot types' draws in 02's
 own files (its tables of `data/consolidated/` and of `data/parts_taken_apart/`, each adding up as 02's do) into a
 temporary folder, few draws, then run 03 on them: press Run, nothing in the project is changed.
+
+Since 2026-11-06 (Matthias: "Relabel and page check"; EVIDENCE.md E37) `TestEveryPageOfTheSixTypes` also runs
+02_composition.py itself for the six robot types from the project's own inputs, 1,000 draws a type, into a temporary
+folder, then 03 on those draws, and checks every page of both as it is saved (`page_problems`): its legends, colours and
+texts within Matthias's rules, no median pressed into the first 5 % of a panel's bars. No page is written.
 """
 
 import importlib.util
@@ -103,7 +108,9 @@ def write_six(params: Params, rng: np.random.Generator) -> None:
             electronics = ([(composition.component_label(composition.CAMERAS), 0.7 * (1 - share)),
                             (composition.component_label(composition.OTHER_SENSORS), 0.3 * (1 - share))]
                            if e in composition.SENSORS_OF else [('Boards and components', 1 - share)])
-            for m, f in [(composition.ALLOY_OF.get(e, 'Aluminium alloys'), share), *electronics]:
+            # Copper and nickel from their own metal (02's WHOLE), as 02's draws give them.
+            own = {element: material for material, element in composition.WHOLE.items()}
+            for m, f in [(composition.ALLOY_OF.get(e) or own.get(e, 'Aluminium alloys'), share), *electronics]:
                 by_material_columns.append(f'{e}: {m}')
                 by_material.append(elements[:, k] * f)
         by_material_columns.append(f'Cu: Brass{composition.FIXED_MARK}')
@@ -179,6 +186,24 @@ class TestComparison(Compared):
         self.assertIn('Titanium (Ti) held in the titanium alloy of one robot of each robot type', titles.values())
         for figure in pages.values():
             composition.plt.close(figure)
+
+    def test_copper_and_nickel_by_what_they_are_on_the_element_pages(self):
+        # Matthias, 2026-11-05: "copper in copper does not make any sense", "Yes, relabel"; 2026-11-06: "Relabel and
+        # page check" (E37): on 03's element pages 02's element_page_name; the page of the mass by material as it was.
+        robots = comparison.read_draws(self.params)
+        legends = {}
+        for name, figure in comparison.pages(robots, self.params):
+            if figure._suptitle:
+                legends[figure._suptitle.get_text()] = {t.get_text() for g in figure.legends for t in g.get_texts()}
+            composition.plt.close(figure)
+        copper = next(v for k, v in legends.items() if k.startswith('Copper (Cu) in one robot'))
+        nickel = next(v for k, v in legends.items() if k.startswith('Nickel (Ni) in one robot'))
+        self.assertIn(composition.ELEMENT_PAGE_NAMES[composition.COPPER], copper)
+        self.assertIn(composition.ELEMENT_PAGE_NAMES['Nickel'], nickel)
+        self.assertFalse({composition.COPPER, 'Nickel'} & (copper | nickel))
+        total = legends['The mass of one robot of each robot type, by material']
+        self.assertTrue({composition.COPPER, 'Nickel'} <= total, sorted(total))
+        self.assertFalse(set(composition.ELEMENT_PAGE_NAMES.values()) & total)
 
     def test_no_median_in_the_first_part_of_its_axis(self):
         # Matthias, 2026-11-05: "Titanium in sensors the x axis is not good, You know this", then "Yes, build it" (E36,
@@ -407,3 +432,85 @@ class TestComparison(Compared):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def page_problems(figure, name: str) -> list:
+    """What breaks Matthias's figure rules on one page as it is saved (VERIFICATION.md V186, V188): a legend beyond the
+    page; on a page with a legend, a colour a panel draws that the legend does not name; a panel or a text beyond the
+    page; a panel whose median lies in the first LOG_BELOW of its bars (02's logarithmic axis, E36). [] where none."""
+    from matplotlib.colors import to_hex
+    from matplotlib.patches import Rectangle
+    figure.canvas.draw()   # the page laid out as it is saved
+    renderer = figure.canvas.get_renderer()
+    width, height = figure.bbox.width, figure.bbox.height
+    inside = lambda box: box.x0 >= -2 and box.x1 <= width + 2 and box.y0 >= -2 and box.y1 <= height + 2  # noqa: E731
+    problems = [(name, 'a legend beyond the page') for legend in figure.legends
+                if not inside(legend.get_window_extent(renderer))]
+    named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
+    for axes in figure.axes:
+        title = axes.get_title(loc='left')[:40]
+        if axes.get_visible() and axes.axison and not inside(axes.get_tightbbox(renderer)):
+            problems.append((name, 'a panel beyond the page', title))
+        if figure.legends:
+            drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
+                     and p.get_height() > 0 and p.get_width() > 0 and p.get_facecolor()[3] > 0}
+            if drawn - named:
+                problems.append((name, 'a colour drawn, not in the legend', title, sorted(drawn - named)))
+        if getattr(axes, 'panel_numbers', None) is not None and axes.patches:
+            where = median_along_bars(axes)
+            if where < composition.LOG_BELOW:
+                problems.append((name, 'its median in the first 5 % of its bars', title, round(where, 4)))
+    texts = [figure._suptitle, *figure.texts] + [t for axes in figure.axes if not axes.axison for t in axes.texts]
+    problems += [(name, 'a text beyond the page', t.get_text()[:40]) for t in texts
+                 if t is not None and t.get_visible() and t.get_text().strip()
+                 and not inside(t.get_window_extent(renderer))]
+    return problems
+
+
+class TestEveryPageOfTheSixTypes(unittest.TestCase):
+    """Matthias, 2026-11-06: "I want that everything is verifyed", then "Relabel and page check": every page 02 draws for
+    the six robot types and every page 03 draws, from the project's own inputs, checked as it is saved (page_problems).
+    02 runs with 1,000 draws a type into a temporary folder, then 03 on those draws; no page is written, nothing in
+    data/ or figures/ is touched. Until 2026-11-06 this check was a scratch script (V186), lost overnight."""
+
+    @classmethod
+    def setUpClass(cls):
+        from contextlib import redirect_stdout
+        from io import StringIO
+        from unittest import mock
+        from matplotlib.figure import Figure
+        params = Params()
+        files = [absolute(params.data.workbook), absolute(params.data.register), params.data.vehicle_sensor_composition]
+        if not all(os.path.exists(f) for f in files):
+            raise unittest.SkipTest('the inputs are not on disk')
+        cls.folder = tempfile.TemporaryDirectory()
+        params.composition.draws = 1000
+        for setting in ('schemas_dir', 'composition_dir', 'composition_figures_dir', 'comparison_dir', 'parts_dir',
+                        'parts_figures_dir'):
+            setattr(params.output, setting, os.path.join(cls.folder.name, setting))
+        cls.pages, cls.problems, cls.codes = {}, {}, {}
+        stage = []
+
+        def checked(figure, path, *args, **kwargs):   # in place of Figure.savefig: check the page, write nothing
+            cls.pages[stage[-1]] += 1
+            cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)))
+
+        with mock.patch.object(Figure, 'savefig', checked), redirect_stdout(StringIO()):
+            for name, module in (('02', composition), ('03', comparison)):
+                stage.append(name)
+                cls.pages[name], cls.problems[name] = 0, []
+                cls.codes[name] = module.run(params)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.folder.cleanup()
+
+    def test_02_every_page_by_the_rules(self):
+        self.assertEqual(self.codes['02'], 0)
+        self.assertGreater(self.pages['02'], 200)   # 263 pages at V186
+        self.assertEqual(self.problems['02'], [])
+
+    def test_03_every_page_by_the_rules(self):
+        self.assertEqual(self.codes['03'], 0)
+        self.assertGreater(self.pages['03'], 80)    # 86 pages at V186
+        self.assertEqual(self.problems['03'], [])
