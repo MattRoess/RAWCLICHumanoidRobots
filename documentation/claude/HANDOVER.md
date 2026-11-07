@@ -65,7 +65,73 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-06, late evening: all of today committed and pushed (start here)
+## 2026-11-07, evening: committed and pushed; where to start tomorrow (start here)
+
+All of today is committed and pushed (his "Write the handover commit and push so that we can cnintue tomorrow"). 647
+tests passed on the last code (VERIFICATION V214).
+
+**Open first, agreed and not yet built: collection and electricity in 04.** His "Yes, enter both" (2026-11-07, evening) to
+the two proposals of EVIDENCE E46.1 and E46.2; he stopped the session before any of it was built (only read: 02's
+`robots.npy`). To build, tests first, as RAWCLICDataCenters' 07 does:
+1. **Collected** = outflow × the collection rate of the draw. Settings: types 2, 3, 5, 6 the triangle 0.20 / 0.70 / 0.95,
+   types 1, 4 0.12 / 0.39 / 0.65 (E), constant 2025–2040; "collected" meaning formally collected for recycling or
+   refurbishment. My choices to state to him when built (not his words): one random number a draw for all types (07
+   draws one a draw); the type's rate on all its outflows (robots, joint sets, battery packs), as 07 collects every
+   outflow. Writes the collected units and kg (`units_collected`, `elements_collected`, by part, as the other flows); the
+   summary; the element pages "Inflow, outflow and collected", collected dashed (07's `plot_scenario`); `check`:
+   collected between 0 and the outflow.
+2. **Electricity**: setting `charging_efficiency` 0.75 / 0.85 / 0.92 (E), one value a draw. A robot of draw i: its
+   battery energy (02's `robots.npy`, column 0 the robot of its type's parts file, its name in `robots.txt`; its energy
+   at the modes from 01's `robots_table_rows`, `battery_wh`, an approximation to say) over its type's runtime of 2025,
+   times the hours a day (24); a quarter's electricity = the quarter's average robots in use × that power × 24 h ×
+   365.25 / 4 days / the efficiency; by year and type; a panel "Electricity" on the overview (07's overview), its draws
+   and summary rows. The made-up draws of the tests then need `robots.npy` and `robots.txt` too. My arithmetic at 85 %:
+   about 48 TWh in 2025, about 3 × 10⁵ TWh in 2040 (told him).
+
+**Built today** (details below and in EVIDENCE E44 to E46, VERIFICATION V210 to V215):
+- **the robot types**: every type its own triangle, 95 % of the draws within ±10 % of its share (2025) to ±30 % (2040),
+  the six put together by the rearrangement algorithm so that they add up to the article's robots in every draw;
+- **the lifetimes** per draw (robots, joints, packs: 30 % shorter to 20 % longer);
+- **the share panel** on the overview, beside the robots in use by type;
+- **the distribution pages** in `figures/stock_and_flow/distributions/` (robots in use by type; each type's share with its
+  triangle; each element in use by part), each followed by its numbers; each element by part in `summary.csv`.
+**Researched, in EVIDENCE E46.1 and E46.2:** the sources of collection and charging efficiency, every key one read myself.
+
+**Two false statements of mine, corrected to him the same day:** type 1's 5 / 10 / 15 % of 6 November was my reading of
+his "within -+5%" (percentage points), not a "±50 %" of his; and 9.2–10.8 % was not his ±10 %.
+
+**His run** (the code changed since his last run of 04), from
+`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`:
+`00_parameters.py` (rewrites `params.xlsx`, the register: `research_share`, `type_share_spread` with its new meaning,
+`lifetime_factor`), then `04_stock_and_flow.py` (rewrites everything in `data/stock_and_flow/` and
+`figures/stock_and_flow/`, now also `distributions/`: 48 pages more; about 31 seconds to put the types together, about
+1.5 minutes of counting, then the pages; it prints how far type 3 lies off its own draws). 01, 02 and 03 are not changed.
+The scratch folder (sandbox, deliberate faults) is emptied overnight; the faults are listed by name in V212 to V214.
+
+**The robot types** (EVIDENCE E44, VERIFICATION V210, V212, V213, METHODOLOGY step 2 of 04), on his "I want that you
+developt an algorthym that has for all 6 types around 10% +- in 2025 and 30%+- in 2040", "NO type 3 is not
+triangular!!" and "Yes, build it". Rejected the same day, in this order: the division by the sum, each type on its own
+(the total not one number), type 3 the rest, the conditioning (type 3 narrower; his ±10 % / ±30 % only at the triangles'
+ends), the linked draw (type 3 bell-shaped). Now:
+- every type's own triangle, 95 % of its draws within ±10 % of its mode in 2025 widening to ±30 % in 2040
+  (`type_share_spread`, now the band one sees; the ends 12.88 % and 38.64 %);
+- every type its own draws; the draws of the six put together by the rearrangement algorithm, started from the five
+  linked by one correlation a year, so that they add up to the article's robots in every draw; type 3 1 minus the
+  others, off its own draws by what the run prints (0.11 % of its half-width at 200,000 draws); nothing divided;
+- measured at 200,000 draws: every type ±10.0 % (2025) and ±29.8–29.9 % (2039 Q4); each type's draws as close to its
+  triangle as random draws are; about 31 seconds more for 04.
+
+**The lifetimes per draw** (EVIDENCE E45, VERIFICATION V211), on "I want that is is 30% short and 20% longer. Also with
+the batteries": a factor of each draw from 0.7 / 1 / 1.2 on the robots' lifetime, one of its own on the packs' charges,
+one of its own on the joints' life (the joints my reading, said to him first).
+
+**The overview** has the panel he asked for beside the robots in use by type ("Add it beside"): each type's share of
+the robots built, a plain axis.
+
+**Still without a band, told him:** the robots in use (the article's one number a year); the packs in use almost (the
+runtimes are single numbers: the workbook's and `runtime_2025_hours` 2 / 2 / 4 h).
+
+## 2026-11-06, late evening: all of today committed and pushed
 
 Matthias: "Write handover, commit and push. We will continue." One commit on `main` holds everything since 5594a1c
 (10:49), all built on his word and tested, the whole suite 630 tests OK (VERIFICATION V208):

@@ -3,6 +3,225 @@
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
 by Claude, newest first.
 
+## 2026-11-07
+
+### V215. The sources on collection and on charging read myself (EVIDENCE.md E46.1, E46.2)
+
+- **What:** the numbers the two research agents reported, checked against the sources themselves before any of them
+  is shown to Matthias.
+- **How:** web pages in the built-in browser (ADAC, Delta's specification tab, Conductix, WiBotic, Figure, arXiv, EUR-Lex
+  Directive 2012/19/EU Art. 7 and Regulation (EU) 2023/1542 Arts 60, 61); PDFs from the files the fetch tool saved, their
+  text extracted with pypdf of RAWCLICRecoveryModel's environment into the scratch folder (Reick et al., Kaewnoen et al.,
+  Beckers et al., the DOE rule, the Global E-waste Monitor 2024 summary, Eurostat's WEEE page, the Commission's battery
+  evaluation, the CWIT summary), each number found in its table or page.
+- **Result:** every number checked as the agents gave it, with one sharpening: the Commission's 2–4 % a year of car
+  batteries is its "conservative approach" beside the makers' 99 %, which leaves out exports.
+- **Not covered:** the sources marked "agent only" in E46.1 and E46.2 (not opened by me); the UK's and Eurostat's ratios,
+  which the agent computed.
+
+### V214. The distribution pages of 04 and the elements by part in its summary (EVIDENCE.md E46)
+
+- **His words:** "Ok it looks good. But I also want the distributions. Check with the data centers, what else has to be
+  done"; to the table of what RAWCLICDataCenters' 07 has and 04 had not, "Yes, as recommended".
+- **Tests first, seen to fail** (1 failure, 4 errors: `count_unit`, `mass_unit`, `triangle_bars`, `DISTRIBUTIONS_DIR`,
+  the summary's rows by part missing), then passing:
+  - the units by hand: 600,000 robots in thousands, 2.4 million in millions, 3.8 billion in billions (over the draws
+    above 0); 2.5 × 10⁸ kg in kt, 1.2 × 10⁹ kg in Mt, 500 kg in kg, 0.5 kg in g;
+  - a triangle's share in each bar by hand: 0 / 1 / 2 in four bars of 0.5, 0.125, 0.375, 0.375, 0.125;
+  - the run on the made-up draws: its pages by exact name, the overview, the element pages, and in `distributions/`
+    the robots in use by type, the types' shares and each element held, each followed by `_numbers.png`; 24 panels with
+    numbers on the robots' and the shares' pages, 4 on an element's; the first panel by hand (robot type 1, 2025: its
+    median, mean and 95 % in its unit); type 3's panel of 2039 Q4 by hand from the run's own random numbers (median,
+    mean, 95 %); every panel's title on the page of numbers after it; the copper page's legend the two parts that hold
+    it (bodies, joint sets), lithium's the battery packs; every page within his figure rules (page_problems) and no
+    legend over a line;
+  - the summary by part: 16 rows each of copper in the bodies, the joint sets, the battery packs; each mean over its
+    draws above 0, by hand; the packs' copper '–'; the joint sets' copper of 2025 1.5 kg × the joint sets in use.
+  43 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04** (35), each caught after one check was changed: the robots' page with
+  the next type, with the year before; the mass unit and the robots' unit one step too late; the triangle's bars summed
+  instead of each; the page of numbers with one row only; the element page without the packs; every part's summary the
+  bodies'; the types' page always at 2025 (passed at first: the check compared type 6, whose own draws, and so their
+  median and mean, are the same at every time; changed to type 3, which shows the pairing; then caught); and the 26 of
+  V213.
+- **Sandbox** on the first 2,000 of his draws of 02: 04 ran, 71 pages (the overview, 22 element pages, 48 distribution
+  pages and their numbers), all within his figure rules, no legend over a line. Looked at: the robots in use by type,
+  the types' shares (each its triangle drawn over its bars), copper and magnesium in use, the page of numbers of the
+  robots. Found and fixed: the ticks of a linear axis written by 02's number format (one decimal from 1) read "0.96, 1,
+  1.1" for ticks 0.96, 1.04, 1.12; each tick now with the decimals its spacing needs (`panel_style`).
+- **The whole suite:** 647 tests, OK (12 min 14 s), on this state.
+- **Not covered:** his run at 200,000 draws; collection and electricity (researched, nothing built).
+
+### V213. Every robot type its own triangle, put together by the rearrangement algorithm (EVIDENCE.md E44)
+
+- **His words:** "I want that you developt an algorthym that has for all 6 types around 10% +- in 2025 and 30%+- in
+  2040. All have to have close to this value!!"; to the linked prototype "NO type 3 is not triangular!! You are
+  cheating"; to the rearranged prototype "Yes, build it". It replaces the conditioning of V212.
+- **Prototypes before proposing** (scratch, 200,000 draws, my scripts): linked draw, every band right, type 3
+  bell-shaped (shown; rejected); rearrangement from unlinked types, every type a triangle but two types correlated −0.99
+  in 2039 and type 1 −0.31 from 2025 to 2039 (found myself, not shown); rearrangement from the linked draw, every type a
+  triangle, the faults gone (shown; agreed).
+- **Tests first, seen to fail** (2 failures, 9 errors: `type_points`, `type_ends`, `link_correlation`, `rearrange`,
+  `unit_triangle`, `linked_scores`, `SHARE_TIMES`, `BALANCING_TYPE` missing; the setting's new limit), then passing:
+  - the unit triangle by hand (−1, −0.5, 0, 0.5, 1 at 0, 0.125, 0.5, 0.875, 1); 95 % of it within ±0.776393;
+  - the link by hand: 0.0872 / 0.2472 = 0.35275 (2025), −0.07 / 0.33 = −0.21212 (2040); a type 3 of 80 % (made up)
+    refused;
+  - the linked scores: no link gives the scores themselves; at 0.35 and −0.21 each pair correlated so (to 0.01), each
+    with variance 1;
+  - the rearrangement by hand: (1, 1), (−1, −1) become (−1, 1), (1, −1), both adding up to 0; on 1,000 draws each type
+    keeps exactly its own draws and the largest sum falls below 5 % of before;
+  - type 3 its own random number: other numbers for type 3 alone change the draws; the same numbers, the same draws;
+  - the shares by hand: at the point h, mode × (1 + h × spread / 0.7764), the ends 12.880, 25.760, 38.640 % in 2025,
+    2032.5, 2040; type 3 1 minus the others; every other type at its top in 2025, type 3 1 − 1.1288 × 58 %;
+  - on 20,000 draws with the settings in force, at 1 January 2025 and all 60 quarters: the six add up to 1 to 10⁻¹²,
+    all above 0, type 3 off its own draws by under 1 % of its half-width, each of the six types' draws within
+    Kolmogorov's 99 % bound of its own triangle at every time, 95 % within ±10 % (2025) and ±29.8 % (last quarter) to
+    3 %, every mean at its mode (0.5 %), type 3 against every other type in 2025, each type's point quarter to quarter
+    correlated above 0.99;
+  - a spread of 0.8 refused (the foot below 0);
+  - the run on the made-up draws says what type 3 lies off its own draws, and every type's share of each year's robots
+    built lies inside its triangle in every draw (type 3 within what the run says: 23 % of its half-width with 40
+    draws).
+  39 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04** (26), each caught after one test was added: no rearrangement; the
+  rearrangement with even weights, in the same order instead of the opposite, stopping after one column; the link
+  without its mean, by the wrong sign, not checked; the unit triangle a straight line; the ends the spread itself;
+  type 3 not its own draws (passed at first: no test checked type 3's own random number; the test above added, then
+  caught); a new pairing every quarter; what type 3 lies off its draws not measured; the run not put together; the
+  shares divided by their sum; type 3 its mode, the sum not one number; the spread not widening; the modes not scaled;
+  and the ten of V208 and V211.
+- **The delivered shares**, 200,000 draws with 04's own random numbers, at 1 January 2025 and every quarter: 31 s, the
+  points 244 MB; the six add up to 1 to 2.2 × 10⁻¹⁶; type 3 off its own draws by at most 0.109 % of its half-width;
+  the largest gap of any type's draws to its triangle 0.0022 (random draws: 0.0030 at 95 %); 95 % of the draws: every
+  type ±10.0 % in 2025, ±16.8 to 16.9 % in 2030 Q1, ±23.5 % in 2035 Q1, ±29.8 to 29.9 % in 2039 Q4 (wanted ±10.0,
+  16.8, 23.5, 29.8 %); every mean on its mode to 5 × 10⁻⁴; the lowest share 2.85 %; a draw quarter to quarter at
+  least 0.9988, 2025 to 2039 Q4 0.59 (type 3) to 0.83; correlations 2025 −0.86 to +0.37, 2039 Q4 −0.71 to +0.28.
+- **Sandbox** on the first 2,000 of his draws of 02: 04 ran (type 3 off its own draws by at most 1.571 % of its
+  half-width with 2,000 draws), the article's robots at 1 January; its 23 pages within his figure rules, no legend over
+  a line or a value; the overview looked at (type 3's band in the share panel as wide as the others'). Two preview pages
+  looked at (scratch only, not part of 04): each type's share at four times, 200,000 draws, its own triangle drawn over
+  them; the robots in use of each type in 2025, 2030, 2035, 2040: every type ±9.8 to 10.3 % in 2025 and ±27.6 to
+  29.1 % in 2040, the six adding up to the article's in every draw.
+- **The whole suite:** 643 tests, OK (12 min 56 s), on this state.
+- **Not covered:** his run at 200,000 draws; the rearrangement's pairing is one of many that add up, chosen by its
+  start (the linked draw), not the only possible one.
+
+### V212. The robot types conditioned on adding up to 1, as RAWCLICRecoveryModel's condition_on_sum (EVIDENCE.md E44)
+
+- **His words:** "All types have to have the same uncertainty!!! This is a must!!!", "The summ of the total has to be
+  correct", "Check all the privous code. You have do it correct before!! It is an approximatoion", "All all code!!";
+  to "Which do you want in 04?" (Conditioning or a linked draw of my own): "Conditioning".
+- **The earlier code, read myself:** RAWCLICRecoveryModel `src/sampling.py` (`condition_on_sum`, `_systematic`,
+  `triangular_density`; its default rule `condition`); RAWCLICStockAndFlow `code/03_02_adjustedflows.py`; this
+  project's `02_composition.py` (`shares_drawn`, `RecipeDraws.parts_of`); RAWCLICDataCenters' rack classes;
+  RAWCLICVehicleComposition's factors; RAWCLICVehicleTractionMotor `composition.py`.
+- **Measured before proposing** (200,000 draws, my scripts; 95 % of the draws as a share of the mode, own triangle
+  ±7.8 % in 2025 and ±23.3 % in 2040): type 3 as the rest ±5.6 % and ±31.7 %; conditioning types 1, 5, 6 ±7.7 % and
+  ±23.2 %, types 2, 4 ±7.1 % and ±21.4 %, type 3 ±4.3 % and ±23.1 %, effective sample 0.872; the linked draw all six
+  7.7 to 7.8 % and 22.8 to 23.3 %. Shown to him with the reason type 3 is narrower in 2025.
+- **Tests first, seen to fail** (8 errors: `DERIVED_TYPE`, `triangle_density`, `systematic`, `condition_on_sum`,
+  `conditioned_points` missing), then passing:
+  - the density by hand (the triangle 0 / 1 / 2: 0, 0, 0.5, 1, 0.5, 0, 0 at −0.5 to 2.5; 10 at the mode of
+    0.4 / 0.5 / 0.6);
+  - three candidates by hand: densities (0.5, 0.5), (1, 0.25), (0, 1), weights 0.5, 0.5, 0, kept 0, 0, 1 at u =
+    0.25, effective sample 2/3;
+  - the weights 0, 3, 1, 0 give 1, 1, 1, 2 at u = 0.3, 0.5 and 0.999: in proportion, never one of weight 0;
+  - no candidate adding up stops with a message;
+  - a case known exactly: two shares, each its triangle 0.4 / 0.5 / 0.6, adding up to 1; the kept follow f(x)², so
+    their 2.5 %, 25 %, 50 %, 75 %, 97.5 % points are 0.43684, 0.47937, 0.5, 0.52063, 0.56316 (drawn without the
+    condition 0.42236 at 2.5 %), met to 10⁻³ on 200,000 draws; the effective sample 8/9 to 0.005;
+  - with the settings in force on 20,000 candidates: the six add up to 1 to 10⁻¹², type 3 inside its own triangle in
+    2025 and every quarter, effective sample above 0.8, every type spread, every mean at its mode (to 0.5 %), no type
+    wider than its own triangle, in 2040 every type within 10 % of its own triangle, type 3 negatively correlated with
+    each other type, the spread of 2040 more than twice that of 2025;
+  - a spread of 90 % (made up): candidates with type 3 below 0 occur and none is kept;
+  - the run on the made-up draws prints the effective sample, and type 3's share of each year's robots built lies in
+    every draw between the lowest and the highest bound of its triangle in the year's quarters.
+  45 tests of 04 and the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught** (23): no conditioning, every weight 1; the density squared;
+  the arithmetic mean over the years; only 2025 weighed; the density not 0 outside its triangle; the resampling without
+  its random number; all draws dropped without a message; the run not conditioned; the effective sample by the kept
+  draws, not the weights; the shares divided by their sum; type 3 drawn on its own, the sum not one number; one random
+  number for all types; the spread not widening; the modes not scaled to what type 1 leaves; the three lifetime factors
+  each ignored (V211); and V208's seven. The fault "the totals summed from the types" of the morning is dropped: with the
+  sum exact it is the same as the code.
+- **The delivered shares**, 200,000 candidates with 04's own random numbers (seed 1, the resampling's u 0.5857): the
+  six add up to 1 to 2.2 × 10⁻¹⁶ in every draw; every mean on its mode (to 3 × 10⁻⁴ of it); 169,806 distinct draws,
+  effective sample 0.8716; 6.44 % of the candidates outside type 3's triangle at a workbook year, weight 0; no kept draw
+  outside it in any quarter. The bands (95 % as a share of the mode), 2025 / 2040: type 1 ±7.7 / 23.2 %, type 2
+  ±7.1 / 21.2 %, type 3 ±4.2 / 23.1 %, type 4 ±7.2 / 21.5 %, type 5 ±7.8 / 23.3 %, type 6 ±7.7 / 23.2 %; 2030 and 2035
+  in METHODOLOGY.md, step 2 of 04.
+- **Sandbox** on the first 2,000 of his draws of 02, copied into the scratch folder: 04 ran, effective sample 87.6 %,
+  the article's robots at 1 January; its 23 pages within his figure rules, no legend over a line or a value; the overview
+  looked at (the share panel: every type's band widening from 2025 to 2040). A preview page of the robots in use of each
+  type in 2025, 2030, 2035 and 2040, the distribution of the draws, looked at (scratch only, not part of 04): the six add
+  up to the article's in every draw; type 3 ±4.2 % in 2025, ±20.7 % in 2040, the others ±7.0 to 7.9 % and ±20.0 to
+  22.5 % (robots in use mix the years they were built in).
+- **The whole suite:** 643 tests, OK (12 min 55 s), on this state with the lifetimes of V211.
+- **Not covered:** his run at 200,000 draws; the approximation of the path (the geometric mean over the workbook's four
+  years) not compared with another weighting.
+
+### V211. The lifetimes in 04 drawn per draw: 30 % shorter, 20 % longer (EVIDENCE.md E45)
+
+- **His words:** "Is the lifetime also with uncertainties. I want that is is 30% short and 20% longer. Also with the
+  batteries"; on the sandbox's overview "where are the uncertainbties", "I see NO uncertainty bads".
+- **Tests first, seen to fail** (3 failures, 4 errors; then 3 errors for the joints), then passing: the setting
+  `lifetime_factor` 0.70 / 1.0 / 1.20 and refused (a single number, a 0, out of order); by hand, at the factor 0.7 the
+  robots of 4.9 years as many left as at 7 years with 1 (0.6), at 1.2 those of 8.4 years (0.6), none gone before 3.5
+  years, all gone at 12; the packs at 80 % and 0.7, 560 charges as 800 at 1 (0.4); the joints at 1.2, 12,000 hours as
+  10,000 at 1 (0.870); in one chunk the robots built in 2025 and retired in 2030, the packs and the joint sets worn out
+  in 2030 differ from draw to draw. 37 tests of 04 and the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught:** the robots', the packs' and the joints' factor each
+  ignored; and the eleven of V210.
+- **Sandbox** on the first 1,000 of his draws of 02: 04 ran, its 23 pages within his figure rules, no legend over a line
+  or a value; the overview looked at and sent to him. Bands (mean, 95 %): robots built 2025 2.49 M (2.26–2.86 M), retired
+  2025 0.89 M (0.66–1.26 M), retired 2039 159 M (45–438 M); joint sets built 2025 7.24 M (6.15–8.83 M), worn out 2035
+  471 M (335–676 M); packs built 2025 52 M (37–74 M), worn out 2035 1.34 B (0.65–2.30 B); the robots in use the
+  article's in every draw. One chunk of 20,000 draws counted in 9.3 s (4.5 s before: the robots now have one survival
+  a draw), peak memory 2.0 GB: about 1.5 minutes of counting at 200,000 draws (an estimate, not run).
+- **The whole suite:** not run on this state alone (a run of the morning, its output last written at 11:56, stopped
+  in the middle of 02's tests when the types changed); run on the state of V212, which holds these lifetimes (V212).
+- **Not covered:** his run at 200,000 draws; the packs in use still with almost no band (single runtimes), the robots in
+  use with none (the article).
+
+### V210. The robot types' shares in 04: every type drawn, one of the six bought (EVIDENCE.md E44)
+
+- **His words:** "All have a triangular distribution, where I assume that gets larger over time. so 5% towards 15%",
+  "I buy one of the six different types. SO the items are correlated", "the last type is not just the rest to 100%",
+  "Check how we have done it before"; to the corrected table "Yes, build it".
+- **How it was done before, read myself:** RAWCLICStockAndFlow `code/03_02_adjustedflows.py`
+  (`sample_future_segment_share_inflow_draws`), `documentation/MODEL_DESCRIPTION.md` § 7.1, `documentation/HANDOVER.md`
+  (2026-10-05, the collection share); RAWCLICDataCenters `documentation/claude/EVIDENCE.md` § 4.1 and METHODOLOGY step
+  B; RAWCLICRecoveryModel `documentation/DESIGN_monte_carlo.md` § 4.
+- **Measured before proposing** (200,000 draws, my script): the six modes adding up to 85 % in 2025 lift every type
+  through the division (type 1 11.77 % instead of 10 %); scaled to 1, each mean stays on its mode.
+- **Tests first, seen to fail** (3 failures, 7 errors: the new settings and functions missing), then passing:
+  the settings (`research_share` 10 % and 5 %, `type_share_spread` 5 % and 15 %, the two old triangles gone; refused: a
+  share of 0 or 1, years other than 2025 and 2040, a spread of 0 or 1, one year only); the modes by hand (2025: 10, 24,
+  42, 12, 6, 6 %; 2032.5: 7.5 % and the workbook's 26.5, 37.5, 15, 5, 4.5 % × 92.5 / 88.5; 2040: 5, 25, 30, 30, 5,
+  5 %; adding up to 1 every quarter); the spread 5, 10, 15 % in 2025, 2032.5, 2040; every type at the same point of its
+  triangle (middle, foot, top) gives the modes; type 1 at its top and the others at their foot in 2025: 0.105 / 0.96 =
+  10.94 %; on 20,000 draws the shares add up to 1, all above 0, every type spread, its mean at its mode (to 3 × 10⁻⁴),
+  the spread in 2040 more than twice that of 2025, type 2 and type 3 correlated below −0.3; in one chunk of 04 every
+  type's robots of 2040 differ from draw to draw. 35 tests of 04 and the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught:** the shares not divided by their sum; one random number for
+  all types; the spread not widening; the modes not scaled to what type 1 leaves; type 3 the rest again; and, again, the
+  seven faults of V208 (draw i not paired, the outflow without the cohorts' losses, packs rounded, joints in the body,
+  the packs' fade ignored, zeros in the statistics).
+- **The delivered shares** on 200,000 draws with 04's own random numbers: the sum 1 to 4.4 × 10⁻¹⁶ in every draw;
+  every mean on its mode (type 3 2040 29.99 %); the 95 % band a little narrower than the triangle (2025 type 1 9.60–10.41
+  % against 9.50–10.50 %; 2040 type 1 4.38–5.65 % against 4.25–5.75 %, type 3 27.13–32.84 % against 25.50–34.50 %), the
+  extremes a little beyond it (2040 type 1 3.95–6.28 %); correlations in 2025: type 3 with types 1, 2, 4, 5, 6 −0.38,
+  −0.68, −0.42, −0.31, −0.31; type 2 with the small ones −0.04 to −0.10; the small types among themselves +0.04 to +0.13
+  (when types 2 and 3 are low, all the others rise).
+- **Sandbox** on the first 1,000 of his 200,000 draws of 02, copied into the scratch folder (the scratch copy of
+  yesterday was emptied overnight): 04 ran, the article's robots at 1 January, every type's robots with a band (type 1
+  2025 1.00 M, 0.96–1.04 M; 2040 3.77 B, 3.33–4.25 B); its 23 pages within his figure rules, no legend over a line or a
+  value; the overview looked at.
+- **The whole suite:** run once with the lifetimes of V211 built on top (V211); the run started on this state alone was
+  stopped when the lifetimes came.
+- **Not covered:** his run at 200,000 draws.
+
 ## 2026-11-06
 
 ### V209. His runs of 00, 01 and 04 read back (04 on his 200,000 draws of 02)

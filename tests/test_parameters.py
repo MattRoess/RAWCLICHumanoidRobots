@@ -38,7 +38,7 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         # the research share, its folders; the world's production and reserves it draws, read where they lie.
         'stock_and_flow.robots', 'stock_and_flow.robot_lifetime_years', 'stock_and_flow.hours_a_day',
         'stock_and_flow.joint_life_hours', 'stock_and_flow.battery_cycles_to_80', 'stock_and_flow.battery_replaced_below',
-        'stock_and_flow.runtime_2025_hours', 'stock_and_flow.research_share_2025', 'stock_and_flow.research_share_2040',
+        'stock_and_flow.runtime_2025_hours', 'stock_and_flow.research_share', 'stock_and_flow.type_share_spread', 'stock_and_flow.lifetime_factor',
         'output.stock_and_flow_dir', 'output.stock_and_flow_figures_dir', 'data.data_center_scenarios',
         'data.usgs_commodities'}
 

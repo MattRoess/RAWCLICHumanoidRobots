@@ -18,20 +18,26 @@ datacenter", "I want the same figures as for the datacenters, but expand them al
 elements. Also have real lifetimes not something fixed like this. I want to see uncerttainites", "Add also the limit in
 stock and production like for the data centers", to the table of this stage "Yes, build it"; then "No look at the robots
 as a unit with exception of the batteries", "Have at least so many battery packs ready for use as it is needed to have
-them for 1 day to switch. So they can recharge slowly", "Yes, replace joints" (documentation/claude/EVIDENCE.md E39 to
-E43).
+them for 1 day to switch. So they can recharge slowly", "Yes, replace joints"; 2026-11-07, on the robot types: "All have
+a triangular distribution", "the last type is not just the rest to 100%", "Have them from 10% to 30%", "All types have
+to have the same uncertainty!!!", "The summ of the total has to be correct", "Check all the privous code. You have do it
+correct before!! It is an approximatoion", to RAWCLICRecoveryModel's conditioning "Conditioning", then "I want that you
+developt an algorthym that has for all 6 types around 10% +- in 2025 and 30%+- in 2040", "NO type 3 is not
+triangular!!" and to the rearrangement "Yes, build it"; on the lifetimes "I want that is is 30% short and 20% longer.
+Also with the batteries" (documentation/claude/EVIDENCE.md E39 to E45).
 
 WHAT IT READS
 -------------
   - Its settings (`stock_and_flow`): the article's robots at 1 January, 2025 to 2040 (10 M to 70 × 10⁹); a robot's
-    lifetime 5 / 7 / 10 years; the hours a day, 24 (the article: robots "can work 24/7"); a joint's life 7,000 /
+    lifetime 5 / 7 / 10 years and the factor of a draw on it, on the joints' life and on the packs' charges, each its
+    own, 0.7 / 1 / 1.2; the hours a day, 24 (the article: robots "can work 24/7"); a joint's life 7,000 /
     10,000 / 30,000 hours; a battery pack's charges until 80 % of its capacity, 500 / 800 / 1,000, and the capacity
     below which it is replaced, 75 / 80 / 85 % (one value a draw); the runtime in 2025 of robot types 1, 3 and 5; the
-    share of research robots (type 1) among the robots built, in 2025 and in 2040 (one point of the two triangles a
-    draw).
-  - His workbook (`data.workbook`): the shares of robot types 2, 4, 5 and 6 among the robots shipped (sheet Market
-    Units & Shares 2025-2040, its first table; type 1's share there is not used, type 3's is the remainder) and the
-    runtime or the battery energy density of each type (sheet Material Trajectories 2025-2040).
+    mode of the share of research robots (type 1) among the robots built, 10 % in 2025 and 5 % in 2040; how far the
+    share of each type lies from its mode in 95 % of the draws, 10 % of it in 2025 and 30 % in 2040.
+  - His workbook (`data.workbook`): the shares of robot types 2 to 6 among the robots shipped (sheet Market Units &
+    Shares 2025-2040, its first table; type 1's share there is not used) and the runtime or the battery energy density
+    of each type (sheet Material Trajectories 2025-2040).
   - 02's draws of each robot type: the kg of each element of interest in one robot, by kind of part
     (`output.parts_dir`, table 'elements', columns '<kind>: <element>'), its elements in the order of 02's table
     (`output.composition_dir`, 'elements.txt'). All six types with as many draws; draw i of each type is a robot of
@@ -44,24 +50,40 @@ HOW IT COUNTS (every draw; quarter by quarter, as 07)
 -------------
   1. The robots: in use at the end of each quarter, the article's 1 January values, the quarters between geometric
      (V(y)^(1 − k/4) × V(y + 1)^(k/4), as 07). Each quarter's robots arrive in its middle and leave by the share of
-     them whose lifetime (the triangle 5 / 7 / 10 years, spread among them) is shorter than their age; a quarter's
+     them whose lifetime (the triangle 5 / 7 / 10 years, spread among them, times the draw's factor from the triangle
+     0.7 / 1 / 1.2: "30% short and 20% longer") is shorter than their age; a quarter's
      inflow is the target less what the earlier quarters' robots still hold, never below 0. The robots of 1 January
      2025 by their ages: built in the quarters before at the article's own growth (its 2026 over its 2025), as many as
      it takes to hold the 10 M with their survivals (an estimate, E42).
-  2. The robot types: each quarter's robots built by type. The research robots (type 1): their share drawn once a draw,
-     the same point of its triangle of 2025 and of 2040, a straight line between; types 2, 4, 5 and 6 the workbook's
-     shares, a straight line between its years; type 3, the largest, the remainder (1 minus the others; nothing is
-     normalised, and a remainder below 0 stops the run). The robots of 1 January 2025 by the shares of 2025.
+  2. The robot types (Matthias, 2026-11-07: "I want that you developt an algorthym that has for all 6 types around 10% +-
+     in 2025 and 30%+- in 2040. All have to have close to this value!!", "NO type 3 is not triangular!!", to the
+     rearrangement "Yes, build it"). Every type's share of the robots built has its own triangle, mode × (1 ∓ end), the
+     end the spread over 0.7764, so that 95 % of its draws lie within ±10 % of its mode in 2025 widening to ±30 % in
+     2040 (12.88 % and 38.64 % at the ends). Every type has its own draws of it, one random number a type and draw, the
+     same draws in every year. Which draws of the six go together in one draw is then chosen so that the six add up to
+     the article's robots: at 1 January 2025 and in every quarter, starting from the five other types linked by one
+     correlation (0.353 in 2025, −0.212 in 2040) with type 3 1 minus them, each type's own draws put in that order,
+     then the rearrangement algorithm (Puccetti & Rüschendorf 2012): each type's draws in turn put in the opposite order
+     of the sum of the others, until the sum no longer improves. No draw changes, only which draws share a row; nothing
+     is divided ("I do NOT want this [normalisation]"). Type 3, the largest, is 1 minus the other five, so that the sum
+     is exact; it lies off its own draws by what the rearrangement leaves, which the run prints (0.14 % of its
+     half-width at 200,000 draws; with few draws more: 0.43 % at 2,000, 23 % at 40). Measured at 200,000 draws: every
+     type ±10.0 % in 2025 and ±29.8 % in the last quarter of 2039 (95 % of the draws); each type's draws as close to its
+     triangle as random draws of a triangle are; a draw from one quarter to the next correlated at least 0.998. The
+     modes: type 1 10 % in 2025 to 5 % in 2040; types 2 to 6 the workbook's shares, scaled together to what type 1
+     leaves, so that the six modes add up to 1; a straight line between the years. Each type's robots built are the
+     article's robots built times its share. The robots of 1 January 2025 by the shares of 2025.
   3. The joint sets: a robot's joints (the kinds 01 numbers 1 to 6: hip, knee, ankle, waist, arm and head joints) a
      stock of its own, as many as the robots in use of its type, each set leaving when it wears out (its life the
-     triangle 7,000 / 10,000 / 30,000 hours at the hours a day, spread among the sets) and replaced by a new one, as
+     triangle 7,000 / 10,000 / 30,000 hours at the hours a day, spread among the sets, times the draw's own factor from
+     the triangle 0.7 / 1 / 1.2, as the robots' and the packs') and replaced by a new one, as
      07's units that follow the GPUs: a stock target with their own lifetimes.
   4. The battery packs: a robot holds as many as one day's work needs, the hours a day over a pack's runtime, rounded
      up (types 2, 4 and 6 their runtime in the workbook; types 1, 3 and 5 the setting's runtime of 2025 times their
      battery energy density over that of 2025; a straight line between the workbook's years, the last value held after
      it). Each pack is charged once a day and replaced when its capacity falls below the draw's share: its life in
-     charges, its charges to 80 % (spread among the packs) times (1 − the share) / 0.2, a straight-line fade (an
-     approximation). A stock target, as the joint sets: the robots in use times the packs a robot needs. Where that
+     charges, its charges to 80 % (spread among the packs, times the draw's own factor from the triangle 0.7 / 1 /
+     1.2: "Also with the batteries") times (1 − the share) / 0.2, a straight-line fade (an approximation). A stock target, as the joint sets: the robots in use times the packs a robot needs. Where that
      need falls (longer runtimes), the packs in use stay until they wear out and the stock lies above the need.
      07's approximation in both: the joint sets and the packs of a retired robot go on in a new robot until they wear
      out, which makes their inflow and outflow slightly low.
@@ -70,9 +92,8 @@ HOW IT COUNTS (every draw; quarter by quarter, as 07)
      kinds, a pack the kind Battery pack (02 builds one pack a robot). Sums on the raw draws, before any statistic.
   6. The years: the flows added up over the four quarters of a year, the stocks at 1 January of 2025 to 2040.
 Each chunk of draws is checked (`check`): in every quarter the stock before + inflow − outflow = the stock, the outflow
-counted cohort by cohort apart from the stock; no flow below 0; the robots in use at each 1 January the article's; the
-six types adding up to all robots; the joint sets as many as the robots; the packs never fewer than the need. A fault
-stops the run.
+counted cohort by cohort apart from the stock; no flow below 0; the article's robots in use at each 1 January; the joint
+sets as many as the robots of their type; the packs never fewer than the need. A fault stops the run.
 
 WHAT IT WRITES
 --------------
@@ -80,13 +101,21 @@ Into `output.stock_and_flow_dir` (`data/stock_and_flow/`; not in git), the draws
 on all levels"), float32 (about 7 significant digits): units_in.npy and units_out.npy (draw × year 2025 to 2039 × robots, joint sets, battery packs
 × robot type 1 to 6), units_stock.npy (draw × 1 January 2025 to 2040 × the same), elements_in.npy, elements_out.npy
 (draw × year × robots' bodies, joint sets, battery packs × element, kg) and elements_stock.npy (draw × 1 January × the
-same); their axes in draws.txt; summary.csv, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above
-0 and the share of the draws above 0, by year. The elements of one robot type are its units times 02's draw i.
+same); article_in.npy, article_stock.npy, article_out.npy (draw × year: the article's robots built, in use and
+retired, at the draw's lifetime); their axes in draws.txt; summary.csv, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above
+0 and the share of the draws above 0, by year, each element also by part ('Copper, joint sets'; as RAWCLICDataCenters'
+07 writes its groups; 2026-11-07, "Yes, as recommended"). The elements of one robot type are its units times 02's draw i.
 Into `output.stock_and_flow_figures_dir` (`figures/stock_and_flow/`; not in git), as 07's, each an A4 landscape page:
-overview.png (the robots in use; built and retired; in use by robot type; the joint sets; the battery packs in use;
-built and worn out) and elements/<Element>.png (its stock beside the world's reserves; its inflow and outflow beside
+overview.png (the robots in use; built and retired; in use by robot type; the share of the robots built by robot type;
+the joint sets; the battery packs in use; built and worn out) and elements/<Element>.png (its stock beside the world's reserves; its inflow and outflow beside
 the world's mine production in 2025). Each line the mean over the draws above 0, its band 95 % of them; logarithmic
-axes. An element 0 in every draw has no page, and 04 says so.
+axes. An element 0 in every draw has no page, and 04 says so. In distributions/ (Matthias, 2026-11-07: "I also want the
+distributions", "Yes, as recommended"), in 02's form (bars of the share of the draws, the median solid, the mean dotted,
+95 % dashed, no number on a panel), each page followed by '<name>_numbers.png', the numbers of its panels (EVIDENCE.md
+E34): robots_in_use_by_type.png (the robots in use of each type at 1 January 2025, 2030, 2035, 2040), type_shares.png
+(each type's share of the robots built in 2025 and the first quarters of 2030 and 2035 and the last of 2039, its own
+triangle drawn over it) and elements/<Element>.png (the element in use at the four 1 January, each bar split by robots'
+bodies, joint sets and battery packs as RAWCLICDataCenters' 05 splits its elements).
 
 Where it sits: after 03_comparison.py; it reads 02's draws and nothing of 03.
 """
@@ -107,6 +136,7 @@ sys.path.insert(0, HERE)
 
 import numpy as np  # noqa: E402
 import openpyxl  # noqa: E402
+from scipy.special import ndtr, ndtri  # noqa: E402  (the normal distribution and its inverse)
 
 from src.params_schema import Params, ParameterError, absolute, current  # noqa: E402
 
@@ -131,6 +161,7 @@ composition = comparison.composition
 schemas = composition.schemas
 plt = composition.plt
 from matplotlib import ticker  # noqa: E402  (after 01, which sets matplotlib to draw into files only)
+from matplotlib.patches import Patch  # noqa: E402  (a part's colour in a page's legend)
 
 # ------------------------------------------------------------------------------------------------------
 # The time, the parts of a robot, what it writes
@@ -141,8 +172,9 @@ QUARTERS = 4 * (LAST - FIRST)     # 60: 2025 Q1 to 2039 Q4
 DAYS_A_YEAR = 365.25              # days in a year, for the charges and operating hours of a year
 FADE_TO_80 = 0.2                  # the capacity a pack loses until 80 %: 1 − 0.8
 TYPES = (1, 2, 3, 4, 5, 6)        # the robot types, the workbook's categories
-RESEARCH_TYPE = 1                 # its share the setting's triangles, not the workbook's
-REMAINDER_TYPE = 3                # the largest type takes 1 minus the others (never normalised)
+RESEARCH_TYPE = 1                 # its mode the setting's, not the workbook's
+BALANCING_TYPE = 3                # the largest: 1 − the other five, so that the six add up to 1 (step 2)
+HALF95 = 1 - math.sqrt(0.05)      # 95 % of a symmetric triangle lies within 0.7764 of its half-width: (1 − 0.7764)² = 5 %
 # The joint kinds: those 01 numbers on its robot (1 to 6; the other kinds have letters). The battery: its kind.
 JOINT_KINDS = tuple(kind for kind, mark in schemas.MARKS.items() if mark.isdigit())
 BATTERY_KIND = 'battery'
@@ -155,10 +187,16 @@ RUNTIME_ROW, DENSITY_ROW = 'Runtime (hours)', 'Battery Energy Density (Wh/kg)'
 WORKBOOK_YEARS = (2025, 2030, 2035, 2040)
 # What it writes, by exact name.
 UNIT_FILES = ('units_in', 'units_stock', 'units_out')
+ARTICLE_FILES = ('article_in', 'article_stock', 'article_out')   # the article's robots built, in use, retired
 ELEMENT_FILES = ('elements_in', 'elements_stock', 'elements_out')
 FLOWS = ('in', 'stock', 'out')
 SUMMARY, AXES_FILE = 'summary.csv', 'draws.txt'
+SHARE_QUANTITY = 'share of the robots built, %'   # each type's share of a year's robots built, in the summary
 OVERVIEW, ELEMENTS_DIR = 'overview.png', 'elements'
+DISTRIBUTIONS_DIR = 'distributions'   # the pages of the distributions of the draws, each followed by its numbers
+DISTRIBUTION_YEARS = (2025, 2030, 2035, 2040)    # the 1 January of the distribution pages of robots and elements
+# The times of the page of the types' shares, each a time the shares are drawn (SHARE_TIMES), and its label.
+SHARE_PAGE_TIMES = ((2025.0, '2025'), (2030.125, '2030 Q1'), (2035.125, '2035 Q1'), (2039.875, '2039 Q4'))
 CHUNK = 20000                     # draws counted at once (memory: 1.4 GB at most, measured 2026-11-06)
 TOLERANCE = 1e-9                  # of the largest stock: a balance that misses by more is a fault (07's check_balance)
 
@@ -209,19 +247,31 @@ def triangle_ppf(u, low: float, mode: float, high: float):
                     high - np.sqrt((1 - u) * (high - low) * (high - mode)))
 
 
-def joint_survival(age, hours_a_day: float, life_hours: tuple):
-    """The share of one quarter's joint sets still in use at `age` (years): their operating hours, the hours a day for
-    every day of their age, against their life in hours spread among the sets (step 3)."""
-    return survival(np.asarray(age, dtype=float) * hours_a_day * DAYS_A_YEAR, life_hours)
+def robot_survival(age, factor, lifetime: tuple):
+    """The share of one quarter's robots still in use at `age` (years), one row a draw of `factor` (the draw's factor on
+    the lifetime, Matthias's "30% short and 20% longer"): the lifetime triangle, spread among the robots, times the
+    factor; so a robot of age a survives as one of age a / factor would with the triangle itself (step 1)."""
+    age, factor = np.asarray(age, dtype=float), np.atleast_1d(np.asarray(factor, dtype=float))
+    return survival(age[None, :] / factor[:, None], lifetime)
 
 
-def pack_survival(age, threshold, cycles_to_80: tuple):
+def joint_survival(age, hours_a_day: float, life_hours: tuple, factor=1.0):
+    """The share of one quarter's joint sets still in use at `age` (years), one row a draw of `factor` (the draw's
+    factor on the joints' life, as on the robots' and the packs'): their operating hours, the hours a day for every day
+    of their age, against their life in hours spread among the sets times the factor (step 3)."""
+    age, factor = np.asarray(age, dtype=float), np.atleast_1d(np.asarray(factor, dtype=float))
+    return survival(age[None, :] * hours_a_day * DAYS_A_YEAR / factor[:, None], life_hours)
+
+
+def pack_survival(age, threshold, cycles_to_80: tuple, factor=1.0):
     """The share of one quarter's battery packs still in use at `age` (years), one row a draw of `threshold` (the
-    capacity below which a pack is replaced): a pack charged once a day leaves when its charges reach its charges to
-    80 % × (1 − threshold) / 0.2 (a straight-line fade), so it survives while its charges to 80 %, spread among the
-    packs, exceed its charges × 0.2 / (1 − threshold) (step 4)."""
+    capacity below which a pack is replaced) and `factor` (the draw's factor on the charges, "Also with the
+    batteries"): a pack charged once a day leaves when its charges reach its charges to 80 % × factor × (1 − threshold)
+    / 0.2 (a straight-line fade), so it survives while its charges to 80 %, spread among the packs, exceed its charges ×
+    0.2 / (1 − threshold) / factor (step 4)."""
     age, threshold = np.asarray(age, dtype=float), np.atleast_1d(np.asarray(threshold, dtype=float))
-    return survival(age[None, :] * DAYS_A_YEAR * FADE_TO_80 / (1 - threshold[:, None]), cycles_to_80)
+    factor = np.broadcast_to(np.asarray(factor, dtype=float), threshold.shape)
+    return survival(age[None, :] * DAYS_A_YEAR * FADE_TO_80 / ((1 - threshold) * factor)[:, None], cycles_to_80)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -342,30 +392,154 @@ def mid_times() -> np.ndarray:
     return FIRST + (np.arange(QUARTERS) + 0.5) / 4
 
 
+def share_times() -> np.ndarray:
+    """1 January 2025 and the middles of the quarters: where the robot types' shares are drawn (the robots of 1 January
+    2025, then each quarter's robots built)."""
+    return np.concatenate([[float(FIRST)], mid_times()])
+
+
+SHARE_TIMES = share_times()       # 61: 1 January 2025, then the middle of each quarter
+
+
 def end_times() -> np.ndarray:
     """The end of each quarter, 2025 Q1 to 2039 Q4, in years: when its stock is counted."""
     return FIRST + (np.arange(QUARTERS) + 1.0) / 4
 
 
-def type_shares(params: Params, shares: dict, u: np.ndarray, times: np.ndarray) -> np.ndarray:
-    """Each robot type's share of the robots built at `times` in every draw (n × times × 6): type 1 the draw's point
-    `u` of its triangles of 2025 and 2040, a straight line between; types 2, 4, 5 and 6 the workbook's; type 3 the
-    remainder. Raises ValueError where the remainder falls below 0."""
-    flow = params.stock_and_flow
-    first = triangle_ppf(u, *flow.research_share_2025)
-    last = triangle_ppf(u, *flow.research_share_2040)
-    along_time = np.clip((times - FIRST) / (LAST - FIRST), 0, 1)
-    out = np.zeros((u.size, times.size, len(TYPES)))
-    out[:, :, TYPES.index(RESEARCH_TYPE)] = first[:, None] + (last - first)[:, None] * along_time[None, :]
-    for k, t in enumerate(TYPES):
-        if t not in (RESEARCH_TYPE, REMAINDER_TYPE):
-            out[:, :, k] = along(times, shares[t])[None, :]
-    rest = TYPES.index(REMAINDER_TYPE)
-    out[:, :, rest] = 1 - out.sum(axis=2)
-    if (out[:, :, rest] < 0).any():
-        raise ValueError(f'robot type {REMAINDER_TYPE}, the remainder of the shares, falls below 0: the shares of the '
-                         'other types add up to more than 1.')
+def between(pairs: tuple, times: np.ndarray) -> np.ndarray:
+    """A setting given for 2025 and 2040 ((2025, value), (2040, value)) at `times`: a straight line between, held
+    outside."""
+    (first_year, first), (last_year, last) = pairs
+    return np.interp(times, [first_year, last_year], [first, last])
+
+
+def type_modes(params: Params, shares: dict, times: np.ndarray) -> np.ndarray:
+    """The mode of each robot type's share of the robots built at `times` (6 × times): type 1 the setting's (10 % to
+    5 %); types 2 to 6 the workbook's shares, a straight line between its years, scaled together to what type 1 leaves,
+    so that the six modes add up to 1 (in 2025 the workbook's type 1 is 25 %, the setting's 10 %: types 2 to 6 take
+    the 15 points in proportion)."""
+    out = np.empty((len(TYPES), times.size))
+    research = TYPES.index(RESEARCH_TYPE)
+    out[research] = between(params.stock_and_flow.research_share, times)
+    others = [k for k, t in enumerate(TYPES) if t != RESEARCH_TYPE]
+    for k in others:
+        out[k] = along(times, shares[TYPES[k]])
+    out[others] *= (1 - out[research]) / out[others].sum(axis=0)
     return out
+
+
+def type_spread(params: Params, times: np.ndarray) -> np.ndarray:
+    """How far each type's share, every type's alike, lies from its mode in 95 % of the draws at `times`, a share of the
+    mode: 10 % in 2025 widening to 30 % in 2040 (Matthias: "Damit I told you 10% in 2025 and 30% in 2040", "I said +-10%
+    and then +- 30% this is never the case", "all 6 types around 10% +- in 2025 and 30%+- in 2040")."""
+    return between(params.stock_and_flow.type_share_spread, times)
+
+
+def type_ends(params: Params, times: np.ndarray) -> np.ndarray:
+    """The ends of each type's triangle at `times`, a share of the mode: the spread over HALF95, so that 95 % of the
+    triangle lies within the spread (2025: 0.10 / 0.7764 = 12.88 %; 2040: 38.64 %)."""
+    return type_spread(params, times) / HALF95
+
+
+def type_shares(params: Params, shares: dict, points: np.ndarray, times: np.ndarray) -> np.ndarray:
+    """Each robot type's share of the robots built at `times` in every draw (n × times × 6), from `points` (n × times ×
+    5, the point of the unit triangle −1 / 0 / 1 of types 1, 2, 4, 5 and 6, from `type_points`): each of them mode × (1
+    + point × end); type 3 1 minus them, so that the six add up to the article's robots in every draw (Matthias,
+    2026-11-07: "The summ of the total has to be correct"). Nothing divided."""
+    modes, ends = type_modes(params, shares, times), type_ends(params, times)        # 6 × times; times
+    others = [k for k, t in enumerate(TYPES) if t != BALANCING_TYPE]
+    rest = TYPES.index(BALANCING_TYPE)
+    out = np.empty((points.shape[0], times.size, len(TYPES)))
+    out[:, :, others] = modes[others].T[None] * (1 + ends[None, :, None] * points)
+    out[:, :, rest] = 1 - out[:, :, others].sum(axis=2)
+    return out
+
+
+def unit_triangle(u):
+    """The symmetric triangle −1 / 0 / 1 at the share u of it: a type's point in its own triangle from its random number."""
+    u = np.asarray(u, dtype=float)
+    return np.where(u < 0.5, -1 + np.sqrt(2 * u), 1 - np.sqrt(2 * (1 - u)))
+
+
+def linked_scores(eps: np.ndarray, rho: np.ndarray) -> np.ndarray:
+    """Five normal scores a draw at each time (n × times × 5), any two correlated by the time's `rho`, each with
+    variance 1, from `eps` (n × 5, independent normal scores, the same for all times, so that a draw is one world):
+    R^(1/2) eps with R = (1 − rho) I + rho J, that is √(1 − rho) × (eps − their mean) + √(1 + 4 rho) × their mean."""
+    mean = eps.mean(axis=1, keepdims=True)
+    return (np.sqrt(1 - rho)[None, :, None] * (eps - mean)[:, None, :]
+            + np.sqrt(1 + 4 * rho)[None, :, None] * mean[:, None, :])
+
+
+def link_correlation(modes: np.ndarray) -> np.ndarray:
+    """The correlation of the five other types at each time (modes: 6 × times) that gives type 3, 1 minus them, the
+    spread of a type of its own: its variance m3² × that of the unit triangle when (m3² − Σm²) / ((Σm)² − Σm²), the
+    sums over the other five (2025: 0.353; 2040: −0.212). Only where the rearrangement starts from (`type_points`).
+    Raises ValueError where it would have to lie outside −1/4 (the least five can share) to 1."""
+    others = [k for k, t in enumerate(TYPES) if t != BALANCING_TYPE]
+    rest = TYPES.index(BALANCING_TYPE)
+    total, squares = modes[others].sum(axis=0), (modes[others] ** 2).sum(axis=0)
+    rho = (modes[rest] ** 2 - squares) / (total ** 2 - squares)
+    if (rho < -0.25).any() or (rho > 1).any():
+        raise ValueError(f'robot type {BALANCING_TYPE} cannot have the spread of the other types: its share is too large '
+                         'or too small against theirs.')
+    return rho
+
+
+def rearrange(h: np.ndarray, weights: np.ndarray, ordered: list, sweeps: int = 200) -> int:
+    """The rearrangement algorithm (Puccetti & Rüschendorf 2012): the points `h` (n × types, each column one type's own
+    draws) rearranged in place within each column, so that Σ weights × h is as near 0 in every row as it gets. Each
+    column in turn is put in the opposite order of the sum of the others (its largest point beside their smallest sum),
+    until a sweep over all columns no longer lowers the largest row sum by 0.1 %. `ordered`: each column's points from
+    the largest to the smallest. No point changes, only which points share a row. Returns the sweeps it took."""
+    total = h @ weights
+    for sweep in range(1, sweeps + 1):
+        before = np.abs(total).max()
+        for k in range(h.shape[1]):
+            rest = total - weights[k] * h[:, k]
+            h[np.argsort(rest, kind='stable'), k] = ordered[k]
+            total = rest + weights[k] * h[:, k]
+        if np.abs(total).max() >= 0.999 * before:
+            return sweep
+    return sweeps
+
+
+def type_points(params: Params, shares: dict, z: np.ndarray, u_rest: np.ndarray) -> tuple:
+    """Each type's point of its own triangle in every draw, at 1 January 2025 and in the middle of every quarter
+    (SHARE_TIMES), put together so that the six shares add up to 1 (Matthias, 2026-11-07: "I want that you developt an
+    algorthym that has for all 6 types around 10% +- in 2025 and 30%+- in 2040. All have to have close to this value!!",
+    "NO type 3 is not triangular!!", to the rearrangement "Yes, build it"):
+      - every type its own draws of its own triangle: types 1, 2, 4, 5 and 6 from `z` (n × 5), type 3 from `u_rest` (n),
+        one random number a type and draw, the same draws in every year;
+      - at each time the start: the five linked by one correlation (`link_correlation`, normal scores of `z`,
+        `linked_scores`), type 3 1 minus them; each type's own draws put in the order of the start;
+      - then the rearrangement (`rearrange`), weighted by the time's modes, so that the six add up to 1 in every draw.
+    The point of the unit triangle −1 / 0 / 1 is the same at all times, its ends scaled by `type_ends`. Returns (the
+    points of types 1, 2, 4, 5 and 6, n × SHARE_TIMES × 5, float32; the largest amount by which type 3, 1 minus them,
+    lies off its own draws, a share of its triangle's half-width: what the rearrangement leaves)."""
+    others = [k for k, t in enumerate(TYPES) if t != BALANCING_TYPE]
+    rest = TYPES.index(BALANCING_TYPE)
+    modes = type_modes(params, shares, SHARE_TIMES)
+    rho = link_correlation(modes)
+    own = np.empty((z.shape[0], len(TYPES)))                       # each type's own draws of the unit triangle
+    own[:, others], own[:, rest] = unit_triangle(z), unit_triangle(u_rest)
+    ascending = [np.sort(own[:, k]) for k in range(len(TYPES))]
+    descending = [a[::-1] for a in ascending]
+    eps = ndtri(np.clip(z, 1e-12, 1 - 1e-12))                      # the five's normal scores: the same ranks as z
+    points = np.empty((z.shape[0], SHARE_TIMES.size, len(others)), dtype=np.float32)
+    worst = 0.0
+    for i in range(SHARE_TIMES.size):
+        start = np.empty_like(own)
+        start[:, others] = unit_triangle(ndtr(linked_scores(eps, rho[i:i + 1])[:, 0, :]))
+        start[:, rest] = -(start[:, others] @ modes[others, i]) / modes[rest, i]
+        h = np.empty_like(own)
+        for k in range(len(TYPES)):                                 # own draws in the order of the start
+            h[np.argsort(start[:, k], kind='stable'), k] = ascending[k]
+        rearrange(h, modes[:, i], descending)
+        points[:, i, :] = h[:, others]
+        # What type 3, 1 minus the five as type_shares makes it, lies off its own draw, in its triangle's half-widths.
+        forced = -(points[:, i, :].astype(np.float64) @ modes[others, i]) / modes[rest, i]
+        worst = max(worst, float(np.abs(forced - h[:, rest]).max()))
+    return points, worst
 
 
 def runtimes(params: Params, trajectories: dict, times: np.ndarray) -> np.ndarray:
@@ -425,27 +599,33 @@ def robot_parts(params: Params) -> tuple:
 # Steps 1 to 4 in every draw of a chunk
 # ------------------------------------------------------------------------------------------------------
 
-def count(params: Params, shares: dict, trajectories: dict, u: np.ndarray, threshold: np.ndarray) -> tuple:
-    """The robots, joint sets and packs of each type, quarter by quarter, in the draws of `u` (the research share's
-    point) and `threshold` (the capacity below which a pack is replaced): ({(unit, type): Flows}, with all robots
-    under ('robots', 0); {type: the packs needed, n × QUARTERS})."""
+def count(params: Params, shares: dict, trajectories: dict, points: np.ndarray, threshold: np.ndarray,
+          robot_factor: np.ndarray, pack_factor: np.ndarray, joint_factor: np.ndarray) -> tuple:
+    """The robots, joint sets and packs of each type, quarter by quarter, in the draws of `points` (n × SHARE_TIMES × 5,
+    the points of types 1, 2, 4, 5 and 6 in their triangles from `type_points`), `threshold` (the capacity below which a pack is replaced), `robot_factor`, `pack_factor`
+    and `joint_factor` (the draw's factors on the robots' lifetime, the packs' charges and the joints' life):
+    ({(unit, type): Flows}, with all robots under ('robots', 0); {type: the packs needed, n × QUARTERS})."""
     flow = params.stock_and_flow
     robots = {year: float(v) for year, v in flow.robots}
     growth = robots[FIRST + 1] / robots[FIRST]
-    n = u.size
+    n = points.shape[0]
     # The quarters before 2025 that can still hold a unit: the longest life of a robot, a joint set or a pack.
-    longest = max(flow.robot_lifetime_years[2], flow.joint_life_hours[2] / (flow.hours_a_day * DAYS_A_YEAR),
-                  flow.battery_cycles_to_80[2] * (1 - flow.battery_replaced_below[0]) / FADE_TO_80 / DAYS_A_YEAR)
+    longest = max(flow.robot_lifetime_years[2] * flow.lifetime_factor[2],
+                  flow.joint_life_hours[2] * flow.lifetime_factor[2] / (flow.hours_a_day * DAYS_A_YEAR),
+                  flow.battery_cycles_to_80[2] * flow.lifetime_factor[2] * (1 - flow.battery_replaced_below[0])
+                  / FADE_TO_80 / DAYS_A_YEAR)
     before = int(math.ceil(4 * longest)) + 1
     age = ages(before + QUARTERS)
-    robot_survive = survival(age, flow.robot_lifetime_years)
-    joint_survive = joint_survival(age, flow.hours_a_day, flow.joint_life_hours)
-    pack_survive = pack_survival(age, threshold, flow.battery_cycles_to_80)          # one row a draw
+    robot_survive = robot_survival(age, robot_factor, flow.robot_lifetime_years)          # one row a draw
+    joint_survive = joint_survival(age, flow.hours_a_day, flow.joint_life_hours, joint_factor)    # one row a draw
+    pack_survive = pack_survival(age, threshold, flow.battery_cycles_to_80, pack_factor)   # one row a draw
     counted, needs = {}, {}
+    # The article's robots in use, the frame: what has to be built in each quarter, at the draw's lifetime, to hold
+    # them. Each type then builds its own share of it.
     total = cohorts(robot_survive, robots[FIRST], growth, target=np.broadcast_to(targets(robots), (n, QUARTERS)))
-    counted[('robots', 0)] = total
-    built_shares = type_shares(params, shares, u, mid_times())                       # n × QUARTERS × 6
-    start_shares = type_shares(params, shares, u, np.array([float(FIRST)]))[:, 0, :]  # n × 6
+    counted[('article', 0)] = total
+    built_shares = type_shares(params, shares, points[:, 1:], SHARE_TIMES[1:])     # n × QUARTERS × 6
+    start_shares = type_shares(params, shares, points[:, :1], SHARE_TIMES[:1])[:, 0]   # n × 6: 1 January 2025
     packs = packs_per_robot(params, trajectories, end_times())                        # 6 × QUARTERS
     first_packs = packs_per_robot(params, trajectories, np.array([float(FIRST)]))[:, 0]
     for k, t in enumerate(TYPES):
@@ -461,9 +641,9 @@ def count(params: Params, shares: dict, trajectories: dict, u: np.ndarray, thres
 
 def check(params: Params, counted: dict, needs: dict) -> list:
     """The faults of one chunk, in plain words ([] where none): a quarter whose stock before + inflow − outflow is not
-    its stock (the outflow counted apart, cohort by cohort), a flow below 0, the robots in use at a 1 January not the
-    article's, the types not adding up to all robots, joint sets not as many as the robots, packs fewer than needed.
-    Each to TOLERANCE of the largest stock (07's check_balance)."""
+    its stock (the outflow counted apart, cohort by cohort), a flow below 0, the article's frame not holding its robots
+    in use at a 1 January, the six types not adding up to it, joint sets not as many as the robots, packs fewer than
+    needed. Each to TOLERANCE of the largest stock (07's check_balance)."""
     faults = []
     robots = {year: float(v) for year, v in params.stock_and_flow.robots}
     for (unit, t), f in counted.items():
@@ -476,14 +656,14 @@ def check(params: Params, counted: dict, needs: dict) -> list:
                           f'stock up to {scale:.3g}).')
         if (f.built < 0).any() or (f.gone < -TOLERANCE * scale).any():
             faults.append(f'{what}: a flow below 0.')
-    total = counted[('robots', 0)]
-    at_january = np.concatenate([total.start[:, None], total.stock[:, 3::4]], axis=1)
+    article = counted[('article', 0)]
+    at_january = np.concatenate([article.start[:, None], article.stock[:, 3::4]], axis=1)
     for y, year in enumerate(range(FIRST, LAST + 1)):
         if np.abs(at_january[:, y] - robots[year]).max() > TOLERANCE * robots[year]:
             faults.append(f"the robots in use at 1 January {year} are not the article's {robots[year]:,.0f}.")
-    scale = float(total.stock.max())
-    if np.abs(sum(counted[('robots', t)].stock for t in TYPES) - total.stock).max() > TOLERANCE * scale:
-        faults.append('the robots of the six types do not add up to all robots.')
+    scale = float(article.stock.max())
+    if np.abs(sum(counted[('robots', t)].stock for t in TYPES) - article.stock).max() > TOLERANCE * scale:
+        faults.append("the robots of the six types do not add up to the article's.")
     for t in TYPES:
         if np.abs(counted[('joint sets', t)].stock - counted[('robots', t)].stock).max() > TOLERANCE * scale:
             faults.append(f'robot type {t}: the joint sets in use are not as many as its robots in use.')
@@ -640,6 +820,18 @@ def log_panel(axes, series: list, word: str, tick_label=decade_label) -> bool:
     return True
 
 
+def share_panel(axes, series: list, word: str) -> None:
+    """One panel on a plain axis from 0, for shares in %: each of `series` (years, stats of stats_of, label, colour)
+    its mean a line and 95 % of its draws a band (Matthias, 2026-11-07: each type's range "one has to see it")."""
+    for years, stats, label, colour in series:
+        axes.plot(years, stats['mean'], '-', color=colour, label=label)
+        axes.fill_between(years, stats['low'], stats['high'], alpha=0.25, color=colour, linewidth=0)
+    axes.set_xlim(FIRST, LAST)
+    axes.set_xticks(range(FIRST, LAST + 1, 5))
+    axes.set_ylim(bottom=0)
+    axes.set_ylabel(word)
+
+
 def held_in_label(axes) -> bool:
     """Whether a label of the panel says the share of the draws that hold it: then the panel has a legend, also with
     one line ("one colour, no legend" otherwise), so that the share is written beside it."""
@@ -701,11 +893,12 @@ def lines_under(axes, box, renderer=None) -> bool:
 
 def place_legends(figure) -> None:
     """Each panel's legend in the first of LEGEND_PLACES where no line runs under it (else matplotlib's 'best'), the
-    page laid out as it is saved."""
+    page laid out as it is saved. A place without a panel that only holds a legend (the overview's robot types) keeps
+    its legend as it is."""
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
     for axes in figure.axes:
-        if axes.get_legend() is None:
+        if axes.get_legend() is None or not axes.axison:
             continue
         for place in LEGEND_PLACES:
             legend = axes.legend(loc=place)
@@ -715,12 +908,13 @@ def place_legends(figure) -> None:
             axes.legend(loc='best')
 
 
-def save_figure(figure, path: str, note: str, dpi: int) -> str:
+def save_figure(figure, path: str, note: str, dpi: int, top: float = 1.0) -> str:
     """Write a page with its note at the foot, wrapped within the page's width, and close it (07's save_figure); each
-    legend where no line runs under it (place_legends)."""
+    legend where no line runs under it (place_legends); `top` below 1 leaves room above the panels for a page's
+    legend."""
     lines = textwrap.wrap(note, NOTE_WIDTH)
     figure.text(0.5, 0.008, '\n'.join(lines), ha='center', va='bottom', fontsize=8)
-    figure.tight_layout(rect=(0, 0.012 + 0.02 * len(lines), 1, 1))
+    figure.tight_layout(rect=(0, 0.012 + 0.02 * len(lines), 1, top))
     place_legends(figure)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     figure.savefig(path, dpi=dpi, facecolor='white')
@@ -729,35 +923,44 @@ def save_figure(figure, path: str, note: str, dpi: int) -> str:
 
 
 def overview_page(summary: dict, names: dict, draws: int, path: str, dpi: int) -> str:
-    """The overview: the robots in use; built and retired; in use by robot type; the joint sets; the battery packs in
-    use; built and worn out."""
+    """The overview, two rows of four: the robots in use; built and retired; in use by robot type; beside it each type's
+    share of the robots built (Matthias, 2026-11-07, "Add it beside"); the joint sets; the battery packs in use; built
+    and worn out; the robot types' legend in the eighth place, for the two panels of the types."""
     flows, stocks = np.arange(FIRST, LAST), np.arange(FIRST, LAST + 1)
 
     def line(unit, t, flow, label, colour):
         return (stocks if flow == 'stock' else flows, summary[(unit, t, flow)], label, colour)
 
+    figure, grid = plt.subplots(2, 4, figsize=A4_LANDSCAPE)
     panels = (
-        ('Robots in use', [line('robots', 0, 'stock', 'in use', IN_USE)], 'robots'),
-        ('Robots built and retired', [line('robots', 0, 'in', 'built', BUILT),
-                                      line('robots', 0, 'out', 'retired', GONE)], 'robots per year'),
-        ('Robots in use by robot type', [line('robots', t, 'stock', f'robot type {t}', TYPE_COLOURS[k])
-                                         for k, t in enumerate(TYPES)], 'robots'),
-        ('Joint sets', [line('joint sets', 0, 'stock', 'in use', IN_USE),
-                        line('joint sets', 0, 'in', 'built per year', BUILT),
-                        line('joint sets', 0, 'out', 'worn out per year', GONE)], 'joint sets'),
-        ('Battery packs in use', [line('battery packs', 0, 'stock', 'in use', IN_USE)], 'battery packs'),
-        ('Battery packs built and worn out', [line('battery packs', 0, 'in', 'built', BUILT),
-                                              line('battery packs', 0, 'out', 'worn out', GONE)],
+        (grid[0, 0], 'Robots in use', [line('robots', 0, 'stock', 'in use', IN_USE)], 'robots'),
+        (grid[0, 1], 'Robots built\nand retired', [line('robots', 0, 'in', 'built', BUILT),
+                                                 line('robots', 0, 'out', 'retired', GONE)], 'robots per year'),
+        (grid[0, 2], 'Robots in use\nby robot type', [line('robots', t, 'stock', f'robot type {t}', TYPE_COLOURS[k])
+                                                    for k, t in enumerate(TYPES)], 'robots'),
+        (grid[1, 0], 'Joint sets', [line('joint sets', 0, 'stock', 'in use', IN_USE),
+                                    line('joint sets', 0, 'in', 'built per year', BUILT),
+                                    line('joint sets', 0, 'out', 'worn out per year', GONE)], 'joint sets'),
+        (grid[1, 1], 'Battery packs\nin use', [line('battery packs', 0, 'stock', 'in use', IN_USE)], 'battery packs'),
+        (grid[1, 2], 'Battery packs\nbuilt and worn out', [line('battery packs', 0, 'in', 'built', BUILT),
+                                                         line('battery packs', 0, 'out', 'worn out', GONE)],
          'battery packs per year'))
-    figure, grid = plt.subplots(2, 3, figsize=A4_LANDSCAPE)
-    for axes, (title, series, word) in zip(grid.flat, panels):
+    for axes, title, series, word in panels:
         if log_panel(axes, series, word):
             axes.set_title(title)
-            if len(series) > 1 or held_in_label(axes):
+            types_panel = title.startswith('Robots in use\nby')
+            if (len(series) > 1 and not types_panel) or held_in_label(axes):
                 axes.legend(loc='upper left')
+    share_panel(grid[0, 3], [line(SHARE_QUANTITY, t, 'in', f'robot type {t}', TYPE_COLOURS[k])
+                             for k, t in enumerate(TYPES)], '% of the robots built')
+    grid[0, 3].set_title('Share of the robots built\nby robot type')
+    # The eighth place: the legend of the robot types, for the two panels of the types beside each other.
+    grid[1, 3].axis('off')
+    grid[1, 3].legend(*grid[0, 3].get_legend_handles_labels(), loc='center', title='Robot types')
     figure.suptitle('Humanoid robots in the world')
     types = '; '.join(f'{t} {names[t]}' for t in TYPES)
-    note = (figure_note(draws) + ' A joint set: the hip, knee, ankle, waist, arm and head joints of one robot. '
+    note = (figure_note(draws).replace('logarithmic axes.', 'logarithmic axes, the shares a plain one.')
+            + ' A joint set: the hip, knee, ankle, waist, arm and head joints of one robot. '
             f'Robot types: {types}.')
     return save_figure(figure, path, note, dpi)
 
@@ -793,6 +996,198 @@ def element_file(symbol: str) -> str:
 
 
 # ------------------------------------------------------------------------------------------------------
+# The distribution pages (Matthias, 2026-11-07: "I also want the distributions", to the table "Yes, as recommended"), in
+# 02's form (its centre_lines, stacked_bars, mass_ticks, panel_rows: one copy of the code): bars of the share of the
+# draws, the median a solid line, the mean a dotted one, 2.5 % and 97.5 % dashed, no number on a panel; each page
+# followed by a page of its numbers (EVIDENCE.md E34). The elements split by part as RAWCLICDataCenters' 05 splits its
+# elements by 03 and 04, the smaller part lower.
+# ------------------------------------------------------------------------------------------------------
+
+PART_COLOURS = {"robots' bodies": '#4477AA', 'joint sets': '#CCBB44', 'battery packs': '#AA3377'}   # Paul Tol's bright
+TRIANGLE_INK = '0.45'             # the grey of a type's own triangle drawn over its draws
+NUMBER_COLUMNS = (0.02, 0.21, 0.31, 0.45, 0.59, 0.79)    # where each column of a page of numbers starts, across the page
+
+
+def count_unit(values: np.ndarray) -> tuple:
+    """The unit a panel of robots is written in, by the mean of its draws above 0, so that it reads from 1 up:
+    (robots in one unit, its words), e.g. (1e6, 'million robots')."""
+    positive = values[values > 0]
+    typical = float(positive.mean()) if positive.size else 0.0
+    for per, words in ((1e9, 'billion robots'), (1e6, 'million robots'), (1e3, 'thousand robots')):
+        if typical >= per:
+            return per, words
+    return 1.0, 'robots'
+
+
+def mass_unit(values_kg: np.ndarray) -> tuple:
+    """The unit a panel of kg is written in, by the mean of its draws above 0, so that it reads from 1 up (kg, not Mg;
+    Mt the largest, as mass_text): (kg in one unit, its symbol)."""
+    positive = values_kg[values_kg > 0]
+    typical = float(positive.mean()) if positive.size else 0.0
+    for per, unit in ((1e9, 'Mt'), (1e6, 'kt'), (1e3, 't'), (1.0, 'kg'), (1e-3, 'g')):
+        if typical >= per:
+            return per, unit
+    return 1e-6, 'mg'
+
+
+def triangle_bars(edges: np.ndarray, triangle: tuple) -> np.ndarray:
+    """A triangle's share in each bar between `edges`: what its draws would put there, drawn over the bars of a type's
+    share so that one sees each type's draws are its own triangle's."""
+    return np.diff(triangle_cdf(edges, *triangle))
+
+
+def panel_style(axes, title: str, unit: str, first_in_row: bool) -> None:
+    """A distribution panel's title, axes and ticks (02's mass_ticks: plain numbers, 4000 not 4k, also on a
+    logarithmic axis); the share of the draws named on the first panel of a row."""
+    axes.set_title(title, fontsize=8, fontweight='bold', loc='left')
+    composition.mass_ticks(axes, 4)
+    if axes.get_xscale() == 'linear':
+        # 02's panel_number writes one decimal from 1 up, which labels ticks 0.08 apart "0.96, 1, 1.1" (found on the
+        # sandbox's pages, 2026-11-07): here each tick with the decimals its spacing needs, plain, without an offset.
+        axes.xaxis.set_major_formatter(ticker.ScalarFormatter(useOffset=False))
+        axes.ticklabel_format(axis='x', style='plain', useOffset=False)
+    axes.yaxis.set_major_locator(plt.MaxNLocator(3))
+    axes.yaxis.set_major_formatter(plt.FuncFormatter(composition.panel_number))
+    axes.tick_params(labelsize=7)
+    axes.set_xlabel(unit, fontsize=7)
+    if first_in_row:
+        axes.set_ylabel('share of the draws', fontsize=7)
+    axes.grid(axis='x', alpha=0.3)
+    for side in ('top', 'right'):
+        axes.spines[side].set_visible(False)
+
+
+def distribution_panel(axes, values: np.ndarray, title: str, unit: str, colour: str, first_in_row: bool,
+                       triangle: tuple | None = None) -> None:
+    """One quantity over the draws (`values` in its `unit`, all above 0): 70 bars from its smallest draw to 02's axis
+    end (its 99.5th percentile), each the share of the draws; its median, mean and 95 % (02's centre_lines, the numbers
+    kept for the page of numbers); `triangle` (min, mode, max in the same unit), where given, its share in each bar as a
+    grey line."""
+    end = composition.axis_end(values)
+    low = float(values.min())
+    edges = (np.linspace(low, end, composition.APART_BINS + 1) if end > low
+             else np.histogram_bin_edges(values, bins=composition.APART_BINS))
+    counts, edges = np.histogram(values[values <= edges[-1]], bins=edges)
+    heights = counts / values.size
+    axes.bar(edges[:-1], heights, width=np.diff(edges), align='edge', color=colour, edgecolor='none')
+    top = float(heights.max())
+    if triangle is not None:
+        expected = triangle_bars(edges, triangle)
+        axes.plot((edges[:-1] + edges[1:]) / 2, expected, color=TRIANGLE_INK, linewidth=0.9)
+        top = max(top, float(expected.max()))
+    axes.set_ylim(0, 1.1 * top)
+    composition.centre_lines(axes, values, '', end, unit, title)
+    panel_style(axes, title, unit, first_in_row)
+
+
+def element_distribution_panel(axes, parts: dict, title: str, first_in_row: bool) -> list:
+    """One element in use over the draws, its kg split by part (`parts`: {part: kg in each draw}): 02's stacked_bars
+    (the smaller part lower, a part held in fewer than 2.5 % of the draws not drawn; where the element is 0 in some
+    draws, over those that hold it) in the unit that reads from 1 up, its median, mean and 95 % (centre_lines). Returns
+    the parts drawn, for the page's legend; [] where no draw holds it (the place then says so)."""
+    total = sum(parts.values())
+    if not (total > 0).any():
+        axes.set_title(title, fontsize=8, fontweight='bold', loc='left')
+        axes.axis('off')
+        axes.text(0, 0.5, 'none in use in any draw', transform=axes.transAxes, fontsize=8)
+        return []
+    per, unit = mass_unit(total)
+    bars = composition.stacked_bars(axes, {part: kg / per for part, kg in parts.items()}, PART_COLOURS)
+    axes.set_ylim(0, 1.1 * bars.top)
+    composition.centre_lines(axes, bars.values, bars.held_in, bars.end, unit, title)
+    panel_style(axes, title, f'in use ({unit})', first_in_row)
+    return bars.drawn
+
+
+def distribution_note(draws: int, what: str) -> str:
+    """The foot of a distribution page: what the bars and lines are, then what is particular to the page."""
+    return (f'Bars: the {draws:,} draws, the height of a bar the share of them; solid line: the median; dotted: the mean; '
+            'dashed: 2.5 % and 97.5 % (95 % of the draws); each panel on its own scale; the draws beyond its axis (its '
+            f'99.5th percentile) not drawn; the numbers of every panel on the next page. {what}')
+
+
+def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
+    """The page of numbers that follows a page of panels (EVIDENCE.md E34), A4 landscape as 04's pages: a row per panel
+    (02's panel_rows: its title, in what share of the draws it is held, the median, the mean, 95 % of the draws, the
+    draws beyond its axis), each under 02's column names (NUMBERS_HEAD)."""
+    page = plt.figure(figsize=A4_LANDSCAPE)
+    page.suptitle(heading)
+    for x, words in zip(NUMBER_COLUMNS, composition.NUMBERS_HEAD):
+        page.text(x, 0.91, words, fontsize=9, fontweight='bold', va='top')
+    step, y = min(0.034, 0.82 / max(len(rows), 1)), 0.87
+    for row in rows:
+        page.add_artist(plt.Line2D([0.02, 0.98], [y + 0.007, y + 0.007], color=composition.GRID, linewidth=0.8))
+        for x, cell in zip(NUMBER_COLUMNS, row):
+            page.text(x, y, cell, fontsize=8, va='top')
+        y -= step
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    page.savefig(path, dpi=dpi, facecolor='white')
+    plt.close(page)
+    return path
+
+
+def with_its_numbers(figure, path: str, note: str, dpi: int, top: float = 1.0) -> list:
+    """A page of panels saved (save_figure), then the page of its numbers, '<name>_numbers.png' beside it."""
+    heading = (figure._suptitle.get_text() if figure._suptitle else '') + ': its numbers'
+    rows = composition.panel_rows(figure)
+    saved = save_figure(figure, path, note, dpi, top)
+    return [saved, numbers_page(heading, rows, path[:-len('.png')] + '_numbers.png', dpi)]
+
+
+def robots_distribution_page(files: dict, draws: int, folder: str, dpi: int) -> list:
+    """a) The robots in use of each type at 1 January 2025, 2030, 2035 and 2040: a row a year, a panel a type, each in
+    thousands, millions or billions of robots as it reads."""
+    figure, grid = plt.subplots(len(DISTRIBUTION_YEARS), len(TYPES), figsize=A4_LANDSCAPE)
+    for r, year in enumerate(DISTRIBUTION_YEARS):
+        for k, t in enumerate(TYPES):
+            values = np.asarray(files['units_stock'][:, year - FIRST, UNITS.index('robots'), k], dtype=np.float64)
+            per, words = count_unit(values)
+            distribution_panel(grid[r, k], values / per, f'Robot type {t}, {year}', words, TYPE_COLOURS[k], k == 0)
+    figure.suptitle('Humanoid robots in use by robot type at 1 January: the distribution of the draws')
+    note = distribution_note(draws, 'The six types add up to the robots in use of ai-2040.com Plan A in every draw.')
+    return with_its_numbers(figure, os.path.join(folder, 'robots_in_use_by_type.png'), note, dpi)
+
+
+def shares_distribution_page(params: Params, shares: dict, points: np.ndarray, draws: int, folder: str,
+                             dpi: int) -> list:
+    """b) Each type's share of the robots built at 1 January 2025 and in the quarters SHARE_PAGE_TIMES names, its own
+    triangle drawn over its bars (Matthias, 2026-11-07: "NO type 3 is not triangular!!")."""
+    times = np.array([t for t, _ in SHARE_PAGE_TIMES])
+    index = [int(np.argmin(np.abs(SHARE_TIMES - t))) for t in times]
+    got = 100 * type_shares(params, shares, points[:, index], times)                  # draws × times × 6, %
+    modes, ends = 100 * type_modes(params, shares, times), type_ends(params, times)
+    figure, grid = plt.subplots(len(times), len(TYPES), figsize=A4_LANDSCAPE)
+    for r, (_, label) in enumerate(SHARE_PAGE_TIMES):
+        for k, t in enumerate(TYPES):
+            triangle = (modes[k, r] * (1 - ends[r]), modes[k, r], modes[k, r] * (1 + ends[r]))
+            distribution_panel(grid[r, k], got[:, r, k], f'Robot type {t}, {label}', '% of the robots built',
+                               TYPE_COLOURS[k], k == 0, triangle)
+    figure.suptitle("Each robot type's share of the robots built: the distribution of the draws")
+    note = distribution_note(draws, "Grey line: the type's own triangle, its share of the draws in each bar; 95 % of "
+                             'its draws within ±10 % of its mode in 2025 widening to ±30 % in 2040. The six shares add '
+                             'up to 100 % in every draw (Q1, Q4: the middle of the first, the last quarter).')
+    return with_its_numbers(figure, os.path.join(folder, 'type_shares.png'), note, dpi)
+
+
+def element_distribution_page(symbol: str, kg, draws: int, path: str, dpi: int) -> list:
+    """c) One element in use at 1 January 2025, 2030, 2035 and 2040 (`kg`: draws × years × PARTS), each panel split by
+    part; the legend names the parts drawn."""
+    figure, grid = plt.subplots(2, 2, figsize=A4_LANDSCAPE)
+    drawn = set()
+    for axes, year, first in zip(grid.flat, DISTRIBUTION_YEARS, (True, False, True, False)):
+        parts = {part: np.asarray(kg[:, year - FIRST, j], dtype=np.float64) for j, part in enumerate(PARTS)}
+        drawn |= set(element_distribution_panel(axes, parts, f'1 January {year}', first))
+    handles = [Patch(color=PART_COLOURS[p], label=p) for p in PARTS if p in drawn]
+    figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.955), ncol=max(len(handles), 1),
+                  frameon=False)
+    figure.suptitle(f'{composition.ELEMENT_NAMES.get(symbol, symbol)} in use: the distribution of the draws')
+    note = distribution_note(draws, "Each bar split into the kg its draws hold in the robots' bodies, the joint sets and "
+                             'the battery packs, the smaller part lower; where the element is not in use in every draw, '
+                             'over the draws that hold it, their share on the next page.')
+    return with_its_numbers(figure, path, note, dpi, top=0.93)
+
+
+# ------------------------------------------------------------------------------------------------------
 # The run
 # ------------------------------------------------------------------------------------------------------
 
@@ -807,10 +1202,24 @@ def run(params: Params) -> int:
         print(f'04 stopped: {error}')
         return 1
     draws = parts[TYPES[0]].shape[0]
-    # One point of the research share's triangles and one capacity threshold a draw, the same in every rerun.
+    # Each type's point of its share's triangle, one capacity threshold and the three lifetime factors a draw (the
+    # robots', the packs' and the joints', each its own random number), the same in every rerun.
     rng = np.random.default_rng([params.composition.seed, 4])
-    u = rng.random(draws)
+    z = rng.random((draws, len(TYPES) - 1))                 # types 1, 2, 4, 5 and 6: each its own random number
     threshold = triangle_ppf(rng.random(draws), *flow.battery_replaced_below)
+    robot_factor = triangle_ppf(rng.random(draws), *flow.lifetime_factor)
+    pack_factor = triangle_ppf(rng.random(draws), *flow.lifetime_factor)
+    joint_factor = triangle_ppf(rng.random(draws), *flow.lifetime_factor)
+    u_rest = rng.random(draws)                              # type 3's own random number, drawn last: the others stay
+    # Step 2: every type its own triangle, the draws of the six put together so that they add up to 1.
+    print(f'04: the robot types: each its own triangle, the six put together to add up to 1 (rearrangement) …')
+    try:
+        points, off = type_points(params, shares, z, u_rest)
+    except ValueError as error:
+        print(f'04 stopped: {error}')
+        return 1
+    print(f'04: the robot types put together; type {BALANCING_TYPE} off its own draws by at most {100 * off:.3f} % of its '
+          'half-width')
     folder = absolute(params.output.stock_and_flow_dir)
     os.makedirs(folder, exist_ok=True)
     years = {'in': LAST - FIRST, 'stock': LAST - FIRST + 1, 'out': LAST - FIRST}
@@ -822,13 +1231,13 @@ def run(params: Params) -> int:
         files[element_name] = np.lib.format.open_memmap(os.path.join(folder, f'{element_name}.npy'), mode='w+',
                                                         dtype=np.float32,
                                                         shape=(draws, years[flow_name], len(PARTS), len(elements)))
+    for article_name, flow_name in zip(ARTICLE_FILES, FLOWS):
+        files[article_name] = np.lib.format.open_memmap(os.path.join(folder, f'{article_name}.npy'), mode='w+',
+                                                        dtype=np.float32, shape=(draws, years[flow_name]))
     for first in range(0, draws, CHUNK):
         rows = slice(first, min(first + CHUNK, draws))
-        try:
-            counted, needs = count(params, shares, trajectories, u[rows], threshold[rows])
-        except ValueError as error:
-            print(f'04 stopped: {error}')
-            return 1
+        counted, needs = count(params, shares, trajectories, points[rows], threshold[rows], robot_factor[rows],
+                               pack_factor[rows], joint_factor[rows])
         faults = check(params, counted, needs)
         if faults:
             print(f'04 stopped: the stock and flow of draws {first + 1:,} to {rows.stop:,} does not add up; the draws '
@@ -837,6 +1246,8 @@ def run(params: Params) -> int:
                 print(f'  {fault}')
             return 1
         by_year = {(unit, t): years_of(counted[(unit, t)]) for unit in UNITS for t in TYPES}
+        for article_name, values in zip(ARTICLE_FILES, years_of(counted[('article', 0)])):
+            files[article_name][rows] = values
         for j, unit in enumerate(UNITS):
             for i, (unit_name, element_name) in enumerate(zip(UNIT_FILES, ELEMENT_FILES)):
                 kg = 0.0
@@ -852,6 +1263,8 @@ def run(params: Params) -> int:
     with open(os.path.join(folder, AXES_FILE), 'w', encoding='utf-8') as handle:
         handle.write(f"{', '.join(UNIT_FILES)}: draw; year (in, out: {FIRST} to {LAST - 1}; stock: 1 January {FIRST} "
                      f"to {LAST}); unit ({', '.join(UNITS)}); robot type ({', '.join(map(str, TYPES))})\n")
+        handle.write(f"{', '.join(ARTICLE_FILES)}: draw; year (the same); the article's robots built, in use, retired "
+                     "(each type its own share of the robots built)\n")
         handle.write(f"{', '.join(ELEMENT_FILES)}: draw; year (the same); part ({', '.join(PARTS)}); element "
                      f"({', '.join(elements)}); kg\n")
     # The summary, over the draws above 0: every unit of all types and of each type; every element of all three parts.
@@ -859,20 +1272,39 @@ def run(params: Params) -> int:
     for unit_name, flow_name in zip(UNIT_FILES, FLOWS):
         values = np.array(files[unit_name], dtype=np.float64)
         for j, unit in enumerate(UNITS):
-            summary[(unit, 0, flow_name)] = stats_of(values[:, :, j, :].sum(axis=2))
+            # All robots: the article's (each type its own share of them, not their sum); joint sets and packs: the
+            # types' added up.
+            total = (np.array(files[ARTICLE_FILES[FLOWS.index(flow_name)]], dtype=np.float64) if unit == 'robots'
+                     else values[:, :, j, :].sum(axis=2))
+            summary[(unit, 0, flow_name)] = stats_of(total)
             for k, t in enumerate(TYPES):
                 summary[(unit, t, flow_name)] = stats_of(values[:, :, j, k])
+    # Each type's share of the robots built in a year, %, draw by draw (Matthias, 2026-11-07, the panel "Add it
+    # beside" the robots in use by type): its robots built over the article's robots built, its own drawn share.
+    built = np.array(files['units_in'][:, :, UNITS.index('robots'), :], dtype=np.float64)
+    article_built = np.array(files['article_in'], dtype=np.float64)
+    for k, t in enumerate(TYPES):
+        summary[(SHARE_QUANTITY, t, 'in')] = stats_of(100 * built[:, :, k] / article_built)
     for element_name, flow_name in zip(ELEMENT_FILES, FLOWS):
         values = files[element_name].sum(axis=2, dtype=np.float64)              # draws × years × elements
         for e, symbol in enumerate(elements):
             summary[('element', symbol, flow_name)] = stats_of(values[:, :, e])
+            # By part, as RAWCLICDataCenters' 07 writes its groups ("Yes, as recommended"): the robots' bodies, the
+            # joint sets, the battery packs, each over its own draws above 0.
+            for j, part in enumerate(PARTS):
+                summary[('element part', (symbol, part), flow_name)] = stats_of(
+                    np.asarray(files[element_name][:, :, j, e], dtype=np.float64))
     with open(os.path.join(folder, SUMMARY), 'w', newline='', encoding='utf-8') as handle:
         writer = csv.writer(handle)
         writer.writerow(('quantity', 'robot type', 'flow', 'year', 'mean', '2.5 %', '97.5 %',
                          'held in % of the draws'))
         for (what, which, flow_name), stats in summary.items():
-            quantity = composition.ELEMENT_NAMES.get(which, which) if what == 'element' else what
-            robot_type = which if what != 'element' and which else 'all'
+            if what == 'element':
+                quantity, robot_type = composition.ELEMENT_NAMES.get(which, which), 'all'
+            elif what == 'element part':                                         # 'Copper, joint sets'
+                quantity, robot_type = f'{composition.ELEMENT_NAMES.get(which[0], which[0])}, {which[1]}', 'all'
+            else:
+                quantity, robot_type = what, which if which else 'all'
             for i in range(len(stats['mean'])):
                 cells = [f'{stats[key][i]:.6g}' if np.isfinite(stats[key][i]) else '–'
                          for key in ('mean', 'low', 'high')]
@@ -890,6 +1322,15 @@ def run(params: Params) -> int:
             held.append(symbol)
             element_page(symbol, summary, world.get(symbol, {}), notes.get(symbol, []), draws,
                          os.path.join(figures, ELEMENTS_DIR, element_file(symbol)), params.output.dpi)
+        # The distribution pages, each followed by its numbers.
+        distributions = os.path.join(figures, DISTRIBUTIONS_DIR)
+        written = robots_distribution_page(files, draws, distributions, params.output.dpi)
+        written += shares_distribution_page(params, shares, points, draws, distributions, params.output.dpi)
+        for symbol in held:
+            written += element_distribution_page(symbol, files['elements_stock'][:, :, :, elements.index(symbol)],
+                                                 draws, os.path.join(distributions, ELEMENTS_DIR,
+                                                                     element_file(symbol)), params.output.dpi)
+    print(f'04: {len(written)} distribution pages and their numbers in {distributions}.')
     without = [composition.ELEMENT_NAMES.get(s, s) for s in held if s not in world]
     if without:
         print(f"04: no world production or reserves for {', '.join(without)}; their pages say so.")

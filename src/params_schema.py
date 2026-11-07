@@ -45,6 +45,7 @@ returns the settings in force after checking them; `flatten()` lists them for th
 from __future__ import annotations
 
 import glob
+import math
 import os
 from dataclasses import dataclass, field, fields
 
@@ -326,6 +327,17 @@ class StockFlowParams:
         metadata={'doc': "A robot's lifetime, years (min, mode, max), spread among the robots of each quarter "
                          '(EVIDENCE.md E39.3, E42).'})
 
+    # The uncertainty of the lifetimes, a factor drawn once a draw (min, mode, max): Matthias, 2026-11-07, "Is the
+    # lifetime also with uncertainties. I want that is is 30% short and 20% longer. Also with the batteries"
+    # (EVIDENCE.md E45). One factor a draw scales the robots' lifetime (the triangle above, spread among the robots,
+    # times it), another of its own the battery packs' charges to 80 %, a third the joints' life in hours, as
+    # RAWCLICStockAndFlow draws its lifetimes once a draw around their mode.
+    # SAFE TO CHANGE: only on Matthias's word; in order, above 0, the min below the max.
+    lifetime_factor: tuple = field(
+        default=(0.70, 1.0, 1.20),
+        metadata={'doc': "The factor of a draw on the robots' lifetime and, each drawn on its own, on the battery "
+                         "packs' charges and the joints' life (min, mode, max): Matthias's 30 % shorter, 20 % longer."})
+
     # The hours a day a robot works: the article's "AIs and robots can work 24/7" (its main page, read 2026-11-06).
     # SAFE TO CHANGE: only with the article; above 0, at most 24.
     hours_a_day: float = field(
@@ -373,17 +385,30 @@ class StockFlowParams:
         metadata={'doc': "A battery pack's runtime in 2025, hours, of robot types 1, 3 and 5, their anchor robots' "
                          '(EVIDENCE.md E39.1).'})
 
-    # The share of research robots, robot type 1, among the robots built (min, mode, max), in 2025 and in 2040, a straight
-    # line between, one random number a draw for the whole path: Matthias, 2026-11-06, "I assume reseach wil be around
-    # 10% within -+5% and over time this will decrease"; to 2040 half of it (E). The other types take the workbook's
-    # shares of the robots shipped (sheet Market Units & Shares 2025-2040), type 3, the largest, the remainder.
-    # SAFE TO CHANGE: only on Matthias's word; in order, between 0 and 1.
-    research_share_2025: tuple = field(
-        default=(0.05, 0.10, 0.15),
-        metadata={'doc': 'The share of robot type 1 among the robots built in 2025 (min, mode, max; Matthias).'})
-    research_share_2040: tuple = field(
-        default=(0.025, 0.05, 0.075),
-        metadata={'doc': 'The share of robot type 1 among the robots built in 2040 (min, mode, max; half of 2025, E).'})
+    # The mode of the share of research robots, robot type 1, among the robots built, in 2025 and in 2040, a straight line
+    # between: Matthias, 2026-11-06, "I assume reseach wil be around 10% within -+5% and over time this will decrease";
+    # to 2040 half of it (E, agreed in the table of 04, "Yes, build it"). Types 2 to 6 take the workbook's shares of the
+    # robots shipped (sheet Market Units & Shares 2025-2040), scaled together to what type 1 leaves, so that the six
+    # modes add up to 1 (Matthias, 2026-11-07, to the table of the type shares, "Yes, build it"; EVIDENCE.md E44).
+    # SAFE TO CHANGE: only on Matthias's word; the years 2025 and 2040, each share above 0 and below 1.
+    # Its uncertainty the same as every other type's (`type_share_spread`; Matthias, 2026-11-07: "robot type 1 has the
+    # same unceratinties as all the other").
+    research_share: tuple = field(
+        default=((2025, 0.10), (2040, 0.05)),
+        metadata={'doc': 'The mode of the share of robot type 1 among the robots built, in 2025 and 2040 (Matthias; '
+                         '2040 half of 2025, E).'})
+
+    # How far the share of each robot type lies from its mode in 95 % of the draws, a share of the mode, in 2025 and in
+    # 2040, a straight line between (Matthias, 2026-11-07: "Damit I told you 10% in 2025 and 30% in 2040", "I said +-10%
+    # and then +- 30% this is never the case", "all 6 types around 10% +- in 2025 and 30%+- in 2040. All have to have
+    # close to this value!!"). 04 gives every type its own triangle, mode × (1 ∓ spread / 0.7764) (95 % of a triangle
+    # lies within 0.7764 of its half-width), and puts the draws of the six together so that they add up to the article's
+    # robots in every draw (the rearrangement algorithm; "Yes, build it"); nothing divided (E44).
+    # SAFE TO CHANGE: only on Matthias's word; the years 2025 and 2040, each spread above 0 and below 0.7764.
+    type_share_spread: tuple = field(
+        default=((2025, 0.10), (2040, 0.30)),
+        metadata={'doc': "How far the share of each robot type lies from its mode in 95 % of the draws, as a share of "
+                         "the mode, in 2025 and 2040 (Matthias's 10 % and 30 %)."})
 
 
 @dataclass
@@ -524,8 +549,9 @@ def validate(params: Params) -> None:
                                  ' to an .xlsx workbook') + f', not {value!r}.')
 
     # 04's robots: one value a year from 0 up, the years without a gap, two at least (a year's flow needs the next 1
-    # January). Its triangles in order, their min below their max (a triangle, never a single number); the shares and
-    # the capacity below 1; the hours a day at most 24; a runtime of 2025 for each of robot types 1, 3 and 5.
+    # January). Its triangles in order, their min below their max (a triangle, never a single number); the capacity
+    # below 1; the research share and the types' spread given for 2025 and 2040, each above 0 and below 1; the hours a
+    # day at most 24; a runtime of 2025 for each of robot types 1, 3 and 5.
     robots = params.stock_and_flow.robots
     years = [y for y, _ in robots] if isinstance(robots, tuple) else []
     if (len(years) < 2 or years != list(range(years[0], years[0] + len(years)))
@@ -534,14 +560,25 @@ def validate(params: Params) -> None:
                              f'least, each above 0, not {robots!r}.')
     flow = params.stock_and_flow
     for name in ('robot_lifetime_years', 'joint_life_hours', 'battery_cycles_to_80', 'battery_replaced_below',
-                 'research_share_2025', 'research_share_2040'):
+                 'lifetime_factor'):
         low, mode, high = getattr(flow, name)
         if not (0 < low <= mode <= high and low < high):
             raise ParameterError(f'stock_and_flow.{name} must be a min, mode and max above 0, in order, the min below '
                                  f'the max, not {getattr(flow, name)!r}.')
-    for name in ('battery_replaced_below', 'research_share_2025', 'research_share_2040'):
-        if getattr(flow, name)[2] >= 1:
-            raise ParameterError(f'stock_and_flow.{name} must stay below 1, not {getattr(flow, name)!r}.')
+    if flow.battery_replaced_below[2] >= 1:
+        raise ParameterError(f'stock_and_flow.battery_replaced_below must stay below 1, not '
+                             f'{flow.battery_replaced_below!r}.')
+    for name in ('research_share', 'type_share_spread'):
+        value = getattr(flow, name)
+        if (not isinstance(value, tuple) or [y for y, _ in value] != [2025, 2040]
+                or not all(0 < v < 1 for _, v in value)):
+            raise ParameterError(f'stock_and_flow.{name} must be ((2025, value), (2040, value)), each value above 0 '
+                                 f'and below 1, not {value!r}.')
+    # 95 % of a triangle lies within 1 − √0.05 = 0.7764 of its half-width: a spread beyond it puts the triangle's foot
+    # below 0 (04's type_ends).
+    if not all(v < 1 - math.sqrt(0.05) for _, v in flow.type_share_spread):
+        raise ParameterError(f'stock_and_flow.type_share_spread {flow.type_share_spread!r}: a spread of 0.7764 or more '
+                             "puts a robot type's triangle below 0.")
     if not 0 < flow.hours_a_day <= 24:
         raise ParameterError(f'stock_and_flow.hours_a_day must be above 0 and at most 24, not {flow.hours_a_day}.')
     if sorted(t for t, _ in flow.runtime_2025_hours) != [1, 3, 5] or any(h <= 0 for _, h in flow.runtime_2025_hours):

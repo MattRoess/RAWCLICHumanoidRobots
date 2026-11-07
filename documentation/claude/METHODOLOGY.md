@@ -1216,19 +1216,58 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
    explorer's row Robots, `stock_and_flow.robots`) at each 1 January, 10 M in 2025 to 70 × 10⁹ in 2040, the quarters
    between geometric, as 07's compute path. Each quarter's robots arrive in its middle and leave as the share of them
    whose lifetime is shorter than their age: the triangle 5 / 7 / 10 years spread among them
-   (`stock_and_flow.robot_lifetime_years`; CRU, Agility and the article, E39.3), as 07 spreads its GPUs' lifetimes. A
+   (`stock_and_flow.robot_lifetime_years`; CRU, Agility and the article, E39.3), as 07 spreads its GPUs' lifetimes,
+   times the draw's factor from the triangle 0.7 / 1 / 1.2 (since 2026-11-07, `lifetime_factor`, EVIDENCE.md E45;
+   Matthias: "30% short and 20% longer"): 3.5 / 4.9 / 7 years at its foot, 6 / 8.4 / 12 years at its top. A
    quarter's inflow is the target less what the earlier quarters still hold, never below 0. The robots of 1 January
    2025 were built in the quarters before at the article's own growth (11.6 M over 10 M a year), as many as hold its 10 M
    with their survivals (E): the article states no ages.
-2. **The robot types.** The robots built in a quarter by type: the research robots (type 1) Matthias's "around 10% within
-   -+5%" in 2025, half of it in 2040 (E), a straight line between, the same point of both triangles in a draw
-   (`research_share_2025`, `research_share_2040`); types 2, 4, 5 and 6 his workbook's shares of the robots shipped
-   (sheet Market Units & Shares 2025-2040), a straight line between its years; type 3, the largest, the remainder, 1
-   minus the others (not normalised; a remainder below 0 stops 04). The robots of 1 January 2025 by the shares of 2025.
+2. **The robot types** (since 2026-11-07, EVIDENCE.md E44; Matthias: "All have a triangular distribution", "the last
+   type is not just the rest to 100%", "All types have to have the same uncertainty!!!", "The summ of the total has to
+   be correct", "I said +-10% and then +- 30% this is never the case", "I want that you developt an algorthym that has
+   for all 6 types around 10% +- in 2025 and 30%+- in 2040. All have to have close to this value!!", "NO type 3 is not
+   triangular!!", to the rearrangement "Yes, build it"). Every type's share of the robots built has its own triangle.
+   Its mode: type 1 Matthias's 10 % in 2025, half of it in 2040 (E; `research_share`); types 2 to 6 his workbook's
+   shares of the robots shipped (sheet Market Units & Shares 2025-2040), scaled together to what type 1 leaves so that
+   the six modes add up to 1 (in 2025: 24, 42, 12, 6 and 6 %); a straight line between the years. Its triangle: mode ×
+   (1 ∓ end), the end the spread over 0.7764 (95 % of a symmetric triangle lies within 1 − √0.05 = 0.7764 of its
+   half-width), so that 95 % of its draws lie within ±10 % of its mode in 2025 widening to ±30 % in 2040, the same for
+   every type (`type_share_spread`; the ends 12.88 % and 38.64 %). How the six are drawn so that they add up to the
+   article's robots in every draw:
+   - every type has its own draws of its own triangle, one random number a type and draw, the same draws in every
+     year;
+   - at 1 January 2025 and in the middle of every quarter, a start: the five other types linked by one correlation,
+     (m3² − Σm²) / ((Σm)² − Σm²) over their modes (0.353 in 2025, −0.207 in the last quarter of 2039), and type 3 1
+     minus them; each type's own draws put in the order of the start;
+   - then the rearrangement algorithm (Puccetti & Rüschendorf 2012; Embrechts, Puccetti & Rüschendorf 2013): each
+     type's draws in turn put in the opposite order of the sum of the other five, weighted by the modes, until a sweep
+     no longer lowers the largest sum by 0.1 %. No draw changes, only which draws of the six share a row.
+   Nothing is divided ("I do NOT want this [normalisation]"). Type 3, the largest, is 1 minus the other five, so that
+   the sum is exact; it lies off its own draws by what the rearrangement leaves, which the run prints: 0.11 % of its
+   half-width at 200,000 draws with 04's own random numbers, more with few draws (1.6 % at 2,000, 23 % at 40).
+   Measured at 200,000 draws with 04's own random numbers (95 % of the draws, as a share of the mode):
+
+   | Time | Wanted | Type 1 | Type 2 | Type 3 | Type 4 | Type 5 | Type 6 |
+   |---|---|---|---|---|---|---|---|
+   | 1 January 2025 | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % |
+   | 2030, first quarter | ±16.8 % | ±16.8 % | ±16.8 % | ±16.9 % | ±16.8 % | ±16.9 % | ±16.8 % |
+   | 2035, first quarter | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % |
+   | 2039, last quarter | ±29.8 % | ±29.9 % | ±29.8 % | ±29.9 % | ±29.8 % | ±29.9 % | ±29.8 % |
+
+   Each type's draws as close to its triangle as random draws of a triangle are (largest gap of their distribution
+   0.0022, against 0.0030 for random draws at 95 %); every mean on its mode (to 5 × 10⁻⁴ of it); the six adding up to
+   1 to 2 × 10⁻¹⁶; the lowest share 2.85 %. A draw is one world over the years: each type's point from one quarter to
+   the next correlated at least 0.999, from 2025 to the last quarter of 2039 0.59 to 0.83. The correlations between
+   the types: in 2025 type 3 against each other type (−0.58 to −0.86), the other five together (+0.35 to +0.37), as
+   they must be when type 3, 42 % of the robots built, is to move ±10 %; in 2039 type 3 against types 2 and 4 (−0.52,
+   −0.71) and a little with types 1, 5 and 6 (+0.21 to +0.28). About 31 seconds at 200,000 draws; the points of the
+   five, 244 MB. Each type's robots built are the article's robots built times its share. The robots of 1 January 2025
+   by the shares of 2025.
 3. **The joint sets.** A robot's joints, the kinds 01 numbers 1 to 6 (hip, knee, ankle, waist, arm and head joints), are
    a stock of their own, as many as the robots in use of each type, each set worn out after 7,000 / 10,000 / 30,000
    hours (`joint_life_hours`, the rated lives of strain-wave and planetary gears, E43) at 24 hours a day (the article:
-   robots "can work 24/7", `hours_a_day`), 0.8 / 1.1 / 3.4 years, spread among the sets, and replaced.
+   robots "can work 24/7", `hours_a_day`), 0.8 / 1.1 / 3.4 years, spread among the sets, times the draw's own factor
+   from the same triangle 0.7 / 1 / 1.2 (since 2026-11-07, E45), and replaced.
 4. **The battery packs.** A robot holds as many packs as a day's work needs, its hours a day over a pack's runtime,
    rounded up (Matthias: "at least so many battery packs ready for use as it is needed to have them for 1 day to
    switch"): types 2, 4 and 6 their runtimes in his workbook (sheet Material Trajectories 2025-2040, a straight line
@@ -1236,7 +1275,8 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
    E39.1, `runtime_2025_hours`) times their energy density over that of 2025. In 2025: 12, 7, 12, 12, 6 and 24 packs a
    robot of types 1 to 6; in 2040 5, 1, 4, 3, 3 and 6. Each pack is charged once a day and replaced when its capacity
    falls below 80 % ± 5 % (`battery_replaced_below`, one value a draw): its charges to that capacity are its charges to
-   80 % (500 / 800 / 1,000, E39.2, `battery_cycles_to_80`, spread among the packs) times (1 − the capacity) / 0.2, a
+   80 % (500 / 800 / 1,000, E39.2, `battery_cycles_to_80`, spread among the packs, times the draw's own factor from
+   the triangle 0.7 / 1 / 1.2 since 2026-11-07, E45: "Also with the batteries") times (1 − the capacity) / 0.2, a
    straight-line fade (an approximation: cells fade faster at first and near their end). The packs in use follow the
    robots in use times the packs a robot needs; where that need falls, the packs in use stay until they wear out, above
    the need for a while.
@@ -1249,17 +1289,18 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
 out, which makes their inflow and outflow slightly low. Each chunk is checked before it is written (`check`): the stock
 before + inflow − outflow is the stock in every quarter, the outflow counted cohort by cohort apart from the stock; no
 flow below 0; the robots at each 1 January the article's; the types adding up to all robots; the joint sets as many as
-the robots; the packs never fewer than the need. The robots' own numbers have no band: the article fixes the stock and
-the lifetime is spread among the robots, as 07 does; the bands come from 02's draws, the research share and the packs'
-capacity.
+the robots; the packs never fewer than the need. The bands come from 02's draws, the types' shares, the three
+lifetime factors and the packs' capacity. The robots in use have none: the article gives one number a year. The packs
+in use have almost none: the packs a robot holds come from runtimes that are single numbers (the workbook's and
+`runtime_2025_hours`).
 
 **What it writes.** `data/stock_and_flow/`: the draws, float32, by year (flows 2025 to 2039, stocks at 1 January 2025 to
 2040): `units_in`, `units_stock`, `units_out` (draw × year × robots, joint sets, battery packs × type) and
 `elements_in`, `elements_stock`, `elements_out` (draw × year × robots' bodies, joint sets, battery packs × element, kg),
 their axes in `draws.txt`; `summary.csv`, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above 0,
 and their share. About 3.1 GB at 200,000 draws. `figures/stock_and_flow/`, as 07's, A4 landscape with its print fonts:
-`overview.png` (robots in use; built and retired; in use by type; the joint sets; the battery packs in use; built and
-worn out) and `elements/<Element>.png` (its stock beside the world's reserves; its inflow and outflow beside the world's
+`overview.png` (robots in use; built and retired; in use by type; each type's share of the robots built, a plain axis;
+the joint sets; the battery packs in use; built and worn out) and `elements/<Element>.png` (its stock beside the world's reserves; its inflow and outflow beside the world's
 mine production in 2025, dashed, a range as a grey band, a value beyond the scale written in the panel). The world's
 numbers are RAWCLICDataCenters' sheet ElementReference, the ones 07 draws, and for magnesium, titanium and indium,
 which it does not hold, USGS's data file (Mineral Commodity Summaries 2026): magnesium metal from smelters and
@@ -1267,4 +1308,15 @@ magnesite's magnesium by its formula (E), titanium sponge and ilmenite and rutil
 least), refined indium, no reserves; none for dysprosium and terbium, whose pages say so. Every line is the mean over
 the draws above 0, its band 95 % of them, with the share of the draws that hold it where it is not all of them ("A 0 is
 not part of a distribution"); a legend at the upper left unless a line or a written value lies under it there. An
-element 0 in every draw has no page.
+element 0 in every draw has no page. Since 2026-11-07 (Matthias: "I also want the distributions. Check with the data centers,
+what else has to be done", to the comparison with RAWCLICDataCenters' 07 "Yes, as recommended"; EVIDENCE.md E46): the
+distribution pages in `figures/stock_and_flow/distributions/`, in 02's form (bars of the share of the draws, the median a
+solid line, the mean a dotted one, 2.5 % and 97.5 % dashed, no number on a panel; each page followed by the page of its
+numbers, E34): the robots in use of each type at 1 January 2025, 2030, 2035 and 2040 (`robots_in_use_by_type.png`);
+each type's share of the robots built in 2025 and in the first quarters of 2030 and 2035 and the last of 2039, its own
+triangle drawn over its bars in grey (`type_shares.png`); each element in use at the four 1 January, each bar split into
+the kg of the robots' bodies, the joint sets and the battery packs, the smaller part lower, as RAWCLICDataCenters' 05
+splits its elements by 03 and 04 (`elements/<Element>.png`; an element not in use in every draw over the draws that hold
+it, their share on the page of numbers). Each panel in the unit that reads from 1 up (thousand, million, billion robots;
+g, kg, t, kt, Mt), its ticks with the decimals their spacing needs. `summary.csv` also holds each element by part
+("Copper, joint sets"), as 07 writes its groups.
