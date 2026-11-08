@@ -37,6 +37,11 @@ data/parts_taken_apart/
 # 04_stock_and_flow.py writes the draws of the robots, joint sets, battery packs and their elements here (their axes
 # in draws.txt).
 data/stock_and_flow/
+# tools/copy_data_center_draws.py copies RAWCLICDataCenters' 07 draws here (with elements.txt and source.txt); that
+# repository is private, so nothing of the copy goes to GitHub.
+data/raw/data_center_stock_and_flow/
+# 05_combined_stock_and_flow.py writes the draws of the data centres and the robots together here (elements.txt each).
+data/combined_stock_and_flow/
 
 ### THE EARLIER MODEL
 # Matthias, 2026-10-26: left out of the repository until he decides whether it stays (documentation/claude/HANDOVER.md).

@@ -1685,7 +1685,18 @@ SMALL_APART = {
                   # The joints' ceramic capacitors (E38 point 4), last too.
                   ('all', "Ceramic capacitors in a driver board (the G1's small joint's, weighed)", 8, 16, 24,
                    'capacitors', 'E', 'E38 point 4'),
-                  ('all', 'Ceramic capacitor, its barium titanate', 14.44, 39.67, 72.49, 'mg', 'S', 'E38 point 4')],
+                  ('all', 'Ceramic capacitor, its barium titanate', 14.44, 39.67, 72.49, 'mg', 'S', 'E38 point 4'),
+                  # The large capacitors (E51), as the builders write them.
+                  ('all', 'Large capacitors on a joint driver board', 0, 2, 4, 'capacitors', 'S, E', 'E51'),
+                  ('all', 'Large capacitor of a joint driver board, its mass', 0.68, 1.5, 2.6, 'g', 'S, E', 'E51'),
+                  ('all', 'Capacitors on a capacitor board', 2, 5, 8, 'capacitors', 'S, E', 'E51'),
+                  ('all', 'Capacitor of a capacitor board, its mass', 2.6, 5.3, 8.0, 'g', 'S', 'E51')]
+                 + [('all', f'{kind}, {what} share', 0.01, 0.02, 0.03, 'share', 'S, E', 'E51')
+                    for kind, whats in (('Liquid electrolytic capacitor', ('aluminium', 'iron', 'copper', 'tin',
+                                                                            'kaolinite')),
+                                        ('Hybrid polymer capacitor', ('aluminium', 'iron', 'chromium', 'copper', 'tin',
+                                                                      'glass fibre')))
+                    for what in whats],
     'Sources': [('T1', 'China Post Securities, teardown', 'https://example.org', 'A teardown')],
 }
 APART_LISTS = [('Body region', 'Legs'), ('Body region', 'Arms'), ('Body region', 'Torso'), ('Body region', 'Head'),
@@ -2839,3 +2850,124 @@ class TestTableHeadingsInsideTheBand(unittest.TestCase):
                     self.assertGreaterEqual(e.x0, band.x0, msg=(n, t.get_text()))
             schemas.plt.close(figure)
 
+
+
+class TestHowARobotIsTakenApart(unittest.TestCase):
+    """Matthias, 2026-11-08: "I want a detailed list of the component, so it is easy to understand and establish a
+    recycling to know how to take it apart!!!", the four groups in his words, "Also the joints the can be split up in
+    smaller parts. I waht schemas for this. So that you have documented this once for all!!", "Yes do it": the one list
+    of four groups and their parts (TAKEN_APART), the rule that places every row in a part (taken_part) and the page that
+    draws them (taken_apart_page)."""
+
+    def test_the_four_groups_and_their_parts(self):
+        self.assertEqual(list(schemas.TAKEN_APART), ['Joints', 'Battery', 'Electronics', 'Body'])
+        self.assertEqual(schemas.TAKEN_PARTS, [
+            'Magnets', 'Motor windings and steel', 'Gears and bearings', 'Housings and other parts', 'Hydraulics',
+            'Cells', 'Housing, busbars and wires', 'PCB', 'Small PCB', 'Wires', 'Sensors', 'Frame', 'Shell',
+            'Screws, pins and bearings'])
+        self.assertEqual(len(set(schemas.TAKEN_PARTS)), 14)                 # each part once
+        self.assertEqual(set(schemas.GROUP_COLOURS), set(schemas.TAKEN_APART))
+        # Every kind of part in a group: nothing of a robot outside the four.
+        self.assertEqual(set(schemas.KIND_GROUP), set(schemas.KINDS))
+        self.assertTrue(set(schemas.PART_KIND.values()) <= set(schemas.KIND_GROUP))
+
+    def test_every_row_goes_where_he_said(self):
+        # By hand, row by row, each in his words: the joints with the wheels and the hydraulics; sensors, fans, boards
+        # and wires the electronics wherever they sit; the battery; the body with its screws.
+        rows = [
+            (dict(kind='hips', item='Motor rotor', material='NdFeB magnets'), 'Magnets'),
+            (dict(kind='base', item='Magnet carrier', material='NdFeB magnets'), 'Magnets'),          # a wheel's motor
+            (dict(kind='hydraulics', item='Hydraulic power unit', material='NdFeB magnets'), 'Magnets'),
+            (dict(kind='knees', item='Motor stator', material='Copper'), 'Motor windings and steel'),
+            (dict(kind='lift', item='Motor rotor', material='Electrical steel'), 'Motor windings and steel'),
+            (dict(kind='waist', item='Gear stage 1, sun gear', material='Steel'), 'Gears and bearings'),
+            (dict(kind='arms', item='Two small bearings', material='Steel'), 'Gears and bearings'),
+            (dict(kind='ankles', item='Output flange', material='Steel'), 'Housings and other parts'),
+            (dict(kind='base', item='Casters', material=''), 'Housings and other parts'),
+            (dict(kind='lift', item='Lift column: aluminium profile', material=''), 'Housings and other parts'),
+            (dict(kind='hips', item='Hydraulic actuators, hips'), 'Hydraulics'),
+            (dict(kind='headjoints', item='Servo valves, head'), 'Hydraulics'),
+            (dict(kind='knees', item='Actuator bodies, rods and seals, knees', material='Titanium alloy'), 'Hydraulics'),
+            (dict(kind='hydraulics', item='Hydraulic oil', material='Other'), 'Hydraulics'),
+            (dict(kind='hips', item='Hip fan'), 'PCB'),                                             # "Fans are parts
+            (dict(kind='boards', item='Main board fan'), 'PCB'),                                    # of the electronic"
+            (dict(kind='boards', item='Main board heat sink: heat pipes and fins', material='Copper'), 'PCB'),
+            (dict(kind='boards', component='circuit boards'), 'PCB'),
+            (dict(kind='hips', component='circuit boards'), 'Small PCB'),                           # a driver board
+            (dict(kind='battery', component='circuit boards'), 'Small PCB'),                        # its management
+            (dict(kind='head', component='circuit boards'), 'Small PCB'),
+            (dict(kind='cables', component='circuit boards'), 'Small PCB'),                         # the legs' boards
+            (dict(kind='cables', component='cables', material='Copper'), 'Wires'),
+            (dict(kind='cables', component='connectors'), 'Wires'),
+            (dict(kind='hips', component='other sensors'), 'Sensors'),                              # an encoder
+            (dict(kind='head', component='cameras'), 'Sensors'),
+            (dict(kind='head', item='Camera, head', material='Aluminium alloys', sensor=True), 'Sensors'),
+            (dict(kind='battery', item='Battery cells', material='Battery cells'), 'Cells'),
+            (dict(kind='battery', item='Auxiliary battery cells (30 V)'), 'Cells'),
+            (dict(kind='battery', item='Battery housing, busbars and wires', material='Aluminium alloys'),
+             'Housing, busbars and wires'),
+            (dict(kind='frame', item='Frame', material='Aluminium alloys'), 'Frame'),
+            (dict(kind='frame', item='Frame and shell'), 'Frame'),
+            (dict(kind='frame', item='Shell: ABS composite', material='Plastics'), 'Shell'),
+            (dict(kind='frame', item='Magnets in the covers, N52 (80)', material='NdFeB magnets'), 'Shell'),
+            (dict(kind='frame', item='Screws, grade 12.9 (753)', material='Steel'), 'Screws, pins and bearings'),
+            (dict(kind='frame', item='Bearings outside the actuators (9)'), 'Screws, pins and bearings'),
+        ]
+        for how, part in rows:
+            self.assertEqual(schemas.taken_part(**how), part, msg=how)
+
+    def test_a_row_it_cannot_place_stops(self):
+        for how in (dict(kind='frame', item='Gold-plated widget'), dict(kind='hips', item='Housing of the frame'),
+                    dict(kind='head', item='Hydraulic actuators, head'),     # a head actuator is a head joint
+                    dict(kind='nowhere', item='Frame'), dict(kind='boards', component='fans')):
+            with self.assertRaises(ValueError, msg=how):
+                schemas.taken_part(**how)
+
+    def test_the_page_draws_the_list_and_nothing_else(self):
+        figure = schemas.taken_apart_page()
+        texts = [t.get_text().replace('\n', ' ') for t in figure.axes[0].texts]
+        joined = ' '.join(texts)
+        self.assertEqual(texts[0], 'How a humanoid robot is taken apart: four groups and their parts')
+        for group, (what, parts) in schemas.TAKEN_APART.items():
+            self.assertIn(group, texts)
+            self.assertIn(what, joined)
+            for part, holds in parts:
+                self.assertIn(part, texts)
+                self.assertIn(holds, joined)
+        for word in schemas.PROJECT_WORDS:
+            self.assertNotIn(word, joined)
+        # Every box on the page and above the note at its foot; no text below 14 points; no text beyond its box.
+        renderer = figure.canvas.get_renderer()
+        note = next(t for t in figure.axes[0].texts if t.get_text().startswith('Every element'))
+        boxes = [p.get_window_extent(renderer) for p in figure.axes[0].patches]
+        page = figure.bbox
+        for box in boxes:
+            self.assertGreaterEqual(box.y0, note.get_window_extent(renderer).y1)
+            self.assertLessEqual(box.y1, page.y1)
+        for t in figure.axes[0].texts:
+            self.assertGreaterEqual(t.get_fontsize(), schemas.SCREEN_TEXT)
+            e = t.get_window_extent(renderer)
+            self.assertLessEqual(e.x1, page.x1)
+            if t is not note and texts.index(t.get_text().replace('\n', ' ')) > 0:
+                inside = [b for b in boxes if b.x0 <= e.x0 <= b.x1 and b.y0 <= e.y1 <= b.y1 + 1]
+                self.assertTrue(inside, msg=t.get_text())
+                self.assertLessEqual(e.x1, max(b.x1 for b in inside), msg=t.get_text())
+                self.assertGreaterEqual(e.y0, min(b.y0 for b in inside) - 1, msg=t.get_text())
+        schemas.plt.close(figure)
+
+
+class TestCapacitorBoards(unittest.TestCase):
+    """EVIDENCE.md E51 ("Yes, enter 1 to 8"): which boards carry large capacitors, a robot's own count of them, and the
+    checks of the new constants."""
+
+    def test_which_boards_carry_large_capacitors(self):
+        for name in ('Capacitor buffer board', 'Capacitor board RBE-PWR-CAP', 'Motor capacitor board RBE-PWR-MCAP'):
+            self.assertTrue(schemas.is_capacitor_board(name), name)
+        for name in ('Driver board, small joint', 'Main control board (RK3588S, core board)',
+                     'Battery management board', "Ceramic capacitors in a driver board (the G1's small joint's, "
+                                                 'weighed)'):
+            self.assertFalse(schemas.is_capacitor_board(name), name)
+
+    def test_the_component_is_a_small_pcb(self):
+        self.assertEqual(schemas.taken_part('hips', component='capacitors'), 'Small PCB')
+        self.assertEqual(schemas.taken_part('cables', component='capacitors'), 'Small PCB')

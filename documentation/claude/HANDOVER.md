@@ -65,7 +65,138 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-07, evening: committed and pushed; where to start tomorrow (start here)
+## 2026-11-08, evening: where to start tomorrow, on the other Mac (start here)
+
+**All of today committed and pushed to `main`** at the end of the day, on his word ("uodate the handover and then commit
+and push"): 19 changed files and 3 new ones (05, its test, the copy tool), by exact names; no data. The other Mac's git
+(in `$HOME/gitdirs/`) does not sync through iCloud: there run `git fetch` and `git status` first; while its git lags
+behind GitHub, never commit there, align it only on his word, and if any file differs from `origin/main`, it is
+uncommitted work: stop and ask (GitHub/CLAUDE.md §9).
+
+**His runs, in RAWCLICHumanoidRobots, in this order** (full paths under
+`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`):
+1. `01_schemas.py`: **done**, 14:32, "No fault found in the inputs" (V225).
+2. `02_composition.py`: **done**, 14:48 to 14:49 (by the modification times; its contents not yet read back). The one
+   change to 02 since is strontium's name, for 05; the robots hold no strontium: no rerun.
+3. `03_comparison.py` and 4. `04_stock_and_flow.py`: **done** (by the times: 03's pages 15:15:51 to 15:16:53, 04's
+   draws from 15:20:35, its pages to 15:24:13; their contents not yet read back). 04's code changed after it
+   (its element page shared with 05, its note wrapped): its results stand; a rerun would only set the note of its
+   element pages on three lines (his run's note fits on its two, looked at).
+5. `tools/copy_data_center_draws.py`: **done**, 15:55:06 to 15:55:48, from RAWCLICDataCenters' `stock_flow_draws.csv`
+   (9.3 GB, of 2026-10-23 14:38, his run of 07 after c was taken back): `element_draws.npy` 2.30 GB, `elements.txt`,
+   `source.txt` in `data/raw/data_center_stock_and_flow/`.
+6. `05_combined_stock_and_flow.py`: **done**, 15:56:04 to 15:59:05, after the code's last change (05 15:28:38, the page
+   it shares with 04 15:45:25): 81 pages, 23 element pages and 4 distribution pages in each of `A`, `B`, `C`;
+   `data/combined_stock_and_flow/` with `summary.csv` (V226, his run). Looked at: `B/distributions/elements_2040.png`,
+   `C/elements/Copper.png`.
+7. Not needed for 05, seconds each, whenever: `00_parameters.py` (the register with the four new settings),
+   `01_schemas.py` (the overview with 05).
+
+**First thing tomorrow:** the times of his 05 outputs again (iCloud can put an older copy back), and the rest of its
+pages looked at; then his 02, 03 and 04 as below.
+
+**Then read his run of 02 back** (rule: read what is on disk, compare times):
+- the modification times of `data/consolidated/<type>/` and `data/parts_taken_apart/<type>/` against
+  `02_composition.py` (iCloud can put an older copy back: check every output, memory "Documents synced by iCloud");
+- `taken_apart.npy/.txt` and `taken_apart_mass.npy/.txt` present for all six types; `part_groups` the four groups;
+- each type's `summary.csv`, its section "Boards of the kind of part": the layers check (in the sandbox: the small
+  2-layer boards 92 to 100 % of their draws above, head and battery boards about a third, driver boards 6 to 12 %);
+- 02's pages: `figures/composition/<type>_groups_<k>.png` and `<type>_parts_<k>.png`, looked at;
+- then, after his 03 and 04, their pages likewise (`comparison_groups_<k>`, `comparison_part_groups_1`,
+  `comparison_parts_<k>`; 04's `distributions/elements_<year>.png` and `parts_<year>_<k>.png`).
+
+**Today, in one list** (the entry below holds each with its words; EVIDENCE E46 to E52, VERIFICATION V216 to V226):
+- 04 exactly as RAWCLICDataCenters' 07 (years, axes, the article's 70 × 10⁹ at the end of 2040); the robots in use and
+  the elements as 05's distribution pages.
+- How a robot is taken apart: four groups, 14 parts, once in 01 (`TAKEN_APART`, its page `taken_apart.png`), in 02, 03 and
+  04; the hydraulic head actuators are head joints.
+- The large capacitors at every joint driver and on the capacitor boards; the boards' layers and the check of their
+  copper.
+- 02's check of every material's elements, which could never fail, fixed.
+- The verification and validation report: the first section of VERIFICATION.md (what the words mean, how each is done,
+  every comparison with independent data).
+- The whole suite at the end: 681 tests, OK (V224). Sandbox of the whole chain at 2,000 draws: 667 pages, all within his
+  rules.
+- Late afternoon, "write 05 combination of results of 04 and 07 with the distributions", "Yes, build it": 05, the AI data
+  centres (07, scenarios A, B, C) and the humanoid robots (04) together, draw i with draw i, 2025 to 2040, each element's
+  in, stock and out, its distribution pages as 04's; 07's draws copied into `data/raw/` by a tool (E52, V226). The page
+  check now lays a page out at the dpi it is saved with (it had let 05's note run off the page).
+
+**Open, for his decision** (nothing built):
+- The thin boards' measured copper is above what their layers hold (V223); limiting it needs the share of a layer left
+  after etching, which no source gives.
+- The elements of one robot are **not validated**: the only outside figures are second-hand and higher than the model
+  for the NdFeB magnets (Optimus about 3.5 kg, the model 1.0 to 1.8 kg) and copper (CRU 4 to 8 kg per 60 kg, the model
+  2.1 to 3.3 kg); a first-hand source (a second teardown, a maker's material declaration) would settle it.
+- Combining 07's and 04's distributions: **built** as 05 (V226); his runs above, item 5.
+- Copying this project's six files of other projects into `data/raw/` (GitHub/CLAUDE.md §6): asked, not answered.
+- Collection and charging efficiency in 04: agreed (E46.1, E46.2), not built.
+- Found, not fixed: RAWCLICVehicleElectronics' documents give its board sizes in mm², its code in cm²; 02 and 03 keep a
+  type's pages open until they are saved (matplotlib's warning, there before today).
+
+## 2026-11-08: two requirements written; the types' page from the results
+
+Not committed (on his word only).
+- **His run of 00 and 04** (09:24 to 09:27) read back: complete, every page new (VERIFICATION V216).
+- **Two requirements in GitHub/CLAUDE.md** (and in memory), for every project:
+  - §6: every data file a project's code reads lies in its own `data/raw/`, copied with its source and date; nothing
+    read from another project's folder ("This has to be for each of the project in this github!!"). Where projects read
+    from others today: this project six files (RAWCLICVehicleElectronics `04_VehiclePCBComposition.xlsx`,
+    `07_VehicleSensorComposition.xlsx`; RAWCLICDataCenters `04_DataCenterElementComposition.xlsx`,
+    `05_DataCenterScenarios.xlsx`, `MCS2026_Commodities_Data.csv`; RAWCLICVehicleTractionMotor
+    `10_MaterialElementDefinitions.xlsx`) and RAWCLICVehicleTractionMotor's magnet code; RAWCLICStockAndFlow the draws of
+    VehicleTractionMotor, VehicleBattery and VehicleElectronics; RAWCLICRecoveryModel StockAndFlow's outputs. Open for
+    him: the code dependency, the large draws, keeping copies current, data out of git. **Asked, not answered:** copy
+    this project's six files into `data/raw/` now.
+  - §5: a figure is a result of the run or a schema of the implementation, never an input drawn over or instead of the
+    results ("I want to see the triangulas from the MC and not some faque trianguals", "I only want to see results or
+    schemas, of the implementation").
+- **Built:** `distributions/type_shares.png` from the results: each type's robots built in 2025, 2030, 2035, 2039 over
+  all robots built that year, from the counted draws; the drawn triangle removed (EVIDENCE E46, VERIFICATION V217). His
+  run of 04 rewrites the page (it has no figures-only mode).
+- **Then 04 at 1 July** (E47, V218), undone the same day: **04's years now exactly as RAWCLICDataCenters' 07** (E48,
+  V219; "Both have to be exactly the same, as we have to combine both data!!!", "Yes!!"): quarters 2025 Q1 to 2040 Q4,
+  flows of the calendar years 2025 to 2040, stocks at the end of each year; then ("Follow the artcile!! 70 x 10E9") each
+  of the article's values at the end of its year, 70 × 10⁹ at the end of 2040, the estimate of 2041 withdrawn, 1 January
+  2025 8.62 M (E48, V220). **Open, his:** the article's own code dates its robots at 1 January. **One page of the robots in use**
+  (`distributions/robots_in_use.png`): the end of 2025, 2030, 2035, 2040, the six types one above the other in each
+  panel, every draw on the axis, the robots in all in the title; it replaces the pages of the robots in use by type and
+  of the types' shares. Never show a year 2039 ("Do never ever give me 2039").
+- **The distributions exactly as RAWCLICDataCenters' 05** (E49, V221): `distributions/elements_2025.png` to
+  `elements_2040.png`, a panel per element held, each bar split (since E50 by the four groups; in the morning by bodies,
+  joint sets and packs); "End of" gone from every title.
+- **How a robot is taken apart, in 01 to 04** (E50, V222; "I want a detailed list of the component ... to know how to
+  take it apart!!!", "Yes do it", "Yes, add 1 to 3"): four groups (joints with the wheels, the lift column and the
+  hydraulics; battery; electronics; body) and 14 parts, one list in 01 (`TAKEN_APART`) with its page
+  `figures/schemas/taken_apart.png`; 02 books every element and kilogram to its part, checked in every draw, writes
+  `taken_apart` and `taken_apart_mass`, its part groups are the four groups, its pages each element by group and the
+  list part by part; 03 the same side by side; 04 counts the elements in the 14 parts, each with its unit's lifetime,
+  splits its distribution pages by the four groups and lists them part by part a year. The builders put the hydraulic
+  head actuators in the head joints (13 cells of types 3 and 5; the two files written). The three-way split of the
+  morning (bodies, joint sets, packs) is gone. **His runs, in RAWCLICHumanoidRobots: 01, 02, 03, 04** (02 again: its new
+  tables; 04's element files about 4.2 GB each). Nothing committed.
+- **The verification and validation report** (VERIFICATION.md, its first section): what the two words mean, how each is
+  done, what is validated against independent data and what not ("I want a full verification and validation report").
+- **The large capacitors and the boards' layers** (E51, V223; "So have them correct!!", "Yes, enter 1 to 8"): every
+  joint's driver board 0 / 2 / 4 large capacitors, each 0.68 / 1.5 / 2.6 g, liquid or hybrid each as often, inside the
+  joint module; the capacitor boards 2 / 5 / 8 of 2.6 / 5.3 / 8.0 g, 10 / 20 / 30 cm²; the RP1's "Leg board" its
+  motor-capacitor board with its maker's 5; their elements by FROLYT's and TDK's declarations; the layers by where a board
+  sits; the boards' copper checked against them and reported. All six parts files rewritten by their builders (only the
+  new rows changed). RAWCLICVehicleElectronics models neither layers nor capacitors.
+- **02's check of every material's elements** (V224, "Yes, fix it"): it compared the elements with themselves and could
+  never fail; now each material's kilograms are counted where its mass is booked, its elements where they are booked,
+  and 02 stops where they miss each other by more than 0.1 %.
+- **Open for him:** the layers check finds the thin boards' measured copper above what their layers hold (V223); limiting
+  it needs a share of each layer left after etching, which no source gives. The elements of one robot are not validated:
+  the outside figures (second-hand) are higher for the magnets (about twice) and copper (VERIFICATION, its first
+  section).
+- **Next, his: combine 07's and 04's distributions** ("The distributions have to be combines 07 and 04 output"); the plan
+  was put to him (where it lives, which of 07's scenarios, which quantities); nothing built. His run of 04 rewrites everything; the old
+  pages `robots_in_use_by_type*.png` and `type_shares*.png` in his `figures/stock_and_flow/distributions/` are left from
+  the morning's run (he deletes the figure folders before his runs).
+- **Still open, agreed:** collection and electricity in 04 (the entry below).
+
+## 2026-11-07, evening: committed and pushed; where to start tomorrow
 
 All of today is committed and pushed (his "Write the handover commit and push so that we can cnintue tomorrow"). 647
 tests passed on the last code (VERIFICATION V214).

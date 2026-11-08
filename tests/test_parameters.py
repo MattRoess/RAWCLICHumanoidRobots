@@ -40,7 +40,9 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         'stock_and_flow.joint_life_hours', 'stock_and_flow.battery_cycles_to_80', 'stock_and_flow.battery_replaced_below',
         'stock_and_flow.runtime_2025_hours', 'stock_and_flow.research_share', 'stock_and_flow.type_share_spread', 'stock_and_flow.lifetime_factor',
         'output.stock_and_flow_dir', 'output.stock_and_flow_figures_dir', 'data.data_center_scenarios',
-        'data.usgs_commodities'}
+        'data.usgs_commodities',
+        'data.data_center_stock_and_flow_source', 'data.data_center_draws_dir', 'output.combined_dir',
+        'output.combined_figures_dir'}
 
 
 class TestSettings(unittest.TestCase):

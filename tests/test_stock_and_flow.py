@@ -44,7 +44,7 @@ _spec.loader.exec_module(stock_and_flow)
 from src.params_schema import ParameterError, Params, absolute, validate  # noqa: E402
 
 S = stock_and_flow
-# The article's robots in the world, Plan A, at 1 January (its economics explorer, preset "AI 2040 Plan A Scenario",
+# The article's robots in the world, Plan A, each at the end of its year (2026-11-08: "Follow the artcile!! 70 x 10E9") (its economics explorer, preset "AI 2040 Plan A Scenario",
 # Input Table, row "Robots"; EVIDENCE.md E40), as the article writes them.
 ARTICLE = {2025: 10e6, 2026: 11.6e6, 2027: 13.3e6, 2028: 15.3e6, 2029: 18.2e6, 2030: 23e6, 2031: 35.7e6, 2032: 72e6,
            2033: 170e6, 2034: 423e6, 2035: 1.0e9, 2036: 2.26e9, 2037: 5.28e9, 2038: 12.5e9, 2039: 29.7e9, 2040: 70e9}
@@ -72,6 +72,7 @@ class TestTheSettings(unittest.TestCase):
         self.assertEqual(flow.research_share, ((2025, 0.10), (2040, 0.05)))      # its mode: "around 10%", "decrease"
         self.assertEqual(flow.type_share_spread, ((2025, 0.10), (2040, 0.30)))   # "10% in 2025 and 30% in 2040"
         self.assertEqual(flow.lifetime_factor, (0.70, 1.0, 1.20))                # "30% short and 20% longer"
+        self.assertFalse(hasattr(flow, 'robots_2041'))                          # "Follow the artcile!! 70 x 10E9"
         for gone in ('robot_depreciation', 'research_share_2025', 'research_share_2040'):   # the earlier ones, gone
             self.assertFalse(hasattr(flow, gone), gone)
 
@@ -151,18 +152,23 @@ class TestTheCohorts(unittest.TestCase):
     """The robots in use quarter by quarter (07's compute path and follow_target), checked by hand."""
 
     def test_the_quarters_between_the_articles_years(self):
+        # 2025 Q1 to 2040 Q4 (07's quarters), each of the article's values at the end of its year (Matthias,
+        # 2026-11-08: "Follow the artcile!! 70 x 10E9"); 1 January 2025 its 10 M less one year of its own growth,
+        # 10 M / 1.16 = 8.62 M (E42's growth).
         quarters = S.targets(ARTICLE)
-        self.assertEqual(quarters.shape, (60,))
-        self.assertAlmostEqual(quarters[3], 11.6e6)                              # the end of 2025 Q4: 1 January 2026
-        self.assertAlmostEqual(quarters[1], (10e6 * 11.6e6) ** 0.5)              # half way, geometric: 10.77 M
-        self.assertAlmostEqual(quarters[-1], 70e9)
+        self.assertEqual(quarters.shape, (64,))
+        self.assertAlmostEqual(S.start_robots(ARTICLE), 10e6 / 1.16)
+        self.assertAlmostEqual(quarters[3], 10e6)                                # the end of 2025
+        self.assertAlmostEqual(quarters[1], (10e6 / 1.16 * 10e6) ** 0.5)          # half way through 2025, geometric
+        self.assertAlmostEqual(quarters[7], 11.6e6)                              # the end of 2026
+        self.assertAlmostEqual(quarters[63], 70e9)                               # the end of 2040: the article's
 
     def test_units_living_one_year_by_hand(self):
         # Every unit lives 4 quarters (ages 0.125 to 0.875 years in use, 1.125 gone); 100 in use, no growth: 25 arrive
         # in each quarter before 2025, and 25 arrive and 25 leave in every quarter after.
-        span = 8 + 60
+        span = 8 + 64
         survive = np.where(np.arange(span) < 4, 1.0, 0.0)
-        f = S.cohorts(survive, 100.0, 1.0, target=np.full((2, 60), 100.0))
+        f = S.cohorts(survive, 100.0, 1.0, target=np.full((2, 64), 100.0))
         np.testing.assert_allclose(f.past, 25.0)
         np.testing.assert_allclose(f.built, 25.0)
         np.testing.assert_allclose(f.gone, 25.0)
@@ -170,9 +176,9 @@ class TestTheCohorts(unittest.TestCase):
         np.testing.assert_allclose(f.start, 100.0)
 
     def test_a_falling_target_never_takes_a_unit_out(self):
-        span = 8 + 60
+        span = 8 + 64
         survive = np.where(np.arange(span) < 4, 1.0, 0.0)
-        target = np.full((1, 60), 100.0)
+        target = np.full((1, 64), 100.0)
         target[0, 10:] = 40.0                                                    # 60 fewer needed from quarter 10
         f = S.cohorts(survive, 100.0, 1.0, target=target)
         self.assertEqual(f.built[0, 10], 0.0)                                    # never below 0
@@ -181,13 +187,14 @@ class TestTheCohorts(unittest.TestCase):
         self.assertAlmostEqual(f.stock[0, 13], 40.0)                             # back on the target
 
     def test_the_robots_of_1_january_2025(self):
-        # The robots of 1 January 2025, built in the quarters before at the article's own growth, hold its 10 M.
+        # The robots of 1 January 2025, 10 M / 1.16 = 8.62 M, built in the quarters before at the article's own growth.
         params = Params()
-        age = S.ages(41 + 60)
-        f = S.cohorts(S.survival(age, params.stock_and_flow.robot_lifetime_years), 10e6, 1.16,
-                      target=np.broadcast_to(S.targets(ARTICLE), (1, 60)))
+        age = S.ages(41 + 64)
+        first = S.start_robots(ARTICLE)
+        f = S.cohorts(S.survival(age, params.stock_and_flow.robot_lifetime_years), first, 1.16,
+                      target=np.broadcast_to(S.targets(ARTICLE), (1, 64)))
         p = np.arange(41, 0, -1)
-        self.assertAlmostEqual(float((f.past[0] * S.survival(S.ages(41)[p - 1], (5.0, 7.0, 10.0))).sum()), 10e6,
+        self.assertAlmostEqual(float((f.past[0] * S.survival(S.ages(41)[p - 1], (5.0, 7.0, 10.0))).sum()), first,
                                delta=1e-3)
         np.testing.assert_allclose(f.past[0, 1:] / f.past[0, :-1], 1.16 ** 0.25)  # growing by the article's 16 %
         self.assertTrue((f.built > 0).all())
@@ -276,6 +283,20 @@ class TestTheWorkbook(unittest.TestCase):
         h = (got / modes.T[None] - 1) / ends[None, :, None]
         for i in range(S.SHARE_TIMES.size - 1):
             self.assertTrue(all(np.corrcoef(h[:, i, k], h[:, i + 1, k])[0, 1] > 0.99 for k in range(6)), i)
+
+    def test_the_years_as_the_data_centres(self):
+        # Matthias, 2026-11-08: "Both have to be exactly the same, as we have to combine both data!!!", "Both have to be
+        # on the same x axis scale!!", "Yes!!": the quarters and years of RAWCLICDataCenters' 07, 2025 Q1 to 2040 Q4,
+        # the workbook's years and the settings at 1 January.
+        self.assertEqual(S.QUARTERS, 64)
+        self.assertAlmostEqual(S.mid_times()[0], 2025.125)                       # the middle of 2025 Q1
+        self.assertAlmostEqual(S.end_times()[-1], 2041.0)                        # the end of 2040
+        self.assertAlmostEqual(S.SHARE_TIMES[0], 2025.0)
+        self.assertEqual(S.SHARE_TIMES.size, 65)
+        self.assertAlmostEqual(float(S.along(np.array([2030.0]), (1.0, 2.0, 3.0, 4.0))[0]), 2.0)
+        self.assertAlmostEqual(float(S.along(np.array([2027.5]), (1.0, 2.0, 3.0, 4.0))[0]), 1.5)
+        np.testing.assert_allclose(S.between(((2025, 0.1), (2040, 0.3)), np.array([2025.0, 2032.5, 2040.0])),
+                                   [0.1, 0.2, 0.3])
 
     def test_the_packs_a_robot_holds(self):
         packs = S.packs_per_robot(self.params, self.trajectories, np.array([2025.0, 2040.0]))
@@ -367,8 +388,9 @@ class TestTheCount(unittest.TestCase):
     def test_it_adds_up(self):
         self.assertEqual(S.check(self.params, self.counted, self.needs), [])
         article = self.counted[('article', 0)]                                    # the article's robots, the frame
-        np.testing.assert_allclose(article.stock[:, 3::4], np.broadcast_to([ARTICLE[y] for y in range(2026, 2041)],
-                                                                           (30, 15)), rtol=1e-12)
+        np.testing.assert_allclose(article.stock[:, 3::4],                        # the end of 2025 to 2040
+                                   np.broadcast_to([ARTICLE[y] for y in range(2025, 2041)], (30, 16)), rtol=1e-12)
+        np.testing.assert_allclose(article.start, 10e6 / 1.16, rtol=1e-12)        # 1 January 2025
         # The six types add up to the article's robots in every draw: one number.
         types = sum(self.counted[('robots', t)].stock for t in S.TYPES)
         np.testing.assert_allclose(types, article.stock, rtol=1e-9)
@@ -394,10 +416,12 @@ class TestTheCount(unittest.TestCase):
             self.assertGreater(np.ptp(self.counted[('robots', t)].stock[:, -1]), 0, t)
 
     def test_the_robots_of_2025_by_hand(self):
-        # The article's 2025 and 2026 with the lifetimes 5 / 7 / 10 years: built 2.43 M, retired 0.83 M (none of
-        # them below 5 years old, a young fleet growing by 16 % a year).
-        built, stock, gone = S.years_of(self.counted[('article', 0)])
-        self.assertAlmostEqual(stock[0, 0] + built[0, 0] - gone[0, 0], 11.6e6, delta=1e-3)
+        # The article's 2025 at the end of 2025, its start 8.62 M; with the lifetimes 5 / 7 / 10 years a young fleet
+        # growing by 16 % a year; the stock of 2025 its end, as 07.
+        article = self.counted[('article', 0)]
+        built, stock, gone = S.years_of(article)
+        self.assertAlmostEqual(stock[0, 0], 10e6, delta=1e-3)
+        self.assertAlmostEqual(article.start[0] + built[0, 0] - gone[0, 0], 10e6, delta=1e-3)
         self.assertGreater(gone[0, 0], 0.5e6)
         self.assertLess(gone[0, 0], 1.2e6)
 
@@ -408,6 +432,11 @@ class TestTheCount(unittest.TestCase):
         change(values)
         counted[key] = counted[key]._replace(**{field: values})
         return S.check(self.params, counted, self.needs)
+
+    def test_a_wrong_start_is_caught(self):
+        def other(values):
+            values *= 1.01                                                        # not 10 M / 1.16
+        self.assertTrue(any('1 January 2025' in f for f in self.faults_of(('article', 0), 'start', other)))
 
     def test_each_fault_is_caught(self):
         def more(values):
@@ -460,12 +489,6 @@ class TestTheDistributionPanels(unittest.TestCase):
         self.assertEqual(S.mass_unit(np.array([1.2e9])), (1e9, 'Mt'))
         self.assertEqual(S.mass_unit(np.array([500.0])), (1.0, 'kg'))
         self.assertEqual(S.mass_unit(np.array([0.5])), (1e-3, 'g'))
-
-    def test_a_triangles_share_in_each_bar(self):
-        # The triangle 0 / 1 / 2 in four bars of 0.5: below 0.5 lies 0.5² / 2 = 0.125 of it, below 1 half of it, so
-        # its shares are 0.125, 0.375, 0.375, 0.125.
-        np.testing.assert_allclose(S.triangle_bars(np.array([0.0, 0.5, 1.0, 1.5, 2.0]), (0.0, 1.0, 2.0)),
-                                   [0.125, 0.375, 0.375, 0.125])
 
 
 class TestTheLegends(unittest.TestCase):
@@ -527,13 +550,20 @@ def made_up_draws(params: Params) -> None:
         os.makedirs(apart)
         with open(os.path.join(consolidated, 'elements.txt'), 'w', encoding='utf-8') as handle:
             handle.write('\n'.join(ELEMENTS) + '\n')
-        columns = ['Frame and shell: Al', 'Boards and computers: Cu', 'Hip joints: Cu', 'Arm joints and hands: Cu',
-                   'Battery pack: Li']
+        # Each element by its kind and its part of how a robot is taken apart, as 02 writes them (taken_apart): the
+        # frame's aluminium, the computer's copper (a PCB), the joints' motors' copper and their driver boards' (small
+        # PCBs, in the joint sets), the cells' lithium and the battery management board's copper (a small PCB, in the
+        # packs): the electronics in three units, each with its own lifetime.
+        columns = ['Frame and shell: Frame: Al', 'Boards and computers: PCB: Cu',
+                   'Hip joints: Motor windings and steel: Cu', 'Hip joints: Small PCB: Cu',
+                   'Arm joints and hands: Motor windings and steel: Cu', 'Battery pack: Cells: Li',
+                   'Battery pack: Small PCB: Cu']
         draw = np.arange(N) / N
-        values = np.column_stack([t * (1 + draw), np.full(N, 0.25), np.ones(N), np.full(N, 0.5), np.full(N, 2.0)])
-        with open(os.path.join(apart, 'elements.txt'), 'w', encoding='utf-8') as handle:
+        values = np.column_stack([t * (1 + draw), np.full(N, 0.25), np.ones(N), np.full(N, 0.2), np.full(N, 0.5),
+                                  np.full(N, 2.0), np.full(N, 0.1)])
+        with open(os.path.join(apart, 'taken_apart.txt'), 'w', encoding='utf-8') as handle:
             handle.write('\n'.join(columns) + '\n')
-        np.save(os.path.join(apart, 'elements.npy'), values.astype(np.float32))
+        np.save(os.path.join(apart, 'taken_apart.npy'), values.astype(np.float32))
 
 
 class TestTheRun(unittest.TestCase):
@@ -552,12 +582,13 @@ class TestTheRun(unittest.TestCase):
             stock_and_flow_dir=where('data'), stock_and_flow_figures_dir=where('figures'))
         made_up_draws(params)
         cls.params, cls.problems, cls.saved, cls.covered, cls.titles = params, [], [], [], []
-        cls.panels, cls.texts, cls.figure_legends = {}, {}, {}
+        cls.panels, cls.texts, cls.figure_legends, cls.type_numbers, cls.limits, cls.rows = {}, {}, {}, {}, {}, {}
+        cls.element_numbers = {}
         save = Figure.savefig
 
         def checked(figure, path, *args, **kwargs):
             name = os.path.basename(str(path))
-            cls.problems += page_problems(figure, name)
+            cls.problems += page_problems(figure, name, kwargs.get('dpi'))
             renderer = figure.canvas.get_renderer()
             cls.covered += [(name, axes.get_title()) for axes in figure.axes if axes.get_legend() is not None
                             and S.lines_under(axes, axes.get_legend().get_window_extent(renderer), renderer)]
@@ -566,6 +597,16 @@ class TestTheRun(unittest.TestCase):
             cls.panels[where] = [a.panel_numbers for a in figure.axes if getattr(a, 'panel_numbers', None) is not None]
             cls.texts[where] = [t.get_text() for t in figure.texts]
             cls.figure_legends[where] = [t.get_text() for legend in figure.legends for t in legend.get_texts()]
+            cls.element_numbers[where] = [a.element_numbers for a in figure.axes if getattr(a, 'element_numbers', None)]
+            cls.type_numbers[where] = [a.type_numbers for a in figure.axes if getattr(a, 'type_numbers', None)]
+            cls.limits[where] = [(a.get_title(loc='left'), a.get_xlim()) for a in figure.axes if a.axison]
+            from matplotlib.colors import to_hex
+            cls.rows[where] = [({to_hex(p.get_facecolor()): p.get_y() for p in a.patches},
+                                {t.get_text(): y for t, y in zip(a.get_yticklabels(), a.get_yticks())},
+                                {c: (min(p.get_x() for p in a.patches if to_hex(p.get_facecolor()) == c),
+                                     max(p.get_x() + p.get_width() for p in a.patches if to_hex(p.get_facecolor()) == c))
+                                 for c in {to_hex(p.get_facecolor()) for p in a.patches}})
+                               for a in figure.axes if getattr(a, 'type_numbers', None)]
             cls.legends = getattr(cls, 'legends', []) + [
                 (name, [t.get_text() for t in a.get_legend().get_texts()]) for a in figure.axes
                 if not a.axison and a.get_legend() is not None]
@@ -591,12 +632,13 @@ class TestTheRun(unittest.TestCase):
     def test_it_runs(self):
         self.assertEqual(self.code, 0, self.printed)
         self.assertRegex(self.printed, r'type 3 off its own draws by at most \d+\.\d+ % of its half-width')
-        self.assertEqual(self.files['units_stock'].shape, (N, 16, 3, 6))
-        self.assertEqual(self.files['units_in'].shape, (N, 15, 3, 6))
-        self.assertEqual(self.files['elements_stock'].shape, (N, 16, 3, 4))
+        self.assertEqual(self.files['units_stock'].shape, (N, 16, 3, 6))       # the end of 2025 to the end of 2040
+        self.assertEqual(self.files['units_in'].shape, (N, 16, 3, 6))          # 2025 to 2040
+        self.assertEqual(self.files['elements_stock'].shape, (N, 16, 14, 4))   # the 14 parts of how it is taken apart
 
     def test_the_robots_as_the_article(self):
-        # The robots in use, the article's in every draw (its own file), the types each their own share of it.
+        # The robots in use at the end of each year, as 07 reports its stocks: the article's value of the year, 10 M
+        # (2025) to 70 × 10⁹ (2040) ("Follow the artcile!! 70 x 10E9"); the types each their own share of it.
         robots = np.load(os.path.join(self.params.output.stock_and_flow_dir, 'article_stock.npy'))
         np.testing.assert_allclose(robots, np.broadcast_to([ARTICLE[y] for y in range(2025, 2041)], (N, 16)),
                                    rtol=1e-6)                                    # float32: 7 digits
@@ -615,28 +657,41 @@ class TestTheRun(unittest.TestCase):
         times = S.mid_times()
         modes, ends = S.type_modes(self.params, shares, times), S.type_ends(self.params, times)
         for k in range(len(S.TYPES)):
-            low = (modes[k] * (1 - ends)).reshape(15, 4).min(axis=1)
-            high = (modes[k] * (1 + ends)).reshape(15, 4).max(axis=1)
+            low = (modes[k] * (1 - ends)).reshape(16, 4).min(axis=1)
+            high = (modes[k] * (1 + ends)).reshape(16, 4).max(axis=1)
             slack = 1e-5 + (off * (modes[k] * ends).max() if S.TYPES[k] == S.BALANCING_TYPE else 0.0)
             share = built[:, :, k] / article
             self.assertTrue((share >= low - slack).all() and (share <= high + slack).all(), S.TYPES[k])
 
     def test_every_kg_by_hand(self):
-        units, kg = self.files['units_stock'].astype(np.float64), self.files['elements_stock'].astype(np.float64)
+        # Every part by hand, in the stock, the inflow and the outflow: each part's kg of one robot of type t in draw i
+        # times the units of type t that carry it (the robots, the joint sets, the packs), added over the types.
         al, cu, li = ELEMENTS.index('Al'), ELEMENTS.index('Cu'), ELEMENTS.index('Li')
+        part = {name: S.PARTS.index(name) for name in ('Frame', 'PCB', 'Motor windings and steel', 'Small PCB',
+                                                       'Cells')}
         frame = np.array(S.TYPES)[None, :] * (1 + np.arange(N) / N)[:, None]    # draw i, type t
-        # The bodies: each type's robots × its frame of draw i, added over the types (the pairing of draw i).
-        np.testing.assert_allclose(kg[:, :, 0, al], (units[:, :, 0, :] * frame[:, None, :]).sum(axis=2), rtol=1e-5)
-        np.testing.assert_allclose(kg[:, :, 0, cu], units[:, :, 0, :].sum(axis=2) * 0.25, rtol=1e-5)
-        # The joint sets: 1 + 0.5 kg of copper each; the packs: 2 kg of lithium each; nothing else in them.
-        np.testing.assert_allclose(kg[:, :, 1, cu], units[:, :, 1, :].sum(axis=2) * 1.5, rtol=1e-5)
-        np.testing.assert_allclose(kg[:, :, 2, li], units[:, :, 2, :].sum(axis=2) * 2.0, rtol=1e-5)
-        self.assertEqual(kg[:, :, 1, al].max(), 0.0)
-        self.assertEqual(kg[:, :, 0, li].max(), 0.0)
-        self.assertEqual(kg[:, :, :, ELEMENTS.index('Nd')].max(), 0.0)
-        flows = self.files['elements_in'].astype(np.float64)
-        np.testing.assert_allclose(flows[:, :, 2, li], self.files['units_in'][:, :, 2, :].sum(axis=2) * 2.0,
-                                   rtol=1e-5)
+        for units_name, element_name in zip(S.UNIT_FILES, S.ELEMENT_FILES):
+            units, kg = self.files[units_name].astype(np.float64), self.files[element_name].astype(np.float64)
+            robots, joints, packs = (units[:, :, j, :] for j in range(3))
+            expected = {
+                ('Frame', al): (robots * frame[:, None, :]).sum(axis=2),                  # the pairing of draw i
+                ('PCB', cu): robots.sum(axis=2) * 0.25,
+                ('Motor windings and steel', cu): joints.sum(axis=2) * 1.5,
+                # The electronics in the joints with the joint sets, in the packs with the packs: their own lifetimes.
+                ('Small PCB', cu): joints.sum(axis=2) * 0.2 + packs.sum(axis=2) * 0.1,
+                ('Cells', li): packs.sum(axis=2) * 2.0}
+            for (name, e), values in expected.items():
+                np.testing.assert_allclose(kg[:, :, part[name], e], values, rtol=1e-5, err_msg=(element_name, name))
+            # Nothing anywhere else: every other part and element 0.
+            rest = kg.copy()
+            for (name, e) in expected:
+                rest[:, :, part[name], e] = 0
+            self.assertEqual(rest.max(), 0.0, element_name)
+        # The groups add up from their parts: the electronics' copper the PCB's and the small PCBs'.
+        electronics = [S.PARTS.index(p) for p in S.PARTS if S.schemas.TAKEN_GROUP[p] == 'Electronics']
+        kg = self.files['elements_stock'].astype(np.float64)
+        np.testing.assert_allclose(kg[:, :, electronics, cu].sum(axis=2),
+                                   kg[:, :, part['PCB'], cu] + kg[:, :, part['Small PCB'], cu], rtol=1e-12)
 
     def test_its_summary(self):
         import csv
@@ -645,7 +700,7 @@ class TestTheRun(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         first = next(r for r in rows if r['quantity'] == 'robots' and r['robot type'] == 'all'
                      and r['flow'] == 'stock' and r['year'] == '2025')
-        self.assertAlmostEqual(float(first['mean']), 10e6, delta=10)
+        self.assertAlmostEqual(float(first['mean']), 10e6, delta=10)            # the end of 2025: the article's
         neodymium = [r for r in rows if r['quantity'] == 'Neodymium']
         self.assertTrue(neodymium and all(r['mean'] == '–' and r['held in % of the draws'] == '0.0'
                                           for r in neodymium))
@@ -668,86 +723,190 @@ class TestTheRun(unittest.TestCase):
         held = ('Lithium', 'Aluminium', 'Copper')
         D = S.DISTRIBUTIONS_DIR
         self.assertEqual(names, sorted([S.OVERVIEW] + [os.path.join(S.ELEMENTS_DIR, f'{e}.png') for e in held]
-                                       + [os.path.join(D, f) for f in ('robots_in_use_by_type.png',
-                                                                       'robots_in_use_by_type_numbers.png',
-                                                                       'type_shares.png', 'type_shares_numbers.png')]
-                                       + [os.path.join(D, S.ELEMENTS_DIR, f'{e}{end}') for e in held
-                                          for end in ('.png', '_numbers.png')]))
+                                       + [os.path.join(D, f) for f in ('robots_in_use.png', 'robots_in_use_numbers.png')]
+                                       + [os.path.join(D, f'elements_{y}.png') for y in (2025, 2030, 2035, 2040)]
+                                       + [os.path.join(D, f'parts_{y}_1.png') for y in (2025, 2030, 2035, 2040)]))
         self.assertTrue(all(os.path.exists(p) for p in self.saved))
         self.assertEqual(self.problems, [])
         self.assertEqual(self.covered, [])                     # no line and no written value under a legend
         self.assertIn('Neodymium: no numbers, 0 kg in every draw; no page.', self.printed)
 
     def test_the_distribution_pages(self):
-        # Matthias, 2026-11-07: "I also want the distributions", to the table "Yes, as recommended": a) the robots in use
-        # by type at 1 January 2025, 2030, 2035, 2040; b) each type's share of the robots built at four times, its
-        # triangle drawn over it; c) each element in use at the four years, split by part. Every panel keeps its
-        # numbers (median, mean, 95 %) for the page after it (EVIDENCE.md E34), none written on it.
+        # Matthias, 2026-11-07: "I also want the distributions"; 2026-11-08: "can you not combine the 6 types to 1", "I
+        # want to see at the end how many robots there are", "it is 2025, 2030, 2035 and 2040!!", the years as 07's
+        # ("Yes!!"): one page of the robots in use at the end of 2025, 2030, 2035, 2040, a panel a year, the six types
+        # one above the other, the robots in all in its title; every draw on its axis (why is the largest part of the
+        # triangal cut off?); the numbers on the page after. Each element in use at the four year ends, split by part,
+        # its numbers after it.
         D, E = S.DISTRIBUTIONS_DIR, os.path.join(S.DISTRIBUTIONS_DIR, S.ELEMENTS_DIR)
-        robots = self.panels[os.path.join(D, 'robots_in_use_by_type.png')]
-        self.assertEqual(len(robots), 24)                                         # 4 years × 6 types
-        self.assertEqual(len(self.panels[os.path.join(D, 'type_shares.png')]), 24)
-        self.assertEqual(len(self.panels[os.path.join(E, 'Copper.png')]), 4)     # 1 January 2025, 2030, 2035, 2040
-        # By hand, the first panel: robot type 1 at 1 January 2025, in thousands or millions as it reads.
-        title, held_in, median, mean, low, high, unit, beyond = robots[0]
-        self.assertEqual(title, 'Robot type 1, 2025')
-        values = self.files['units_stock'][:, 0, 0, 0].astype(np.float64)
-        per, word = S.count_unit(values)
-        self.assertEqual(unit, word)
+        page = os.path.join(D, 'robots_in_use.png')
+        panels = self.type_numbers[page]
+        self.assertEqual(len(panels), 4)
+        self.assertTrue(all(len(rows) == 6 for rows in panels))
+        titles = [title for title, _ in self.limits[page]]
+        # The year alone (Matthias, 2026-11-08: "Sorry end of goes away. This is not needed").
+        self.assertEqual(titles, [f'{y}: {ARTICLE[y]:,.0f} robots' for y in (2025, 2030, 2035, 2040)])
+        # By hand: robot type 3 at the end of 2040, in its panel's unit.
+        values = self.files['units_stock'][:, 15, 0, 2].astype(np.float64)
+        everything = self.files['units_stock'][:, 15, 0, :].astype(np.float64)
+        per, word = S.count_unit(everything.max(axis=1))
+        name, median, mean, low, high, unit = panels[3][2]
+        self.assertEqual((name, unit), ('Robot type 3, 2040', word))
         self.assertAlmostEqual(median, np.median(values) / per, places=6)
         self.assertAlmostEqual(mean, values.mean() / per, places=6)
         np.testing.assert_allclose([low, high], np.percentile(values, (2.5, 97.5)) / per, rtol=1e-9)
-        # Each page of panels followed by its page of numbers, a row per panel, named by its panel.
-        for page, numbers in (('robots_in_use_by_type.png', 'robots_in_use_by_type_numbers.png'),
-                              ('type_shares.png', 'type_shares_numbers.png')):
-            words = ' '.join(self.texts[os.path.join(D, numbers)])
-            for panel in self.panels[os.path.join(D, page)]:
-                self.assertIn(panel[0], words)
-        # b) by hand: the shares from the run's own random numbers (its stream: the five types, the four triangles of a
-        # draw, then type 3's), type 3 in the last quarter of 2039, in %. Type 3, 1 minus the others, depends on how
-        # the six are put together at that time (a type's own draws are the same at every time, only put together
-        # anew), so its median and 95 % show the time and the pairing.
-        rng = np.random.default_rng([self.params.composition.seed, 4])
-        z = rng.random((N, 5))
-        for _ in range(4):
-            rng.random(N)
-        workbook, _ = S.workbook_rows(self.params)
-        points, _ = S.type_points(self.params, workbook, z, rng.random(N))
-        last = 100 * S.type_shares(self.params, workbook, points[:, -1:], S.SHARE_TIMES[-1:])[:, 0, 2]
-        title, _, median, mean, low, high, *_ = self.panels[os.path.join(D, 'type_shares.png')][3 * 6 + 2]
-        self.assertEqual(title, 'Robot type 3, 2039 Q4')
-        self.assertAlmostEqual(median, float(np.median(last)), places=9)
-        self.assertAlmostEqual(mean, float(last.mean()), places=9)
-        np.testing.assert_allclose([low, high], np.percentile(last, (2.5, 97.5)), rtol=1e-12)
-        words = ' '.join(self.texts[os.path.join(E, 'Copper_numbers.png')])
-        self.assertIn('1 January 2040', words)
-        # c) split by part: the made-up copper sits in the bodies (0.25 kg, the boards) and the joint sets (1.5 kg),
-        # none in the packs; the legend names the two parts drawn. Lithium only in the packs.
-        self.assertEqual(sorted(self.figure_legends[os.path.join(E, 'Copper.png')]), ['joint sets', "robots' bodies"])
-        self.assertEqual(self.figure_legends[os.path.join(E, 'Lithium.png')], ['battery packs'])
+        # Type 1's row at the top, type 6's at the bottom, each labelled where its bars stand.
+        for bottoms, labels, _ in self.rows[page]:
+            for k, t in enumerate(S.TYPES):
+                self.assertEqual(bottoms[S.TYPE_COLOURS[k].lower()], 5 - k)
+                self.assertAlmostEqual(labels[f'robot type {t}'], 5 - k + 0.4)
+        # Nothing cut: type 3's bars of 2040 run from its smallest to its largest draw.
+        left, right = self.rows[page][3][2][S.TYPE_COLOURS[2].lower()]
+        self.assertAlmostEqual(left, values.min() / per, places=9)
+        self.assertAlmostEqual(right, values.max() / per, places=9)
+        # Nothing cut: the axis holds the smallest and the largest draw of all six types.
+        left, right = self.limits[page][3][1]
+        self.assertLessEqual(left, everything.min() / per + 1e-12)
+        self.assertGreaterEqual(right, everything.max() / per - 1e-12)
+        words = ' '.join(self.texts[os.path.join(D, 'robots_in_use_numbers.png')])
+        for rows in panels:
+            for row in rows:
+                self.assertIn(row[0], words)
+        # The elements in all robots in use, a page a year, exactly as RAWCLICDataCenters' 05 draws a data centre's
+        # elements (Matthias, 2026-11-08: "I also want finally see the distribution. Exactkly the figures we have
+        # worked out for the data centers!!!"): a panel per element held, each bar split by part, its mean with its
+        # number, 95 % dashed. By hand: copper in 2040, all parts added up, in its unit.
+        page = os.path.join(D, 'elements_2040.png')
+        panels = self.element_numbers[page]
+        self.assertEqual([p[0] for p in panels], ['Lithium (Li)', 'Aluminium (Al)', 'Copper (Cu)'])
+        total = self.files['elements_stock'][:, 15, :, ELEMENTS.index('Cu')].astype(np.float64).sum(axis=1)
+        per, unit = S.mass_unit(total)
+        title, mean, low, high, written = next(p for p in panels if p[0] == 'Copper (Cu)')
+        self.assertEqual(written, unit)
+        self.assertAlmostEqual(mean, total.mean() / per, places=6)
+        np.testing.assert_allclose([low, high], np.percentile(total, (2.5, 97.5)) / per, rtol=1e-9)
+        # Its legend the groups drawn on the page, in their order: aluminium in the body, lithium in the battery,
+        # copper in the joints and the electronics.
+        self.assertEqual(self.figure_legends[page], ['Joints', 'Battery', 'Electronics', 'Body'])
+        self.assertEqual(len(self.element_numbers[os.path.join(D, 'elements_2025.png')]), 3)
 
-    def test_the_summary_by_part(self):
-        # Each element by part (as RAWCLICDataCenters' 07 writes its groups): the robots' bodies, the joint sets, the
-        # battery packs, each over its draws above 0; made-up copper in the joint sets: 1.5 kg a robot of every type.
+    def test_an_element_held_in_some_draws(self):
+        # "A 0 is not part of a distribution": copper held in half the draws, in the frame only; lithium in no
+        # draw. The page: copper's mean and 95 % over the draws that hold it, "held in 50 % of the draws" written,
+        # no panel for lithium, and a legend of the one part drawn.
+        from matplotlib.figure import Figure
+        from unittest import mock
+        rng = np.random.default_rng(7)
+        kg = np.zeros((400, len(S.PARTS), 2))
+        kg[::2, S.PARTS.index('Frame'), 0] = rng.uniform(1e3, 2e3, 200)
+        seen = {}
+
+        def record(figure, path, *args, **kwargs):
+            seen['numbers'] = [a.element_numbers for a in figure.axes if getattr(a, 'element_numbers', None)]
+            seen['words'] = [t.get_text() for a in figure.axes for t in a.texts]
+            seen['legend'] = [t.get_text() for legend in figure.legends for t in legend.get_texts()]
+
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(Figure, 'savefig', record):
+            S.elements_page(2040, kg, ['Cu', 'Li'], 400, os.path.join(folder, 'elements_2040.png'), 50)
+        held = kg[::2, S.PARTS.index('Frame'), 0]
+        per, unit = S.mass_unit(held)
+        [(title, mean, low, high, written)] = seen['numbers']
+        self.assertEqual(title, 'Copper (Cu)')
+        self.assertAlmostEqual(mean, held.mean() / per, places=9)
+        np.testing.assert_allclose([low, high], np.percentile(held, (2.5, 97.5)) / per, rtol=1e-9)
+        self.assertTrue(any('held in 50 % of the draws' in w for w in seen['words']))
+        self.assertEqual(seen['legend'], ['Body'])
+
+    def test_the_list_part_by_part(self):
+        # Matthias, 2026-11-08: "I want a detailed list of the component ... to know how to take it apart!!!": after
+        # each year's page of the elements, the list of every element in each part that holds it, by hand: the small
+        # PCBs' copper at the end of 2040 the joint sets' 0.2 kg and the packs' 0.1 kg; no row for a part that holds
+        # none (the cells' copper); every row once; the page shows the rows.
+        stock = self.files['elements_stock'][:, 15].astype(np.float64)
+        rows = S.parts_rows(stock, ELEMENTS)
+        self.assertEqual([tuple(r[:3]) for r in rows], [
+            ('Lithium', 'Battery', 'Cells'), ('Aluminium', 'Body', 'Frame'),
+            ('Copper', 'Joints', 'Motor windings and steel'), ('Copper', 'Electronics', 'PCB'),
+            ('Copper', 'Electronics', 'Small PCB')])
+        units = self.files['units_stock'][:, 15].astype(np.float64).sum(axis=2)
+        small = 0.2 * units[:, 1] + 0.1 * units[:, 2]
+        per, unit = S.mass_unit(small)
+        row = next(r for r in rows if r[2] == 'Small PCB')
+        self.assertEqual(row[3], 'all draws')
+        self.assertEqual(row[5], f'{S.composition.panel_number(small.mean() / per)} {unit}')
+        low, high = np.percentile(small / per, (2.5, 97.5))
+        self.assertEqual(row[6], f'{S.composition.panel_number(low)} to {S.composition.panel_number(high)} {unit}')
+        page = os.path.join(S.DISTRIBUTIONS_DIR, 'parts_2040_1.png')
+        for r in rows:
+            self.assertIn(r[5], self.texts[page])
+        self.assertEqual(self.texts[page].count('Small PCB'), 1)
+
+    def test_the_list_over_the_draws_that_hold_it(self):
+        # "A 0 is not part of a distribution": copper in the small PCBs in half of 400 draws, in the frame in all; the
+        # list's row of the small PCBs held in 50 %, its median, mean and 95 % over the 200 draws that hold it.
+        rng = np.random.default_rng(11)
+        kg = np.zeros((400, len(S.PARTS), 1))
+        kg[::2, S.PARTS.index('Small PCB'), 0] = rng.uniform(10.0, 30.0, 200)
+        kg[:, S.PARTS.index('Frame'), 0] = rng.uniform(1.0, 2.0, 400)
+        rows = {r[2]: r for r in S.parts_rows(kg, ['Cu'])}
+        self.assertEqual(sorted(rows), ['Frame', 'Small PCB'])
+        held = kg[::2, S.PARTS.index('Small PCB'), 0]
+        per, unit = S.mass_unit(held)
+        low, median, high = np.percentile(held / per, (2.5, 50, 97.5))
+        n = S.composition.panel_number
+        self.assertEqual(rows['Small PCB'][3:], ['50 %', f'{n(median)}\u00a0{unit}', f'{n(held.mean() / per)}\u00a0{unit}',
+                                                 f'{n(low)} to {n(high)}\u00a0{unit}'])
+        self.assertEqual(rows['Frame'][3], 'all draws')
+
+    def test_the_years_of_the_summary(self):
+        # As 07: the stocks at the end of 2025 to 2040, the flows of the calendar years 2025 to 2040.
         import csv
         with open(os.path.join(self.params.output.stock_and_flow_dir, S.SUMMARY), newline='',
                   encoding='utf-8') as handle:
             rows = list(csv.DictReader(handle))
-        kg = self.files['elements_stock'].astype(np.float64)
+        stock = [r['year'] for r in rows if r['quantity'] == 'robots' and r['robot type'] == 'all' and r['flow'] == 'stock']
+        built = [r['year'] for r in rows if r['quantity'] == 'robots' and r['robot type'] == 'all' and r['flow'] == 'in']
+        self.assertEqual(stock, [str(y) for y in range(2025, 2041)])
+        self.assertEqual(built, [str(y) for y in range(2025, 2041)])
+
+    def test_the_summary_by_group_and_part(self):
+        # Each element by group ('Copper, Electronics') and by part ('Copper, Electronics: Small PCB'), each over its
+        # draws above 0, every flow, every year; a part or group that holds none of it '–'.
+        import csv
+        with open(os.path.join(self.params.output.stock_and_flow_dir, S.SUMMARY), newline='',
+                  encoding='utf-8') as handle:
+            rows = list(csv.DictReader(handle))
         cu = ELEMENTS.index('Cu')
-        for j, part in enumerate(S.PARTS):
-            got = [r for r in rows if r['quantity'] == f'Copper, {part}' and r['flow'] == 'stock']
-            self.assertEqual(len(got), 16, part)
-            values = kg[:, 5, j, cu]
-            row = next(r for r in got if r['year'] == '2030')
-            if (values > 0).any():
-                self.assertAlmostEqual(float(row['mean']) / values[values > 0].mean(), 1.0, places=5)
-            else:
-                self.assertEqual(row['mean'], '–')                                 # the packs hold no copper
-        joints = next(r for r in rows if r['quantity'] == 'Copper, joint sets' and r['flow'] == 'stock'
-                      and r['year'] == '2025')
-        units = self.files['units_stock'][:, 0, 1, :].astype(np.float64).sum(axis=1)        # joint sets in use, 2025
-        self.assertAlmostEqual(float(joints['mean']) / (1.5 * units).mean(), 1.0, places=5)
+        for element_name, flow in zip(S.ELEMENT_FILES, S.FLOWS):
+            kg = self.files[element_name].astype(np.float64)
+            for j, part in enumerate(S.PARTS):
+                group = S.schemas.TAKEN_GROUP[part]
+                got = [r for r in rows if r['quantity'] == f'Copper, {group}: {part}' and r['flow'] == flow]
+                self.assertEqual(len(got), 16, part)
+                values = kg[:, 5, j, cu]
+                row = next(r for r in got if r['year'] == '2030')
+                if (values > 0).any():
+                    above = values[values > 0]
+                    self.assertAlmostEqual(float(row['mean']) / above.mean(), 1.0, places=5)
+                    low, high = np.percentile(above, (2.5, 97.5))
+                    self.assertAlmostEqual(float(row['2.5 %']) / low, 1.0, places=5)
+                    self.assertAlmostEqual(float(row['97.5 %']) / high, 1.0, places=5)
+                else:
+                    self.assertEqual(row['mean'], '–')                             # the cells hold no copper
+            for group in S.GROUPS:
+                values = kg[:, 5, [S.PARTS.index(p) for p in S.PARTS if S.schemas.TAKEN_GROUP[p] == group],
+                            cu].sum(axis=1)
+                row = next(r for r in rows if r['quantity'] == f'Copper, {group}' and r['flow'] == flow
+                           and r['year'] == '2030')
+                if (values > 0).any():
+                    self.assertAlmostEqual(float(row['mean']) / values[values > 0].mean(), 1.0, places=5)
+                else:
+                    self.assertEqual(row['mean'], '–')                             # the battery's copper is a PCB's
+        # By hand: the small PCBs' copper in use at the end of 2025, the joint sets' 0.2 kg and the packs' 0.1 kg.
+        small = next(r for r in rows if r['quantity'] == 'Copper, Electronics: Small PCB' and r['flow'] == 'stock'
+                     and r['year'] == '2025')
+        units = self.files['units_stock'][:, 0, :, :].astype(np.float64).sum(axis=2)
+        self.assertAlmostEqual(float(small['mean']) / (0.2 * units[:, 1] + 0.1 * units[:, 2]).mean(), 1.0, places=5)
 
     def test_without_02_it_stops(self):
         params = dataclasses.replace(self.params)
@@ -766,13 +925,15 @@ class TestTheRun(unittest.TestCase):
             made_up_draws(params)
             book = S.schemas.read_workbook(absolute(params.data.workbook), params)
             text = os.path.join(params.output.parts_dir, S.composition.folder_name(book.categories[2]),
-                                'elements.txt')
+                                'taken_apart.txt')
             with open(text, encoding='utf-8') as handle:
-                columns = handle.read().replace('Frame and shell: Al', 'Wings: Al')
-            with open(text, 'w', encoding='utf-8') as handle:
-                handle.write(columns)
-            with self.assertRaisesRegex(ValueError, "'Wings: Al' of 02 is no kind"):
-                S.robot_parts(params)
+                written = handle.read()
+            for wrong, words in (('Wings: Frame: Al', "'Wings: Frame: Al' of 02 is no kind"),
+                                 ('Frame and shell: Gizmo: Al', "'Frame and shell: Gizmo: Al' of 02 is no kind")):
+                with open(text, 'w', encoding='utf-8') as handle:
+                    handle.write(written.replace('Frame and shell: Frame: Al', wrong))
+                with self.assertRaisesRegex(ValueError, words):
+                    S.robot_parts(params)
 
 
 if __name__ == '__main__':

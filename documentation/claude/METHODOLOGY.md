@@ -16,9 +16,11 @@ Every setting is in `src/params_schema.py`.
 |---|---|---|---|
 | `00_parameters.py` | `src/params_schema.py` | `params.xlsx`, `documentation/claude/PARAMETER_REFERENCE.md` | Checks every setting, says which input files are on disk, writes the register of the settings. |
 | `01_schemas.py` | `data/raw/humanoid_robots_2040_workbook.xlsx`, `data/researched/shared_lists.xlsx`, `data/researched/element_recipes.xlsx`, `data/researched/humanoid_register.xlsx`, each robot type's `data/researched/<n>_<name>/parts_taken_apart.xlsx`, the sibling projects' files, `documentation/sources/` | `figures/schemas/` | Reads every input and checks that each holds together (checks 1 to 22). Draws, 16 × 9 inches a page: the overview (how the model works; the six robot types), a notes page, the faults and checks, for each robot type taken apart (1 to 6) its robots' table and where its kinds of part sit, the same pages (type 2's since 2026-10-30: "Yes, as type 1's"; types 3 and 4's since 2026-10-30, EVIDENCE.md E11.7 open point B, each over its robots of every parts file); for a robot type with no parts file, when `output.robot_types_with_pages` names it, its former pages of the workbook's anchor robot. Nothing is drawn at random. |
-| `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups and its body regions. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
+| `02_composition.py` | The same files, through 01's functions; the register (its sheets Type n for each type's robots); for each type taken apart its parts file, the sibling projects' board, sensor, tantalum and steel data where they lie, and RAWCLICVehicleTractionMotor's own magnet code in its own environment; the settings `composition.*`, `output.*` | `data/consolidated/<n>_<name>/`, `data/parts_taken_apart/<n>_<name>/`, `figures/composition/`, `figures/parts_taken_apart/<n>_<name>/` | Draws what each robot type is made of, `composition.draws` times (Monte Carlo): its materials, its elements, its part groups (since 2026-11-08 the four groups of how a robot is taken apart) and its body regions; every element and kilogram booked to its part of how a robot is taken apart. A type some of whose robots are taken apart is drawn part by part over them, each from its own rows in the parts file it stands in, with that file's shared numbers (type 1 over all its robots, type 2 over its 96 with a mass; since 2026-10-30, E11.7, type 3 over 91 of its 168 with a mass and type 4 over 47 of its 129 (E12.6; the Reflex without a mass since 2026-11-01)); its draws from its parts once every robot of it with a mass is taken apart, else from the workbook, as the other types (types 3 to 6 so far; types 5 and 6 part by part since 2026-11-01, E16.6, over 9 and 4 of their robots). Writes the draws and a summary for each robot type; each type taken apart part by part; the pages of the robot types `output.robot_types_with_pages` names (1 to 6): for a type taken apart its element and material pages, its two figures of where its critical elements sit (type 1's until 2026-10-29 the stage 04) and where each material sits. |
 | `03_comparison.py` | The draws of 02, in `data/consolidated/` and `data/parts_taken_apart/`; the names of the robot types from the workbook | `figures/comparison/` | The six robot types side by side, one item a page, each type a panel of 02's form, split into what contributes to it: the mass of one robot by material, each material by kind of part, each element of interest by the material it comes from, the mass by part group and by body region, copper recycled as copper or fixed in alloys (EVIDENCE.md E29, since 2026-11-04). Draws nothing at random itself. |
 | `04_stock_and_flow.py` | The draws of 02 (`data/parts_taken_apart/`, their elements by kind of part; the order of the elements in `data/consolidated/`); the workbook's shares, runtimes and energy densities; the settings `stock_and_flow.*`; RAWCLICDataCenters' sheet ElementReference and USGS's data file, where they lie | `data/stock_and_flow/`, `figures/stock_and_flow/` | The robots of ai-2040.com Plan A quarter by quarter as RAWCLICDataCenters' 07, their joint sets and battery packs replaced on their own, the 22 elements in them, each robot 02's draw i of its type (EVIDENCE.md E42, since 2026-11-06; "The stock and flow of the humanoid robots and their elements" below). |
+| `tools/copy_data_center_draws.py` | RAWCLICDataCenters' 07 draws (`stock_flow_draws.csv`, the setting `data.data_center_stock_and_flow_source`; nothing else reads it) | `data/raw/data_center_stock_and_flow/` | Copies 07's element columns of 2025 to 2040 (in, stock, out), every scenario and draw, with its source and date; stops where a row is missing or doubled (EVIDENCE.md E52, since 2026-11-08). His run, once and after every run of 07. |
+| `05_combined_stock_and_flow.py` | The copy of 07's draws; 04's element draws; the world's production and reserves as 04 | `data/combined_stock_and_flow/`, `figures/combined_stock_and_flow/` | The AI data centres (scenarios A, B, C) and the humanoid robots together, draw i with draw i, 2025 to 2040: each element's stock, inflow and outflow, with their distributions (EVIDENCE.md E52, since 2026-11-08; "05: the AI data centres and the humanoid robots together" below). |
 
 Matthias, 2026-10-26: "The composition has the be for each of the type as there are different stock and flows for
 them", and, choosing the answer offered: "One stage, 02_composition.py, with the same code for all six robot types,
@@ -531,6 +533,111 @@ mass since 2026-11-01).
 it"): each alloy, grade and magnet class a robot type taken apart holds, what it holds by its recipe (each element from
 its least to its most share of its mass, its base metal the rest; a magnet class by the least and most of its drawn
 fractions, RAWCLICVehicleTractionMotor's own), and its kg in one robot, on the alloys pages after the material pages.
+
+## How a robot is taken apart: four groups and their parts (since 2026-11-08)
+
+Matthias, 2026-11-08: "I want a detailed list of the component, so it is easy to understand and establish a recycling to
+know how to take it apart!!!", the groups in his words ("jointes with also wheel, hydrowlic", "just battery",
+"electroncs with PCB, wires and sensors", "the body, which includes screws"), "Also the joints the can be split up in
+smaller parts. I waht schemas for this", "Yes do it", "Yes, add 1 to 3" (EVIDENCE.md E50).
+
+**The list, once.** `01_schemas.py`'s `TAKEN_APART` holds the four groups and their 14 parts, in the order every page
+shows them; its page `figures/schemas/taken_apart.png` draws them, with what each part holds, from that list alone.
+
+| Group | Its parts |
+|---|---|
+| Joints (every joint, with the wheels, the lift column and the hydraulics) | Magnets · Motor windings and steel · Gears and bearings · Housings and other parts · Hydraulics |
+| Battery | Cells · Housing, busbars and wires |
+| Electronics (every board, wire and sensor, wherever it sits) | PCB · Small PCB · Wires · Sensors |
+| Body (what holds the robot together and covers it) | Frame · Shell · Screws, pins and bearings |
+
+**Step 1, the rule (01).** Every kilogram 02 books has a part (`taken_part`): a sensor and its housing the sensors,
+wherever it sits; a circuit board a PCB in the kind Boards and computers, a small PCB anywhere else (a joint's driver
+board, the battery management board, the head board, the small boards in the legs); a cable or connector a wire; NdFeB
+magnets in the joints group the magnets; battery cells the cells; every other row by its name (`TAKEN_BY_NAME`: a fan
+and a heat sink a PCB, a gear stage a gear, a housing or flange a housing, a hydraulic actuator, valve or actuator body
+the hydraulics, a screw or pin the screws, a shell or cover the shell, the frame the frame). The kind of part decides
+only the group the names are matched in (`KIND_GROUP`). A row no rule places is a fault of 01 (`taken_apart_faults`, its
+sheet and row) and stops 02. The hydraulic robots' head actuators, their valves, boards and sensors are head joints
+("head is again a joint which moves the head"), in the builders' places (`PLACES`).
+
+**Step 2, the booking (02).** Every element of interest of every robot is booked to its kind and its part
+(`Robot.declare`), and every kilogram of material too (`Robot.material`); 02 checks in every draw that the parts of each
+kind add up to the kind's elements and its mass (`check_taken`, to a billionth: the same kilograms added in another
+order) and stops otherwise. It writes `taken_apart` ('<kind>: <part>: <element>') and `taken_apart_mass` ('<kind>:
+<part>') into `data/parts_taken_apart/<n>_<name>/`. A robot type's part groups (`part_groups.npy`) are the four groups,
+each the mass of its parts, in place of the shared lists' seven (Joint drives … Wheels and wheel drives); they add up to
+the robot's mass. Its pages: each element in one robot by the four groups (`<type>_groups_<k>.png`, each followed by its
+numbers) and the list part by part (`<type>_parts_<k>.png`: each element in each part that holds it, its group, the share
+of the draws that hold it, its median, mean and 95 % over those draws).
+
+**Step 3, the comparison (03).** It reads `taken_apart` and checks, in every draw, that each type's parts add up to its
+elements. The mass by the four groups (`comparison_part_groups_1.png`, in the groups' colours), each element by the four
+groups (`comparison_groups_<k>.png`, with their numbers) and, after all pages, each element part by part, one robot of
+each type (`comparison_parts_<k>.png`).
+
+**Step 4, the robots in use (04).** One robot's kg of each element in each part comes from `taken_apart`; a part goes with
+the unit of its kind and so with its lifetime (`unit_of`): a joint's parts, its driver board and encoders too, with the
+joint sets; the battery's, its management board too, with the packs; every other with the robots. The elements built, in
+use and retired are counted in the 14 parts; a group is the sum of its parts, draw by draw. The distribution pages split
+each element by the four groups; after each year's page the list part by part (`parts_<year>_<k>.png`). The summary holds
+each element by group ('Copper, Electronics') and by part ('Copper, Electronics: Small PCB').
+
+**The rows of every list** come from one function, 02's `part_rows`; 03 and 04 use it.
+
+## 05: the AI data centres and the humanoid robots together (since 2026-11-08)
+
+Matthias, 2026-11-08: "write 05 combination of results of 04 and 07 with the distributions", "Yes, build it"
+(EVIDENCE.md E52).
+
+1. **The copy of 07's draws.** `tools/copy_data_center_draws.py` reads RAWCLICDataCenters' 07 draws
+   (stock_flow_draws.csv) and writes their element columns of 2025 to 2040, in, stock and out, scenario by scenario and
+   draw by draw, into `data/raw/data_center_stock_and_flow/`, with its source and date; it stops where a scenario, draw or
+   year is missing or comes twice. Nothing else in this project reads 07's folder (GitHub/CLAUDE.md §6).
+2. **The check.** 05 stops, writing nothing, where the copy and 04's draws do not belong together: another number of
+   draws, other years, not 07's three flows, not 04's 14 parts.
+3. **The sum.** For each scenario A, B, C, flow and year, in every draw: the data centres' kilograms of each element
+   (07's draw i) + the humanoid robots' (04's draw i, its parts of how a robot is taken apart added up). An element
+   only one model holds is its alone. The two models are independent, so draw i + draw i is a draw of the sum.
+4. **What it writes.** The sums, draw by draw, and a summary of the data centres, the robots and both together over
+   the draws above 0; for each scenario the page of each element (stock, inflow, outflow; three lines each; world
+   reserves and production dashed, as 04) and the distributions of the year ends 2025, 2030, 2035 and 2040 as
+   RAWCLICDataCenters' 05 draws them, each bar split into the data centres and the humanoid robots.
+5. **Left out:** 07's "collected" (04 has none yet).
+
+## The large capacitors and the boards' layers (since 2026-11-08)
+
+Matthias, 2026-11-08: "PCBs have different size and layors etc. There are also quite large capacitors close to each
+joint motor, as this is required to move the fast and in time. So have them correct!!", "Yes, enter 1 to 8" (EVIDENCE.md
+E51, its source table).
+
+1. **A joint's large capacitors.** Every joint's driver board carries 0 / 2 / 4 large capacitors, a whole number drawn
+   once a draw and the same on every joint of the robot (one design of driver a robot), each 0.68 / 1.5 / 2.6 g. They
+   sit inside the joint module: a module whose mass its maker states keeps that mass, its structure takes them in; a
+   joint built from the G1's weighed parts gains them, and the robot's frame, its remainder, gives them up.
+2. **A capacitor board's capacitors.** The boards that carry large capacitors (`is_capacitor_board`: the G1's four
+   capacitor buffer boards, the RP1's capacitor and motor-capacitor boards, two each) hold 2 / 5 / 8 of them, or their
+   maker's number where its parts list counts them (the RP1's motor-capacitor board 5), each 2.6 / 5.3 / 8.0 g; the
+   boards themselves 10 / 20 / 30 cm², at the board mass per cm² as every board not weighed.
+3. **What a large capacitor is made of.** It is a liquid electrolytic or a hybrid polymer capacitor, one or the other in
+   each draw, each as often (never blended). Its shares are drawn (aluminium of foil, can and terminals, iron, copper and
+   tin of the leads; the liquid's seal kaolinite, the hybrid's chromium and glass fibre); the organic rest (paper,
+   electrolyte, rubber, sleeve) is their remainder, its carbon, hydrogen and oxygen by formula. Their aluminium, copper
+   and tin are elements of interest; the aluminium bound in the kaolinite and the glass is not. They are booked in the
+   electronics as their component, the capacitors, in the part **Small PCB** of how a robot is taken apart (the board
+   they sit on), in the kind of part their board sits in.
+4. **The layers.** Each board has its layers by where it sits (`board_layers`): a joint's driver board 4 / 4 / 6, the
+   computer and power boards 6, the head's and the battery's boards 4, every other, small board 2.
+5. **The copper against the layers.** A board's copper stays its measured share of the board's mass (Bizzo). 02 checks,
+   in every draw, whether its copper per cm² is above the most all the layers of its group could hold (two outer layers
+   of 1 oz, 36.7 mg/cm² each finished, every inner layer 26.9 mg/cm²), and reports the share of the draws above for each
+   kind of part (02's report, each type's `summary.csv`). It cuts nothing.
+
+**Every material's elements against its kilograms (since 2026-11-08, "Yes, fix it").** 02 counts each material's
+kilograms whose elements are drawn where its mass is booked (a recipe, a grade, the magnets', the cells'; a board less
+what sits on it; a sensor's elements; the capacitors; the titanate), and the elements booked under it where each element
+is booked; in every draw they must agree within 0.1 % (`check_recipes`), or 02 stops and names the material. Until then
+the two were one count, compared with itself.
 
 ## The electronics by their components (since 2026-11-05)
 
@@ -1181,7 +1288,9 @@ down:
 | `comparison_total_1.png`, the mass of one robot | its materials | the discrete rainbow of 16 |
 | `comparison_materials_<k>.png`, each material any type holds (15 in V170's run: no type holds ceramics) | the kind of part it sits in | the kinds' of 01 and 02 |
 | `comparison_elements_<k>.png`, each element of interest any type holds (22 in V170's run), in alphabetical order of their names, 1 Aluminium … 22 Titanium (Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only") | the material it comes from, the copper fixed in alloys pale grey | 02's of the element pages (muted) |
-| `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the part group, the body region | the discrete rainbow of 12, of 7 |
+| `comparison_groups_<k>.png`, each element of interest any type holds, in the same order (since 2026-11-08) | the four groups of how a robot is taken apart | 01's `GROUP_COLOURS` |
+| `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the four groups (since 2026-11-08; the shared lists' part groups before), the body region | 01's `GROUP_COLOURS`, the discrete rainbow of 7 |
+| `comparison_parts_<k>.png`, after all the pages above, each element one robot of each type part by part (since 2026-11-08) | a row for each type and each part that holds it | — |
 | `comparison_copper_1.png`, copper's inflow | recycled as copper, fixed in alloys | 02's copper, pale grey |
 
 Each panel is 02's (`stacked_bars`, `centre_lines`, `panel_axes`; on the element pages `by_material_panel`): the bars the
@@ -1209,11 +1318,15 @@ for use as it is needed to have them for 1 day to switch. So they can recharge s
 (EVIDENCE.md E39 to E43, VERIFICATION.md V208). The first 04 of the same day, the article's robots with its own formula
 of the robots built and nothing else (V206), is replaced.
 
-`04_stock_and_flow.py` follows RAWCLICDataCenters' 07 step by step, quarter by quarter from 2025 Q1 to 2039 Q4, in
+`04_stock_and_flow.py` follows RAWCLICDataCenters' 07 step by step, quarter by quarter from 2025 Q1 to 2040 Q4, its years
+exactly as 07's (since 2026-11-08, EVIDENCE.md E48: the flows of each calendar year, the stocks at its end), in
 chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
 
 1. **The robots.** In use at the end of each quarter: the article's (AI Futures Project, *AI 2040: Plan A*, its economics
-   explorer's row Robots, `stock_and_flow.robots`) at each 1 January, 10 M in 2025 to 70 × 10⁹ in 2040, the quarters
+   explorer's row Robots, `stock_and_flow.robots`), each value at the end of its year (Matthias, 2026-11-08: "Follow the
+   artcile!! 70 x 10E9"), 10 M at the end of 2025 to 70 × 10⁹ at the end of 2040; at 1 January 2025, before the
+   article's first value, its 10 M less one year of its own growth, 10 M / 1.16 = 8.62 M (E, the growth of E42); the
+   quarters
    between geometric, as 07's compute path. Each quarter's robots arrive in its middle and leave as the share of them
    whose lifetime is shorter than their age: the triangle 5 / 7 / 10 years spread among them
    (`stock_and_flow.robot_lifetime_years`; CRU, Agility and the article, E39.3), as 07 spreads its GPUs' lifetimes,
@@ -1237,7 +1350,7 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
    - every type has its own draws of its own triangle, one random number a type and draw, the same draws in every
      year;
    - at 1 January 2025 and in the middle of every quarter, a start: the five other types linked by one correlation,
-     (m3² − Σm²) / ((Σm)² − Σm²) over their modes (0.353 in 2025, −0.207 in the last quarter of 2039), and type 3 1
+     (m3² − Σm²) / ((Σm)² − Σm²) over their modes (0.353 in 2025, −0.212 in the last quarter of 2040), and type 3 1
      minus them; each type's own draws put in the order of the start;
    - then the rearrangement algorithm (Puccetti & Rüschendorf 2012; Embrechts, Puccetti & Rüschendorf 2013): each
      type's draws in turn put in the opposite order of the sum of the other five, weighted by the modes, until a sweep
@@ -1252,16 +1365,16 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
    | 1 January 2025 | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % | ±10.0 % |
    | 2030, first quarter | ±16.8 % | ±16.8 % | ±16.8 % | ±16.9 % | ±16.8 % | ±16.9 % | ±16.8 % |
    | 2035, first quarter | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % | ±23.5 % |
-   | 2039, last quarter | ±29.8 % | ±29.9 % | ±29.8 % | ±29.9 % | ±29.8 % | ±29.9 % | ±29.8 % |
+   | 2040, last quarter | ±30.0 % | ±30.0 % | ±29.9 % | ±30.1 % | ±30.0 % | ±30.1 % | ±29.9 % |
 
    Each type's draws as close to its triangle as random draws of a triangle are (largest gap of their distribution
    0.0022, against 0.0030 for random draws at 95 %); every mean on its mode (to 5 × 10⁻⁴ of it); the six adding up to
    1 to 2 × 10⁻¹⁶; the lowest share 2.85 %. A draw is one world over the years: each type's point from one quarter to
-   the next correlated at least 0.999, from 2025 to the last quarter of 2039 0.59 to 0.83. The correlations between
+   the next correlated at least 0.998, from 2025 to the last quarter of 2040 0.56 to 0.83. The correlations between
    the types: in 2025 type 3 against each other type (−0.58 to −0.86), the other five together (+0.35 to +0.37), as
-   they must be when type 3, 42 % of the robots built, is to move ±10 %; in 2039 type 3 against types 2 and 4 (−0.52,
-   −0.71) and a little with types 1, 5 and 6 (+0.21 to +0.28). About 31 seconds at 200,000 draws; the points of the
-   five, 244 MB. Each type's robots built are the article's robots built times its share. The robots of 1 January 2025
+   they must be when type 3, 42 % of the robots built, is to move ±10 %; in the last quarter of 2040 type 3 against types 2
+   and 4 (−0.51, −0.71) and a little with types 1, 5 and 6 (+0.23 to +0.29). About 31 seconds at 200,000 draws; the points of the
+   five, 260 MB. Each type's robots built are the article's robots built times its share. The robots of 1 January 2025
    by the shares of 2025.
 3. **The joint sets.** A robot's joints, the kinds 01 numbers 1 to 6 (hip, knee, ankle, waist, arm and head joints), are
    a stock of their own, as many as the robots in use of each type, each set worn out after 7,000 / 10,000 / 30,000
@@ -1288,17 +1401,18 @@ chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
 07's approximation in steps 3 and 4: the joint sets and packs of a retired robot go on in a new robot until they wear
 out, which makes their inflow and outflow slightly low. Each chunk is checked before it is written (`check`): the stock
 before + inflow − outflow is the stock in every quarter, the outflow counted cohort by cohort apart from the stock; no
-flow below 0; the robots at each 1 January the article's; the types adding up to all robots; the joint sets as many as
+flow below 0; the robots at the end of each year the article's, at 1 January 2025 8.62 M; the types adding up to all robots; the joint sets as many as
 the robots; the packs never fewer than the need. The bands come from 02's draws, the types' shares, the three
 lifetime factors and the packs' capacity. The robots in use have none: the article gives one number a year. The packs
 in use have almost none: the packs a robot holds come from runtimes that are single numbers (the workbook's and
 `runtime_2025_hours`).
 
-**What it writes.** `data/stock_and_flow/`: the draws, float32, by year (flows 2025 to 2039, stocks at 1 January 2025 to
-2040): `units_in`, `units_stock`, `units_out` (draw × year × robots, joint sets, battery packs × type) and
-`elements_in`, `elements_stock`, `elements_out` (draw × year × robots' bodies, joint sets, battery packs × element, kg),
-their axes in `draws.txt`; `summary.csv`, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above 0,
-and their share. About 3.1 GB at 200,000 draws. `figures/stock_and_flow/`, as 07's, A4 landscape with its print fonts:
+**What it writes.** `data/stock_and_flow/`: the draws, float32, by year, as 07 (flows of the calendar years 2025 to
+2040; stocks at the end of each year, 2025 to 2040): `units_in`, `units_stock`, `units_out` (draw × year × robots, joint sets, battery packs × type) and
+`elements_in`, `elements_stock`, `elements_out` (draw × year × the 14 parts of how a robot is taken apart × element,
+kg; since 2026-11-08, until then robots' bodies, joint sets, battery packs), their axes in `draws.txt`; `summary.csv`,
+each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above 0, and their share. About 15 GB at 200,000
+draws (the three element files 4.2 GB each). `figures/stock_and_flow/`, as 07's, A4 landscape with its print fonts:
 `overview.png` (robots in use; built and retired; in use by type; each type's share of the robots built, a plain axis;
 the joint sets; the battery packs in use; built and worn out) and `elements/<Element>.png` (its stock beside the world's reserves; its inflow and outflow beside the world's
 mine production in 2025, dashed, a range as a grey band, a value beyond the scale written in the panel). The world's
@@ -1310,13 +1424,20 @@ the draws above 0, its band 95 % of them, with the share of the draws that hold 
 not part of a distribution"); a legend at the upper left unless a line or a written value lies under it there. An
 element 0 in every draw has no page. Since 2026-11-07 (Matthias: "I also want the distributions. Check with the data centers,
 what else has to be done", to the comparison with RAWCLICDataCenters' 07 "Yes, as recommended"; EVIDENCE.md E46): the
-distribution pages in `figures/stock_and_flow/distributions/`, in 02's form (bars of the share of the draws, the median a
-solid line, the mean a dotted one, 2.5 % and 97.5 % dashed, no number on a panel; each page followed by the page of its
-numbers, E34): the robots in use of each type at 1 January 2025, 2030, 2035 and 2040 (`robots_in_use_by_type.png`);
-each type's share of the robots built in 2025 and in the first quarters of 2030 and 2035 and the last of 2039, its own
-triangle drawn over its bars in grey (`type_shares.png`); each element in use at the four 1 January, each bar split into
-the kg of the robots' bodies, the joint sets and the battery packs, the smaller part lower, as RAWCLICDataCenters' 05
-splits its elements by 03 and 04 (`elements/<Element>.png`; an element not in use in every draw over the draws that hold
-it, their share on the page of numbers). Each panel in the unit that reads from 1 up (thousand, million, billion robots;
-g, kg, t, kt, Mt), its ticks with the decimals their spacing needs. `summary.csv` also holds each element by part
-("Copper, joint sets"), as 07 writes its groups.
+distribution pages in `figures/stock_and_flow/distributions/`: the robots in use of 2025, 2030, 2035 and 2040, a panel a
+year, the six types one above the other on one axis, each row its draws (bars scaled to the row) with its median, mean
+and 95 %, every draw on the axis, the robots in all, the article's, in the panel's title, followed by the page of its
+numbers (`robots_in_use.png`; since 2026-11-08: "can you not combine the 6 types to 1", "I want to see at the end how many
+robots there are", "it is 2025, 2030, 2035 and 2040!!", "Sorry end of goes away", E47, E48; it replaces the pages of the
+robots in use by type and of the types' shares, the second of which drew the types' input draws with their input
+triangle over them until that morning: "I want to see the triangulas from the MC and not some faque trianguals",
+GitHub/CLAUDE.md §5); and the elements in all robots in use, a page a year (`elements_2025.png` to `elements_2040.png`),
+exactly as RAWCLICDataCenters' 05 draws the elements of one data centre (Matthias, 2026-11-08: "I also want finally see
+the distribution. Exactkly the figures we have worked out for the data centers!!!"; E49): a panel per element held in at
+least 2.5 % of the draws, four across, the distribution of its kg (70 bars over every draw, the height the share of the
+draws), each bar split into the kg of the four groups of how a robot is taken apart (joints, battery, electronics, body;
+since 2026-11-08, until then the robots' bodies, the joint sets and the battery packs), the smaller lower, the mean a
+solid line with its number, 2.5 % and 97.5 % dashed, the groups' means written in the panel, one legend; over the draws
+that hold the element, their share written where it is not all of them; each followed by the list of its elements part
+by part (`parts_<year>_<k>.png`). They replace the pages of one element at four years of 2026-11-07. `summary.csv` also
+holds each element by group ("Copper, Electronics") and by part ("Copper, Electronics: Small PCB").

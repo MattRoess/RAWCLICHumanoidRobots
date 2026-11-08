@@ -283,11 +283,17 @@ class TestHandCalculations(unittest.TestCase):
         d = self.at()
         # Cables: 6 m × (2 × 0.82 + 2 × 0.13) mm2 × 8.96 g/cm3 = 102.144 g; 46 mated XT30 (2+2) × 2.12 g × 0.35 of
         # contacts × 0.62 copper of their brass = 21.16184 g (2026-10-29, "Yes, enter all", EVIDENCE.md E5.22: the pair
-        # 1.1224 g + 1 g, its contacts brass); 4 capacitor buffer boards × 5 cm2 × 0.56 g/cm2 × 0.20 = 2.24 g. The
-        # element copper is the copper and the boards' copper, 104.384 g; the brass stays a material, its copper bound
-        # in it (EVIDENCE.md E19 point 3, question 3), so it is in the recipes' copper only.
-        np.testing.assert_allclose(self.element(d, 'Unitree G1', 'cables', 'Cu'), 0.104384, rtol=1e-9)
-        np.testing.assert_allclose(self.recipe_element(d, 'Unitree G1', 'cables', 'Cu'), 0.12554584, rtol=1e-9)
+        # 1.1224 g + 1 g, its contacts brass); 4 capacitor buffer boards × 20 cm2 (E51, 5 until then) × 0.56 g/cm2 ×
+        # 0.20 = 8.96 g; their large capacitors (E51): 4 boards × k of them (a whole number drawn, 2 to 8) × 5.3 g ×
+        # the copper of their kind, the liquid's 0.55 % or the hybrid's 0.2 %. The element copper is the copper, the
+        # boards' and the capacitors', 111.104 g and the capacitors'; the brass stays a material, its copper bound in it
+        # (EVIDENCE.md E19 point 3, question 3), so it is in the recipes' copper only.
+        element = self.element(d, 'Unitree G1', 'cables', 'Cu')
+        capacitors = element - 0.111104
+        possible = np.array([4 * k * 0.0053 * share for k in range(2, 9) for share in (0.0055, 0.002)])
+        self.assertTrue(all(np.isclose(possible, c, rtol=1e-9, atol=0).any() for c in capacitors), capacitors)
+        np.testing.assert_allclose(self.recipe_element(d, 'Unitree G1', 'cables', 'Cu') - capacitors,
+                                   0.12554584 + 0.00672, rtol=1e-9)
 
     def test_the_g1s_gold_in_its_hips(self):
         d = self.at()
@@ -1028,7 +1034,7 @@ class TestPagesByMaterial(unittest.TestCase):
         d, c = self.drawn()
         labels = {m for m, _ in d.by_material if m.startswith(composition.ELECTRONICS)}
         self.assertEqual(composition.ELECTRONICS_COMPONENTS,
-                         ('circuit boards', 'cameras', 'other sensors', 'cables', 'connectors'))
+                         ('circuit boards', 'cameras', 'other sensors', 'cables', 'connectors', 'capacitors'))
         self.assertTrue(labels <= set(map(composition.component_label, composition.ELECTRONICS_COMPONENTS)), labels)
         self.assertNotIn(composition.ELECTRONICS, {m for m, _ in d.by_material})
         titanium = {m for m, e in d.by_material if e == 'Ti'}
@@ -1053,7 +1059,9 @@ class TestPagesByMaterial(unittest.TestCase):
         pages = composition.taken_apart_pages(c, d, [], self.params)
         names = [name for name, _ in pages]
         kinds = [name.rsplit('_', 2)[-2] for name in names if '_numbers_' not in name]   # each with its numbers, E34
-        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'means', 'materials', 'alloys'].index))
+        # The groups and the list part by part after the alloys (2026-11-08, "Yes, add 1 to 3").
+        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'means', 'materials', 'alloys', 'groups',
+                                                   'parts'].index))
         seen = means_seen = False
         for name, figure in pages:
             if '_elements_' in name:
@@ -1080,8 +1088,10 @@ class TestPagesByMaterial(unittest.TestCase):
                     # The electronics' components together in copper's row, the electronics' name once after them in
                     # brackets (E32; since 2026-11-06, E38: "Have LIDAR etc. first and then just in brackets boards and
                     # components").
+                    # (Its words, not its line breaks: a row wraps where it is long.)
                     row = next(t.get_text().replace('\n', ' ') for t in figure.texts
-                               if 'Copper ' in t.get_text() and 'Battery cells ' in t.get_text())
+                               if 'Copper ' in t.get_text().replace('\n', ' ')
+                               and 'Battery cells ' in t.get_text().replace('\n', ' '))
                     tail = f'({composition.ELECTRONICS.lower()})'
                     self.assertEqual(row.count(tail), 1, row)
                     self.assertNotIn(f'{composition.ELECTRONICS}: ', row)
@@ -1814,11 +1824,11 @@ class TestRemainderBelowZeroReported(unittest.TestCase):
                              for note in composition.taken_apart_notes(c, d, [], self.params)
                              if not c.remainder_below.any()))
         groups = c.tables['part_groups'][1]
-        frame = c.tables['part_groups'][0].index('Frame')
+        frame = c.tables['part_groups'][0].index('Body')        # the four groups since 2026-11-08
         groups[7, frame] = -0.1
         c.remainder_below[7] = True
         notes = ' '.join(composition.taken_apart_notes(c, d, [], self.params))
-        self.assertIn('the part group Frame is below zero in', notes)
+        self.assertIn('the part group Body is below zero in', notes)
         self.assertIn('reported, not cut', notes)
 
 
@@ -2598,7 +2608,7 @@ class TestHeadJoints(unittest.TestCase):
         self.assertEqual(schemas.MARKS['headjoints'], '6')
         self.assertEqual(schemas.JOINT_KIND['head'], 'headjoints')
         self.assertEqual(schemas.JOINT_KIND['neck'], 'headjoints')
-        self.assertEqual(composition.KIND_PART_GROUP['headjoints'], 'Joint drives')
+        self.assertEqual(schemas.KIND_GROUP['headjoints'], 'Joints')            # the four groups since 2026-11-08
         self.assertEqual(composition.KIND_BODY_REGION['headjoints'], 'Head')
         self.assertIn('headjoints', schemas.SPOTS)
         colours = [c for _, c in schemas.KINDS.values()]
@@ -2691,3 +2701,368 @@ class TestNewSensorsAndCapacitors(unittest.TestCase):
         # Barium and titanium by the formula, draw by draw: the boards' titanium is the capacitors' alone.
         np.testing.assert_allclose(titanium / barium, composition.TITANATE['Ti'] / composition.TITANATE['Ba'],
                                    rtol=1e-9)
+
+
+class TestTakenApart(unittest.TestCase):
+    """Matthias, 2026-11-08: "I want a detailed list of the component, so it is easy to understand and establish a
+    recycling to know how to take it apart!!!", the four groups in his words, "Yes do it": every element of interest of
+    every robot booked to its kind and its part of how a robot is taken apart (01's TAKEN_APART), the parts of a kind
+    adding up to the kind, draw by draw, in every robot type; each by hand where it can be."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self, robot_type: int):
+        inputs = type_inputs_or_skip(self, self.params, robot_type)
+        return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def test_the_parts_add_up_to_every_kind_in_every_type(self):
+        for robot_type in range(1, 7):
+            _, d = self.drawn(robot_type)
+            self.assertTrue(d.taken, msg=robot_type)
+            self.assertTrue({part for _, part, _ in d.taken} <= set(schemas.TAKEN_PARTS), msg=robot_type)
+            for (kind, element), kg in d.elements.items():
+                split = sum(v for (k, _, e), v in d.taken.items() if k == kind and e == element)
+                np.testing.assert_allclose(split, kg, rtol=1e-9, atol=1e-15, err_msg=f'{robot_type} {kind} {element}')
+
+    def test_by_hand_in_robot_type_1(self):
+        _, d = self.drawn(1)
+        taken = lambda kind, part, e: d.taken.get((kind, part, e), np.zeros(d.n))   # noqa: E731
+        # The joints' magnets: their kg (02's details by grade class) times the fixed neodymium share, all in Magnets.
+        for kind in ('hips', 'knees', 'ankles', 'waist', 'arms', 'headjoints'):
+            magnets = sum((v for (k, m, _), v in d.details.items() if k == kind and m == 'NdFeB magnets'),
+                          np.zeros(d.n))
+            np.testing.assert_allclose(taken(kind, 'Magnets', 'Nd'), magnets * FIXED_MAGNET['Nd'], rtol=1e-12,
+                                       err_msg=kind)
+        # The RoboParty RP1's 80 magnets in its covers: the body's shell, never the joints' magnets.
+        rp1 = d.robot == d.robots.index('RoboParty RP1')
+        self.assertTrue(np.all(taken('frame', 'Shell', 'Nd')[rp1] > 0))
+        self.assertFalse(np.any(taken('frame', 'Shell', 'Nd')[~rp1]))
+        self.assertNotIn(('frame', 'Magnets', 'Nd'), d.taken)
+        # The boards: the computer's gold a PCB, the driver boards' gold in the joints a small PCB, the battery
+        # management board's a small PCB; the cables' copper wires; the cells' lithium cells; the head's indium sensors.
+        self.assertTrue(composition.held(taken('boards', 'PCB', 'Au')))
+        self.assertTrue(composition.held(taken('hips', 'Small PCB', 'Au')))
+        self.assertTrue(composition.held(taken('battery', 'Small PCB', 'Au')))
+        self.assertNotIn(('boards', 'Small PCB', 'Au'), d.taken)
+        np.testing.assert_allclose(taken('cables', 'Wires', 'Cu') + taken('cables', 'Small PCB', 'Cu'),
+                                   d.elements[('cables', 'Cu')], rtol=1e-12)
+        np.testing.assert_allclose(taken('battery', 'Cells', 'Li'), d.elements[('battery', 'Li')], rtol=1e-12)
+        self.assertTrue(composition.held(taken('head', 'Sensors', 'In')))
+        # The encoders in the joints: their neodymium in the sensors, in the kind of their joints.
+        self.assertTrue(composition.held(taken('hips', 'Sensors', 'Nd')))
+        # The hip fans: their copper a PCB in the hips (the G1's two), not the joints' motors.
+        g1 = d.robot == d.robots.index('Unitree G1')
+        self.assertTrue(np.all(taken('hips', 'PCB', 'Cu')[g1] > 0))
+
+    def test_the_head_actuators_in_the_head_joints(self):
+        # "I told you head is again a joint which moves the head etc.": the Atlas HD's head actuator, valve, board and
+        # sensors in the head joints; its titanium body in the hydraulics; its position sensor's neodymium a sensor.
+        _, d = self.drawn(5)
+        atlas = np.isin(d.robot, [d.robots.index(r) for r in ('Atlas HD ISA v2', 'Atlas HD ISA v5 knees')])
+        self.assertTrue(np.all(d.taken[('headjoints', 'Hydraulics', 'Ti')][atlas] > 0))
+        self.assertTrue(np.all(d.taken[('headjoints', 'Sensors', 'Nd')][atlas] > 0))
+        self.assertFalse([key for key in d.taken if key[0] == 'head' and key[1] == 'Hydraulics'])
+
+    def test_a_fault_in_the_split_stops_02(self):
+        _, d = self.drawn(1)
+        key = next(k for k in d.taken if k[2] == 'Cu')
+        wrong = dict(d.taken)
+        wrong[key] = wrong[key] * 1.001
+        with self.assertRaises(ValueError):
+            composition.check_taken(dataclasses.replace(d, taken=wrong))
+        renamed = dict(d.taken)
+        renamed[(key[0], 'Gears', key[2])] = renamed.pop(key)
+        with self.assertRaises(ValueError):
+            composition.check_taken(dataclasses.replace(d, taken=renamed))
+        missing = dict(d.taken)
+        missing.pop(key)
+        with self.assertRaises(ValueError):
+            composition.check_taken(dataclasses.replace(d, taken=missing))
+
+
+class TestTakenApartAtOneRobot(unittest.TestCase):
+    """Matthias, 2026-11-08: "Why I am not allowed to know what the different components contribut already at this
+    level", "Yes, add 1 to 3": the mass of one robot by the four groups of how a robot is taken apart (its part groups,
+    in place of the shared lists' seven), each element of a robot type split by the four groups, and the list part by
+    part."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self, robot_type: int):
+        inputs = type_inputs_or_skip(self, self.params, robot_type)
+        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+        category = next(c for c in inputs.base.book.categories if c.number == robot_type)
+        return inputs, d, composition.compose_taken_apart(category, d, inputs.base.lists)
+
+    def test_the_mass_by_the_four_groups(self):
+        for robot_type in (1, 5):
+            _, d, c = self.drawn(robot_type)
+            columns, draws = c.tables['part_groups']
+            self.assertEqual(columns, ['Joints', 'Battery', 'Electronics', 'Body'], msg=robot_type)
+            # The four add up to the robot's mass in every draw.
+            np.testing.assert_allclose(draws.sum(axis=1), d.mass, rtol=1e-9, err_msg=robot_type)
+            # The mass of each kind by part adds up to the kind.
+            for kind in {k for k, _ in d.taken_kg}:
+                np.testing.assert_allclose(sum(v for (k, _), v in d.taken_kg.items() if k == kind),
+                                           composition.kind_kg(d, kind), rtol=1e-9, err_msg=(robot_type, kind))
+        # By hand, robot type 1: the battery group the battery kind less its management board (a small PCB of the
+        # electronics); the body the frame and shell kind whole.
+        _, d, c = self.drawn(1)
+        columns, draws = c.tables['part_groups']
+        boards = sum(kg for (k, part), kg in d.taken_kg.items() if k == 'battery' and part == 'Small PCB')
+        self.assertTrue(composition.held(boards))
+        np.testing.assert_allclose(draws[:, columns.index('Battery')], composition.kind_kg(d, 'battery') - boards,
+                                   rtol=1e-9)
+        np.testing.assert_allclose(draws[:, columns.index('Body')], composition.kind_kg(d, 'frame'), rtol=1e-9)
+
+    def test_a_fault_in_the_mass_stops_02(self):
+        _, d, _ = self.drawn(1)
+        key = next(k for k in d.taken_kg if k[0] == 'frame')
+        wrong = dict(d.taken_kg)
+        wrong[key] = wrong[key] * 1.001
+        with self.assertRaises(ValueError):
+            composition.check_taken(dataclasses.replace(d, taken_kg=wrong))
+
+    def test_the_pages_of_the_groups_and_the_list(self):
+        _, d, c = self.drawn(1)
+        groups, lists = composition.group_pages(c, d)
+        self.assertTrue(groups and lists)
+        self.assertEqual([name for name, _ in groups], [f'{c.name}_groups_{k}.png' for k in range(1, len(groups) + 1)])
+        self.assertEqual([name for name, _ in lists], [f'{c.name}_parts_{k}.png' for k in range(1, len(lists) + 1)])
+        legend = [t.get_text() for t in groups[0][1].legends[0].get_texts()]
+        self.assertEqual(legend, [g for g in schemas.TAKEN_APART if g in legend])          # in their order
+        # The list: neodymium in the joints' magnets, its mean by hand over the draws that hold it.
+        by_part = {(composition.element_label(e), part): sum(
+            (kg for (_, x, y), kg in d.taken.items() if x == part and y == e), np.zeros(d.n))
+            for e in ('Nd',) for part in schemas.TAKEN_PARTS}
+        rows = composition.part_rows(by_part)
+        magnets = next(r for r in rows if r[2] == 'Magnets')
+        values = by_part[(composition.element_label('Nd'), 'Magnets')]
+        per, unit = composition.panel_unit(values[values > 0])
+        self.assertEqual(magnets[1], 'Joints')
+        self.assertEqual(magnets[5], f'{composition.panel_number(values[values > 0].mean() / per)} {unit}')
+        texts = ' '.join(t.get_text() for _, page in lists for t in page.texts)
+        self.assertIn('Magnets', texts)
+        for _, figure in groups + lists:
+            composition.plt.close(figure)
+
+
+class TestLargeCapacitors(unittest.TestCase):
+    """Matthias, 2026-11-08: "There are also quite large capacitors close to each joint motor, as this is required to
+    move the fast and in time. So have them correct!!", "Yes, enter 1 to 8" (EVIDENCE.md E51): the large capacitors of
+    every joint's driver board and of the capacitor boards, by hand with their numbers, masses and shares fixed; the
+    RP1's motor-capacitor board with its maker's 5; the check of every board's copper against its layers."""
+
+    FIXED = {'Large capacitors on a joint driver board': (2, 2, 2),
+             'Large capacitor of a joint driver board, its mass': (1.5, 1.5, 1.5),
+             'Capacitors on a capacitor board': (4, 4, 4),
+             'Capacitor of a capacitor board, its mass': (5.3, 5.3, 5.3)}
+    # Copper and tin the same in both kinds; aluminium 47 % in the liquid, 40 % in the hybrid, so that the kind drawn
+    # shows; a seal's kaolinite (its aluminium bound, not an element of interest) and the rest as written.
+    SHARES = {'aluminium': 0.47, 'copper': 0.01, 'tin': 0.006}
+    HYBRID_ALUMINIUM = 0.40
+
+    @classmethod
+    def setUpClass(cls):
+        cls.params = Params()
+        cls.params.composition.draws = 1000
+
+    def drawn(self, fixed=True):
+        inputs = type_inputs_or_skip(self, self.params, 1)
+        if fixed:
+            values = dict(self.FIXED)
+            for kind, whats in schemas.CAPACITOR_SHARES.items():
+                for what in whats:
+                    share = self.SHARES.get(what, 0.04)
+                    if kind == schemas.HYBRID_CAPACITOR and what == 'aluminium':
+                        share = self.HYBRID_ALUMINIUM
+                    values[schemas.capacitor_share(kind, what)] = (share, share, share)
+            values.update(fixed if isinstance(fixed, dict) else {})
+            apart = inputs.apart
+            shared = dict(apart.constants[schemas.ALL_ROBOTS])
+            for quantity, triple in values.items():
+                row, _, unit, label, source = shared[quantity]
+                shared[quantity] = (row, triple, unit, label, source)
+            constants = dict(apart.constants)
+            constants[schemas.ALL_ROBOTS] = shared
+            inputs = dataclasses.replace(inputs, apart=dataclasses.replace(apart, constants=constants))
+        return inputs, draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
+
+    def test_every_kg_by_hand(self):
+        inputs, d = self.drawn()
+        apart = inputs.apart
+        source = composition.component_label(composition.CAPACITOR_PARTS)
+        for robot in ('Unitree G1', 'RoboParty RP1', 'AgiBot X1'):
+            rows = d.robot == d.robots.index(robot)
+            joints = sum(j.count for j in apart.joints if j.robot == robot)
+            boards = sum(b.count * (apart.constants[robot].get(schemas.CAPACITORS_ON + b.name, (0, (4,)))[1][0])
+                         for b in apart.boards if b.robot == robot and schemas.is_capacitor_board(b.name))
+            mass = (joints * 2 * 1.5 + boards * 5.3) / 1000                   # kg of large capacitors in the robot
+            for symbol, share in (('Cu', 0.01), ('Sn', 0.006)):
+                got = d.by_material[(source, symbol)][rows]
+                np.testing.assert_allclose(got, mass * share, rtol=1e-9, err_msg=(robot, symbol))
+            # Aluminium: the liquid's 47 % or the hybrid's 40 % in each draw, each kind in about half the draws (a
+            # discrete state, never blended).
+            share = d.by_material[(source, 'Al')][rows] / mass
+            liquid = np.isclose(share, 0.47, rtol=1e-9)
+            self.assertTrue(np.all(liquid | np.isclose(share, self.HYBRID_ALUMINIUM, rtol=1e-9)), robot)
+            self.assertTrue(0.35 < liquid.mean() < 0.65, (robot, liquid.mean()))
+        # The RP1's motor-capacitor boards: its maker's 5 each (2 boards), the capacitor boards the shared 4.
+        self.assertEqual(apart.constants['RoboParty RP1'][schemas.CAPACITORS_ON
+                                                          + 'Motor capacitor board RBE-PWR-MCAP'][1], (5, 5, 5))
+
+    def test_a_stated_module_mass_keeps_its_mass(self):
+        # The capacitors inside the joint module: a joint whose module mass its maker states keeps it, its structure
+        # the less, even with 4 capacitors of 100 g each (made heavy, so that a capacitor outside the module shows).
+        inputs, d = self.drawn({'Large capacitors on a joint driver board': (4, 4, 4),
+                                'Large capacitor of a joint driver board, its mass': (100, 100, 100)})
+        columns, draws = d.parts
+        checked = 0
+        for j in inputs.apart.joints:
+            if j.robot != 'AgiBot X1' or None in j.module_mass:
+                continue
+            rows = d.robot == d.robots.index(j.robot)
+            one = draws[rows, columns.index(f'{j.robot}: {j.name} ({j.count} joints)')] / j.count
+            self.assertTrue(np.all((one >= j.module_mass[0] - 1e-9) & (one <= j.module_mass[2] + 1e-9)), j.name)
+            checked += 1
+        self.assertGreater(checked, 0)
+
+    def test_in_the_small_pcbs_and_adding_up(self):
+        inputs, d = self.drawn()
+        category = next(c for c in inputs.base.book.categories if c.number == 1)
+        c = composition.compose_taken_apart(category, d, inputs.base.lists)
+        self.assertEqual(composition.draw_faults(c), [])        # every element of the recipes adds up to its material
+        # The capacitors' elements of interest in the small PCBs: the joints' in their joint kinds, the boards' in the
+        # cables (where the capacitor boards sit).
+        source = composition.component_label(composition.CAPACITOR_PARTS)
+        caps_al = d.by_material[(source, 'Al')]
+        small_al = sum(v for (k, part, e), v in d.taken.items() if part == 'Small PCB' and e == 'Al')
+        self.assertTrue(np.all(small_al >= caps_al - 1e-12))
+        self.assertNotIn(('frame', 'Small PCB', 'Al'), d.taken)
+
+    def test_the_numbers_drawn_whole_and_the_kinds_each_as_often(self):
+        inputs, d = self.drawn(fixed=False)
+        source = composition.component_label(composition.CAPACITOR_PARTS)
+        al = d.by_material[(source, 'Al')]
+        self.assertTrue(composition.held(al))
+        # Robots with no capacitor board and no large capacitor on their drivers in some draws: none in those (the
+        # number 0 / 2 / 4 a whole number; 0 drawn).
+        x1 = d.robot == d.robots.index('AgiBot X1')
+        self.assertTrue(np.any(al[x1] == 0) and np.any(al[x1] > 0))
+
+    def test_the_boards_copper_against_their_layers(self):
+        self.assertAlmostEqual(schemas.layers_copper_mg(2), 73.4)
+        self.assertAlmostEqual(schemas.layers_copper_mg(4), 127.2)
+        self.assertAlmostEqual(schemas.layers_copper_mg(6), 181.0)
+        self.assertEqual(schemas.board_layers('hips'), (4, 4, 6))
+        self.assertEqual(schemas.board_layers('boards'), (6, 6, 6))
+        self.assertEqual(schemas.board_layers('battery'), (4, 4, 4))
+        self.assertEqual(schemas.board_layers('cables'), (2, 2, 2))
+        _, d = self.drawn(fixed=False)
+        self.assertTrue(d.layer_check)
+        for kind, (above, total) in d.layer_check.items():
+            self.assertGreater(total, 0, kind)
+            self.assertLessEqual(above, total, kind)
+        # By hand, with every board not weighed 0.56 g/cm2 and 20 % copper: 112 mg/cm2, above the 73.4 two whole layers
+        # hold (the small boards in the cables), below the 127.2 of four (the head's and the battery's boards) and the
+        # 181 of six (the computer's): above in every draw of the first, in none of the others.
+        _, d = self.drawn({'Board mass per cm2 (boards not weighed)': (0.56, 0.56, 0.56),
+                           "Copper share of a board's mass": (0.2, 0.2, 0.2)})
+        for kind, expected in (('cables', 1.0), ('boards', 0.0), ('head', 0.0), ('battery', 0.0)):
+            above, total = d.layer_check[kind]
+            self.assertEqual(above / total, expected, kind)
+        rows = {row[0]: row for row in composition.layer_rows(d)}
+        self.assertEqual(rows['Hip joints'][1:3], ['4 / 4 / 6', 181.0])
+        self.assertEqual(rows['Cables'][1:3], ['2 / 2 / 2', 73.4])
+
+
+class TestOneCapacitorAndOneBoard(unittest.TestCase):
+    """One robot's capacitors and one board booked directly (Robot.capacitors, Robot.board), with the draws they share
+    set by hand (EVIDENCE.md E51): every kilogram of the capacitors in their elements, by kind; the check of a board's
+    copper against the most layers of its group."""
+
+    N = 4
+
+    def shared(self):
+        n, constant = self.N, {}
+        for kind, whats in schemas.CAPACITOR_SHARES.items():
+            for what in whats:
+                constant[schemas.capacitor_share(kind, what)] = np.full(n, 0.05)
+        constant[schemas.capacitor_share(schemas.LIQUID_CAPACITOR, 'aluminium')] = np.full(n, 0.48)
+        constant[schemas.capacitor_share(schemas.HYBRID_CAPACITOR, 'aluminium')] = np.full(n, 0.46)
+        constant.update({composition.BOARD_COPPER: np.full(n, 0.2), composition.BOARD_GLASS: np.full(n, 0.55),
+                         composition.BOARD_BROMINE: np.full(n, 0.088)})
+        glass = {'Si': np.full(n, 0.5), 'O': np.full(n, 0.5)}
+        return types.SimpleNamespace(
+            capacitor_kind=np.array([0, 1, 0, 1]), constant=constant, recipe={}, recipe_name={}, tantalum=np.zeros(n),
+            pcb={('PE_HVS', m): np.zeros(n) for m in schemas.BOARD_METALS}, heat_grade={},
+            grade_elements=lambda name: glass, grade_leaves=lambda name: {name: np.ones(n)})
+
+    def robot(self):
+        return composition.Robot('Test robot', np.arange(self.N), self.shared(), np.full(self.N, 30.0))
+
+    def test_every_kg_of_the_capacitors_in_their_elements(self):
+        r = self.robot()
+        kg = np.array([0.01, 0.02, 0.0, 0.004])
+        r.capacitors('Test robot: a joint', 'hips', kg, False)
+        total = sum(v for (k, _), v in r.recipe_elements.items() if k == 'hips')
+        np.testing.assert_allclose(total, kg, rtol=1e-12)                       # all of their mass, no more
+        # Of interest: the aluminium of the foil, can and terminals (48 % liquid, 46 % hybrid), copper and tin; not the
+        # kaolinite's or the glass's aluminium.
+        np.testing.assert_allclose(r.elements[('hips', 'Al')], kg * np.array([0.48, 0.46, 0.48, 0.46]), rtol=1e-12)
+        np.testing.assert_allclose(r.elements[('hips', 'Cu')], kg * 0.05, rtol=1e-12)
+        self.assertEqual(set(k[1] for k in r.taken), {'Small PCB'})
+        np.testing.assert_allclose(r.taken_kg[('hips', 'Small PCB')], kg, rtol=1e-12)
+
+    def test_a_boards_copper_against_the_most_layers_of_its_group(self):
+        # A joint's driver board of 150 mg/cm2 copper (0.75 g/cm2, 20 %): below the 181 of six whole layers, the most
+        # of a driver (4 / 4 / 6), above the 127.2 of four: not counted above. A small board in the cables of the same
+        # copper, two layers (73.4): above in every draw.
+        area = np.full(self.N, 20.0)
+        kg = area * 0.75 / 1000
+        r = self.robot()
+        r.board('hips', 'PE_HVS', kg, area, False)
+        r.board('cables', 'PE_HVS', kg, area, False)
+        self.assertEqual(r.layer_check['hips'], (0, self.N))
+        self.assertEqual(r.layer_check['cables'], (self.N, self.N))
+
+
+class TestEveryMaterialInItsElements(unittest.TestCase):
+    """Matthias, 2026-11-08, "Yes, fix it": 02's check that the elements add up to the materials compared the elements
+    booked with the kilograms booked as elements, one sum twice, and could never fail (V223: the capacitors' organic
+    rest doubled passed it). Now each material's kilograms whose elements are drawn are counted where the mass is booked
+    (Robot.in_recipes), its elements where they are booked (Robot.elements_of), and 02 checks every material in every
+    draw (check_recipes)."""
+
+    def robot(self):
+        return TestOneCapacitorAndOneBoard().robot()
+
+    def test_the_two_counts_of_a_capacitor_and_a_board(self):
+        r = self.robot()
+        kg = np.array([0.01, 0.02, 0.0, 0.004])
+        r.capacitors('Test robot: a joint', 'hips', kg, False)
+        np.testing.assert_allclose(r.in_recipes[composition.ELECTRONICS], kg, rtol=1e-12)
+        np.testing.assert_allclose(r.elements_of[composition.ELECTRONICS], kg, rtol=1e-12)
+        area = np.full(4, 20.0)
+        board = area * 0.75 / 1000
+        r.board('hips', 'PE_HVS', board, area, False)
+        np.testing.assert_allclose(r.in_recipes[composition.ELECTRONICS], kg + board, rtol=1e-12)
+        np.testing.assert_allclose(r.elements_of[composition.ELECTRONICS], kg + board, rtol=1e-12)
+
+    def test_a_material_whose_elements_miss_its_mass_stops_02(self):
+        params = Params()
+        params.composition.draws = 200
+        inputs = type_inputs_or_skip(self, params, 1)
+        d = draw(inputs, params, fixed_magnets(inputs, 200))
+        composition.check_recipes(d)                                           # as drawn: every material adds up
+        for material in (composition.ELECTRONICS, composition.CELL_MATERIAL, 'Aluminium alloys'):
+            wrong = dict(d.elements_of)
+            wrong[material] = wrong[material] * 1.01                         # 1 %, ten times the tolerance
+            with self.assertRaises(ValueError, msg=material):
+                composition.check_recipes(dataclasses.replace(d, elements_of=wrong))

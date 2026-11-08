@@ -8,6 +8,245 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E52. 05: the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together (2026-11-08). Built
+
+His words: "The distributions have to be combines 07 and 04 output", "Both have to be exactly the same, as we have to
+combine both data!!!", "New stage 05 here", "write 05 combination of results of 04 and 07 with the distributions"; to
+the table of rows 1 to 8, "Yes, build it".
+
+**What 07 holds** (read 2026-11-08, its files and its handover): `data/data_center_stock_and_flow/stock_flow_draws.csv`,
+9.3 GB, 200,000 draws, scenarios A, B and C, the years 2022 to 2040 (flows of the calendar year, stocks at its end, as
+04 counts them since E48), the kilograms of 20 elements in, in stock, out and collected. Written 2026-10-23 14:38 by his
+rerun of 07 (14:05 to 14:40), whose summaries were byte-identical to those before c; 07's code since then as at that
+run (RAWCLICDataCenters' handover of 2026-10-23: "c taken back, everything as before c").
+
+**Built, as agreed:**
+
+| # | Row | Built |
+|---|---|---|
+| 1 | Where | `05_combined_stock_and_flow.py` in RAWCLICHumanoidRobots |
+| 2 | What | each element's stock, inflow and outflow 2025 to 2040, the data centres (07's draw i) + the humanoid robots (04's draw i), added on the raw draws; both 200,000 draws |
+| 3 | Scenarios | A, B and C, each with the humanoid robots |
+| 4 | Elements | the 23 of either: 07's 20, 04's 22; magnesium, titanium and indium the robots' only, strontium the data centres' only (its name added to 02's list) |
+| 5 | Pages | per scenario: `elements/<Element>.png`, stock, inflow and outflow, each with the data centres, the humanoid robots and both together (04's `log_panel`), world reserves and production dashed; `distributions/elements_2025.png` to `elements_2040.png`, as RAWCLICDataCenters' 05 (04's `split_elements_page`, one copy with 04's own pages), each bar split into the data centres and the humanoid robots |
+| 6 | Collected | left out (04 has none yet) |
+| 7 | 07's draws in this project (GitHub/CLAUDE.md §6) | `tools/copy_data_center_draws.py` copies 07's element columns of 2025 to 2040 (in, stock, out) into `data/raw/data_center_stock_and_flow/` (`element_draws.npy`, about 2.3 GB; `elements.txt`; `source.txt` with the source file, its size and date, when copied); it stops where a scenario, draw or year is missing or doubled. The setting `data.data_center_stock_and_flow_source` names 07's file, read by the tool alone; 05 reads only the copy. His run, once and after every run of 07 |
+| 8 | What 05 writes | `data/combined_stock_and_flow/<scenario>/elements_in.npy`, `elements_stock.npy`, `elements_out.npy` (draw × year × element, both together), `elements.txt`; `summary.csv` (every scenario, element, source, flow and year over the draws above 0); the pages in `figures/combined_stock_and_flow/<scenario>/` |
+
+**Also changed for it:** 04's distribution page made one function both use (`split_elements_page`; `element_panel` takes
+the colours of its splits); 01's overview draws the sixth stage and the fifth output (its stage texts shortened to two
+lines, so that six fit); the settings `data.data_center_stock_and_flow_source`, `data.data_center_draws_dir`,
+`output.combined_dir`, `output.combined_figures_dir`.
+
+**Pairing draw i with draw i:** the two models draw independently (07's random stream its own, 04's its own); adding
+draw i of one to draw i of the other is a valid draw of the sum of two independent quantities, made on the raw draws
+before any statistic.
+
+## E51. The large capacitors at the joint motors and on the capacitor boards; the boards' layers (2026-11-08). Built
+
+His words: "I want that you check the car vehicle electronics and learn from ther, how it has to be done here. So PCBs
+have different size and layors etc. There are also quite large capacitors close to each joint motor, as this is
+required to move the fast and in time. So have them correct!!"; to the table of rows 1 to 8, "Yes, enter 1 to 8".
+
+**What RAWCLICVehicleElectronics does** (read by a helper, file by file, 2026-11-08): its boards in three size classes,
+small, medium and large, each a length and a width as min / mode / max (`Data/03_VehiclePCBSize.xlsx`, sheet PCBSize; its
+code in cm², its documents in mm²: a fault there, reported, not fixed); a count of boards of each class per car
+component; the metals as mg per cm² by six board categories (`04_VehiclePCBComposition.xlsx`, no source named in the
+sheet). No layers, no board thickness, no laminate (its "board" the ten metals, about 0.033 g per cm²), **no capacitor of
+any kind**, the traction inverters boards only. What could be taken from it (the size classes) this project already has
+in its own form: every board its own area, min / mode / max.
+
+**Sources** (✓ read by me first-hand today; ◦ read by the helper as the file itself; ▫ second-hand):
+
+| Source | What it is | What it gives | Same kind, representative? |
+|---|---|---|---|
+| ✓ CubeMars, DRV80-4830-1C-A4 Driver Installation Instructions V1.0.0 (cubemars.com, PDF) | maker's manual of a robot-joint driver, 48 V, 30 A rms, 90 A peak | "Electrolytic capacitor 180uF-63V-8*20 ... rubycon 2PCS"; "Power MOS ... 6PCS" | yes: a commercial joint driver, a large one |
+| ✓ RoboParty RP1_hardware, `02_PCB/08_RBE-PWR-MCAP/01_BOM_MCAP_2026-09-07.xlsx` (GitHub) | the maker's own bill of materials of the RP1's motor-capacitor board | 5 × CAP_TH_BD13-L30 (C1, C2, C4, C6, C7; 13 × 30 mm cans), a TOLL MOSFET, 280 kΩ and 680 kΩ, a 16 V zener, an XT30PW(2+2) | yes: a humanoid of type 1 |
+| ◦ RP1_hardware fabrication sheets of its 14 boards | maker's files | 6 layers the main and back boards; 4 the head, hand and battery boards; 2 the motor-capacitor, fan, IMU and small boards; 1 oz outer, 0.5 oz inner copper; 1.6 mm; the motor-capacitor board 65.4 × 31.2 mm | yes |
+| ✓ FROLYT, material declaration of its radial aluminium electrolytic capacitors (RoHS_Umbrella_radial.pdf) | maker's declaration, typical values, one 470 mg capacitor | aluminium foil 25.3 %, paper 5.3 %, electrolyte 17.8 % (γ-butyrolactone 75 %, ethylene glycol 10 %, 15 % additives), aluminium can 21.1 %, rubber 16.3 %, PET sleeve 4.4 %, tin-coated iron wire 9.8 % | yes: the kind of capacitor on the boards |
+| ◦ TDK Electronics, material data sheet of single-ended aluminium electrolytic capacitors (2019) (its server refused my download) | maker's declaration, typical values | foil 27 %, can 23.7 %, paper 5.6 %, electrolyte 10.5 %, seal 22.5 % (40 % kaolinite), sleeve 5 %, iron 4 %, copper 1.1 %, tin 0.6 %; masses by can size (8 × 11.5 mm 1.0 g … 10 × 20 mm 2.6 g, 12.5 × 30 mm 5.3 g, 18 × 20 mm 8.0 g) | yes |
+| ◦ TDK Electronics, SMD hybrid polymer capacitors (04/2025) | maker's declaration | aluminium 24.5 + 19.5 + 2.7 %, iron 0.7 %, stainless steel 0.8 %, copper 0.2 %, tin 0.1 %, polyester with 30 % glass fibre 18.6 %, the organic rest | yes |
+| ◦ mjbots moteus r4.11 (open hardware); ◦ Ben Katz, Cheetah drivers (open hardware); ◦ TI TIDA-010979 (a humanoid joint drive, design guide) | open designs, a reference design | moteus: 16 + 2 × 10 µF ceramic, no electrolytic, 4 layers, 46 × 53 mm; Katz V4: 8 or 17 ceramic, v2: 2 SMD electrolytics; TI: 17 × 10 µF ceramic, 6 layers, 1 oz | yes |
+| ◦ ODrive v3 BOMs | open hardware, a two-motor board | 8 × 120 µF 50 V hybrid polymer (48 V) or 8 × 470 µF 25 V: 4 a motor; 4 layers | partly: not a joint |
+| ▫ T3k (Munro's G1 knee, through AMASS) | second-hand | the knee's power board "an array of ceramic capacitors"; no electrolytic | the G1, second-hand |
+| ◦ JLCPCB, copper weights and stack-ups | fabricator's pages | 1 oz = 35 µm, finished outer about 41 µm; inner 0.5 oz about 15 µm, 1 oz about 30 µm | the boards' copper per layer |
+
+**Decided** ("Yes, enter 1 to 8"):
+
+| # | What | Entered | Label, basis |
+|---|---|---|---|
+| 1 | Large capacitors on each joint's driver board | 0 / 2 / 4, a whole number, the same on every joint of a robot (one design of driver a robot), inside the joint module (a stated module mass keeps its mass) | S anchors (0: moteus, TI, the G1's knee; 2: CubeMars ✓, Katz v2; 4: ODrive per motor), E spread |
+| 2 | Mass of each | 0.68 / 1.5 / 2.6 g | min, max declared (FROLYT 6.8 × 12.5, TDK 10 × 20); mode the CubeMars 8 × 20 can by volume (E) |
+| 3 | Their kind | liquid electrolytic or hybrid polymer, each as often, a discrete state per draw | E (CubeMars liquid ✓, ODrive hybrid) |
+| 4 | What they are made of | liquid: aluminium 46.4 / 48.55 / 50.7 %, iron 4.0 / 6.9 / 9.8 %, copper 0 / 0.55 / 1.1 %, tin 0.3 / 0.6 / 0.9 %, kaolinite 0 / 4.5 / 9 %; hybrid: aluminium 42 / 46.7 / 51.4 %, iron 1.17 / 1.3 / 1.43 %, chromium 0.115 / 0.128 / 0.141 %, copper 0.18 / 0.2 / 0.22 %, tin 0.09 / 0.1 / 0.11 %, glass fibre 5.02 / 5.58 / 6.14 %; the organic rest the remainder, never normalised, its elements by formula from FROLYT's mix: C 65.5, H 9.5, O 25.0 % | S declared (two makers for the liquid, the band between them; one maker for the hybrid, ± 10 %, E) |
+| 5 | Capacitor boards (the G1's 4 buffer boards, the RP1's 2 + 2) | 2 / 5 / 8 capacitors a board, each 2.6 / 5.3 / 8.0 g; the board 10 / 20 / 30 cm² (until then 2 / 5 / 10, no capacitors) | S (RP1 ✓ 5 cans, 20.4 cm²; masses declared), E spread; the G1's size an estimate from the RP1's (E) |
+| 6 | The RP1's "Leg board YCL.E000057" | its motor-capacitor board RBE-PWR-MCAP, with its maker's 5 capacitors (`Capacitors on: …`) | S (✓ its BOM) |
+| 7 | Layers | a joint's driver board 4 / 4 / 6, the computer and power boards 6, the head's and battery's boards 4, every other, small board 2 | S (moteus, Katz, ODrive, TI; the RP1's 14 boards) |
+| 8 | Copper | stays the measured share of a board's mass (Bizzo 12.5 / 20 / 28.7 %); checked against what all the layers of its group could hold at most (outer 36.7 mg/cm², inner 26.9 mg/cm²): reported, not cut | S per layer (JLCPCB); no source gives the share of a layer left after etching |
+
+**What lands where:** the shared constants and the RP1's count in every parts file through the builders
+(`tools/parts_taken_apart.py`, the type 1 builder), the boards changed there; 01's names, the rule for a capacitor
+board (`is_capacitor_board`), the layers (`BOARD_LAYERS`, `board_layers`, `layers_copper_mg`) and the checks of the new
+rows; 02's `Robot.capacitors` (the component capacitors, the part Small PCB), the joints' and the capacitor boards'
+capacitors in `draw_robot`, the check in `Robot.board`, its report (`layer_rows`, each type's summary.csv and 02's
+report).
+
+**Found, reported, not changed:** E38 named Ben Katz's driver "8 in 1206": his V4 board without its connector; the V4
+with it has 17, his v2 two electrolytics. E38 said no first-hand source names a commercial humanoid joint's
+capacitors: CubeMars (a maker's manual) and the RP1 (a maker's BOM) now do. The layers check finds the driver boards'
+copper above what six whole layers hold in some draws (V223): the weighed board's mass and its area are drawn apart, so
+its copper per cm² reaches some 480 mg.
+
+## E50. How a robot is taken apart: four groups, 14 parts, in 01, 02, 03 and 04 (2026-11-08). Built
+
+His words, in order: "I want the list to be detailed, so that we known in with components of the robots these elements
+are"; "Sensor are electronics and not body"; "Fans are parts of the electronic"; "I told you head is again a joint which
+moves the head etc."; "Damit who the hell told you just to have body and joints!!!" (the split robots' bodies, joint
+sets, battery packs was my proposal of 2026-11-07, his "Yes, as recommended" to it); "I want a detailed list of the
+component, so it is easy to understand and establish a recycling to know how to take it apart!!!"; "This list is much to
+detailed. Have of it are jointes with also wheel, hydrowlic, Have just battery, Have electroncs with PCB, wires and
+sensors. and the body, which includes screws"; "I want also the the subcategories, so PCB, wires small PCB and sensors";
+"Also the joints the can be split up in smaller parts. I waht schemas for this. So that you have documented this once for
+all!!"; "I want it 100% correct. No problem to rerun"; "Yes do it"; then "why is 03 not updated?", "Why I am not allowed
+to know what the different components contribut already at this level", "Yes, add 1 to 3".
+
+**The list, once, in 01** (`TAKEN_APART`; drawn on `figures/schemas/taken_apart.png`): four groups, each with its parts.
+
+| Group | Part | What it holds (the page's words) | Placed by (01's `taken_part`) |
+|---|---|---|---|
+| Joints | Magnets | NdFeB magnets of all motors and hydraulic pumps | material NdFeB magnets in a kind of the joints group (the six joint kinds, the wheeled base, the lift column, the hydraulics) |
+| | Motor windings and steel | rest of the motors: windings, steel, magnet carriers (the carriers aluminium: 392 g of type 1's aluminium, V222) | joint components Motor stator, Motor rotor, Magnet carrier |
+| | Gears and bearings | gear stages, their carriers, bearings inside the joints (stage 2's carrier 12.5 / 25 / 40 % aluminium) | Gear stage 1 and 2, Two small bearings |
+| | Housings and other parts | housings, end caps, flanges; wheels, casters, lift, hands | Housing, Two end caps, Output flange, Other; casters, the lift column's profile, hands and arm end pieces, the knee's copper strip |
+| | Hydraulics | actuators, valves, power unit, manifold, oil, hoses | rows named Hydraulic …, Digital hydraulic …, Servo valves, Actuator bodies; the kind Hydraulics |
+| Battery | Cells | the battery cells, NMC or LFP | material Battery cells; rows Battery cells, Auxiliary battery cells |
+| | Housing, busbars and wires | the pack's housing, nickel strips, busbars, wires | the row Battery housing |
+| Electronics | PCB | the computer and power boards, all fans and heat sinks | a circuit board in the kind Boards and computers; every fan; the heat sinks |
+| | Small PCB | joint drivers and their capacitors, head, battery, leg boards | every other circuit board (in a joint, the battery, the head, the cables); since E51 the large capacitors |
+| | Wires | cables (copper, insulation) and connectors | the components cables and connectors |
+| | Sensors | cameras, LiDARs, encoders, all sensors; screens, modems | every row of the sheet Sensors with its housing, wherever it sits |
+| Body | Frame | the frame: aluminium, steel, titanium, magnesium | Frame (the remainder), Frame and shell, lower-leg links, titanium parts, stainless shafts |
+| | Shell | shell and covers, rubber feet, dampers, cover magnets | Shell …, rubber feet, silicone dampers, sensor shield, the RP1's magnets in its covers |
+| | Screws, pins and bearings | screws, pins, bearings outside the joints, inserts | Screws, Pins, bearings outside the actuators, brass parts and inserts |
+
+A row the rule cannot place stops 02 and is a fault of 01 (`taken_apart_faults`): no row is placed by chance. The kind of
+a part decides only its group where its name and material do not (`KIND_GROUP`). Every row of all six parts files is
+placed (V222).
+
+**The head's hydraulic actuators are head joints** ("head is again a joint which moves the head"): the builders' places
+of a hydraulic actuator (`tools/parts_taken_apart.py`, `PLACES`) put the head's in the kind Head joints, with its valve,
+board and sensors; 01's `PART_KIND` reads 'Head joints'. 13 cells of two parts files change, all from Head to Head
+joints (type 3: Neo1; type 5: the Atlas HD ISA v2 and v5 knees), nothing else (V222). In 04 they now follow the joint
+sets' lifetime, not the robots'.
+
+**What lands where:**
+
+| What | Where |
+|---|---|
+| The list, the rule, the page, the check of every row | `01_schemas.py`: `TAKEN_APART`, `TAKEN_PARTS`, `TAKEN_GROUP`, `GROUP_COLOURS`, `KIND_GROUP`, `TAKEN_BY_NAME`, `taken_part`, `taken_apart_faults`, `taken_apart_page`; `PART_KIND['Head joints']` |
+| Every element and every kilogram of a robot booked to its kind and part; the check that the parts add up to each kind, draw by draw; the tables | `02_composition.py`: `Robot.taken`, `Robot.taken_kg`, `declare`, `material`, `check_taken`; `data/parts_taken_apart/<type>/taken_apart` and `taken_apart_mass` |
+| The mass of one robot by the four groups (the part groups, in place of the shared lists' seven: Joint drives … Wheels and wheel drives); each element of a type by the four groups; the list part by part | `02_composition.py`: `compose_taken_apart`, `group_panel`, `group_pages`, `part_rows`, `part_list_pages`; pages `<type>_groups_<k>.png`, `<type>_parts_<k>.png` |
+| The six types side by side: each element by the four groups; the mass by the four groups; the list part by part; the check that the parts add up to the elements | `03_comparison.py`: `Robot.by_group`, `by_part`, `problems`, `parts_pages`; pages `comparison_groups_<k>.png`, `comparison_part_groups_1.png`, `comparison_parts_<k>.png` |
+| The elements in use, built and retired counted in the 14 parts, each with the lifetime of the unit that carries it (a joint's parts, its driver board and encoders too, with the joint sets; the battery's, its management board too, with the packs; the rest with the robots); the summary by group and by part; the distribution pages split by the four groups; the list part by part a year | `04_stock_and_flow.py`: `PARTS`, `GROUPS`, `unit_of`, `robot_parts`, `element_summary`, `element_panel`, `elements_page`, `parts_rows`, `parts_pages`; `distributions/parts_<year>_<k>.png` |
+| Removed | 04's three parts robots' bodies, joint sets, battery packs (`PART_COLOURS`); 02's `KIND_PART_GROUP` |
+
+**What it costs:** 04's three element files hold the 14 parts: about 4.2 GB each at 200,000 draws (0.8 GB with three),
+12.7 GB in all ("keep the distribution on all levels").
+
+**Not in it until E51:** the layers and sizes of the boards, and the large capacitors at each joint motor ("There are
+also quite large capacitors close to each joint motor ... So have them correct!!"). RAWCLICVehicleElectronics models
+neither layers nor capacitors (its boards: three size classes, length × width, metals per cm² by six categories; no
+laminate, no capacitor item).
+
+## E49. The elements' distributions exactly as RAWCLICDataCenters' 05 (2026-11-08). Built
+
+Matthias, 2026-11-08: "Why the hell can you not just have to dates 2025, 2030, 2035, and 2040 on the figures. ... I told
+you in the beginning that datacenter and robots have to follow strictly the article and they have to be identically
+implemented. ... I also want finally see the distribution. Exactkly the figures we have worked out for the data
+centers!!!", and before it "Sorry end of goes away. This is not needed". Looked at myself: RAWCLICDataCenters'
+`figures/data_center_elements/configurations/Hyperscale_Large_AI_inference.png` (05's distribution page) and
+`figures/data_center_stock_and_flow/A/elements/Copper.png` (07's), and 05's `_stacked_panel` and
+`plot_configuration_elements`. 04's overview and element pages already follow 07's; the distribution pages now follow
+05's:
+
+| What | As RAWCLICDataCenters' 05 | Where |
+|---|---|---|
+| One page | a page per year, 2025, 2030, 2035, 2040 (05: a page per data centre) | `elements_page`; `distributions/elements_<year>.png` |
+| A panel | per element held in at least 2.5 % of the draws (05's `board_is_held`), four across, 05's sizes | `elements_page` |
+| The bars | the distribution of the element's kg in all robots in use, 70 bars over every draw, each split into the robots' bodies, the joint sets and the battery packs (05: IT hardware and infrastructure), the smaller lower | `element_panel` |
+| The lines | the mean solid with its number, 2.5 % and 97.5 % dashed; the parts' means written top right; one legend | `element_panel`, `elements_page` |
+| Kept from this project | over the draws that hold the element, their share written where not all ("A 0 is not part of a distribution") | `element_panel` |
+| Removed | the pages of one element at four years with their pages of numbers (2026-11-07), `element_distribution_panel`, `element_distribution_page`, `panel_style`, `with_its_numbers`, `distribution_note` | — |
+| "End of" | gone from every title: "2040: 70,000,000,000 robots", "Robot type 3, 2040" | `robots_in_use_page` |
+
+## E48. 04's years exactly as RAWCLICDataCenters' 07; the article's values at the end of each year (2026-11-08). Built
+
+Matthias, 2026-11-08, after the shift to 1 July (E47): "it is 2025, 2030, 2035 and 2040!!", "Both have to be exactly the
+same, as we have to combine both data!!!", "How is it with the data centers. Do never ever give me 2039", "Both have to be
+on the same x axis scale!!", to the table below "Yes!!", then "Why have you made it different. I told you before that it
+has to be the same as with the datacenters" (2026-11-06: "Do exactly what has been done for the datacenter"), and "The
+distributions have to be combines 07 and 04 output". Read myself in RAWCLICDataCenters' 07: quarters 2022 Q1 to 2040 Q4;
+the article's compute at each 1 January 2022 to 2041, 1 January 2041 an estimate (E, the article's growth of 2035-2040
+continued, his "1 a"); `to_years`: a flow the sum of its calendar year's quarters, a stock the stock at the end of the
+year's last quarter; its figures each year at its year, the axis from the first year to the last.
+
+Until then 04 differed from 07: its stocks at the start of each year (1 January 2025 to 2040), its flows of 2025 to 2039
+only, and, the same morning, the shift to 1 July (E47). The article's robots row ends at 2040; the end of 2040 needs 1
+January 2041:
+
+| 1 January 2041 (E) | Robots | Basis |
+|---|---|---|
+| min | 158.2 × 10⁹ | 70 × 10⁹ × 2.26, the article's lowest yearly growth of 2035-2040 (2036 over 2035) |
+| mode | 163.7 × 10⁹ | 70 × 10⁹ × 2.339, its average growth of 2035-2040 (70^(1/5)), as 07 continued its own |
+| max | 166.3 × 10⁹ | 70 × 10⁹ × 2.376, its highest (2039 over 2038) |
+
+Where it lands:
+
+| What | Now, as 07 | Where |
+|---|---|---|
+| The quarters | 2025 Q1 to 2040 Q4, 64 | `QUARTERS`, `mid_times`, `end_times`, `share_times` (65 times) |
+| The article's robots | at 1 January 2025 to 2040; at 1 January 2041 the triangle above, one value a draw, drawn after every other random number | `robots_2041`; `targets` (one row a draw), `run` (`after`) |
+| The workbook's years, type 1's mode, the types' spread | at 1 January of their years (as before 2026-11-08) | `along`, `between` |
+| The years | flows of the calendar years 2025 to 2040, stocks at the end of each year (as 07's `to_years`); `summary.csv` and `draws.txt` so | `years_of`, `run` |
+| The check | the article's robots at every 1 January, the draw's estimate at 1 January 2041 | `check` |
+| The pages | every year at its year, the axis 2025 to 2040; the robots-in-use page at the end of 2025, 2030, 2035, 2040, the end of 2040 with the 95 % of its robots in all | `log_panel`, `share_panel`, `overview_page`, `element_page`, `robots_in_use_page`, `robots_text` |
+| Removed | `JULY`, `START`, `flow_year` | — |
+
+**Then the estimate of 2041 withdrawn** (Matthias, to my proposal of bounds for the robots, which gave 145 to 185 × 10⁹ at
+the end of 2040: "Follow the artcile!! 70 x 10E9"): each of the article's values is the robots in use at the end of its
+year, 10 M at the end of 2025 to 70 × 10⁹ at the end of 2040, so that the year 2040 shows the article's 70 × 10⁹ on 07's
+axis; `robots_2041` removed; 1 January 2025, before the article's first value, its 10 M less one year of its own growth
+(10 M / 1.16 = 8.62 M, E, the growth with which the robots before 2025 are built, E42) (`start_robots`, `targets`,
+`count`, `check`). **Said to him, his to settle:** the article's own code dates its robots at 1 January ("Q_robot are
+Jan-1 (start-of-year) stocks", `model/costSide.js`, read on 2026-11-06, the setting's comment); at the end of their years
+they stand one year later than the article dates them. The bounds proposed for the robots (the text's 400 M of 2034 and
+2 B of 2036 against the table) are not entered.
+
+Not yet done, his: the combination of 07's and 04's distributions ("The distributions have to be combines 07 and 04
+output"), put to him to settle first (where it lives, which of 07's scenarios, which quantities).
+
+## E47. 04 at 1 July; the robots in use of the six types on one page (2026-11-08). The page built; 1 July undone (E48)
+
+Matthias, 2026-11-08, on the types' page: "why is the largest part of the triangal cut off? Furthermroe can you not combine
+the 6 types to 1", "I want to see at the end how many robots there are", "not 39 I want 2040", "SHit it to 1st of July",
+and to the table of what the shift changes "Yes" (with the years from 1 July to 30 June that I recommended). Why the end
+was cut: 02's axis ends at the 99.5th percentile of the draws (for long tails); a triangle there still stands at about
+10 % of its peak. Where it lands:
+
+| What | Now | Where |
+|---|---|---|
+| The article's robots in use | at 1 July of 2025 to 2040 (until then 1 January, as 07) | `JULY`, `START`, `targets` (unchanged formula), `check` |
+| The quarters | 1 July 2025 to 30 June 2040, 60 | `mid_times`, `end_times`, `share_times`, `SHARE_TIMES` |
+| The workbook's years, type 1's mode and the types' spread | at 1 July of their years | `along`, `between` |
+| The robots of the start | at 1 July 2025, their packs at the runtimes of 1 July 2025 | `count` |
+| The flows by year | from 1 July to 30 June, 2025/26 to 2039/40 (`summary.csv`, `draws.txt`); stocks at 1 July | `flow_year`, `years_of`, `run` |
+| The pages' time axes | stocks at 1 July, flows at the middle of their year; 2025 to 2041 | `log_panel`, `share_panel`, `overview_page`, `element_page`, `figure_note` |
+| One page of the robots in use | 1 July 2025, 2030, 2035, 2040, a panel a year, the six types one above the other, every draw on one axis, the robots in all (the article's) in the title; its numbers after it | `robots_in_use_page`, `RIDGE_BINS` |
+| Removed | the pages of the robots in use by type and of the types' shares, `distribution_panel` | — |
+| The element distribution pages | at 1 July 2025, 2030, 2035, 2040 (02's axis rule kept: elements have long tails) | `element_distribution_page` |
+
+Not changed: RAWCLICDataCenters' 07, which places the article's compute at 1 January.
+
 ## E46. 04 against RAWCLICDataCenters' 07: the distributions built; collection and electricity researched (2026-11-07)
 
 Matthias, 2026-11-07, after the overview of the rearranged types: "Ok it looks good. But I also want the distributions.
@@ -18,13 +257,22 @@ recommended"):
 
 | # | What | In RAWCLICDataCenters | Decided | Where it lands |
 |---|---|---|---|---|
-| 1 | The distribution pages | not in 07; 03 and 05 draw them (bars of the share of the draws, 95 % dashed; 05 stacks each element by 03 and 04) | built, in this project's form (02: median solid, mean dotted, no number on a panel, a page of numbers after each, E34) | `distribution_panel`, `element_distribution_panel`, `robots_distribution_page`, `shares_distribution_page`, `element_distribution_page`, `numbers_page`, `with_its_numbers`, `count_unit`, `mass_unit`, `triangle_bars`; `figures/stock_and_flow/distributions/` |
+| 1 | The distribution pages | not in 07; 03 and 05 draw them (bars of the share of the draws, 95 % dashed; 05 stacks each element by 03 and 04) | built, in this project's form (02: median solid, mean dotted, no number on a panel, a page of numbers after each, E34) | `distribution_panel`, `element_distribution_panel`, `robots_distribution_page`, `shares_distribution_page`, `element_distribution_page`, `numbers_page`, `with_its_numbers`, `count_unit`, `mass_unit`; `figures/stock_and_flow/distributions/` |
 | 2 | Collected: the outflow times a collection rate | 07's element pages, "Inflow, outflow and collected"; sheet Collection (0.98 / 0.995 / 0.9999, E, for hyperscale data centres) | research first, a table of sources before any number; nothing built | below |
 | 3 | The robots' electricity | 07's overview, Power and Electricity (IT power × load × PUE) | research first, as 2; each robot's battery energy is already in the parts files (01, 02) | below |
 | 4 | The elements by part in the summary | 07's `group_summary.csv` | built: rows "Copper, joint sets" in `summary.csv` | `run` (summary), the csv writer |
 
 Not carried over: 07's scenarios A, B and C and their comparison pages (three paths of the GPUs' efficiency; the article
 gives the robots one path).
+
+**2026-11-08: the types' page from the results.** Until then `type_shares.png` drew each type's share from the types'
+input draws (`type_points`, at 1 January 2025 and three quarters) with the input triangle in grey over the bars.
+Matthias: "I want to see the triangulas from the MC and not some faque trianguals. You are again Lying to me. You know I
+want to see results and not this!!!", "Never never again do something like this!!! write a roule", "requirement!!", "I
+only want to see results or schemas, of the implementation". Now: each type's robots built in 2025, 2030, 2035 and 2039
+over all robots built that year, draw by draw, from the counted draws (`units_in`, `article_in`), nothing drawn over the
+bars; `triangle_bars`, `TRIANGLE_INK` and `SHARE_PAGE_TIMES` removed. The requirement is in GitHub/CLAUDE.md §5: a figure
+is a result of the run or a schema of the implementation, never an input (VERIFICATION.md V217).
 
 ### E46.1 Collection of retired robots: the sources (research; nothing entered)
 

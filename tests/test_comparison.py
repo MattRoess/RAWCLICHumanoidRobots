@@ -41,8 +41,10 @@ from src.params_schema import Params, absolute  # noqa: E402
 N = 400
 ELEMENTS = ['Li', 'B', 'Mg', 'Al', 'Ti', 'Mn', 'Co', 'Ni', 'Cu', 'Sn', 'Pb', 'Ag', 'Au', 'Dy', 'Ga', 'In', 'Nb', 'Nd',
             'Pd', 'Pr', 'Ta', 'Tb']
-PART_GROUPS = ['Joint drives', 'Hands', 'Battery', 'Computer', 'Sensors', 'Frame', 'Shell and armour', 'Cables',
-               'Cooling', 'Screws and bearings', 'Wheels and wheel drives', 'Mixed']
+PART_GROUPS = ['Joints', 'Battery', 'Electronics', 'Body']   # 02's since 2026-11-08: the four groups ("Yes, add 1 to 3")
+# Each element by kind and part of how a robot is taken apart, as 02's taken_apart: the joints' magnets and their small
+# PCBs half of the draw's share each, the frame the rest.
+TAKEN = (('Hip joints', 'Magnets', 0.5), ('Hip joints', 'Small PCB', 0.5), ('Frame and shell', 'Frame', None))
 BODY_REGIONS = ['Legs', 'Arms', 'Hands', 'Torso', 'Head', 'Base', 'Whole body']
 MATERIALS = list(composition.MATERIAL_ORDER) + [composition.NOT_ALLOCATED]
 NOT_HELD = 'Ceramics'          # held by no robot type: no page
@@ -122,6 +124,14 @@ def write_six(params: Params, rng: np.random.Generator) -> None:
         by_material_columns.append(f'Cu: Brass{composition.FIXED_MARK}')
         by_material.append(fixed)
         save(parts, 'by_material', by_material_columns, np.column_stack(by_material))
+        # Each element by kind and part (TAKEN): the joints' share of the draw, half magnets, half small PCBs; the frame
+        # the rest; adding up to the element.
+        taken_columns, taken = [], []
+        for kind, part, f in TAKEN:
+            for k, e in enumerate(ELEMENTS):
+                taken_columns.append(f'{kind}: {part}: {e}')
+                taken.append(elements[:, k] * (share * f if f is not None else 1 - share))
+        save(parts, 'taken_apart', taken_columns, np.column_stack(taken))
         # The robots of the register drawn, '<number> <name>', as 02 writes them (none an outlier).
         with open(os.path.join(parts, 'register.txt'), 'w', encoding='utf-8') as file:
             file.write(f'{t}00 Robot A of type {t}\n{t}01 Robot B of type {t}\n')
@@ -172,12 +182,59 @@ class TestComparison(Compared):
         expected = (['comparison_body_regions_1.png', 'comparison_copper_1.png']
                     + [f'comparison_elements_{k}.png' for k in range(1, pages_of_elements + 1)]
                     + [f'comparison_materials_{k}.png' for k in range(1, len(materials) + 1)]
-                    + ['comparison_part_groups_1.png', 'comparison_total_1.png'])
+                    + ['comparison_part_groups_1.png', 'comparison_total_1.png']
+                    # Each element by the four groups ("Yes, add 1 to 3").
+                    + [f'comparison_groups_{k}.png' for k in range(1, len(ELEMENTS) + 1)])
         # Each page of panels followed by the page of its numbers (E34).
         expected += [f'comparison_numbers_{k}.png' for k in range(1, len(expected) + 1)]
+        # Then each element's list part by part, its pages as many as its rows fill (a row for each type and part
+        # holding it), numbered on: at least one an element.
+        lists = len([w for w in written if w.startswith('comparison_parts_')])
+        self.assertGreaterEqual(lists, len(ELEMENTS))
+        expected += [f'comparison_parts_{k}.png' for k in range(1, lists + 1)]
         notes = [w for w in written if w.startswith('comparison_notes_')]
         self.assertTrue(notes)
         self.assertEqual(sorted(set(written) - set(notes)), sorted(expected))
+
+    def test_each_element_by_group_and_part_by_hand(self):
+        # "Why I am not allowed to know what the different components contribut already at this level", "Yes, add 1 to
+        # 3": each element of one robot of each type by the four groups, each group the sum of its parts; the list part
+        # by part, by hand: robot type 2's copper in the frame, the draw's 1 - share.
+        robots = comparison.read_draws(self.params)
+        two = next(r for r in robots if r.number == 2)
+        cu = two.column('elements', 'Cu')
+        groups = two.by_group('Cu')
+        self.assertEqual(list(groups), ['Joints', 'Electronics', 'Body'])
+        np.testing.assert_allclose(groups['Joints'], groups['Electronics'], rtol=1e-6)        # half and half
+        np.testing.assert_allclose(sum(groups.values()), cu, rtol=1e-5)
+        frame = two.by_part('Cu')['Frame']
+        rows = composition.part_rows({(f'{two.number} {two.title}', part): v for part, v in two.by_part('Cu').items()})
+        row = next(r for r in rows if r[2] == 'Frame')
+        per, unit = composition.panel_unit(frame[frame > 0])
+        self.assertEqual(row[:4], [f'{two.number} {two.title}', 'Body', 'Frame', 'all draws'])
+        self.assertEqual(row[5], f'{composition.panel_number(frame[frame > 0].mean() / per)}\u00a0{unit}')
+        # The page of copper by group: robot type 2's panel its total's mean.
+        page = comparison.compare_page('Copper by group', robots, lambda r: r.by_group('Cu'), schemas.GROUP_COLOURS)
+        numbers = [a.panel_numbers for a in page.axes if getattr(a, 'panel_numbers', None) is not None]
+        per, unit = composition.panel_unit(cu)
+        self.assertAlmostEqual(numbers[1][3], cu.mean() / per, places=6)
+        composition.plt.close(page)
+
+    def test_parts_that_do_not_add_up_stop_it(self):
+        # A deliberate fault: robot type 3's taken_apart without its frame's copper; 03 stops, naming the element.
+        path = self.table_path(3, 'parts_dir', 'taken_apart')
+        draws = np.load(path)
+        columns = open(path[:-4] + '.txt', encoding='utf-8').read().splitlines()
+        wrong = draws.copy()
+        wrong[:, columns.index('Frame and shell: Frame: Cu')] = 0
+        np.save(path, wrong)
+        try:
+            found = comparison.problems(comparison.read_draws(self.params))
+        finally:
+            np.save(path, draws)
+        self.assertEqual([f for f in found if 'by part' in f],
+                         ['robot type 3: its elements by part of how a robot is taken apart do not add up to its '
+                          'elements: Cu.'])
 
     def test_the_sensors_titanium_a_page_of_its_own(self):
         # Matthias, 2026-11-05: "where the hell is titanium in the sensor … I only see titanium alloy the heavy stuff",
@@ -228,7 +285,9 @@ class TestComparison(Compared):
             self.assertEqual(titles[f'{label} in the sensors of one robot of each robot type'],
                              {composition.shown_name(composition.component_label(c))
                               for c in (composition.CAMERAS, composition.OTHER_SENSORS)})
-            self.assertFalse([t for t in titles if t.startswith(f'{label} in one robot')], label)
+            # (Its pages by group and part by part split it otherwise: by the four groups.)
+            self.assertFalse([t for t in titles if t.startswith(f'{label} in one robot') and ', by group' not in t
+                              and 'part by part' not in t], label)
         self.assertTrue([t for t in titles if t.startswith('Cobalt (Co) in one robot')])   # one page, as before
 
     def test_no_median_in_the_first_part_of_its_axis(self):
@@ -303,7 +362,7 @@ class TestComparison(Compared):
         pages = list(comparison.pages(comparison.read_draws(self.params), self.params))
         names = [name for name, _ in pages]
         figures = dict(pages)
-        drawn = [n for n in names if '_notes_' not in n and '_numbers_' not in n]
+        drawn = [n for n in names if '_notes_' not in n and '_numbers_' not in n and '_parts_' not in n]
         self.assertEqual(len([n for n in names if '_numbers_' in n]), len(drawn))
         for name in drawn:
             following = names[names.index(name) + 1]
@@ -371,7 +430,7 @@ class TestComparison(Compared):
         from matplotlib.text import Text
         robots = comparison.read_draws(self.params)
         for name, figure in comparison.pages(robots, self.params):
-            if '_notes_' in name or '_numbers_' in name:   # a page of text (E34: the numbers apart)
+            if '_notes_' in name or '_numbers_' in name or '_parts_' in name:   # a page of text (E34; the lists)
                 composition.plt.close(figure)
                 continue
             charts = [a for a in figure.axes if a.axison]
@@ -405,7 +464,7 @@ class TestComparison(Compared):
         found = False
         for name, figure in comparison.pages(robots, self.params):
             titles = [a.get_title(loc='left') for a in figure.axes if a.axison]
-            if '_numbers_' not in name and any('Terbium' in t for t in [figure._suptitle.get_text()
+            if '_numbers_' not in name and '_parts_' not in name and any('Terbium' in t for t in [figure._suptitle.get_text()
                                                                         if figure._suptitle else '']):
                 found = True
                 self.assertEqual(len(titles), 5, msg=titles)
@@ -461,37 +520,46 @@ if __name__ == '__main__':
     unittest.main()
 
 
-def page_problems(figure, name: str) -> list:
+def page_problems(figure, name: str, dpi=None) -> list:
     """What breaks Matthias's figure rules on one page as it is saved (VERIFICATION.md V186, V188): a legend beyond the
     page; on a page with a legend, a colour a panel draws that the legend does not name; a panel or a text beyond the
-    page; a panel whose median lies in the first LOG_BELOW of its bars (02's logarithmic axis, E36). [] where none."""
-    from matplotlib.colors import to_hex
-    from matplotlib.patches import Rectangle
-    figure.canvas.draw()   # the page laid out as it is saved
-    renderer = figure.canvas.get_renderer()
-    width, height = figure.bbox.width, figure.bbox.height
-    inside = lambda box: box.x0 >= -2 and box.x1 <= width + 2 and box.y0 >= -2 and box.y1 <= height + 2  # noqa: E731
-    problems = [(name, 'a legend beyond the page') for legend in figure.legends
-                if not inside(legend.get_window_extent(renderer))]
-    named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
-    for axes in figure.axes:
-        title = axes.get_title(loc='left')[:40]
-        if axes.get_visible() and axes.axison and not inside(axes.get_tightbbox(renderer)):
-            problems.append((name, 'a panel beyond the page', title))
-        if figure.legends:
-            drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
-                     and p.get_height() > 0 and p.get_width() > 0 and p.get_facecolor()[3] > 0}
-            if drawn - named:
-                problems.append((name, 'a colour drawn, not in the legend', title, sorted(drawn - named)))
-        if getattr(axes, 'panel_numbers', None) is not None and axes.patches:
-            where = median_along_bars(axes)
-            if where < composition.LOG_BELOW:
-                problems.append((name, 'its median in the first 5 % of its bars', title, round(where, 4)))
-    texts = [figure._suptitle, *figure.texts] + [t for axes in figure.axes if not axes.axison for t in axes.texts]
-    problems += [(name, 'a text beyond the page', t.get_text()[:40]) for t in texts
-                 if t is not None and t.get_visible() and t.get_text().strip()
-                 and not inside(t.get_window_extent(renderer))]
-    return problems
+    page; a panel whose median lies in the first LOG_BELOW of its bars (02's logarithmic axis, E36). [] where none.
+    The page is laid out at `dpi`, the resolution it is saved with (the figure's own where None): a text grows a
+    little with the resolution, and a note that fitted at the screen's 100 dpi ran off 05's page saved at 150 dpi
+    (VERIFICATION.md V226)."""
+    shown_at = figure.dpi
+    if dpi is not None:
+        figure.set_dpi(dpi)   # the page as it is saved
+    try:
+        from matplotlib.colors import to_hex
+        from matplotlib.patches import Rectangle
+        figure.canvas.draw()   # the page laid out as it is saved
+        renderer = figure.canvas.get_renderer()
+        width, height = figure.bbox.width, figure.bbox.height
+        inside = lambda box: box.x0 >= -2 and box.x1 <= width + 2 and box.y0 >= -2 and box.y1 <= height + 2  # noqa: E731
+        problems = [(name, 'a legend beyond the page') for legend in figure.legends
+                    if not inside(legend.get_window_extent(renderer))]
+        named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
+        for axes in figure.axes:
+            title = axes.get_title(loc='left')[:40]
+            if axes.get_visible() and axes.axison and not inside(axes.get_tightbbox(renderer)):
+                problems.append((name, 'a panel beyond the page', title))
+            if figure.legends:
+                drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
+                         and p.get_height() > 0 and p.get_width() > 0 and p.get_facecolor()[3] > 0}
+                if drawn - named:
+                    problems.append((name, 'a colour drawn, not in the legend', title, sorted(drawn - named)))
+            if getattr(axes, 'panel_numbers', None) is not None and axes.patches:
+                where = median_along_bars(axes)
+                if where < composition.LOG_BELOW:
+                    problems.append((name, 'its median in the first 5 % of its bars', title, round(where, 4)))
+        texts = [figure._suptitle, *figure.texts] + [t for axes in figure.axes if not axes.axison for t in axes.texts]
+        problems += [(name, 'a text beyond the page', t.get_text()[:40]) for t in texts
+                     if t is not None and t.get_visible() and t.get_text().strip()
+                     and not inside(t.get_window_extent(renderer))]
+        return problems
+    finally:
+        figure.set_dpi(shown_at)   # the figure back as it was, for the save itself
 
 
 class TestEveryPageOfTheSixTypes(unittest.TestCase):
@@ -520,7 +588,7 @@ class TestEveryPageOfTheSixTypes(unittest.TestCase):
 
         def checked(figure, path, *args, **kwargs):   # in place of Figure.savefig: check the page, write nothing
             cls.pages[stage[-1]] += 1
-            cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)))
+            cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)), kwargs.get('dpi'))
 
         with mock.patch.object(Figure, 'savefig', checked), redirect_stdout(StringIO()):
             for name, module in (('02', composition), ('03', comparison)):

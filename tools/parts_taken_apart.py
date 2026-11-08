@@ -266,9 +266,11 @@ SHARES_ROWS = [
 # HYDRAULICS (point 9.7). No source weighs the parts inside an actuator, a valve or a power unit: their materials are
 # the sources', their shares estimates, half to 1.5 times the mode.
 HYDRAULICS = 'Hydraulics'
-# A hydraulic actuator's place: its kind (the figure's row) and its body region.
+# A hydraulic actuator's place: its kind (the figure's row) and its body region. The head's actuators, with their
+# valves, boards and sensors, in the head joints: joints that move the head (Matthias, 2026-11-08: "I told you head is
+# again a joint which moves the head etc."; until then in the kind Head).
 PLACES = {'hips': ('Hips', 'Legs'), 'knees': ('Knees', 'Legs'), 'ankles': ('Ankles', 'Legs'),
-          'waist': ('Waist', 'Torso'), 'arms': ('Arms', 'Arms'), 'head': ('Head', 'Head')}
+          'waist': ('Waist', 'Torso'), 'arms': ('Arms', 'Arms'), 'head': ('Head joints', 'Head')}
 # Moog's ISA dry, kg, by its version (FRO, Barasuol et al. 2018, Table 2: "Dry weight 920 g 1,600 g"), and its servo
 # valve, kg (MOO, Moog's E024 datasheet: "Mass: 95 g (3.35 oz)").
 ISA_KG = {'v2': 0.92, 'v5': 1.6}
@@ -436,7 +438,55 @@ SHARED_CONSTANTS_LAST = [
      'joint drive "seventeen 10μF ceramic capacitors"; up to 1.5 times (EVIDENCE.md E38 point 4)'),
     ('all', 'Ceramic capacitor, its barium titanate', 14.44, 39.67, 72.49, 'mg', 'S',
      'E38-KEM: barium titanate of one MLCC by its case size, 0805 / 1206 / 1210 (EVIDENCE.md E38 point 4)'),
+    # The large capacitors at each joint motor and on the capacitor boards (Matthias, 2026-11-08: "There are also quite
+    # large capacitors close to each joint motor ... So have them correct!!", "Yes, enter 1 to 8"; EVIDENCE.md E51):
+    # their number (whole numbers 02 draws), the mass of one, and what they are made of by kind, liquid electrolytic
+    # or hybrid polymer, each as often (01_schemas.py reads the same names).
+    ('all', 'Large capacitors on a joint driver board', 0, 2, 4, 'capacitors', 'S, E',
+     'E51: 0 on moteus r4.11 (open hardware), TI TIDA-010979 (a humanoid joint drive) and the G1 knee (T3k, '
+     'second-hand): ceramic capacitors only; 2 on the CubeMars AKE90 driver (its manual: "Electrolytic '
+     'capacitor 180uF-63V-8*20 ... rubycon 2PCS") and Ben Katz v2; 4 an ODrive v3 motor (its BOM); a whole '
+     'number, the same on every joint of a robot'),
+    ('all', 'Large capacitor of a joint driver board, its mass', 0.68, 1.5, 2.6, 'g', 'S, E',
+     'E51: FROLYT 6.8 x 12.5 mm 680 mg, TDK 10 x 20 mm 2.6 g (declared); the mode the 8 x 20 mm can of the CubeMars '
+     'driver by its volume between them (E)'),
+    ('all', 'Capacitors on a capacitor board', 2, 5, 8, 'capacitors', 'S, E',
+     "E51: the RP1's motor-capacitor board 5 (RoboParty's BOM, C1, C2, C4, C6, C7, 13 x 30 mm); 2 to 8 (E)"),
+    ('all', 'Capacitor of a capacitor board, its mass', 2.6, 5.3, 8.0, 'g', 'S',
+     'E51: TDK 10 x 20 mm 2.6 g, 12.5 x 30 mm 5.3 g, 18 x 20 mm 8.0 g (declared)'),
+    ('all', 'Liquid electrolytic capacitor, aluminium share', 0.464, 0.4855, 0.507, 'share', 'S, E',
+     'E51: foil and can, FROLYT 25.3 + 21.1 %, TDK 27 + 23.7 % (declared); the mode between (E)'),
+    ('all', 'Liquid electrolytic capacitor, iron share', 0.04, 0.069, 0.098, 'share', 'S, E',
+     'E51: the lead wires, TDK 4 %, FROLYT 9.8 % (tin-coated iron, declared); the mode between (E)'),
+    ('all', 'Liquid electrolytic capacitor, copper share', 0, 0.0055, 0.011, 'share', 'S, E',
+     'E51: the leads, TDK 1.1 %, FROLYT none (iron wire, declared); the mode between (E)'),
+    ('all', 'Liquid electrolytic capacitor, tin share', 0.003, 0.006, 0.009, 'share', 'S, E',
+     "E51: the leads' plating, TDK 0.6 % (declared; FROLYT's not apart from its wire); half to 1.5 times (E)"),
+    ('all', 'Liquid electrolytic capacitor, kaolinite share', 0, 0.045, 0.09, 'share', 'S, E',
+     "E51: the seal's filler, TDK 40 % of its 22.5 % seal, 9 %; FROLYT's seal butyl rubber, none named (declared); "
+     'the mode between (E)'),
+    ('all', 'Hybrid polymer capacitor, aluminium share', 0.42, 0.467, 0.514, 'share', 'S, E',
+     'E51: foil, can and terminals, TDK 24.5 + 19.5 + 2.7 % (declared, one maker); ± 10 % (E)'),
+    ('all', 'Hybrid polymer capacitor, iron share', 0.0117, 0.013, 0.0143, 'share', 'S, E',
+     'E51: the terminals, TDK iron 0.7 % and stainless steel 0.8 % at 75 % iron (declared); ± 10 % (E)'),
+    ('all', 'Hybrid polymer capacitor, chromium share', 0.00115, 0.00128, 0.00141, 'share', 'S, E',
+     'E51: the stainless steel, TDK 0.8 % at 16 % chromium (declared); ± 10 % (E)'),
+    ('all', 'Hybrid polymer capacitor, copper share', 0.0018, 0.002, 0.0022, 'share', 'S, E',
+     'E51: the terminals, TDK 0.2 % (declared); ± 10 % (E)'),
+    ('all', 'Hybrid polymer capacitor, tin share', 0.0009, 0.001, 0.0011, 'share', 'S, E',
+     'E51: the terminals, TDK 0.1 % (declared); ± 10 % (E)'),
+    ('all', 'Hybrid polymer capacitor, glass fibre share', 0.0502, 0.0558, 0.0614, 'share', 'S, E',
+     'E51: the base plate, TDK 18.6 % polyester with 30 % glass fibre (declared); ± 10 % (E)'),
 ]
+
+# The capacitors on a capacitor board where its maker's own parts list counts them (E51): (robot, board) -> ((min, mode,
+# max), label, source); 02 draws every other capacitor board's from the shared constant.
+CAPACITORS_ON = 'Capacitors on: '   # 01_schemas.py reads the same prefix (CAPACITORS_ON)
+CAPACITOR_BOARD_NUMBER = {
+    ('RoboParty RP1', 'Motor capacitor board RBE-PWR-MCAP'): (
+        (5, 5, 5), 'S', "E51: RoboParty's BOM of the board (RP1_hardware, 02_PCB/08_RBE-PWR-MCAP): C1, C2, C4, C6, C7, "
+                        'CAP-TH_BD13-L30'),
+}
 
 # --- Sources: those the shared rows cite ---------------------------------------------------------------------
 # Each a row of the sheet Sources, by its code (EVIDENCE.md E2.1); a robot type's builder places them among its own.
@@ -1485,6 +1535,10 @@ def robot_rows(b: dict, robot_type: int, averaged_joints: list | None = None) ->
         if (name, sensor) in SENSORS_NUMBER:
             out['Constants'].append((name, NUMBER_OF + sensor, *SENSORS_NUMBER[(name, sensor)], 'sensors', 'E',
                                      'E38 point 2: its maker states it, not its number (E)'))
+    # E51: the capacitors on a capacitor board where its maker's parts list counts them.
+    for (robot, board), (values, label, source) in CAPACITOR_BOARD_NUMBER.items():
+        if robot == name:
+            out['Constants'].append((name, CAPACITORS_ON + board, *values, 'capacitors', label, source))
     return out
 
 

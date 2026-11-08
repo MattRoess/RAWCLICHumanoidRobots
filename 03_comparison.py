@@ -108,7 +108,7 @@ plt = composition.plt
 
 # The tables of each robot type part by part that 03 reads (02's APART_TABLES): each material by kind of part, each
 # element by the material it comes from.
-PARTS_TABLES = ('materials', 'by_material')
+PARTS_TABLES = ('materials', 'by_material', 'taken_apart')   # taken_apart since 2026-11-08 ("Yes, add 1 to 3")
 # The draws are written as float32, whose rounding is about 6e-8 of a value; a sum of a few dozen columns may miss its
 # whole by some 1e-6 of it. A miss above this share of the whole means the files do not belong together.
 FLOAT32_TOLERANCE = 1e-4
@@ -141,6 +141,27 @@ class Robot:
             if first == head:
                 out[rest] = draws[:, k].astype(np.float64)
         return out
+
+    def taken(self, symbol: str, key) -> dict:
+        """One element of interest in the parts of how a robot is taken apart (the parts table 'taken_apart',
+        '<kind>: <part>: <element>'), added over the kinds, keyed by `key(part)` (the part itself, or its group), in
+        the order of 01's parts: {key: its draws}."""
+        columns, draws = self.parts['taken_apart']
+        out = {}
+        for part in schemas.TAKEN_PARTS:
+            for k, column in enumerate(columns):
+                kind, _, rest = column.partition(': ')
+                if rest == f'{part}: {symbol}':
+                    out[key(part)] = out.get(key(part), 0) + draws[:, k].astype(np.float64)
+        return out
+
+    def by_group(self, symbol: str) -> dict:
+        """One element by the four groups of how a robot is taken apart, {group: its draws}, each the sum of its parts."""
+        return self.taken(symbol, lambda part: schemas.TAKEN_GROUP[part])
+
+    def by_part(self, symbol: str) -> dict:
+        """One element by the parts of how a robot is taken apart, {part: its draws}, added over the kinds."""
+        return self.taken(symbol, lambda part: part)
 
     def in_kinds(self, material: str) -> dict:
         """One material in each kind of part it sits in, {kind's name: its draws} (the parts table 'materials',
@@ -235,6 +256,11 @@ def problems(robots: list) -> list:
         if off:
             found.append(f'robot type {robot.number}: its elements by material do not add up to its elements: '
                          f"{', '.join(off)}.")
+        off = [e for e in robot.tables['elements'][0]
+               if misses(sum(robot.by_part(e).values(), np.zeros(n)), robot.column('elements', e))]
+        if off:
+            found.append(f'robot type {robot.number}: its elements by part of how a robot is taken apart do not add up '
+                         f"to its elements: {', '.join(off)}.")
         recycled, fixed, inflow = (robot.column('copper', c) for c in composition.COPPER_COLUMNS)
         in_alloys = sum((kg for symbol in robot.tables['elements'][0] for kg in fixed_in(robot, symbol).values()),
                         np.zeros(n))
@@ -306,7 +332,8 @@ COPPER_COLOURS = {RECYCLED: composition.MATERIAL_COLOURS[composition.COPPER],
 
 PREFIX = 'comparison'
 # The numbered pages, one series each (comparison_<series>_<k>.png), in the order they are drawn.
-SERIES = ('notes', 'total', 'materials', 'elements', 'part_groups', 'body_regions', 'copper', 'numbers')
+SERIES = ('notes', 'total', 'materials', 'elements', 'groups', 'part_groups', 'body_regions', 'copper', 'numbers',
+          'parts')
 # The four pages of 03's old form (2026-10-26 to 2026-11-04: a bar of the mean and a line over 95 % per type), removed by
 # their exact names where an earlier run left them (E29).
 OLD_PAGES = ('materials.png', 'elements.png', 'part_groups.png', 'body_regions.png')
@@ -449,13 +476,36 @@ def notes(robots: list, outliers: list, params: Params) -> list:
 def pages(robots: list, params: Params, outliers: list = ()):
     """Every page, as (file name, figure), one at a time (each is saved and closed before the next is drawn); the
     `outliers` named on the notes page; each page of panels followed by the page of its numbers (02's numbers_page,
-    E34), comparison_numbers_<k>.png."""
+    E34), comparison_numbers_<k>.png; then the lists part by part, comparison_parts_<k>.png."""
     yield from composition.notes_pages(PREFIX, 'Comparing the six robot types: how to read the pages',
                                        notes(robots, list(outliers), params))
     for k, (name, figure) in enumerate(panel_pages(robots), 1):
         numbers = composition.numbers_page(f'{PREFIX}_numbers_{k}.png', figure)   # read before the page is closed
         yield name, figure
         yield numbers
+    yield from parts_pages(robots)
+
+
+def elements_shown(robots: list) -> list:
+    """The elements of interest any robot type holds in at least 2.5 % of its draws, in alphabetical order of their
+    names, as the element pages."""
+    return sorted((e for e in robots[0].tables['elements'][0] if held_by_any(robots, 'elements', e)),
+                  key=composition.element_label)
+
+
+def parts_pages(robots: list):
+    """For each element shown, the list of one robot of each robot type part by part of how a robot is taken apart
+    (02's part_rows and part_list_pages, one copy): a row for each type and each part that holds it, 14 rows a page,
+    comparison_parts_<k>.png counted on over the elements (Matthias, 2026-11-08: "I want a detailed list of the
+    component ... to know how to take it apart!!!", "Yes, add 1 to 3")."""
+    k = 0
+    for symbol in elements_shown(robots):
+        kg = {(f'{r.number} {r.title}', part): values for r in robots for part, values in r.by_part(symbol).items()}
+        for _, page in composition.part_list_pages(
+                'x', f'{composition.element_label(symbol)} in one robot of each robot type, part by part',
+                composition.part_rows(kg), first_head='Robot type'):
+            k += 1
+            yield f'{PREFIX}_parts_{k}.png', page
 
 
 def panel_pages(robots: list):
@@ -512,11 +562,19 @@ def panel_pages(robots: list):
                    compare_page(f'{composition.element_label(symbol)} in the sensors of one robot of each robot type',
                                 robots, lambda r, e=symbol: composition.sensors_split(e, recovered_from(r, e)),
                                 composition.MATERIAL_COLOURS))
-    for table, words in (('part_groups', 'part group'), ('body_regions', 'body region')):
+    # Each element by the four groups of how a robot is taken apart (Matthias, 2026-11-08: "Why I am not allowed to
+    # know what the different components contribut already at this level", "Yes, add 1 to 3").
+    for k, symbol in enumerate(elements_shown(robots), 1):
+        yield (f'{PREFIX}_groups_{k}.png',
+               compare_page(f'{composition.element_label(symbol)} in one robot of each robot type, by group', robots,
+                            lambda r, e=symbol: r.by_group(e), schemas.GROUP_COLOURS))
+    # The mass by part group (02's: the four groups, in their colours) and by body region.
+    for table, words in (('part_groups', 'group'), ('body_regions', 'body region')):
         columns = robots[0].tables[table][0]
+        colours = {**rainbow(columns), **{g: c for g, c in schemas.GROUP_COLOURS.items() if g in columns}}
         yield (f'{PREFIX}_{table}_1.png',
                compare_page(f'The mass of one robot of each robot type, by {words}', robots,
-                            lambda r, t=table, c=columns: {name: r.column(t, name) for name in c}, rainbow(columns)))
+                            lambda r, t=table, c=columns: {name: r.column(t, name) for name in c}, colours))
     yield (f'{PREFIX}_copper_1.png',
            compare_page('Copper in one robot of each robot type: its inflow, recycled as copper or fixed in alloys',
                         robots, lambda r: {RECYCLED: r.column('copper', composition.COPPER_COLUMNS[0]),

@@ -1,7 +1,492 @@
 # Verification and validation
 
 Every check made on this project: what, how, against what, the result, the date, and what it does not cover. Written
-by Claude, newest first.
+by Claude, newest first. The first section says what verification and validation mean here and how each is done; the
+entries V1 to V222 below it are the checks themselves.
+
+## What verification and validation mean, and how they are done here (2026-11-08)
+
+Matthias, 2026-11-08: "I want a full verification and validation report, where you also define what this means and how
+you have implemented it according to the meaning. I also mean correct results!!!"
+
+### The meaning
+
+- **Verification** answers: *does the code compute what the model, as written down, says?* The model is written down in
+  METHODOLOGY.md, EVIDENCE.md, the schemas of 01 and the code's comments. A verified number is the number the written
+  method gives for the given inputs, with no error of the code in between. Verification says nothing about whether the
+  inputs or the method describe real robots.
+- **Validation** answers: *do the model's results describe the real robots, and the real numbers of robots in the world,
+  well enough for what the model is for* (the materials and elements in humanoid robots, in one robot and in all robots
+  in use 2025 to 2040, as a basis for recycling)? A result is validated when it agrees, within its uncertainty, with
+  independent data that did not go into it: a maker's stated mass, a teardown's weighing, a published composition, a
+  world statistic. A comparison with the model's own input validates nothing (GitHub/CLAUDE.md §3: "A cross-check that
+  stops at the input does not validate the model").
+- **Correct results**, as he asks for them, are results that are verified, and validated wherever independent data
+  exist. Where no independent data exist, a result rests on its sources (EVIDENCE.md, a source table before every min,
+  mode and max) and carries its uncertainty (min, mode and max on every input, 95 % of the draws on every result). This
+  report then says so plainly: *not validated, rests on its sources*.
+
+### How verification is done (what each method is, and where)
+
+| # | Method | What it proves | Where |
+|---|---|---|---|
+| V-1 | **Tests first, seen to fail, then passing** | that the code does what the specification says, case by case, and that the test can fail | `tests/` (649+ tests); each entry below names its tests and that they failed before the change |
+| V-2 | **Hand calculations** | that a result equals the same number worked out independently from the inputs, draw by draw (e.g. the neodymium in a joint's magnets = the magnets' kg × the neodymium share; the small PCBs' copper in use = joint sets × 0.2 kg + packs × 0.1 kg) | in the tests; each entry below says which |
+| V-3 | **Deliberate faults** (mutations) | that the tests see the kind of error they are meant to see: a fault is put into a scratch copy of the code (a wrong lifetime, a part booked to the next part, a percentile at 5 and 95 instead of 2.5 and 97.5 …), and the tests must fail. A fault the tests do not catch gets a new test | scratch copies, never the project; each entry lists every fault and what caught it |
+| V-4 | **Checks built into the code that stop the run** | that what must add up does add up in every draw of every run, also at 200,000 draws: 02 the materials to the robot's mass, the elements by material, by place and by part to the elements, the mass by part to each kind, each material's elements to its kilograms whose elements are drawn (since V224; before, that check compared the elements with themselves); 03 the same once more on what 02 wrote; 04 the stock balance in every quarter, the article's robots at every year end, the joint sets as many as the robots, the packs never fewer than needed | `02_composition.py` `draw_faults`, `check_taken`; `03_comparison.py` `problems`; `04_stock_and_flow.py` `check`; 01's checks of every input (faults pages) |
+| V-5 | **Each stage checks the one before** | that what a stage reads is what the stage before wrote and belongs together | 03 reads 02's tables and stops on any miss; 04 stops on a column of 02 that is no kind, part and element |
+| V-6 | **Regenerated data compared cell by cell** | that a regenerated input file changes only where it should | the parts files against their builders (`scratchpad/builders/compare.py`); the tests compare each builder with its file on disk |
+| V-7 | **Every page checked as it is saved, and looked at** | his figure rules: no text beyond the page or its panel, no text over data, text 14 pt and up (02, 03; 04's A4 pages as 07's), no project words, no legend over a line; and by eye: what each page shows and whether its numbers make sense | `tests/test_comparison.py` `page_problems`; the sandbox runs (below); each entry names the pages looked at |
+| V-8 | **Documents drawn from the code's own lists, tested** | that the schemas and the overview say what the code does: the page of how a robot is taken apart is drawn from `TAKEN_APART`, the overview's stages from `STAGES` | `tests/test_schemas.py` |
+| V-9 | **The whole suite after every change; the chain in a sandbox** | that nothing else broke; that 01 → 02 → 03 → 04 run together on the project's own inputs at 2,000 draws, into scratch folders, every page checked (V-7) | the entries below; never against `data/` or `figures/`, never 200,000 draws (his runs) |
+
+### How validation is done
+
+| # | Method | What it proves | Where |
+|---|---|---|---|
+| A-1 | **Every input from representative sources**, each questioned (measured, a design value or a claim; first-hand or second-hand) and shown in a source table before its min, mode and max are entered | that the inputs describe the kind of thing they are used for (GitHub/CLAUDE.md §8) | EVIDENCE.md, an entry per input |
+| A-2 | **Results against independent data** | that the results describe the real robots: a result compared with data that did not go into it | the table "What is validated" below |
+| A-3 | **Uncertainty carried to the result** | that a result shows how well it is known: min, mode and max on every input, never a single number; 95 % of the draws on every result; a 0 not part of a distribution | METHODOLOGY.md; every page |
+| A-4 | **Order of magnitude and sense, by eye** | that no result is absurd: each new result looked at, traced to its inputs where it surprises (e.g. V222: 617 g of aluminium in the gears of a type 1 robot, traced to the second gear stage's carrier, 12.5 to 40 % aluminium in the parts file) | each entry below |
+
+### What is validated: every result compared with independent data (as of 2026-11-08)
+
+Collected from V1 to V221 and EVIDENCE.md, and the comparison of 2026-11-08 (V222, rows A11 to A13). "Independent" means
+the data did not go into that result.
+
+| # | Result of the model | Against | The numbers | Verdict | Where |
+|---|---|---|---|---|---|
+| A1 | the G1's large joint, from its small joint's parts and size factors | T1 (teardown, weighed) 1,100 g; T3k (second-hand) 1,085 g | draws 912 / 1,034 / 1,158 g, mean 6 % under T1 | within its range; nothing scaled to meet it. Partly the same sources (T1's small joint, T3k's dimensions); on the proposal's scratch run, not on 02's | V45, E2.8 |
+| A2 | type 1's joint mass from torque (fitted on AgiBot's three) | the G1's weighed joints (T1) | small 0.525 kg vs 0.50–0.58 from the fit; large 1.1 vs 0.87–1.07 | close; not used to fit | E2.8e |
+| A3 | type 1's fit at 360 N·m | Unitree M107, maker's 1.9 kg | 1.62 kg, 15 % below | a check only (the M107 then went into type 2's fit) | E6.7 |
+| A4 | type 2's joint-mass fit (12 makers) | the G1's weighed joints (T1) | small 0.525 vs 0.426–0.515; large 1.1 vs 0.868–1.124 | close; not used to fit | V83, E6.8 |
+| A5 | type 2's fit | 8 makers' modules found later (Lumos, MagicLab) | mass / fit 0.60 to 1.38 | all inside half to 1.5 times | V86, V87, E7.2 |
+| A6 | type 2's joint template on the JingChu | JCBOT's stated knee 2 kg | 1.85 kg (0.92) | close; the stated value then entered | V88 |
+| A7 | the RP1's cable copper at the model's min / mode / max | RoboParty's own harness list and drawings | maker 171–375 g (about 12 m); model 52 / 170 / 406 g (10 m) | within the model's range; at its min / mode / max, not on its draws | V150, E22.1 |
+| A8 | the G1's frame, shell, harness, fasteners, cooling together | U3, Unitree's design file, link masses (approximate reading) | 14.9 kg vs about 13 kg | totals agree; the split does not | V45, E2.8 |
+| A9 | the G1's materials in the proposal | his workbook's estimates (not measured) | aluminium 12.2 vs 12 kg agrees; copper 1.2–1.9 vs 3–4.5 kg; cables a third; fasteners a quarter; cooling a sixth | not independent measured data: an estimate against an estimate | V45, V149, E2.8 |
+| A10 | 04's element inflow and stock (his run of 2026-11-06) | world mine production 2025 and reserves (RAWCLICDataCenters' ElementReference, USGS MCS 2026) | inflow above a year's world production from 2033 (Nd, Pr) to 2039 (B, Ag, Au, Nb); stock above reserves from 2039 (Nd) | a comparison of scale, driven by the article's robots (an input); not repeated since V210 | V209 |
+| A11 | dysprosium in one robot, each type (02, sandbox of V222, 2,000 draws) | "analysts: 35–79 g dysprosium per humanoid" (Humanoid.guide, an industry article, no robot named) | medians type 1 57 g, 2 75, 3 83, 4 64, 5 101, 6 90; 95 % from 7 to 237 g | type 1 inside; types 2 to 6 at or above the top of the range, every 95 % overlapping it. The source is second-hand and names no mass of robot: weak | V222 |
+| A12 | NdFeB magnets in one robot, each type | "Optimus about 3.5 kg NdFeB" (Aibang Robotics, a Chinese industry article, a claim) | medians 1.0 (type 1), 1.4, 1.5, 1.2, 1.8, 1.6 kg; 97.5 % 1.9 to 3.8 kg | **the model about half the claim**; 3.5 kg only in the top of types 2, 3, 5's draws. Reported, not changed; a claim, second-hand | V222 |
+| A13 | copper in one robot, per 60 kg of robot | CRU via rehack.com: "4-8 kg of copper for actuators and wiring" in a robot of about 60 kg (a search result, not read; second-hand of second-hand) | medians 3.3 (type 1), 2.4, 2.3, 2.5, 2.8, 2.1 kg; 97.5 % 3.9 to 4.7 kg | **the model below the range** (by 1.5 to 2.5 times at the medians). Reported, not changed; the weakest of sources | V222 |
+
+**Compared with inputs only** (these validate no result, they verify): the G1's small joint against T1's own parts
+(V45); its battery 421 Wh against T1's 0.42 kWh (V45); the sandbox's elements against the project's own earlier G1
+figures (V53); joints against the makers' module masses they are built from (V57, V58, V144); type 2's template against
+type 1's (V87); every result's mean against its triangle's (V32, V44, V213); the robots in use against the article's
+(V216). Inputs against outside sources (A-1, not results): the recipes (V14: aluminium 6061 and 7075 exactly; magnets
+not confirmed, Co 4–12 % against 5 %; board copper 2.5–7.4 % against 14.2 % measured, then replaced by Bizzo's), the
+magnets (V15), the cells (V16, V19), gallium (V192, V194), the boards (E2.8b), the rotor's magnet share (E2.10), the
+workbook's LiDAR (V45), the makers' model files (V95, E5), the runtimes (E39); and the article's robots against
+humanoid forecasts (E40, E41: 250 times the humanoids shipped in 2025), which he decided: "Use the numbers in the
+article".
+
+**Not validated, rests on its sources** (no independent data found, or none compared):
+- the elements of one robot of every type beyond A11 to A13 (lithium, cobalt, nickel, gold, silver, palladium,
+  gallium, indium, tantalum, terbium …): no independent per-robot data found;
+- types 2 to 6 have no teardown ("T1 is the only first-hand teardown with masses", E2.8); most of their element kg
+  rests on parts labelled E (V187: copper 78 to 98 %, Nd+Pr 76 to 98 %, gold 77 to 96 %, by type);
+- the boards' areas and metals (no measured area of a robot's main board; the car and data-centre data 20 times apart on
+  copper per cm², E2.8b); the boards' layers and the large capacitors at the joint motors (in the model since E51, V223:
+  their inputs from makers' declarations and drivers, no independent figure of a humanoid's capacitors found); the
+  layers check finds the measured copper above what a thin board's layers hold (V223);
+- the magnets' grade by joint, gallium by grade, the stator's copper share (E2.10);
+- the cables of any robot but the RP1 (V150);
+- the housings of the 304 packs no source weighs (E20);
+- 04: the robots in use are the article's, with no band; no humanoid maker publishes a joint life, none a lifetime in
+  years (V205, V212); collection and charging efficiency not built (E46);
+- 03 compares the types only with each other.
+
+**What this means for correct results.** Every result is verified: the code computes what the documents say, the
+totals add up in every draw, the tests see the errors they are meant to see (V-1 to V-9). Validated against independent
+data are some masses of one robot (A1 to A8) and, weakly, the dysprosium (A11). Two outside figures, both second-hand
+claims, are higher than the model: NdFeB about twice (A12), copper 1.5 to 2.5 times (A13). Whether the model is low or
+the claims are high cannot be settled with them; it needs a first-hand source (a teardown of a second robot, a maker's
+material declaration). Until then the elements of one robot are **not validated**; they rest on their sources and their
+95 % ranges.
+
+
+## 2026-11-08
+
+### V226. 05: the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together (EVIDENCE.md E52)
+
+Matthias, 2026-11-08: "write 05 combination of results of 04 and 07 with the distributions", then "Yes, build it" to the
+specification's rows 1 to 8. Built: `tools/copy_data_center_draws.py` (07's element draws copied into
+`data/raw/data_center_stock_and_flow/`, GitHub/CLAUDE.md §6) and `05_combined_stock_and_flow.py`.
+
+- **Tests** (`tests/test_combined_stock_and_flow.py`, 8 tests), passing. They were written with the code, not run
+  before it existed; what they catch is shown by the deliberate faults below:
+  - *the copy:* every number of a made-up 07 file found again in the copy, at its scenario, draw, year, flow and element;
+    07's "collected" and the years before 2025 left out; a missing row and a doubled row each stop the tool with no
+    `source.txt`;
+  - *the combination, every kg by hand:* for each scenario, flow and year, each element's data centres + robots draw i
+    with draw i, an element only one of the two holds counted from that one alone (the elements: the union, 23);
+  - *its summary:* mean, median, 2.5th and 97.5th percentile of each line against numpy on the same draws;
+  - *its pages:* 69 element pages and 12 distribution pages, every page within his rules (`page_problems`), each legend
+    naming exactly the lines drawn;
+  - *its checks:* other numbers of draws or of years in the two inputs stop 05 ("do not pair draw by draw"); no copy of
+    07 stops it and names the tool.
+- **Deliberate faults, each in a scratch copy** (V-3), 10 of 10 caught by the tests: the robots of the next year; one
+  part of the robots only; the data centres of scenario A for all three; the data centres of another flow; the draws
+  shuffled (robot draws reversed); an element matched to the wrong column; the copy keeping 2024 to 2039; the copy not
+  checking doubled rows; the copy taking "collected" for "out"; the pairing check switched off (caught by a crash on the
+  unequal shapes, not by the check's words).
+- **Sandbox on real data** (scratch, nothing in `data/` or `figures/`): 07's first 2,000 draws cut from its
+  `stock_flow_draws.csv`, copied by the tool (1 s), and 04's 2,000 draws of the sandbox chain; 05 wrote 81 pages in 78 s,
+  every page within his rules, no legend over a line.
+- **Order of magnitude:** copper in stock at the end of 2040, scenario A, read directly from 07's file and from the
+  copy: the same to four digits, so the copy is exact. Its size, far above the world's copper mine production of a year,
+  is 07's (RAWCLICDataCenters' VERIFICATION: its scenario A from ai-2040.com's compute, brought to Matthias on
+  2026-10-22), not a fault of 05. 07's numbers are not written here: this repository is public, RAWCLICDataCenters is
+  private. The robots: 70 billion in use at the end of 2040 (04, from ai-2040.com); per robot, medians, aluminium
+  36.5 kg, copper 3.97 kg, lithium 0.307 kg, neodymium 0.377 kg.
+- **A fault found by looking, which the automatic check missed:** on the distribution pages the note at the foot ran off
+  the page on both sides ("each panel…", "…not drawn" cut). Two causes: the shared page (04's `split_elements_page`,
+  also 04's own element pages) wrote its note as one line, unwrapped; and `page_problems` laid each page out at the
+  screen's 100 dpi, where the line measured 4 to 1,916 of 1,920 px (99.6 %), while the page is saved at 150 dpi, where the
+  letters come out a little wider. **Fixed:** `page_problems` now lays each page out at the dpi it is saved with (the
+  three hooks of 02/03, 04 and 05 pass it); then 05's tests failed on the 12 distribution pages, as they should; the
+  shared page now wraps its note to the page's width (07's characters a line, scaled to the page's width and its 11 pt)
+  and leaves room for its lines; 05's 8 and 04's 48 tests pass, the sandbox again 81 pages with no problem. **Looked at:**
+  05's `A/distributions/elements_2040.png` (the note on three lines inside the page) and 04's `elements_2040.png` drawn
+  from the sandbox chain (three lines, inside).
+- **His run, read back:** the copy tool 15:55:06 to 15:55:48 (`element_draws.npy` 2.30 GB, from 07's file of 2026-10-23
+  14:38:09); 05 15:56:04 to 15:59:05, after the last change of its code (05 15:28:38, 04's shared page 15:45:25): 81
+  pages, 23 element pages and 4 distribution pages in each scenario's folder. Looked at: `B/distributions/elements_2040.png`
+  (200,000 draws, the note on three lines inside the page, each legend naming what is drawn) and `C/elements/Copper.png`.
+- **The whole suite,** after the last change of the code (the page check at the saved dpi, the wrapped note): 689 tests
+  in 1,069 s, OK (681 before, and 05's 8).
+- **Not covered:** the tool on the real 9 GB file and 05 at 200,000 draws (his runs; at 200,000 draws the copy holds about
+  2.2 GB and 05's draws about 2.6 GB, scaled from 2,000 draws; the time is not measured); the element pages of scenarios
+  B and C looked at one by one (checked by `page_problems` only).
+
+### V225. His run of 01 read back (2026-11-08, 14:32)
+
+- **Times:** his 01 wrote `figures/schemas/` at 14:32:30 to 14:32:31: `overview_1.png`, `overview_2.png`, `notes.png`,
+  `taken_apart.png`, `faults_1.png` to `faults_3.png`; `01_schemas.py` last changed 12:43:42: the run is of the final code.
+- **Faults:** "No fault found in the inputs." The three pages are 01's list of what it checks.
+- **Looked at:** `taken_apart.png`: the four groups and 14 parts with the descriptions as corrected (magnet carriers,
+  gear carriers, the drivers' capacitors), every text inside its box.
+- **A gap of mine, closed:** the sandbox runs of V222 to V224 read 01's pages and its exit code, not its count of faults
+  (01 ends with 0 also where it finds faults); his run shows none. Sandbox runs from now on read the count.
+- **Not covered:** his runs of 02 (going at the handover), 03 and 04.
+
+### V224. 02's check that every material's elements add up to its kilograms (his "Yes, fix it")
+
+- **What was wrong** (found in V223): `Robot.element` added each element's kilograms both to the elements (the table
+  recipe_elements) and to `in_recipes`, "the kilograms of each material that follow a recipe"; `draw_faults` then
+  compared the two, one sum with itself. It could never fail: the capacitors' organic rest doubled passed it.
+- **What it is now:** two counts that come from different places. `Robot.in_recipes`, a material's kilograms whose
+  elements are drawn, is counted where the mass is booked (`Robot.drawn`): a material with a recipe, a grade, the
+  magnets' or the cells' fractions; a board, less what sits on it (its encoders, its capacitors' titanate); a sensor, its
+  car sensor elements' kilograms; the large capacitors; the titanate; the cells. `Robot.elements_of`, the kilograms of the
+  elements booked under a material, is counted where each element is booked. 02 checks every material in every draw
+  (`check_recipes`, after `check_taken`): its elements within 0.1 % of its kilograms (02's COMPOUND_TOLERANCE: the
+  element recipes' compounds are written to five decimals), and stops otherwise, naming the material and the draws.
+  `draw_faults`' sum over all materials now compares the two counts too.
+- **Tests first, seen to fail** (no `elements_of`, no `check_recipes`), then passing: a capacitor and a board booked
+  directly, both counts their kilograms by hand; type 1 drawn at 200 draws passes; its electronics, cells and aluminium
+  each made 1 % off: 02 stops each time.
+- **Deliberate faults, each in a scratch copy** (V-3), every one stopping 02 with the new check's words ("Boards and
+  components: its elements miss its kilograms whose elements are drawn in 178 draws (by up to 0.171 kg)"; "Battery
+  cells: … in 200 draws (by up to 3.07 kg)"): the capacitors' organic rest doubled; the cells' kilograms not counted; a
+  board counted with what sits on it; a sensor not counted; the titanate not counted; a board missing its bromine; a
+  recipe's first element left out.
+- **All six robot types as drawn pass it:** at 1,000 draws (the tests of the parts) and in the sandbox chain at 2,000
+  draws (01 46 pages, 02 372, 03 208, 04 41, every page within his rules, no legend over a line).
+- **The whole suite:** 681 tests in 1,001 s, OK.
+- **Not covered:** a material booked whole without any elements (a material with no recipe, as Other) is not in the
+  check: it holds no elements by design, as before.
+
+### V223. The large capacitors at the joint motors and on the capacitor boards; the boards' layers (EVIDENCE.md E51)
+
+- **His words:** "There are also quite large capacitors close to each joint motor ... So have them correct!!", "PCBs have
+  different size and layors etc.", "Yes, enter 1 to 8".
+- **Sources read first-hand before the proposal** (A-1): the CubeMars driver manual (2 × 180 µF 63 V, 8 × 20 mm, Rubycon),
+  FROLYT's declaration (its shares add up to 100 %), RoboParty's BOM of the RP1's motor-capacitor board (5 cans of 13 ×
+  30 mm). TDK's two declarations: its server refused my download; read by the helper as files.
+- **The builders** (V-6): all six files rebuilt in scratch and compared row by row with the files on disk: added in each
+  the 15 shared constants; in type 1 the four capacitor boards changed (2 / 5 / 10 → 10 / 20 / 30 cm²; the RP1's "Leg board
+  YCL.E000057" → "Motor capacitor board RBE-PWR-MCAP") and the RP1's own count added; nothing else. Written; all six
+  again equal to their builders. A test of 01's pages then caught my label of the G1's buffer board, "S, E": its size is
+  the RP1's board's, for the G1 an estimate: "E".
+- **Tests** (V-1, V-2), all passing:
+
+| What | How |
+|---|---|
+| the rows as agreed (0 / 2 / 4; 0.68 / 1.5 / 2.6 g; 2 / 5 / 8; 2.6 / 5.3 / 8.0 g; the four capacitor boards at 10 / 20 / 30 cm²; no leg board; the RP1's 5) | the builder's file read by 01 |
+| 01's checks: a robot's count naming a board that is no capacitor board of it; a count from 0 on a capacitor board; a liquid capacitor's shares reaching 1.4 at their maxima | deliberate faults in the file, each its fault (V-3) |
+| which boards carry capacitors (3 names yes, 4 no); the capacitors a small PCB | by hand |
+| every kg by hand, type 1 with the numbers, masses and shares fixed: the capacitors' copper and tin in the G1, the RP1 and the X1 = (its joints × 2 × 1.5 g + its capacitor boards × their capacitors × 5.3 g) × the share, draw by draw; the RP1's motor-capacitor boards its maker's 5, its capacitor boards the shared 4; aluminium 47 % (liquid) or 40 % (hybrid) in every draw, each kind in 35 to 65 % of them | by hand |
+| a joint whose module mass its maker states keeps it, with 4 capacitors of 100 g each (the X1's joints within their module masses) | by hand |
+| the capacitors' elements in the small PCBs; the type's elements adding up (02's `draw_faults`) | test |
+| one robot's capacitors booked directly, the shared draws set by hand: all of their mass in their elements, no more; aluminium of interest 48 % (liquid) and 46 % (hybrid), not the kaolinite's or the glass's; copper; the part Small PCB | by hand |
+| the layers check: the most copper of 2, 4 and 6 layers 73.4, 127.2 and 181.0 mg/cm²; the layers by kind; with every board not weighed 0.56 g/cm² and 20 % copper (112 mg/cm²) the small boards above in every draw, the head's, battery's and computer's in none; one driver board of 150 mg/cm² not above (its group's most, 6 layers), one small board of the same above | by hand |
+
+- **Deliberate faults, each in a scratch copy** (V-3); every one caught, two only after a test was added:
+
+| Fault | Caught by |
+|---|---|
+| the capacitors outside the joint module | every kg by hand; the stated module mass |
+| the kind never drawn (always liquid) | every kg by hand (aluminium 47 % or 40 %); one capacitor by hand |
+| the kaolinite's aluminium as an element of interest | every kg by hand; one capacitor by hand |
+| the organic rest doubled | one capacitor by hand (a test added for it). 02's existing check "the elements do not add up to the materials that have recipes" did not catch it: it compared the elements booked with the kilograms booked as elements, the same sum (`draw_faults`); fixed on his word in V224 |
+| the maker's own count ignored | every kg by hand |
+| the capacitors a PCB | the small PCBs; the component a small PCB |
+| no board a capacitor board | 7 tests |
+| a capacitor's grams taken as kg | every kg by hand |
+| the layers check at the fewest layers of a group | one driver board by hand (a test added for it) |
+| a small board of 4 layers | the layers check by hand |
+
+- **Sandbox, the whole chain at 2,000 draws** (V-9): 01 46 pages, 02 372, 03 208, 04 41, every page within his rules, no
+  legend over a line; robots in use 10,000,000 (2025) and 70,000,000,000 (2040); at most 2.4 GB.
+- **The results, by eye** (A-4): the large capacitors in one robot about 42 to 67 g (median by type; 95 % 12 to 237 g),
+  held in 84 to 93 % of the draws (none where a robot draws 0 on its drivers and has no capacitor board); their aluminium
+  20 to 32 g, copper and tin 0.1 to 0.2 g each. By hand at the modes: 25 joints × 1 to 2 × 1.6 g, and the G1's 4 boards ×
+  5 × 5.3 g, about 40 to 190 g: the same order.
+- **The layers check, found** (02's report, each type's `summary.csv`): the share of the boards' draws whose copper is
+  above what all their layers could hold: the small boards in the cables (2 layers, 73.4 mg/cm²) 92 to 100 %; the head's
+  boards (4, 127.2) 34 to 50 %; the battery's (4) 31 to 33 %; the joints' driver boards (4 / 4 / 6, 181) 6 to 12 %; the
+  computer's (6) 2 %. The measured copper share (Bizzo, mixed boards with their components) at 0.56 g per cm² gives
+  112 mg/cm² at the mode, more than a thin board's layers hold; and a driver board's weighed mass and its area are drawn
+  apart, so its copper per cm² reaches some 480 mg. Reported to him, not changed (row 8: the copper stays measured).
+- **The whole suite, first run:** 679 tests in 993 s; 3 failures and 1 error, each from this change, each understood:
+  (1) the G1's copper in its cables, a hand calculation of before (buffer boards of 5 cm², no capacitors): the code gave
+  exactly the new hand values, 102.144 g of cable copper + 8.96 g of board copper (4 × 20 cm² × 0.56 × 20 %) + the
+  capacitors' copper by kind and number (111.687 g liquid with 5 a board, 111.316 g hybrid …); the test now says so;
+  (2) the list of the electronics' components named the old five; (3) the capacitors' colour, Tol's dark blue, was a
+  sensor kind's already: now his dark cyan `#225555`; (4) the means page's copper row, now with the capacitors' 268 mg,
+  wraps "Battery cells" over two lines: the test compared the raw lines, now the words. Those tests again: 30, OK.
+- **The whole suite, second run:** 679 tests in 954 s, OK, on the final code of this entry.
+- **Validation:** the capacitors' inputs rest on makers' declarations and two makers' joint drivers (A-1); no
+  independent figure of a humanoid's capacitors in grams was found to compare a result with: **not validated**.
+- **Not covered:** his runs of 01 to 04 at 200,000 draws.
+
+### V222. How a robot is taken apart: four groups and 14 parts in 01, 02, 03 and 04 (EVIDENCE.md E50)
+
+- **His words:** "I want a detailed list of the component, so it is easy to understand and establish a recycling to know
+  how to take it apart!!!"; the four groups and their subcategories in his words; "Also the joints the can be split up in
+  smaller parts. I waht schemas for this"; "I want it 100% correct. No problem to rerun"; "Yes do it"; "Yes, add 1 to 3".
+- **What is verified, and how** (the methods of the section above):
+
+| Step | What | How (method) | Result |
+|---|---|---|---|
+| 01, the list | four groups, 14 parts, each once, every kind of part in a group | tests (V-1) | pass |
+| 01, the rule | 36 rows placed by hand as his words say (a hip fan a PCB, a driver board a small PCB, the battery management board a small PCB, a sensor's housing a sensor, the RP1's cover magnets the shell, a wheel's motor magnets the magnets, a head actuator's valve the hydraulics …); 5 rows that must stop it | tests, hand (V-1, V-2) | pass |
+| 01, every row of all six parts files | each row 02 books has a part | 01's check on the six files as the builders write them (V-4) | 0 rows unplaced; a made-up row caught with its row number (V-3) |
+| 01, the page | every group, part and description on it, nothing outside its box, no text below 14 points, no project words; looked at | tests (V-7, V-8), by eye | pass; two descriptions corrected after the sandbox (below) |
+| The builders | the head's hydraulic actuators, valves, boards and sensors in the head joints | all six files rebuilt in scratch, compared cell by cell with the files on disk (V-6): before the change 0 cells differ in all six; after it 13 (type 3: 1, type 5: 12), all Head → Head joints; written; all six again equal to their builders | as intended, nothing else |
+| 02, the booking | every element and every kilogram to its kind and part; parts add up to each kind in every draw | built-in check `check_taken` (V-4); test in all six types at 1,000 draws (V-1) | pass |
+| 02, by hand (type 1) | the joints' neodymium = the magnets' kg × 0.24 in every joint kind; the RP1's cover magnets in the shell, only in its draws; gold: the computer's a PCB, the driver boards' and the battery board's small PCBs; the cables' copper wires; the cells' lithium cells; the head's indium sensors; the encoders' neodymium sensors; the G1's hip fans' copper a PCB; the battery group = the battery kind less its board; the body = the frame and shell kind | V-2 | pass |
+| 02, type 5 | the Atlas HD's head actuator in the head joints: its titanium hydraulics, its position sensor's neodymium a sensor | V-2 | pass |
+| 02, the groups' mass | the four groups add up to the robot's mass in every draw (types 1 and 5) | V-1, V-2 | pass |
+| 03 | the parts add up to the elements (its own check, V-4/V-5); copper of type 2 by group and part by hand (V-2); the page of copper by group, type 2's mean | V-1, V-2 | pass |
+| 04, every kilogram by hand | each part's kg in the stock, the inflow and the outflow = its kg of one robot × the units that carry it, added over the types; the small PCBs' copper = joint sets × 0.2 kg + packs × 0.1 kg (each with its own lifetime); every other part 0 | V-2 | pass |
+| 04, the summary | each element by group and by part, its mean, 2.5 % and 97.5 % over the draws above 0, every flow | V-2 | pass |
+| 04, the pages | the elements of 2040 split by the four groups, legend in their order, copper's mean by hand; the list of 2040 part by part, the small PCBs' row by hand; a list made by hand with a part held in half the draws | V-1, V-2, V-7 | pass |
+
+- **Deliberate faults, each in a scratch copy** (V-3); every one caught:
+
+| Stage | Fault | Caught by |
+|---|---|---|
+| 04 | the packs' parts with the robots' lifetime | every kg by hand, the summary (3 tests) |
+| 04 | the joints' parts with the robots' lifetime | every kg by hand |
+| 04 | a part booked to the next part | every kg by hand, the summary, the list (3) |
+| 04 | a group summed from one of its parts | the summary ("–" where the group holds copper) |
+| 04 | the page summing one part of each group | the page's copper by hand |
+| 04 | the summary's 95 % at 5 and 95 | the summary (a test added for it: it was missed at first) |
+| 04 | the summary's mean over every draw, zeros too | the summary (2) |
+| 04 | every type's units times type 1's robot | every kg by hand |
+| 02, 04 | the list's statistics over every draw, zeros too (two ways) | the list over the draws that hold it (a test added for it: missed at first) |
+| 01 | every circuit board a PCB | the rows by hand, type 1 by hand (gold of the driver boards), the groups' mass (3) |
+| 01 | no rule for the magnets | the rows by hand, the magnets by hand, the pages of the groups (3) |
+| 01 | a fan in the joints placed nowhere | 01's check of every row (the G1's hip fans named), the rows by hand; 02 stops (10) |
+| 01 | the cover magnets as the joints' magnets | the rows by hand, the RP1 by hand (3) |
+| 02 | a sensor's housing placed by its name | 02 stops: the housing has no part (`taken_part`) (7) |
+| 02 | the cells' mass not booked by part | 02 stops: the battery's parts miss its mass (`check_taken`) (7) |
+| 02 | the groups' mass all in the joints | the four groups by hand |
+| 02 | the check of the split switched off | the faults in the split |
+| 03 | the groups as the parts | copper by group by hand |
+| 03 | the check of the parts switched off | the parts that do not add up |
+
+- **Sandbox, the whole chain** (V-9) on the project's own inputs at 2,000 draws a type, into scratch folders
+  (`scratchpad/check_1108/sandbox_chain.py`): 01 0 faults, 46 pages; 02 372 pages (156 s); 03 208 pages (76 s); 04 41
+  pages (31 s); every page within his figure rules, no legend over a line; robots in use at the end of 2025 10,000,000,
+  of 2040 70,000,000,000; the whole run 287 s, at most 2.1 GB of memory. Looked at: the schema page; type 1's first page
+  of elements by group and its first list page; 03's mass by group; 04's elements of 2040 by group and its first list
+  page of 2040.
+- **By eye, and what it found** (A-4): type 1's aluminium in the gears, 617 g a robot, traced to the parts file (the
+  second gear stage's carrier 12.5 / 25 / 40 % aluminium) and the 392 g in the motors to the magnet carriers (aluminium):
+  right, but the page's words said "the steel gear stages" and "copper windings, electrical steel" only. Corrected:
+  "gear stages, their carriers, bearings inside the joints", "rest of the motors: windings, steel, magnet carriers".
+  The titanium of the small PCBs in 2040, 744 kt (about 11 g a robot), is the barium titanate of the driver boards'
+  ceramic capacitors (E38 point 4, unchanged). The groups on 04's page agree with the parts on its list (aluminium in the
+  joints 453 Mt: motors 40, gears 67, housings 345, hydraulics where held).
+- **Found, not changed:** 02 and 03 keep a type's pages open until it is saved in full (matplotlib's "More than 20
+  figures" warning, there before today, V221's suite too); the new pages add to it. RAWCLICVehicleElectronics' documents
+  give its board sizes in mm², its code in cm² (its `docs/06_PCB_MODEL_DESIGN.md`, `04_PCBAreaMC/PCBAreaMC.py:386`).
+- **The whole suite, first run:** 668 tests in 998 s; 51 failures and 2 errors, all from two causes. (1) 01's new check of
+  every row (`taken_apart_faults`) left out the rows drawn with the joints only by their kind; the test files' joint
+  modules stand in a joint kind ("Joint module, small" in the ankles), so every check of a test file found four faults
+  more (49 tests of `TestPartsTakenApart`). 02 knows those rows by what they are computed from ("the sum of JointParts",
+  "the Joints' module masses", "the Joints' shares"; the encoders' "Sensors and SensorElements"): these markers now stand
+  in 01 (`FROM_JOINTS`, `FROM_SENSORS`), 02 reads them there (one copy), and the check leaves those rows out as 02 does.
+  (2) Two tests of 02 still named the old part group "Frame" and the old series of pages; they name the four groups'
+  "Body" and the series with 'groups' and 'parts'. Those tests and all of 01's, again: 265, OK.
+- **The whole suite, second run:** 668 tests in 973 s, OK (on the code of this entry; started before the capacitors
+  of V223 were begun, every module loaded at its start).
+- **Validation:** the change books what the model already computed into finer parts; every total is unchanged (the parts
+  add up to the kinds, the kinds to the robot, in every draw); it changes no value of an input. New today: the elements
+  of one robot against the three outside figures the documents hold (rows A11 to A13 of "What is validated" above, from
+  this sandbox): dysprosium within or above the analysts' 35–79 g; NdFeB about half the Optimus claim of 3.5 kg; copper
+  below CRU's 4–8 kg per 60 kg. All three sources second-hand; reported, not changed.
+- **Not covered:** his runs of 01, 02, 03 and 04 at 200,000 draws (04's element files about 4.2 GB each); the layers and
+  sizes of the boards and the large capacitors at the joint motors (E51, open).
+
+### V221. The titles by the year alone; the elements' distributions exactly as RAWCLICDataCenters' 05 (EVIDENCE.md E49)
+
+- **His words:** "Sorry end of goes away. This is not needed"; "I also want finally see the distribution. Exactkly the
+  figures we have worked out for the data centers!!!".
+- **Tests first, seen to fail**, then passing: the robots-in-use page titled "2025: 10,000,000 robots" to "2040:
+  70,000,000,000 robots", its rows "Robot type 3, 2040"; no text "End of" on any page; the pages by exact name (the
+  overview, the element pages, `distributions/robots_in_use.png` and its numbers, `distributions/elements_2025.png` to
+  `elements_2040.png`); on the page of 2040 a panel each for lithium, aluminium and copper (neodymium not held), in 02's
+  order; copper's mean and 95 % by hand (all parts added up, in its unit); the page's legend the three parts drawn; and
+  a page made by hand ("A 0 is not part of a distribution"): copper held in half of 400 draws, in the bodies only,
+  lithium in none: copper's mean and 95 % over the 200 draws that hold it, "held in 50 % of the draws" written, no
+  panel for lithium, the legend the one part drawn. 46 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults**, each in a scratch copy of 04, each caught by the check meant for it (46 tests, 1 failing): the
+  elements of the year before; the joint sets left out of the total; the zeros in the mean (the total and the parts
+  both over every draw: the mean half the true one); the share held not written; a legend of every part, drawn or not;
+  the median as the line; the 95 % at 5 and 95. A first version of the zeros fault, over every draw in the total only,
+  was caught by a crash, not by a check, and does not count.
+- **Sandbox** on the first 2,000 of his draws of 02: 29 pages (the overview, 22 element pages, the robots-in-use page and
+  its numbers, the four pages of the elements), all within his figure rules, no legend over a line. The page of 2040
+  looked at: 22 panels, each split by part, its mean and 95 %; titanium's draws spread from near 0 to about 200 Mt, most
+  of them pressed into its first bars (05's form has no logarithmic axis); magnesium held in 11 % of the draws.
+- **The whole suite:** 649 tests in 766 s, OK (started before the test of the element held in some draws was added,
+  with the code of 04 as it stands; that test and the rest of 04's and the settings' tests run after it: 52, OK).
+- **Not covered:** his run of 04 at 200,000 draws.
+
+### V220. The article's values at the end of each year; the estimate of 2041 withdrawn (EVIDENCE.md E48)
+
+- **His words:** "Follow the artcile!! 70 x 10E9".
+- **Tests first, seen to fail** (6 failures, 3 errors), then passing: `robots_2041` gone; the targets one path of 64
+  quarters, the end of 2025 10 M, half way through 2025 geometric from 8.62 M, the end of 2026 11.6 M, the end of 2040
+  70 × 10⁹; the start 10 M / 1.16; the cohorts of 1 January 2025 holding 8.62 M; one chunk: the year ends the article's
+  2025 to 2040, the start 8.62 M, a wrong start caught; the run: the robots at the year ends the article's 10 M to 70 ×
+  10⁹ in every draw, the summary's first stock 10 M, the robots-in-use page titled "End of 2025: 10,000,000 robots" to
+  "End of 2040: 70,000,000,000 robots". 45 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught** (5): the values at 1 January again; the start without the
+  growth; the start not checked; the year ends at the third quarter; the types started at the 2025 value.
+- **Sandbox** on the first 2,000 of his draws of 02: 04 ran, the robots in use at the end of 2025 10,000,000 and of 2040
+  70,000,000,000; 69 pages, all within his figure rules, no legend over a line; the robots-in-use page looked at.
+- **The whole suite:** a run on this state finished after the change of V221 had begun and does not count; run on the
+  state of V221.
+- **Not covered:** his run of 04 at 200,000 draws; the article's own dating of its robots (1 January), put to him.
+
+### V219. 04's years exactly as RAWCLICDataCenters' 07; the robots at 1 January 2041 (EVIDENCE.md E48)
+
+- **His words:** "Both have to be exactly the same, as we have to combine both data!!!", "Both have to be on the same x
+  axis scale!!", to the table of the estimate of 1 January 2041 "Yes!!", "Do never ever give me 2039".
+- **Tests first, seen to fail** (9 failures, 7 errors), then passing:
+  - the setting `robots_2041` 158.2 / 163.7 / 166.3 × 10⁹, equal to 70 × 10⁹ × 2.26, × 70^(1/5), × 29.7 / 12.5 (to
+    0.1 %); refused out of order, as a single number, with a min of 0;
+  - the quarters by hand: 64; the first quarter's middle 2025.125, the last quarter's end 2041.0; 65 times of the
+    types' draws; a workbook value read at its 1 January; the settings at 2025.0, 2032.5, 2040.0;
+  - the targets: 2 draws × 64 quarters; the end of 2025 11.6 M (1 January 2026), half way geometric, the end of 2039 70
+    × 10⁹, the end of 2040 each draw's 2041, the quarter before it geometric towards it;
+  - the cohorts and the robots of 1 January 2025 by hand with 64 quarters;
+  - one chunk: the check passes; the article's 1 January 2026 to 2040 at the year ends, the draw's 2041 at the end of
+    2040; a wrong end of 2040 caught ("not the draw's estimate"); the stock of 2025 its end, 11.6 M, start + built −
+    retired = 11.6 M;
+  - the run: every file 16 years (flows 2025 to 2040, stocks the end of 2025 to the end of 2040); the robots at the year
+    ends the article's of 1 January 2026 to 2040 and, at the end of 2040, the run's own draws of 2041 (its random numbers
+    recomputed in their order); the summary's years 2025 to 2040 for stocks and flows alike, its first stock 11.6 M; the
+    robots-in-use page titled "End of 2025: 11,600,000 robots", "End of 2030: 35,700,000 robots", "End of 2035:
+    2,260,000,000 robots" and "End of 2040: … to … robots" (95 % of the run's 2041 draws); type 3 at the end of 2040 by
+    hand; the element pages at the year ends; every page within his figure rules.
+  45 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught** (7): the end of 2040 the 2040 value, without 2041; the
+  stocks at the start of the year; the check without 2041; the workbook's years at 1 July; 2041 drawn before the other
+  random numbers; the title of 2040 one draw's; the summary a year late.
+- **Measured at 200,000 draws** with 04's own random numbers (65 times): the types' bands at the last quarter of 2040
+  ±29.9 to 30.1 % (wanted ±30.0 %); each type's draws within 0.0022 of its triangle; type 3 off its own draws by at most
+  0.109 % of its half-width; the six adding up to 1 to 2.2 × 10⁻¹⁶; correlations at the last quarter of 2040 −0.71 to
+  +0.29; a draw quarter to quarter at least 0.9988; about 34 s.
+- **Sandbox** on the first 2,000 of his draws of 02: 04 ran, the robots in use at the end of 2025 11,600,000, at the
+  end of 2040 162.7 × 10⁹ on average; 69 pages, all within his figure rules, no legend over a line. Looked at: the
+  robots-in-use page (the end of 2040 159.3 to 165.5 × 10⁹, 95 % of the draws) and the overview (2025 to 2040, as 07).
+- **The whole suite:** a run on this state finished after the change of V220 had begun and does not count; run on the
+  state of V220.
+- **Not covered:** his run of 04 at 200,000 draws; the combination with 07 (not built).
+
+### V218. 04 at 1 July; the robots in use of the six types on one page (EVIDENCE.md E47)
+
+- **His words:** "why is the largest part of the triangal cut off? Furthermroe can you not combine the 6 types to 1",
+  "I want to see at the end how many robots there are", "not 39 I want 2040", "SHit it to 1st of July", "Yes".
+- **Tests first, seen to fail** (6 failures, 2 errors: the modes, spread, shares and packs at the workbook's years now
+  at 1 July; the dates; the summary's years; the pages), then passing:
+  - the dates by hand: the model's first day 2025.5, the first quarter's middle 2025.625, the last quarter's end 2040.5,
+    the types' first time 2025.5; a workbook value of 2030 read at 2030.5, half way at 2028.0; a setting of 2025 and
+    2040 at 2025.5, 2033.0, 2040.5; the flow years named '2025/26' and '2039/40';
+  - the modes, spreads, shares and packs by hand as before, at 2025.5, 2033.0 and 2040.5;
+  - the run: the stocks of the summary at 2025 to 2040 (1 July), the flows at 2025/26 to 2039/40; the pages by exact
+    name (the overview, the element pages, `distributions/robots_in_use.png` and its numbers, the element distribution
+    pages and theirs); the combined page's four panels titled "1 July 2025: 10,000,000 robots" to "1 July 2040:
+    70,000,000,000 robots", six rows each, type 1 at the top and type 6 at the bottom, each labelled where its bars stand;
+    type 3 at 1 July 2040 by hand (median, mean, 95 % in its panel's unit); its bars from its smallest to its largest
+    draw, the axis holding every draw of the six; every row named on the page of numbers; the element distribution
+    pages at "1 July 2025" to "1 July 2040"; every page within his figure rules, no legend over a line.
+  44 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught** (9, one after a check was added): the workbook's years at 1
+  January; the settings' years at 1 January; the model from 1 January; the flows named by the calendar year; the page's
+  axis cut at 99.5 %; the page a year early; the title one type's robots instead of all; type 1 at the bottom; the rows'
+  bars cut at 99.5 % (passed at first: only the axis was checked; then the bars of each row checked to reach its smallest
+  and largest draw, caught).
+- **Sandbox** on the first 2,000 of his draws of 02: 04 ran, the robots in use at 1 July 2025 10,000,000 and 2040
+  70,000,000,000; 69 pages (the overview, 22 element pages, 46 distribution pages and their numbers), all within his
+  figure rules, no legend over a line. Looked at: the combined page (four years, six rows each, nothing cut) and the
+  overview (stocks at 1 July, flows in the middle of their year).
+- **The whole suite:** a run on this state finished after the change of V219 had begun and does not count; run on the
+  state of V219.
+- **Not covered:** his run of 04 at 200,000 draws with this code.
+
+### V217. The types' shares page from the results of the run (EVIDENCE.md E46)
+
+- **His words:** "I want to see the triangulas from the MC and not some faque trianguals. You are again Lying to me. You
+  know I want to see results and not this!!!", "Never never again do something like this!!! write a roule",
+  "requirement!!", "I only want to see results or schemas, of the implementation".
+- **Tests first, seen to fail** (the shares page's panel of type 3 in 2039 by hand from `units_in` and `article_in`),
+  then passing: type 3 in 2039 and type 1 in 2025, each type's robots built in the year over all robots built, their
+  median, mean and 95 % by hand; every panel of the page only its four lines (median, mean, 2.5 %, 97.5 %), nothing drawn
+  over the bars; the page of numbers within the page (the unit "% of the robots built in the year" ran beyond it,
+  shortened to "% of the robots built"). 42 tests of 04 and 6 of the settings, OK.
+- **Deliberate faults in scratch copies of 04, each caught:** the robots built of all types of the year before; the next
+  type's robots; the robots in use instead of built; a line drawn over the bars.
+- **The page from his run of 2026-11-08** (200,000 draws, its files read only, the page written into the scratch folder):
+  within his figure rules (page_problems); 2025: type 1 9.83 % (8.78–10.88 %), type 3 42.12 % (37.61–46.62 %); 2039:
+  type 1 5.15 % (3.63–6.66 %), type 3 30.48 % (21.50–39.44 %); the six adding up to 100 % in every draw to 10⁻⁵
+  (float32). Looked at.
+- **The whole suite:** a run started on this state overlapped the edits of V218 and does not count; run on the state
+  of V218.
+- **Not covered:** his run of 04 with this code (it rewrites the page).
+
+### V216. His runs of 00 and 04 read back (04 on his 200,000 draws of 02)
+
+- **His words:** "I am runing 04", then "04 is done".
+- **The times:** `params.xlsx` 09:24:08 (00); 04's draw files opened 09:24:47 to 09:24:48 (after putting the robot
+  types together), written by 09:27:01; `summary.csv` 09:27:23; all 71 pages at 09:27 (the overview, 22 element pages,
+  48 distribution pages and their numbers): each after the last change of the code (`04_stock_and_flow.py` 2026-11-07
+  15:53:11, commit fa790ed 16:36).
+- **The numbers** (`summary.csv`): the robots in use the article's, 10 M (2025) and 70 × 10⁹ (2040), in every draw;
+  each type's share of the robots built in the year, 95 % of the draws: 2025 ±10.7 % of its mean for every type (type
+  1 9.83 %, 8.78–10.88 %; type 3 42.12 %, 37.61–46.62 %), 2039 ±29.4 to 29.5 % (a year's share mixes its four quarters,
+  each within ±10 % to ±30 %, whose modes move within the year: a little wider than one quarter's); 3,036 rows of the
+  elements by part.
+- **The pages looked at:** the overview, the types' shares (every type, type 3 too, on its own triangle), the robots in
+  use by type, neodymium in use (by bodies and joint sets).
+- **Not covered:** the pages not opened (the other element pages and their numbers).
 
 ## 2026-11-07
 

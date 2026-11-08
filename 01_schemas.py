@@ -76,6 +76,9 @@ Into `output.schemas_dir` (`figures/schemas/`), every page 16 × 9 inches with n
   overview_2.png               the six robot types, those whose steps have begun in colour, the others grey; the
                                faults found and what is open.
   notes.png                    how to read these pages, once.
+  taken_apart.png              how a humanoid robot is taken apart: the four groups (joints, battery, electronics,
+                               body) and their parts, each with what it holds; the one list 02 books every element
+                               to and 04 splits and lists the elements in use by (TAKEN_APART).
   faults_<k>.png               every fault found, with where it is, or "No fault found"; what was checked and what
                                the checks cannot tell; as many pages as they need.
   categories/1_<name>_robots_<k>.png
@@ -133,13 +136,15 @@ from src.params_schema import ParameterError, Params, absolute, current  # noqa:
 STAGES = [
     ('00_parameters.py', '00 Settings', '00_parameters.py: every setting, checked'),
     ('01_schemas.py', '01 Checks', '01_schemas.py: every input checked, these pages'),
-    ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} draws, each robot taken apart from its own parts'),
-    ('03_comparison.py', '03 Comparison', '03_comparison.py: the six robot types side by side, from the draws of 02'),
+    ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} draws, each robot from its own parts'),
+    ('03_comparison.py', '03 Comparison', '03_comparison.py: the six robot types side by side'),
     # Since 2026-11-06 (Matthias: "Use the numbers in the article", "Yes, build it", "Yes, replace joints";
     # EVIDENCE.md E42, E43): the robots of ai-2040.com Plan A, their joint sets and battery packs, and the elements in
     # them, each robot one of 02's draws of its type.
-    ('04_stock_and_flow.py', '04 Stock and flow', '04_stock_and_flow.py: the robots of ai-2040.com Plan A and their '
-                                                  'elements, from the draws of 02'),
+    ('04_stock_and_flow.py', '04 Stock and flow', '04_stock_and_flow.py: all robots in use, ai-2040.com'),
+    # Since 2026-11-08 (Matthias: "write 05 combination of results of 04 and 07 with the distributions", "Yes, build
+    # it"; EVIDENCE.md E52): the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together.
+    ('05_combined_stock_and_flow.py', '05 Together', '05_combined_stock_and_flow.py: with the AI data centres'),
 ]
 
 # What check_workbook tests, in plain words, for faults.png and documentation/claude/VERIFICATION.md.
@@ -1552,12 +1557,68 @@ SHELL_SHARE = 'Shell, share of the robot mass'
 # of one, mg; every other driver board the same share of its mass. tools/parts_taken_apart.py writes the same names.
 CAPACITORS = "Ceramic capacitors in a driver board (the G1's small joint's, weighed)"
 CAPACITOR_TITANATE = 'Ceramic capacitor, its barium titanate'
+# The large capacitors at each joint motor and on the capacitor boards (Matthias, 2026-11-08: "There are also quite
+# large capacitors close to each joint motor ... So have them correct!!", "Yes, enter 1 to 8"; EVIDENCE.md E51): their
+# number on a joint's driver board and on a capacitor board (whole numbers 02 draws), the mass of one, and what they are
+# made of by kind, liquid electrolytic or hybrid polymer, each as often, the organic rest (paper, electrolyte, rubber,
+# sleeve) the remainder of the shares. tools/parts_taken_apart.py writes the same names.
+LARGE_CAPACITORS = 'Large capacitors on a joint driver board'
+LARGE_CAPACITOR_G = 'Large capacitor of a joint driver board, its mass'
+BOARD_CAPACITORS = 'Capacitors on a capacitor board'
+BOARD_CAPACITOR_G = 'Capacitor of a capacitor board, its mass'
+LIQUID_CAPACITOR, HYBRID_CAPACITOR = 'Liquid electrolytic capacitor', 'Hybrid polymer capacitor'
+CAPACITOR_KINDS = LIQUID_CAPACITOR + ' or ' + HYBRID_CAPACITOR       # one or the other, each as often (OR)
+CAPACITOR_SHARES = {LIQUID_CAPACITOR: ('aluminium', 'iron', 'copper', 'tin', 'kaolinite'),
+                    HYBRID_CAPACITOR: ('aluminium', 'iron', 'chromium', 'copper', 'tin', 'glass fibre')}
+# A robot's own count of the capacitors on one of its capacitor boards, where its maker's parts list counts them:
+# 'Capacitors on: <board>' (the RP1's motor-capacitor board, 5).
+CAPACITORS_ON = 'Capacitors on: '
+
+
+def capacitor_share(kind: str, what: str) -> str:
+    """The name of the constant of one share of a kind of large capacitor ('Liquid electrolytic capacitor, aluminium
+    share')."""
+    return f'{kind}, {what} share'
+
+
+def is_capacitor_board(name: str) -> bool:
+    """Whether a row of the sheet Boards is a capacitor board, a board that carries large capacitors (the G1's
+    capacitor buffer boards, the RP1's capacitor and motor-capacitor boards): its name holds 'capacitor' and then
+    'board'."""
+    return re.search(r'\bcapacitor\b.*\bboard\b', name.lower()) is not None
+
+
 APART_SHARED_CONSTANTS = ('Board mass per cm2 (boards not weighed)', "Copper share of a board's mass",
                           'Power conductor cross-section (2 conductors)',
                           'Signal conductor cross-section (2 conductors)', 'Copper density',
                           'Insulation and jackets, per mass of copper', 'Sensor housing, aluminium share',
                           'Board rest, glass fibre share', 'Board rest, bromine share', CAPACITORS,
-                          CAPACITOR_TITANATE)
+                          CAPACITOR_TITANATE, LARGE_CAPACITORS, LARGE_CAPACITOR_G, BOARD_CAPACITORS,
+                          BOARD_CAPACITOR_G) + tuple(capacitor_share(kind, what)
+                                                     for kind, whats in CAPACITOR_SHARES.items() for what in whats)
+# The layers of a board by where it sits (Matthias, 2026-11-08, "PCBs have different size and layors etc.", "Yes, enter 1
+# to 8", row 7; EVIDENCE.md E51): a joint's driver board 4 / 4 / 6 (moteus, Ben Katz's and ODrive's 4, TI's humanoid
+# joint drive 6); the computer and power boards 6, the head's and the battery's boards 4, every other, small board 2
+# (the RP1's 14 boards, its maker's files). Min, mode, max.
+BOARD_LAYERS = {'driver': (4, 4, 6), 'boards': (6, 6, 6), 'head': (4, 4, 4), 'battery': (4, 4, 4), 'small': (2, 2, 2)}
+# The copper of a whole layer, mg per cm2, at copper's 8.96 g/cm3 (row 8; E51): an outer layer of 1 oz, finished about
+# 41 µm (JLCPCB), 36.7; an inner one of 0.5 to 1 oz, finished 15 to 30 µm, 13.4 to 26.9.
+OUTER_LAYER_MG, INNER_LAYER_MG = 36.7, (13.4, 26.9)
+
+
+def board_layers(kind: str) -> tuple:
+    """The layers of a board (min, mode, max) by the kind of part it sits in (BOARD_LAYERS): a board in a joint (a
+    driver board) as a driver's, in the computer's kind Boards and computers a computer's or power board's, in the head
+    or the battery theirs, every other a small board's."""
+    if KIND_GROUP.get(kind) == GROUP_JOINTS:
+        return BOARD_LAYERS['driver']
+    return BOARD_LAYERS.get(kind, BOARD_LAYERS['small'])
+
+
+def layers_copper_mg(layers: int) -> float:
+    """The most copper a board of `layers` layers can hold, mg per cm2: every layer whole, its two outer layers of 1 oz,
+    its inner ones of 1 oz (row 8: the check of a board's copper, measured as a share of its mass, against its layers)."""
+    return 2 * OUTER_LAYER_MG + max(layers - 2, 0) * INNER_LAYER_MG[1]
 # The rest of a board beyond its metals (2026-10-29, "Yes, enter them", point 3b; EVIDENCE.md E5.21): glass fibre and
 # bromine each a share of it, epoxy their remainder, the glass and the epoxy by these recipes of the element recipes.
 BOARD_GLASS, BOARD_BROMINE = 'Board rest, glass fibre share', 'Board rest, bromine share'
@@ -2158,10 +2219,21 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
         if quantity not in shared:
             faults.append(Fault(on, 0, f"'{quantity}' is missing (for {ALL_ROBOTS}); the stage that draws the file "
                                        'needs it.'))
-    # The capacitors of a driver board are counted: whole numbers from 1 up, drawn whole by 02 (E38 point 4).
-    if CAPACITORS in shared and any(v is None or v < 1 or v != int(v) for v in shared[CAPACITORS][1]):
-        faults.append(Fault(on, shared[CAPACITORS][0], f"'{CAPACITORS}': its min, mode and max must be whole numbers "
-                                                       f'from 1 up, not {shared[CAPACITORS][1]}.'))
+    # The capacitors of a driver board are counted: whole numbers from 1 up, drawn whole by 02 (E38 point 4); the large
+    # capacitors of a joint's driver board from 0 up (a driver with ceramic capacitors only), those of a capacitor board
+    # from 1 up (E51).
+    for quantity, least in ((CAPACITORS, 1), (LARGE_CAPACITORS, 0), (BOARD_CAPACITORS, 1)):
+        if quantity in shared and any(v is None or v < least or v != int(v) for v in shared[quantity][1]):
+            faults.append(Fault(on, shared[quantity][0], f"'{quantity}': its min, mode and max must be whole numbers "
+                                                         f'from {least} up, not {shared[quantity][1]}.'))
+    # The shares of a kind of large capacitor leave its organic rest above zero at their maxima (E51): no normalising.
+    for kind, whats in CAPACITOR_SHARES.items():
+        names = [capacitor_share(kind, what) for what in whats]
+        if all(n in shared for n in names):
+            highest = sum(shared[n][1][2] or 0 for n in names)
+            if highest >= 1:
+                faults.append(Fault(on, shared[names[0]][0], f"the shares of a '{kind}' reach {highest:g} at their "
+                                                             'maxima: nothing is left for its organic rest.'))
     if BOARD_GLASS in shared and BOARD_BROMINE in shared:   # the epoxy, their remainder, above zero in every draw
         highest = (shared[BOARD_GLASS][1][2] or 0) + (shared[BOARD_BROMINE][1][2] or 0)
         if highest >= 1:
@@ -2219,12 +2291,23 @@ def check_parts_taken_apart(apart: PartsTakenApart, lists: SharedLists, params: 
             faults.append(Fault(where + 'Joints', 0, f'{robot}: it has a lift motor, but no lift column in the sheet '
                                                      'Parts.'))
         faults += hydraulic_faults(apart, robot, where)
+    faults += taken_apart_faults(apart, where)
     for robot, given in apart.constants.items():
         for quantity, (row, values, _, label, _) in given.items():
             faults += label_faults(on, row, f'{robot}, {quantity}', label)
             # A sensor's drawn number is cut at one, a stated limit: its row says the robot holds it (E38 point 2).
             faults += bounds_faults(on, row, f'{robot}, {quantity}', values, label == 'E',
                                     floor=1.0 if quantity.startswith(NUMBER_OF) else None)
+            # The capacitors its maker counts on one of its capacitor boards (E51): of a capacitor board of the
+            # robot, whole numbers from 1 up.
+            if quantity.startswith(CAPACITORS_ON):
+                board = quantity[len(CAPACITORS_ON):]
+                if not any(b.robot == robot and b.name == board and is_capacitor_board(b.name) for b in apart.boards):
+                    faults.append(Fault(on, row, f"{robot}, '{quantity}': no capacitor board '{board}' of the robot in "
+                                                 'the sheet Boards.'))
+                if any(v is None or v < 1 or v != int(v) for v in values):
+                    faults.append(Fault(on, row, f"{robot}, '{quantity}': its min, mode and max must be whole numbers "
+                                                 f'from 1 up, not {values}.'))
             # A sensor's drawn number (E31 point 3): of a sensor of the robot, whole numbers from 1 up, never 0 (a
             # robot with cameras holds one at least).
             if quantity.startswith(NUMBER_OF):
@@ -3454,7 +3537,10 @@ PART_KIND = {'Hips': 'hips', 'Knees': 'knees', 'Waist': 'waist', 'Arms': 'arms',
              'Boards': 'boards', 'Head': 'head', 'Cables': 'cables', 'Frame and shell': 'frame',
              'Wheeled base': 'base', 'Lift column': 'lift',
              # A hydraulic actuator in the row of its place, the ankles' too (EVIDENCE.md E27.7 point 9.7).
-             'Ankles': 'ankles', 'Hydraulics': 'hydraulics'}
+             'Ankles': 'ankles', 'Hydraulics': 'hydraulics',
+             # A hydraulic robot's head actuators, their valves, boards and sensors: joints that move the head
+             # (Matthias, 2026-11-08: "I told you head is again a joint which moves the head etc.").
+             'Head joints': 'headjoints'}
 # What each kind holds, in plain words, for 01's page of robot type 1.
 KIND_HOLDS = {
     'hips': 'each joint a motor (copper winding, electrical steel, magnets), gears, bearings, a housing, a driver '
@@ -3481,6 +3567,207 @@ JOINT_KIND = {'hip': 'hips', 'knee': 'knees', 'ankle': 'ankles', 'waist': 'waist
               'elbow': 'arms', 'wrist': 'arms', 'gripper': 'arms', 'hand': 'arms', 'head': 'headjoints',
               'neck': 'headjoints',
               'wheel': 'base', 'steering': 'base', 'lift': 'lift'}
+
+# ------------------------------------------------------------------------------------------------------
+# How a robot is taken apart
+# ------------------------------------------------------------------------------------------------------
+# Matthias, 2026-11-08: "I want a detailed list of the component, so it is easy to understand and establish a
+# recycling to know how to take it apart!!!", the groups in his words ("jointes with also wheel, hydrowlic", "just
+# battery", "electroncs with PCB, wires and sensors", "the body, which includes screws"; "Sensor are electronics and not
+# body", "Fans are parts of the electronic", "head is again a joint which moves the head"), "Also the joints the can be
+# split up in smaller parts. I waht schemas for this. So that you have documented this once for all!!", "Yes do it".
+# Four groups, each with its parts, in the order every page shows them: (the part, what it holds in plain words). This
+# is the one list: 02 books every element of every robot to one of these parts (taken_part), 04 splits the elements in
+# use by the groups and lists them by part, and 01 draws them (taken_apart_page).
+GROUP_JOINTS, GROUP_BATTERY, GROUP_ELECTRONICS, GROUP_BODY = 'Joints', 'Battery', 'Electronics', 'Body'
+TAKEN_APART = {
+    GROUP_JOINTS: ('every joint, with the wheels, lift column and hydraulics', [
+        ('Magnets', 'NdFeB magnets of all motors and hydraulic pumps'),
+        ('Motor windings and steel', 'rest of the motors: windings, steel, magnet carriers'),
+        ('Gears and bearings', 'gear stages, their carriers, bearings inside the joints'),
+        ('Housings and other parts', 'housings, end caps, flanges; wheels, casters, lift, hands'),
+        ('Hydraulics', 'actuators, valves, power unit, manifold, oil, hoses')]),
+    GROUP_BATTERY: ('the battery pack', [
+        ('Cells', 'the battery cells, NMC or LFP'),
+        ('Housing, busbars and wires', "the pack's housing, nickel strips, busbars, wires")]),
+    GROUP_ELECTRONICS: ('every board, wire and sensor, wherever it sits', [
+        ('PCB', 'the computer and power boards, all fans and heat sinks'),
+        ('Small PCB', 'joint drivers and their capacitors, head, battery, leg boards'),
+        ('Wires', 'cables (copper, insulation) and connectors'),
+        ('Sensors', 'cameras, LiDARs, encoders, all sensors; screens, modems')]),
+    GROUP_BODY: ('what holds the robot together and covers it', [
+        ('Frame', 'the frame: aluminium, steel, titanium, magnesium'),
+        ('Shell', 'shell and covers, rubber feet, dampers, cover magnets'),
+        ('Screws, pins and bearings', 'screws, pins, bearings outside the joints, inserts')]),
+}
+# Every part in the order of the page, and the group of each.
+TAKEN_PARTS = [part for _, parts in TAKEN_APART.values() for part, _ in parts]
+TAKEN_GROUP = {part: group for group, (_, parts) in TAKEN_APART.items() for part, _ in parts}
+# The colour of each group on every page (Paul Tol's "bright" scheme, as published): the joints blue, the battery
+# purple, the electronics green, the body yellow.
+GROUP_COLOURS = {GROUP_JOINTS: '#4477AA', GROUP_BATTERY: '#AA3377', GROUP_ELECTRONICS: '#228833', GROUP_BODY: '#CCBB44'}
+# The group of each kind of part (KINDS): the joints with the wheeled base, the lift column and the hydraulics; the
+# battery; the boards, the head (its cameras, LiDARs, microphones, speakers and board) and the cables in the
+# electronics; the frame and shell the body. What a kind holds of another group goes there by its part (taken_part):
+# a joint's driver board and encoders to the electronics, a sensor's housing to the sensors.
+KIND_GROUP = {'hips': GROUP_JOINTS, 'knees': GROUP_JOINTS, 'ankles': GROUP_JOINTS, 'waist': GROUP_JOINTS, 'arms': GROUP_JOINTS, 'headjoints': GROUP_JOINTS,
+              'base': GROUP_JOINTS, 'lift': GROUP_JOINTS, 'hydraulics': GROUP_JOINTS, 'battery': GROUP_BATTERY, 'boards': GROUP_ELECTRONICS,
+              'head': GROUP_ELECTRONICS, 'cables': GROUP_ELECTRONICS, 'frame': GROUP_BODY}
+# The components of the electronics 02 books (its ELECTRONICS_COMPONENTS, E32), each with its part: a circuit board a
+# PCB in the kind Boards and computers (the computer and power boards), a small PCB anywhere else.
+COMPONENT_PART = {'circuit boards': None, 'cameras': 'Sensors', 'other sensors': 'Sensors', 'cables': 'Wires',
+                  'connectors': 'Wires',
+                  # The large capacitors (E51): on the small PCB they sit on, a joint's driver board or a capacitor board.
+                  'capacitors': 'Small PCB'}
+TAKEN_MAGNETS, TAKEN_CELLS = 'NdFeB magnets', 'Battery cells'   # the materials that are a part of their own
+# What the kind of part alone does not say, by the name of the row (of the sheets Parts and JointParts): its words
+# before a comma, a colon or a bracket, in lower case, matched whole against each pattern of its kind's group in turn.
+# A row that matches none is a fault (01's check of the parts files) and stops 02: every row is placed on purpose.
+TAKEN_BY_NAME = {
+    GROUP_JOINTS: [(r'(digital )?hydraulic .*|servo valves|actuator bodies', 'Hydraulics'),
+             (r'.* fan', 'PCB'),
+             (r'motor stator|motor rotor|magnet carrier', 'Motor windings and steel'),
+             (r'gear stage \d|two small bearings', 'Gears and bearings'),
+             (r'housing|two end caps|output flange|other|knee vapour chamber and copper strip|end pieces of the arms|'
+              r'fixed plastic hands|casters|lift column', 'Housings and other parts')],
+    GROUP_BATTERY: [(r'(auxiliary )?battery cells', 'Cells'), (r'battery housing', 'Housing, busbars and wires')],
+    GROUP_ELECTRONICS: [(r'.* fan|.* heat sink', 'PCB')],
+    GROUP_BODY: [(r'frame|frame and shell|lower-leg links|titanium|titanium alloy parts|stainless 17-4ph shafts and crosses',
+            'Frame'),
+           (r'shell|shell and torso plastic parts|rubber feet and handle|sensor shield|magnets in the covers|'
+            r'silicone dampers', 'Shell'),
+           (r'screws|pins|pins and screws|bearings outside the actuators|brass parts|brass threaded inserts',
+            'Screws, pins and bearings')],
+}
+
+
+def row_words(item: str) -> str:
+    """The words of a row's name that place it (TAKEN_BY_NAME): before a comma, a colon or a bracket, in lower case."""
+    return re.split(r'[,(:]', item, maxsplit=1)[0].strip().lower()
+
+
+def taken_part(kind: str, item: str = '', material: str = '', component: str = '', sensor: bool = False) -> str:
+    """The part of TAKEN_APART that kilograms of a robot belong to: `kind` its kind of part (KINDS), `item` the name of
+    its row (Parts, JointParts), `material` what it is made of, `component` the component of the electronics 02 books it
+    in (COMPONENT_PART), `sensor` true for a sensor's housing. A sensor, a board, a cable or a connector goes to the
+    electronics wherever it sits; NdFeB magnets in the joints to the magnets, battery cells to the cells; every other row
+    by its name (TAKEN_BY_NAME). Raises ValueError where the kind or the row has no part, so that nothing is placed by
+    chance."""
+    if kind not in KIND_GROUP:
+        raise ValueError(f"the kind of part '{kind}' is in no group of how a robot is taken apart.")
+    if sensor:
+        return 'Sensors'
+    if component:
+        if component not in COMPONENT_PART:
+            raise ValueError(f"the component of the electronics '{component}' has no part of how a robot is taken "
+                             'apart.')
+        return COMPONENT_PART[component] or ('PCB' if kind == 'boards' else 'Small PCB')
+    group = KIND_GROUP[kind]
+    if group == GROUP_JOINTS and material == TAKEN_MAGNETS:
+        return 'Magnets'
+    if group == GROUP_BATTERY and material == TAKEN_CELLS:
+        return 'Cells'
+    words = row_words(item)
+    for pattern, part in TAKEN_BY_NAME[group]:
+        if re.fullmatch(pattern, words):
+            return part
+    raise ValueError(f"'{item}' ({KINDS[kind][0]}): no part of how a robot is taken apart matches its name.")
+
+
+# The start of what the battery pack row is computed from: the pack as a whole, its cells and its management board,
+# which 02 books part by part (its cells, its housing, its board), never as itself.
+PACK_WHOLE = 'its cells, its management board'
+# The starts of what a part drawn with the joints is computed from (the joint modules: drawn as their joints), and of a
+# part that is its sensors' elements only (the encoders): neither booked as itself by 02's parts (one copy: 02 reads
+# them here).
+FROM_JOINTS = ('the sum of JointParts', "the Joints' module masses", "the Joints' shares")
+FROM_SENSORS = 'Sensors and SensorElements'
+
+
+def taken_apart_faults(apart, where: str) -> list:
+    """Every row of a parts file that 02 books, placed in a part of TAKEN_APART (taken_part), as 02 places it: each part
+    of the sheet Parts by its kind, name and material (a part of the cables a wire), each component of the sheet
+    JointParts (its driver board a small PCB) by its name and material in the joints, the kind of every board and sensor
+    in a group. A row placed nowhere is a fault: 02 would stop at it. The rows not booked as themselves are left out: a
+    part inside the joints or computed from them (drawn as their joints, FROM_JOINTS), the encoders (their elements
+    only, FROM_SENSORS), the battery pack as a whole, a hydraulic actuator as weighed (booked as its valves, boards,
+    sensors and body)."""
+    faults = []
+
+    def placed(sheet, row, what, **how):
+        try:
+            taken_part(**how)
+        except ValueError as error:
+            faults.append(Fault(where + sheet, row, f'{what}: {error}'))
+
+    for p in apart.parts:
+        kind = PART_KIND.get(p.kind)
+        if kind is None or p.computed.startswith(FROM_JOINTS + (FROM_SENSORS, PACK_WHOLE, ACTUATORS_WHOLE)):
+            continue
+        placed('Parts', p.row, f'{p.robot}, {p.name}', kind=kind, item=p.name, material=p.material,
+               component='cables' if kind == 'cables' else '')
+    for c in apart.joint_parts:
+        if c.name != 'Driver board':
+            placed('JointParts', c.row, c.name, kind='hips', item=c.name, material=c.material)
+    for sheet, rows in (('Boards', apart.boards), ('Sensors', apart.sensors)):
+        for b in rows:
+            kind = PART_KIND.get(b.kind)
+            if kind is not None and kind not in KIND_GROUP:
+                faults.append(Fault(where + sheet, b.row, f"{b.robot}, {b.name}: the kind of part '{b.kind}' is in no "
+                                                          'group of how a robot is taken apart.'))
+    return faults
+
+
+def taken_apart_page():
+    """The schema of how a humanoid robot is taken apart (Matthias, 2026-11-08: "I waht schemas for this. So that you
+    have documented this once for all!!"): the four groups of TAKEN_APART side by side, each in its colour with what it
+    is, and below it a box for each of its parts with what the part holds. Drawn from TAKEN_APART alone, so that the
+    page is the list 02 and 04 use."""
+    figure, axes = screen_page()
+    renderer = figure.canvas.get_renderer()
+    axes.text(0.4, 0.35, 'How a humanoid robot is taken apart: four groups and their parts', fontsize=SCREEN_HEADING,
+              fontweight='bold', va='top')
+    left, gap, pad = 0.4, 0.3, 0.12
+    width = (SCREEN_PAGE[0] - 2 * left - 3 * gap) / 4
+    to_inches = axes.transData.inverted()
+
+    def fitted(x: float, y: float, text: str, room: float, size: float, colour: str, weight: str) -> float:
+        # `text` at (x, y), its top left, wrapped so that it is no wider than `room` inches as drawn (measured, a line
+        # shorter each try); returns the y of its foot, measured.
+        chars = max(10, int(room * SCREEN_CHARS * SCREEN_TEXT / size))
+        while True:
+            drawn = axes.text(x, y, '\n'.join(textwrap.wrap(text, chars)), fontsize=size, color=colour,
+                              fontweight=weight, va='top', ha='left', linespacing=1.3)
+            box = drawn.get_window_extent(renderer)
+            right, foot = to_inches.transform((box.x1, box.y0))
+            if right <= x + room or chars <= 10:
+                return foot
+            drawn.remove()
+            chars -= 1
+
+    bottoms = []
+    for k, (group, (what, parts)) in enumerate(TAKEN_APART.items()):
+        x, y = left + k * (width + gap), 0.85
+        colour = GROUP_COLOURS[group]
+        ink = SCREEN_INK if group == GROUP_BODY else 'white'     # dark words on the light yellow, white on the others
+        below = fitted(x + pad, y + 0.1, group, width - 2 * pad, SCREEN_TITLE, ink, 'bold')
+        foot = fitted(x + pad, below + 0.06, what, width - 2 * pad, SCREEN_TEXT, ink, 'normal')
+        axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8,
+                                 zorder=0))
+        y = foot + 0.22
+        for part, holds in parts:
+            below = fitted(x + pad + 0.06, y + 0.08, part, width - 2 * pad - 0.06, SCREEN_TITLE, SCREEN_INK, 'bold')
+            foot = fitted(x + pad + 0.06, below + 0.05, holds, width - 2 * pad - 0.06, SCREEN_TEXT, SCREEN_INK,
+                          'normal')
+            axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor='#FFFFFF', edgecolor=SCREEN_INK,
+                                     linewidth=0.8, zorder=0))
+            axes.add_patch(Rectangle((x, y), 0.08, foot + 0.1 - y, facecolor=colour, edgecolor='none', zorder=0))
+            y = foot + 0.18
+        bottoms.append(y)
+    screen_text(axes, 0.4, max(bottoms) + 0.05, 'Every element of every robot is counted in one of these parts, '
+                'wherever the part sits; the stock and flow splits the elements in use by the four groups and lists '
+                'them part by part.', SCREEN_PAGE[0] - 0.8)
+    return figure
 # The NdFeB grade classes for 150 °C and above (RAWCLICVehicleTractionMotor's sheet PermanentMagnetNdFeB): a joint
 # whose heat group draws one of them in most draws is ringed red on the robot.
 HOT_CLASSES = {'SH', 'UH', 'EH', 'AH'}
@@ -4010,33 +4297,36 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
         ('The robot types part by part', "each robot type's robots with a mass, each from its own parts; from the "
                                          "makers' sources, a builder per type", 'his'),
         ('The element recipes', 'what each material is made of, element by element', 'his'),
-        ('The sibling projects', 'car boards and sensors, data-centre tantalum, traction-motor magnets and steels; '
-                                 "the world's production and reserves", 'sibling'),
+        ('The sibling projects', 'car boards and sensors, motor magnets and steels, the AI data centres; world '
+                                 'production and reserves', 'sibling'),
     ]
     stages = [(title, words.format(draws=f'{params.composition.draws:,}')) for _, title, words in STAGES]
     # What each stage writes, by the stage that writes it (its place in STAGES): 02 the draws and its pages, 03 its,
     # 04 its draws and pages.
     outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw', 2),
-               ('The pages of the robot types taken apart', 'their elements and materials in one robot; where '
-                                                            'their critical elements and each material sit', 2),
+               ('The pages of each robot type', 'its elements and materials, and where each sits', 2),
                ('The comparison pages', 'the six robot types side by side, one item a page', 3),
-               ('The robots and their elements in the world', 'in use, built and out, 2025 to 2040, beside the '
-                                                              "world's production and reserves", 4)]
+               ('The robots and their elements in the world', 'in use, built and out, 2025 to 2040', 4),
+               # 05 (2026-11-08, E52): the AI data centres and the humanoid robots together.
+               ('The data centres and the robots', 'their elements together, with their distributions', 5)]
     left, middle, right, width = 0.4, 6.3, 11.2, 5.1
     tops = [1.1 + k * 1.42 for k in range(len(inputs))]
-    stage_tops = [1.1 + k * 1.42 for k in range(len(stages))]   # five stages beside the five inputs
+    # The stages, six since 05 (2026-11-08), as many as fit between the title and the legend, each box two lines.
+    step = min(1.42, (8.3 - 1.1) / len(stages))
+    stage_tops = [1.1 + k * step for k in range(len(stages))]
     for k, ((title, text, colour), y) in enumerate(zip(inputs, tops)):
         screen_box(axes, left, y, width, title, text, TOL_LIGHT[colour], 1.3)
         # Each read by 01, then by 02: its arrow into 01's box.
         screen_arrow(axes, (left + width, y + 0.65), (middle, stage_tops[1] + 0.15 + k * 0.28))
     for k, ((title, text), y) in enumerate(zip(stages, stage_tops)):
-        screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], 1.32)   # three lines of text
+        screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], step - 0.1)   # its title and two lines
         if k:
             screen_arrow(axes, (middle + 2.0, y - 0.1), (middle + 2.0, y))
+    output_step = (8.3 - 1.1) / len(outputs)
     for k, (title, text, stage) in enumerate(outputs):
-        y = 1.1 + k * 1.75
-        screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT['output'], 1.55)
-        screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.6), (right, y + 0.78))
+        y = 1.1 + k * output_step
+        screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT['output'], output_step - 0.15)
+        screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.5), (right, y + (output_step - 0.15) / 2))
     legend = [('his', 'Matthias\'s inputs'), ('sibling', 'the sibling projects\' data'), ('stage', 'the stages, run '
               'by pressing Run'), ('output', 'what they write')]
     x = 0.4
@@ -4607,7 +4897,10 @@ def main() -> int:
     with_pages = params.output.robot_types_with_pages
     pages = [('overview_1.png', overview_flow(register, drawn, params)),
              ('overview_2.png', overview_types(book, faults, reports, drawn, params, counted, listed, outliers)),
-             ('notes.png', notes_page(params))]
+             ('notes.png', notes_page(params)),
+             # How a robot is taken apart, the four groups and their parts (Matthias, 2026-11-08, "I waht schemas for
+             # this. So that you have documented this once for all!!", "Yes do it").
+             ('taken_apart.png', taken_apart_page())]
     pages += [(f'faults_{k}.png', figure) for k, figure in enumerate(fault_pages(faults), 1)]
     former = former_page_types(with_pages, views)
     for category in book.categories:

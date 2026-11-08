@@ -2461,3 +2461,84 @@ class TestE38SensorsAndCapacitors(unittest.TestCase):
         self.assertTrue(faults(either=(0.5, 1.0)))                 # not whole numbers
         self.assertTrue(faults(either=(0.0, 0.0)))                 # never held
         self.assertTrue(faults(either=(1.0,)))                     # one number is no 'A or B'
+
+
+class TestEveryRowTakenApart(unittest.TestCase):
+    """Matthias, 2026-11-08 ("I want a detailed list of the component", "Yes do it"): every row of all six types' files
+    that 02 books placed in a part of how a robot is taken apart (01's taken_apart_faults, as 02 places it); a row placed
+    nowhere a fault; a hydraulic robot's head actuators, their valves, boards and sensors in the head joints ("I told you
+    head is again a joint which moves the head etc.")."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.files = {n: written(b)[0] for n, b in ((1, builder), (2, builder_two), (3, builder_three),
+                                                   (4, builder_four), (5, builder_five), (6, builder_six))}
+
+    def test_every_row_is_placed(self):
+        for n, apart in self.files.items():
+            self.assertEqual([f.text for f in schemas.taken_apart_faults(apart, '')], [], msg=n)
+
+    def test_a_row_placed_nowhere_is_a_fault(self):
+        apart = self.files[1]
+        screws = next(p for p in apart.parts if p.kind == 'Frame and shell' and p.name.startswith('Screws'))
+        wrong = dataclasses.replace(apart, parts=apart.parts + [dataclasses.replace(screws, name='Gold-plated widget',
+                                                                                    row=999)])
+        faults = schemas.taken_apart_faults(wrong, 'x: ')
+        self.assertEqual([(f.row, 'Gold-plated widget' in f.text) for f in faults], [(999, True)])
+
+    def test_the_head_actuators_are_head_joints(self):
+        for n in (3, 5):
+            rows = [r for r in self.files[n].parts + self.files[n].boards + self.files[n].sensors
+                    if r.name.endswith(', head')]
+            moving = [r for r in rows if re.search(r'actuator|valves', r.name, re.I)]
+            self.assertTrue(moving, msg=n)
+            self.assertEqual({r.kind for r in moving}, {'Head joints'}, msg=n)
+            self.assertEqual({r.kind for r in rows if r not in moving} - {'Head'}, set(), msg=n)
+
+
+class TestLargeCapacitorRows(unittest.TestCase):
+    """EVIDENCE.md E51 ("Yes, enter 1 to 8"): the builders' rows of the large capacitors and the capacitor boards, and
+    01's checks of them, each with a deliberate fault."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.one = written(builder)[0]
+
+    def test_the_rows_as_agreed(self):
+        shared = self.one.constants[schemas.ALL_ROBOTS]
+        self.assertEqual(shared[schemas.LARGE_CAPACITORS][1], (0, 2, 4))
+        self.assertEqual(shared[schemas.LARGE_CAPACITOR_G][1], (0.68, 1.5, 2.6))
+        self.assertEqual(shared[schemas.BOARD_CAPACITORS][1], (2, 5, 8))
+        self.assertEqual(shared[schemas.BOARD_CAPACITOR_G][1], (2.6, 5.3, 8.0))
+        boards = {(b.robot, b.name): b for b in self.one.boards if schemas.is_capacitor_board(b.name)}
+        self.assertEqual(sorted(boards), [('RoboParty RP1', 'Capacitor board RBE-PWR-CAP'),
+                                          ('RoboParty RP1', 'Motor capacitor board RBE-PWR-MCAP'),
+                                          ('Unitree G1', 'Capacitor buffer board'),
+                                          ('Unitree G1+', 'Capacitor buffer board')])
+        self.assertEqual({b.bounds for b in boards.values()}, {(10, 20, 30)})
+        self.assertFalse([b for b in self.one.boards if b.name.startswith('Leg board')])
+        self.assertEqual(self.one.constants['RoboParty RP1'][schemas.CAPACITORS_ON
+                                                             + 'Motor capacitor board RBE-PWR-MCAP'][1], (5, 5, 5))
+
+    def test_a_wrong_count_or_board_is_a_fault(self):
+        params = Params()
+        lists = schemas.read_shared_lists(absolute(params.data.shared_lists))
+        one = self.one
+        rp1 = dict(one.constants['RoboParty RP1'])
+        row, values, unit, label, source = rp1[schemas.CAPACITORS_ON + 'Motor capacitor board RBE-PWR-MCAP']
+        rp1[schemas.CAPACITORS_ON + 'Wing board'] = (row, values, unit, label, source)
+        wrong = dataclasses.replace(one, constants={**one.constants, 'RoboParty RP1': rp1})
+        texts = [f.text for f in schemas.check_parts_taken_apart(wrong, lists, params)]
+        self.assertEqual([t for t in texts if 'Wing board' in t],
+                         ["RoboParty RP1, 'Capacitors on: Wing board': no capacitor board 'Wing board' of the robot in "
+                          'the sheet Boards.'])
+        shared = dict(one.constants[schemas.ALL_ROBOTS])
+        row, _, unit, label, source = shared[schemas.BOARD_CAPACITORS]
+        shared[schemas.BOARD_CAPACITORS] = (row, (0, 5, 8), unit, label, source)
+        name = schemas.capacitor_share(schemas.LIQUID_CAPACITOR, 'aluminium')
+        row, _, unit, label, source = shared[name]
+        shared[name] = (row, (0.46, 0.5, 0.95), unit, label, source)
+        wrong = dataclasses.replace(one, constants={**one.constants, schemas.ALL_ROBOTS: shared})
+        texts = [f.text for f in schemas.check_parts_taken_apart(wrong, lists, params)]
+        self.assertTrue(any(schemas.BOARD_CAPACITORS in t and 'from 1 up' in t for t in texts), texts)
+        self.assertTrue(any('nothing is left for its organic rest' in t for t in texts), texts)
