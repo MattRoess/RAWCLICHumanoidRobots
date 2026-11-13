@@ -177,6 +177,18 @@ draws that hold it, and the share of the draws that hold it).
 The draws keep their zeros (a robot without a part holds 0 kg in it), since sums are made on raw draws; only the
 statistics, the tables and the pages leave them out.
 
+MEMORY (Matthias, 2026-11-13, after his run of 02 held 43 GB on his 16 GB computer, swapped for 48 minutes and wrote
+nothing: "This is very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte
+Carlo", "It must adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4).
+Before any type is drawn, a trial of MEMORY_TRIAL draws of each robot type taken apart gives the memory it will need
+at `composition.draws` (memory_needed); a type that would need more than MEMORY_SHARE of the computer's memory stops
+the run there, nothing drawn. One robot type is held at a time: drawn, checked, its tables part by part and its
+figures written, and its draws part by part let go before the next. Each robot's parts and joints' structures are held
+over its own draws only (PartBlocks), so the memory grows with the draws and the materials and elements, not with the
+number of robots; parts.npy is written robot by robot straight into the file. Everything goes into staging folders
+('<output folder>.writing') and is moved into the output folders only when every type has added up: a run stopped by a
+fault writes nothing. The outputs are byte for byte those of the code before (VERIFICATION V236).
+
 Every robot type has the same columns of elements, all the elements of interest any of them holds (0 where a robot
 type's materials hold none so far). Pages only of the robot types `output.robot_types_with_pages` names (Matthias, 2026-10-29: "Type 1
 only"; types 1 and 2 since 2026-10-30, types 1 to 4 since 2026-10-30, E11.7 open point B); the draws of all six are
@@ -216,14 +228,18 @@ from __future__ import annotations
 import csv
 import importlib.util
 import math
+import gc
 import os
+import resource
+import shutil
+import weakref
 import re
 import subprocess
 import sys
 import tempfile
 import textwrap
 import time
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, fields, replace
 from types import SimpleNamespace
 
 # Run from anywhere, and put the project root on the path, so that `src` imports. Must come before any import of src.
@@ -425,6 +441,9 @@ class RecipeDraws:
 
     def __init__(self, recipes, rng: np.random.Generator, n: int):
         self.recipes, self.rng, self.n = recipes, rng, n
+        # The draws kept (Shared.keep): None for all N; `size` their number. What is drawn later is drawn over all N
+        # draws and then kept (kept), so that the random numbers are those drawn when every set held all N.
+        self.rows, self.size = None, n
         self.members: dict = {}   # (recipe, the item they sit within, '' for the recipe itself) -> its items
         for i in recipes.items:
             self.members.setdefault((i.recipe, i.within), []).append(i)
@@ -432,6 +451,11 @@ class RecipeDraws:
         self.states: dict = {}    # (recipe, group) -> the alternative drawn in every draw, as its place in the group
         self.done: dict = {}      # recipe -> its element shares and those as metal, for a recipe drawn without a
         #                           cell's energy
+
+    def kept(self, values: np.ndarray) -> np.ndarray:
+        """A draw over all N draws, as drawn (the same random numbers), kept over the draws this set keeps (`rows`,
+        Shared.keep): all of them where it keeps all."""
+        return values if self.rows is None else values[self.rows]
 
     def share(self, item, f: np.ndarray | None) -> np.ndarray:
         """One item's share of what it sits within, in every draw: its mode × f where it follows the energy, else a
@@ -442,7 +466,7 @@ class RecipeDraws:
             return item.share[1] * f
         key = (item.recipe, item.item)
         if key not in self.shares:
-            self.shares[key] = triangle(self.rng, *item.share, self.n)
+            self.shares[key] = self.kept(triangle(self.rng, *item.share, self.n))
         return self.shares[key]
 
     def elements(self, recipe: str, f: np.ndarray | None = None) -> dict:
@@ -459,7 +483,7 @@ class RecipeDraws:
             return self.done[recipe]
         out: dict = {}
         metal: dict = {}
-        self.add(recipe, '', np.ones(self.n), f, out, metal, False)
+        self.add(recipe, '', np.ones(self.size), f, out, metal, False)
         if f is None:
             self.done[recipe] = (out, metal)
         return out, metal
@@ -472,11 +496,12 @@ class RecipeDraws:
             # Alternatives: one is drawn in each draw, by its probability; it takes the group's whole weight.
             key = (recipe, within)
             if key not in self.states:
-                self.states[key] = self.rng.choice(len(items), size=self.n, p=[i.probability for i in items])
+                self.states[key] = self.kept(self.rng.choice(len(items), size=self.n,
+                                                             p=[i.probability for i in items]))
             return [(i, (self.states[key] == k).astype(float)) for k, i in enumerate(items)]
         # Shares: each drawn, the remainder 1 minus the others, never below zero (01 checks the largest shares).
         parts = [(i, self.share(i, f)) for i in items if not i.remainder]
-        rest = 1 - sum(share for _, share in parts) if parts else np.ones(self.n)
+        rest = 1 - sum(share for _, share in parts) if parts else np.ones(self.size)
         if rest.min() < -SUM_TOLERANCE:
             raise ValueError(f"{recipe}, within '{within or 'the recipe itself'}': the remainder falls below zero "
                              f'in {(rest < -SUM_TOLERANCE).sum()} draws.')
@@ -488,7 +513,7 @@ class RecipeDraws:
         die-cast alloy and its wrought 6061 and 7075; the gear stage 2's steel: its 20CrMnTi and GCr15); a recipe made
         of compounds is a leaf itself. The shares add up to 1 in every draw (Matthias, 2026-10-29: "The different
         steels and aluminum alyoys")."""
-        weight = np.ones(self.n) if weight is None else weight
+        weight = np.ones(self.size) if weight is None else weight
         out: dict = {}
         for i, share in self.parts_of(recipe, within, None):
             part = weight * share
@@ -1493,6 +1518,93 @@ def magnet_fractions(params: Params, classes: list, n: int) -> dict:
 # The draws
 # ------------------------------------------------------------------------------------------------------
 
+class DiskArrays:
+    """Arrays of the N draws kept on the disk, memory-mapped, in a temporary folder of their own, removed with the
+    draws that hold them: the system keeps in memory only what is in use and writes the rest to the disk, never to its
+    swap, whatever the draws and the data (the rule of the GitHub folder's CLAUDE.md §4: "a large matrix lives on disk,
+    memory-mapped"; Matthias, 2026-11-13: "so if it is not reliable the go for a safe solution"). The values are the
+    arrays' own, the same as in memory."""
+
+    def __init__(self):
+        self.folder = tempfile.mkdtemp(prefix='humanoid_02_draws_')
+        self.files = 0
+        weakref.finalize(self, shutil.rmtree, self.folder, True)   # the folder removed when the draws are let go
+
+    def matrix(self, values: np.ndarray) -> np.ndarray:
+        """`values` written to a file of the folder and read back memory-mapped."""
+        path = os.path.join(self.folder, f'{self.files}.npy')
+        self.files += 1
+        kept = np.lib.format.open_memmap(path, mode='w+', dtype=values.dtype, shape=values.shape)
+        kept[...] = values
+        return kept
+
+    def table(self, arrays: dict) -> dict:
+        """Every array of `arrays` (key -> the N draws) a row of one file, memory-mapped: key -> its row."""
+        if not arrays:
+            return arrays
+        keys = list(arrays)
+        kept = self.matrix(np.stack([arrays[k] for k in keys]))
+        return {k: kept[j] for j, k in enumerate(keys)}
+
+
+# The draws written at a time into parts.npy (PartBlocks.save): 5,000 draws × every robot's columns in float32, some
+# 50 MB for robot type 3.
+SAVE_ROWS = 5000
+
+
+@dataclass
+class PartBlocks:
+    """The kg of all units of each row of each robot (its columns '<robot>: <part>'), kept robot by robot: a draw is one
+    robot, so a robot's columns are 0 in every other robot's draws, and only its own draws are held. `blocks`: for each
+    robot, (its draws, the place of its first column in `columns`, its kg: its draws × its columns). Its memory grows
+    with the draws and the rows of one robot, never with the number of robots. Until 2026-11-13 a matrix of every draw ×
+    every robot's columns: 7.4 GB for robot type 3 at 200,000 draws, all six types 43 GB on a 16 GB computer (Matthias:
+    "This is very very bad designe!!!", "Fix it damit and this never ever happens again", "It must adopte, so if data
+    are added, it still works!!!")."""
+
+    n: int
+    columns: list
+    blocks: list
+
+    def column(self, name: str) -> np.ndarray:
+        """One column over the N draws, 0 where another robot is drawn."""
+        k = self.columns.index(name)
+        values = np.zeros(self.n)
+        for rows, first, kg in self.blocks:
+            if first <= k < first + kg.shape[1]:
+                values[rows] = kg[:, k - first]
+        return values
+
+    def robot_column(self, name: str) -> np.ndarray:
+        """One column over the draws of its own robot only, in the order of those draws."""
+        k = self.columns.index(name)
+        return next(kg[:, k - first] for rows, first, kg in self.blocks if first <= k < first + kg.shape[1])
+
+    def dense(self) -> np.ndarray:
+        """Every column over every draw, the matrix parts.npy holds: for the tests at few draws, never at a run's size
+        (N × every robot's columns)."""
+        out = np.zeros((self.n, len(self.columns)))
+        for rows, first, kg in self.blocks:
+            out[rows, first:first + kg.shape[1]] = kg
+        return out
+
+    def save(self, path: str) -> None:
+        """parts.npy exactly as np.save writes the matrix in float32 (its header, its bytes), written block after block
+        of SAVE_ROWS draws, each block filled from the robots' draws in it, so that at most one block is in memory
+        whatever the draws and the robots (a matrix of 3.7 GB for robot type 3 at 200,000 draws)."""
+        header = {'descr': np.lib.format.dtype_to_descr(np.dtype(np.float32)), 'fortran_order': False,
+                  'shape': (self.n, len(self.columns))}
+        with open(path, 'wb') as file:
+            np.lib.format.write_array_header_1_0(file, header)
+            for start in range(0, self.n, SAVE_ROWS):
+                stop = min(start + SAVE_ROWS, self.n)
+                block = np.zeros((stop - start, len(self.columns)), dtype=np.float32)
+                for rows, first, kg in self.blocks:          # a robot's draws in order: those in this block
+                    a, b = np.searchsorted(rows, start), np.searchsorted(rows, stop)
+                    block[rows[a:b] - start, first:first + kg.shape[1]] = kg[a:b]
+                file.write(block.tobytes())
+
+
 @dataclass
 class Draws:
     """A robot type taken apart, drawn N times, each draw one of its robots."""
@@ -1501,9 +1613,11 @@ class Draws:
     robots: list          # the robots of the parts file, in the order of its sheet Robots (a version each)
     robot: np.ndarray     # the robot of the parts file each draw is, as its place in `robots`
     mass: np.ndarray      # kg: that robot's mass in each draw
-    parts: tuple          # (columns '<robot>: <part>', N × columns): kg of all units of each row of each robot
-    remainders: list      # the columns of `parts` that are remainders (frames, battery housings)
-    structures: dict      # '<robot>: <joint> structure' -> kg of one joint's structure, a remainder (0 elsewhere)
+    part_blocks: PartBlocks   # kg of all units of each row of each robot, robot by robot (PartBlocks)
+    remainders: list      # the columns of the parts that are remainders (frames, battery housings)
+    # '<robot>: <joint> structure' -> (its robot's draws, kg of one joint's structure in them), a remainder; 0 in every
+    # other robot's draws, which are not held (as PartBlocks)
+    structure_blocks: dict
     materials: tuple      # (columns (kind, material), N × columns): kg
     elements: dict        # (kind, element of interest) -> kg in each draw (E19 point 3)
     estimated: dict       # (kind, element) -> the part of those kg resting on masses labelled E (TRACKED elements)
@@ -1536,6 +1650,22 @@ class Draws:
     # kind -> (draws of its boards with copper above what all their layers can hold, draws of its boards): E51 row 8
     layer_check: dict = None
     elements_of: dict = None       # material -> kg of the elements booked under it, in each draw (check_recipes)
+    disk: object = None            # its DiskArrays: the folder of its draws on the disk, removed with the record
+
+    @property
+    def parts(self) -> tuple:
+        """(columns, N × columns): every robot's parts over every draw, built from part_blocks: for the tests at few
+        draws, never at a run's size (PartBlocks.dense)."""
+        return self.part_blocks.columns, self.part_blocks.dense()
+
+    @property
+    def structures(self) -> dict:
+        """'<robot>: <joint> structure' -> kg over every draw, 0 in another robot's: for the tests at few draws."""
+        out = {}
+        for column, (rows, kg) in self.structure_blocks.items():
+            out[column] = np.zeros(self.n)
+            out[column][rows] = kg
+        return out
 
 
 class Shared:
@@ -1546,6 +1676,7 @@ class Shared:
     def __init__(self, inputs: ApartInputs, params: Params, magnets: dict, rng: np.random.Generator, n: int):
         apart = inputs.apart
         self.rng, self.n = rng, n
+        self.rows, self.size = None, n   # the draws kept (keep): None for all N; `size` their number
         self.magnets = {k: (names, drawn) for k, (names, drawn) in magnets.items()}
         # The joint's components, kg, for each size: the small one's grams times its spread, the large one's grams
         # times its factor; and the joint at its modes, which a module mass given is measured against.
@@ -1639,6 +1770,19 @@ class Shared:
         self.board_capacitors = whole_numbers(rng, *shared[schemas.BOARD_CAPACITORS][1], n)
         self.capacitor_kind = self.state(schemas.CAPACITOR_KINDS)
 
+    def kept(self, values: np.ndarray) -> np.ndarray:
+        """A draw over all N draws, as drawn (the same random numbers), kept over the draws this set keeps (`rows`,
+        Shared.keep): all of them where it keeps all."""
+        return values if self.rows is None else values[self.rows]
+
+    def keep(self, rows: np.ndarray) -> 'Shared':
+        """This set kept over the draws `rows` only (those of the robots of its file, draw_taken_apart): every draw it
+        holds cut to them (keep_rows), and what it draws later kept so (kept). Returns itself."""
+        keep_rows(self, rows, self.n)
+        self.rows, self.size = rows, rows.size
+        self.recipes.rows, self.recipes.size = rows, rows.size
+        return self
+
     def cell_draws(self, recipe: str) -> tuple:
         """The cells of `recipe` in every draw: their energy per kg (Wh/kg), their element shares and those of them as
         metal (their foils and tabs, whose copper and aluminium are elements of interest, E19 point 3). NMC as
@@ -1652,7 +1796,7 @@ class Shared:
             cells = [c for c in self.cell_sheet.values() if c.recipe == recipe]
             if not cells:
                 raise ValueError(f"no cell of the sheet Cells follows the recipe '{recipe}'.")
-            chosen = self.rng.integers(len(cells), size=self.n)
+            chosen = self.kept(self.rng.integers(len(cells), size=self.n))
             wh_per_kg = np.array([c.energy_wh / c.grams * 1000 for c in cells])[chosen]
             self.other_cells[recipe] = (wh_per_kg, *self.recipes.drawn(recipe, wh_per_kg / self.nmc_mode))
         return self.other_cells[recipe]
@@ -1662,14 +1806,14 @@ class Shared:
         wherever it is written (a discrete state, never blended: the electrical steel of the stator and the rotor is
         one grade in a draw)."""
         if written not in self.states:
-            self.states[written] = self.rng.integers(len(schemas.alternatives(written)), size=self.n)
+            self.states[written] = self.kept(self.rng.integers(len(schemas.alternatives(written)), size=self.n))
         return self.states[written]
 
     def grade_leaves(self, grade: str) -> dict:
         """What a grade or a recipe is made of, for the material pages: the recipes it holds and their share in every
         draw (RecipeDraws.leaves); a steel of the sibling's workbook is itself."""
         if grade not in self.split:
-            self.split[grade] = {grade: np.ones(self.n)} if grade in self.steels else self.recipes.leaves(grade)
+            self.split[grade] = {grade: np.ones(self.size)} if grade in self.steels else self.recipes.leaves(grade)
         return self.split[grade]
 
     def grade_elements(self, grade: str) -> dict:
@@ -1683,7 +1827,7 @@ class Shared:
                 elements, remainder = self.steels[grade]
                 typical = (schemas.composition(self.compounds[SIBLING_MODES[grade]][0]) if grade in SIBLING_MODES
                            else {})
-                out = {e: triangle(self.rng, low, typical.get(e, (low + high) / 2), high, self.n)
+                out = {e: self.kept(triangle(self.rng, low, typical.get(e, (low + high) / 2), high, self.n))
                        for e, (low, high) in elements.items() if high > 0}
                 out[remainder] = 1 - sum(out.values())
                 self.graded[grade] = out
@@ -1696,6 +1840,10 @@ class Robot:
     def __init__(self, name: str, rows: np.ndarray, shared: Shared, mass: np.ndarray):
         self.name, self.rows, self.shared, self.mass = name, rows, shared, mass
         self.n = rows.size
+        # Its draws within its shared draws: the same rows where these hold every draw; their places among the draws
+        # kept where they hold only the draws of the robots of one file (keep_rows; a type over several files).
+        kept = getattr(shared, 'rows', None)
+        self.local = rows if kept is None else np.searchsorted(kept, rows)
         self.parts: dict = {}       # part column -> kg
         self.materials: dict = {}   # (kind, material) -> kg
         self.elements: dict = {}    # (kind, element of interest) -> kg (E19 point 3)
@@ -1725,7 +1873,7 @@ class Robot:
 
     def of(self, values: np.ndarray) -> np.ndarray:
         """This robot's rows of draws shared by all robots."""
-        return values[self.rows]
+        return values[self.local]
 
     def drawn(self, material: str, kg) -> None:
         """`kg` of `material` whose elements are drawn, wherever they are booked (check_recipes)."""
@@ -1953,6 +2101,29 @@ class Robot:
                                  element in INTEREST, on, place, taken='Sensors')
 
 
+def keep_rows(value, rows: np.ndarray, n: int):
+    """`value` with every array whose first axis is the N draws cut to the draws `rows`, walking through its dicts and
+    lists (changed in place), its tuples (made anew) and the objects of this file (Shared, RecipeDraws); everything else
+    as it is. Used to keep of a file's shared draws only the draws of its robots (draw_taken_apart)."""
+    if isinstance(value, np.ndarray):
+        return value[rows] if value.ndim and value.shape[0] == n else value
+    if isinstance(value, dict):
+        for key in value:
+            value[key] = keep_rows(value[key], rows, n)
+        return value
+    if isinstance(value, list):
+        value[:] = [keep_rows(v, rows, n) for v in value]
+        return value
+    if isinstance(value, tuple):
+        items = [keep_rows(v, rows, n) for v in value]
+        return type(value)(*items) if hasattr(value, '_fields') else tuple(items)
+    if type(value).__module__ == __name__ and hasattr(value, '__dict__'):
+        for key, v in vars(value).items():
+            setattr(value, key, keep_rows(v, rows, n))
+        return value
+    return value
+
+
 def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=None) -> Draws:
     """A robot type over its robots of the register taken apart, drawn `composition.draws` times (HOW IT DRAWS A
     ROBOT TYPE TAKEN APART in the docstring at the top): each draw one of the register's robots of the type taken
@@ -1982,10 +2153,17 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
         shared = Shared(inputs, params, magnets, rng, n)
         shared_of = {name: shared for name in names}
     else:
-        # Each file's set as of the type drawing it (its recipes are the type's): only its rows replaced.
-        per_file = {t: Shared(replace(inputs, apart=f), params, magnets, rng, n) for t, f in sorted(files.items())}
+        # Each file's set as of the type drawing it (its recipes are the type's): only its rows replaced. Each set
+        # drawn over all N draws, in the order of the files as before (the same random numbers), then cut to the draws
+        # of its own file's robots, the only ones that read it (keep_rows; until 2026-11-13 every set over all N draws:
+        # four sets of 1 GB for robot type 3 at 200,000 draws).
+        file_of = {name: t for t, f in files.items() for name in f.robots if name in apart.robots}
+        per_file = {}
+        for t, f in sorted(files.items()):
+            mine = np.flatnonzero(np.isin(robot, [k for k, name in enumerate(names) if file_of.get(name) == t]))
+            per_file[t] = Shared(replace(inputs, apart=f), params, magnets, rng, n).keep(mine)
         shared = per_file[min(per_file)]
-        shared_of = {name: per_file[t] for t, f in files.items() for name in f.robots if name in apart.robots}
+        shared_of = {name: per_file[t] for name, t in file_of.items()}
     mass = np.zeros(n)
     done = []
     for k, name in enumerate(names):
@@ -2002,13 +2180,22 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
         done.append(r)
         if say is not None and (k + 1) % 10 == 0:
             say(k + 1, len(names), name)
-    d = assemble(n, names, robot, mass, done, apart, shared if len(files) == 1 else heat_of(done, shared_of, n))
+    # What assemble takes of the shared draws (their heat), and the aluminium's recipe for the notes page; then the
+    # shared draws let go, before the robots' draws are put together (assemble).
+    heat = (SimpleNamespace(heat=shared.heat, heat_grade=shared.heat_grade) if len(files) == 1
+            else heat_of(done, shared_of, n))
+    aluminium = shared.recipe_name[ALUMINIUM]
+    for r in done:
+        r.shared = None
+    shared = shared_of = per_file = None
+    d = assemble(n, names, robot, mass, done, apart, heat)
+    done = None
     check_taken(d)   # every element of each kind in its parts of how a robot is taken apart, adding up to the kind
     check_recipes(d)   # every material's elements adding up to its kilograms whose elements are drawn
     d.register, d.register_robot = [f'{r.number} {r.name}' for r in robots], which
     d.on_estimates = on_estimates(apart, [v for r in robots for v in schemas.versions(r.taken_apart)])
     d.robot_type, d.listed = inputs.robot_type, inputs.listed or len(robots)
-    d.aluminium = alloy_words(inputs.base.recipes, shared.recipe_name[ALUMINIUM])
+    d.aluminium = alloy_words(inputs.base.recipes, aluminium)
     d.templates = schemas.template_words(apart)   # E13 rules 2 and 4, for its notes page
     d.holds = holds_words(d, inputs, magnets)     # the alloys table (E19 point 4)
     return d
@@ -2021,9 +2208,9 @@ def heat_of(done: list, shared_of: dict, n: int) -> SimpleNamespace:
     heat, grade = np.zeros(n), {}
     for r in done:
         s = shared_of[r.name]
-        heat[r.rows] = s.heat[r.rows]
+        heat[r.rows] = r.of(s.heat)
         for group, classes in s.heat_grade.items():
-            grade.setdefault(group, np.full(n, '', dtype=classes.dtype))[r.rows] = classes[r.rows]
+            grade.setdefault(group, np.full(n, '', dtype=classes.dtype))[r.rows] = r.of(classes)
     return SimpleNamespace(heat=heat, heat_grade=grade)
 
 
@@ -2334,52 +2521,99 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
 
 
 def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: list, apart, shared: Shared) -> Draws:
-    """The robots' draws put together into the N draws, in the order the data file names things."""
+    """The robots' draws put together into the N draws, in the order the data file names things. Each quantity's
+    draws of the robots let go once it is put together (let_go), so that the robots' draws and the draws put together
+    are not held whole at the same time (2026-11-13: the peak of drawing robot type 3 was both)."""
     def put(key, store, r):
         values = np.zeros(n)
         values[r.rows] = store[key]
         return values
 
-    part_columns = [c for r in done for c in r.parts]
-    parts = np.column_stack([put(c, r.parts, r) for r in done for c in r.parts])
+    def let_go(name: str) -> None:
+        for r in done:
+            setattr(r, name, None)
+
+    disk = DiskArrays()   # the draws put together kept on the disk, memory-mapped (DiskArrays)
+
+    # The parts and the joints' structures robot by robot (PartBlocks): only each robot's own draws are held.
+    part_columns, blocks = [], []
+    for r in done:
+        blocks.append((r.rows, len(part_columns), np.column_stack([r.parts[c] * np.ones(r.n) for c in r.parts])
+                       if r.parts else np.zeros((r.n, 0))))
+        part_columns += list(r.parts)
+    part_blocks = PartBlocks(n, part_columns, blocks)
+    let_go('parts')
     remainders = [f'{p.robot}: {p.name}' for p in apart.parts if p.computed.startswith((FRAME, HOUSING, ACTUATOR_REST))]
-    structures = {c: put(c, r.structures, r) for r in done for c in r.structures}
+    structure_blocks = {c: (r.rows, r.structures[c] * np.ones(r.n)) for r in done for c in r.structures}
+    let_go('structures')
     material_keys = sorted({k for r in done for k in r.materials}, key=lambda k: (list(KINDS).index(k[0]), k[1]))
     materials = np.column_stack([sum((put(k, r.materials, r) for r in done if k in r.materials), np.zeros(n))
                                  for k in material_keys])
+    materials = disk.matrix(materials)
+    let_go('materials')
     elements = {k: sum((put(k, r.elements, r) for r in done if k in r.elements), np.zeros(n))
                 for k in {k for r in done for k in r.elements}}
+    elements = disk.table(elements)
+    let_go('elements')
     estimated = {k: sum((put(k, r.estimated, r) for r in done if k in r.estimated), np.zeros(n))
                  for k in {k for r in done for k in r.estimated}}
+    estimated = disk.table(estimated)
+    let_go('estimated')
     hot = schemas.hot_kinds(apart)
     followed = {m: sum((put(m, r.followed, r) for r in done if m in r.followed), np.zeros(n))
                 for m in {m for r in done for m in r.followed}}
+    followed = disk.table(followed)
+    let_go('followed')
     details = {k: sum((put(k, r.details, r) for r in done if k in r.details), np.zeros(n))
                for k in {k for r in done for k in r.details}}
+    details = disk.table(details)
+    let_go('details')
     recipe_elements = {k: sum((put(k, r.recipe_elements, r) for r in done if k in r.recipe_elements), np.zeros(n))
                        for k in {k for r in done for k in r.recipe_elements}}
+    recipe_elements = disk.table(recipe_elements)
+    let_go('recipe_elements')
     in_recipes = {m: sum((put(m, r.in_recipes, r) for r in done if m in r.in_recipes), np.zeros(n))
                   for m in {m for r in done for m in r.in_recipes}}
+    in_recipes = disk.table(in_recipes)
+    let_go('in_recipes')
     elements_of = {m: sum((put(m, r.elements_of, r) for r in done if m in r.elements_of), np.zeros(n))
                    for m in {m for r in done for m in r.elements_of}}
+    elements_of = disk.table(elements_of)
+    let_go('elements_of')
     by_material = {k: sum((put(k, r.by_material, r) for r in done if k in r.by_material), np.zeros(n))
                    for k in {k for r in done for k in r.by_material}}
+    by_material = disk.table(by_material)
+    let_go('by_material')
     fixed = {k: sum((put(k, r.fixed, r) for r in done if k in r.fixed), np.zeros(n))
              for k in {k for r in done for k in r.fixed}}
+    fixed = disk.table(fixed)
+    let_go('fixed')
     places = {k: sum((put(k, r.places, r) for r in done if k in r.places), np.zeros(n))
               for k in {k for r in done for k in r.places}}
+    places = disk.table(places)
+    let_go('places')
     places_estimated = {k: sum((put(k, r.places_estimated, r) for r in done if k in r.places_estimated), np.zeros(n))
                         for k in {k for r in done for k in r.places_estimated}}
+    places_estimated = disk.table(places_estimated)
+    let_go('places_estimated')
     taken = {k: sum((put(k, r.taken, r) for r in done if k in r.taken), np.zeros(n))
              for k in {k for r in done for k in r.taken}}
+    taken = disk.table(taken)
+    let_go('taken')
     taken_kg = {k: sum((put(k, r.taken_kg, r) for r in done if k in r.taken_kg), np.zeros(n))
                 for k in {k for r in done for k in r.taken_kg}}
+    taken_kg = disk.table(taken_kg)
+    let_go('taken_kg')
     layer_check = {k: tuple(sum(r.layer_check[k][i] for r in done if k in r.layer_check) for i in (0, 1))
                    for k in {k for r in done for k in r.layer_check}}
-    return Draws(n, names, robot, mass, (part_columns, parts), remainders, structures, (material_keys, materials),
+
+    let_go('layer_check')
+    drawn = Draws(n, names, robot, mass, part_blocks, remainders, structure_blocks, (material_keys, materials),
                  elements, estimated, hot, shared.heat, shared.heat_grade, followed, details, recipe_elements,
                  in_recipes, by_material, fixed=fixed, places=places, places_estimated=places_estimated, taken=taken,
                  taken_kg=taken_kg, layer_check=layer_check, elements_of=elements_of)
+    drawn.disk = disk   # its folder on the disk lives as long as the record
+    return drawn
 
 
 def check_recipes(d: Draws) -> None:
@@ -2436,26 +2670,22 @@ def kind_kg(d: Draws, kind: str) -> np.ndarray:
 def remainders_below(d: Draws) -> np.ndarray:
     """In every draw, whether a remainder of the robot drawn (its frame, a weighed pack's housing, a joint's structure)
     is below zero (E21)."""
-    columns, draws = d.parts
     below = np.zeros(d.n, dtype=bool)
     for column in d.remainders:
-        below |= draws[:, columns.index(column)] < 0
-    for values in d.structures.values():
-        below |= values < 0
+        below |= d.part_blocks.column(column) < 0
+    for rows, values in d.structure_blocks.values():
+        below[rows] |= values < 0
     return below
 
 
 def below_zero(d: Draws) -> dict:
     """The share of each robot's draws where one of its remainders (a frame, a battery housing, a joint's structure)
     falls below zero: '<robot>: <part>' -> share."""
-    columns, draws = d.parts
     out = {}
     for column in d.remainders:
-        k = d.robots.index(column.split(': ')[0])
-        out[column] = float((draws[d.robot == k, columns.index(column)] < 0).mean())
-    for column, values in d.structures.items():
-        k = d.robots.index(column.split(': ')[0])
-        out[column] = float((values[d.robot == k] < 0).mean())
+        out[column] = float((d.part_blocks.robot_column(column) < 0).mean())   # over its robot's draws
+    for column, (rows, values) in d.structure_blocks.items():
+        out[column] = float((values < 0).mean())
     return out
 
 
@@ -2541,38 +2771,44 @@ def write_taken_apart(d: Draws, folder: str) -> None:
     names = ', '.join(f'{k} {name}' for k, name in enumerate(d.robots))
     element_keys = [(kind, e) for kind in KINDS for e in element_order({e for k, e in d.elements if k == kind})]
     grade_keys = sorted(d.details, key=lambda key: (list(KINDS).index(key[0]), key[1], key[2]))
+    # Each table built only when it is written and let go after (until 2026-11-13 all built first: a second copy of
+    # the type's draws held while writing, 3 GB for robot type 3 at 200,000 draws).
     tables = {
-        'robots': ([f'Robot drawn ({names})', 'Mass (kg)', 'Robot of the register'],
+        'robots': lambda: ([f'Robot drawn ({names})', 'Mass (kg)', 'Robot of the register'],
                    np.column_stack([d.robot, d.mass, d.register_robot])),
-        'parts': d.parts,
-        'materials': ([f'{KINDS[k][0]}: {m}' for k, m in d.materials[0]], d.materials[1]),
+        'parts': lambda: (d.part_blocks.columns, d.part_blocks),   # written robot by robot (PartBlocks.save)
+        'materials': lambda: ([f'{KINDS[k][0]}: {m}' for k, m in d.materials[0]], d.materials[1]),
         # Each material by its grade, alloy or magnet grade class ('<kind>: <material>: <grade>'; a material whole
         # without the third part): the draws behind the material pages.
-        'grades': ([f'{KINDS[k][0]}: {m}' + (f': {x}' if x else '') for k, m, x in grade_keys],
+        'grades': lambda: ([f'{KINDS[k][0]}: {m}' + (f': {x}' if x else '') for k, m, x in grade_keys],
                    np.column_stack([d.details[key] for key in grade_keys])),
-        'elements': ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
+        'elements': lambda: ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
                      np.column_stack([d.elements[k] for k in element_keys])),
-        'estimated': ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
+        'estimated': lambda: ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
                       np.column_stack([d.estimated.get(k, np.zeros(d.n)) for k in element_keys])),
-        'by_material': by_material_table(d),
+        'by_material': lambda: by_material_table(d),
         # Each element of interest by its place (PLACES): a kind of part, or the electronics' component, '<place>: <e>'.
-        'places': ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
+        'places': lambda: ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
                    np.column_stack([d.places[k] for k in place_keys(d)])),
-        'places_estimated': ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
+        'places_estimated': lambda: ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
                              np.column_stack([d.places_estimated.get(k, np.zeros(d.n)) for k in place_keys(d)])),
         # Each element of interest by its kind and its part of how a robot is taken apart ('<kind>: <part>: <e>'), in
         # the order of the kinds, of 01's TAKEN_PARTS and of the elements: what 04 counts the elements in use by.
-        'taken_apart': ([f'{KINDS[k][0]}: {part}: {e}' for k, part, e in taken_keys(d)],
+        'taken_apart': lambda: ([f'{KINDS[k][0]}: {part}: {e}' for k, part, e in taken_keys(d)],
                         np.column_stack([d.taken[k] for k in taken_keys(d)])),
         # The mass of each kind by its part of how a robot is taken apart ('<kind>: <part>'), all its materials.
-        'taken_apart_mass': ([f'{KINDS[k][0]}: {part}' for k, part in taken_mass_keys(d)],
+        'taken_apart_mass': lambda: ([f'{KINDS[k][0]}: {part}' for k, part in taken_mass_keys(d)],
                              np.column_stack([d.taken_kg[k] for k in taken_mass_keys(d)])),
     }
     for table in APART_TABLES:
-        columns, draws = tables[table]
-        np.save(os.path.join(folder, f'{table}.npy'), np.asarray(draws, dtype=np.float32))
+        columns, draws = tables[table]()
+        if isinstance(draws, PartBlocks):
+            draws.save(os.path.join(folder, f'{table}.npy'))
+        else:
+            np.save(os.path.join(folder, f'{table}.npy'), np.asarray(draws, dtype=np.float32))
         with open(os.path.join(folder, f'{table}.txt'), 'w', encoding='utf-8') as file:
             file.write('\n'.join(columns) + '\n')
+        columns = draws = None   # let go before the next table is built
     # The robots of the register drawn, '<number> <name>', in the order of the column 'Robot of the register'.
     with open(os.path.join(folder, 'register.txt'), 'w', encoding='utf-8') as file:
         file.write('\n'.join(d.register) + '\n')
@@ -2756,7 +2992,7 @@ def interval_chart(figure, page, page_height: float, x: float, y: float, title: 
     95 % interval of each row written beside it, both of the draws that hold it, and the share of the draws that hold it
     where it is not all (Matthias, 2026-11-01: "If a value is 0 then it is NOT part of the distribution"); '–' for a
     row with no mass in any draw. (x, y): the chart's top left, inches. Returns the y below it."""
-    schemas.write(page, x, y, [title], size=11, weight='bold')
+    schemas.write(page, x, y, [title], size=11, weight='normal')
     schemas.write(page, x, y + 0.27, [what], size=9, colour=MUTED)
     y += 0.6
     numbers = x + LABEL + CHART + 0.15
@@ -2826,7 +3062,7 @@ def draw_page(c: Composition, draws: int, path: str, params: Params) -> None:
     top = 1.15
     height = top + 0.85 + ROW * max(len(materials), len(elements)) + 0.55 + len(notes) * schemas.LINE + 0.4
     figure, page = schemas.new_page(PAGE_WIDTH, height)
-    page.text(MARGIN, 0.35, f'Robot type {c.number}: {c.title}', fontsize=15, fontweight='bold', va='top')
+    page.text(MARGIN, 0.35, f'Robot type {c.number}: {c.title}', fontsize=15, va='top')   # regular since 2026-11-13
     page.text(MARGIN, 0.75, f'What one robot is made of, from {draws:,} model runs. Each bar is the median of the runs '
                             'that hold it, with its 95 % interval; Held in: the share of the runs that hold it, where '
                             'not all.', fontsize=10, color=MUTED, va='top')
@@ -3034,7 +3270,7 @@ def element_panel(axes, kg: np.ndarray, title: str, first_in_row: bool) -> None:
         kg = kg[kg > 0]
     per, unit = panel_unit(kg)
     values = kg / per
-    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, loc='left')
     # Its 70 bars from the smallest draw to the axis's end (AXIS_END), each the share of all the panel's draws; the
     # draws beyond the end not drawn, said above the panel. Its draws spread over orders of magnitude (LOG_BELOW): the
     # bars even on a logarithmic axis.
@@ -3106,7 +3342,7 @@ def numbers_page(name: str, figure) -> tuple:
     page = plt.figure(figsize=APART_PAGE)
     page.suptitle(textwrap.fill(heading, 110), fontsize=APART_HEADING, y=0.985)
     for x, words in zip(NUMBERS_X, NUMBERS_HEAD):
-        page.text(x, 0.875, words, fontsize=APART_TEXT, fontweight='bold', va='top')   # 0.90 until 2026-11-13 (text_gap)
+        page.text(x, 0.875, words, fontsize=APART_TEXT, va='top')   # 0.90 until 2026-11-13 (text_gap)
     y = TABLE_TOP
     for row in panel_rows(figure):
         cells = [textwrap.fill(cell, width) for cell, width in zip(row, NUMBERS_WRAP)]
@@ -3128,20 +3364,24 @@ def with_numbers(pages: list, prefix: str, first: int = 1) -> list:
 
 # Points: below the mass axis to its numbers, above the panel to its title; more than half the height of a 14-point
 # number (about 8 points), so that the share axis's first and last numbers stand clear of them (matplotlib's 3.5 and 6).
-TICK_PAD, TITLE_PAD = 9.0, 10.0
+# SHARE_PAD: left of the share axis to its numbers (matplotlib's 3.5 until 2026-11-13: at 2,000 runs the top number,
+# '0.06', fell on the panel's top and stood 7 points from the left-aligned title above; half a line is 8).
+TICK_PAD, TITLE_PAD, SHARE_PAD = 13.0, 10.0, 6.0   # TICK_PAD 9 until Luciole (2026-11-13), whose taller lines needed 13
 
 
 def panel_axes(axes, unit: str, first_in_row: bool) -> None:
     """The axes of a panel of the element and material pages: mass in one robot in its unit, the share of the draws
     on the first of a row, plain numbers (mass_ticks, also on a logarithmic mass axis), hairlines on the mass. The mass
-    axis's numbers TICK_PAD below the axis and the panel's title TITLE_PAD above it, so that neither stands beside the
-    share axis's first or last number (FigureTests' text_gap, 2026-11-13: the "0" of the shares beside the first mass,
-    "0.8", 2 to 7 points apart)."""
+    axis's numbers TICK_PAD below the axis, the share axis's SHARE_PAD left of it and the panel's title TITLE_PAD above
+    it, so that neither stands beside the share axis's first or last number (FigureTests' text_gap, 2026-11-13: the "0"
+    of the shares beside the first mass, "0.8", 2 to 7 points apart; at 2,000 runs the top share, "0.06", 7 points from
+    a two-line title)."""
     mass_ticks(axes, 5)
     axes.yaxis.set_major_locator(plt.MaxNLocator(3))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(panel_number))
     axes.tick_params(labelsize=APART_TEXT)
     axes.tick_params(axis='x', pad=TICK_PAD)
+    axes.tick_params(axis='y', pad=SHARE_PAD)
     axes.set_title('', pad=TITLE_PAD)              # the offset of every title of the panel, its left one too
     axes.set_xlabel(f'mass in one robot ({unit})', fontsize=APART_LABEL)
     if first_in_row:
@@ -3159,7 +3399,7 @@ def by_material_panel(axes, parts: dict, title: str, first_in_row: bool, fixed: 
     hold the element written in the panel, top right, the largest first, a material of `fixed` marked '(fixed)': its
     share of the element fixed in the alloy (E25). Returns (the top of its bars, the lines of those means, the materials
     drawn), for make_room and the page's legend."""
-    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, loc='left')
     # The materials `fixed` (E25) as one part of the bars, FIXED_PART; each of them in the means, marked.
     whole = {m: kg for m, kg in parts.items() if m not in fixed}
     if fixed:
@@ -3176,7 +3416,7 @@ def group_panel(axes, groups: dict, title: str, first_in_row: bool) -> tuple:
     histogram of its total over the draws (stacked_bars, the group with the smaller mean lower, 01's GROUP_COLOURS), its
     median, mean and 95 % (centre_lines), as the element pages' panels. Returns (the top of its bars, 0, the groups
     drawn), as by_material_panel."""
-    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, loc='left')
     bars = stacked_bars(axes, groups, schemas.GROUP_COLOURS)
     centre_lines(axes, bars.values, bars.held_in, bars.end, bars.unit, title)
     panel_axes(axes, bars.unit, first_in_row)
@@ -3233,7 +3473,7 @@ def part_list_pages(name: str, heading: str, rows: list, first_head: str = 'Elem
         title = heading + (f' ({k} of {len(pages)})' if len(pages) > 1 else '')
         figure.suptitle(textwrap.fill(title, 110), fontsize=APART_HEADING, y=0.985)
         for x, words in zip(PART_LIST_X, (first_head,) + PART_LIST_HEAD[1:]):
-            figure.text(x, 0.90, words, fontsize=APART_TEXT, fontweight='bold', va='top')
+            figure.text(x, 0.90, words, fontsize=APART_TEXT, va='top')
         y = TABLE_TOP
         for cells, tall in page_rows:
             figure.add_artist(plt.Line2D([0.03, 0.97], [y + 0.012, y + 0.012], color=GRID, linewidth=1))
@@ -3289,7 +3529,7 @@ def alloy_place(axes, symbol: str, drawn: dict, title: str) -> None:
     axes.set_xticks([])   # no tick labels left on an empty place (they would count as text of the page)
     axes.set_yticks([])
     axes.axis('off')
-    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, loc='left')
     words = f'{ALLOY_OF[symbol]}: ' + not_drawn_words(np.asarray(total) if np.ndim(total) else np.zeros(1))
     axes.text(0, 0.85, words, transform=axes.transAxes, fontsize=APART_TEXT, va='top', color=APART_INK)
 
@@ -3331,7 +3571,7 @@ def medians_pages(c: Composition, d: Draws) -> list:
         figure.suptitle(f'{lead(d)}: each element in one robot, its median by the material it comes from ({p} of '
                         f'{len(pages)})', fontsize=APART_HEADING, y=0.985)
         for x, words in zip(MEANS_X, MEANS_HEAD):
-            figure.text(x, 0.90, words, fontsize=APART_TEXT, fontweight='bold', va='top')
+            figure.text(x, 0.90, words, fontsize=APART_TEXT, va='top')
         y = TABLE_TOP
         for cells in page:
             figure.add_artist(plt.Line2D([0.03, 0.97], [y + 0.012, y + 0.012], color=GRID, linewidth=1))
@@ -3652,11 +3892,7 @@ def draw_taken_apart_pages(c: Composition, d: Draws, left_out: list, folder: str
     """A robot type's pages into `folder` (its `outliers` named on its notes pages), and its pages of an earlier run
     beyond them removed (said as removed); returns their file names."""
     os.makedirs(folder, exist_ok=True)
-    written = []
-    for name, figure in taken_apart_pages(c, d, left_out, params, later, outliers):
-        figure.savefig(os.path.join(folder, name), dpi=params.output.dpi, facecolor='white')
-        plt.close(figure)
-        written.append(name)
+    written = save_pages(taken_apart_pages(c, d, left_out, params, later, outliers), folder, params.output.dpi)
     for name in remove_pages_not_drawn(folder, c.name, COMPOSITION_SERIES, written):
         print(f'  {name} removed: a page of an earlier run no longer drawn.', flush=True)
     return written
@@ -3755,6 +3991,22 @@ def save_figure(figure, path: str, dpi: int) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     figure.savefig(path, dpi=dpi, facecolor='white')
     plt.close(figure)
+
+
+def save_pages(pages: list, folder: str, dpi: int) -> list:
+    """Each page of `pages` ((file name below `folder`, figure)) written, closed and let go before the next is written,
+    the image matplotlib drew it into freed with it; `pages` emptied; returns the file names. Each page at 300 dpi is
+    drawn into an image of 52 MB, which matplotlib keeps with the figure: all of a robot type's pages kept until the
+    last was written held some 2.5 GB beyond what Python counts (measured 2026-11-13, the rule that every stage fits in
+    half the computer's memory, the GitHub folder's CLAUDE.md §4)."""
+    names = []
+    while pages:
+        name, figure = pages.pop(0)
+        save_figure(figure, os.path.join(folder, name), dpi)
+        del figure
+        gc.collect()   # a figure refers to itself through its parts: only the collector frees it and its image
+        names.append(name)
+    return names
 
 
 def places_order() -> list:
@@ -3877,7 +4129,7 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str, rows: list | Non
     panels can be read together."""
     every = [k for k in places_order() if k in kinds and held(kinds[k])]   # kinds of part, then components
     shown = every if rows is None else [k for k in every if k in rows]
-    axes.set_title(title, fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(title, fontsize=APART_TITLE, loc='left')
     if not shown:
         axes.text(0.5, 0.5, 'none in these robots', transform=axes.transAxes, ha='center', va='center',
                   fontsize=APART_TEXT)
@@ -3925,7 +4177,7 @@ def ridge_panel(axes, kinds: dict, estimated: dict, title: str, rows: list | Non
     above = offset_copy(axes.transAxes, fig=axes.figure, y=2, units='points')
     for column, what in zip(columns, heads):
         axes.text(column, 1.0, what, transform=above, ha='left', va='bottom', fontsize=APART_TEXT, color=APART_INK)
-    axes.set_title(f'{title}, in {unit}', fontsize=APART_TITLE, fontweight='bold', loc='left')
+    axes.set_title(f'{title}, in {unit}', fontsize=APART_TITLE, loc='left')
     axes.set_ylim(0, len(shown))
     axes.set_yticks([row + 0.45 for row in range(len(shown))])
     # A kind of part with its mark on the robot; a component of the electronics by its name (it has no one place).
@@ -3958,7 +4210,7 @@ def overview_page(d: Draws, page: list, number: int, of: int):
     last panel, as on the data centres' pages (since 2026-11-13, "Yes, all": above the panels it stood 4 points from the
     panel's title); page `number` of `of`."""
     figure = plt.figure(figsize=APART_PAGE)
-    figure.add_axes((0.01, 0.04, 0.22, 0.85))
+    figure.add_axes((0.01, 0.04, 0.21, 0.85))   # 0.22 wide until 2026-11-13: the base's mark 'F' 6.8 points from a row label
     draw_schema(figure.axes[0], d)
     height = APART_PAGE[1]
     top = height - OVERVIEW_TOP                    # inches from the page's foot to the top of the next panel
@@ -3975,12 +4227,31 @@ def overview_page(d: Draws, page: list, number: int, of: int):
         top -= tall + OVERVIEW_GAP
     figure.suptitle(f'Robot type {d.robot_type} taken apart: where the critical materials sit, and how sure we are '
                     f'({number} of {of})', fontsize=APART_HEADING, y=0.975)
-    # the colours of the rows (the groups of the places drawn), the median and the 95 % interval, in one legend below
-    # the last panel's axis title (rule 3: every colour and mark its sample)
+    # the colours of the rows and of the robot's marks (the groups of the places drawn and of every kind on the robot,
+    # draw_schema), the median and the 95 % interval, in one legend below the last panel's axis title (rule 3: every
+    # colour and mark its sample; until 2026-11-13 the groups of the rows alone, so the body's yellow mark on the robot
+    # had no sample on a page without a row of the body)
+    groups |= {schemas.KIND_GROUP[k] for k, _ in d.materials[0]}
     handles = ([Patch(color=schemas.GROUP_COLOURS[g], label=g) for g in schemas.TAKEN_APART if g in groups]
                + distribution_handles(d.n))
-    figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.62, (top + OVERVIEW_GAP - 0.85) / height),
-                  ncol=len(handles), frameon=False, fontsize=APART_TEXT)
+    # In one row where it fits between the robot (its drawing ends at 0.22 of the page's width) and the page's right
+    # edge, measured as drawn in the page's font; else in fewer columns, as many rows as it needs (2026-11-13: in one
+    # row of six it ran 2 pixels beyond the page, Luciole's letters being wider than the former font's; the real run's
+    # "Median of 200,000 model runs" is longer still than the tests' 200).
+    renderer = figure.canvas.get_renderer()
+    for columns in range(len(handles), 0, -1):
+        legend = figure.legend(handles=handles, loc='upper center', ncol=columns, frameon=False, fontsize=APART_TEXT,
+                               bbox_to_anchor=(0.62, (top + OVERVIEW_GAP - 0.85) / height))
+        box = legend.get_window_extent(renderer).transformed(figure.transFigure.inverted())
+        if (box.x0 >= 0.23 and box.x1 <= 0.99) or columns == 1:
+            break
+        legend.remove()
+    # its rows even (six entries in two rows three and three, not five and one)
+    even = math.ceil(len(handles) / math.ceil(len(handles) / columns))
+    if even < columns:
+        legend.remove()
+        figure.legend(handles=handles, loc='upper center', ncol=even, frameon=False, fontsize=APART_TEXT,
+                      bbox_to_anchor=(0.62, (top + OVERVIEW_GAP - 0.85) / height))
     return figure
 
 
@@ -4021,10 +4292,7 @@ def draw_parts_figures(d: Draws, params: Params, folder: str) -> None:
     """Every page of the overview, and the figures of where each material sits (sources_pages), into `folder` (the
     type's folder in `output.parts_figures_dir`); its numbered pages of an earlier run beyond them removed (said as
     removed)."""
-    written = []
-    for name, figure in parts_figure_pages(d) + sources_pages(d):
-        save_figure(figure, os.path.join(folder, name), params.output.dpi)
-        written.append(name)
+    written = save_pages(parts_figure_pages(d) + sources_pages(d), folder, params.output.dpi)
     for name in remove_pages_not_drawn(folder, f'robot_type_{d.robot_type}', PARTS_SERIES, written):
         print(f'  {name} removed: a page of an earlier run no longer drawn.', flush=True)
 
@@ -4235,7 +4503,7 @@ def alloys_pages(c: Composition, d: Draws) -> list:
         figure.suptitle(f'{lead(d)}: its alloys and grades, what each holds ({p} of {len(pages)})',
                         fontsize=APART_HEADING, y=0.985)
         for x, words in zip(TABLE_X, TABLE_HEAD):
-            figure.text(x, 0.90, words, fontsize=APART_TEXT, fontweight='bold', va='top')
+            figure.text(x, 0.90, words, fontsize=APART_TEXT, va='top')
         y = TABLE_TOP
         for cells in page:
             figure.add_artist(plt.Line2D([0.03, 0.97], [y + 0.012, y + 0.012], color=GRID, linewidth=1))
@@ -4383,10 +4651,135 @@ class Steps:
         return 0
 
 
+# The memory check before a run (Step 3), on the safe side: the trial's draws; its estimate counts the draws kept on the
+# disk (DiskArrays) as if all were in memory, and PEAK_FACTOR (what drawing a type holds at its peak, as a multiple of
+# what it holds when done: measured 1.2 on robot type 3, set at 2), and the pages' PAGES_MEMORY, so that it is never
+# below what the run holds (measured 2026-11-13: 2.4 GB at 50,000 draws against its 3.2); the run stops before any type
+# is drawn where that estimate passes MEMORY_SHARE of the computer's memory, the line where it would begin to swap
+# (VERIFICATION V236).
+MEMORY_TRIAL, MEMORY_SHARE, PEAK_FACTOR = 2000, 0.75, 2.0
+# What drawing the pages holds beyond the draws (matplotlib, its images), measured 2026-11-13: about 1 GB at 20,000 to
+# 50,000 draws; added to the check so that it never says less than the run holds (VERIFICATION V236).
+PAGES_MEMORY = 1.0e9
+
+
+def held_bytes(value) -> int:
+    """The bytes the arrays in `value` hold: an array, a dict, tuple or list of them, a PartBlocks or a record of them."""
+    if isinstance(value, np.ndarray):
+        return value.nbytes         # its draws on the disk too (DiskArrays), as if all were in memory: the safe side
+    if isinstance(value, dict):
+        return sum(held_bytes(v) for v in value.values())
+    if isinstance(value, (tuple, list)):
+        return sum(held_bytes(v) for v in value)
+    if isinstance(value, (PartBlocks, Draws)):
+        return sum(held_bytes(getattr(value, f.name)) for f in fields(value))
+    return 0
+
+
+def memory_needed(a, category, lists, params: Params) -> tuple:
+    """(the bytes drawing robot type `a` will hold at its peak, the bytes of its Composition kept until every type is
+    drawn), at params.composition.draws: `a` its ApartInputs, `category` its category of the workbook, `lists` the
+    shared lists; from a trial of MEMORY_TRIAL draws, scaled to the draws, the peak times PEAK_FACTOR. Grows with the
+    draws and the materials and elements, not with the number of robots (PartBlocks, Shared.keep)."""
+    trial = replace(params, composition=replace(params.composition, draws=MEMORY_TRIAL))
+    d = draw_taken_apart(a, trial, magnet_fractions(trial, grade_classes(a), MEMORY_TRIAL))
+    scale = params.composition.draws / MEMORY_TRIAL
+    kept = held_bytes(vars(compose_taken_apart(category, d, lists))) * scale
+    return (held_bytes(d) * scale + kept) * PEAK_FACTOR, kept
+
+
+def memory_in_use() -> float:
+    """The bytes this process has held at most so far, as the system counts them (its peak resident memory)."""
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return float(peak if sys.platform == 'darwin' else peak * 1024)   # bytes on macOS, kilobytes elsewhere
+
+
+def staging_folders(params: Params) -> dict:
+    """The staging folder of each output folder 02 writes ('<folder>.writing', beside it), emptied of what a stopped
+    run left there and made anew: what 02 writes goes there first and reaches the output folders only when every
+    robot type has added up (move_staged). The staging folders hold only 02's own files of this run."""
+    staged = {}
+    for name in ('composition_dir', 'composition_figures_dir', 'parts_dir', 'parts_figures_dir'):
+        folder = absolute(getattr(params.output, name)).rstrip(os.sep) + '.writing'
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+        os.makedirs(folder)
+        staged[name] = folder
+    return staged
+
+
+def clear_staging(staged: dict) -> None:
+    """The staging folders removed, with what this run wrote into them (a run stopped by a fault writes nothing)."""
+    for folder in staged.values():
+        if os.path.isdir(folder):
+            shutil.rmtree(folder)
+
+
+def move_staged(staged: dict) -> None:
+    """Every file of the staging folders moved into its output folder (the folder's name without '.writing'), at the
+    same place below it; a file there of the same name replaced, every other file there left as it is; then the
+    staging folders, empty, removed."""
+    for folder in staged.values():
+        target = folder[:-len('.writing')]
+        for here, _, names in os.walk(folder):
+            into = os.path.join(target, os.path.relpath(here, folder))
+            os.makedirs(into, exist_ok=True)
+            for name in names:
+                os.replace(os.path.join(here, name), os.path.join(into, name))
+        shutil.rmtree(folder)
+
+
+def write_part_by_part(category, d: Draws, a, c, inputs: Inputs, params: Params, staged: dict, with_pages: tuple,
+                       steps) -> None:
+    """A robot type drawn part by part: its tables part by part, its pages of its robots part by part and its two
+    figures with where each material sits (where the settings name its pages), into the staging folders, with the
+    reports of its draws."""
+    folder = folder_name(category)
+    if d.robot_type in with_pages:
+        steps.begin(f'Robot type {d.robot_type}: drawing its pages')
+        shown = c if not a.later else compose_taken_apart(category, d, inputs.lists)
+        draw_taken_apart_pages(shown, d, a.left_out, staged['composition_figures_dir'], params, a.later, a.outliers)
+        steps.end('  drawn in {}.')
+    steps.begin(f'Robot type {d.robot_type} part by part: writing its draws')
+    write_taken_apart(d, os.path.join(staged['parts_dir'], folder))
+    steps.end('  written in {}.')
+    # The check of the boards' copper against their layers (E51 row 8), reported, not cut.
+    print(f'  Robot type {d.robot_type}: its boards\' copper (a share of their mass) above what all their layers can '
+          'hold: ' + '; '.join(layer_words(d)), flush=True)
+    print(f"  Robot type {d.robot_type} drawn part by part over {len(d.register)} robots of the register's sheet "
+          f"Type {d.robot_type}; not drawn (no mass stated): "
+          f"{', '.join(f'{r.number} {r.name}' for r in a.left_out) or 'none'}"
+          + (f"; not drawn, an outlier: {', '.join(f'{r.number} {r.name}' for r in a.outliers)}"
+             if a.outliers else '')
+          + (f'; not yet taken apart: {len(a.later)}, so its draws are from the workbook.'
+             if a.later else '.'))
+    for column, share in below_zero(d).items():
+        if share > 0:
+            print(f'  {column} is below zero in {100 * share:.1f} % of its draws (reported, not cut).')
+    print(f'  Robot type {d.robot_type} part by part written into {params.output.parts_dir}/{folder}/.')
+    if d.robot_type in with_pages:
+        steps.begin(f'Robot type {d.robot_type} part by part: drawing its two figures and where each material sits')
+        draw_parts_figures(d, params, os.path.join(staged['parts_figures_dir'], folder))
+        steps.end('  drawn in {}.')
+        for symbol, name in FIGURE_ELEMENTS:
+            total = sum(by_kind(d, symbol).values())
+            per, unit = panel_unit(total)
+            mean, median, low, high, held_in = statistics(total / per)   # over the draws that hold it
+            if mean is None:
+                print(f'  {name} in one robot: in none of the draws')
+                continue
+            print(f'  {name} in one robot: median {panel_number(median)} {unit}, mean {panel_number(mean)} {unit} '
+                  f'(95 %: {panel_number(low)} to {panel_number(high)})'
+                  + (f', held in {panel_number(held_in)} % of the draws' if held_in < 100 else ''))
+        print(f'  Its two figures and where each material sits drawn into {params.output.parts_figures_dir}/'
+              f'{folder}/.')
+
+
 def run(params: Params) -> int:
-    """Reads and checks the inputs, draws every robot type, checks every draw, and only then writes. 0 when it has
-    written, 1 when a fault stopped it (nothing written). Each step is said as it begins and its time when it ends
-    (Steps)."""
+    """Reads and checks the inputs, checks the memory each robot type will need, then draws, checks and writes one
+    robot type after another into staging folders, and moves everything into the output folders only when every type
+    has added up (MEMORY in the docstring at the top). 0 when it has written, 1 when a fault stopped it (nothing
+    written). Each step is said as it begins and its time when it ends (Steps)."""
     steps = Steps()
     # Step 1: the inputs.
     steps.begin("Reading the inputs: the workbook, the shared lists, the element recipes, the register, the parts "
@@ -4428,67 +4821,90 @@ def run(params: Params) -> int:
         return steps.stopped()
     steps.end('  no fault, in {}.')
 
-    # Step 3: each robot type: part by part where its robots are taken apart (every tenth robot said as it is drawn);
-    # its draws from its parts once every robot of it with a mass is taken apart, from the workbook
-    # until then (Q2), its part by part draws then on their own, with their pages.
+    # Step 3: the memory each robot type taken apart will need, from a trial of MEMORY_TRIAL draws, before any is
+    # drawn: a type that would hold more than MEMORY_SHARE of this computer's memory stops the run here, nothing drawn
+    # (Matthias, 2026-11-13, after 02 held 43 GB on his 16 GB computer: "It must adopte, so if data are added, it still
+    # works!!!").
     draws = params.composition.draws
+    steps.begin(f'Checking the memory each robot type taken apart needs at {draws:,} draws (a trial of '
+                f'{MEMORY_TRIAL:,} draws each)')
+    # What the run will hold at most: what this process holds already (the inputs read), the summaries of every type
+    # kept until all are drawn, and the largest peak of drawing one type.
+    budget = MEMORY_SHARE * os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+    needs = {n: memory_needed(a, next(c for c in inputs.book.categories if c.number == n), inputs.lists, params)
+             for n, a in aparts.items()}
+    for n, (peak, kept) in needs.items():
+        print(f'  robot type {n}: about {peak / 1e9:.1f} GB at its peak', flush=True)
+    total = (memory_in_use() + sum(kept for _, kept in needs.values())
+             + max((peak for peak, _ in needs.values()), default=0.0) + PAGES_MEMORY)
+    print(f'  the run at most about {total / 1e9:.1f} GB, of {budget / 1e9:.1f} GB ({MEMORY_SHARE:.0%} of this '
+          'computer\'s memory)', flush=True)
+    if total > budget:
+        print(f'The run would need about {total / 1e9:.1f} GB, more than {budget / 1e9:.1f} GB, {MEMORY_SHARE:.0%} of '
+              'this computer\'s memory; nothing is drawn.', file=sys.stderr)
+        return steps.stopped()
+    steps.end('  it fits, in {}.')
+
+    # Step 4: one robot type after another, drawn (part by part where its robots are taken apart, every tenth robot
+    # said as it is drawn; from the workbook until all its robots with a mass are taken apart, Q2), its draws checked,
+    # its tables part by part and its figures written into the staging folders (staged), and its draws part by part let
+    # go before the next type is drawn, so that one type at a time is held (until 2026-11-13 all six at once). What is
+    # kept of each type is its draws of the materials and elements (Composition), whose element columns are made the
+    # same for all types once all are drawn (same_elements); nothing reaches the output folders unless every type adds
+    # up (Step 6).
+    staged = staging_folders(params)
     print(f'{draws:,} draws per robot type, seed {params.composition.seed}.', flush=True)
-    drawn, taken = [], {}
+    drawn, taken = [], set()
+    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"; type 2 since 2026-10-30
     for category in inputs.book.categories:
         a = aparts.get(category.number)
+        d = None
         if a is not None:
             versions = len(a.apart.robots)
             steps.begin(f'Robot type {category.number}: drawing part by part over its {len(a.robots)} robots'
                         + (f' ({versions} with their versions)' if versions != len(a.robots) else '')
                         + f', {draws:,} draws')
             magnets = magnet_fractions(params, grade_classes(a), draws)
-            taken[category.number] = draw_taken_apart(
-                a, params, magnets,
-                say=lambda done, of, name: print(f'  robot {done} of {of} drawn: {name}', flush=True))
-            if not a.later:
-                drawn.append(compose_taken_apart(category, taken[category.number], inputs.lists))
+            d = draw_taken_apart(a, params, magnets,
+                                 say=lambda done, of, name: print(f'  robot {done} of {of} drawn: {name}', flush=True))
+            taken.add(category.number)
+            c = compose_taken_apart(category, d, inputs.lists) if not a.later else None
             steps.end('  done in {}.')
         if a is None or a.later:
             steps.begin(f'Robot type {category.number}: drawing from the workbook, {draws:,} draws'
                         + (' (its draws until all its robots with a mass are taken apart)'
                            if a is not None else ''))
-            drawn.append(compose(category, inputs, params))
+            c = compose(category, inputs, params)
             steps.end('  done in {}.')
-
-    # Step 4: every draw checked; nothing is written unless all add up.
-    steps.begin('Checking that the draws add up')
-    same_elements(drawn)
-    problems = [problem for c in drawn for problem in draw_faults(c)]
-    if problems:
-        print('The draws do not add up; nothing is written.', file=sys.stderr)
-        for problem in problems:
-            print(f'  {problem}', file=sys.stderr)
-        return steps.stopped()
-    for c in drawn:
+        # Its draws checked; nothing is written unless all add up.
+        steps.begin(f'Robot type {category.number}: checking that its draws add up')
+        problems = draw_faults(c)
+        if problems:
+            print('The draws do not add up; nothing is written.', file=sys.stderr)
+            for problem in problems:
+                print(f'  {problem}', file=sys.stderr)
+            clear_staging(staged)
+            return steps.stopped()
         for report in remainder_reports(c):
             print(f'  robot type {c.number}: {report} (reported, not cut).', flush=True)
-    steps.end('  they add up, in {}.')
+        steps.end('  they add up, in {}.')
+        if d is not None:
+            write_part_by_part(category, d, a, c, inputs, params, staged, with_pages, steps)
+            del d   # its draws part by part let go: one robot type at a time in memory
+            gc.collect()
+        drawn.append(c)
 
-    # Step 5: each robot type written, with its pages where the setting names it; then each type taken apart part by
-    # part, with its two figures.
-    out, pages = absolute(params.output.composition_dir), absolute(params.output.composition_figures_dir)
-    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"; type 2 since 2026-10-30
+    # Step 5: every robot type's draws of the materials and elements, their element columns the same for all
+    # (same_elements), written with their pages into the staging folders.
+    same_elements(drawn)
     for c in drawn:
         steps.begin(f'Robot type {c.number}: writing its draws')
-        write(c, os.path.join(out, c.name))
+        write(c, os.path.join(staged['composition_dir'], c.name))
         steps.end('  written in {}.')
-        if c.number in with_pages:
-            steps.begin(f'Robot type {c.number}: drawing its pages')
-        # Its draws are written for every robot type; its pages only where the setting names it: a type taken apart
-        # its pages of its robots part by part, another its page of the workbook.
-        if c.number in with_pages and c.number in taken:
-            shown = c if not aparts[c.number].later else compose_taken_apart(
-                next(k for k in inputs.book.categories if k.number == c.number), taken[c.number], inputs.lists)
-            draw_taken_apart_pages(shown, taken[c.number], aparts[c.number].left_out, pages, params,
-                                   aparts[c.number].later, aparts[c.number].outliers)
-        elif c.number in with_pages:
-            draw_page(c, params.composition.draws, os.path.join(pages, c.name + '.png'), params)
-        if c.number in with_pages:
+        if c.number in with_pages and c.number not in taken:
+            steps.begin(f'Robot type {c.number}: drawing its page')
+            draw_page(c, params.composition.draws, os.path.join(staged['composition_figures_dir'], c.name + '.png'),
+                      params)
             steps.end('  drawn in {}.')
         rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
         stats = statistics_of(c.column('total', 'Total'))
@@ -4498,46 +4914,15 @@ def run(params: Params) -> int:
               f"{stats['97.5 % (kg)']:.1f}); Not allocated below zero in "
               f"{rows[NOT_ALLOCATED]['Draws below zero (%)']:.1f} % of the draws; elements of interest in part: "
               f"{', '.join(partly) or 'none'}; staying materials: {', '.join(kept) or 'none'}.")
-    for category in inputs.book.categories:
-        if category.number not in taken:
-            continue
-        d, a, folder = taken[category.number], aparts[category.number], folder_name(category)
-        steps.begin(f'Robot type {d.robot_type} part by part: writing its draws')
-        write_taken_apart(d, os.path.join(absolute(params.output.parts_dir), folder))
-        steps.end('  written in {}.')
-        # The check of the boards' copper against their layers (E51 row 8), reported, not cut.
-        print(f'  Robot type {d.robot_type}: its boards\' copper (a share of their mass) above what all their layers can '
-              'hold: ' + '; '.join(layer_words(d)), flush=True)
-        print(f"  Robot type {d.robot_type} drawn part by part over {len(d.register)} robots of the register's sheet "
-              f"Type {d.robot_type}; not drawn (no mass stated): "
-              f"{', '.join(f'{r.number} {r.name}' for r in a.left_out) or 'none'}"
-              + (f"; not drawn, an outlier: {', '.join(f'{r.number} {r.name}' for r in a.outliers)}"
-                 if a.outliers else '')
-              + (f'; not yet taken apart: {len(a.later)}, so its draws are from the workbook.'
-                 if a.later else '.'))
-        for column, share in below_zero(d).items():
-            if share > 0:
-                print(f'  {column} is below zero in {100 * share:.1f} % of its draws (reported, not cut).')
-        print(f'  Robot type {d.robot_type} part by part written into {params.output.parts_dir}/{folder}/.')
-        if d.robot_type in with_pages:
-            steps.begin(f'Robot type {d.robot_type} part by part: drawing its two figures and where each material sits')
-            draw_parts_figures(d, params, os.path.join(absolute(params.output.parts_figures_dir), folder))
-            steps.end('  drawn in {}.')
-            for symbol, name in FIGURE_ELEMENTS:
-                total = sum(by_kind(d, symbol).values())
-                per, unit = panel_unit(total)
-                mean, median, low, high, held_in = statistics(total / per)   # over the draws that hold it
-                if mean is None:
-                    print(f'  {name} in one robot: in none of the draws')
-                    continue
-                print(f'  {name} in one robot: median {panel_number(median)} {unit}, mean {panel_number(mean)} {unit} '
-                      f'(95 %: {panel_number(low)} to {panel_number(high)})'
-                      + (f', held in {panel_number(held_in)} % of the draws' if held_in < 100 else ''))
-            print(f'  Its two figures and where each material sits drawn into {params.output.parts_figures_dir}/'
-                  f'{folder}/.')
+
+    # Step 6: every type has added up: everything staged moved into the output folders, a file there of the same name
+    # replaced, every other file there left as it is.
+    steps.begin('Moving what is written into the output folders')
+    move_staged(staged)
+    steps.end('  moved in {}.')
     print(f'Written into {params.output.composition_dir}/, one folder per robot type, and the pages into '
           f'{params.output.composition_figures_dir}/.')
-    # Step 6: the whole run's time.
+    # Step 7: the whole run's time.
     return steps.done()
 
 

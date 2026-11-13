@@ -547,6 +547,7 @@ def page_problems(figure, name: str, dpi=None, tight: bool = False) -> list:
     try:
         from matplotlib.colors import to_hex
         from matplotlib.patches import Rectangle
+        from figure_tests.rules import is_ink
         figure.canvas.draw()   # the page laid out as it is saved
         renderer = figure.canvas.get_renderer()
         width, height = figure.bbox.width, figure.bbox.height
@@ -565,6 +566,9 @@ def page_problems(figure, name: str, dpi=None, tight: bool = False) -> list:
                         # legend names only the median and the 95 % interval, 2026-11-13)
                 drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
                          and p.get_height() > 0 and p.get_width() > 0 and p.get_facecolor()[3] > 0}
+                # black, grey and white are ink, not a colour that means something (FigureTests' is_ink: the robot's
+                # light grey body on the overview pages, the pale band of a table)
+                drawn = {c for c in drawn if not is_ink(c)}
                 if drawn - named:
                     problems.append((name, 'a colour drawn, not in the legend', title, sorted(drawn - named)))
             if getattr(axes, 'panel_numbers', None) is not None and axes.patches:

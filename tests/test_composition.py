@@ -388,9 +388,13 @@ class TestRun(Drawn):
         with contextlib.redirect_stdout(out):
             self.assertEqual(composition.run(params), 0)
         lines = out.getvalue().splitlines()
+        # Since 2026-11-13 one robot type after another, each checked as it is drawn (02's MEMORY), then the draws of
+        # every type written and moved into the output folders.
         steps = ('Reading the inputs', '  read in ', 'Checking every input', '  no fault, in ', 'Robot type 1: drawing',
-                 '  done in ', 'Robot type 2: drawing', 'Checking that the draws add up', '  they add up, in ',
-                 'Robot type 1: writing its draws', 'Robot type 2: writing its draws', '02 done in ')
+                 '  done in ', 'Robot type 1: checking that its draws add up', '  they add up, in ',
+                 'Robot type 2: drawing', 'Robot type 2: checking that its draws add up',
+                 'Robot type 1: writing its draws', 'Robot type 2: writing its draws',
+                 'Moving what is written into the output folders', '02 done in ')
         found = [next((k for k, line in enumerate(lines) if line.startswith(step)), None) for step in steps]
         self.assertNotIn(None, found, dict(zip(steps, found)))
         self.assertEqual(found, sorted(found), lines)

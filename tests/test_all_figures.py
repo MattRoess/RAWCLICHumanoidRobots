@@ -90,12 +90,13 @@ def proper_names() -> tuple:
 #   extra_words     the jargon of the data-centre pages, which this project's pages follow (Matthias, 2026-11-10:
 #                   "NOBODY can understand it"): inflow, outflow; "Plan A" (the ai-2040 article's name of its scenario:
 #                   not a scientist's word, rule 2 of 2026-11-12)
+#   font            every text in Luciole, the font of the settings (Matthias, 2026-11-13: "All Luciole")
 #   text_pages      the notes pages of 02 and 03 ("how to read its pages", <...>_notes_<k>.png): pages of text, with no
 #                   foot of three sentences to keep, and "average" may name an input there, as his workbook does
 #                   (Matthias, 2026-11-13: "Yes, both"); every other rule holds on them
 SETTINGS = ft.Settings(proper_names=proper_names(), schema_folders=("schemas",),
                        extra_words=(r"\binflows?\b", r"\boutflows?\b", r"\bPlan A\b"),
-                       text_pages=(r"_notes_\d+\.png$",))
+                       text_pages=(r"_notes_\d+\.png$",), font=ps.current().output.font)
 
 
 class TestTheInstalledVersion(unittest.TestCase):

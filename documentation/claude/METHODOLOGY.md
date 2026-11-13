@@ -326,8 +326,13 @@ report by report.
 Since 2026-10-29 (Matthias: "I told you the 01 figures are shit", "Also the overview acn be done nicer!!", then "Yes,
 build it" on the specification in HANDOVER.md): every page of 01 is 16 × 9 inches with no text below 14 points (at
 least 18 pixels fit to a 1920 × 1080 screen, tested), the notes once on a page of their own, plain words (tested: no
-file names of documents, section numbers or codes), Paul Tol's colours as published (his "light" scheme for the boxes,
-his discrete rainbow for the kinds of part). Pages only for the robot types `output.robot_types_with_pages` names
+file names of documents, section numbers or codes), published colours. Since 2026-11-13 the boxes and the four groups
+of how a robot is taken apart in the U.S. Web Design System's colours of grade 60 (designsystem.digital.gov: white text
+on them stands out 4.5 : 1 or more), of its hues those every reader tells apart, colour-blind too: every box's title
+white on a band of its colour, the rest of the box that colour at 12 % with its text dark, a part's name dark on its
+group's light shade, below the group's title (Matthias: "There are color schemas, which address the topic", "This is
+perfect"; the rule in the GitHub folder's CLAUDE.md, the tests `TestBoxTitles`). Until then Paul Tol's "light" scheme for
+the boxes and his "bright" scheme for the groups. Pages only for the robot types `output.robot_types_with_pages` names
 ("Type 1 only"; types 1 to 4 since 2026-10-30, E11.7 open point B):
 
 - **`overview_1.png`**: how the model works, as boxes joined by arrows: the inputs (the research workbook, the
@@ -355,6 +360,24 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
   Sources holds every source its rows cite, those of the sheets one set for all (MagnetGrades, JointParts, Shares)
   too (since 2026-11-05, "Yes, all ten", E35 item 7: M30, T1, T3, T3k, Bizzo 2014 and Drexler 2025 had been missing
   from some files).
+  Since 2026-11-13 (Matthias: "These tables are very very bad. The table hearder is just shit", "Text goes into other
+  field. There are units and the header has units. Especially the scales are not understandable", "NO NO NO, why are
+  there now no scales. You can do it better", "It is a waste of space", "Aligne the header damit!!!", "Define rules and
+  test damit!!"; the rule "Tables on a page" in the GitHub folder's CLAUDE.md §5): every column its own field, as wide
+  as its title and its widest entry measured as drawn (`table_fields`), 0.15 inch between two; the width left before
+  the cells goes to the two bars, half each. The units once, in the titles: Height (m), Mass (kg), Battery (Wh); the
+  entries plain numbers. The mass's bar and the battery's bar each first in its column, its most likely number
+  right-aligned after it; each bar with its scale (`bar_scale`): a line, its ticks and their numbers just above the
+  bars, from 0 to a round number at or above the largest robot drawn, as many numbers as fit, thin lines from the ticks
+  down through the rows. The heading in two tiers: the titles white on the U.S. Web Design System's gray 60, each
+  where its column starts (a bar's) or as its entries align (names left, numbers right), on one baseline; below, on its
+  light shade, the scales and the five cells' names on one baseline. A group's heading dark on that light shade. A
+  robot without a battery: "no battery" from the bar's start, on its row's background. No column of the base on wheels
+  ("the base column is a wast of space, as it is hard applicable. Have it as a footnote for the few robots"): a robot
+  on wheels has its base's mark after its name (`base_marks`: ¹ the base most of the type's robots stand on, ² the
+  next), each page's key names the bases of its rows ("On wheels: ¹ 2 wheels, 2 casters; …"); 17 rows a page (18
+  before) to leave the key its third line. Tested on every page of every robot type (`TestRobotsTables`, each of his
+  faults put back into a copy of 01 and caught).
 - **`categories/1_<name>_robot.png`**: robot type 1's kinds of part, where they sit on the robot (the marks and
   colours of 02's figures, one copy of the drawing in 01), the joints whose magnets are for 150 °C or more in most
   draws ringed red. Since 2026-11-13 each kind in the colour of its group of how a robot is taken apart (joints,
@@ -414,7 +437,26 @@ Masses are rounded to three decimals on the pages; the checks use the workbook's
 
 `02_composition.py` draws each robot type `composition.draws` times (200,000; the tests and Claude's checks use a few
 thousand). The same code serves all six robot types. Matthias agreed the specification and its recommendations a to
-g on 2026-10-26 (HANDOVER.md). In each draw:
+g on 2026-10-26 (HANDOVER.md).
+
+**Its memory (since 2026-11-13).** Matthias's run of 02 held 43 GB on his 16 GB computer and wrote nothing ("This is
+very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte Carlo", "It must
+adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4). 02 now holds one
+robot type at a time: drawn, checked, its tables and pages written, let go before the next; each robot's parts and
+joints' structures only over its own draws (`PartBlocks`), so that the memory grows with the draws and the materials
+and elements, never with the number of robots; for a type over several parts files each file's shared draws only over
+its own robots' draws (`Shared.keep`, the random numbers as before); each table built only when it is written, each page
+written and freed before the next; its large draw tables kept on the disk, memory-mapped (`DiskArrays`), so that the
+system holds in memory only what is in use and writes the rest to the disk, never to its swap. Before any type is
+drawn, a trial of 2,000 draws of each gives the memory the run will need (`memory_needed`, on the safe side: the draws on
+the disk counted as if in memory, its peak twice the measured, the pages added); a run whose estimate passes 75 % of the
+computer's memory, where it would begin to swap, stops there, nothing drawn.
+Everything goes into staging folders ('<output folder>.writing') and reaches the output folders only when every type
+adds up. The outputs are byte for byte those of before (VERIFICATION V236). Measured at 200,000 draws (extrapolated
+from 50,000 and 100,000): about 7.3 GB; 03, which reads 02's tables memory-mapped, about 4.1 GB; tests/test_memory.py
+measures every stage at two sizes and fails where one would not fit.
+
+In each draw:
 
 1. **Each part:** the mass of all its units, one triangle on the workbook's minimum, mode and maximum (recommendation
    a: the units of a part are drawn together, as the workbook gives one range per part). Its part group takes it,
@@ -1275,6 +1317,23 @@ datacenters", then "Yes, 1 to 5"), as RAWCLICDataCenters draws its materials:
   alloy or magnet class in every kind of part, in every draw. A grade or alloy is split by the shares its recipe's
   elements are drawn with (02's `RecipeDraws.leaves`: the gear stage 2's steel into its 20CrMnTi and GCr15, type 1's
   aluminium into its alloys), so that the grades of a material add up to it in every draw (tested).
+
+## The font of the pages, and titles in regular weight (since 2026-11-13)
+
+Matthias, 2026-11-13, on the comparison pages: "These titles look ugly. Font terrible why the hell such a bold"; then
+"Do research which fonds are designe for best readability", and after examples of his own page in the fonts designed
+for readability (Verdana, Atkinson Hyperlegible Next, Luciole, B612, Source Sans 3, Noto Sans; the research and its
+sources in VERIFICATION V229): "C and F", then "All Luciole". Every text of every page is set in Luciole, made for
+readers with low vision (Galiano et al. 2023, Acta Psychologica 236: 103926, compared it with Arial, Verdana, Frutiger,
+Eido and OpenDyslexic in 145 readers: about half of those with low vision preferred it, a slight advantage over some
+fonts), its files in `fonts/Luciole/` (CC BY 4.0), registered by 01 when any stage loads it (`font_style`,
+`FONT_STYLE`; the settings `output.font`, `output.font_folder`), the powers of ten written as math in it too, a letter
+Luciole lacks in matplotlib's own DejaVu Sans (`FALLBACK_FONT`: the ψ of "PsiBot ψ-SynRobot" and the non-breaking
+hyphen of "Keenon XMAN‑R1" showed empty boxes until then; "Yes, fix ψ first", tested on every robot's name); 04's
+element pages, drawn in matplotlib's default style, keep it. No title and no heading is bold (until then panel and page
+titles, 01's headings and the tables' column headings were): "I do not like the bold titles. It looks gross and very
+dominant"; only the marks of the kinds of part on the robot, one number or letter each, stay bold. FigureTests 0.6.0
+checks both on every page (its rules font and bold_title).
 
 ## What 03 draws
 

@@ -939,7 +939,7 @@ class TestPagesByMaterial(unittest.TestCase):
         kg = c.column('elements', 'Li')
         per, unit = composition.panel_unit(kg[kg > 0])
         figure, axes = composition.plt.subplots()
-        composition.centre_lines(axes, kg / per, '', float((kg / per).max()), unit, 'Lithium (Li)')
+        composition.centre_lines(axes, kg / per, 1.0, float((kg / per).max()), unit, 'Lithium (Li)')   # held in all
         row = composition.panel_rows(figure)[0]
         self.assertEqual(row[0], 'Lithium (Li)')
         self.assertEqual(row[2], f'{composition.panel_number(float(np.median(kg / per)))}\u00a0{unit}')
@@ -2117,6 +2117,9 @@ class TestLegendsAndPlaces(unittest.TestCase):
         for name, figure in self.pages():
             named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles
                      if hasattr(h, 'get_facecolor')}      # the median's and the 95 %'s samples are lines
+            if not named:   # a page of one colour, its titles naming what it draws (its legend: the median, the 95 %)
+                composition.plt.close(figure)
+                continue
             for axes in figure.axes:
                 drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
                          and p.get_height() > 0 and p.get_facecolor()[3] > 0}

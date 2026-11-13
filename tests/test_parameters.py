@@ -32,7 +32,8 @@ KEYS = {'data.workbook', 'data.taxonomy_sheet', 'data.components_sheet', 'data.m
         'checks.tolerance_kg', 'composition.draws', 'composition.type_one_lowest_kg', 'composition.outliers',
         'composition.seed', 'composition.nmc_wh_per_kg_min', 'composition.nmc_wh_per_kg_mode',
         'composition.nmc_wh_per_kg_max', 'output.schemas_dir', 'output.composition_dir',
-        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'output.parts_dir',
+        'output.composition_figures_dir', 'output.comparison_dir', 'output.dpi', 'output.font', 'output.font_folder',
+        'output.parts_dir',
         'output.parts_figures_dir', 'output.robot_types_with_pages',
         # 04's (2026-11-06, EVIDENCE.md E42, E43): the article's robots, the lifetimes, the hours, the battery packs,
         # the research share, its folders; the world's production and reserves it draws, read where they lie.

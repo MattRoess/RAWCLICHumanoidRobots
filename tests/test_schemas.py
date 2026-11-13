@@ -650,12 +650,15 @@ class TestTypeTwoPages(unittest.TestCase):
         return schemas.taken_apart_type_pages('categories/2_type', self.apart, 2, self.register)
 
     def title(self, figure) -> str:
+        # The page's title: its text in the heading's size (until 2026-11-13 found by its bold, which the titles lost
+        # with "I do not like the bold titles. It looks gross and very dominant").
         from matplotlib.text import Text
-        return next(t.get_text() for t in figure.findobj(Text) if t.get_fontweight() == 'bold' and t.get_text())
+        return next(t.get_text() for t in figure.findobj(Text) if t.get_fontsize() == schemas.SCREEN_HEADING
+                    and t.get_text())
 
     def test_its_pages_are_type_1s_with_its_own_title(self):
         pages = self.pages()
-        # Batches 1, 2, 2b and since 2026-10-30 the robots on wheels: 96 robots, 102 rows, on pages of 18 lines.
+        # Batches 1, 2, 2b and since 2026-10-30 the robots on wheels: 96 robots, 102 rows, on pages of T_LINES lines.
         # Since 2026-11-13 ("Yes, all") the robot page is followed by the page of what each kind of part holds.
         tables = len(pages) - 2
         self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in range(1, tables + 1)]
@@ -736,24 +739,6 @@ class TestTypeTwoPages(unittest.TestCase):
                 for label, sources in rows:
                     if label.startswith('S'):
                         self.assertIsNotNone(schemas.first_source(self.apart, sources), (robot, cell, sources))
-
-    def test_no_battery_label_runs_into_the_cells_beside_it(self):
-        # 2026-10-30, batch 2b's entry: the Walker Tienkung's "1584 Wh" ran into its first cell; the battery's axis now
-        # leaves room for the label of the longest bar.
-        from matplotlib.patches import Rectangle
-        from matplotlib.text import Text
-        for name, figure in enumerate(schemas.robots_table_pages(self.apart, 2), start=1):
-            figure.canvas.draw()
-            renderer = figure.canvas.get_renderer()
-            labels = [t for t in figure.findobj(Text) if t.get_text().endswith(' Wh') and t.get_visible()]
-            cells = [p for p in figure.findobj(Rectangle) if p.get_x() >= schemas.T_CELLS[0] - schemas.T_CELL[0]
-                     and p.get_width() <= schemas.T_CELL[0] + 1e-9]
-            self.assertTrue(labels and cells, name)
-            boxes = [c.get_window_extent(renderer) for c in cells]
-            for t in labels:
-                box = t.get_window_extent(renderer)
-                self.assertFalse(any(box.overlaps(b) for b in boxes), (name, t.get_text()))
-            schemas.plt.close(figure)
 
     def test_the_former_pages_only_for_a_type_with_no_parts_file(self):
         self.assertEqual(schemas.former_page_types((1, 2), {1: None, 2: self.apart}), [])
@@ -860,10 +845,10 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
                          schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
 
 
-    def test_the_mass_axis_without_the_outlier(self):
-        # Matthias, 2026-11-05, "Yes, all ten" (open item 4): the Neo1's 1,200 kg ran the mass axis of the robots tables
-        # of types 3 and 5 to 1,600 kg; the axis runs to the largest robot drawn, the Neo1's row its mass written, no
-        # bar, no dot.
+    def test_the_outlier_row_as_every_row(self):
+        # Matthias, 2026-11-05, "Yes, all ten" (open item 4): the Neo1's 1,200 kg ran the mass's scale of the robots
+        # tables of types 3 and 5 to 1,600 kg; the scale runs to the largest robot drawn, the Neo1's row its mass
+        # written, no bar, no dot.
         from matplotlib.text import Text
         from matplotlib.lines import Line2D
         names = schemas.outlier_names(schemas.outlier_robots(self.register, Params()), Params())
@@ -872,12 +857,13 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
             pages = schemas.robots_table_pages(self.views[n], n, outliers=names)
             figure = next(f for f in pages if 'NeodraDynamics Neo1 *' in [t.get_text() for t in f.findobj(Text)])
             words = [t.get_text() for t in figure.findobj(Text)]
-            self.assertIn('1200 kg', words, msg=n)
+            self.assertIn('1200', words, msg=n)
             self.assertNotIn('1600', words, msg=n)
             lines = schemas.table_pages(rows)[pages.index(figure)]
             dots = [line for line in figure.findobj(Line2D) if line.get_marker() == 'o']
             self.assertEqual(len(dots), sum(1 for line in lines if line[0] == 'robot' and not line[1].outlier),
                              msg=n)
+
 
 class TestMaterialFaults(Small):
     """The checks of the sheet 'Material Composition per Cat', each seen to catch the fault it guards."""
@@ -2844,7 +2830,8 @@ class TestTableHeadingsInsideTheBand(unittest.TestCase):
             figure.canvas.draw()
             renderer = figure.canvas.get_renderer()
             band = next(p for p in figure.axes[0].patches if isinstance(p, Rectangle)
-                        and p.get_facecolor()[:3] == to_rgb(schemas.TABLE_BAND)).get_window_extent(renderer)
+                        and p.get_facecolor()[:3] == to_rgb(schemas.TABLE_HEAD)).get_window_extent(renderer)
+            band.y0 -= (schemas.T_BAND[1] - schemas.T_BAND[0] - schemas.T_TIER) * figure.dpi   # and its light tier
             for t in figure.findobj(Text):
                 e = t.get_window_extent(renderer)
                 if t.get_text().strip() and band.y0 <= (e.y0 + e.y1) / 2 <= band.y1:
@@ -2958,6 +2945,250 @@ class TestHowARobotIsTakenApart(unittest.TestCase):
         schemas.plt.close(figure)
 
 
+class TestBoxTitles(unittest.TestCase):
+    """Matthias, 2026-11-13, on 01's boxes: "I do not want any normal text in white. So this has to be bright. But the
+    title band should be darker"; "The titles can and should be white, if the background is darker. ... You had rules
+    for contrast, which you are not using at all"; "Try to be consistent"; "There are color schemas, which address the
+    topic"; "The titles are finally good, but not the subboxes under joints, batteries etcs. They look more important
+    than the titles"; to the example in the U.S. Web Design System's colours: "This is perfect. Now put the rules and
+    test together". Each fault he found, a test:
+    1. every box colour one of the published scheme's (USWDS, grade 60), none made up;
+    2. every box title white, on a band of the box's colour at full strength, 4.5 : 1 at least (the contrast rule);
+    3. one rule for every box: no title dark on one box and white on another;
+    4. the rest of a box light (the colour at BODY_SHARE), its text dark, no normal text in white;
+    5. a part's box below its group's title, lighter: its name dark on the group's light shade, never on a band as
+       strong as the group's."""
+
+    # USWDS system tokens of grade 60, as listed on designsystem.digital.gov/design-tokens/color/system-tokens/ (read
+    # 2026-11-13 through a fetching agent): white text on them 6.1 to 7.0 : 1.
+    USWDS_60 = {'blue-60': '#2c608a', 'blue-60v': '#005ea2', 'cyan-60': '#2a646d', 'cyan-60v': '#00687d',
+                'mint-60': '#286846', 'mint-60v': '#146947', 'green-60': '#4c6424', 'green-60v': '#466c04',
+                'gold-60': '#6b5947', 'gold-60v': '#7a591a', 'yellow-60': '#6b5a39', 'yellow-60v': '#776017',
+                'orange-60': '#775540', 'orange-60v': '#8c471c', 'red-60': '#a23737', 'red-60v': '#b50909',
+                'magenta-60': '#8b4566', 'magenta-60v': '#ab2165', 'violet-60': '#665190', 'violet-60v': '#783cb9',
+                'indigo-60': '#4d52af', 'indigo-60v': '#4a50c4', 'gray-60': '#5c5c5c'}
+
+    def colours(self) -> list:
+        return list(schemas.BOX_COLOURS.values()) + list(schemas.GROUP_COLOURS.values())
+
+    def test_1_every_colour_from_the_scheme(self):
+        for colour in self.colours():
+            self.assertIn(colour.lower(), self.USWDS_60.values(), msg=colour)
+
+    def test_2_to_4_a_box_of_each_colour(self):
+        from matplotlib.colors import to_rgba
+        for colour in self.colours():
+            figure, axes = schemas.screen_page()
+            schemas.screen_box(axes, 1.0, 1.0, 5.0, 'A title', 'its words on the rest of the box', colour, 1.5)
+            body, band = axes.patches
+            title, words = axes.texts
+            self.assertEqual(band.get_facecolor(), to_rgba(colour), msg=colour)               # full strength
+            self.assertEqual(to_rgba(title.get_color()), to_rgba('white'), msg=colour)         # 2 and 3: white
+            self.assertGreaterEqual(schemas.contrast_ratio('white', colour), 4.5, msg=colour)
+            self.assertEqual(body.get_facecolor(), to_rgba(colour, schemas.BODY_SHARE), msg=colour)   # 4: light,
+            self.assertEqual(to_rgba(words.get_color()), to_rgba(schemas.SCREEN_INK), msg=colour)     # dark text
+            shown = tuple(schemas.BODY_SHARE * c + 1 - schemas.BODY_SHARE for c in to_rgba(colour)[:3])
+            self.assertGreaterEqual(schemas.contrast_ratio(schemas.SCREEN_INK, shown), 7.0, msg=colour)
+            schemas.plt.close(figure)
+
+    def test_5_how_a_robot_is_taken_apart(self):
+        from matplotlib.colors import to_rgba
+        figure = schemas.taken_apart_page()
+        axes = figure.axes[0]
+
+        def band_under(text):
+            x, y = text.get_position()
+            under = [p for p in axes.patches if p.get_x() <= x <= p.get_x() + p.get_width()
+                     and p.get_y() <= y <= p.get_y() + p.get_height()]
+            return max(under, key=lambda p: p.get_zorder())                    # the patch drawn on top, under it
+        for group, colour in schemas.GROUP_COLOURS.items():
+            title = next(t for t in axes.texts if t.get_text() == group)
+            self.assertEqual(band_under(title).get_facecolor(), to_rgba(colour), msg=group)
+            self.assertEqual(to_rgba(title.get_color()), to_rgba('white'), msg=group)
+        for part, group in schemas.TAKEN_GROUP.items():
+            name = next(t for t in axes.texts if t.get_text().replace('\n', ' ') == part)
+            self.assertEqual(band_under(name).get_facecolor(), to_rgba(schemas.GROUP_COLOURS[group], schemas.BODY_SHARE),
+                             msg=part)                                          # the group's light shade, not its band
+            self.assertEqual(to_rgba(name.get_color()), to_rgba(schemas.SCREEN_INK), msg=part)
+        # no normal text in white: only the four groups' titles
+        for t in axes.texts:
+            if t.get_text() not in schemas.GROUP_COLOURS:
+                self.assertGreaterEqual(schemas.contrast_ratio(t.get_color(), 'white'), 12.0, msg=t.get_text()[:40])
+        schemas.plt.close(figure)
+
+
+class TestRobotsTables(unittest.TestCase):
+    """The rule "Tables on a page" (the GitHub folder's CLAUDE.md §5), from Matthias, 2026-11-13: "These tables are very
+    very bad. The table hearder is just shit", "Text goes into other field. There are units and the header has units.
+    Especially the scales are not understandable", "NO NO NO, why are there now no scales. You can do it better", "It is
+    a waste of space", "Aligne the header damit!!!", "Define rules and test damit!!". One test for each point, on every
+    page of every robot type: 1 a unit once, in its title; 2 each bar with a scale (a line, its ticks, their numbers
+    from 0, its lines down the rows) and its bars on it; 3 every text inside its field; 4 the heading white on the dark
+    tier, each title where its column starts or as its entries align, every text of a tier on one baseline; 5 the
+    groups' headings dark on the light tier; 6 no width left empty: the bars take it."""
+
+    @classmethod
+    def setUpClass(cls):
+        params = Params()
+        paths = [real_parts_file(n) for n in TYPE_FOLDERS] + [absolute(params.data.register)]
+        if not all(os.path.exists(p) for p in paths):
+            raise unittest.SkipTest('the parts files or the register are not on disk')
+        register = schemas.read_register(absolute(params.data.register))
+        files = {n: schemas.read_parts_taken_apart(real_parts_file(n)) for n in TYPE_FOLDERS}
+        cls.tables = {}
+        for n in TYPE_FOLDERS:
+            view = schemas.type_parts(files, register, n)
+            rows = schemas.robots_table_rows(view)
+            cls.tables[n] = (rows, schemas.table_fields(rows, schemas.base_marks(rows)),
+                             schemas.robots_table_pages(view, n))
+
+    @classmethod
+    def tearDownClass(cls):
+        for _, _, pages in getattr(cls, 'tables', {}).values():
+            for figure in pages:
+                schemas.plt.close(figure)
+
+    def texts(self, figure, top: float, foot: float) -> list:
+        # the texts between `top` and `foot` inches from the page's top
+        return [t for t in figure.axes[0].texts if t.get_text().strip() and top <= t.get_position()[1] <= foot]
+
+    def bars(self, fields) -> list:
+        return [f for f in fields if f.entry is None]
+
+    def test_1_a_unit_once_in_its_title(self):
+        for n, (rows, fields, pages) in self.tables.items():
+            self.assertEqual([f.title for f in fields if '(' in f.title], ['Height (m)', 'Mass (kg)', 'Battery (Wh)'])
+            for figure, lines in zip(pages, schemas.table_pages(rows)):
+                bottom = schemas.T_TOP + len(lines) * schemas.T_ROW
+                for t in self.texts(figure, schemas.T_TOP, bottom):
+                    self.assertFalse(re.search(r'\d\s*(m|kg|Wh)$', t.get_text()), msg=(n, t.get_text()))
+
+    def test_2_each_bar_has_its_scale_and_its_bars_on_it(self):
+        from matplotlib.colors import to_rgb
+        for n, (rows, fields, pages) in self.tables.items():
+            for figure, lines in zip(pages, schemas.table_pages(rows)):
+                axes = figure.axes[0]
+                bottom = schemas.T_TOP + len(lines) * schemas.T_ROW
+                light = self.texts(figure, schemas.T_BAND[0] + schemas.T_TIER, schemas.T_BAND[1])
+                for bar in self.bars(fields):
+                    # its line along the light tier's foot, the field's width
+                    self.assertTrue([l for l in axes.lines if list(l.get_xdata()) == [bar.left, bar.right]
+                                     and l.get_ydata()[0] == l.get_ydata()[1]], msg=(n, bar.title))
+                    numbers = sorted((t for t in light if bar.left - 1e-9 <= t.get_position()[0] <= bar.right + 1e-9),
+                                     key=lambda t: t.get_position()[0])
+                    values = [float(t.get_text()) for t in numbers]
+                    self.assertGreaterEqual(len(values), 2, msg=(n, bar.title))
+                    self.assertEqual(values[0], 0, msg=(n, bar.title))
+                    self.assertEqual(values, sorted(values), msg=(n, bar.title))
+                    self.assertAlmostEqual(numbers[0].get_position()[0], bar.left, msg=(n, bar.title))
+                    self.assertAlmostEqual(numbers[-1].get_position()[0], bar.right, msg=(n, bar.title))
+                    for t in numbers:                                   # each number's tick and its line down the rows
+                        x = t.get_position()[0]
+                        self.assertTrue([l for l in axes.lines if list(l.get_xdata()) == [x, x]
+                                         and max(l.get_ydata()) >= bottom - 1e-9], msg=(n, bar.title, t.get_text()))
+                # every bar inside its field: the mass's from its lowest to its highest, the battery's from 0
+                for patch in axes.patches:
+                    if patch.get_facecolor()[:3] == to_rgb(schemas.TABLE_BAR):
+                        field = next(b for b in self.bars(fields)
+                                     if b.left - 1e-6 <= patch.get_x() <= b.right + 1e-6)
+                        self.assertLessEqual(patch.get_x() + patch.get_width(), field.right + 1e-6, msg=n)
+            # an outlier's row: its mass written, no bar; the mass's scale to the largest robot drawn
+            self.assertFalse(any(r.outlier for r in rows))
+
+    def test_3_every_text_inside_its_field(self):
+        for n, (rows, fields, pages) in self.tables.items():
+            for figure, lines in zip(pages, schemas.table_pages(rows)):
+                figure.canvas.draw()
+                renderer = figure.canvas.get_renderer()
+                to_page = figure.axes[0].transData.inverted()
+                bottom = schemas.T_TOP + len(lines) * schemas.T_ROW              # the page's rows end; the key below
+                for t in figure.axes[0].texts:
+                    x, y = t.get_position()
+                    if not t.get_text().strip() or not schemas.T_TOP <= y <= bottom or x > fields[-1].right:
+                        continue
+                    if t.get_text().replace(' (continued)', '') in schemas.JOINT_GROUPS.values():
+                        continue                                                # a group's heading spans the row
+                    box = t.get_window_extent(renderer)
+                    left, right = sorted(to_page.transform([(box.x0, 0), (box.x1, 0)])[:, 0])
+                    k = next(k for k, f in enumerate(fields) if f.left - 1e-6 <= x <= f.right + 1e-6)
+                    # 'no battery' from its bar's start over its number's field, both empty in its row
+                    last = k + 1 if t.get_text() == 'no battery' else k
+                    self.assertGreaterEqual(left, fields[k].left - 0.01, msg=(n, t.get_text()))
+                    self.assertLessEqual(right, fields[last].right + 0.01, msg=(n, t.get_text()))
+
+    def test_3_a_name_too_long_stops_it(self):
+        # A deliberate fault: a robot's name so long that the columns cannot fit before the cells.
+        from dataclasses import replace
+        rows, fields, _ = self.tables[2]
+        long = replace(rows[0], name='A robot whose name is far too long for any table of this page at all')
+        with self.assertRaises(ValueError):
+            schemas.table_fields(rows + [long], schemas.base_marks(rows))
+
+    def test_4_the_heading(self):
+        from matplotlib.colors import to_rgba
+        for n, (rows, fields, pages) in self.tables.items():
+            figure = pages[0]
+            tier = schemas.T_BAND[0] + schemas.T_TIER
+            dark = self.texts(figure, schemas.T_BAND[0], tier)
+            titles = {t.get_text(): t for t in dark}
+            for f in fields:
+                if not f.title:
+                    continue
+                t = titles[f.title]
+                self.assertEqual(to_rgba(t.get_color()), to_rgba('white'), msg=(n, f.title))
+                where = (f.left, 'left') if f.entry is None else (f.at, f.align)   # a bar's title where it starts
+                self.assertEqual((t.get_position()[0], t.get_horizontalalignment()), where, msg=(n, f.title))
+            self.assertEqual(to_rgba(titles['Where its numbers come from'].get_color()), to_rgba('white'))
+            light = self.texts(figure, tier, schemas.T_BAND[1])
+            for tier_texts in (dark, light):                                  # one baseline a tier
+                self.assertEqual(len({round(t.get_position()[1], 6) for t in tier_texts}), 1, msg=n)
+                self.assertEqual({t.get_verticalalignment() for t in tier_texts}, {'baseline'}, msg=n)
+
+    def test_5_the_groups_headings(self):
+        from matplotlib.colors import to_rgba
+        for n, (rows, fields, pages) in self.tables.items():
+            figure = pages[0]
+            for t in figure.axes[0].texts:
+                if t.get_text().replace(' (continued)', '') in schemas.JOINT_GROUPS.values():
+                    x, y = t.get_position()
+                    band = max((p for p in figure.axes[0].patches if p.get_y() <= y <= p.get_y() + p.get_height()
+                                and p.get_x() <= x <= p.get_x() + p.get_width()), key=lambda p: p.get_zorder())
+                    self.assertEqual(band.get_facecolor(), to_rgba(schemas.TABLE_HEAD, schemas.TABLE_SUB), msg=n)
+                    self.assertEqual(to_rgba(t.get_color()), to_rgba(schemas.SCREEN_INK), msg=n)
+
+    def test_7_the_bases_as_a_footnote(self):
+        # Matthias, 2026-11-13: "the base column is a wast of space, as it is hard applicable. Have it as a footnote for
+        # the few robots": no column of the base; a robot on wheels its base's mark after its name, the most common base
+        # ¹; each page's key names the bases of its rows with their marks, and no other.
+        from matplotlib.text import Text
+        for n, (rows, fields, pages) in self.tables.items():
+            self.assertNotIn('Base', [f.title for f in fields], msg=n)
+            marks = schemas.base_marks(rows)
+            counts = [sum(r.base == b for r in rows) for b in marks]
+            self.assertEqual(counts, sorted(counts, reverse=True), msg=n)
+            for figure, lines in zip(pages, schemas.table_pages(rows)):
+                words = [t.get_text() for t in figure.findobj(Text)]
+                key = next((w for w in words if w.startswith('Two colours in a cell')), '').replace('\n', ' ')
+                on_page = {line[1].base for line in lines if line[0] == 'robot' and line[1].base}
+                for line in lines:
+                    if line[0] == 'robot':
+                        r = line[1]
+                        self.assertIn(r.name + (f' {schemas.OUTLIER_MARK}' if r.outlier else '')
+                                      + marks.get(r.base, ''), words, msg=(n, r.name))
+                for base, mark in marks.items():
+                    self.assertEqual(f'{mark} {base}' in key, base in on_page, msg=(n, base))
+
+    def test_6_no_width_left_empty(self):
+        for n, (rows, fields, pages) in self.tables.items():
+            self.assertAlmostEqual(fields[-1].right + schemas.TABLE_GAP, schemas.T_CELLS[0] - schemas.T_CELL[0] / 2,
+                                   msg=n)
+            for a, b in zip(fields, fields[1:]):
+                gap = schemas.BAR_PAD if a.entry is None else schemas.TABLE_GAP
+                self.assertAlmostEqual(b.left - a.right, gap, msg=(n, a.title, b.title))
+            first, second = self.bars(fields)
+            self.assertAlmostEqual(first.right - first.left, second.right - second.left, msg=n)
+
+
 class TestCapacitorBoards(unittest.TestCase):
     """EVIDENCE.md E51 ("Yes, enter 1 to 8"): which boards carry large capacitors, a robot's own count of them, and the
     checks of the new constants."""
@@ -2973,3 +3204,55 @@ class TestCapacitorBoards(unittest.TestCase):
     def test_the_component_is_a_small_pcb(self):
         self.assertEqual(schemas.taken_part('hips', component='capacitors'), 'Small PCB')
         self.assertEqual(schemas.taken_part('cables', component='capacitors'), 'Small PCB')
+
+
+class TestTheFont(unittest.TestCase):
+    """Matthias, 2026-11-13: "These titles look ugly. Font terrible why the hell such a bold", "Do research which fonds
+    are designe for best readability", then "All Luciole" and "fonts/Luciole/, in git": every page of every stage in
+    Luciole, its files in the project, set by 01 when it is loaded (font_style, FONT_STYLE)."""
+
+    def test_every_text_in_the_font_of_the_settings(self):
+        params = Params()
+        self.assertEqual(params.output.font, 'Luciole')
+        self.assertTrue(glob.glob(os.path.join(absolute(params.output.font_folder), '*.ttf')))
+        self.assertTrue(os.path.exists(os.path.join(absolute(params.output.font_folder), 'LICENSE.txt')))
+        self.assertEqual(schemas.matplotlib.rcParams['font.family'], [params.output.font, schemas.FALLBACK_FONT])
+        figure = schemas.plt.figure()
+        texts = [figure.text(0.1, 0.1, 'Copper 0.8 kg'), figure.text(0.1, 0.3, 'Head', fontweight='bold')]
+        figure.canvas.draw()
+        self.assertEqual([t.get_fontname() for t in texts], [params.output.font] * 2)
+        schemas.plt.close(figure)
+
+    def test_every_letter_of_the_robots_names_has_a_glyph(self):
+        # Matthias, 2026-11-13, "Yes, fix ψ first": Luciole has no ψ, and "PsiBot ψ-SynRobot" showed an empty box on
+        # type 2's pages; the letters it lacks are drawn in FALLBACK_FONT. Every letter of every robot's name in the
+        # register and in the parts files (the names the pages draw; the makers' names, some in Chinese letters, no page
+        # draws), drawn, without matplotlib's warning of a glyph missing; the ψ itself first, so that the test stands
+        # without the files too.
+        import warnings
+        params = Params()
+        names = {'PsiBot ψ-SynRobot'}
+        register = absolute(params.data.register)
+        if os.path.exists(register):
+            names |= {r.name for r in schemas.read_register(register) if r.name}
+        for n in TYPE_FOLDERS:
+            if os.path.exists(real_parts_file(n)):
+                names |= set(schemas.read_parts_taken_apart(real_parts_file(n)).robots)
+        letters = ''.join(sorted(set(''.join(names)) - set(' \n')))
+        figure = schemas.plt.figure()
+        figure.text(0.05, 0.5, letters, fontsize=10)
+        figure.text(0.05, 0.3, letters, fontsize=10, fontweight='bold')
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            figure.canvas.draw()
+        schemas.plt.close(figure)
+        self.assertEqual([str(w.message) for w in caught if 'missing from font' in str(w.message)], [])
+
+    def test_no_font_file_stops_it(self):
+        # A deliberate fault: the settings name a folder without a font file.
+        params = Params()
+        with tempfile.TemporaryDirectory() as folder:
+            params.output.font_folder = folder
+            with self.assertRaises(schemas.ParameterError) as caught:
+                schemas.font_style(params)
+        self.assertIn('no font file', str(caught.exception))

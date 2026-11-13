@@ -108,6 +108,299 @@ material declaration). Until then the elements of one robot are **not validated*
 
 ## 2026-11-13
 
+### V236. The memory of the stages at 200,000 draws: 02 held 43 GB; found, fixed, proved, measured
+
+- **What happened:** his run of 2026-11-13 15:02: 02 at 200,000 draws reached a memory footprint of 43 GB on his 16 GB
+  computer (the system's `footprint`), the swap 15.6 of 16 GB used; after 48 minutes it had written nothing; he killed
+  it (15:51). Nothing of his outputs was touched (the files of 2026-11-08 still there). Matthias: "This is very very bad
+  designe!!!", "Damit it is always MC. Wrtite done those rules, that you have to test and optimize!!!!", "Fix it damit
+  and this never ever happens again. We always do Monte Carlo Get this damit.", "It must adopte, so if data are added,
+  it still works!!!". Claude's fault: every check today ran 200 or 2,000 draws and never measured the memory at the
+  real size.
+- **Rule written:** the GitHub folder's CLAUDE.md §4 (every stage's memory and time measured at growing numbers of
+  runs, extrapolated, the peak in half the computer's memory, optimised first; memory designed; outputs byte for byte
+  the same; a memory test; memory watched during his run), and the memory note of it.
+- **Found, measured (robot type 3 at 20,000 draws, Python's tracemalloc and the system's footprint):** (1) all six
+  robot types held at once until all were drawn; (2) the parts as a matrix of every draw × every robot's columns, 7.4 GB
+  for type 3 at 200,000 (each draw is one robot: the rest zeros), the joints' structures likewise 2.9 GB; (3) for a type
+  over several parts files (types 3 and 4: four files) four sets of shared draws over all N draws, 1 GB each at
+  200,000; (4) assemble holding the robots' draws and the draws put together at once (peak 972 MB at 20,000 against
+  296 MB kept); (5) every table built before the first was written; (6) every page of a type built before the first was
+  written: each page drawn into a 52 MB image (300 dpi) that matplotlib keeps with the figure, 2.5 GB held beyond what
+  Python counts.
+- **Fixed (02):** `PartBlocks` (each robot's parts over its own draws; parts.npy written robot by robot into the file,
+  numpy's open_memmap); the structures likewise; `Shared.keep` and `keep_rows` (each file's set cut to its robots'
+  draws; what it draws later drawn over all N draws, the same random numbers, then kept); the shared draws let go
+  before assemble, and assemble letting go of each quantity's robot draws once put together; one robot type at a time
+  (drawn, checked, its tables and figures staged, let go), the summaries' element columns made the same once all are
+  drawn, everything moved from the staging folders ('<folder>.writing') into the output folders only when every type
+  adds up; each table built when written; each page written, closed and freed before the next (`save_pages`); the
+  memory check before any type is drawn (`memory_needed`, a trial of 2,000 draws of each type; the run stops, nothing
+  drawn, where it would hold more than half the computer's memory). (03): its tables read memory-mapped.
+- **Proved the same:** 02 at 2,000 draws on his inputs, old code and new code each with PYTHONHASHSEED=0, all 597 files
+  of its four output folders compared byte for byte: identical, but for the time each summary.xlsx stores (its
+  docProps/core.xml; every cell compared equal) — after each of the four rounds of changes. 03's 208 pages with and
+  without memory-mapping: identical.
+- **Found, not changed (told him):** the old code does not repeat bit for bit between two runs: some sums run over
+  Python sets, whose order changes with each process (hash randomisation), so the last digit of some medians and
+  percentiles in the summaries (the 16th or 17th significant figure) and two of the group pages differ between two
+  runs of the same code (old code against itself: 20 of 597 files). The draws themselves (the .npy files) are the same.
+- **Measured (peak footprint, each stage in its own process on his inputs; /usr/bin/time -l):**
+
+  | Stage | before | 20,000 | 50,000 | 100,000 | 200,000, extrapolated |
+  |---|---|---|---|---|---|
+  | 01 | — | 2.8 GB | 2.8 GB | — | 2.8 GB |
+  | 02 | 43 GB at 200,000 | 1.4 GB | 3.2 GB | 4.6 GB | about 7.3 GB |
+  | 03 | 4.2 / 4.7 GB at 20,000 / 50,000 | 4.0 GB | 4.1 GB | 4.1 GB | about 4.1 GB |
+  | 04 | — | 4.4 GB | 4.5 GB | — | about 4.9 GB |
+  | 05 | — | 1.4 GB | 1.6 GB | — | about 2.1 GB |
+
+  Half his computer's memory: 8.6 GB. 02's own check at 100,000: the run at most 4.1 GB (measured 4.6).
+- **Then, "so if it is not reliable the go for a safe solution":** the straight lines through two sizes disagreed (02:
+  13.6 GB from 5,000 and 25,000; 12.3 from 20,000 and 50,000; 7.3 from 50,000 and 100,000), so 02's large draw tables
+  (the materials and every quantity put together) went onto the disk, memory-mapped (`DiskArrays`, one temporary
+  folder a robot type, removed with its draws): the system keeps in memory only what is in use and writes the rest to
+  the disk, never to its swap. parts.npy written block after block of 5,000 draws (`SAVE_ROWS`). Measured: 02 1.1 GB at
+  20,000, 2.4 GB at 50,000 (before 1.4 and 3.2); outputs byte for byte the same (597 files, hash seed 0; only the time
+  in summary.xlsx). The check before a run on the safe side: it counts the draws on the disk as if all were in memory,
+  PEAK_FACTOR 2 (measured 1.2) and the pages' 1 GB (PAGES_MEMORY), so it is above every measurement (3.2 GB against the
+  measured 2.4 at 50,000), and stops the run before any type is drawn above 75 % of the computer's memory, the line where
+  it would begin to swap (MEMORY_SHARE 0.75). Claude ran 02 and 03 once at 100,000 runs before Matthias's limit ("I do
+  not want that you go beyond 50 000 runs"): the rule now in the GitHub folder's CLAUDE.md §4 (5).
+- **Tests:** tests/test_memory.py: the parts robot by robot (held bytes, the matrix, each column, parts.npy byte for byte
+  as np.save writes the matrix, also over several blocks of 5,000 draws and 40 robots); 02's check at the settings'
+  draws below the limit; 02, 03 and 04 measured at 20,000 and 50,000 runs in their own processes, extrapolated in a
+  straight line to the settings' draws, below the limit: 02 1.65 GB at 20,000, 2.40 at 50,000, about 6.1 GB at
+  200,000; 03 4.30, 4.42, about 5.0 GB; 04 3.74, 3.83, about 4.3 GB; all below 12.9 GB and below half his memory
+  (8.6 GB): 5 tests, OK. 02's step messages test updated (each type checked as
+  it is drawn); tests of 01 (267), 02's parts (test_parts_taken_apart) and composition: 451 tests, all pass after it.
+- **The whole suite after it** (744 tests): every page of 01 to 05 at 200 runs, 0 faults; two failures, both from
+  before fixes made while it ran (02's step messages; 02's check against the former line of half the memory), both
+  passing when run again. 02's check at 200,000 draws with the code as committed: 8.9 GB estimated, its line 12.9 GB.
+- **Not covered:** 200,000 draws themselves (his run): extrapolated, not measured; the memory test's straight line from
+  20,000 and 50,000 overestimates 02 (measured).
+
+### V235. The full check before his run ("Do the full check and give me the run table")
+
+- **The whole suite:** every test file (740 tests in 31 minutes): OK. Its figure check at 200 runs, every rule of
+  FigureTests 0.6.0: 01 53 pages, 02 369, 03 208, 04 41, 05 81, 0 faults; no warning of a missing glyph in its log
+  (every warning kept).
+- **Every stage at 2,000 runs** on his workbook, register and parts files, 05 on the first 2,000 runs of the data
+  centres' 08 (the copy tool's own copy of `stock_flow_draws.csv` of 2026-11-12 11:57): 01 53 pages, 02 369, 03 208, 04
+  41, 05 81, 0 faults; 0 warnings of a missing glyph; the repository's `data/` and `figures/` untouched (True).
+- **FigureTests installed** in the project's `.venv`: rules.py, checker.py, proofs.py and `__init__.py` byte for byte
+  the tag v0.6.0 (pushed), the version `requirements.txt` pins.
+- **Looked at:** the robots' tables of all six types (V234), the box pages of 01 (V230), the pages of V231 to V233.
+- **Not covered:** 200,000 runs (his run); the pages not opened one by one (the rules check every one).
+
+### V234. The robots' tables: rules and tests for each fault he found
+
+- **Why:** Matthias, 2026-11-13, on the robots' tables after the bold titles were removed: "These tables are very very
+  bad. The table hearder is just shit", "Why the hell did you not capture this?"; to a header in two tiers with the
+  scales' numbers in it: "Text goes into other field. There are units and the header has units. Especially the scales
+  are not understandable"; to a table without bars: "NO NO NO, why are there now no scales. You can do it better", "It
+  is a waste of space"; "Define rules and test damit!!", "If I tell you to fix something, then damit fix it. I will
+  tell you, if something is not needed and can be removed!!", "Aligne the header damit!!!".
+- **Rules written:** the GitHub folder's CLAUDE.md §5 "Tables on a page" (units once, real scales, every text in its
+  field, the heading, no width left empty; after a change of style every page that relied on it checked) and §1 "Fix
+  means fix, never remove"; the memory notes of both.
+- **Built (01):** `table_fields` (each column's field measured, MEASURE_PAD 0.03 inch as drawn text is up to 0.02 inch
+  wider than matplotlib's measure; the width left to the bars), `bar_scale` (ticks as many as fit, each pair of
+  neighbouring numbers measured as drawn; two ends where nothing else fits), `row_marks`, the page as described in
+  METHODOLOGY.
+- **Tests:** `TestRobotsTables`, six, on every page of the six robot types: 1 a unit once, in its title; 2 each bar's
+  scale (its line, numbers from 0 at its start to its end, a tick and a line down the rows at each) and every bar inside
+  it; 3 every text inside its field, and a name too long stops 01 (deliberate fault); 4 the heading (white titles, each
+  where its column starts or as its entries align, every text of a tier on one baseline); 5 the groups' headings dark on
+  the light tier; 6 no width left empty. `test_the_outlier_row_as_every_row` (the Neo1: its mass written, no bar, the
+  scale to the largest robot drawn) and the heading-band test updated; the battery labels' test removed with the labels.
+- **Each fault put back, each caught** (scratch `table_faults.py`, a copy of 01 for each): units after the heights by
+  test 1; no scale's line by test 2; a title centred by test 4; the fields 0.5 inch too narrow by test 3; the titles not
+  on one baseline by test 4; the bars 0.05 inch short of the width by test 6.
+- **Result:** all 266 tests of 01 pass; 01 in the sandbox at 200 runs, 52 pages, 0 faults; tables of types 1, 2 and 3
+  opened and looked at, sent to him.
+- **Then "the base column is a wast of space, as it is hard applicable. Have it as a footnote for the few robots":**
+  the column removed; `base_marks` numbers the bases of a type (¹ the most common), the mark after a robot's name, each
+  page's key names its bases. Two faults of Claude's on the way, both shown by opening the page: the footnote missing
+  (the joints' marks of each row overwrote the bases' marks, a name used twice) and, once it showed, the key's third
+  line off the page on full pages (rows of 0.30 inch brought the rows' texts 6.9 points apart, so 17 rows a page
+  instead of 18). Test 7 (`test_7_the_bases_as_a_footnote`): no column of the base, the marks in the order of their
+  counts, each robot's mark after its name, each page's key naming exactly the bases of its rows. All 267 tests of 01
+  pass; 01 in the sandbox 53 pages, 0 faults; type 2's page 6 opened.
+- **Left behind, removed on his word ("Yes, remove them"):** the old table's settings, by exact name: `T_HEIGHT`,
+  `T_MASS`, `T_MASS_TEXT`, `T_JOINTS`, `T_BATTERY`, `T_WHEELS`, `WH_ROOM`, `WH_GAP`, `WH_LABEL_PAD`, `TABLE_BAND`, with
+  their comments. Before: no reader in the stages, `src/`, `tools/` or the tests (grep of each name). After: no file of
+  the code, the tests, METHODOLOGY or README names them; all 266 tests of 01 pass; 01 in the sandbox 52 pages, 0 faults.
+- **Not done:** the general rule for every project (a unit in a title not written again after the numbers below it) is
+  not in FigureTests: another session is writing FigureTests 0.7.0 at the same time (its files changed at 13:40), and two
+  writers on one file overwrite each other. FigureTests 0.6.0 was committed, tagged and pushed by that session (a48704d).
+
+### V233. The letters Luciole lacks: drawn in DejaVu Sans ("Yes, fix ψ first")
+
+- **Found:** matplotlib warned "Glyph 968 (GREEK SMALL LETTER PSI) missing from font(s) Luciole" while drawing 01's
+  pages: "PsiBot ψ-SynRobot" (the register; type 2's parts file) showed an empty box on type 2's pages since the font
+  changed. Every letter of the names read (fontTools against Luciole's character map): of the robots' names only ψ and
+  the non-breaking hyphen of "Keenon XMAN‑R1" are missing, both in DejaVu Sans; the makers' names hold some 80 Chinese
+  and Japanese letters that neither font has, but no stage draws a maker's name (grep of `.maker` in 01 to 05: none).
+- **Built:** `FALLBACK_FONT = 'DejaVu Sans'` in 01, matplotlib's own font (it comes with matplotlib, so on every computer);
+  `font.family` Luciole, then it: matplotlib takes a letter from the second font only where the first lacks it.
+- **Checks:** `TestTheFont.test_every_letter_of_the_robots_names_has_a_glyph`, written first: draws the ψ and every letter
+  of every robot's name in the register and the six parts files, regular and bold, and fails on matplotlib's warning of
+  a missing glyph; failed on the former code (ψ and the non-breaking hyphen), passes now. The test that every text is in
+  Luciole (`get_fontname`) still passes, so FigureTests' rule font is unchanged. All 260 tests of 01 pass. Every stage
+  in the sandbox at 200 runs, its log searched for the warning: 01 52 pages, 02 369, 03 208, 04 41, 05 81, 0 faults,
+  0 warnings of a missing glyph. Type 2's table page 6 opened: "PsiBot ψ-SynRobot" with its ψ.
+- **Found, not changed (told him):** compared with his page of 2026-11-08, type 2's battery axis runs to 10,000 Wh, not
+  5,000: the label room measured this morning (V230, "4061 Wh") gives the axis 5,415 Wh at least, which its two numbers
+  round up to 10,000; the bars half as long. At 5,000 the label would end 0.05 inch inside the half line before the
+  first cell.
+- **Not covered by the test:** a letter in a text other than a robot's name; the sandbox's log, which holds matplotlib's
+  warning for every text of every page drawn, covers those pages at 200 runs.
+
+### V231. The whole suite after the fonts and the colours; four faults it found, fixed
+
+- **What:** every test file of the project (`python -m unittest tests.test_parameters tests.test_schemas
+  tests.test_make_humanoid_register tests.test_make_parts_taken_apart tests.test_parts_taken_apart tests.test_composition
+  tests.test_comparison tests.test_stock_and_flow tests.test_combined_stock_and_flow tests.test_all_figures`; discovery
+  does not find the tests folder, which has no `__init__.py`), the last the figure check of every page of 01 to 05 at
+  200 runs in a sandbox with every rule of FigureTests 0.6.0.
+- **Result:** 732 tests in 29 minutes, 4 failed. The figure check: 01 52 pages, 02 369, 03 208 with 0 faults (02 had 1,
+  03 2 before the font and box changes); 04 41 pages 1 fault (87 before), 05 81 pages 1 fault (277 before).
+- **The four, fixed:**
+  1. and 2. 02's overview pages (`test_every_legend_within_its_page`, `test_02_every_page_by_the_rules`): the legend
+     below the panels, six entries in one row, 2 pixels beyond the page (Luciole wider; the real run's "Median of
+     200,000 model runs" longer still than the tests' 200). Now measured as drawn: in one row where it fits between the
+     robot's drawing and the page's edge, else in fewer columns, its rows even (three and three).
+  3. 04's elements of 2040: the line of a panel's group medians wider than its panel, into the next panel's line (1.9
+     points). Now `wrap_part_words` breaks it between two groups to the panel's width, measured once the page is laid
+     out, and raises the title 12 points a line.
+  4. 05's elements of 2040, scenario A: the mass axis's '10000' 0.2 points from the share axis's '0'. The mass numbers
+     now 13 points below the axis, 02's `TICK_PAD` (one copy).
+- **Checks after the fix:** the two legend tests pass (7 tests); 02, 04 and 05 in the sandbox at 200 runs: 369, 41 and
+  81 pages, 0 faults; the overview of robot type 1, 04's and 05's (A) pages of 2040 opened and looked at.
+- **Order of magnitude, checked against his run of 2026-11-08:** 283 Mt of copper in the robots of 2040 is the
+  article's 70 billion robots (`robots,all,stock,2040,7e+10` in data/stock_and_flow/summary.csv) times about 4 kg; the
+  data centres' 15,300 Mt is their model's run as copied (their copper inflow 4.8 Mt in 2030 in data/combined_stock_and_
+  flow/summary.csv). Neither changed by today's work.
+- **Not covered:** the sandbox at 2,000 runs on 08's copy (V232).
+
+### V232. Every stage at 2,000 runs on his real inputs and 08's copy
+
+- **What:** 01 to 05 as by pressing Run, in a sandbox (scratch `stages2000.py`): his workbook, register and parts files,
+  2,000 runs of each robot type, 05 on the first 2,000 runs of the data centres' 08 (the copy tool's own copy of
+  `stock_flow_draws.csv` of 2026-11-12 11:57, 9.5 GB, scenarios A, B and C, 20 elements); every figure checked by every
+  rule of FigureTests 0.6.0 with the project's settings; the repository's `data/` and `figures/` compared by their
+  files' times before and after.
+- **Result:** 01 52 pages, 02 369, 04 41, 05 81: 0 faults; 03 208 pages, 1 fault: on `comparison_groups_1.png` the share
+  axis's top number, '0.06', fell on the panel's top (at 200 runs it fell lower) and stood 7.0 points from the
+  two-line title of robot type 5 (half a line 8). Fixed in 02's `panel_axes` (02's and 03's panels): the share axis's
+  numbers 6 points from the axis (`SHARE_PAD`, 3.5 before). 02 and 03 run again at 2,000 runs: 369 and 208 pages, 0
+  faults. The repository's `data/` and `figures/` untouched (True). The runs counted: `elements_stock.npy` (2000, 16, 14,
+  22).
+- **Looked at:** 03's page of aluminium by group (the fault gone), robot type 1's overview (its legend in two even rows
+  of three, "Median of 2,000 model runs"), before them the pages of V231.
+- **Not covered:** 200,000 runs (his run); the pages not opened one by one (750 pages: the rules check them all).
+
+### V230. 01's boxes: the title band in the box's colour, the title white or dark by the contrast rule
+
+- **Why:** Matthias, 2026-11-13: "The titles in the boxes are not noticible ... Bold is also not good", "D, darker band",
+  "The boxes are good, but the contrast is not enough", to dark grey bands with white titles "I do not want any normal
+  text in white. So this has to be bright. But the title band should be darker"; to bands Claude had made lighter so
+  that a dark title would reach 7 : 1 (the opposite of darker): "The titles can and should be white, if the background
+  is darker. You are really not good with these topics. You had rules for contrast, which you are not using at all."
+  He was right: 01 had the rule (`mark_ink`, white or dark, whichever stands out more, for the marks on the robot) and
+  FigureTests had it (text_contrast, 4.5 : 1); the boxes used neither choice.
+- **Built:** `ink_on` (01) replaces `mark_ink`: white or the dark ink, whichever stands out more by the WCAG contrast
+  ratio, a transparent colour read as it shows over the white page; used for the marks (as before) and for every box
+  title. Every band the box's own colour at full strength; the rest of the box the same colour at 35 % (BODY_SHARE),
+  its text dark. `box_shades` and `TITLE_CONTRAST` removed (no reader left: grep of the project's code, tests and
+  documents). No new colour on any page (darker shades of the four groups' colours fail colour_blind, found earlier
+  today).
+- **The inks, by hand (WCAG, white / #222222 on the colour):** Joints #4477AA 4.7 / 3.4 white; Battery #AA3377 6.1 / 2.6
+  white; Electronics #228833 4.5 / 3.5 white; Body #CCBB44 2.0 / 8.2 dark; the overview's colours, all dark: #EEDD88
+  1.4 / 11.6, #AAAA00 2.5 / 6.4, #77AADD 2.4 / 6.5, #44BB99 2.4 / 6.7, #DDDDDD 1.4 / 11.7.
+- **Checks:** `tests.test_schemas.TestBoxTitles`, written first, failed on the former code (the Joints band at 58 %
+  strength, its title dark), passes now: a box of each of the nine colours (band at full strength, rest at 35 %, title
+  ink as the hand list, 4.5 : 1 at least, the text dark); how a robot is taken apart (the groups' bands their colours,
+  three titles white, Body's dark; every other text dark, none white); the hand list holds every box colour. 01 in the
+  sandbox (200 runs) with every rule of FigureTests 0.6.0: 52 pages, 0 faults; overview_1, overview_2 and taken_apart
+  opened and looked at.
+- **Found, not changed (told him):** Luciole has no ψ: the robot "PsiBot ψ-SynRobot" (the register, type 2's parts file)
+  shows an empty box for it on type 2's pages since the font changed (matplotlib warned "Glyph 968 ... missing from
+  font(s) Luciole"); no rule of FigureTests sees a missing letter.
+- **Then, "Try to be consistent" and "There are color schemas, which address the topic":** some titles white, some
+  dark, by the colour of their box; every title white needs every band dark. Darker shades made by Claude collided
+  (Body's dark olive and Electronics' green 2.5 for a colour-blind reader, five pairs on the overview): dropped. The
+  schemes read: the U.S. Web Design System (designsystem.digital.gov, its colour pages read by a fetching agent, the
+  hex codes as listed): every colour has a grade, 0 white to 100 black; "A magic number of 50+ results in WCAG 2.0 AA
+  contrast", so white text on every grade 60 colour, dark text on grade 5; it warns against colour as the only sign
+  of meaning. IBM's Carbon (carbondesignsystem.com): its contrast table puts white text on grades 60 and above (read
+  from the table, not stated as a rule); several of its hues' grades not on its pages. Paul Tol's pages: not
+  readable from here (personal.sron.nl does not resolve; the Internet Archive refused). Computed (FigureTests'
+  functions): white on the system's grade 60 6.1 to 7.0 : 1, dark on grade 5 14.0 to 14.7 : 1 for all 14 hue families;
+  every band at grade 60, the hues that keep every pair apart (colour_blind 10.5, colour_normal 21): the groups cyan
+  60v #00687d, violet 60v #783cb9, green 60v #466c04, gold 60 #6b5947 (worst pair 1.15 times the limits); the
+  overview gold 60, green 60v, indigo 60v #4a50c4, cyan 60 #2a646d, gray 60 (1.15). An example, a copy of 01 in the
+  scratch folder with these colours and each box's rest the band's colour at 12 %: 52 pages, 0 faults, the pages
+  looked at. Matthias: "The titles are finally good, but not the subboxes under joints, batteries etcs. They look more
+  important than the titles": the parts' boxes back to the project's form (the name dark on the group's light shade);
+  0 faults, looked at. Then "This is perfect. Now put the rules and test together": built into 01 (`GROUP_COLOURS`,
+  read by 02, 03 and 04 too; `BOX_COLOURS` in place of `TOL_LIGHT`, renamed as it is no longer Tol's scheme;
+  `BODY_SHARE` 0.12); the rule written into the GitHub folder's CLAUDE.md §5 (all projects); `TestBoxTitles` rewritten
+  first, one test for each fault he found (1 every colour one of the scheme's grade 60, 2 to 4 a box of each colour:
+  band at full strength, title white at 4.5 : 1 or more, the rest at 12 % with dark text at 7 : 1 or more, 5 the parts'
+  names dark on their group's light shade, only the groups' titles white), failed on the former colours (no
+  `BOX_COLOURS`; Body's title dark), pass now; all 259 tests of 01 pass.
+- **Two tests of 01 that the font and the regular titles broke, fixed:** test_its_pages_are_type_1s_with_its_own_title
+  found the page title by its bold, now by the heading's size; test_no_battery_label_runs_into_the_cells_beside_it,
+  type 2's "4061 Wh" in its first cell (Luciole's figures wider): the battery axis now leaves room for its longest label
+  measured in the font as drawn (TextToPath), WH_GAP 0.1 inch before the first cell; type 1's axis unchanged (its label
+  short). All 259 tests of 01 pass.
+- **Not covered:** the whole suite and the figure check of 02 to 05 not yet run after this change.
+
+### V229. The font of every page: research, examples, his choice (Luciole); titles in regular weight
+
+- **Why:** Matthias, 2026-11-13, on 03's pages: "These titles look ugly. Font terrible why the hell such a bold"; "No
+  have the much better. Show me examples. I decide!!!"; after nine examples in DejaVu Sans, Helvetica Neue, Avenir
+  Next, Arial, Gill Sans and Optima: "I am not happy with the fonts. Do research which fonds are designe for best
+  readability. I think noe you chosse will be listed". He was right: apart from Arial (a reference in one study), none
+  was designed for readability.
+- **The research, read first-hand unless said:** Reimer et al. 2014, Ergonomics 57(11) (MIT AgeLab with Monotype, four
+  of eight authors Monotype's; MIT DSpace): a humanist against a square grotesque typeface in a driving simulator, men's
+  total glance time 10.6 % shorter, errors 3.1 % lower for both sexes (measured). Galiano et al. 2023, Acta Psychologica
+  236:103926 (its abstract through Europe PMC; PubMed refused the fetch and showed a reCAPTCHA in the browser, not
+  passed): Luciole against Arial, OpenDyslexic, Verdana, Eido and Frutiger in 145 readers, 73 with low vision; about half
+  of those preferred Luciole; "a slight advantage of the Luciole font over some fonts (e.g., Eido and OpenDyslexic)", no
+  measured advantage over Arial, Verdana or Frutiger. Luciole's site: made "explicitly for visually impaired people" by
+  the CTRDV and typographies.fr; three studies "reveal a preference" (preference, not speed); CC BY 4.0. The Braille
+  Institute's page on Atkinson Hyperlegible (Next, 2025): design claims (B/8, O/0, 1/I/i/l told apart), no test cited.
+  B612's repository (Airbus, ENAC, Intactile): designed for cockpit screens, "tested" stated, no data published (its
+  domain b612-font.com now serves unrelated pages). Datawrapper (Muth 2022, a practice guide): sans-serif, "regular
+  (instead of bold or thin)", lining tabular figures; Roboto, Lato, Open Sans, Source Sans, Noto Sans. Verdana: designed
+  by Matthew Carter for screens (an account second-hand); studies mixed. Russell-Minda et al. 2007 (a review of typeface
+  legibility for low vision; not read first-hand, only pages citing it): few quality studies, disagreeing results.
+  Frutiger, the measured humanist face, is commercial: left out.
+- **The examples:** five free fonts downloaded on his word ("Yes, download"; Atkinson Hyperlegible Next, B612, Source Sans
+  3, Noto Sans from Google Fonts' repository, Luciole from its site; sizes as stated beforehand) into the scratch folder;
+  the variable fonts made into Regular (and Atkinson's Medium) instances with fontTools (matplotlib draws a variable
+  font's default instance, Source Sans 3's ExtraLight). A panel of his run (robot type 2's copper, 200,000 runs) in nine
+  styles; then, to "C and F", 03's copper page from his run, drawn by 03's own code, in all Verdana, all Luciole and the
+  two mixes. Each page opened and corrected before it was shown (titles run off the right edge, labels on axis titles).
+  His choice: "All Luciole"; the folder: "fonts/Luciole/, in git".
+- **Built:** `fonts/Luciole/` (Luciole-Regular.ttf, Luciole-Bold.ttf as downloaded, sha256 4c754… and 254e9…, and its
+  LICENSE.txt); the settings `output.font`, `output.font_folder`; 01's `font_style` registers the files and sets the font
+  of every stage (the powers of ten written as math too; its calligraphic and monospace math fonts as well, since
+  matplotlib warned "Failed to find font weight normal" for the default 'cursive'); 04's pages in the default style keep
+  it. Panel titles in regular weight: 02 six and its page title of a robot type, 03 two, 04 two; then, on "I do not like
+  the bold titles. It looks gross and very dominant", every other heading too: 01 35 (page titles, box titles, group
+  headings, table headings, its warnings in red keep their colour), 02 five column headings, 04 two; the three marks of
+  the kinds of part (one number or letter each) stay bold. FigureTests 0.6.0: the rules bold_title (every title and every
+  text of more than two characters) and font, proofs first (its VERIFICATION). The project's figure test: `font=` the settings' font.
+- **Checks:** `tests.test_schemas.TestTheFont`: every text, bold too, drawn in Luciole; a folder without a font file
+  stops 01 (deliberate fault). test_parameters with the two settings: pass. The full figure check: RESULT.
+- **Not covered:** the reading-speed evidence for Luciole is a preference and a slight advantage over two fonts; its
+  look on paper is not checked; mathtext is set in Luciole but not checked by the rule font.
+
 ### V228. Every figure checked by the shared figure tests (FigureTests 0.5.0); what they found, fixed (his "Yes, 1 to 7")
 
 Matthias, 2026-11-13: "There is now the package for figure testing. I want that you intergate the new results with the

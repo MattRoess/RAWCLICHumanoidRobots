@@ -37,7 +37,10 @@ data/parts_taken_apart/
 # 04_stock_and_flow.py writes the draws of the robots, joint sets, battery packs and their elements here (their axes
 # in draws.txt).
 data/stock_and_flow/
-# tools/copy_data_center_draws.py copies RAWCLICDataCenters' 07 draws here (with elements.txt and source.txt); that
+# 02_composition.py writes into staging folders beside its output folders ('<folder>.writing') and moves everything
+# into the output folders when every robot type adds up (since 2026-11-13); a stopped run may leave them.
+*.writing/
+# tools/copy_data_center_draws.py copies RAWCLICDataCenters' 08 draws here (with elements.txt and source.txt); that
 # repository is private, so nothing of the copy goes to GitHub.
 data/raw/data_center_stock_and_flow/
 # 05_combined_stock_and_flow.py writes the draws of the data centres and the robots together here (elements.txt each).

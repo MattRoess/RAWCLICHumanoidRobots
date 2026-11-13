@@ -65,7 +65,56 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-13: every figure checked by the shared figure tests; 08's results taken in (start here)
+## 2026-11-13, evening: handover — his run tomorrow (start here)
+
+**State.** Committed and pushed tonight (the commit named in Claude's last message). The checks: the whole suite (744
+tests, every page of 01 to 05 at 200 runs, 0 faults; two tests failed in it, both from before fixes made while it ran,
+and passed when run again: 02's step messages, 10 tests; 02's memory check, 5 tests of tests/test_memory.py), every
+stage at 2,000 runs on his inputs (V235), the memory test (02, 03, 04 at 20,000 and 50,000 runs, V236), 02's outputs
+byte for byte those of the old code (597 files, V236). 02's check before drawing, at 200,000 draws: 8.9 GB estimated
+(on the safe side) against its line of 12.9 GB, so it starts.
+Today, in this order: the boxes and the groups in the U.S. Web Design System's grade-60 colours, titles white (V230);
+the robots' tables with real scales, units once, every text in its field, the base a footnote (V234); ψ in DejaVu Sans
+(V233); his run at 15:00 (00 and 01 ran; 02 held 43 GB of his 16 GB and he killed it); 02's memory fixed (one type at a
+time, each robot's parts over its own draws, each file's shared draws over its robots, the large tables on the disk
+memory-mapped, pages one at a time, a check before drawing that stops above 75 % of the memory; 03 memory-mapped);
+measured at 200,000 (extrapolated): 01 2.8, 02 about 6, 03 about 5, 04 about 4.3, 05 about 2 GB.
+
+**His run tomorrow** ("no I do this tomorow"), in RAWCLICHumanoidRobots:
+
+| # | Full path | Run? | About |
+|---|---|---|---|
+| – | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` | do not run: unchanged since his run of 2026-11-13 15:00 (code 09:02, settings 09:33) | – |
+| – | `…/01_schemas.py` | do not run: unchanged since his run at 15:02 (code 14:16), its 53 pages current; run it only if `figures/schemas/` is deleted | 1 min |
+| 1 | `…/02_composition.py` | run (first its memory check) | 10 min |
+| 2 | `…/03_comparison.py` | run | 2 min |
+| 3 | `…/04_stock_and_flow.py` | run | 4 min |
+| 4 | `…/tools/copy_data_center_draws.py` | run before 05 (08's draws of 2026-11-12) | 10 min |
+| 5 | `…/05_combined_stock_and_flow.py` | run | 3 min |
+| – | any stage of RAWCLICDataCenters | do not run | – |
+
+During his run: watch each stage's start and end and its memory (footprint, 5 s), tell the next stage unprompted with
+its full path, check each stage's outputs at once (`figures/parts_taken_apart/` holds an empty folder left by the killed
+run; staging folders `<output>.writing` must be gone after 02).
+
+**Open, for him to decide or to do:**
+1. FigureTests: the rule for a unit written twice (a title "Mass (kg)" and "35 kg" below it) not yet added: another
+   session was writing FigureTests 0.7.0 at the same time (its files changed 13:40); add it once that is committed.
+   FigureTests 0.6.0 is committed, tagged and pushed (a48704d, by that session); the robots pin v0.6.0, installed byte for
+   byte.
+2. Found, not changed: the code does not repeat the last digits of some summary statistics between two runs (sums over
+   Python sets, hash randomisation): the 16th or 17th significant figure of some medians and percentiles in the
+   summaries, two group pages; the draws (.npy) the same. Fixing it (sorted iteration) is his decision.
+3. Leftovers to ask once: the colours KINDS and SENSOR_KINDS in 02 (no reader after the group colours), his 36 old
+   element and numbers pages in `figures/parts_taken_apart/` (no longer drawn; he deletes figure folders before runs).
+4. The robots' commit `59b8f38` was not on GitHub (the permission check refused Claude's push on 2026-11-13 morning);
+   tonight's push carries it, or he pushes by hand: `git -C /Users/rm/Documents/GitHub/RAWCLICHumanoidRobots push origin
+   main`.
+5. Rules written today (the GitHub folder's CLAUDE.md, not in git): boxes and text on colour (§5), tables on a page
+   (§5), fix means fix (§1), we always do Monte Carlo — tested and optimised at the real size, Claude's runs 50,000 at
+   most (§4).
+
+## 2026-11-13: every figure checked by the shared figure tests; 08's results taken in
 
 Matthias, 2026-11-13: "There is now the package for figure testing. I want that you intergate the new results with the
 robots and als test all the figures", "Yes, 1 to 7" (the seven steps: install FigureTests pinned and a test of every
@@ -84,7 +133,38 @@ to leave soon", then "Handover, commit push I have to leave"), with FigureTests 
 pushed (its four new rules repeated_label, colour_blind, colour_normal, text_contrast, text_gap and the setting
 text_pages), which this project's pin needs. No run is named to him until everything below is done and checked.
 
-**First when he is back, in this order:**
+**Since the handover (2026-11-13, later):** the titles settled. His words: "No have the much better. Show me examples.
+I decide!!!", "Do research which fonds are designe for best readability", "Yes, download", "C and F", "All Luciole",
+"fonts/Luciole/, in git" (VERIFICATION V229). Every page of every stage in Luciole, its files in `fonts/Luciole/`, set by
+01 (`font_style`); panel and page titles in regular weight; FigureTests 0.6.0 (rules bold_title, font) installed here,
+**not committed, not tagged**: the pin `v0.6.0` needs his word to commit, tag and push FigureTests. The robots' commit
+`59b8f38` is still not on GitHub (the push needs his hand: the permission check refused mine); today's later changes are
+not committed. 01's headings and the tables' column headings regular too ("I do not like the bold titles. It looks
+gross and very dominant"); only the marks on the robot stay bold. 01's boxes (V230): the U.S. Web Design System's colours
+of grade 60 for every box and for the four groups (01 to 04 read them, `GROUP_COLOURS`, `BOX_COLOURS`); every title
+white on its band, the rest of the box at 12 %, its text dark; a part's name dark on its group's light shade ("This is
+perfect. Now put the rules and test together": the rule in the GitHub folder's CLAUDE.md §5, the tests
+`TestBoxTitles`). Found, not changed, asked: Luciole has no ψ ("PsiBot ψ-SynRobot", type 2's pages show an empty box).
+Checked (V231, V232): the whole suite, 732 tests, its four faults fixed and their tests run again (204 + 7 pass); every
+stage at 2,000 runs on his inputs and 08's copy, 0 faults on all 751 pages, `data/` and `figures/` untouched. His run
+needs all of 00 to 05 and the copy tool before 05 (this project's copy is 07's of 2026-10-23; 08 wrote 2026-11-12).
+Nothing committed since `59b8f38` (not pushed). FigureTests 0.6.0 committed, tagged and pushed by another session
+(a48704d, 13:30); the installed package is byte for byte that tag. The robots' tables rebuilt (V234: units once, bars
+with scales, every text in its field, the heading aligned, the base a footnote); the full check passed (V235: 740 tests,
+every page of 01 to 05 at 200 and at 2,000 runs, 0 faults). Waiting: the FigureTests rule for a unit written twice,
+until the other session's 0.7.0 is done.
+
+**His run of 2026-11-13 15:00 stopped (V236):** 00 and 01 ran; 02 held 43 GB on his 16 GB computer, swapped 48 minutes,
+wrote nothing; he killed it. Fixed the same evening: 02 holds one type at a time, each robot's parts over its own draws,
+each file's shared draws over its robots' draws, tables and pages one at a time, a memory check before drawing, staging
+folders; 02's large draw tables on the disk, memory-mapped (DiskArrays); the check before a run on the safe side,
+stopping above 75 % of the memory; 03 reads memory-mapped. Outputs byte for byte the same (hash seed fixed for the
+comparison). Claude's own measuring runs: 50,000 at most (his word). Measured at
+200,000 (extrapolated): 01 2.8, 02 7.3, 03 4.1, 04 4.9, 05 2.1 GB (half his memory 8.6 GB). The rule "we always do
+Monte Carlo; tested and optimised at the real size" in the GitHub folder's CLAUDE.md §4. Found, not changed: the code
+does not repeat the last digits of some summary statistics between runs (sums over Python sets).
+
+**First when he is back, in this order (items 1 and 2 done since, see above and V229):**
 1. **The titles** (Matthias, at the end: "These titles look ugly. Font terrible why the hell such a bold", then "No
    have the much better. Show me examples. I decide!!!"): show him one page of examples before changing anything, the
    same panel of real runs with its title in several styles, each named (now: DejaVu Sans bold 16 pt; DejaVu Sans

@@ -120,12 +120,49 @@ import matplotlib  # noqa: E402
 
 matplotlib.use('Agg')  # draw into files only: no window opens, also in a terminal without a screen
 import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.colors import to_rgb  # noqa: E402  (the ink of a mark on a colour, mark_ink)
+from matplotlib.colors import to_rgb, to_rgba  # noqa: E402  (the ink of a text on a colour, ink_on)
 from matplotlib.patches import Circle, FancyArrowPatch, Rectangle  # noqa: E402
+from matplotlib.font_manager import FontProperties  # noqa: E402  (a label's width as drawn, robots_table_pages)
+from matplotlib.textpath import TextToPath  # noqa: E402
 from matplotlib.ticker import MaxNLocator  # noqa: E402
 from openpyxl import load_workbook  # noqa: E402
 
 from src.params_schema import ParameterError, Params, absolute, current  # noqa: E402
+
+# ------------------------------------------------------------------------------------------------------
+# The font of every page of every stage (Matthias, 2026-11-13: "These titles look ugly. Font terrible why the hell such
+# a bold", then "All Luciole"). Every stage loads this file (02 directly, 03 to 05 through 02), so the font is set here
+# once, when it is loaded. No text of a page is bold, titles and headings included ("I do not like the bold titles. It
+# looks gross and very dominant"); only the marks of the kinds of part on the robot, one number or letter each.
+# ------------------------------------------------------------------------------------------------------
+# The font of a letter the page's font lacks: matplotlib's own DejaVu Sans, which comes with matplotlib and so is on
+# every computer that draws the pages. Luciole has no ψ and no non-breaking hyphen, and "PsiBot ψ-SynRobot" showed an
+# empty box on robot type 2's pages (Matthias, 2026-11-13: "Yes, fix ψ first"); every other letter stays Luciole.
+FALLBACK_FONT = 'DejaVu Sans'
+
+
+def font_style(params: Params) -> dict:
+    """The font of every page as matplotlib's settings: params.output.font, its files in params.output.font_folder
+    registered with matplotlib, so that every computer draws the pages in it (a font matplotlib cannot find falls back
+    to another without a word: FigureTests' rule font catches it), a letter it lacks in FALLBACK_FONT; the powers of ten
+    written as math ($10^{6}$) in it too. Raises ParameterError where the folder holds no font file."""
+    import glob
+    from matplotlib import font_manager
+    folder = absolute(params.output.font_folder)
+    files = sorted(glob.glob(os.path.join(folder, '*.ttf')))
+    if not files:
+        raise ParameterError(f'{folder}: no font file (.ttf) of the font {params.output.font} (output.font_folder).')
+    for path in files:
+        font_manager.fontManager.addfont(path)
+    font = params.output.font
+    # every font of matplotlib's math in it, its calligraphic and monospace ones too (their defaults, 'cursive' and
+    # 'monospace', are not installed everywhere: matplotlib warned "Failed to find font weight normal")
+    return {'font.family': [font, FALLBACK_FONT], 'mathtext.fontset': 'custom', 'mathtext.rm': font, 'mathtext.it': font,
+            'mathtext.sf': font, 'mathtext.cal': font, 'mathtext.tt': font, 'mathtext.bf': f'{font}:bold'}
+
+
+FONT_STYLE = font_style(current())       # the settings of src/params_schema.py, when this file is loaded
+matplotlib.rcParams.update(FONT_STYLE)
 
 # ------------------------------------------------------------------------------------------------------
 # What the overview says about the project
@@ -3066,7 +3103,7 @@ def save(figure, path: str, dpi: int) -> None:
 
 def evidence_key(axes, x, y) -> float:
     """The colour key of the evidence, as in the workbook; returns the y below it."""
-    write(axes, x, y, ['Evidence, coloured as in the workbook:'], weight='bold')
+    write(axes, x, y, ['Evidence, coloured as in the workbook:'], weight='normal')
     y += LINE * 1.2
     for evidence, colour in EVIDENCE_COLOUR.items():
         box(axes, x, y, 0.3, LINE * 0.8, colour)
@@ -3136,7 +3173,7 @@ def draw_category(category: Category, parts_list: PartsList | None, report: str 
         + table_height + 1.9
     figure, axes = new_page(PAGE_WIDTH, height)
 
-    axes.text(0.3, 0.3, f'Category {category.number}: {category.name}', fontsize=16, fontweight='bold',
+    axes.text(0.3, 0.3, f'Category {category.number}: {category.name}', fontsize=16,
               va='top')
     y = write(axes, 0.3, 0.75, definition, size=11)
 
@@ -3147,7 +3184,7 @@ def draw_category(category: Category, parts_list: PartsList | None, report: str 
     for i, (title, lines) in enumerate(boxes):
         x = 0.3 + i * (box_width + 0.2)
         box(axes, x, y, box_width, box_height)
-        write(axes, x + 0.12, y + 0.1, [title], weight='bold')
+        write(axes, x + 0.12, y + 0.1, [title], weight='normal')
         write(axes, x + 0.12, y + 0.1 + LINE * 1.2, lines)
     y += box_height + 0.35
 
@@ -3155,13 +3192,13 @@ def draw_category(category: Category, parts_list: PartsList | None, report: str 
     headings = max(len(h) for h, _, _, _ in PART_TABLE)
     box(axes, 0.2, y, PAGE_WIDTH - 0.4, headings * LINE + 0.12, '#EEEEEE')
     for heading, x, _, align in PART_TABLE:
-        write(axes, x, y + 0.06, heading, weight='bold', align=align)
+        write(axes, x, y + 0.06, heading, weight='normal', align=align)
     y += headings * LINE + 0.12
     for kind, item, lines in rows:
         row_height = LINE * lines + 0.12
         if kind == 'subsystem':
             box(axes, 0.2, y, PAGE_WIDTH - 0.4, row_height, SUBSYSTEM)
-            write(axes, 0.3, y + 0.06, [item], weight='bold')
+            write(axes, 0.3, y + 0.06, [item], weight='normal')
         else:
             box(axes, 0.2, y, PAGE_WIDTH - 0.4, row_height, EVIDENCE_COLOUR.get(item.evidence, '#DDDDDD'))
             colour = RED if item.row in faulty_rows else 'black'
@@ -3177,7 +3214,7 @@ def draw_category(category: Category, parts_list: PartsList | None, report: str 
                   + [p.row for p in parts])]
     if own:
         y = write(axes, 0.3, y, [f'{len(own)} fault(s) in the rows of this category, drawn in red: see '
-                                 'faults.png.'], colour=RED, weight='bold')
+                                 'faults.png.'], colour=RED, weight='normal')
     else:
         y = write(axes, 0.3, y, ['No fault found in the rows of this category.'])
     y = evidence_key(axes, 0.3, y + 0.1)
@@ -3220,7 +3257,7 @@ PLAIN_WHY = 'The name says the material.'   # the reason of an obvious placement
 def bars(figure, page, page_height: float, x: float, y: float, title: str, names: list, values: dict) -> float:
     """Horizontal bars of kg at the mode, one per name of the shared list, with the value at the end of each bar;
     a name the robot has none of shows '–'. Returns the y below the chart."""
-    write(page, x - 1.6, y, [title], weight='bold')
+    write(page, x - 1.6, y, [title], weight='normal')
     height = BAR_STEP * len(names)
     axes = figure.add_axes([x / PAGE_WIDTH, 1 - (y + 0.3 + height) / page_height, CHART_WIDTH / PAGE_WIDTH,
                             height / page_height])
@@ -3264,7 +3301,7 @@ def table(page, y: float, columns: list, rows: list, colours: list) -> float:
     headings = max(len(h) for h, _, _, _ in columns)
     box(page, 0.2, y, TABLE_RIGHT - 0.2, headings * LINE + 0.12, '#EEEEEE')
     for heading, x, _, align in columns:
-        write(page, x, y + 0.06, heading, weight='bold', align=align)
+        write(page, x, y + 0.06, heading, weight='normal', align=align)
     y += headings * LINE + 0.12
     for cells, colour in zip(rows, colours):
         height = max(len(c) for c in cells) * LINE + 0.12
@@ -3335,7 +3372,7 @@ def draw_shared_lists(category: Category, parts_list: PartsList, materials: Mate
     figure, page = new_page(PAGE_WIDTH, height)
 
     page.text(0.3, 0.3, f'Robot type {category.number} in the shared lists: {category.name}', fontsize=16,
-              fontweight='bold', va='top')
+              va='top')
     anchor = category.anchor.splitlines()[0] if category.anchor else '—'
     y = write(page, 0.3, 0.75, [f'Anchor robot: {anchor}. Electric motors outside the hands: '
                                 f'{kg(motors_of(parts_list, lists))}.',
@@ -3344,7 +3381,7 @@ def draw_shared_lists(category: Category, parts_list: PartsList, materials: Mate
 
     # The parts, with the bars by part group and by body region beside them.
     y += 0.3
-    write(page, 0.3, y, ['Parts'], size=11, weight='bold')
+    write(page, 0.3, y, ['Parts'], size=11, weight='normal')
     y += 0.35
     bottom = table(page, y, SHARED_PART_TABLE, part_cells, [RED if p.row in red_parts else 'black' for p in parts])
     below = bars(figure, page, height, CHART_X, y, 'By part group', lists.names[PART_GROUP], groups)
@@ -3353,7 +3390,7 @@ def draw_shared_lists(category: Category, parts_list: PartsList, materials: Mate
     y = max(bottom, below) + 0.5
 
     # The materials, with the bars by material beside them.
-    write(page, 0.3, y, ['Materials'], size=11, weight='bold')
+    write(page, 0.3, y, ['Materials'], size=11, weight='normal')
     y += 0.35
     colours = material_colours + ['black'] * bool(unallocated)
     bottom = below = table(page, y, SHARED_MATERIAL_TABLE, material_cells, colours)
@@ -3365,11 +3402,11 @@ def draw_shared_lists(category: Category, parts_list: PartsList, materials: Mate
     # The foot of the page.
     if own:
         y = write(page, 0.3, y, [f'{len(own)} fault(s) in the rows or placements of this robot type, drawn in red: '
-                                 'see faults.png.'], colour=RED, weight='bold')
+                                 'see faults.png.'], colour=RED, weight='normal')
     else:
         y = write(page, 0.3, y, ['No fault found in the rows or placements of this robot type.'])
     if note_lines:
-        y = write(page, 0.3, y + 0.1, ['Notes'], weight='bold')
+        y = write(page, 0.3, y + 0.1, ['Notes'], weight='normal')
         y = write(page, 0.3, y, note_lines)
     write(page, 0.3, y + 0.15, wrap(f'Source: {params.data.workbook}, sheets \'{params.data.components_sheet}\' rows '
                                     f'{parts_list.first_row} to {parts_list.difference_row} and '
@@ -3607,9 +3644,14 @@ TAKEN_APART = {
 # Every part in the order of the page, and the group of each.
 TAKEN_PARTS = [part for _, parts in TAKEN_APART.values() for part, _ in parts]
 TAKEN_GROUP = {part: group for group, (_, parts) in TAKEN_APART.items() for part, _ in parts}
-# The colour of each group on every page (Paul Tol's "bright" scheme, as published): the joints blue, the battery
-# purple, the electronics green, the body yellow.
-GROUP_COLOURS = {GROUP_JOINTS: '#4477AA', GROUP_BATTERY: '#AA3377', GROUP_ELECTRONICS: '#228833', GROUP_BODY: '#CCBB44'}
+# The colour of each group on every page of 01 to 04: the U.S. Web Design System's colours of grade 60 (its system
+# tokens, designsystem.digital.gov, as listed), on which white text stands out 4.5 : 1 or more by the scheme's own rule
+# (a difference of 50 grades from white); of its hues those that every reader tells apart, colour-blind too
+# (FigureTests' colour_blind and colour_normal, the closest pair 1.15 times their limits): the joints cyan 60v, the
+# battery violet 60v, the electronics green 60v, the body gold 60. Matthias, 2026-11-13: "There are color schemas, which
+# address the topic", then to the example "This is perfect". Until then Paul Tol's "bright" scheme (#4477AA, #AA3377,
+# #228833, #CCBB44), on two of which a white title stood out less than 4.5 : 1.
+GROUP_COLOURS = {GROUP_JOINTS: '#00687d', GROUP_BATTERY: '#783cb9', GROUP_ELECTRONICS: '#466c04', GROUP_BODY: '#6b5947'}
 # The group of each kind of part (KINDS): the joints with the wheeled base, the lift column and the hydraulics; the
 # battery; the boards, the head (its cameras, LiDARs, microphones, speakers and board) and the cables in the
 # electronics; the frame and shell the body. What a kind holds of another group goes there by its part (taken_part):
@@ -3730,7 +3772,7 @@ def taken_apart_page():
     figure, axes = screen_page()
     renderer = figure.canvas.get_renderer()
     axes.text(0.4, 0.35, 'How a humanoid robot is taken apart: four groups and their parts', fontsize=SCREEN_HEADING,
-              fontweight='bold', va='top')
+              va='top')
     left, gap, pad = 0.4, 0.3, 0.12
     width = (SCREEN_PAGE[0] - 2 * left - 3 * gap) / 4
     to_inches = axes.transData.inverted()
@@ -3749,24 +3791,36 @@ def taken_apart_page():
             drawn.remove()
             chars -= 1
 
+    # Each box's title on a band, the box below lighter (screen_box's form, 2026-11-13): a group's name white on a band
+    # of its colour at full strength (ink_on), its words dark on the colour BODY_SHARE as strong; a part's name dark on
+    # that lighter shade, so that the parts stand below their group ("The titles are finally good, but not the subboxes
+    # under joints, batteries etcs. They look more important than the titles"), its words dark on white, the colour's
+    # stripe at its left.
     bottoms = []
     for k, (group, (what, parts)) in enumerate(TAKEN_APART.items()):
         x, y = left + k * (width + gap), 0.85
         colour = GROUP_COLOURS[group]
-        ink = SCREEN_INK if group == GROUP_BODY else 'white'     # dark words on the light yellow, white on the others
-        below = fitted(x + pad, y + 0.1, group, width - 2 * pad, SCREEN_TITLE, ink, 'bold')
-        # half a title's height at least between a title and its text (FigureTests' text_gap; 0.06 until 2026-11-13)
-        foot = fitted(x + pad, below + 0.13, what, width - 2 * pad, SCREEN_TEXT, ink, 'normal')
-        axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8,
+        tint = to_rgba(colour, BODY_SHARE)
+        below = fitted(x + pad, y + BAND_PAD, group, width - 2 * pad, SCREEN_TITLE, ink_on(colour), 'normal')
+        band = below + BAND_PAD
+        # half a title's height at least between a title and its text (FigureTests' text_gap)
+        foot = fitted(x + pad, band + 0.1, what, width - 2 * pad, SCREEN_TEXT, SCREEN_INK, 'normal')
+        axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor=tint, edgecolor=SCREEN_INK, linewidth=0.8,
                                  zorder=0))
+        axes.add_patch(Rectangle((x, y), width, band - y, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8,
+                                 zorder=0.5))
         y = foot + 0.22
         for part, holds in parts:
-            below = fitted(x + pad + 0.06, y + 0.08, part, width - 2 * pad - 0.06, SCREEN_TITLE, SCREEN_INK, 'bold')
-            foot = fitted(x + pad + 0.06, below + 0.13, holds, width - 2 * pad - 0.06, SCREEN_TEXT, SCREEN_INK,
+            below = fitted(x + pad + 0.06, y + BAND_PAD, part, width - 2 * pad - 0.06, SCREEN_TITLE, SCREEN_INK,
+                           'normal')
+            band = below + BAND_PAD
+            foot = fitted(x + pad + 0.06, band + 0.1, holds, width - 2 * pad - 0.06, SCREEN_TEXT, SCREEN_INK,
                           'normal')
             axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor='#FFFFFF', edgecolor=SCREEN_INK,
                                      linewidth=0.8, zorder=0))
-            axes.add_patch(Rectangle((x, y), 0.08, foot + 0.1 - y, facecolor=colour, edgecolor='none', zorder=0))
+            axes.add_patch(Rectangle((x, y), width, band - y, facecolor=tint, edgecolor=SCREEN_INK, linewidth=0.8,
+                                     zorder=0.5))
+            axes.add_patch(Rectangle((x, y), 0.08, foot + 0.1 - y, facecolor=colour, edgecolor='none', zorder=0.6))
             y = foot + 0.18
         bottoms.append(y)
     screen_text(axes, 0.4, max(bottoms) + 0.05, 'Every element of every robot is counted in one of these parts, '
@@ -3790,15 +3844,6 @@ SPOTS = {'hips': [(-0.06, 0.475), (0.06, 0.475)], 'knees': [(-0.065, 0.27), (0.0
 MARKS = {'hips': '1', 'knees': '2', 'ankles': '3', 'waist': '4', 'arms': '5', 'headjoints': '6', 'battery': 'A',
          'boards': 'B',
          'head': 'C', 'cables': 'D', 'frame': 'E', 'base': 'F', 'lift': 'G', 'hydraulics': 'H'}
-def mark_ink(colour) -> str:
-    """The ink of a mark written on a kind's colour: white or KIND_INK, whichever stands out more from it by the WCAG
-    contrast ratio (FigureTests' rule text_contrast, 4.5 : 1; until 2026-11-13 a list of the kinds that took white,
-    which left the head's 'C' at 3.4 : 1)."""
-    def luminance(c):
-        rgb = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in to_rgb(c)]
-        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
-    ratio = lambda a, b: (max(luminance(a), luminance(b)) + 0.05) / (min(luminance(a), luminance(b)) + 0.05)   # noqa: E731
-    return 'white' if ratio('white', colour) >= ratio(KIND_INK, colour) else KIND_INK
 # The base on wheels drawn beside the robot's feet for a type that has robots on wheels (E9.7 point 9, open point B), in
 # the body's units: the base (across from, to; up from, to), its two wheels (across; their radius), and the lift column
 # above it (across from, to; up to).
@@ -3861,7 +3906,7 @@ def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
                 axes.add_patch(Rectangle((u - 0.027, -v - 0.027), 0.054, 0.054, facecolor=colour, edgecolor=KIND_INK,
                                          linewidth=0.8, zorder=3))
             axes.text(*at, MARKS[kind], ha='center', va='center', fontsize=size, fontweight='bold', zorder=4,
-                      color=mark_ink(colour))
+                      color=ink_on(colour, KIND_INK))
     axes.text(-0.31, 0.09, 'Numbers: joints; letters: the\nother parts, as in the rows.\nRed ring: magnets for '
               '150 °C\nor more in most runs.', ha='left', va='top', fontsize=size, color=KIND_INK, linespacing=1.3)
     axes.set_xlim(-0.32, 0.32)
@@ -3991,7 +4036,7 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
 
     # The heading: the robot, its mass and its motors.
     page.text(0.3, 0.3, f'How robot type {category.number} is built: {category.name}', fontsize=16,
-              fontweight='bold', va='top')
+              va='top')
     anchor = category.anchor.splitlines()[0] if category.anchor else '—'
     low, high = bounds([p.total_kg for p in parts_list.parts])
     stated = (f'Stated mass {kg(parts_list.stated_mass_kg)} kg ({parts_list.stated_evidence}). '
@@ -3999,8 +4044,8 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
     write(page, 0.3, 0.75, [f'Anchor robot: {anchor}, {kg(height_m)} m tall. {stated}Its parts add up to '
                             f'{kg(total)} kg (bounds {kg(low)}–{kg(high)} kg).',
                             f'Electric motors outside the hands: {kg(sum(motors.values()))}.'], size=11)
-    write(page, PARTS_X, top - 0.5, ['Its parts, where they sit'], size=12, weight='bold', align='center')
-    write(page, (CHART_LEFT + CHART_RIGHT) / 2, top - 0.5, ['What it is made of'], size=12, weight='bold',
+    write(page, PARTS_X, top - 0.5, ['Its parts, where they sit'], size=12, weight='normal', align='center')
+    write(page, (CHART_LEFT + CHART_RIGHT) / 2, top - 0.5, ['What it is made of'], size=12, weight='normal',
           align='center')
 
     # The parts robot: its outline is the shell, the dark lines its frame, and the parts drawn where they sit.
@@ -4056,7 +4101,7 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
         colour = PART_COLOUR.get(group, SKELETON if group == 'Frame' else MOTOR if group == 'Joint drives'
                                  else '#6C757D')
         page.add_patch(Box((0.3, y), 0.12, 0.38, facecolor=colour, edgecolor='none'))
-        write(page, 0.5, y, [f'{group}: {kg(groups[group])} kg'], weight='bold')
+        write(page, 0.5, y, [f'{group}: {kg(groups[group])} kg'], weight='normal')
         write(page, 0.5, y + LINE, [f'{detail}; bounds {kg(low)}–{kg(high)} kg'])
         target = at(*PART_SPOTS.get(group, (0, 0.5)))
         page.plot([3.75, target[0]], [y + 0.18, target[1]], color='#8A8A8A', linewidth=0.6, linestyle='--')
@@ -4086,13 +4131,13 @@ def draw_robot(category: Category, parts_list: PartsList, materials: MaterialsLi
         count = motors.get(region, 0)
         motor_line = (f'{kg(count)} motor{"s" * (count != 1)}' if count else
                       'its motors are inside, not counted' if region == 'Hands' else 'no motors')
-        write(page, label_x, y, [f'{region}: {kg(regions[region])} kg'], weight='bold')
+        write(page, label_x, y, [f'{region}: {kg(regions[region])} kg'], weight='normal')
         write(page, label_x, y + LINE, [motor_line])
         target = at(*REGION_SPOTS[region])
         page.plot([label_x - 0.08, target[0]], [y + 0.18, target[1]], color='#8A8A8A', linewidth=0.6,
                   linestyle='--')
     if whole_lines:
-        write(page, label_x, whole_y, whole_lines[:1], weight='bold')
+        write(page, label_x, whole_y, whole_lines[:1], weight='normal')
         write(page, label_x, whole_y + LINE, whole_lines[1:])
 
     # What it is made of: one bar per shared material, in the order of the sheet Lists and on the same kg scale on
@@ -4160,11 +4205,12 @@ SCREEN_PAGE = (16, 9)              # inches: a screen's shape
 SCREEN_TEXT, SCREEN_TITLE, SCREEN_HEADING = 14, 16, 20   # points: the smallest text, a box's title, a page's title
 SCREEN_LINE = 0.27                 # inches: one line of 14-point text with its spacing
 SCREEN_CHARS = 9.0                 # characters of 14-point text in an inch, for wrapping
-# Paul Tol's "light" scheme, as published: the inputs Matthias holds, the sibling projects' data, the stages, what
-# they write, what is not yet worked on. The sibling projects' data in his olive since 2026-11-13 (his light cyan,
-# #99DDFF, stood 17.2 from the stages' light blue in CAM02-UCS, under the 21 of FigureTests' rule colour_normal; the
-# olive stands 22.9 from every other colour of the page, 21.1 for a colour-blind reader).
-TOL_LIGHT = {'his': '#EEDD88', 'sibling': '#AAAA00', 'stage': '#77AADD', 'output': '#44BB99', 'later': '#DDDDDD'}
+# The colours of the overview's boxes: the inputs Matthias holds, the sibling projects' data, the stages, what they
+# write, what is not yet worked on. The U.S. Web Design System's grade 60, as GROUP_COLOURS (white titles 4.5 : 1 or
+# more; every pair told apart, colour-blind too, the closest 1.15 times FigureTests' limits): gold 60, green 60v,
+# indigo 60v, cyan 60, gray 60. Until 2026-11-13 Paul Tol's "light" scheme (TOL_LIGHT), on which a white title could
+# not stand out.
+BOX_COLOURS = {'his': '#6b5947', 'sibling': '#466c04', 'stage': '#4a50c4', 'output': '#2a646d', 'later': '#5c5c5c'}
 SCREEN_INK = '#222222'
 # Words of the project no page of 01 or 02 may show (his figure rule: no code names, no project jargon): file names,
 # sections of EVIDENCE.md, the label of an estimate, the sibling files' numbers. The faults pages may name a sheet of
@@ -4194,12 +4240,51 @@ def screen_text(axes, x: float, y: float, text: str, width_in: float, size: floa
     return y + len(lines) * SCREEN_LINE * size / SCREEN_TEXT
 
 
+# A box's title on a band, the rest of the box lighter (Matthias, 2026-11-13: "The titles in the boxes are not
+# noticible. That is not good. Bold is also not good. Do you have another solution", to the examples "D, darker band";
+# then "The boxes are good, but the contrast is not enough"; to bands of dark grey with white titles, "I do not want any
+# normal text in white. So this has to be bright. But the title band should be darker"; and to bands made lighter so
+# that a dark title would do, "The titles can and should be white, if the background is darker. ... You had rules for
+# contrast, which you are not using at all"; "Try to be consistent"; "There are color schemas, which address the
+# topic"; to the example in the U.S. Web Design System's colours, "This is perfect"): the band the box's own colour at
+# full strength, one of the scheme's grade 60 (BOX_COLOURS, GROUP_COLOURS), the title on it white (ink_on, the rule of
+# the contrast ratio, gives white on every one of them); the rest of the box the same colour BODY_SHARE as strong, by
+# transparency over the white page, near the scheme's grades 5 to 10, its text dark. FigureTests counts a colour made
+# lighter by transparency as that colour, and reads a text against it as it shows. BAND_PAD: inches above and below
+# the title.
+BODY_SHARE, BAND_PAD = 0.12, 0.06
+
+
+def contrast_ratio(a, b) -> float:
+    """The WCAG contrast ratio of two opaque colours, 1 to 21 (FigureTests' rule text_contrast asks 4.5 at least)."""
+    def luminance(c):
+        rgb = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in to_rgb(c)]
+        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+    light, dark = sorted((luminance(a), luminance(b)), reverse=True)
+    return (light + 0.05) / (dark + 0.05)
+
+
+def ink_on(colour, dark: str = SCREEN_INK) -> str:
+    """The ink of a text written on `colour`: white or `dark`, whichever stands out more from it by the WCAG contrast
+    ratio (contrast_ratio); a colour made lighter by transparency read as it shows over the white page. Used for every
+    box's title and for the marks of the kinds of part (for the marks since 2026-11-13, before a list of the kinds
+    whose mark took white, which left the head's 'C' at 3.4 : 1; for the box titles since Matthias's "You had rules for
+    contrast, which you are not using at all", 2026-11-13)."""
+    red, green, blue, alpha = to_rgba(colour)
+    shown = tuple(alpha * c + 1 - alpha for c in (red, green, blue))
+    return 'white' if contrast_ratio('white', shown) >= contrast_ratio(dark, shown) else dark
+
+
 def screen_box(axes, x: float, y: float, width: float, title: str, text: str, colour: str, height: float) -> None:
-    """A box with its title in bold and its text below, filled with `colour`."""
-    axes.add_patch(Rectangle((x, y), width, height, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8))
-    below = screen_text(axes, x + 0.12, y + 0.1, title, width - 0.24, SCREEN_TITLE, weight='bold')
-    # half a title's height at least between the title and its text (FigureTests' text_gap; 4 points until 2026-11-13)
-    screen_text(axes, x + 0.12, below + 0.1, text, width - 0.24)
+    """A box of `colour`: its title on a band of the colour at full strength, in white or dark (ink_on); below it the
+    box BODY_SHARE as strong, its text dark."""
+    axes.add_patch(Rectangle((x, y), width, height, facecolor=to_rgba(colour, BODY_SHARE), edgecolor=SCREEN_INK,
+                             linewidth=0.8))
+    below = screen_text(axes, x + 0.12, y + BAND_PAD, title, width - 0.24, SCREEN_TITLE, ink_on(colour))
+    axes.add_patch(Rectangle((x, y), width, below + BAND_PAD - y, facecolor=colour, edgecolor=SCREEN_INK,
+                             linewidth=0.8))
+    # half a title's height at least between the title and its text (FigureTests' text_gap)
+    screen_text(axes, x + 0.12, below + BAND_PAD + 0.1, text, width - 0.24)
 
 
 def screen_arrow(axes, start: tuple, end: tuple, colour: str = SCREEN_INK) -> None:
@@ -4303,7 +4388,7 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
     in its colour."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, 'How the model works: from the inputs through the stages to the results',
-              fontsize=SCREEN_HEADING, fontweight='bold', va='top')
+              fontsize=SCREEN_HEADING, va='top')
     of_type = {n: sum(n in r.types for r in register) if register else 0 for n in range(1, 7)}
     inputs = [
         ('The research workbook', 'six robot types, an anchor robot each, its parts and materials', 'his'),
@@ -4333,23 +4418,23 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
     step = min(1.42, (8.3 - 1.1) / len(stages))
     stage_tops = [1.1 + k * step for k in range(len(stages))]
     for k, ((title, text, colour), y) in enumerate(zip(inputs, tops)):
-        screen_box(axes, left, y, width, title, text, TOL_LIGHT[colour], 1.3)
+        screen_box(axes, left, y, width, title, text, BOX_COLOURS[colour], 1.3)
         # Each read by 01, then by 02: its arrow into 01's box.
         screen_arrow(axes, (left + width, y + 0.65), (middle, stage_tops[1] + 0.15 + k * 0.28))
     for k, ((title, text), y) in enumerate(zip(stages, stage_tops)):
-        screen_box(axes, middle, y, 4.0, title, text, TOL_LIGHT['stage'], step - 0.1)   # its title and two lines
+        screen_box(axes, middle, y, 4.0, title, text, BOX_COLOURS['stage'], step - 0.1)   # its title and two lines
         if k:
             screen_arrow(axes, (middle + 2.0, y - 0.1), (middle + 2.0, y))
     output_step = (8.3 - 1.1) / len(outputs)
     for k, (title, text, stage) in enumerate(outputs):
         y = 1.1 + k * output_step
-        screen_box(axes, right, y, 4.4, title, text, TOL_LIGHT['output'], output_step - 0.15)
+        screen_box(axes, right, y, 4.4, title, text, BOX_COLOURS['output'], output_step - 0.15)
         screen_arrow(axes, (middle + 4.0, stage_tops[stage] + 0.5), (right, y + (output_step - 0.15) / 2))
     legend = [('his', 'Matthias\'s inputs'), ('sibling', 'the sibling projects\' data'), ('stage', 'the stages, run '
               'by pressing Run'), ('output', 'what they write')]
     x = 0.4
     for key, label in legend:
-        axes.add_patch(Rectangle((x, 8.45), 0.3, 0.3, facecolor=TOL_LIGHT[key], edgecolor=SCREEN_INK, linewidth=0.8))
+        axes.add_patch(Rectangle((x, 8.45), 0.3, 0.3, facecolor=BOX_COLOURS[key], edgecolor=SCREEN_INK, linewidth=0.8))
         axes.text(x + 0.4, 8.6, label, fontsize=SCREEN_TEXT, va='center', color=SCREEN_INK)   # below the boxes
         x += 0.6 + len(label) * 0.115
     return figure
@@ -4363,7 +4448,7 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
     found and what is open. `outliers` (outlier_robots) are named on the cards of their types, `aparts` and `register`
     then without them (EVIDENCE.md E30)."""
     figure, axes = screen_page()
-    axes.text(0.4, 0.35, 'The six robot types', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
+    axes.text(0.4, 0.35, 'The six robot types', fontsize=SCREEN_HEADING, va='top')
     worked = params.output.robot_types_with_pages
     width, height = 4.9, 2.9
     for k, category in enumerate(book.categories[:6]):
@@ -4373,10 +4458,10 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
         if category.number in worked and apart is not None:
             text = type_card_text(category.number, anchor, apart, register, category.number in listed,
                                   [r for r in outliers if category.number in r.types])
-            colour = TOL_LIGHT['output']
+            colour = BOX_COLOURS['output']
         elif category.number in worked:
             text = f'The workbook\'s anchor robot: {anchor}.'
-            colour = TOL_LIGHT['stage']
+            colour = BOX_COLOURS['stage']
         else:
             notes = []
             if is_notional(category.anchor):
@@ -4386,13 +4471,13 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
             text = type_card_text(category.number, anchor, None, register, category.number in listed) or (
                 f'The workbook\'s anchor robot: {anchor}' + (f' ({"; ".join(notes)})' if notes else '') +
                 '. Not yet worked on.')
-            colour = TOL_LIGHT['later']
+            colour = BOX_COLOURS['later']
         screen_box(axes, x, y, width, f'{category.number}  {category.name}', text, colour, height)
     y = 7.55
     found = (f'{len(faults)} fault(s) found in the inputs: see the faults pages.' if faults else
              'No fault found in the inputs (what was checked: the faults pages).')
     y = screen_text(axes, 0.4, y, found, 15.2, colour='#CC3311' if faults else SCREEN_INK,
-                    weight='bold' if faults else 'normal')
+                    weight='normal')
     # What is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"; the line written by hand before
     # was out of date).
     screen_text(axes, 0.4, y + 0.12, open_words(register, aparts), 15.2)   # 0.05 until 2026-11-13 (text_gap)
@@ -4404,7 +4489,7 @@ def notes_page(params: Params | None = None):
     the robot types with pages are those of `output.robot_types_with_pages` (00's, where `params` is not given)."""
     worked = (params or Params()).output.robot_types_with_pages
     figure, axes = screen_page()
-    axes.text(0.4, 0.35, 'How to read these pages', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
+    axes.text(0.4, 0.35, 'How to read these pages', fontsize=SCREEN_HEADING, va='top')
     notes = [
         'These pages show the inputs as they are written, before anything is drawn at random: every mass has a '
         'minimum, a mode (the most likely value) and a maximum. The model runs of the Monte Carlo, with their median '
@@ -4443,11 +4528,11 @@ def fault_pages(faults: list) -> list:
         if figure is None or y + lines > SCREEN_PAGE[1] - 0.4:
             figure, axes = screen_page()
             axes.text(0.4, 0.35, f'Faults and checks ({len(pages) + 1})', fontsize=SCREEN_HEADING,
-                      fontweight='bold', va='top')
+                      va='top')
             pages.append(figure)
             y = 1.15
         if kind == 'heading':
-            y = screen_text(axes, 0.4, y, text, 15.0, SCREEN_TITLE, weight='bold') + 0.1
+            y = screen_text(axes, 0.4, y, text, 15.0, SCREEN_TITLE, weight='normal') + 0.1
         else:
             y = screen_text(axes, 0.4, y, ('• ' if kind == 'item' else '') + text, 15.0,
                             colour='#CC3311' if kind == 'fault' else SCREEN_INK) + 0.12   # text_gap: 0.05 before
@@ -4470,14 +4555,14 @@ def robot_type_page(apart: PartsTakenApart, robot_type: int = 1):
     column, the other groups in the second (since 2026-11-13, "Yes, all": what each kind holds is on kinds_page)."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, f'Robot type {robot_type}: where its kinds of part sit', fontsize=SCREEN_HEADING,
-              fontweight='bold', va='top')
+              va='top')
     kinds = kinds_of(apart)
     draw_kinds(figure.add_axes((0.01, 0.06, 0.3, 0.84)), hot_kinds(apart), SCREEN_TEXT, set(kinds))
     groups = [g for g in TAKEN_APART if any(KIND_GROUP[k] == g for k in kinds)]
     for x, column in zip(ROBOT_COLUMNS, ([GROUP_JOINTS], [g for g in TAKEN_APART if g != GROUP_JOINTS])):
         y = 1.3
         for group in [g for g in column if g in groups]:
-            axes.text(x, y + 0.18, group, ha='left', va='center', fontsize=SCREEN_TITLE, fontweight='bold',
+            axes.text(x, y + 0.18, group, ha='left', va='center', fontsize=SCREEN_TITLE,
                       color=SCREEN_INK)
             y += ROBOT_LINE
             for kind in [k for k in kinds if KIND_GROUP[k] == group]:
@@ -4485,7 +4570,7 @@ def robot_type_page(apart: PartsTakenApart, robot_type: int = 1):
                 axes.add_patch(Rectangle((x, y + 0.02), 0.32, 0.32, facecolor=colour, edgecolor=SCREEN_INK,
                                          linewidth=0.8))
                 axes.text(x + 0.16, y + 0.18, MARKS[kind], ha='center', va='center', fontsize=SCREEN_TEXT,
-                          fontweight='bold', color=mark_ink(colour))
+                          fontweight='bold', color=ink_on(colour))
                 axes.text(x + 0.5, y + 0.18, KINDS[kind][0], ha='left', va='center', fontsize=SCREEN_TEXT,
                           color=SCREEN_INK)
                 y += ROBOT_LINE
@@ -4498,13 +4583,13 @@ def kinds_page(apart: PartsTakenApart, robot_type: int = 1):
     a row per kind, its mark in its group's colour, its name and what it holds, KINDS_GAP between two rows."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, f'Robot type {robot_type}: what each kind of part holds', fontsize=SCREEN_HEADING,
-              fontweight='bold', va='top')
+              va='top')
     y = 1.15
     for kind in kinds_of(apart):
         colour = GROUP_COLOURS[KIND_GROUP[kind]]
         axes.add_patch(Rectangle((0.4, y + 0.0), 0.32, 0.32, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8))
         axes.text(0.56, y + 0.16, MARKS[kind], ha='center', va='center', fontsize=SCREEN_TEXT, fontweight='bold',
-                  color=mark_ink(colour))
+                  color=ink_on(colour))
         y = screen_text(axes, 0.95, y, f'{KINDS[kind][0]}: {KIND_HOLDS[kind]}', 14.6) + KINDS_GAP
     return figure
 
@@ -4544,33 +4629,141 @@ LIFT_MARK = '‡'     # beside the joints of a robot on wheels with a lift colum
 # in the key.
 OUTLIER_MARK = '*'
 TABLE_KEY_OUTLIER = ' {mark} an outlier, not drawn: {reason}.'
-TABLE_KEY = ('Two colours in a cell: its numbers rest on both. Mass: the bar from its min to its max, the dot its '
-             f'mode. Battery: its energy at the modes. {SHARES_MARK} its joints a share of its mass.')
+TABLE_KEY = ('Two colours in a cell: its numbers rest on both. Mass: the bar from the lowest to the highest, the dot '
+             f'the most likely. Battery: at the most likely values. {SHARES_MARK} joints a share of the mass.')
 TABLE_KEY_WHEELS = f' {LIFT_MARK} a lift column.'   # the base in its own plain words ("2 wheels, 2 casters")
-# The table's places, in inches from the page's top left: the robot's name; its height (right-aligned); the mass axis
-# from 0 to its end; the mass written; the joints (right-aligned); the battery axis; the first cell's middle and the
-# step to the next; a cell's width and height; the heading band's top and bottom; the first row's top and a row's
-# height; the rows of a page, the groups' headings counted.
-T_NAME, T_HEIGHT = 0.4, 3.9      # 3.85 until 2026-11-13: the longest name 5.8 points from its height (text_gap)
-T_MASS, T_MASS_TEXT = (4.15, 6.95), 7.08
-T_JOINTS = 8.45
-T_BATTERY = (8.85, 10.3)
+# The table's places, in inches from the page's top left: the robot's name (its left edge; every other column placed
+# by table_fields since 2026-11-13); the first cell's middle and the step to the next; a cell's width and height; the
+# heading band's top and bottom; the first row's top and a row's height; the rows of a page, the groups' headings
+# counted.
+T_NAME = 0.4
 T_CELLS, T_CELL = (11.3, 0.95), (0.72, 0.22)   # 11.3 since 2026-11-04: "Frame and shell" 0.1 inch inside the band
 T_BAND = (0.95, 2.05)
 T_TOP, T_ROW = 2.12, 0.32
-T_LINES = 18
-# A table with robots on wheels (type 2's since 2026-10-30, E9.7 point 8) makes room for a column of their base: the
-# name and height columns, the mass axis, the joints and the battery axis narrower; the cells where they are.
-# Set since 2026-11-13 from the widths of the longest entries at 14 points (matplotlib's TextPath), each column at
-# least half a line (7 points, FigureTests' text_gap) from the next: a mass to 0.94 inches ('125.85 kg'), the joints'
-# number 0.22 and its marks 0.18 ('†‡'), the base's words to 1.86 ('2 wheels, 2 casters'), the battery's label after
-# its bar (WH_ROOM). Until then joints 6.95, base 7.3, battery 9.3 to 10.1: the marks stood 2.2 points from the base's
-# words.
-T_WHEELS = dict(height=T_HEIGHT, mass=(4.05, 5.65), mass_text=5.75, joints=7.05, base=7.48, battery=(9.5, 10.3))
-# The longest battery bar at most this share of its column, to leave room for its label (robots_table_pages).
-WH_ROOM = 0.9
-# Light grey of every other row, the heading band, the axes' lines, the bars (Paul Tol's grey, as published).
-TABLE_SHADE, TABLE_BAND, TABLE_GRID, TABLE_BAR = '#F2F2F2', '#DDDDDD', '#C8C8C8', '#BBBBBB'
+T_LINES = 17   # 18 until 2026-11-13: the footnote of the bases on wheels needs a third line of the key
+# Light grey of every other row, the scales' lines down the rows, the bars (Paul Tol's grey, as published).
+TABLE_SHADE, TABLE_GRID, TABLE_BAR = '#F2F2F2', '#C8C8C8', '#BBBBBB'
+# The table's heading in two tiers, as every box (the GitHub folder's CLAUDE.md §5): the columns' titles, their units
+# with them, white on the U.S. Web Design System's gray 60 (TABLE_HEAD); below them on its TABLE_SUB share the scales of
+# the two bars and the cells' names; the groups' headings on the same light shade. T_TIER: inches of the dark tier.
+# A column's field as wide as its widest entry (and its title, where the title is its own), measured as drawn; the
+# width left before the cells goes to the bars of the mass and the battery, half each; TABLE_GAP inches between two
+# fields and before the cells, BAR_PAD between a number and its bar, MARK_PAD between the joints and their marks; a
+# scale's numbers SCALE_ROOM inches apart at least. Matthias, 2026-11-13: "The table hearder is just shit", "Text goes
+# into other field. There are units and the header has units. Especially the scales are not understandable", "Yes,
+# build it", then to the table without bars: "NO NO NO, why are there now no scales. You can do it better", "It is a
+# waste of space".
+TABLE_HEAD, TABLE_SUB, T_TIER, TIER_CAP = '#5c5c5c', 0.25, 0.42, 0.07   # TIER_CAP: half a 14-point capital
+TABLE_GAP, BAR_PAD, MARK_PAD, SCALE_ROOM = 0.15, 0.12, 0.12, 0.15
+# Inches added to a text field's measured width: a text as drawn is up to 0.02 inch wider than matplotlib's measure of
+# it ("2 wheels, 4 casters" 0.02 inch beyond its field, 2026-11-13).
+MEASURE_PAD = 0.03
+
+
+@dataclass
+class TableField:
+    """One column of a robots' table (robots_table_pages): its title in the heading's dark tier ('' for the number
+    after a bar, which stands under the bar's title), how its title and entries align, what a row writes in it
+    (`entry`, RobotRow -> text; None for a bar), the inches after its entries that belong to it (the joints' marks),
+    its edges (table_fields)."""
+
+    title: str
+    align: str
+    entry: object
+    after: float = 0.0
+    left: float = 0.0
+    right: float = 0.0
+
+    @property
+    def at(self) -> float:
+        """The x its title and entries are aligned to: its left edge, or its right edge before `after`."""
+        return self.left if self.align == 'left' else self.right - self.after
+
+
+# The marks of the bases on wheels after a robot's name, ¹ for the base most robots of the table stand on, ² for the
+# next; each page's footnote names the bases of its rows (Matthias, 2026-11-13: "the base column is a wast of space, as
+# it is hard applicable. Have it as a footnote for the few robots"; a column of its own until then).
+BASE_MARKS = '¹²³⁴⁵⁶⁷⁸⁹'
+
+
+def base_marks(rows: list) -> dict:
+    """{base in words: its mark} for the bases on wheels of a table's robots, the most common first (ties by name).
+    Raises ValueError where a table has more bases than BASE_MARKS has marks."""
+    counts = {}
+    for r in rows:
+        if r.base:
+            counts[r.base] = counts.get(r.base, 0) + 1
+    bases = sorted(counts, key=lambda b: (-counts[b], b))
+    if len(bases) > len(BASE_MARKS):
+        raise ValueError(f'{len(bases)} bases on wheels, but only {len(BASE_MARKS)} marks for them.')
+    return dict(zip(bases, BASE_MARKS))
+
+
+def table_fields(rows: list, marks: dict) -> list:
+    """The columns of a robots' table from T_NAME rightwards: the robot (an outlier's mark and its base's mark, `marks`,
+    after its name); its height; its mass's bar, then its most likely mass; its joints (their marks after them); its
+    battery's bar, then its energy. A bar's title, its scale's first number and its bars start at its left edge, its numbers stand
+    right-aligned after it ("Aligne the header damit!!!", 2026-11-13). A text field as wide as its widest entry in the
+    page's font (measured), and as its title; the width left before the cells the bars', half each, each at least as
+    wide as its title needs over it and its number. Raises ValueError where they would be narrower: a text would run
+    into the next field."""
+    measure = TextToPath()
+    font = FontProperties(size=SCREEN_TEXT)
+    width = lambda text: measure.get_text_width_height_descent(text, font, ismath=False)[0] / 72 if text else 0.0  # noqa: E731
+    fields = ([TableField('Robot', 'left', lambda r: r.name + (f' {OUTLIER_MARK}' if r.outlier else '')
+                          + marks.get(r.base, '')),
+               TableField('Height (m)', 'right', lambda r: kg(r.height) if r.height else ''),
+               TableField('Mass (kg)', 'left', None), TableField('', 'right', lambda r: kg(r.mass[1])),
+               TableField('Joints', 'right', lambda r: str(r.joints)),
+               TableField('Battery (Wh)', 'left', None),
+                 TableField('', 'right', lambda r: '' if r.battery_wh is None else f'{r.battery_wh:.0f}')])
+    joint_marks = [m for m in (row_marks(r) for r in rows) if m]
+    joints = next(f for f in fields if f.title == 'Joints')
+    joints.after = MARK_PAD + max(width(m) for m in joint_marks) if joint_marks else 0.0
+    bars = [k for k, f in enumerate(fields) if f.entry is None]
+    wide = [0.0 if f.entry is None else max([width(f.title)] + [width(f.entry(r)) for r in rows]) + f.after
+            + MEASURE_PAD for f in fields]
+    gaps = sum(BAR_PAD if k in bars else TABLE_GAP for k in range(len(fields)))   # the last: before the cells
+    bar = (T_CELLS[0] - T_CELL[0] / 2 - T_NAME - sum(wide) - gaps) / len(bars)
+    for k in bars:
+        need = width(fields[k].title) - wide[k + 1] - BAR_PAD       # its title over the bar and its number
+        if bar < max(need, 4 * SCALE_ROOM):
+            raise ValueError(f'The bar under "{fields[k].title}" would be {bar:.2f} inches wide: the table\'s '
+                             'columns do not fit before its cells.')
+        wide[k] = bar
+    x = T_NAME
+    for k, (f, w) in enumerate(zip(fields, wide)):
+        f.left, f.right = x, x + w
+        x = f.right + (BAR_PAD if k in bars else TABLE_GAP)
+    return fields
+
+
+def bar_scale(field: TableField, top: float) -> tuple:
+    """The scale of a bar's field from 0 to at least `top`: its ticks, round numbers, as many as fit with SCALE_ROOM
+    inches between every two neighbouring numbers as drawn (the first from its tick rightwards, the last leftwards, the
+    others centred, as robots_table_pages writes them), where none fit its two ends, 0 and a round number at or above
+    `top`; and the x of a value on it. Raises ValueError where not even its two ends fit."""
+    measure = TextToPath()
+    font = FontProperties(size=SCREEN_TEXT)
+    span = field.right - field.left
+    # round ends: 1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 times a power of ten, the first at or above `top`
+    power = 10 ** math.floor(math.log10(top))
+    end = next(m * power for m in (1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10) if m * power >= top)
+    for ticks in [axis_ticks(top, bins) for bins in range(max(1, int(span / (2 * SCALE_ROOM))), 0, -1)] + [[0, end]]:
+        wide = [measure.get_text_width_height_descent(f'{t:g}', font, ismath=False)[0] / 72 for t in ticks]
+        last = len(ticks) - 1
+        # how far each number reaches left and right of its tick
+        reach = [(0.0 if j == 0 else w if j == last else w / 2, w if j == 0 else 0.0 if j == last else w / 2)
+                 for j, w in enumerate(wide)]
+        step = span / max(last, 1)
+        if all(step >= reach[j][1] + reach[j + 1][0] + SCALE_ROOM for j in range(last)):
+            return ticks, lambda value, t=ticks[-1]: field.left + value / t * span
+    raise ValueError(f'A bar {span:.2f} inches wide cannot hold the two ends of its scale.')
+
+
+def row_marks(r) -> str:
+    """The marks after a robot's joints: its joints a share of its mass, a lift column."""
+    return (SHARES_MARK if r.shares else '') + (LIFT_MARK if r.lift else '')
 
 
 @dataclass
@@ -4721,27 +4914,21 @@ def axis_ticks(top: float, bins: int) -> list:
 
 def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int | None = None,
                        listed: int | None = None, without: int = 0, outliers: dict | None = None) -> list:
-    """The table of a robot type's robots, its pages as table_pages splits them: the heading band with the two axes'
-    ticks and the five cells' names, the rows, the key at the foot. Its title says how many of the type's robots of the
+    """The table of a robot type's robots, its pages as table_pages splits them: the heading in two tiers (the columns'
+    titles with their units; the two bars' scales and the five cells' names), the rows, each value in its column's field
+    (table_fields), the key at the foot. Its title says how many of the type's robots of the
     register (`listed`) are taken apart (`taken`) where not all are (type 2's, since 2026-10-30). A robot of `outliers`
     (outlier_names: robot -> reason) keeps its row, its name marked, the mark and its reason in the key of its page."""
     rows = robots_table_rows(apart, outliers)
-    # A table with robots on wheels: the narrower columns and the base's (T_WHEELS); else type 1's places.
+    # Its columns, each its own field (table_fields); a robot on wheels its base's mark after its name. The mass's
+    # scale to the largest robot drawn: an outlier (not drawn) keeps its row and its mass written, no bar (Matthias,
+    # 2026-11-05, "Yes, all ten", open item 4: the Neo1's 1,200 kg ran the axis to 1,600 kg).
     wheels = any(r.base for r in rows)
-    height_at, mass_axis, mass_text, joints_at, battery_axis = (
-        (T_WHEELS['height'], T_WHEELS['mass'], T_WHEELS['mass_text'], T_WHEELS['joints'], T_WHEELS['battery'])
-        if wheels else (T_HEIGHT, T_MASS, T_MASS_TEXT, T_JOINTS, T_BATTERY))
-    # The mass axis to the largest robot drawn: an outlier (not drawn) keeps its row and its mass written, no bar
-    # (Matthias, 2026-11-05, "Yes, all ten", open item 4: the Neo1's 1,200 kg ran the axis to 1,600 kg).
-    mass_ticks = axis_ticks(max(r.mass[2] for r in rows if not r.outlier), 2 if wheels else 5)   # narrower on wheels
-    # The battery's axis leaves room for the label of the longest bar: that bar ends at 90 % of the column at most, its
-    # label beside it then clear of the cells (2026-10-30, batch 2b's entry: "1584 Wh" ran into them; type 1's axis the
-    # same as before, 0 to 800 Wh).
-    # Two steps of the battery's axis; on a table with robots on wheels its column is narrower, so only its two ends.
-    wh_ticks = axis_ticks(max(r.battery_wh for r in rows if r.battery_wh is not None) / WH_ROOM, 2)
-    wh_ticks = [wh_ticks[0], wh_ticks[-1]] if wheels else wh_ticks
-    mass_x = lambda kg_: mass_axis[0] + kg_ / mass_ticks[-1] * (mass_axis[1] - mass_axis[0])          # noqa: E731
-    wh_x = lambda wh: battery_axis[0] + wh / wh_ticks[-1] * (battery_axis[1] - battery_axis[0])       # noqa: E731
+    marks = base_marks(rows)
+    fields = table_fields(rows, marks)
+    mass, battery = [k for k, f in enumerate(fields) if f.entry is None]
+    mass_ticks, mass_x = bar_scale(fields[mass], max(r.mass[2] for r in rows if not r.outlier))
+    wh_ticks, wh_x = bar_scale(fields[battery], max(r.battery_wh for r in rows if r.battery_wh is not None))
     cells = {cell: T_CELLS[0] + k * T_CELLS[1] for k, cell in enumerate(TABLE_CELLS)}
     words = dict(fontsize=SCREEN_TEXT, color=SCREEN_INK)
     split = table_pages(rows)
@@ -4758,26 +4945,38 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
         else:
             robots = f'its {len(rows)} robots'
         axes.text(0.4, 0.35, f'Robot type {robot_type}: {robots}, each drawn from its own parts ({p} of '
-                             f'{len(split)})', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
+                             f'{len(split)})', fontsize=SCREEN_HEADING, va='top')
 
-        # The heading band: the columns' names; below them the two axes' ticks and the five cells' names.
-        axes.add_patch(Rectangle((0.25, T_BAND[0]), 15.5, T_BAND[1] - T_BAND[0], facecolor=TABLE_BAND,
+        # The heading in two tiers: the columns' titles, their units with them, white on the dark tier, each aligned as
+        # its entries (a number's title from its field's left over its bar too); below them on the light tier the two
+        # bars' scales (a line, its ticks, their numbers above them) and the five cells' names, on one foot.
+        tier = T_BAND[0] + T_TIER
+        axes.add_patch(Rectangle((0.25, T_BAND[0]), 15.5, T_TIER, facecolor=TABLE_HEAD, edgecolor='none'))
+        axes.add_patch(Rectangle((0.25, tier), 15.5, T_BAND[1] - tier, facecolor=to_rgba(TABLE_HEAD, TABLE_SUB),
                                  edgecolor='none'))
-        first, second = T_BAND[0] + 0.08, T_BAND[0] + 0.48
-        headings = [(T_NAME, 'Robot', 'left'), (height_at, 'Height', 'right'),
-                    (sum(mass_axis) / 2, 'Mass (kg)', 'center'), (joints_at, 'Joints', 'right'),
-                    (sum(battery_axis) / 2, 'Battery (Wh)', 'center'),
-                    (cells[TABLE_CELLS[2]], 'Where its numbers come from', 'center')]
-        if wheels:
-            headings.append((T_WHEELS['base'], 'Base', 'left'))
-        for x, heading, align in headings:
-            axes.text(x, first, heading, ha=align, va='top', fontweight='bold', **words)
-        for x, tick in [(mass_x(t), t) for t in mass_ticks] + [(wh_x(t), t) for t in wh_ticks]:
-            axes.text(x, second, f'{tick:g}', ha='center', va='top', **words)
+        # every text of a tier on one baseline (a box's centre would lift a word with a descender, "Battery"); the
+        # dark tier's in its middle, a capital's half height (TIER_CAP inches) below it
+        title_at, foot = (T_BAND[0] + tier) / 2 + TIER_CAP, T_BAND[1] - 0.17
+        for f in fields:
+            if f.title:
+                axes.text(f.left if f.entry is None else f.at, title_at, f.title,
+                          ha='left' if f.entry is None else f.align, va='baseline', fontsize=SCREEN_TEXT,
+                          color=ink_on(TABLE_HEAD))
+        axes.text(cells[TABLE_CELLS[2]], title_at, 'Where its numbers come from', ha='center', va='baseline',
+                  fontsize=SCREEN_TEXT, color=ink_on(TABLE_HEAD))
+        for field, ticks, at in ((fields[mass], mass_ticks, mass_x), (fields[battery], wh_ticks, wh_x)):
+            axes.plot([field.left, field.right], [T_BAND[1] - 0.04] * 2, color=SCREEN_INK, linewidth=0.8)
+            for j, tick in enumerate(ticks):
+                axes.plot([at(tick)] * 2, [T_BAND[1] - 0.04, T_BAND[1] - 0.11], color=SCREEN_INK, linewidth=0.8)
+                # the first number from its tick rightwards, the last leftwards, the others centred: all in the field
+                align = 'left' if j == 0 else 'right' if j == len(ticks) - 1 else 'center'
+                axes.text(at(tick), foot, f'{tick:g}', ha=align, va='baseline', **words)
         for cell, x in cells.items():
-            axes.text(x, second, textwrap.fill(cell, 9), ha='center', va='top', linespacing=1.1, **words)
+            axes.text(x, foot, textwrap.fill(cell, 9), ha='center', va='baseline', linespacing=1.1, **words)
 
-        # The rows: a group's heading on white, across the axes' lines; a robot's row shaded every other time.
+        # The rows: a group's heading dark on the light shade, over the scales' lines; a robot's row shaded every other
+        # time, each of its numbers and words in its field, its mass a bar from its lowest to its highest with a dot at
+        # its most likely (none for an outlier), its battery a bar from 0 ('no battery' over both of its fields).
         bottom = T_TOP + len(lines) * T_ROW
         for x in [mass_x(t) for t in mass_ticks] + [wh_x(t) for t in wh_ticks]:
             axes.plot([x, x], [T_BAND[1], bottom], color=TABLE_GRID, linewidth=0.8, zorder=1)
@@ -4786,37 +4985,36 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
             top = T_TOP + k * T_ROW
             middle = top + T_ROW / 2
             if line[0] == 'group':
-                axes.add_patch(Rectangle((0.25, top), 15.5, T_ROW, facecolor='white', edgecolor='none', zorder=1.5))
+                axes.add_patch(Rectangle((0.25, top), 15.5, T_ROW, facecolor=to_rgba(TABLE_HEAD, TABLE_SUB),
+                                         edgecolor='none', zorder=1.5))
                 axes.text(T_NAME, middle, JOINT_GROUPS[line[1]] + (' (continued)' if line[2] else ''), ha='left',
-                          va='center', fontweight='bold', zorder=4, **words)
+                          va='center', zorder=4, **words)
                 shaded = False
                 continue
             r = line[1]
+            ground = TABLE_SHADE if shaded else 'white'           # the row's own background
             if shaded:
                 axes.add_patch(Rectangle((0.25, top), 15.5, T_ROW, facecolor=TABLE_SHADE, edgecolor='none', zorder=0))
             shaded = not shaded
-            axes.text(T_NAME, middle, r.name + (f' {OUTLIER_MARK}' if r.outlier else ''), ha='left', va='center',
-                      **words)
-            axes.text(height_at, middle, f'{kg(r.height)} m' if r.height else '', ha='right', va='center', **words)
-            low, mode, high = r.mass
+            for f in fields:
+                if f.entry is not None:
+                    axes.text(f.at, middle, f.entry(r), ha=f.align, va='center', **words)
+            joint_marks = row_marks(r)
+            if joint_marks:
+                joints = next(f for f in fields if f.title == 'Joints')
+                axes.text(joints.at + MARK_PAD, middle, joint_marks, ha='left', va='center', **words)
+            low, likely, high = r.mass
             if not r.outlier:
                 axes.add_patch(Rectangle((mass_x(low), middle - 0.06), mass_x(high) - mass_x(low), 0.12,
                                          facecolor=TABLE_BAR, edgecolor=SCREEN_INK, linewidth=0.6, zorder=2))
-                axes.plot(mass_x(mode), middle, 'o', color=SCREEN_INK, markersize=6, zorder=3)
-            axes.text(mass_text, middle, f'{kg(mode)} kg', ha='left', va='center', **words)
-            axes.text(joints_at, middle, str(r.joints), ha='right', va='center', **words)
-            marks = (SHARES_MARK if r.shares else '') + (LIFT_MARK if r.lift else '')
-            if marks:
-                axes.text(joints_at + 0.12, middle, marks, ha='left', va='center', **words)   # text_gap: 0.05 before
-            if r.base:
-                axes.text(T_WHEELS['base'], middle, r.base, ha='left', va='center', **words)
-            if r.battery_wh is None:   # a robot that carries no battery (E16.2): words, no bar
-                axes.text(battery_axis[0], middle, 'no battery', ha='left', va='center', **words)
+                axes.plot(mass_x(likely), middle, 'o', color=SCREEN_INK, markersize=6, zorder=3)
+            if r.battery_wh is None:   # a robot that carries no battery (E16.2): no bar; its words from the bar's start
+                # over both of its fields, on the row's own background, so that no line of the scale runs through them
+                axes.text(fields[battery].left, middle, 'no battery', ha='left', va='center', zorder=4,
+                          bbox=dict(facecolor=ground, edgecolor='none', pad=2), **words)
             else:
-                axes.add_patch(Rectangle((battery_axis[0], middle - 0.09), wh_x(r.battery_wh) - battery_axis[0], 0.18,
-                                         facecolor=TABLE_BAR, edgecolor='none', zorder=2))
-                axes.text(wh_x(r.battery_wh) + 0.08, middle, f'{r.battery_wh:.0f} Wh', ha='left', va='center',
-                          **words)
+                axes.add_patch(Rectangle((fields[battery].left, middle - 0.09), wh_x(r.battery_wh) - fields[battery].left,
+                                         0.18, facecolor=TABLE_BAR, edgecolor='none', zorder=2))
             width, height = T_CELL
             for cell, x in cells.items():   # a cell in as many stripes as its rows have bases
                 bases = r.bases[cell]
@@ -4835,7 +5033,10 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
             x += 0.42 + len(text) / SCREEN_CHARS + 0.45
         # An outlier's mark and reason on the page that holds its row (E30 point 5).
         reasons = dict.fromkeys(outliers[line[1].name] for line in lines if line[0] == 'robot' and line[1].outlier)
-        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (TABLE_KEY_WHEELS if wheels else '')
+        # The bases of the page's robots on wheels, each with its mark, in the order of the marks.
+        bases = [b for b in marks if any(line[0] == 'robot' and line[1].base == b for line in lines)]
+        footnote = f' On wheels: {"; ".join(f"{marks[b]} {b}" for b in bases)}.' if bases else ''
+        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (TABLE_KEY_WHEELS if wheels else '') + footnote
                     + ''.join(TABLE_KEY_OUTLIER.format(mark=OUTLIER_MARK, reason=reason) for reason in reasons), 15.2)
         figures.append(figure)
     return figures

@@ -502,13 +502,26 @@ class OutputParams:
         default=os.path.join('figures', 'combined_stock_and_flow'),
         metadata={'doc': 'Where 05_combined_stock_and_flow.py draws its pages, a folder for each scenario of 08.'})
 
-    # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
-    # and a page small enough to open quickly.
+    # The resolution of every figure, in dots per inch (300 since 2026-11-13, the data centres' setting).
     dpi: int = field(
         default=300,
         metadata={'doc': 'Resolution of the figures in dots per inch: 300, the data centres\' "best figure setting" '
                          '(Matthias, 2026-11-12: "I want that we use the best figure setting!!!"; for this project '
                          '2026-11-13: "test all the figures", "Yes, 1 to 7").'})
+
+    # The font of every page (Matthias, 2026-11-13: "These titles look ugly. Font terrible why the hell such a bold",
+    # "Do research which fonds are designe for best readability", then, after the fonts designed for readability were
+    # drawn on his pages, "All Luciole"; the folder: "fonts/Luciole/, in git"). Luciole: made for readers with low
+    # vision by the Centre Technique Régional pour la Déficience Visuelle and the studio typographies.fr, compared with
+    # Arial, Verdana, Frutiger, Eido and OpenDyslexic in 145 readers (Galiano et al. 2023, Acta Psychologica 236:
+    # 103926); licence CC BY 4.0, its files and licence in `fonts/Luciole/`. SAFE TO CHANGE: the font only with its
+    # files in the folder (01 stops where none is there; FigureTests' rule font checks every page).
+    font: str = field(
+        default='Luciole',
+        metadata={'doc': 'The font of every page, by its family name (its files in font_folder).'})
+    font_folder: str = field(
+        default=os.path.join('fonts', 'Luciole'),
+        metadata={'doc': 'The folder of the font files (.ttf) of the font, in the project, in git.'})
 
 
 @dataclass

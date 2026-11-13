@@ -833,7 +833,10 @@ def element_summary(files: dict, elements: list) -> dict:
 # figures look great on a landscpae A4 page"): titles 11 pt, axes and legends 9 pt (rule 9 of 2026-11-12).
 A4_LANDSCAPE = (297 / 25.4, 210 / 25.4)                    # inches
 PRINT_STYLE = {'font.size': 9, 'axes.titlesize': 11, 'axes.labelsize': 9, 'xtick.labelsize': 9, 'ytick.labelsize': 9,
-               'legend.fontsize': 9, 'legend.title_fontsize': 9, 'figure.titlesize': 13, 'lines.linewidth': 1.4}
+               'legend.fontsize': 9, 'legend.title_fontsize': 9, 'figure.titlesize': 13, 'lines.linewidth': 1.4,
+               # the years 7 points below the axis, clear of the lowest number of the mass axis beside them (matplotlib's
+               # 3.5 until 2026-11-13: in Luciole '2025' stood 1.4 to 4 points from '100 kg'; FigureTests' text_gap)
+               'xtick.major.pad': 7.0}
 # The colours of the three quantities and of the six robot types, from published schemes (Paul Tol's bright, vibrant and
 # muted, and Okabe & Ito's), chosen 2026-11-13 by FigureTests' colour rules (Matthias: "B", "Yes, build the three rules
 # as proposed"): every two of the three, and every two of the six, told apart by red-green colour-blind readers (at
@@ -1246,7 +1249,7 @@ def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
     page = plt.figure(figsize=A4_LANDSCAPE)
     page.suptitle(heading)
     for x, words in zip(NUMBER_COLUMNS, composition.NUMBERS_HEAD):
-        page.text(x, 0.91, words, fontsize=9, fontweight='bold', va='top')
+        page.text(x, 0.91, words, fontsize=9, va='top')
     step, y = min(0.034, 0.82 / max(len(rows), 1)), 0.87
     for row in rows:
         page.add_artist(plt.Line2D([0.02, 0.98], [y + 0.007, y + 0.007], color=composition.GRID, linewidth=0.8))
@@ -1315,7 +1318,7 @@ def robots_in_use_page(files: dict, draws: int, folder: str, dpi: int) -> list:
         else:
             low_all, high_all = np.percentile(totals, (2.5, 97.5))
             words_in_all = f'{robots_text(low_all)} to {robots_text(high_all)}'
-        axes.set_title(f'{year}: {words_in_all} robots', loc='left', fontsize=11, fontweight='bold')   # the year alone
+        axes.set_title(f'{year}: {words_in_all} robots', loc='left', fontsize=11)   # the year alone
     figure.suptitle('Humanoid robots in use by robot type')
     note = (f'Each row one robot type: how often each number of its robots came out in {draws:,} model runs, the height '
             'scaled to the row, every run on the axis. The six types add up to the robots in use of the ai-2040 '
@@ -1335,6 +1338,12 @@ def part_words(name: str, kg: np.ndarray) -> str | None:
     if not held.size:
         return None
     return f'{name}: {mass_text(float(np.median(held)))}{composition.held_words(held.size / kg.size, short=True)}'
+
+
+# The panel's title this many points above the panel, above the line of each part's median (17 until 2026-11-13: in
+# Luciole, a taller font, the two stood 0.7 points apart; FigureTests' text_gap); PART_LINE points more for each further
+# line of medians (wrap_part_words).
+PART_TITLE_PAD, PART_LINE = 26, 12
 
 
 def element_panel(axes, groups: dict, title: str, share_label: bool, colours: dict | None = None) -> list:
@@ -1370,26 +1379,56 @@ def element_panel(axes, groups: dict, title: str, share_label: bool, colours: di
     axes.axvline(median, **composition.MEDIAN_MARK)
     for bound in (low, high):
         axes.axvline(bound, **composition.BOUND_MARK)
-    axes.text(median, 0.97, f' {composition.panel_number(median)} {unit}', transform=axes.get_xaxis_transform(),
+    # the median's number just inside the top of the panel, 0.94 of its height (0.97 until 2026-11-13: in Luciole it stood
+    # 6 points from the line of medians above the panel; FigureTests' text_gap)
+    axes.text(median, 0.94, f' {composition.panel_number(median)} {unit}', transform=axes.get_xaxis_transform(),
               ha='left', va='top', fontsize=12, color='#222222', bbox=dict(facecolor='white', edgecolor='none',
                                                                           alpha=0.8, pad=1))
     # each part's median on a line under the title, above the panel, on no line (the design of 2026-11-12)
-    words = '   '.join(w for w in (part_words(g, np.asarray(groups[g], dtype=np.float64)[inside] * 1.0)
-                                    for g in drawn) if w)
-    axes.text(0.0, 1.015, words, transform=axes.transAxes, ha='left', va='bottom', fontsize=10, color='#222222')
-    axes.xaxis.set_major_locator(plt.MaxNLocator(5))
+    parts = [w for w in (part_words(g, np.asarray(groups[g], dtype=np.float64)[inside] * 1.0) for g in drawn) if w]
+    line = axes.text(0.0, 1.015, '   '.join(parts), transform=axes.transAxes, ha='left', va='bottom', fontsize=10,
+                     color='#222222')
+    axes.part_words = (line, parts)    # wrapped to the panel's width once the page is laid out (wrap_part_words)
+    # four mass numbers at most (five until 2026-11-13: in Luciole's wider figures '100000' lay on '150000')
+    axes.xaxis.set_major_locator(plt.MaxNLocator(4))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(composition.panel_number))
     axes.yaxis.set_major_locator(plt.MaxNLocator(4))
     axes.yaxis.set_major_formatter(plt.FuncFormatter(composition.panel_number))
+    # the mass numbers 02's TICK_PAD below the axis (3.5 points until 2026-11-13: in Luciole the first, '10000', stood
+    # 0.2 points from the share axis's '0'; FigureTests' text_gap), one copy with 02's panels
     axes.tick_params(labelsize=11)
+    axes.tick_params(axis='x', pad=composition.TICK_PAD)
     axes.set_xlabel(f'mass ({unit})', fontsize=12)
     if share_label:
         axes.set_ylabel('share of the runs', fontsize=12)
     axes.grid(axis='x', alpha=0.3)
-    axes.set_title(title + composition.held_words(float(inside.mean()), short=True), fontsize=13, fontweight='bold',
-                   loc='left', pad=17)
+    # the title PART_TITLE_PAD points above the panel, above the line of each part's median
+    axes.set_title(title + composition.held_words(float(inside.mean()), short=True), fontsize=13,
+                   loc='left', pad=PART_TITLE_PAD)
     axes.element_numbers = (title, median, low, high, unit)
     return drawn
+
+
+def wrap_part_words(axes, renderer) -> bool:
+    """The line of each part's median above a panel (element_panel) in as many lines as the panel's width needs, broken
+    between two parts, and the panel's title raised PART_LINE points for each line added; measured as drawn, once the
+    page is laid out. Until 2026-11-13 one line, which in Luciole ran into the next panel's on the page of 2040 (the
+    joints' and the electronics' medians; FigureTests' text_gap). True where it wrapped."""
+    line, parts = axes.part_words
+    room = axes.get_window_extent(renderer).width
+    if not parts or line.get_window_extent(renderer).width <= room:
+        return False
+    lines = [parts[0]]
+    for words in parts[1:]:
+        line.set_text(f'{lines[-1]}   {words}')
+        if line.get_window_extent(renderer).width <= room:
+            lines[-1] = f'{lines[-1]}   {words}'
+        else:
+            lines.append(words)
+    line.set_text('\n'.join(lines))
+    axes.set_title(axes.get_title(loc='left'), fontsize=13, loc='left',
+                   pad=PART_TITLE_PAD + (len(lines) - 1) * PART_LINE)
+    return True
 
 
 def split_elements_page(title: str, splits: dict, colours: dict, elements: list, note: str, path: str,
@@ -1405,7 +1444,7 @@ def split_elements_page(title: str, splits: dict, colours: dict, elements: list,
     nrows = max(1, math.ceil(len(held) / ncols))
     drawn = set()
     runs = total.shape[0]
-    with plt.style.context('default'):
+    with plt.style.context(['default', schemas.FONT_STYLE]):   # the default style in the pages' font (01's FONT_STYLE)
         figure, grid = plt.subplots(nrows, ncols, figsize=(4.8 * ncols, 3.1 * nrows + 1.3), squeeze=False)
         for k, e in enumerate(held):
             parts = {name: np.asarray(v[:, e], dtype=np.float64) for name, v in splits.items()}
@@ -1422,6 +1461,10 @@ def split_elements_page(title: str, splits: dict, colours: dict, elements: list,
         figure.text(0.5, -0.005, composition.foot_text(note.split('\n'), 150), ha='center', va='top', fontsize=11,
                     color='#555555')
         figure.tight_layout(rect=(0, 0, 1, 0.93))
+        # each panel's line of medians within its panel's width, then the page laid out again for the raised titles
+        renderer = figure.canvas.get_renderer()
+        if any([wrap_part_words(axes, renderer) for axes in grid.flat[:len(held)]]):
+            figure.tight_layout(rect=(0, 0, 1, 0.93))
         os.makedirs(os.path.dirname(path), exist_ok=True)
         figure.savefig(path, dpi=dpi, facecolor='white', bbox_inches='tight')
         plt.close(figure)
@@ -1465,7 +1508,7 @@ def parts_pages(year: int, kg, elements: list, folder: str, dpi: int) -> list:
         page.suptitle(f'{year}: elements in all humanoid robots in use, part by part'
                       + (f' ({k} of {len(pages)})' if len(pages) > 1 else ''))
         for x, words in zip(PARTS_COLUMNS, PARTS_HEAD):
-            page.text(x, 0.91, words, fontsize=9, fontweight='bold', va='top')
+            page.text(x, 0.91, words, fontsize=9, va='top')
         y = 0.87
         for row in page_rows:
             page.add_artist(plt.Line2D([0.02, 0.98], [y + 0.007, y + 0.007], color=composition.GRID, linewidth=0.8))

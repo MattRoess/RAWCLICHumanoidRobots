@@ -184,10 +184,13 @@ class Robot:
 
 
 def read_table(folder: str, table: str) -> tuple:
-    """One table as 02 writes it: its columns (<table>.txt, one a line) and its draws (<table>.npy)."""
+    """One table as 02 writes it: its columns (<table>.txt, one a line) and its draws (<table>.npy), read from the disk
+    as they are needed (memory-mapped, read only), not loaded whole: the tables of all six robot types at 200,000 draws
+    would hold some 7 GB (measured 2026-11-13; the rule that every stage fits in half the computer's memory, the GitHub
+    folder's CLAUDE.md §4). The values are the file's, the same either way."""
     with open(os.path.join(folder, f'{table}.txt'), encoding='utf-8') as file:
         columns = file.read().splitlines()
-    return columns, np.load(os.path.join(folder, f'{table}.npy'))
+    return columns, np.load(os.path.join(folder, f'{table}.npy'), mmap_mode='r')
 
 
 def read_draws(params: Params) -> list:
@@ -424,7 +427,7 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
             continue
         if not composition.held(total):
             here.axis('off')
-            here.set_title(title, fontsize=composition.APART_TITLE, fontweight='bold', loc='left')
+            here.set_title(title, fontsize=composition.APART_TITLE, loc='left')
             here.text(0, 0.85, composition.not_drawn_words(total), transform=here.transAxes,
                       fontsize=composition.APART_TEXT, va='top', color=composition.APART_INK)
             continue
@@ -434,7 +437,7 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
             panels.append((here, composition.by_material_panel(here, {**parts, **fixed}, title, first_in_row,
                                                                tuple(fixed))))
             continue
-        here.set_title(title, fontsize=composition.APART_TITLE, fontweight='bold', loc='left')
+        here.set_title(title, fontsize=composition.APART_TITLE, loc='left')
         bars = composition.stacked_bars(here, parts, colours)
         composition.centre_lines(here, bars.values, bars.held_in, bars.end, bars.unit, title)
         composition.panel_axes(here, bars.unit, first_in_row)
