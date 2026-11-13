@@ -1,6 +1,6 @@
 """
 Tests of 05_combined_stock_and_flow.py and tools/copy_data_center_draws.py: the AI data centres of RAWCLICDataCenters'
-07 and the humanoid robots of 04 together, with their distributions.
+08 and the humanoid robots of 04 together, with their distributions.
 
 **Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
 **Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
@@ -8,7 +8,7 @@ at the root of the repository.
 
 Matthias, 2026-11-08: "write 05 combination of results of 04 and 07 with the distributions", rows 1 to 8, "Yes, build
 it" (documentation/claude/EVIDENCE.md E52). Made-up draws in temporary folders, every kilogram by hand: the copy of a
-made-up file in 07's form; 05 on made-up draws of 07 and 04; its checks, each with a deliberate fault. Nothing in data/
+made-up file in 08's form; 05 on made-up draws of 08 and 04; its checks, each with a deliberate fault. Nothing in data/
 or figures/ is touched.
 """
 
@@ -44,12 +44,12 @@ from src.params_schema import Params, absolute  # noqa: E402
 
 N = 30
 ROBOT_ELEMENTS = ['Li', 'Al', 'Cu', 'Nd']          # 04's (made up): neodymium 0 in every draw
-CENTRE_ELEMENTS = ['Cu', 'Al', 'Sr']               # 07's (made up): strontium the data centres' only
+CENTRE_ELEMENTS = ['Cu', 'Al', 'Sr']               # 08's (made up): strontium the data centres' only
 YEARS = 16
 
 
 def centre_value(s, d, y, f, e):
-    """A made-up kg of 07's copy: scenario s, draw d, year y, flow f, element e (07's order)."""
+    """A made-up kg of 08's copy: scenario s, draw d, year y, flow f, element e (08's order)."""
     return (s + 1) * (1 + d / N) * (y + 1) * (f + 1) * (e + 1) * 1e3
 
 
@@ -59,7 +59,7 @@ def robot_value(d, y, p, e):
 
 
 def write_inputs(params: Params, draws: int = N, years: int = YEARS) -> None:
-    """The made-up copy of 07's draws and 04's draws where 05 reads them (params' folders)."""
+    """The made-up copy of 08's draws and 04's draws where 05 reads them (params' folders)."""
     copy = absolute(params.data.data_center_draws_dir)
     os.makedirs(copy)
     s, d, y, f, e = np.meshgrid(*(np.arange(k) for k in (3, draws, years, 3, len(CENTRE_ELEMENTS))), indexing='ij')
@@ -94,7 +94,7 @@ def settings(folder: str) -> Params:
 
 
 class TestTheCopy(unittest.TestCase):
-    """tools/copy_data_center_draws.py on a made-up file in 07's form: every number copied, 2022 to 2024 and the
+    """tools/copy_data_center_draws.py on a made-up file in 08's form: every number copied, 2022 to 2024 and the
     collected left out; a missing or doubled row stops it."""
 
     def write_csv(self, path: str, rows_left_out=(), row_twice=None) -> None:
@@ -166,7 +166,8 @@ class TestTheCombination(unittest.TestCase):
         def checked(figure, path, *args, **kwargs):
             name = os.path.relpath(str(path), cls.params.output.combined_figures_dir)
             cls.saved.append(name)
-            cls.problems += page_problems(figure, os.path.basename(name), kwargs.get('dpi'))
+            cls.problems += page_problems(figure, os.path.basename(name), kwargs.get('dpi'),
+                                          kwargs.get('bbox_inches') == 'tight')
             cls.legends[name] = [t.get_text() for legend in figure.legends for t in legend.get_texts()]
             save(figure, path, *args, **kwargs)
 
@@ -207,23 +208,24 @@ class TestTheCombination(unittest.TestCase):
         import csv
         with open(os.path.join(self.params.output.combined_dir, C.SUMMARY), newline='', encoding='utf-8') as handle:
             rows = list(csv.DictReader(handle))
-        # Scenario B, copper, together, stock, 2030: the mean, 2.5 % and 97.5 % of the draws by hand.
+        # Scenario B, copper, together, stock, 2030: the median, 2.5 % and 97.5 % of the runs by hand (the mean until
+        # 2026-11-13).
         values = np.array([centre_value(1, d, 5, 1, 0) + 2 * sum(robot_value(d, 5, p, 2)
                                                                  for p in range(len(C.flow.PARTS)))
                            for d in range(N)])
         row = next(r for r in rows if r['scenario'] == 'B' and r['element'] == 'Copper' and r['source'] == 'together'
                    and r['flow'] == 'stock' and r['year'] == '2030')
-        self.assertAlmostEqual(float(row['mean']) / values.mean(), 1, places=5)
+        self.assertAlmostEqual(float(row['median']) / np.median(values), 1, places=5)
         low, high = np.percentile(values, (2.5, 97.5))
         self.assertAlmostEqual(float(row['2.5 %']) / low, 1, places=5)
         self.assertAlmostEqual(float(row['97.5 %']) / high, 1, places=5)
         # Strontium the data centres' alone; lithium the robots' alone; neodymium in no draw: '–', held 0.
         sr = next(r for r in rows if r['element'] == 'Strontium' and r['source'] == C.ROBOTS and r['flow'] == 'in')
-        self.assertEqual((sr['mean'], sr['held in % of the draws']), ('–', '0.0'))
+        self.assertEqual((sr['median'], sr['held in % of the runs']), ('–', '0.0'))
         li = next(r for r in rows if r['element'] == 'Lithium' and r['source'] == C.DATA_CENTRES and r['flow'] == 'in')
-        self.assertEqual(li['mean'], '–')
+        self.assertEqual(li['median'], '–')
         nd = [r for r in rows if r['element'] == 'Neodymium']
-        self.assertTrue(nd and all(r['mean'] == '–' for r in nd))
+        self.assertTrue(nd and all(r['median'] == '–' for r in nd))
 
     def test_its_pages(self):
         held = ['Lithium', 'Aluminium', 'Copper', 'Strontium']
@@ -234,7 +236,7 @@ class TestTheCombination(unittest.TestCase):
         self.assertEqual(self.problems, [])
         self.assertIn('Neodymium: no numbers, 0 kg in every draw; no page.', self.printed)
         self.assertEqual(self.legends[os.path.join('B', C.DISTRIBUTIONS_DIR, 'elements_2040.png')],
-                         [C.DATA_CENTRES, C.ROBOTS])
+                         [C.DATA_CENTRES, C.ROBOTS, f'Median of {N:,} model runs', '95 % interval'])
 
 
 class TestItsChecks(unittest.TestCase):

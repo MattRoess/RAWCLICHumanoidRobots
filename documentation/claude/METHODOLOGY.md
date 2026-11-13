@@ -357,7 +357,14 @@ his discrete rainbow for the kinds of part). Pages only for the robot types `out
   from some files).
 - **`categories/1_<name>_robot.png`**: robot type 1's kinds of part, where they sit on the robot (the marks and
   colours of 02's figures, one copy of the drawing in 01), the joints whose magnets are for 150 °C or more in most
-  draws ringed red, and what each kind holds.
+  draws ringed red. Since 2026-11-13 each kind in the colour of its group of how a robot is taken apart (joints,
+  battery, electronics, body; Matthias: "Yes, both": 14 colours of their own could not all be told apart, FigureTests'
+  colour rules), its number or letter telling the kind; beside the robot the kinds under their group, one line each,
+  the joints in the first column, the other groups in the second, 34 points a line (Matthias, on the page with what
+  each kind holds beside the robot: "These two figures look ugly. The different text are much to close. It looks
+  overloaded", "Yes, all").
+- **`categories/1_<name>_kinds_of_part.png`** (since 2026-11-13, "Yes, all"): what each kind of part holds, a row per
+  kind with its mark in its group's colour, on a page of its own after the robot page.
 - **`categories/2_<name>_robots_<k>.png`, `categories/2_<name>_robot.png`** (since 2026-10-30): the same for robot type
   2; its robots on wheels in sections of their own ("On wheels, every joint from its maker", "On wheels, joints a share
   of the robot's mass"), each row with its base in plain words (its drive wheels, steered or omni, its casters) and ‡
@@ -1207,7 +1214,12 @@ ultrasonic sensors' PZT (40 mg each, most often) in a few wheeled robots; in the
   beside the panel "Titanium (Ti) in the alloy" each robot type's element pages draw a panel "Titanium (Ti) in the
   sensors", the cameras and the other sensors (`SENSORS_OF`, `sensors_split`), and 03 a page of its own. The legend of an
   element page names every material it draws, the alloys too, in as many rows as it needs (`legend_columns`).
-- `robot_type_1_elements_1.png` and `_2.png`, the element figure Matthias approved ("Yes, the element figure is right
+- **Removed on 2026-11-13** (Matthias: "Yes, all", to the finding that split by the four groups they would repeat 02's
+  pages of each element by group, the group medians the same to within 1 %, and split kind by kind their up to 20
+  colours could not all be told apart): the element figure and the page of its numbers after each of its pages
+  (`robot_type_<n>_elements_<k>.png`, `robot_type_<n>_numbers_<k>.png`). Each element place by place is on the
+  overview, by group on 02's `<n>_<name>_groups_<k>.png`. What follows is the figure as it was.
+  `robot_type_1_elements_1.png` and `_2.png`, the element figure Matthias approved ("Yes, the element figure is right
   now", V49), for the three robots: one panel per element, three across (page 1 copper, aluminium, silver, gold,
   palladium, tantalum; page 2 neodymium and praseodymium, dysprosium, gallium, indium); in each the histogram of the
   robot's total over the draws (70 bars, the height the share of the draws), each bar split into the kg its draws hold
@@ -1222,7 +1234,12 @@ ultrasonic sensors' PZT (40 mg each, most often) in a few wheeled robots; in the
   the mean of those draws and "held in", in what share of all the draws it holds it (the waist 96 %, the head 76 to
   83 %, the torso boards' aluminium 41 %, the cables' silver, gold, palladium and tantalum 10 %, the head's indium
   33 %; Matthias, 2026-10-29, "Yes, do it"); hatched where more than half the mean rests on parts whose mass is an
-  estimate (label E).
+  estimate (label E). Since 2026-11-13: the median and the 95 % interval marked, two columns (the median and "held
+  in"); each row in the colour of its group (a component or a sensor the electronics', wherever it sits; "Yes, both");
+  every row 0.42 inches, one text height between two row labels (they stood 5 to 9 points apart: "much to close",
+  "Yes, all"), the panels from the top of the page, two a page where both fit, an element whose rows a page cannot hold
+  in as few panels as hold them, its rows split evenly, on the scale of all of them ("part 1 of 2"); the legend (the
+  groups drawn, the median, the 95 % interval) below the last panel, as on the data centres' pages.
 
 In both, a kind of part holding an element in fewer than 2.5 % of the draws is not drawn. On the element figure, an
 element that is 0 in some draws (indium: in the head of some robots only) shows the draws that hold it and, right of
@@ -1285,11 +1302,11 @@ down:
 
 | Pages | Each type's histogram split by | Colours (Paul Tol's, as published) |
 |---|---|---|
-| `comparison_total_1.png`, the mass of one robot | its materials | the discrete rainbow of 16 |
-| `comparison_materials_<k>.png`, each material any type holds (15 in V170's run: no type holds ceramics) | the kind of part it sits in | the kinds' of 01 and 02 |
+| `comparison_total_1.png`, the mass of one robot | since 2026-11-13 the six materials holding most of it (aluminium alloys, steel, plastics, battery cells, electrical steel, copper: the medians of his run of 2026-11-08 added over the six types; 03 says when a run's six differ), every other material together as "Other materials" (Matthias, "Yes, all": "six fixed colours for the main materials and the rest in grey") | copper, the aluminium alloys and the cells in 02's colours; steel, plastics and electrical steel in Tol's blue, ochre and light cyan; the others grey (the discrete rainbow of 16 until then) |
+| `comparison_materials_<k>.png`, each material any type holds (15 in V170's run: no type holds ceramics) | since 2026-11-13 the group of the kind of part it sits in, the kinds placed whole (01's `KIND_GROUP`, as 01's robot page and 02's overview colour them; "Yes, all"); the kind of part until then | 01's `GROUP_COLOURS` |
 | `comparison_elements_<k>.png`, each element of interest any type holds (22 in V170's run), in alphabetical order of their names, 1 Aluminium … 22 Titanium (Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only") | the material it comes from, the copper fixed in alloys pale grey | 02's of the element pages (muted) |
 | `comparison_groups_<k>.png`, each element of interest any type holds, in the same order (since 2026-11-08) | the four groups of how a robot is taken apart | 01's `GROUP_COLOURS` |
-| `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the four groups (since 2026-11-08; the shared lists' part groups before), the body region | 01's `GROUP_COLOURS`, the discrete rainbow of 7 |
+| `comparison_part_groups_1.png`, `comparison_body_regions_1.png` | the four groups (since 2026-11-08; the shared lists' part groups before), the body region | 01's `GROUP_COLOURS`, the discrete rainbow of 7, its head in the rainbow's orange since 2026-11-13 (its pale green stood 18.2 from the base's yellow, under FigureTests' 21) |
 | `comparison_parts_<k>.png`, after all the pages above, each element one robot of each type part by part (since 2026-11-08) | a row for each type and each part that holds it | — |
 | `comparison_copper_1.png`, copper's inflow | recycled as copper, fixed in alloys | 02's copper, pale grey |
 

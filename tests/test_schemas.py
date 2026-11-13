@@ -656,13 +656,15 @@ class TestTypeTwoPages(unittest.TestCase):
     def test_its_pages_are_type_1s_with_its_own_title(self):
         pages = self.pages()
         # Batches 1, 2, 2b and since 2026-10-30 the robots on wheels: 96 robots, 102 rows, on pages of 18 lines.
-        tables = len(pages) - 1
+        # Since 2026-11-13 ("Yes, all") the robot page is followed by the page of what each kind of part holds.
+        tables = len(pages) - 2
         self.assertEqual([name for name, _ in pages], [f'categories/2_type_robots_{k}.png' for k in range(1, tables + 1)]
-                         + ['categories/2_type_robot.png'])
+                         + ['categories/2_type_robot.png', 'categories/2_type_kinds_of_part.png'])
         # Since 2026-10-30 (E10.1 point 4): only the robots with a mass are counted; the Xialan S0 is not in it.
         self.assertEqual(self.title(pages[0][1]), 'Robot type 2: all its 96 robots with a mass, each drawn from its '
                                                   f'own parts (1 of {tables})')
-        self.assertEqual(self.title(pages[-1][1]), 'Robot type 2: where its kinds of part sit')
+        self.assertEqual(self.title(pages[-2][1]), 'Robot type 2: where its kinds of part sit')
+        self.assertEqual(self.title(pages[-1][1]), 'Robot type 2: what each kind of part holds')
         for _, figure in pages:
             schemas.plt.close(figure)
 

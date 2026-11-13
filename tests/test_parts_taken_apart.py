@@ -114,15 +114,16 @@ def fixed_magnets(inputs, n: int) -> dict:
 
 
 def numbers_of(axes) -> str:
-    """A panel's numbers as they were written above it until 2026-11-05 (since then on the page of numbers after its
-    page, EVIDENCE.md E34, from the numbers the panel keeps): in what share of the draws it is held, its median, its
-    mean, what lies beyond its axis, a line each; '' for a panel without numbers."""
+    """A panel's numbers as the page of its numbers writes them (EVIDENCE.md E34; until 2026-11-05 above the panel),
+    from the numbers the panel keeps: in what share of the runs it is held where not all, its median (no mean since
+    2026-11-13, "Not mean, but median"), what lies beyond its axis, a line each; '' for a panel without numbers."""
     numbers = getattr(axes, 'panel_numbers', None)
     if numbers is None:
         return ''
-    _, held_in, median, mean, _, _, unit, beyond = numbers
-    return '\n'.join(line for line in (held_in, f'median {composition.panel_number(median)}\u00a0{unit}',
-                                        f'mean {composition.panel_number(mean)}\u00a0{unit}', beyond) if line)
+    _, held_in, median, _, _, _, _, unit, beyond = numbers
+    held = f'in {composition.share_text(held_in)} of the runs' if held_in < 0.995 else ''
+    return '\n'.join(line for line in (held, f'median {composition.panel_number(median)}\u00a0{unit}', beyond)
+                     if line)
 
 
 def at_mode(rng, low, mode, high, n):
@@ -502,8 +503,7 @@ class TestReadable(unittest.TestCase):
             params.output.parts_dir = os.path.join(folder, 'data')
             pages = composition.parts_figure_pages(d)
             self.assertEqual([name for name, _ in pages if '_notes_' not in name],
-                             list(composition.parts_figures(robot_type, len(composition.element_pages(d)),
-                                                           len(composition.overview_pages(d)))))
+                             list(composition.parts_figures(robot_type, len(composition.overview_pages(d)))))
             # 02's pages of the robot type: its notes, its elements and its materials nine a page; where each material
             # sits.
             pages += composition.taken_apart_pages(c, d, [], params) + composition.sources_pages(d)
@@ -631,8 +631,9 @@ class TestPartsNotes(unittest.TestCase):
         text = ' '.join(' '.join(t.get_text() for figure in notes for t in figure.texts).split())
         for figure in notes:
             composition.plt.close(figure)
-        for words in ('the element pages', 'the overview pages', 'hatched', 'fewer than 2.5 % of the draws',
-                      f'{d.n:,} draws', "the magnets' grade class"):
+        # The overview the folder's only figure since 2026-11-13 ("Yes, all"): its notes, no element pages'.
+        for words in ('the overview pages', 'hatched', 'fewer than 2.5 % of the runs', f'{d.n:,} model runs',
+                      "the magnets' grade class"):
             self.assertIn(words, text.lower())
 
 
@@ -670,7 +671,7 @@ class TestElementPages(unittest.TestCase):
                     kg = composition.alloy_split(symbol, composition.materials_of(d, symbol)).get(
                         composition.ALLOY_OF[symbol], np.zeros(d.n))
                 label = composition.alloy_title(symbol)   # 'Aluminium (Al) in the alloys' since E33
-                label = label + ', inflow' if label + ', inflow' in panels else label   # copper since E25
+                label = label + ', in all' if label + ', in all' in panels else label   # copper since E25
                 shown = [(label, kg)]
             for label, kg in shown:
                 held = kg > 0
@@ -680,42 +681,21 @@ class TestElementPages(unittest.TestCase):
                 numbers = panels[label]
                 self.assertNotIn('median 0 ', numbers, msg=symbol)
                 if held.all():
-                    self.assertNotIn('of the draws', numbers, msg=symbol)
+                    self.assertNotIn('of the runs', numbers, msg=symbol)
                     continue
                 partly.append(symbol)
                 per, unit = composition.panel_unit(kg[held])
-                self.assertIn(f'in {composition.panel_number(100 * held.mean())} % of the draws', numbers)
+                self.assertIn(f'in {composition.share_text(held.mean())} of the runs', numbers)
                 self.assertIn(f'median {composition.panel_number(np.median(kg[held]) / per)} {unit}', numbers)
         self.assertIn('Ti', partly)      # the titanium alloy, in some robots only (E19 point 3: Ti whole)
         self.assertNotIn('Pb', partly)   # since point 3a in every robot's boards, so in every draw
 
-    def test_a_critical_element_held_in_some_draws_shows_the_draws_that_hold_it(self):
-        # The same on the pages of where the critical elements sit: indium, in the head of some robots only.
-        inputs = inputs_or_skip(self, self.params)
-        d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
-        partly = []
-        for symbol, name in composition.FIGURE_ELEMENTS:
-            kinds = composition.by_kind(d, symbol)
-            total = sum(kinds.values())
-            figure, axes = composition.plt.subplots()
-            composition.stacked_panel(axes, kinds, name, True)
-            texts = share = numbers_of(axes)   # the numbers above the panel since 2026-11-02
-            composition.plt.close(figure)
-            self.assertNotIn('median 0\u00a0', texts, msg=symbol)
-            held = total > 0
-            if held.all():   # since 2026-11-01 the right may say what lies beyond the axis (TestAxisEnd), never a share
-                self.assertNotIn('of the draws', share, msg=symbol)
-                continue
-            partly.append(symbol)
-            self.assertEqual(share.split('\n')[0], f'in {composition.panel_number(100 * held.mean())} % of the draws')
-            per, unit = composition.panel_unit(total[held])
-            self.assertIn(f'median {composition.panel_number(np.median(total[held]) / per)}\u00a0{unit}', texts)
-        self.assertIn('In', partly)
-
     def test_an_overview_row_held_in_some_draws_shows_the_draws_that_hold_it(self):
         # Matthias, 2026-10-29, "Yes, do it": the same for the overview's rows, a kind of part holding the element in
-        # only some draws (aluminium in the torso boards: median 0 before). Its median and mean those of the draws that
-        # hold it; in what share of the draws, a third column; every number within the page.
+        # only some draws (aluminium in the torso boards: median 0 before). Its median that of the draws that hold it; in
+        # what share of the runs, the column 'held in' (two columns since 2026-11-13); every number within the page. An
+        # element with more rows than a page holds on two panels, each its part of the rows, on the scale of all of them
+        # (since 2026-11-13, "Yes, all").
         inputs = inputs_or_skip(self, self.params)
         d = draw(inputs, self.params, fixed_magnets(inputs, self.params.composition.draws))
         partly, panels = [], []
@@ -724,7 +704,7 @@ class TestElementPages(unittest.TestCase):
             figure = composition.overview_page(d, elements, number, len(layout))
             figure.canvas.draw()
             page = figure.bbox
-            for (symbol, _), axes in zip(elements, figure.axes[1:]):       # the robot first, then the panels
+            for (symbol, _, rows, _, _), axes in zip(elements, figure.axes[1:]):   # the robot first, then the panels
                 boxes = []
                 for t in axes.texts:   # every number within the page and clear of every other
                     box = t.get_window_extent()
@@ -737,21 +717,22 @@ class TestElementPages(unittest.TestCase):
                 rows_of = {}
                 for t in axes.texts:
                     rows_of.setdefault(round(t.get_position()[1], 2), []).append(t)
-                panels.append((symbol, {y: [t.get_text() for t in sorted(texts, key=lambda t: t.get_position()[0])]
-                                        for y, texts in rows_of.items()}))
+                panels.append((symbol, rows, {y: [t.get_text() for t in sorted(texts, key=lambda t: t.get_position()[0])]
+                                              for y, texts in rows_of.items()}))
             composition.plt.close(figure)
-        for symbol, at in panels:
+        for symbol, rows, at in panels:
             # Its rows by place since 2026-11-05 ("Yes, fix all three"): each kind of part, the electronics by their
             # components (by_place, places_order).
             kinds = composition.by_place(d, symbol)
-            shown = [k for k in composition.places_order() if k in kinds and composition.held(kinds[k])]
+            every = [k for k in composition.places_order() if k in kinds and composition.held(kinds[k])]
+            shown = [k for k in every if k in rows]
             if not shown:
                 continue
-            per, _ = composition.panel_unit(sum(kinds[k] for k in shown))
+            per, _ = composition.panel_unit(sum(kinds[k] for k in every))
             for row, kind in enumerate(reversed(shown)):
                 held = kinds[kind] > 0
-                median, _, share = at[round(row + 0.45, 2)]
-                self.assertEqual(share, f'{composition.panel_number(100 * held.mean())} %')
+                median, share = at[round(row + 0.45, 2)]
+                self.assertEqual(share, composition.held_share(held.mean()))
                 self.assertEqual(median, composition.panel_number(np.median(kinds[kind][held]) / per))
                 if not held.all():
                     partly.append((symbol, kind))
@@ -761,38 +742,26 @@ class TestElementPages(unittest.TestCase):
 
 
 class TestCentre(unittest.TestCase):
-    """Matthias, 2026-10-28: "Showing the mean is wrong. It is not a good measure. Use the median or show boths", and
-    his answer "Both, median first": the median a solid line, the mean a dotted one, each with its number."""
+    """The overview's rows: the median a solid line, the 95 % interval two dashed ones (since 2026-11-13, the data
+    centres' marks, "Not mean, but median"; until then the mean a dotted line, Matthias's "Both, median first" of
+    2026-10-28). The element panels' marks were tested here until their pages were removed (2026-11-13, "Yes, all")."""
 
     VALUES = np.random.default_rng(3).lognormal(0.0, 1.0, 5000)   # kg, skewed: its mean well above its median
 
     def lines(self, axes, style: str) -> list:
         return [line for line in axes.get_lines() if line.get_linestyle() == style]
 
-    def test_the_element_panel_marks_the_median_solid_and_the_mean_dotted(self):
-        import matplotlib.pyplot as plt
-        figure, axes = plt.subplots()
-        composition.stacked_panel(axes, {'hips': self.VALUES}, 'Copper (Cu)', True)
-        solid, dotted = self.lines(axes, '-'), self.lines(axes, ':')
-        self.assertEqual(len(solid), 1)
-        self.assertEqual(len(dotted), 1)
-        self.assertAlmostEqual(solid[0].get_xdata()[0], np.median(self.VALUES))
-        self.assertAlmostEqual(dotted[0].get_xdata()[0], self.VALUES.mean())
-        # Their numbers above the panel, right, not over its bars (Matthias, 2026-11-02: "The figure is first").
-        above = numbers_of(axes)
-        self.assertTrue('median' in above and 'mean' in above, msg=above)
-        self.assertEqual([t.get_text() for t in axes.texts], [])
-        plt.close(figure)
-
-    def test_the_overview_row_marks_the_median_solid_and_the_mean_dotted(self):
+    def test_the_overview_row_marks_the_median_solid_and_its_95_percent_dashed(self):
         import matplotlib.pyplot as plt
         figure, axes = plt.subplots()
         composition.ridge_panel(axes, {'hips': self.VALUES}, {'hips': np.zeros(self.VALUES.size)}, 'Copper (Cu)')
-        solid, dotted = self.lines(axes, '-'), self.lines(axes, ':')
+        solid, dashed = self.lines(axes, '-'), self.lines(axes, '--')
         self.assertEqual(len(solid), 1)
-        self.assertEqual(len(dotted), 1)
+        self.assertEqual(len(dashed), 2)
+        self.assertEqual(self.lines(axes, ':'), [])
         self.assertAlmostEqual(solid[0].get_xdata()[0], np.median(self.VALUES))
-        self.assertAlmostEqual(dotted[0].get_xdata()[0], self.VALUES.mean())
+        self.assertEqual(sorted(line.get_xdata()[0] for line in dashed),
+                         sorted(np.percentile(self.VALUES, [2.5, 97.5])))
         plt.close(figure)
 
 
@@ -880,8 +849,7 @@ class TestMaterialPages(unittest.TestCase):
         figure, axes = plt.subplots()
         composition.material_panel(axes, kg, title, True)
         numbers = numbers_of(axes)
-        share = 100 * (kg > 0).mean()
-        self.assertIn(f'in {composition.panel_number(share)} % of the draws', numbers)
+        self.assertIn(f'in {composition.share_text((kg > 0).mean())} of the runs', numbers)
         median = np.median(kg[kg > 0]) * 1000
         self.assertIn(f'median {composition.panel_number(median)}', numbers)   # of the draws that hold it, in g
         plt.close(figure)
@@ -948,8 +916,7 @@ class TestPagesByMaterial(unittest.TestCase):
         # row per panel: in what share of the draws it is held, median, mean, the 95 % interval, beyond the axis; on the
         # element and material pages and on the figures of where the critical elements sit.
         d, c = self.drawn()
-        for pages, drawn_series in ((composition.taken_apart_pages(c, d, [], self.params), ('elements', 'materials')),
-                                    (composition.parts_figure_pages(d), ('elements',))):
+        for pages, drawn_series in ((composition.taken_apart_pages(c, d, [], self.params), ('elements', 'materials')),):
             names = [name for name, _ in pages]
             figures = dict(pages)
             drawn = [n for n in names if n.rsplit('_', 2)[-2] in drawn_series]
@@ -967,7 +934,8 @@ class TestPagesByMaterial(unittest.TestCase):
                     self.assertEqual(axes.get_title(loc='right'), '', msg=name)
             for figure in figures.values():
                 composition.plt.close(figure)
-        # Lithium's row on the element pages: its median and mean as its draws give them.
+        # Lithium's row on the element pages: its median and middle half as its runs give them (no mean since
+        # 2026-11-13).
         kg = c.column('elements', 'Li')
         per, unit = composition.panel_unit(kg[kg > 0])
         figure, axes = composition.plt.subplots()
@@ -975,7 +943,8 @@ class TestPagesByMaterial(unittest.TestCase):
         row = composition.panel_rows(figure)[0]
         self.assertEqual(row[0], 'Lithium (Li)')
         self.assertEqual(row[2], f'{composition.panel_number(float(np.median(kg / per)))}\u00a0{unit}')
-        self.assertEqual(row[3], f'{composition.panel_number(float((kg / per).mean()))}\u00a0{unit}')
+        p25, p75 = np.percentile(kg / per, (25, 75))
+        self.assertEqual(row[3], f'{composition.panel_number(p25)} to {composition.panel_number(p75)}\u00a0{unit}')
         composition.plt.close(figure)
 
     def test_the_light_alloys_metals_drawn_as_their_alloy_alone(self):
@@ -1060,28 +1029,29 @@ class TestPagesByMaterial(unittest.TestCase):
         names = [name for name, _ in pages]
         kinds = [name.rsplit('_', 2)[-2] for name in names if '_numbers_' not in name]   # each with its numbers, E34
         # The groups and the list part by part after the alloys (2026-11-08, "Yes, add 1 to 3").
-        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'means', 'materials', 'alloys', 'groups',
+        self.assertEqual(kinds, sorted(kinds, key=['notes', 'elements', 'medians', 'materials', 'alloys', 'groups',
                                                    'parts'].index))
         seen = means_seen = False
         for name, figure in pages:
             if '_elements_' in name:
                 panels = [axes for axes in figure.axes if axes.get_title(loc='left')]
                 self.assertLessEqual(len(panels), 6, msg=name)
-                legend = [t.get_text() for t in figure.legends[0].get_texts()]
+                legend = [t.get_text() for t in figure.legends[0].get_texts()
+                          if not t.get_text().startswith('Median of') and t.get_text() != '95 % interval']
                 # In the materials' order, copper and nickel by what they are (E37, "Yes, relabel").
                 ordered = [composition.element_page_name(m) for m in composition.MATERIAL_COLOURS]
                 self.assertEqual(legend, [m for m in ordered if m in legend], msg=name)
                 for axes in panels:
-                    if axes.get_title(loc='left').startswith('Copper (Cu)'):   # ', inflow' since E25
+                    if axes.get_title(loc='left').startswith('Copper (Cu)'):   # ', in all' since 2026-11-13
                         seen = True
                         self.assertEqual([t.get_text() for t in axes.texts], [])   # no text over its bars
                         for material in (composition.element_page_name(composition.COPPER), 'Battery cells',
                                          composition.shown_name(composition.component_label('circuit boards')),
                                          composition.shown_name(composition.component_label('cables'))):
                             self.assertIn(material, legend)
-            if '_means_' in name:   # each element's mean by material, on pages of their own (2026-11-02)
+            if '_medians_' in name:   # each element's median by material, on pages of their own (the means until 2026-11-13)
                 words = ' '.join(t.get_text() for t in figure.texts)
-                if 'Copper (Cu), inflow' in words:
+                if 'Copper (Cu), in all' in words:
                     means_seen = True
                     for material in ('Copper', 'Battery cells'):
                         self.assertIn(f'{material} ', words)
@@ -1139,7 +1109,7 @@ class TestPagesByMaterial(unittest.TestCase):
                                   for t in figure.texts).split()).lower()
         for _, figure in pages:
             composition.plt.close(figure)
-        for words in ('split into the kg its draws hold from each material', 'elements of interest',
+        for words in ('split into the kg its runs hold from each material', 'elements of interest',
                       'what each holds by its recipe', 'stay materials'):
             self.assertIn(words, notes)
         self.assertNotIn('not yet in the elements', notes)
@@ -1167,8 +1137,7 @@ class TestRun(unittest.TestCase):
                     columns = file.read().splitlines()
                 self.assertEqual(draws.shape, (300, len(columns)), msg=table)
             self.assertTrue(os.path.exists(os.path.join(params.output.parts_dir, 'summary.csv')))
-            for name in (list(composition.parts_figures(1, len(composition.element_pages(d)),
-                                                        len(composition.overview_pages(d))))
+            for name in (list(composition.parts_figures(1, len(composition.overview_pages(d))))
                          + [n for n, _ in composition.sources_pages(d)]):
                 self.assertGreater(os.path.getsize(os.path.join(params.output.parts_figures_dir, name)), 10_000,
                                    msg=name)
@@ -1551,12 +1520,12 @@ class TestZeroNotInDistribution(unittest.TestCase):
             for row, label in enumerate(labels):
                 kg = kinds[by_label[label]]
                 held = kg != 0
-                median_x, mean_x, share_x = (round(x, 3) for x in composition.NUMBER_COLUMNS)
-                for x, value in ((median_x, np.median(kg[held])), (mean_x, kg[held].mean())):
-                    per, unit = composition.panel_unit(np.array([value]))
-                    self.assertEqual(at[(x, row)], f'{composition.panel_number(value / per)}\u00a0{unit}',
-                                     msg=f'{name}, {label}')
-                self.assertEqual(at[(share_x, row)], f'{composition.panel_number(100 * held.mean())} %')
+                median_x, share_x = (round(x, 3) for x in composition.NUMBER_COLUMNS[:2])   # no mean since 2026-11-13
+                value = np.median(kg[held])
+                per, unit = composition.panel_unit(np.array([value]))
+                self.assertEqual(at[(median_x, row)], f'{composition.panel_number(value / per)}\u00a0{unit}',
+                                 msg=f'{name}, {label}')
+                self.assertEqual(at[(share_x, row)], composition.held_share(held.mean()))
                 medians.append(np.median(kg[held]))
                 if not held.all():
                     partly.append((name, label))
@@ -1625,21 +1594,6 @@ class TestAxisEnd(unittest.TestCase):
         self.assertAlmostEqual(sum(p.get_height() for p in bars), (self.kg <= self.end).mean(), places=9)
         self.assertIn(self.beyond, numbers)
 
-    def test_a_critical_element_panel_ends_at_its_99_5th_percentile(self):
-        kinds = dict(zip(list(composition.KINDS)[:2], (0.3 * self.kg, 0.7 * self.kg)))
-        figure, axes = composition.plt.subplots()
-        composition.stacked_panel(axes, kinds, 'Copper (Cu)', True)
-        bars = self.bars(axes)
-        right = max(p.get_x() + p.get_width() for p in bars)
-        heights = sum(p.get_height() for p in bars)
-        numbers = numbers_of(axes)
-        limit = axes.get_xlim()[1]
-        composition.plt.close(figure)
-        self.assertAlmostEqual(right, self.end, places=9)
-        self.assertLess(limit, 1.1 * self.end)
-        self.assertAlmostEqual(heights, (self.kg <= self.end).mean(), places=9)   # both kinds' bars together
-        self.assertIn(self.beyond, numbers)
-
     def test_an_overview_panel_ends_at_its_largest_rows_99_5th_percentile_nothing_piled(self):
         first, second = list(composition.KINDS)[:2]
         kinds = {first: self.kg, second: 0.1 * self.kg}
@@ -1667,22 +1621,6 @@ class TestAxisEnd(unittest.TestCase):
         composition.plt.close(figure)
         self.assertNotIn('beyond', numbers)
 
-    def test_no_critical_element_title_runs_into_its_numbers(self):
-        # As the element and material pages (test_no_panel_title_runs_into_its_numbers): the share held and the words
-        # on the axis's end above the title's line, never over a long title.
-        kinds = dict(zip(list(composition.KINDS)[:2], (np.r_[np.zeros(5000), 0.3 * self.kg],
-                                                       np.r_[np.zeros(5000), 0.7 * self.kg])))
-        figure, axes = composition.plt.subplots(figsize=(5.3, 4))
-        composition.stacked_panel(axes, kinds, 'Neodymium and praseodymium (Nd+Pr)', True)
-        figure.canvas.draw()
-        renderer = figure.canvas.get_renderer()
-        # Since E34 (2026-11-05) nothing is written beside the title: the numbers are kept for the page of numbers.
-        self.assertEqual(axes._right_title.get_text(), '')
-        text = numbers_of(axes)
-        composition.plt.close(figure)
-        self.assertIn('% of the draws', text)
-        self.assertIn('beyond the axis', text)
-
 
 class TestDrawsBelowZero(unittest.TestCase):
     """2026-11-01: his 02 run at 200,000 draws stopped on type 1's pages of where a material sits ("Axis limits cannot
@@ -1699,7 +1637,7 @@ class TestDrawsBelowZero(unittest.TestCase):
         frame = rng.triangular(0.05, 0.1, 0.2, 20_000)
         frame[:400] = -np.linspace(0.01, 1.8, 400)                 # a remainder below zero in 400 draws
         self.kinds = {self.first: frame, self.second: rng.triangular(0.5, 2.0, 4.0, 20_000)}
-        self.d = types.SimpleNamespace(robot_type=1, register=['1 Robot'], listed=1)
+        self.d = types.SimpleNamespace(robot_type=1, register=['1 Robot'], listed=1, n=20_000)
 
     def test_where_a_material_sits_over_the_draws_above_0(self):
         figure = composition.sources_figure(composition.ALUMINIUM, self.kinds, self.d)
@@ -1716,12 +1654,11 @@ class TestDrawsBelowZero(unittest.TestCase):
         per, unit = composition.panel_unit(np.array([np.median(above)]))
         self.assertEqual(at[(round(composition.NUMBER_COLUMNS[0], 3), row)],
                          f'{composition.panel_number(np.median(above) / per)} {unit}')
-        self.assertEqual(at[(round(composition.NUMBER_COLUMNS[2], 3), row)],
-                         f'{composition.panel_number(100 * above.size / frame.size)} %')
+        self.assertEqual(at[(round(composition.NUMBER_COLUMNS[1], 3), row)],
+                         composition.held_share(above.size / frame.size))
 
     def test_the_linear_panels_draw_with_them(self):
         for draw_panel in (lambda a: composition.element_panel(a, self.kinds[self.first], 'Aluminium', True),
-                           lambda a: composition.stacked_panel(a, self.kinds, 'Aluminium (Al)', True),
                            lambda a: composition.ridge_panel(a, self.kinds, {k: np.zeros_like(v)
                                                                              for k, v in self.kinds.items()},
                                                              'Aluminium (Al)')):
@@ -1935,10 +1872,10 @@ class TestCopperSplit(unittest.TestCase):
         for name, figure in pages:
             if '_elements_' in name:
                 titles += [a.get_title(loc='left') for a in figure.axes]
-            if '_means_' in name:   # the means by material on pages of their own (2026-11-02)
+            if '_medians_' in name:   # the medians by material on pages of their own (the means until 2026-11-13)
                 texts += [t.get_text().replace('\n', ' ') for t in figure.texts]
             composition.plt.close(figure)
-        self.assertIn('Copper (Cu), inflow', titles)
+        self.assertIn('Copper (Cu), in all', titles)
         self.assertTrue(any('Aluminium alloys (fixed)' in t for t in texts))
         self.assertTrue(any('Brass (fixed)' in t for t in texts))
 
@@ -2138,7 +2075,7 @@ class TestDrawnNumbers(unittest.TestCase):
         c = composition.compose_taken_apart(category, d, inputs.base.lists)
         notes = ' '.join(composition.taken_apart_notes(c, d, [], params))
         self.assertIn(composition.ESTIMATED_CAMERAS_WORDS, notes)
-        self.assertIn('1 to 12 colour image sensors, most often 3, a whole number in every draw',
+        self.assertIn('1 to 12 colour image sensors, most often 3, a whole number in every run',
                       composition.ESTIMATED_CAMERAS_WORDS)
 
 
@@ -2178,7 +2115,8 @@ class TestLegendsAndPlaces(unittest.TestCase):
         from matplotlib.colors import to_hex
         from matplotlib.patches import Rectangle
         for name, figure in self.pages():
-            named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
+            named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles
+                     if hasattr(h, 'get_facecolor')}      # the median's and the 95 %'s samples are lines
             for axes in figure.axes:
                 drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
                          and p.get_height() > 0 and p.get_facecolor()[3] > 0}
@@ -2210,7 +2148,7 @@ class TestLegendsAndPlaces(unittest.TestCase):
         panels = {getattr(a, 'panel_numbers', (None,))[0]: a for _, f in pages for a in f.axes}
         self.assertIn('Titanium (Ti) in the alloy', panels)
         sensors = panels['Titanium (Ti) in the sensors']
-        self.assertEqual(sensors.panel_numbers[6], 'mg')
+        self.assertEqual(sensors.panel_numbers[7], 'mg')
         page = next(f for _, f in pages if sensors in f.axes)
         labels = {t.get_text() for legend in page.legends for t in legend.get_texts()}
         self.assertIn(composition.shown_name(composition.component_label(composition.CAMERAS)), labels)
@@ -2333,7 +2271,7 @@ class TestCopperAndNickelNamed(unittest.TestCase):
         for name, figure in self.pages():
             if '_elements_' in name:
                 legends |= {t.get_text() for legend in figure.legends for t in legend.get_texts()}
-            if '_means_' in name:
+            if '_medians_' in name:   # the means' pages until 2026-11-13
                 means += [t.get_text().replace('\n', ' ') for t in figure.texts]
             if '_materials_' in name:
                 materials |= {axes.get_title(loc='left') for axes in figure.axes}
@@ -2344,7 +2282,7 @@ class TestCopperAndNickelNamed(unittest.TestCase):
         words = ' '.join(means)
         self.assertIn(self.COPPER_NAME, words)
         self.assertIn(self.NICKEL_NAME, words)
-        # No mean of the bare material: 'Copper 1.4 kg' at the start of a cell or after '; '.
+        # No median of the bare material: 'Copper 1.4 kg' at the start of a cell or after '; '.
         bare = [t for t in means if re.search(r'(^|; )(Copper|Nickel) \d', t)]
         self.assertFalse(bare, bare)
         # The materials pages as they were: 'Copper', 'Nickel: strips of the battery', none of the new names.
@@ -2452,11 +2390,16 @@ class TestSensorsByKind(unittest.TestCase):
                                 if e == element and composition.sensor_of_place(p) in kinds), np.zeros(d.n))
                 np.testing.assert_allclose(by_place, by_material, rtol=1e-9, atol=1e-18, err_msg=(element, component))
 
-    def test_every_place_its_own_colour(self):
-        # Every place of the element pages (a sensor by its kind, its regions together: merge_regions) its own colour.
-        places = [p for p in composition.places_order() if composition.merge_regions({p: 0}) == {p: 0}]
-        colours = [composition.place_colour(p) for p in places]
-        self.assertEqual(len(colours), len(set(colours)), colours)
+    def test_every_place_in_the_colour_of_its_group(self):
+        # Since 2026-11-13 ("Yes, both"; the element pages by place removed, "Yes, all"): a kind of part in its group's
+        # colour (01's KIND_GROUP), a component of the electronics or a sensor, wherever it sits, the electronics'.
+        for place in composition.places_order():
+            group = composition.place_group(place)
+            if place in composition.KINDS:
+                self.assertEqual(group, schemas.KIND_GROUP[place], place)
+            else:
+                self.assertEqual(group, schemas.GROUP_ELECTRONICS, place)
+            self.assertIn(group, schemas.GROUP_COLOURS)
 
     def test_a_sensors_place_its_kind_and_region(self):
         # Matthias, 2026-11-06: "show me where they are located", "Yes do it" (E38 point 7): on the overview each
@@ -2469,7 +2412,6 @@ class TestSensorsByKind(unittest.TestCase):
         self.assertEqual(composition.sensor_of_place(label('cameras, arms')), 'cameras')
         self.assertIsNone(composition.sensor_of_place('hips'))
         self.assertEqual(composition.place_label(label('cameras, head')), 'Cameras, head (boards and components)')
-        self.assertEqual(composition.place_colour(label('cameras, arms')), composition.SENSOR_KINDS['cameras'])
         d, _ = self.drawn()
         indium = composition.by_place(d, 'In')
         self.assertIn(label('cameras, head'), indium)
@@ -2484,16 +2426,31 @@ class TestSensorsByKind(unittest.TestCase):
         faults = composition.check_parts(inputs)
         self.assertTrue(any("its region 'Neck'" in f.text for f in faults), [f.text for f in faults])
 
-    def test_the_overview_two_elements_a_page_where_their_rows_fit(self):
-        # Since E38 copper and aluminium hold up to 17 rows each: two such panels on one page overlapped (V193).
+    def test_the_overview_rows_one_text_height_apart_two_panels_where_they_fit(self):
+        # Since E38 copper and aluminium hold up to 17 rows each: two such panels on one page overlapped (V193). Since
+        # 2026-11-13 ("much to close", "Yes, all") every row OVERVIEW_ROW inches tall: an element whose rows a page
+        # cannot hold in as few panels as hold them, its rows split evenly; two panels a page where both fit.
         d, _ = self.drawn()
+        panels = composition.overview_panels(d)
+        self.assertEqual(list(dict.fromkeys((s, n) for s, n, _, _, _ in panels)), composition.FIGURE_ELEMENTS)
+        for symbol, _ in composition.FIGURE_ELEMENTS:
+            mine = [(rows, part, parts) for s, _, rows, part, parts in panels if s == symbol]
+            places = composition.by_place(d, symbol)
+            every = [p for p in composition.places_order() if p in places and composition.held(places[p])]
+            self.assertEqual([p for rows, _, _ in mine for p in rows], every, symbol)       # each row once, in order
+            self.assertEqual([part for _, part, _ in mine], list(range(1, len(mine) + 1)))
+            self.assertTrue(all(len(rows) <= composition.overview_room(1) for rows, _, _ in mine), symbol)
+            if len(mine) > 1:
+                sizes = [len(rows) for rows, _, _ in mine]
+                self.assertLessEqual(max(sizes) - min(sizes), 1, symbol)                 # split evenly
         layout = composition.overview_pages(d)
-        self.assertEqual([e for page in layout for e in page], composition.FIGURE_ELEMENTS)   # each once, in order
+        self.assertEqual([panel for page in layout for panel in page], panels)            # each once, in order
         for page in layout:
             self.assertIn(len(page), (1, 2))
             if len(page) == 2:
-                self.assertLessEqual(sum(composition.overview_rows(d, s) for s, _ in page), composition.OVERVIEW_ROWS)
-        self.assertTrue(any(len(page) == 1 for page in layout))   # type 1's copper and aluminium each a page
+                self.assertLessEqual(sum(max(len(rows), 1) for _, _, rows, _, _ in page), composition.overview_room(2))
+        # One text height between two rows' labels: a row at least twice a 14-point label's height.
+        self.assertGreaterEqual(composition.OVERVIEW_ROW * 72, 2 * composition.APART_TEXT)
 
     def test_the_kind_first_and_the_electronics_in_brackets(self):
         # Matthias, 2026-11-06: "Have LIDAR etc. first and then just in brackets boards and components".
@@ -2572,25 +2529,6 @@ class TestMagnetsAndSensorsApart(unittest.TestCase):
                           np.zeros(d.n))
             np.testing.assert_allclose(shown + unshown, total, rtol=1e-9, atol=1e-18, err_msg=e)
             self.assertFalse(composition.held(unshown), e)   # nothing held beside them
-
-    def test_the_pages_of_where_they_sit_two_panels(self):
-        d, _, _ = self.drawn()
-        sensor_places = {composition.component_label(k) for k in composition.SENSOR_KINDS}
-        layout = composition.element_pages(d)
-        self.assertEqual([s for s, _ in composition.FIGURE_ELEMENTS], list(dict.fromkeys(s for p in layout for s, _, _ in p)))
-        views = {(s, v) for p in layout for s, _, v in p}
-        self.assertIn(('Nd+Pr', 'magnets'), views)
-        self.assertIn(('Nd+Pr', 'sensors'), views)
-        for name, figure in composition.parts_figure_pages(d):
-            if '_elements_' in name:
-                for a in figure.axes:
-                    title = a.get_title(loc='left').replace('\n', ' ')
-                    if title.endswith('in the sensors'):
-                        self.assertTrue(title.startswith(('Neodymium', 'Dysprosium', 'Gallium')), title)
-            composition.plt.close(figure)
-        places = composition.by_place(d, 'Nd+Pr')
-        self.assertTrue(set(composition.place_view(places, 'sensors')) <= sensor_places)
-        self.assertFalse(set(composition.place_view(places, 'magnets')) & sensor_places)
 
 
 class TestHeadJoints(unittest.TestCase):
@@ -2836,8 +2774,10 @@ class TestTakenApartAtOneRobot(unittest.TestCase):
         self.assertEqual([name for name, _ in groups], [f'{c.name}_groups_{k}.png' for k in range(1, len(groups) + 1)])
         self.assertEqual([name for name, _ in lists], [f'{c.name}_parts_{k}.png' for k in range(1, len(lists) + 1)])
         legend = [t.get_text() for t in groups[0][1].legends[0].get_texts()]
-        self.assertEqual(legend, [g for g in schemas.TAKEN_APART if g in legend])          # in their order
-        # The list: neodymium in the joints' magnets, its mean by hand over the draws that hold it.
+        groups_named = [t for t in legend if t in schemas.TAKEN_APART]
+        self.assertEqual(groups_named, [g for g in schemas.TAKEN_APART if g in legend])    # in their order
+        self.assertEqual(legend[len(groups_named):], [f'Median of {d.n:,} model runs', '95 % interval'])
+        # The list: neodymium in the joints' magnets, its median by hand over the runs that hold it.
         by_part = {(composition.element_label(e), part): sum(
             (kg for (_, x, y), kg in d.taken.items() if x == part and y == e), np.zeros(d.n))
             for e in ('Nd',) for part in schemas.TAKEN_PARTS}
@@ -2846,7 +2786,7 @@ class TestTakenApartAtOneRobot(unittest.TestCase):
         values = by_part[(composition.element_label('Nd'), 'Magnets')]
         per, unit = composition.panel_unit(values[values > 0])
         self.assertEqual(magnets[1], 'Joints')
-        self.assertEqual(magnets[5], f'{composition.panel_number(values[values > 0].mean() / per)} {unit}')
+        self.assertEqual(magnets[4], f'{composition.panel_number(np.median(values[values > 0]) / per)}\u00a0{unit}')
         texts = ' '.join(t.get_text() for _, page in lists for t in page.texts)
         self.assertIn('Magnets', texts)
         for _, figure in groups + lists:

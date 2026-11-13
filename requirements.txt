@@ -35,3 +35,11 @@ tqdm==4.67.3
 # Required by Positron to start a Python console or run a notebook cell.
 # Same version as RAWCLICVehicleBattery.
 ipykernel==7.3.0
+
+# The figure tests every project shares (Matthias, 2026-11-12: "generate a repository for these figures tests, so that
+# it can be used by me in all the projects and repositories", "Installed, pinned"; 2026-11-13: "There is now the package
+# for figure testing ... test all the figures", "Yes, 1 to 7"): its own repository FigureTests, pinned by its version
+# tag; tests/test_all_figures.py checks that the version installed is this one. Install it with --no-deps, so that the
+# pins above stay as they are (checked 2026-11-13: numpy, matplotlib, scipy and pandas unchanged by it):
+#   ./.venv/bin/pip install --no-deps "figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.5.0"
+figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.5.0

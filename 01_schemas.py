@@ -85,8 +85,10 @@ Into `output.schemas_dir` (`figures/schemas/`), every page 16 × 9 inches with n
                                robot type 1's robots, as 02 draws them: each robot's maker, mass (min / mode /
                                max), joints, battery and what of it rests most on estimates.
   categories/1_<name>_robot.png
-                               robot type 1's kinds of part, where they sit on the robot (as on 02's figures) and
-                               what each holds.
+                               robot type 1's kinds of part, where they sit on the robot (as on 02's figures), each
+                               in the colour of its group.
+  categories/1_<name>_kinds_of_part.png
+                               what each of its kinds of part holds (since 2026-11-13, beside the robot until then).
 
 Only the robot types `output.robot_types_with_pages` names get pages ("Type 1 only", 2026-10-29). A robot type whose
 steps have not begun, when named there, gets its former pages of the workbook's anchor robot: categories/<n>_<name>.png
@@ -118,6 +120,7 @@ import matplotlib  # noqa: E402
 
 matplotlib.use('Agg')  # draw into files only: no window opens, also in a terminal without a screen
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.colors import to_rgb  # noqa: E402  (the ink of a mark on a colour, mark_ink)
 from matplotlib.patches import Circle, FancyArrowPatch, Rectangle  # noqa: E402
 from matplotlib.ticker import MaxNLocator  # noqa: E402
 from openpyxl import load_workbook  # noqa: E402
@@ -136,14 +139,14 @@ from src.params_schema import ParameterError, Params, absolute, current  # noqa:
 STAGES = [
     ('00_parameters.py', '00 Settings', '00_parameters.py: every setting, checked'),
     ('01_schemas.py', '01 Checks', '01_schemas.py: every input checked, these pages'),
-    ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} draws, each robot from its own parts'),
+    ('02_composition.py', '02 Monte Carlo', '02_composition.py: {draws} model runs, each robot by its parts'),
     ('03_comparison.py', '03 Comparison', '03_comparison.py: the six robot types side by side'),
     # Since 2026-11-06 (Matthias: "Use the numbers in the article", "Yes, build it", "Yes, replace joints";
     # EVIDENCE.md E42, E43): the robots of ai-2040.com Plan A, their joint sets and battery packs, and the elements in
     # them, each robot one of 02's draws of its type.
     ('04_stock_and_flow.py', '04 Stock and flow', '04_stock_and_flow.py: all robots in use, ai-2040.com'),
     # Since 2026-11-08 (Matthias: "write 05 combination of results of 04 and 07 with the distributions", "Yes, build
-    # it"; EVIDENCE.md E52): the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together.
+    # it"; EVIDENCE.md E52): the AI data centres of RAWCLICDataCenters' 08 and the humanoid robots of 04 together.
     ('05_combined_stock_and_flow.py', '05 Together', '05_combined_stock_and_flow.py: with the AI data centres'),
 ]
 
@@ -208,7 +211,8 @@ CHECKS_DONE = [
     "Robot type 1 part by part, against the sibling projects' files it reads where they lie: every car board category "
     "with its gold, silver, palladium, tin, nickel, aluminium, zinc, iron and lead (RAWCLICVehicleElectronics' car "
     "boards), every car sensor type (its car sensors), a tantalum row (RAWCLICDataCenters' element composition), every "
-    "magnet grade class a heat group can draw (RAWCLICVehicleTractionMotor's element workbook), its sheets of steels.",
+    "magnet grade class a heat group can be given (RAWCLICVehicleTractionMotor's element workbook), its sheets of "
+    'steels.',
     'The register of every known humanoid robot: every number once; a robot with types has one or two different '
     'robot types of the six, a robot without has an entry saying why (not assigned, or the same robot as an entry '
     'with types); every form known; every mass min, mode and max or none, in order; no robot of type 1 below its '
@@ -3751,13 +3755,14 @@ def taken_apart_page():
         colour = GROUP_COLOURS[group]
         ink = SCREEN_INK if group == GROUP_BODY else 'white'     # dark words on the light yellow, white on the others
         below = fitted(x + pad, y + 0.1, group, width - 2 * pad, SCREEN_TITLE, ink, 'bold')
-        foot = fitted(x + pad, below + 0.06, what, width - 2 * pad, SCREEN_TEXT, ink, 'normal')
+        # half a title's height at least between a title and its text (FigureTests' text_gap; 0.06 until 2026-11-13)
+        foot = fitted(x + pad, below + 0.13, what, width - 2 * pad, SCREEN_TEXT, ink, 'normal')
         axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8,
                                  zorder=0))
         y = foot + 0.22
         for part, holds in parts:
             below = fitted(x + pad + 0.06, y + 0.08, part, width - 2 * pad - 0.06, SCREEN_TITLE, SCREEN_INK, 'bold')
-            foot = fitted(x + pad + 0.06, below + 0.05, holds, width - 2 * pad - 0.06, SCREEN_TEXT, SCREEN_INK,
+            foot = fitted(x + pad + 0.06, below + 0.13, holds, width - 2 * pad - 0.06, SCREEN_TEXT, SCREEN_INK,
                           'normal')
             axes.add_patch(Rectangle((x, y), width, foot + 0.1 - y, facecolor='#FFFFFF', edgecolor=SCREEN_INK,
                                      linewidth=0.8, zorder=0))
@@ -3785,7 +3790,15 @@ SPOTS = {'hips': [(-0.06, 0.475), (0.06, 0.475)], 'knees': [(-0.065, 0.27), (0.0
 MARKS = {'hips': '1', 'knees': '2', 'ankles': '3', 'waist': '4', 'arms': '5', 'headjoints': '6', 'battery': 'A',
          'boards': 'B',
          'head': 'C', 'cables': 'D', 'frame': 'E', 'base': 'F', 'lift': 'G', 'hydraulics': 'H'}
-DARK = {'hips', 'knees', 'headjoints', 'battery', 'cables', 'head', 'lift'}   # the kinds whose colour takes white text
+def mark_ink(colour) -> str:
+    """The ink of a mark written on a kind's colour: white or KIND_INK, whichever stands out more from it by the WCAG
+    contrast ratio (FigureTests' rule text_contrast, 4.5 : 1; until 2026-11-13 a list of the kinds that took white,
+    which left the head's 'C' at 3.4 : 1)."""
+    def luminance(c):
+        rgb = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in to_rgb(c)]
+        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
+    ratio = lambda a, b: (max(luminance(a), luminance(b)) + 0.05) / (min(luminance(a), luminance(b)) + 0.05)   # noqa: E731
+    return 'white' if ratio('white', colour) >= ratio(KIND_INK, colour) else KIND_INK
 # The base on wheels drawn beside the robot's feet for a type that has robots on wheels (E9.7 point 9, open point B), in
 # the body's units: the base (across from, to; up from, to), its two wheels (across; their radius), and the lift column
 # above it (across from, to; up to).
@@ -3821,7 +3834,9 @@ def kinds_of(apart: PartsTakenApart) -> list:
 def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
     """The robot with its kinds of part: the schematic body, each joint group numbered where it sits on both sides (a
     red ring where its magnets are for 150 °C or more in most draws), the other kinds lettered, a short key below; the
-    marks in text of `size` points. `kinds`: those the robot type has (every kind but the wheeled base and the lift
+    marks in text of `size` points. Each mark in the colour of its kind's group (GROUP_COLOURS, KIND_GROUP; since
+    2026-11-13, Matthias: "Yes, both", to colouring each kind of part by its group: up to 14 colours of their own could
+    not all be told apart, FigureTests' colour rules); the number or letter tells the kind. `kinds`: those the robot type has (every kind but the wheeled base and the lift
     column where not given); a type with a wheeled base or a lift column has them drawn beside the feet, a base on two
     wheels with a column above it (E9.7 point 9)."""
     kinds = set(KINDS) - {'base', 'lift', 'hydraulics'} if kinds is None else set(kinds)
@@ -3836,7 +3851,7 @@ def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
     for kind, spots in SPOTS.items():
         if kind not in kinds:
             continue
-        colour = KINDS[kind][1]
+        colour = GROUP_COLOURS[KIND_GROUP[kind]]           # its group's colour; the mark tells the kind
         for u, v in spots:
             at = (u, -v)
             if MARKS[kind].isdigit():
@@ -3846,9 +3861,9 @@ def draw_kinds(axes, hot: dict, size: float, kinds: set | None = None) -> None:
                 axes.add_patch(Rectangle((u - 0.027, -v - 0.027), 0.054, 0.054, facecolor=colour, edgecolor=KIND_INK,
                                          linewidth=0.8, zorder=3))
             axes.text(*at, MARKS[kind], ha='center', va='center', fontsize=size, fontweight='bold', zorder=4,
-                      color='white' if kind in DARK else KIND_INK)
+                      color=mark_ink(colour))
     axes.text(-0.31, 0.09, 'Numbers: joints; letters: the\nother parts, as in the rows.\nRed ring: magnets for '
-              '150 °C\nor more in most draws.', ha='left', va='top', fontsize=size, color=KIND_INK, linespacing=1.3)
+              '150 °C\nor more in most runs.', ha='left', va='top', fontsize=size, color=KIND_INK, linespacing=1.3)
     axes.set_xlim(-0.32, 0.32)
     axes.set_ylim(0.36, -1.02)
     axes.set_aspect('equal')
@@ -4146,8 +4161,10 @@ SCREEN_TEXT, SCREEN_TITLE, SCREEN_HEADING = 14, 16, 20   # points: the smallest 
 SCREEN_LINE = 0.27                 # inches: one line of 14-point text with its spacing
 SCREEN_CHARS = 9.0                 # characters of 14-point text in an inch, for wrapping
 # Paul Tol's "light" scheme, as published: the inputs Matthias holds, the sibling projects' data, the stages, what
-# they write, what is not yet worked on.
-TOL_LIGHT = {'his': '#EEDD88', 'sibling': '#99DDFF', 'stage': '#77AADD', 'output': '#44BB99', 'later': '#DDDDDD'}
+# they write, what is not yet worked on. The sibling projects' data in his olive since 2026-11-13 (his light cyan,
+# #99DDFF, stood 17.2 from the stages' light blue in CAM02-UCS, under the 21 of FigureTests' rule colour_normal; the
+# olive stands 22.9 from every other colour of the page, 21.1 for a colour-blind reader).
+TOL_LIGHT = {'his': '#EEDD88', 'sibling': '#AAAA00', 'stage': '#77AADD', 'output': '#44BB99', 'later': '#DDDDDD'}
 SCREEN_INK = '#222222'
 # Words of the project no page of 01 or 02 may show (his figure rule: no code names, no project jargon): file names,
 # sections of EVIDENCE.md, the label of an estimate, the sibling files' numbers. The faults pages may name a sheet of
@@ -4181,7 +4198,8 @@ def screen_box(axes, x: float, y: float, width: float, title: str, text: str, co
     """A box with its title in bold and its text below, filled with `colour`."""
     axes.add_patch(Rectangle((x, y), width, height, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8))
     below = screen_text(axes, x + 0.12, y + 0.1, title, width - 0.24, SCREEN_TITLE, weight='bold')
-    screen_text(axes, x + 0.12, below + 0.04, text, width - 0.24)
+    # half a title's height at least between the title and its text (FigureTests' text_gap; 4 points until 2026-11-13)
+    screen_text(axes, x + 0.12, below + 0.1, text, width - 0.24)
 
 
 def screen_arrow(axes, start: tuple, end: tuple, colour: str = SCREEN_INK) -> None:
@@ -4265,7 +4283,7 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
                             f'not counted. {on_templates}')
         if taken < total:
             return (f'{taken} of its {total} robots of the register with a mass taken apart so far, each drawn part by '
-                    f'part; {span}. Its draws from the workbook until all are. {on_templates}')
+                    f'part; {span}. Its model runs from the workbook until all are. {on_templates}')
         if not without:
             return (f'Its {total} robots of the register, each drawn from its own parts; {span}. The workbook\'s '
                     f'anchor robot, {anchor}, is one of them. {on_templates}')
@@ -4303,7 +4321,7 @@ def overview_flow(register: list | None, aparts: dict | None, params: Params):
     stages = [(title, words.format(draws=f'{params.composition.draws:,}')) for _, title, words in STAGES]
     # What each stage writes, by the stage that writes it (its place in STAGES): 02 the draws and its pages, 03 its,
     # 04 its draws and pages.
-    outputs = [('The draws of each robot type', 'the materials and elements of every robot type, draw by draw', 2),
+    outputs = [('Model runs of each robot type', 'the materials and elements of every robot type, run by run', 2),
                ('The pages of each robot type', 'its elements and materials, and where each sits', 2),
                ('The comparison pages', 'the six robot types side by side, one item a page', 3),
                ('The robots and their elements in the world', 'in use, built and out, 2025 to 2040', 4),
@@ -4377,7 +4395,7 @@ def overview_types(book: Workbook, faults: list, reports: dict, aparts: dict | N
                     weight='bold' if faults else 'normal')
     # What is open, counted from the register (Matthias, 2026-11-02, "Yes, build it"; the line written by hand before
     # was out of date).
-    screen_text(axes, 0.4, y + 0.05, open_words(register, aparts), 15.2)
+    screen_text(axes, 0.4, y + 0.12, open_words(register, aparts), 15.2)   # 0.05 until 2026-11-13 (text_gap)
     return figure
 
 
@@ -4389,14 +4407,14 @@ def notes_page(params: Params | None = None):
     axes.text(0.4, 0.35, 'How to read these pages', fontsize=SCREEN_HEADING, fontweight='bold', va='top')
     notes = [
         'These pages show the inputs as they are written, before anything is drawn at random: every mass has a '
-        'minimum, a mode (the most likely value) and a maximum. The draws of the Monte Carlo, with their median, mean '
-        'and 95 % interval, are on the pages of 02.',
+        'minimum, a mode (the most likely value) and a maximum. The model runs of the Monte Carlo, with their median '
+        'and their 50 % and 95 % intervals, are on the pages of 02.',
         'Each value says where it comes from: weighed (a robot taken apart and weighed part by part), from a source (a '
         'maker\'s specification, model file or parts list, or a third party), or an estimate. An estimate spans at '
         'least half to one and a half times its mode.',
         'Robot type 1 is drawn from its robots, each part by part from its own sources; the table of its robots says '
-        'what of each rests most on estimates. The robot page shows where its kinds of part sit; the same marks and '
-        'colours are on the figures of 02.',
+        'what of each rests most on estimates. The robot page shows where its kinds of part sit, each in the colour '
+        'of its group of how a robot is taken apart; the same marks and colours are on the figures of 02.',
         'Colours: Paul Tol\'s, as published. Pages are drawn only for the robot types whose steps have begun: so far '
         'robot type' + ('s ' if len(worked) > 1 else ' ') + ', '.join(str(n) for n in worked[:-1])
         + (' and ' if len(worked) > 1 else '') + str(worked[-1]) + '.',
@@ -4432,25 +4450,62 @@ def fault_pages(faults: list) -> list:
             y = screen_text(axes, 0.4, y, text, 15.0, SCREEN_TITLE, weight='bold') + 0.1
         else:
             y = screen_text(axes, 0.4, y, ('• ' if kind == 'item' else '') + text, 15.0,
-                            colour='#CC3311' if kind == 'fault' else SCREEN_INK) + 0.05
+                            colour='#CC3311' if kind == 'fault' else SCREEN_INK) + 0.12   # text_gap: 0.05 before
     return pages
+
+
+# The robot page and the page of what each kind holds (Matthias, 2026-11-13, on the robot page with the rows of what
+# each kind holds beside it: "These two figures look ugly. The different text are much to close. It looks overloaded",
+# then "Yes, all" to: the robot page keeps the robot, its marks and the four groups, each kind one line; what each kind
+# holds on a page of its own after it; at least one text height between two lines). In inches: a line of the robot
+# page (a 14-point text about 16 points tall, 34 points a line), where its two columns start (the joints, then the
+# other groups), the gap after a group; the gap between two rows of the page of what each kind holds.
+ROBOT_LINE, ROBOT_COLUMNS, ROBOT_GROUP_GAP, KINDS_GAP = 0.47, (5.6, 10.8), 0.25, 0.22
 
 
 def robot_type_page(apart: PartsTakenApart, robot_type: int = 1):
     """A robot type taken apart as 02 draws it (type 1's since 2026-10-29, type 2's since 2026-10-30, "Yes, as type
-    1's"): the robot with its kinds of part, numbered and lettered as on 02's figures, and what each kind holds."""
+    1's"): the robot with its kinds of part, numbered and lettered as on 02's figures, each in the colour of its group
+    (since 2026-11-13, "Yes, both"); beside it the kinds under their group, one line each, the joints in the first
+    column, the other groups in the second (since 2026-11-13, "Yes, all": what each kind holds is on kinds_page)."""
     figure, axes = screen_page()
     axes.text(0.4, 0.35, f'Robot type {robot_type}: where its kinds of part sit', fontsize=SCREEN_HEADING,
               fontweight='bold', va='top')
     kinds = kinds_of(apart)
     draw_kinds(figure.add_axes((0.01, 0.06, 0.3, 0.84)), hot_kinds(apart), SCREEN_TEXT, set(kinds))
-    y = 1.1
-    for kind in kinds:
-        name, colour = KINDS[kind]
-        axes.add_patch(Rectangle((5.6, y + 0.02), 0.32, 0.32, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8))
-        axes.text(5.76, y + 0.18, MARKS[kind], ha='center', va='center', fontsize=SCREEN_TEXT, fontweight='bold',
-                  color='white' if kind in DARK else SCREEN_INK)
-        y = screen_text(axes, 6.1, y, f'{name}: {KIND_HOLDS[kind]}', 9.5) + 0.12
+    groups = [g for g in TAKEN_APART if any(KIND_GROUP[k] == g for k in kinds)]
+    for x, column in zip(ROBOT_COLUMNS, ([GROUP_JOINTS], [g for g in TAKEN_APART if g != GROUP_JOINTS])):
+        y = 1.3
+        for group in [g for g in column if g in groups]:
+            axes.text(x, y + 0.18, group, ha='left', va='center', fontsize=SCREEN_TITLE, fontweight='bold',
+                      color=SCREEN_INK)
+            y += ROBOT_LINE
+            for kind in [k for k in kinds if KIND_GROUP[k] == group]:
+                colour = GROUP_COLOURS[group]
+                axes.add_patch(Rectangle((x, y + 0.02), 0.32, 0.32, facecolor=colour, edgecolor=SCREEN_INK,
+                                         linewidth=0.8))
+                axes.text(x + 0.16, y + 0.18, MARKS[kind], ha='center', va='center', fontsize=SCREEN_TEXT,
+                          fontweight='bold', color=mark_ink(colour))
+                axes.text(x + 0.5, y + 0.18, KINDS[kind][0], ha='left', va='center', fontsize=SCREEN_TEXT,
+                          color=SCREEN_INK)
+                y += ROBOT_LINE
+            y += ROBOT_GROUP_GAP
+    return figure
+
+
+def kinds_page(apart: PartsTakenApart, robot_type: int = 1):
+    """What each kind of part of a robot type holds (until 2026-11-13 beside the robot on robot_type_page; "Yes, all"):
+    a row per kind, its mark in its group's colour, its name and what it holds, KINDS_GAP between two rows."""
+    figure, axes = screen_page()
+    axes.text(0.4, 0.35, f'Robot type {robot_type}: what each kind of part holds', fontsize=SCREEN_HEADING,
+              fontweight='bold', va='top')
+    y = 1.15
+    for kind in kinds_of(apart):
+        colour = GROUP_COLOURS[KIND_GROUP[kind]]
+        axes.add_patch(Rectangle((0.4, y + 0.0), 0.32, 0.32, facecolor=colour, edgecolor=SCREEN_INK, linewidth=0.8))
+        axes.text(0.56, y + 0.16, MARKS[kind], ha='center', va='center', fontsize=SCREEN_TEXT, fontweight='bold',
+                  color=mark_ink(colour))
+        y = screen_text(axes, 0.95, y, f'{KINDS[kind][0]}: {KIND_HOLDS[kind]}', 14.6) + KINDS_GAP
     return figure
 
 
@@ -4496,7 +4551,7 @@ TABLE_KEY_WHEELS = f' {LIFT_MARK} a lift column.'   # the base in its own plain 
 # from 0 to its end; the mass written; the joints (right-aligned); the battery axis; the first cell's middle and the
 # step to the next; a cell's width and height; the heading band's top and bottom; the first row's top and a row's
 # height; the rows of a page, the groups' headings counted.
-T_NAME, T_HEIGHT = 0.4, 3.85
+T_NAME, T_HEIGHT = 0.4, 3.9      # 3.85 until 2026-11-13: the longest name 5.8 points from its height (text_gap)
 T_MASS, T_MASS_TEXT = (4.15, 6.95), 7.08
 T_JOINTS = 8.45
 T_BATTERY = (8.85, 10.3)
@@ -4506,7 +4561,12 @@ T_TOP, T_ROW = 2.12, 0.32
 T_LINES = 18
 # A table with robots on wheels (type 2's since 2026-10-30, E9.7 point 8) makes room for a column of their base: the
 # name and height columns, the mass axis, the joints and the battery axis narrower; the cells where they are.
-T_WHEELS = dict(height=T_HEIGHT, mass=(4.05, 5.65), mass_text=5.75, joints=6.95, base=7.3, battery=(9.3, 10.1))
+# Set since 2026-11-13 from the widths of the longest entries at 14 points (matplotlib's TextPath), each column at
+# least half a line (7 points, FigureTests' text_gap) from the next: a mass to 0.94 inches ('125.85 kg'), the joints'
+# number 0.22 and its marks 0.18 ('†‡'), the base's words to 1.86 ('2 wheels, 2 casters'), the battery's label after
+# its bar (WH_ROOM). Until then joints 6.95, base 7.3, battery 9.3 to 10.1: the marks stood 2.2 points from the base's
+# words.
+T_WHEELS = dict(height=T_HEIGHT, mass=(4.05, 5.65), mass_text=5.75, joints=7.05, base=7.48, battery=(9.5, 10.3))
 # The longest battery bar at most this share of its column, to leave room for its label (robots_table_pages).
 WH_ROOM = 0.9
 # Light grey of every other row, the heading band, the axes' lines, the bars (Paul Tol's grey, as published).
@@ -4747,7 +4807,7 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
             axes.text(joints_at, middle, str(r.joints), ha='right', va='center', **words)
             marks = (SHARES_MARK if r.shares else '') + (LIFT_MARK if r.lift else '')
             if marks:
-                axes.text(joints_at + 0.05, middle, marks, ha='left', va='center', **words)
+                axes.text(joints_at + 0.12, middle, marks, ha='left', va='center', **words)   # text_gap: 0.05 before
             if r.base:
                 axes.text(T_WHEELS['base'], middle, r.base, ha='left', va='center', **words)
             if r.battery_wh is None:   # a robot that carries no battery (E16.2): words, no bar
@@ -4803,7 +4863,9 @@ def taken_apart_type_pages(stem: str, apart: PartsTakenApart, robot_type: int, r
     pages = [(f'{stem}_robots_{k}.png', figure) for k, figure in
              enumerate(robots_table_pages(apart, robot_type, taken, len(with_mass), len(of_type) - len(with_mass),
                                           outliers), 1)]
-    return pages + [(f'{stem}_robot.png', robot_type_page(apart if drawn is None else drawn, robot_type))]
+    shown = apart if drawn is None else drawn
+    return pages + [(f'{stem}_robot.png', robot_type_page(shown, robot_type)),
+                    (f'{stem}_kinds_of_part.png', kinds_page(shown, robot_type))]
 
 
 def former_page_types(with_pages: tuple, aparts: dict) -> list:

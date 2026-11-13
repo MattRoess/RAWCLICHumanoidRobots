@@ -44,8 +44,9 @@ Into `output.comparison_dir` (`figures/comparison/`; not in git), pages of 16 ×
 02's: the notes once, on pages of their own (comparison_notes_<k>.png), then one item a page, its six robot types in
 six panels, three across and two down:
 
-  comparison_total_1.png             the mass of one robot, split by material
-  comparison_materials_<k>.png       each material any type holds, split by the kind of part it sits in
+  comparison_total_1.png             the mass of one robot, split by material: the six materials holding most of
+                                     it, the others together as "Other materials"
+  comparison_materials_<k>.png       each material any type holds, split by the group of the kind of part it sits in
   comparison_elements_<k>.png        each element of interest any type holds, split by the material it comes from, in
                                      alphabetical order of their names (1 Aluminium … 22 Titanium)
   comparison_part_groups_1.png       the mass of one robot, split by part group
@@ -162,6 +163,17 @@ class Robot:
     def by_part(self, symbol: str) -> dict:
         """One element by the parts of how a robot is taken apart, {part: its draws}, added over the kinds."""
         return self.taken(symbol, lambda part: part)
+
+    def in_groups(self, material: str) -> dict:
+        """One material in each of the four groups of how a robot is taken apart, {group: its draws}: its kinds of part
+        (in_kinds) each in its group, placed whole (01's KIND_GROUP, as 01's robot page and 02's overview colour the
+        kinds; Matthias, 2026-11-13, "Yes, all": up to 14 kinds of part in one panel could not all be told apart)."""
+        kind_of = {name: kind for kind, (name, _) in schemas.KINDS.items()}
+        out = {}
+        for name, kg in self.in_kinds(material).items():
+            group = schemas.KIND_GROUP[kind_of[name]]
+            out[group] = out.get(group, 0) + kg
+        return out
 
     def in_kinds(self, material: str) -> dict:
         """One material in each kind of part it sits in, {kind's name: its draws} (the parts table 'materials',
@@ -319,8 +331,43 @@ def rainbow(names: list) -> dict:
     return {name: RAINBOW[i] for name, i in zip(names, RAINBOW_INDEXES[len(names) - 1])}
 
 
-# The kinds of part in 01's colours, by their names as 02 writes them ('Hip joints', …).
-KIND_COLOURS = {name: colour for name, colour in schemas.KINDS.values()}
+# The six materials holding most of a robot's mass, each in a colour of its own, the same on every page, every other
+# material together in grey (Matthias, 2026-11-13, "Yes, all": "six fixed colours for the main materials and the rest
+# in grey", Tol's rainbow of 16 materials could not all be told apart). The six by the medians of his run of
+# 2026-11-08, added over the six robot types: aluminium alloys 186 kg, steel 72, plastics 58, battery cells 23,
+# electrical steel 17, copper 12 (then the boards and components 10.5 and the NdFeB magnets 8.5; main_materials_check
+# says when a run's six differ). Copper, the aluminium alloys and the cells in 02's colours (MATERIAL_COLOURS); steel,
+# plastics and electrical steel in Paul Tol's blue, ochre and light cyan, chosen so that every two of the six stand at
+# least 21 apart in CAM02-UCS and 10.5 for a colour-blind reader (FigureTests' colour rules; the closest pair 18 %
+# above them), and the black median line shows on each (at least 4.5 : 1).
+MAIN_MATERIALS = {composition.ALUMINIUM: composition.MATERIAL_COLOURS[composition.ALUMINIUM], 'Steel': '#4477AA',
+                  'Plastics': '#997700', composition.CELL_MATERIAL: composition.MATERIAL_COLOURS[composition.CELL_MATERIAL],
+                  'Electrical steel': '#99DDFF', composition.COPPER: composition.MATERIAL_COLOURS[composition.COPPER]}
+OTHER_MATERIALS, OTHER_GREY = 'Other materials', '#BBBBBB'   # Paul Tol's grey
+# The body regions in Tol's rainbow of their number, the head in his rainbow's orange (since 2026-11-13: its pale green,
+# #CAE0AB, stood 18.2 from the base's yellow, under 21; the orange stands 26.0 from every other region, 11.6 for a
+# colour-blind reader).
+BODY_REGION_COLOURS = {'Head': '#EE8026'}
+
+
+def main_and_other(robot, materials: list) -> dict:
+    """The mass of one robot by material for the page of the mass by material: each of MAIN_MATERIALS, and every other
+    material of `materials` added, draw by draw, as OTHER_MATERIALS."""
+    zero = np.zeros(len(robot.tables['total'][1]))
+    out = {m: robot.column('materials', m) for m in MAIN_MATERIALS if m in materials}
+    out[OTHER_MATERIALS] = sum((robot.column('materials', m) for m in materials if m not in MAIN_MATERIALS), zero)
+    return out
+
+
+def main_materials_check(robots: list, materials: list) -> str:
+    """'' where MAIN_MATERIALS are the six materials of `materials` with the largest medians added over the robot types;
+    else the words saying which six they are now (printed while it runs: the colours are fixed, the materials may move)."""
+    medians = {m: sum(float(np.median(r.column('materials', m))) for r in robots) for m in materials}
+    six = sorted(medians, key=medians.get, reverse=True)[:6]
+    if set(six) == set(MAIN_MATERIALS):
+        return ''
+    return ('The six materials holding most of the robots\' mass are now ' + ', '.join(six) + ', not those the page of '
+            'the mass by material colours (MAIN_MATERIALS): the others are grey there.')
 # Copper's inflow: the copper recycled as copper in 02's colour of copper, that fixed in alloys in its pale grey (E25).
 RECYCLED = 'Copper recycled as copper'
 COPPER_COLOURS = {RECYCLED: composition.MATERIAL_COLOURS[composition.COPPER],
@@ -401,13 +448,16 @@ def compare_page(heading: str, robots: list, parts_of, colours: dict, fixed_of=N
     # On an element page (`symbol`) copper and nickel by what they are (02's element_page_name, E37); every page a
     # component of the electronics its component first, the electronics in brackets (02's shown_name, E38).
     names = {m: composition.element_page_name(m) if symbol else composition.shown_name(m) for m in shown}
-    columns = composition.legend_columns(list(names.values())) if shown else 1
-    rows = math.ceil(len(shown) / columns) if shown else 0
+    # one legend: the contributions drawn, the median and the 95 % interval (rule 3 of 2026-11-12: every mark its
+    # sample), the runs of each robot type
+    handles = ([Patch(color=colours[m], label=names[m]) for m in shown]
+               + composition.distribution_handles(len(robots[0].tables['total'][1])))
+    columns = composition.legend_columns([h.get_label() for h in handles])
+    rows = math.ceil(len(handles) / columns)
     figure.suptitle(heading, fontsize=composition.APART_HEADING, y=0.985)
-    if shown:
-        figure.legend(handles=[Patch(color=colours[m], label=names[m]) for m in shown], loc='upper center',
-                      bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False, fontsize=composition.APART_TEXT)
-    figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * composition.LEGEND_ROW), h_pad=0.4, w_pad=2.5)
+    figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.955), ncol=columns, frameon=False,
+                  fontsize=composition.APART_TEXT)
+    figure.tight_layout(rect=(0, 0, 1, 0.95 - max(rows, 1) * composition.LEGEND_ROW), h_pad=composition.PANEL_GAP, w_pad=2.5)
     composition.make_room(figure, panels)
     return figure
 
@@ -430,34 +480,34 @@ def notes(robots: list, outliers: list, params: Params) -> list:
     in 02's words (EVIDENCE.md E30 point 4)."""
     n = len(robots[0].tables['total'][1])
     paragraphs = [
-        'Each page one item, the six robot types side by side: the mass of one robot by material, each material by '
-        'the kind of part it sits in, each element of interest by the material it comes from, the mass of one robot '
+        'Each page one item, the six robot types side by side: the mass of one robot by material (the six materials '
+        'that hold most of it each in its colour, every other material together in grey), each material by the group '
+        'of the kind of part it sits in, each element of interest by the material it comes from, the mass of one robot '
         'by part group and by body region, and copper, recycled as copper or fixed in alloys. One panel per robot type, '
         'in the form of the pages of each robot type (figures/composition/).',
-        'A panel: the bars the draws of one robot of the type, the height the share of the draws, each bar split into '
-        'the kg its draws hold in each contribution, the one with the smaller mean lower, each in its colour (one '
-        'legend at the top of the page). Solid line: the median; dotted line: the mean. Dashed lines: the 2.5th and '
-        '97.5th percentile (95 % of the draws between them). Each axis ends at the 99.5th percentile of its draws: the '
-        "0.5 % beyond are not drawn. " + composition.LOG_WORDS + " Every panel's numbers (in what share of the draws "
-        "it is held, its median, mean and "
-        '95 %, the draws beyond its axis) are on the page after its page.',
+        'A panel: how often each mass of one robot of the type came out in the model runs, the height the share of the '
+        'runs, each bar split into the kg its runs hold in each contribution, the one with the smaller median lower, '
+        'each in its colour (one legend at the top of the page, which also names the median and the 95 % interval, '
+        'where 95 of 100 runs lie). Each axis ends where 99.5 % of its runs lie: the 0.5 % beyond are not drawn. '
+        + composition.LOG_WORDS + " Every panel's numbers (in what share of the runs it is held, its median, its "
+        "50 % and 95 % intervals, the runs beyond its axis) are on the page after its page.",
         'Each panel on its own scale and unit (kg, g, mg): compare the numbers of the panels, not the widths of '
         'their bars. One scale shared by the six would be stretched by the type with the heaviest robots and press '
         'every other type into its first bars.',
-        'A robot type that holds an item in some of its draws only (a robot or a version without it): its panel shows '
-        'the draws that hold it and says in what share of all its draws it is held; one held in fewer than 2.5 % of '
-        'its draws has no panel, and its place on the page says so (a 0 is not part of a distribution). An item no '
-        'type holds has no page.',
-        f'The draws: {n:,} for each robot type, as 02_composition.py wrote them (data/consolidated/ and '
-        'data/parts_taken_apart/), each one robot of the type in the register, each of its robots drawn equally often '
-        '(a robot in two versions, each as often), part by part from its parts file. 03 draws nothing at random; it '
-        'checks that the draws add up before it draws a page.',
+        'A robot type that holds an item in some of its runs only (a robot or a version without it): its panel shows '
+        'the runs that hold it, and its numbers say in what share of all its runs it is held; one held in fewer than '
+        '2.5 % of its runs has no panel, and its place on the page says so (a 0 is not part of a distribution). An item '
+        'no type holds has no page.',
+        f'The model runs: {n:,} for each robot type, as the composition of each robot type wrote them (the folders of '
+        'the robot types in the project\'s data), each one robot of the type in the register, each of its robots drawn equally '
+        'often (a robot in two versions, each as often), part by part from its parts file. The comparison chooses '
+        'nothing at random; it checks that the runs add up before it makes a page.',
         composition.outlier_words(outliers, params, types=True),
         'The elements: only the elements of interest, from what is recovered as elements, as on the pages of each '
         'robot type: copper and nickel each its metal whole; the aluminium, magnesium and titanium alloys the metal '
         'they hold; the NdFeB magnets their rare earths, cobalt, boron, niobium and gallium; the battery cells their '
         'lithium, nickel, cobalt and manganese and the copper and aluminium of their foils and tabs; the boards and '
-        'components their metals of interest. Copper: its inflow, the copper recycled as copper and, in pale grey, the '
+        'components their metals of interest. Copper in all: the copper recycled as copper and, in pale grey, the '
         'copper fixed in alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not '
         'recovered as copper.',
         composition.LIGHT_ALLOY_NOTE,   # what the light alloys' panels leave out (E33)
@@ -465,10 +515,10 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         "The part groups and body regions: each robot type's kinds of part placed whole; rough where a kind holds parts "
         "of another group: the head's joints are counted as sensors, the battery management board as battery; a "
         "hydraulic robot's power unit, oil and hoses as joint drives, in the torso.",
-        "The colours: Paul Tol's schemes, as published, colour-blind safe: the materials of the page of the mass by "
-        'material, the part groups and the body regions each his discrete rainbow of their number; the kinds of part '
-        'the colours of the pages of each robot type (the same rainbow); the materials an element comes from his muted '
-        'scheme, as on the pages of each robot type.',
+        "The colours: Paul Tol's schemes, as published, each two colours of a panel told apart by a colour-blind "
+        'reader too: the six main materials of the page of the mass by material each its own, the others grey; the '
+        'four groups as on the pages of each robot type; the body regions his discrete rainbow of their number, the '
+        'head in its orange; the materials an element comes from as on the pages of each robot type.',
     ]
     return [p for p in paragraphs if p]   # no outlier: no paragraph
 
@@ -509,17 +559,21 @@ def parts_pages(robots: list):
 
 
 def panel_pages(robots: list):
-    """Every page of panels, as (file name, figure), one at a time: the total by material, each material by kind of
-    part, each element by the material it comes from, the part groups, the body regions, copper three ways."""
+    """Every page of panels, as (file name, figure), one at a time: the total by material (the six main ones, the
+    rest together), each material by group, each element by the material it comes from, the part groups, the body
+    regions, copper three ways."""
     materials = material_names(robots)
+    words = main_materials_check(robots, materials)
+    if words:
+        print(words, flush=True)
     yield (f'{PREFIX}_total_1.png',
            compare_page('The mass of one robot of each robot type, by material', robots,
-                        lambda r: {m: r.column('materials', m) for m in materials}, rainbow(materials)))
+                        lambda r: main_and_other(r, materials), {**MAIN_MATERIALS, OTHER_MATERIALS: OTHER_GREY}))
     shown = [m for m in materials if held_by_any(robots, 'materials', m)]
     for k, material in enumerate(shown, 1):
         yield (f'{PREFIX}_materials_{k}.png',
-               compare_page(f'{material} in one robot of each robot type, by the kind of part it sits in', robots,
-                            lambda r, m=material: r.in_kinds(m), KIND_COLOURS))
+               compare_page(f'{material} in one robot of each robot type, by the group of the kind of part it sits in',
+                            robots, lambda r, m=material: r.in_groups(m), schemas.GROUP_COLOURS))
     # The elements in alphabetical order of their names, as each page's title begins ('Aluminium (Al)' … 'Titanium (Ti)';
     # Matthias, 2026-11-04: "Alphabtetic is easier to find", "Elements only"); the materials keep 02's order.
     elements = sorted((e for e in robots[0].tables['elements'][0]
@@ -544,7 +598,7 @@ def panel_pages(robots: list):
                                 lambda r, e=symbol: composition.sensors_split(e, recovered_from(r, e)),
                                 composition.MATERIAL_COLOURS))
             continue
-        inflow = ', inflow' if any(fixed_in(r, symbol) for r in robots) else ''
+        inflow = ', in all' if any(fixed_in(r, symbol) for r in robots) else ''      # copper recycled and fixed (E25)
         # A light alloy's metal titled as what its panels draw, the metal its alloy holds (E33, "Yes, relabel").
         heading = (f'{composition.element_label(symbol)} held in the {composition.ALLOY_OF[symbol].lower()} of one '
                    'robot of each robot type' if symbol in composition.ALLOY_OF else
@@ -572,11 +626,12 @@ def panel_pages(robots: list):
     for table, words in (('part_groups', 'group'), ('body_regions', 'body region')):
         columns = robots[0].tables[table][0]
         colours = {**rainbow(columns), **{g: c for g, c in schemas.GROUP_COLOURS.items() if g in columns}}
+        colours.update({r: c for r, c in BODY_REGION_COLOURS.items() if r in columns and table == 'body_regions'})
         yield (f'{PREFIX}_{table}_1.png',
                compare_page(f'The mass of one robot of each robot type, by {words}', robots,
                             lambda r, t=table, c=columns: {name: r.column(t, name) for name in c}, colours))
     yield (f'{PREFIX}_copper_1.png',
-           compare_page('Copper in one robot of each robot type: its inflow, recycled as copper or fixed in alloys',
+           compare_page('Copper in one robot of each robot type: in all, recycled as copper or fixed in alloys',
                         robots, lambda r: {RECYCLED: r.column('copper', composition.COPPER_COLUMNS[0]),
                                            composition.FIXED_PART: r.column('copper', composition.COPPER_COLUMNS[1])},
                         COPPER_COLOURS))

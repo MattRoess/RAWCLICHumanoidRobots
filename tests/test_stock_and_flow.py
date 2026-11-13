@@ -1,6 +1,6 @@
 """
 Tests of 04_stock_and_flow.py: the humanoid robots in the world, their joint sets and battery packs, quarter by
-quarter as RAWCLICDataCenters' 07, and the elements in them, each robot one of 02's draws of its robot type.
+quarter as RAWCLICDataCenters' 08, and the elements in them, each robot one of 02's draws of its robot type.
 
 **Copyright notice:** Copyright © 2026 Empa, Matthias Roesslein
 **Licence:** CC BY 4.0, Creative Commons Attribution 4.0 International; the full text is in `LICENSE`
@@ -102,7 +102,7 @@ class TestTheSettings(unittest.TestCase):
 
 
 class TestTheLifetimes(unittest.TestCase):
-    """A lifetime spread among the units as a triangle (07's survival), and a draw's value of a triangle."""
+    """A lifetime spread among the units as a triangle (08's survival), and a draw's value of a triangle."""
 
     def test_by_hand(self):
         life = (5.0, 7.0, 10.0)
@@ -149,10 +149,10 @@ class TestTheLifetimes(unittest.TestCase):
 
 
 class TestTheCohorts(unittest.TestCase):
-    """The robots in use quarter by quarter (07's compute path and follow_target), checked by hand."""
+    """The robots in use quarter by quarter (08's compute path and follow_target), checked by hand."""
 
     def test_the_quarters_between_the_articles_years(self):
-        # 2025 Q1 to 2040 Q4 (07's quarters), each of the article's values at the end of its year (Matthias,
+        # 2025 Q1 to 2040 Q4 (08's quarters), each of the article's values at the end of its year (Matthias,
         # 2026-11-08: "Follow the artcile!! 70 x 10E9"); 1 January 2025 its 10 M less one year of its own growth,
         # 10 M / 1.16 = 8.62 M (E42's growth).
         quarters = S.targets(ARTICLE)
@@ -286,7 +286,7 @@ class TestTheWorkbook(unittest.TestCase):
 
     def test_the_years_as_the_data_centres(self):
         # Matthias, 2026-11-08: "Both have to be exactly the same, as we have to combine both data!!!", "Both have to be
-        # on the same x axis scale!!", "Yes!!": the quarters and years of RAWCLICDataCenters' 07, 2025 Q1 to 2040 Q4,
+        # on the same x axis scale!!", "Yes!!": the quarters and years of RAWCLICDataCenters' 08, 2025 Q1 to 2040 Q4,
         # the workbook's years and the settings at 1 January.
         self.assertEqual(S.QUARTERS, 64)
         self.assertAlmostEqual(S.mid_times()[0], 2025.125)                       # the middle of 2025 Q1
@@ -417,7 +417,7 @@ class TestTheCount(unittest.TestCase):
 
     def test_the_robots_of_2025_by_hand(self):
         # The article's 2025 at the end of 2025, its start 8.62 M; with the lifetimes 5 / 7 / 10 years a young fleet
-        # growing by 16 % a year; the stock of 2025 its end, as 07.
+        # growing by 16 % a year; the stock of 2025 its end, as 08.
         article = self.counted[('article', 0)]
         built, stock, gone = S.years_of(article)
         self.assertAlmostEqual(stock[0, 0], 10e6, delta=1e-3)
@@ -460,14 +460,16 @@ class TestTheStatistics(unittest.TestCase):
     """Over the draws above 0 ("A 0 is not part of a distribution"), and the words and units of the figures."""
 
     def test_a_0_is_not_part_of_the_distribution(self):
+        # The median, not the mean, since 2026-11-13 ("Not mean, but median", as RAWCLICDataCenters' 08).
         stats = S.stats_of(np.array([[0.0, 0.0], [1.0, 0.0], [3.0, 0.0]]))
-        self.assertEqual(stats['mean'][0], 2.0)                                  # over 1 and 3, not 0, 1 and 3
+        self.assertEqual(stats['median'][0], 2.0)                                # over 1 and 3, not 0, 1 and 3
         self.assertAlmostEqual(stats['held'][0], 2 / 3)
-        self.assertTrue(np.isnan(stats['mean'][1]))                              # 0 in every draw: no number
+        self.assertTrue(np.isnan(stats['median'][1]))                            # 0 in every run: no number
         self.assertEqual(stats['held'][1], 0.0)
-        self.assertEqual(S.held_words(np.array([1.0, 1.0])), '')
-        self.assertEqual(S.held_words(np.array([0.999, 1.0])), ', held in 99 % to 100 % of the draws')
-        self.assertEqual(S.held_words(np.array([0.0, 0.56, 0.56])), ', held in 56 % of the draws')
+        # In what share of the runs, in 02's words (one copy): never "0 %" for what some runs hold.
+        self.assertEqual(S.composition.held_words(1.0), '')
+        self.assertEqual(S.composition.held_words(0.56), ' (in 56 % of the runs)')
+        self.assertEqual(S.composition.held_words(0.006), ' (in 0.6 % of the runs)')
 
     def test_masses_written_as_07(self):
         self.assertEqual(S.mass_label(1e6), '1 kt')
@@ -489,25 +491,6 @@ class TestTheDistributionPanels(unittest.TestCase):
         self.assertEqual(S.mass_unit(np.array([1.2e9])), (1e9, 'Mt'))
         self.assertEqual(S.mass_unit(np.array([500.0])), (1.0, 'kg'))
         self.assertEqual(S.mass_unit(np.array([0.5])), (1e-3, 'g'))
-
-
-class TestTheLegends(unittest.TestCase):
-    """A legend at the upper left, as 07's, unless a line runs under it or a value is written there (found 2026-11-06:
-    indium's world production ran under the legend)."""
-
-    def test_a_legend_leaves_lines_and_written_values_free(self):
-        figure, axes = S.plt.subplots()
-        axes.plot([0, 1], [0.95, 0.95], label='a line along the top')            # the upper corners taken
-        axes.plot([0, 1], [0.5, 0.5], label='a line in the middle')
-        axes.set_ylim(0, 1)
-        axes.text(0.98, 0.03, 'a value below the scale', transform=axes.transAxes, ha='right', va='bottom')
-        axes.legend(loc='upper left')
-        S.place_legends(figure)
-        renderer = figure.canvas.get_renderer()
-        legend = axes.get_legend()
-        self.assertFalse(S.lines_under(axes, legend.get_window_extent(renderer), renderer))
-        self.assertEqual(legend._loc, 3)                                          # the lower left, the one corner free
-        S.plt.close(figure)
 
 
 @unittest.skipUnless(os.path.exists(Params().data.data_center_scenarios)
@@ -588,10 +571,12 @@ class TestTheRun(unittest.TestCase):
 
         def checked(figure, path, *args, **kwargs):
             name = os.path.basename(str(path))
-            cls.problems += page_problems(figure, name, kwargs.get('dpi'))
+            cls.problems += page_problems(figure, name, kwargs.get('dpi'), kwargs.get('bbox_inches') == 'tight')
             renderer = figure.canvas.get_renderer()
+            # a panel with a legend of its own (since 2026-11-13 none: one legend of the page, below the panels, as
+            # RAWCLICDataCenters' 08, rule 1 of 2026-11-12; until then a legend in a free corner of each panel)
             cls.covered += [(name, axes.get_title()) for axes in figure.axes if axes.get_legend() is not None
-                            and S.lines_under(axes, axes.get_legend().get_window_extent(renderer), renderer)]
+                            and axes.axison]
             cls.saved.append(str(path))
             where = os.path.relpath(str(path), params.output.stock_and_flow_figures_dir)
             cls.panels[where] = [a.panel_numbers for a in figure.axes if getattr(a, 'panel_numbers', None) is not None]
@@ -637,7 +622,7 @@ class TestTheRun(unittest.TestCase):
         self.assertEqual(self.files['elements_stock'].shape, (N, 16, 14, 4))   # the 14 parts of how it is taken apart
 
     def test_the_robots_as_the_article(self):
-        # The robots in use at the end of each year, as 07 reports its stocks: the article's value of the year, 10 M
+        # The robots in use at the end of each year, as 08 reports its stocks: the article's value of the year, 10 M
         # (2025) to 70 × 10⁹ (2040) ("Follow the artcile!! 70 x 10E9"); the types each their own share of it.
         robots = np.load(os.path.join(self.params.output.stock_and_flow_dir, 'article_stock.npy'))
         np.testing.assert_allclose(robots, np.broadcast_to([ARTICLE[y] for y in range(2025, 2041)], (N, 16)),
@@ -700,9 +685,9 @@ class TestTheRun(unittest.TestCase):
             rows = list(csv.DictReader(handle))
         first = next(r for r in rows if r['quantity'] == 'robots' and r['robot type'] == 'all'
                      and r['flow'] == 'stock' and r['year'] == '2025')
-        self.assertAlmostEqual(float(first['mean']), 10e6, delta=10)            # the end of 2025: the article's
+        self.assertAlmostEqual(float(first['median']), 10e6, delta=10)          # the end of 2025: the article's
         neodymium = [r for r in rows if r['quantity'] == 'Neodymium']
-        self.assertTrue(neodymium and all(r['mean'] == '–' and r['held in % of the draws'] == '0.0'
+        self.assertTrue(neodymium and all(r['median'] == '–' and r['held in % of the runs'] == '0.0'
                                           for r in neodymium))
         # Each type's share of the robots built in a year, % (2026-11-07, "Add it beside"): from the draws, draw by
         # draw, its built over the article's built, its own drawn share.
@@ -710,13 +695,16 @@ class TestTheRun(unittest.TestCase):
         article = np.load(os.path.join(self.params.output.stock_and_flow_dir, 'article_in.npy')).astype(np.float64)
         shares = 100 * built / article[:, :, None]
         for t in S.TYPES:
-            got = [float(r['mean']) for r in rows if r['quantity'] == S.SHARE_QUANTITY and r['robot type'] == str(t)]
-            np.testing.assert_allclose(got, shares[:, :, t - 1].mean(axis=0), rtol=1e-5, err_msg=t)
+            got = [float(r['median']) for r in rows if r['quantity'] == S.SHARE_QUANTITY and r['robot type'] == str(t)]
+            np.testing.assert_allclose(got, np.median(shares[:, :, t - 1], axis=0), rtol=1e-5, err_msg=t)
 
     def test_the_overview_has_the_share_panel_beside_the_types(self):
-        self.assertIn(('Robots in use by robot type', 'Share of the robots built by robot type'), self.titles)
-        # The robot types' legend in the eighth place, its six entries (found 2026-11-07: it came out empty).
-        self.assertIn((S.OVERVIEW, [f'robot type {t}' for t in S.TYPES]), self.legends)
+        self.assertIn(('Robots in use by robot type', 'Share by robot type'), self.titles)
+        # The robot types in the page's one legend, below the panels, each with its name (since 2026-11-13; in a panel
+        # of their own, the eighth, until then; found 2026-11-07: it came out empty).
+        entries = self.figure_legends[S.OVERVIEW]
+        for t in S.TYPES:
+            self.assertEqual(sum(e.startswith(f'Robot type {t}: ') for e in entries), 1, (t, entries))
 
     def test_its_pages(self):
         names = sorted(os.path.relpath(p, self.params.output.stock_and_flow_figures_dir) for p in self.saved)
@@ -727,13 +715,16 @@ class TestTheRun(unittest.TestCase):
                                        + [os.path.join(D, f'elements_{y}.png') for y in (2025, 2030, 2035, 2040)]
                                        + [os.path.join(D, f'parts_{y}_1.png') for y in (2025, 2030, 2035, 2040)]))
         self.assertTrue(all(os.path.exists(p) for p in self.saved))
-        self.assertEqual(self.problems, [])
-        self.assertEqual(self.covered, [])                     # no line and no written value under a legend
+        # The robots in use by type: each type a row in its colour, named on the axis ("robot type 1" …; Matthias,
+        # 2026-11-08: "can you not combine the 6 types to 1"); its legend names the median and the 95 % interval.
+        self.assertEqual([p for p in self.problems if p[:2] != ('robots_in_use.png', 'a colour drawn, not in the legend')],
+                         [])
+        self.assertEqual(self.covered, [])                     # no legend inside a panel
         self.assertIn('Neodymium: no numbers, 0 kg in every draw; no page.', self.printed)
 
     def test_the_distribution_pages(self):
         # Matthias, 2026-11-07: "I also want the distributions"; 2026-11-08: "can you not combine the 6 types to 1", "I
-        # want to see at the end how many robots there are", "it is 2025, 2030, 2035 and 2040!!", the years as 07's
+        # want to see at the end how many robots there are", "it is 2025, 2030, 2035 and 2040!!", the years as 08's
         # ("Yes!!"): one page of the robots in use at the end of 2025, 2030, 2035, 2040, a panel a year, the six types
         # one above the other, the robots in all in its title; every draw on its axis (why is the largest part of the
         # triangal cut off?); the numbers on the page after. Each element in use at the four year ends, split by part,
@@ -750,10 +741,9 @@ class TestTheRun(unittest.TestCase):
         values = self.files['units_stock'][:, 15, 0, 2].astype(np.float64)
         everything = self.files['units_stock'][:, 15, 0, :].astype(np.float64)
         per, word = S.count_unit(everything.max(axis=1))
-        name, median, mean, low, high, unit = panels[3][2]
+        name, median, low, high, unit = panels[3][2]                             # no mean since 2026-11-13
         self.assertEqual((name, unit), ('Robot type 3, 2040', word))
         self.assertAlmostEqual(median, np.median(values) / per, places=6)
-        self.assertAlmostEqual(mean, values.mean() / per, places=6)
         np.testing.assert_allclose([low, high], np.percentile(values, (2.5, 97.5)) / per, rtol=1e-9)
         # Type 1's row at the top, type 6's at the bottom, each labelled where its bars stand.
         for bottoms, labels, _ in self.rows[page]:
@@ -781,13 +771,14 @@ class TestTheRun(unittest.TestCase):
         self.assertEqual([p[0] for p in panels], ['Lithium (Li)', 'Aluminium (Al)', 'Copper (Cu)'])
         total = self.files['elements_stock'][:, 15, :, ELEMENTS.index('Cu')].astype(np.float64).sum(axis=1)
         per, unit = S.mass_unit(total)
-        title, mean, low, high, written = next(p for p in panels if p[0] == 'Copper (Cu)')
+        title, median, low, high, written = next(p for p in panels if p[0] == 'Copper (Cu)')
         self.assertEqual(written, unit)
-        self.assertAlmostEqual(mean, total.mean() / per, places=6)
+        self.assertAlmostEqual(median, np.median(total) / per, places=6)
         np.testing.assert_allclose([low, high], np.percentile(total, (2.5, 97.5)) / per, rtol=1e-9)
         # Its legend the groups drawn on the page, in their order: aluminium in the body, lithium in the battery,
         # copper in the joints and the electronics.
-        self.assertEqual(self.figure_legends[page], ['Joints', 'Battery', 'Electronics', 'Body'])
+        self.assertEqual(self.figure_legends[page], ['Joints', 'Battery', 'Electronics', 'Body',
+                                                     f'Median of {N:,} model runs', '95 % interval'])
         self.assertEqual(len(self.element_numbers[os.path.join(D, 'elements_2025.png')]), 3)
 
     def test_an_element_held_in_some_draws(self):
@@ -803,19 +794,20 @@ class TestTheRun(unittest.TestCase):
 
         def record(figure, path, *args, **kwargs):
             seen['numbers'] = [a.element_numbers for a in figure.axes if getattr(a, 'element_numbers', None)]
-            seen['words'] = [t.get_text() for a in figure.axes for t in a.texts]
+            seen['words'] = [a.get_title(loc='left') for a in figure.axes] + [t.get_text() for a in figure.axes
+                                                                              for t in a.texts]
             seen['legend'] = [t.get_text() for legend in figure.legends for t in legend.get_texts()]
 
         with tempfile.TemporaryDirectory() as folder, mock.patch.object(Figure, 'savefig', record):
             S.elements_page(2040, kg, ['Cu', 'Li'], 400, os.path.join(folder, 'elements_2040.png'), 50)
         held = kg[::2, S.PARTS.index('Frame'), 0]
         per, unit = S.mass_unit(held)
-        [(title, mean, low, high, written)] = seen['numbers']
+        [(title, median, low, high, written)] = seen['numbers']
         self.assertEqual(title, 'Copper (Cu)')
-        self.assertAlmostEqual(mean, held.mean() / per, places=9)
+        self.assertAlmostEqual(median, np.median(held) / per, places=9)
         np.testing.assert_allclose([low, high], np.percentile(held, (2.5, 97.5)) / per, rtol=1e-9)
-        self.assertTrue(any('held in 50 % of the draws' in w for w in seen['words']))
-        self.assertEqual(seen['legend'], ['Body'])
+        self.assertTrue(any('Copper (Cu) (50 %)' in w for w in seen['words']), seen['words'])
+        self.assertEqual(seen['legend'], ['Body', 'Median of 400 model runs', '95 % interval'])
 
     def test_the_list_part_by_part(self):
         # Matthias, 2026-11-08: "I want a detailed list of the component ... to know how to take it apart!!!": after
@@ -832,13 +824,15 @@ class TestTheRun(unittest.TestCase):
         small = 0.2 * units[:, 1] + 0.1 * units[:, 2]
         per, unit = S.mass_unit(small)
         row = next(r for r in rows if r[2] == 'Small PCB')
-        self.assertEqual(row[3], 'all draws')
-        self.assertEqual(row[5], f'{S.composition.panel_number(small.mean() / per)} {unit}')
-        low, high = np.percentile(small / per, (2.5, 97.5))
-        self.assertEqual(row[6], f'{S.composition.panel_number(low)} to {S.composition.panel_number(high)} {unit}')
+        n = S.composition.panel_number
+        self.assertEqual(row[3], 'all runs')
+        self.assertEqual(row[4], f'{n(np.median(small) / per)}\u00a0{unit}')
+        p25, p75, low, high = np.percentile(small / per, (25, 75, 2.5, 97.5))
+        self.assertEqual(row[5], f'{n(p25)} to {n(p75)}\u00a0{unit}')
+        self.assertEqual(row[6], f'{n(low)} to {n(high)}\u00a0{unit}')
         page = os.path.join(S.DISTRIBUTIONS_DIR, 'parts_2040_1.png')
         for r in rows:
-            self.assertIn(r[5], self.texts[page])
+            self.assertIn(r[4], self.texts[page])
         self.assertEqual(self.texts[page].count('Small PCB'), 1)
 
     def test_the_list_over_the_draws_that_hold_it(self):
@@ -852,14 +846,14 @@ class TestTheRun(unittest.TestCase):
         self.assertEqual(sorted(rows), ['Frame', 'Small PCB'])
         held = kg[::2, S.PARTS.index('Small PCB'), 0]
         per, unit = S.mass_unit(held)
-        low, median, high = np.percentile(held / per, (2.5, 50, 97.5))
+        low, p25, median, p75, high = np.percentile(held / per, (2.5, 25, 50, 75, 97.5))
         n = S.composition.panel_number
-        self.assertEqual(rows['Small PCB'][3:], ['50 %', f'{n(median)}\u00a0{unit}', f'{n(held.mean() / per)}\u00a0{unit}',
+        self.assertEqual(rows['Small PCB'][3:], ['50 %', f'{n(median)}\u00a0{unit}', f'{n(p25)} to {n(p75)}\u00a0{unit}',
                                                  f'{n(low)} to {n(high)}\u00a0{unit}'])
-        self.assertEqual(rows['Frame'][3], 'all draws')
+        self.assertEqual(rows['Frame'][3], 'all runs')
 
     def test_the_years_of_the_summary(self):
-        # As 07: the stocks at the end of 2025 to 2040, the flows of the calendar years 2025 to 2040.
+        # As 08: the stocks at the end of 2025 to 2040, the flows of the calendar years 2025 to 2040.
         import csv
         with open(os.path.join(self.params.output.stock_and_flow_dir, S.SUMMARY), newline='',
                   encoding='utf-8') as handle:
@@ -887,26 +881,27 @@ class TestTheRun(unittest.TestCase):
                 row = next(r for r in got if r['year'] == '2030')
                 if (values > 0).any():
                     above = values[values > 0]
-                    self.assertAlmostEqual(float(row['mean']) / above.mean(), 1.0, places=5)
+                    self.assertAlmostEqual(float(row['median']) / np.median(above), 1.0, places=5)
                     low, high = np.percentile(above, (2.5, 97.5))
                     self.assertAlmostEqual(float(row['2.5 %']) / low, 1.0, places=5)
                     self.assertAlmostEqual(float(row['97.5 %']) / high, 1.0, places=5)
                 else:
-                    self.assertEqual(row['mean'], '–')                             # the cells hold no copper
+                    self.assertEqual(row['median'], '–')                           # the cells hold no copper
             for group in S.GROUPS:
                 values = kg[:, 5, [S.PARTS.index(p) for p in S.PARTS if S.schemas.TAKEN_GROUP[p] == group],
                             cu].sum(axis=1)
                 row = next(r for r in rows if r['quantity'] == f'Copper, {group}' and r['flow'] == flow
                            and r['year'] == '2030')
                 if (values > 0).any():
-                    self.assertAlmostEqual(float(row['mean']) / values[values > 0].mean(), 1.0, places=5)
+                    self.assertAlmostEqual(float(row['median']) / np.median(values[values > 0]), 1.0, places=5)
                 else:
-                    self.assertEqual(row['mean'], '–')                             # the battery's copper is a PCB's
+                    self.assertEqual(row['median'], '–')                           # the battery's copper is a PCB's
         # By hand: the small PCBs' copper in use at the end of 2025, the joint sets' 0.2 kg and the packs' 0.1 kg.
         small = next(r for r in rows if r['quantity'] == 'Copper, Electronics: Small PCB' and r['flow'] == 'stock'
                      and r['year'] == '2025')
         units = self.files['units_stock'][:, 0, :, :].astype(np.float64).sum(axis=2)
-        self.assertAlmostEqual(float(small['mean']) / (0.2 * units[:, 1] + 0.1 * units[:, 2]).mean(), 1.0, places=5)
+        self.assertAlmostEqual(float(small['median']) / np.median(0.2 * units[:, 1] + 0.1 * units[:, 2]), 1.0,
+                               places=5)
 
     def test_without_02_it_stops(self):
         params = dataclasses.replace(self.params)

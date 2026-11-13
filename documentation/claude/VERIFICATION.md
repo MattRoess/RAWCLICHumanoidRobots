@@ -106,6 +106,129 @@ material declaration). Until then the elements of one robot are **not validated*
 95 % ranges.
 
 
+## 2026-11-13
+
+### V228. Every figure checked by the shared figure tests (FigureTests 0.5.0); what they found, fixed (his "Yes, 1 to 7")
+
+Matthias, 2026-11-13: "There is now the package for figure testing. I want that you intergate the new results with the
+robots and als test all the figures", "Yes, 1 to 7"; on the way "Do not label every point!!!", "the y axis scales are
+shit", "I want B", "Yes, build the three rules as proposed", "Yes, both", and on the robot and overview pages "These two
+figures look ugly. The different text are much to close. It looks overloaded", "Yes, all".
+
+- **The check.** `tests/test_all_figures.py` (new): FigureTests' proofs (every rule caught on a figure drawn with its
+  fault, passed without it), the version installed against the pin of `requirements.txt` (0.5.0; installed from
+  FigureTests' folder until its tag v0.5.0 is pushed, on his word), and every numbered stage 01 to 05 run as by pressing
+  Run with 200 runs of each robot type on his workbooks, every output folder in a temporary folder, every figure checked
+  at the moment it is saved. This project's settings: the robots' and makers' names written together, read from his
+  register and workbook (proper names, not code names); the schema pages in `figures/schemas/`; the jargon "inflow",
+  "outflow", "Plan A"; the notes pages as pages of text (`_notes_<k>.png`: no foot of three sentences to keep).
+- **First run** (before any change, the rules of 0.4.1): 01 148, 02 1,108, 03 309, 04 8, 05 0 faults (after the
+  colour rules of 0.5.0). **Each kind, and what was done:**
+  - *Words:* "draws", "mean", "percentile", "inflow" and an underscore on pages → "model runs", "median", "95 %
+    interval", plain words (01, 02, 03, 05).
+  - *Means:* every page, table and number at the median (02's means pages became the medians pages `_medians_`; the
+    lists' columns: held in, median, middle half, 95 %).
+  - *Legends:* every distribution page names its median and 95 % interval (02, 03, 04, 05).
+  - *The same number beside every point* (04: "12 %" at each of 16 years) → written once per line, where it changes;
+    the new rule repeated_label (FigureTests).
+  - *Axes:* 04's and 05's mass axes in powers of ten again (written-out numbers took a third of each panel).
+  - *Colours* (the rules colour_blind, colour_normal, text_contrast): 04's and 05's types and quantities in nine new
+    colours told apart under both rules; 01's robot drawings and 02's overview rows each kind in its group's colour (four
+    colours, every pair at least 34.3 apart, 15.5 colour blind); 02's parts element pages removed (point A below); 03's
+    mass page six main materials and the rest grey (point B); 03's material pages by group (point C); the cameras' blue
+    on the element pages (#0077BB, at least 25.2 from every other material colour, 22.9 colour blind); 01's overview the
+    sibling projects' olive (#AAAA00, 22.9 from every other box colour, 21.1 colour blind); 03's body regions the head
+    orange (#EE8026, 26.0 and 11.6); each mark's letter white or dark by its contrast.
+  - *Crowded texts* (the new rule text_gap of FigureTests 0.5.0, two separate texts at least half the larger font size
+    apart): with the rule, 01 396, 02 830, 03 145 places, before any change. 02's overview rows 0.42 inches each, one
+    text height between two labels (they stood 5.3 to 9.4 pt apart, ink to ink, measured on his type 2 page), an
+    element whose rows a page cannot hold in two panels on the same scale, the legend below the panels; 01's robot page
+    the robot, its marks and the four groups, one line a kind, what each holds on a page of its own
+    (`_kinds_of_part.png`); the panels of 02's and 03's pages 14 pt apart (4 before), their mass numbers 9 pt below the
+    axis and their titles 10 pt above it (the share axis's "0" stood 2 to 7 pt from the first mass, "0.8"); 01's box
+    titles and list items further from their text; the robot tables' height and joints columns moved. The rule does not
+    catch 01's robot page as it was (its rows 14.6 pt apart): what crowded it was the amount of text, now on its own
+    page.
+- **Point A** (his "Yes, all"): split by the four groups, 02's parts element pages would repeat 02's pages by group:
+  on the sandbox's runs the group medians of each critical element from the places and from the parts agree to within
+  1 % (the largest difference in a single run, 19 % of a group's largest run, the aluminium of the electronics, where a
+  joint's fan is a place's and a PCB's part). Removed: `element_pages`, `element_page`, `stacked_panel`, `place_view`,
+  `place_colour`, `ELEMENT_PANELS`, their tests; the parts folder's series 'elements' and 'numbers'.
+- **Point B:** the six materials with the largest medians of his run of 2026-11-08, added over the six types
+  (`data/consolidated/<type>/materials.npy`): aluminium alloys 186.0 kg, steel 71.8, plastics 57.9, battery cells 22.9,
+  electrical steel 16.8, copper 12.1 (then boards and components 10.5, NdFeB magnets 8.5). Steel, plastics and
+  electrical steel in Tol's blue, ochre and light cyan: of 25 published colours used by no other material, the three
+  whose closest pair with copper's, aluminium's and the cells' colours stands furthest (18 % above both thresholds),
+  each at least 4.5 : 1 against the black median line. 03 prints when a run's six differ.
+- **Point C:** each material of 03 by the group of the kind of part it sits in (01's KIND_GROUP, the kinds placed whole,
+  as the part groups of 03 already were).
+- **The data centres' stage:** 07 until 2026-11-12, 08 since; its file, its scenarios A, B, C and its 20 elements' columns
+  the same (read 2026-11-13: the header, the first and last rows). The copy tool's own function run on 08's file into a
+  scratch folder: 57 s, every scenario, run and year of 2025 to 2040 written exactly once (its own check), the first 167
+  rows of the file equal to the copy within 6e-8 (float32). Scenario A's copper in use at the end of 2040, median of the
+  first 2,000 runs, 1.56e13 kg in 08's copy and in 07's: the data centres' own result, not the copy's. The copy in
+  `data/raw/` is still of 07's file of 2026-10-23: his run of the tool brings it up to date.
+- **Tests, as far as they ran before his handover** ("write handover, commit and push as I have to leave soon"):
+  passing: test_parameters, test_schemas (its two failures of today, the overview's boxes and the new page, fixed and
+  rerun), test_composition, test_make_humanoid_register, test_make_parts_taken_apart, test_stock_and_flow (47, brought
+  to 04 as it is: medians, one legend below the panels). FigureTests: 40 pass. **Not verified:** test_parts_taken_apart,
+  test_comparison and test_combined_stock_and_flow were updated (medians, legends with the median and 95 % samples,
+  "runs", the medians pages, the removed element pages, a checker that knows a page saved tight) and rerun, the rerun
+  stopped at the handover: the parts run had shown one failure and one error, not read. test_all_figures stopped after
+  02: 01 10 faults (the robot table's masses on the joints, which I had moved; fixed after that run started, by
+  measured widths), 02 1 fault (not read; the medians page's column narrowed after the run started).
+- **Sandbox at 2,000 runs** (every stage, his inputs, 05 on the first 2,000 runs of 08's copy): **not run** (its script
+  was ready in the scratch folder).
+- **Found by him at the end, not changed (his word first):** "These titles look ugly. Font terrible why the hell such a
+  bold": the panel titles of 02, 03 and 04 are set in bold (02 in 11 places, 03 in 2, 04 in 4; 01's headings 17); the
+  data centres' 08 writes its titles in normal weight.
+- **Not covered:** the figures of 200 and 2,000 runs, not of 200,000 (his run); a text's gap is measured between the
+  boxes matplotlib gives, not the ink; the colour rules read the colours a panel draws, not how they look printed.
+
+## 2026-11-09
+
+### V227. His runs of 02, 03, 04, the copy and 05 read back (2026-11-09, his "Yes, both")
+
+- **Times:** every output as his runs of 2026-11-08 left it (02 14:48:11 to 14:49:13; 03 15:15:51 to 15:16:53; 04's
+  draws 15:20:35, its pages to 15:24:13; the copy 15:55:48; 05 15:56:04 to 15:59:05): nothing put back by iCloud.
+- **Code changed after his runs** (yesterday's session record, every edit): 01 only its overview (05's stage and
+  output boxes), 02 only strontium's name, the settings only 05's four keys, 04 only the element page it shares with 05
+  (split out, its note wrapped). None changes a number of 02, 03 or 04; only 01's overview pages (14:32) lack 05.
+- **02, all six types, all 200,000 draws:** `taken_apart` added up by element equals `data/consolidated/<type>/elements`,
+  `taken_apart_mass` equals `total`, and by 01's groups equals `part_groups`, each within 1e-7 of the robot's mass
+  (float32); every part one of 01's 14. The layers check: joint driver boards 6 to 11 % of their draws above the copper
+  their layers hold, battery and head boards about a third, the small 2-layer boards on the cables 92 %, the computer
+  boards 2 %, as in the sandbox (V223); the bounds by hand 127.2 (4 layers) and 181.0 mg/cm2 (6 layers).
+- **Every page of 02, 03, 04, 05 and 01 (592):** no ink in the outermost 3 pixels of any page (a text run off a page
+  leaves ink there). Deliberate fault: a page with a note too long for it is flagged (28 and 18 pixels at the sides), one
+  that fits is not.
+- **Looked at:** 02's group pages (24) and part lists (30); 03's group pages (22), the mass by group (1) and the part lists
+  (70); all 41 of 04's pages; 05's 12 distribution pages and 27 of its 69 element pages (A's 23, B's first 4).
+- **04:** three lines of its summary (copper in stock 2040, neodymium in 2030, gallium out 2035) recomputed from its draws:
+  the same to six digits. The robots built and in use equal the article's. Copper per robot in use 7.55 kg at the end of
+  2025, 3.98 kg at the end of 2040: the battery packs, 9.6 a robot in 2025 and 3.05 in 2040, a day's work each robot
+  (METHODOLOGY, 04 step 4, his words), not a fault.
+- **05:** its robot lines equal 04's summary (12,672 numbers, identical); its data-centre lines equal the statistics of
+  the copy computed afresh (10,368 numbers, within 4.6e-6, the six digits of the file); its stored draws together equal
+  the copy plus 04 draw by draw (first 20,000 draws, all years, elements, flows and scenarios, within 6e-8); strontium,
+  which no robot holds, "–" in the robots' lines.
+- **Found, not changed (for his decision):**
+  1. *"0 %" for a part that is held:* 02's `part_rows` (also 03's and 04's lists) writes the share rounded down to a
+     whole percent: titanium in type 3's frame (0.597 % of the draws), lithium and tantalum in type 4's sensors (0.780 %)
+     read "held in 0 %" in 02's and 03's lists, magnesium in type 3's frame (0.6 %) in 03's.
+  2. *02's and 03's lists choose their elements differently:* 02 the elements its type holds in at least 2.5 % of its
+     draws, 03 those any type holds so; magnesium in the frames of types 3 and 4 is in 03's lists, not in 02's. Within an
+     element, neither has a threshold for a part.
+  3. *05, a fault of my build:* on the pages of an element only one side holds (dysprosium, indium, magnesium, terbium,
+     titanium the robots only; strontium the data centres only; 18 pages), the legend names the side that holds none, which
+     has no line, and the robots' line lies hidden under "both together". 04's `log_panel` draws every series given;
+     05's test counted an empty line as drawn.
+  4. *The handover's state of 2026-11-05* reads "164 with the Neo1 not drawn … 11": drawn are 163 and 10, the Neo1 an
+     outlier listed in types 3 and 5 (V-entry of 2026-11-04).
+- **Not covered:** 42 of 05's element pages (B's other 19, C's 23), not looked at: RAWCLICDataCenters' 07 will have two
+  cases instead of three (Matthias, 2026-11-09: "the datacenter will be only two cases not three. Let me first work on
+  this"), so the copy and 05 will be run again.
+
 ## 2026-11-08
 
 ### V226. 05: the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together (EVIDENCE.md E52)

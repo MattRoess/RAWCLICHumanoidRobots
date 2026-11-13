@@ -65,13 +65,120 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-08, evening: where to start tomorrow, on the other Mac (start here)
+## 2026-11-13: every figure checked by the shared figure tests; 08's results taken in (start here)
+
+Matthias, 2026-11-13: "There is now the package for figure testing. I want that you intergate the new results with the
+robots and als test all the figures", "Yes, 1 to 7" (the seven steps: install FigureTests pinned and a test of every
+figure; run it and list the faults; bring every page of 01 to 05 to the rules, following the data centres' 08; take in
+08's results; a sandbox at 2,000 runs; the documents; his run table, commit on his word). On the way, each on his word:
+FigureTests 0.4.1 committed and pushed ("Go ahead"); "Do not label every point!!!" (the rule repeated_label); "the y
+axis scales are shit" (powers of ten again); the colour rules colour_blind, colour_normal, text_contrast ("I want B",
+"Yes, build the three rules as proposed"); "Yes, both" (each kind of part in its group's colour; the notes pages as pages
+of text); on the robot and overview pages "These two figures look ugly. The different text are much to close. It looks
+overloaded", "Yes, all" (the rule text_gap; the overview's rows one text height apart; the robot page split in two; 02's
+parts element pages removed, they would have repeated the pages by group; 03's mass page six main materials and grey;
+03's material pages by group). Every check: VERIFICATION V228.
+
+**WORK IN PROGRESS, NOT READY TO RUN.** Committed and pushed at his word ("write handover, commit and push as I have
+to leave soon", then "Handover, commit push I have to leave"), with FigureTests 0.5.0 committed, tagged v0.5.0 and
+pushed (its four new rules repeated_label, colour_blind, colour_normal, text_contrast, text_gap and the setting
+text_pages), which this project's pin needs. No run is named to him until everything below is done and checked.
+
+**First when he is back, in this order:**
+1. **The titles** (Matthias, at the end: "These titles look ugly. Font terrible why the hell such a bold", then "No
+   have the much better. Show me examples. I decide!!!"): show him one page of examples before changing anything, the
+   same panel of real runs with its title in several styles, each named (now: DejaVu Sans bold 16 pt; DejaVu Sans
+   normal, as the data centres' 08 writes its titles; and fonts matplotlib finds on this Mac, normal weight: Helvetica
+   Neue, Avenir Next, Arial, Gill Sans, Optima, Verdana). He decides; then it goes into every page (02 sets bold in 11
+   places, 03 in 2, 04 in 4; 01's headings 17, his word whether they follow) and becomes a FigureTests rule, proof
+   first, as every fault he finds.
+2. **The tests not verified** (V228): rerun test_parts_taken_apart (its last run stopped at the handover, one failure
+   and one error seen, not read), test_comparison and test_combined_stock_and_flow (updated, rerun stopped), and
+   test_all_figures (stopped after 02: 01's 10 faults fixed after it started, 02's one fault not read). Every test must
+   pass.
+3. **Step 5:** the sandbox at 2,000 runs of every stage on his inputs, 05 on the first 2,000 runs of 08's copy (the copy
+   tool's function on 08's file into a scratch folder, 57 s; the scratch script is gone with the scratch folder: a
+   copy of tests/test_all_figures.py's sandbox with 2,000 runs and data_center_draws_dir on the copy's first 2,000
+   runs). Open every output; record in VERIFICATION.
+4. **Step 7:** his run table (every stage, run or not, what it writes, how long), then his runs: `00_parameters.py`
+   (the dpi 300 and the 08 words in the register), `01_schemas.py` to `05_combined_stock_and_flow.py`, the copy tool
+   `tools/copy_data_center_draws.py` before 05 (08's file into `data/raw/`); his figures folders are his to delete
+   first.
+5. **Ask once:** the leftovers below.
+
+**The data centres' 08.** RAWCLICDataCenters' stock and flow is its stage 08 since 2026-11-12, its file
+`data/data_center_stock_and_flow/stock_flow_draws.csv` (2026-11-12 11:57, 9.5 GB), scenarios A, B, C (C now the
+article's own path), the same 20 elements and columns: the copy tool needs no change but its words. Tested: the tool's
+own function on 08's file into a scratch folder, 57 s, every scenario, run and year written once, the first 167 rows equal
+to the file within 6e-8. The two cases of 2026-11-09 did not come: 08 runs A, B and C (its setting `scenarios`). The copy
+in `data/raw/data_center_stock_and_flow/` is still 07's of 2026-10-23: his run of the tool brings 08 in, then 05.
+
+**Leftovers to ask about** (none removed): the colours of 01's 14 kinds (`KINDS`, the second item) and of 02's 13
+sensor kinds (`SENSOR_KINDS`), read only by tests since today; his old pages of the removed element figure, 36 files
+`robot_type_<n>_elements_<k>.png` and `robot_type_<n>_numbers_<k>.png` in `figures/parts_taken_apart/<type>/` (his
+files: he deletes the figure folders before his runs).
+
+**Found, not changed:** the overview's hatching (more than half the median rests on estimates) has no sample in its
+legend, only words on the notes page (rule 3 of 2026-11-12); 03's comparison pages and 02's parts lists choose their
+elements differently (V227 item 2, open).
+
+## 2026-11-09: handover for the next discussion
+
+He switched to another discussion ("Write a handover, as I have now to switch to another discussion"). Everything below
+is the state at that moment.
+
+**Git.** The code is commit `4392945` on `main`, pushed (2026-11-08). Uncommitted: `documentation/claude/HANDOVER.md`
+and `documentation/claude/VERIFICATION.md` (today's corrections and V227); commit and push only on his word. Work on
+this Mac ("Actually I stay at home"); first thing: `git status`, expecting only those two files.
+
+**His runs: all done and read back** (VERIFICATION V227; full paths under
+`/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`):
+01 (2026-11-08 14:32), 02 (14:48 to 14:49), 03 (15:15 to 15:16), 04 (to 15:24), `tools/copy_data_center_draws.py`
+(15:55), 05 (15:56 to 15:59). Every number checked against its source (02's parts against each robot, 04's summary
+against its draws, 05 against 04 and the copy of 07, draw by draw); all 592 pages without anything run off. Looked at:
+every new page of 02, 03 and 04, 05's 12 distribution pages and 27 of its 69 element pages; the other 42 not, since 05
+will be run again (next point). Not needed, seconds each, whenever he likes: `01_schemas.py` (its overview pages,
+14:32, lack 05) and `00_parameters.py` (the register with 05's four settings).
+
+**Waiting for him: the data centres in two cases.** Matthias, 2026-11-09: "Just be aware, that the datacenter will be
+only two cases not three. Let me first work on this." He works on it in RAWCLICDataCenters; nothing is built here until
+he has done it and named the two. Before anything here, check there: `git log --date=iso` of `07_data_center_stock_and_flow.py`
+and the date of its `data/data_center_stock_and_flow/stock_flow_draws.csv` (now 2026-10-23 14:38, three cases A, B, C).
+What then follows here, each on his word: `SCENARIOS = ('A', 'B', 'C')` and the docstrings in
+`tools/copy_data_center_draws.py` and `05_combined_stock_and_flow.py`; 05's test (`tests/test_combined_stock_and_flow.py`,
+its made-up 07 file of three cases); README (rows tool and 05), METHODOLOGY (05, step 3), EVIDENCE E52; the whole suite;
+a sandbox at 2,000 draws; then his runs: the copy, then 05 (its old folders `A`, `B`, `C` under `data/combined_stock_and_flow/`,
+`figures/combined_stock_and_flow/` and the copy are his to remove or keep: ask, never delete). Until the code follows, the
+copy tool stops on a 07 file of two cases ("scenario-draw-years … missing") and writes nothing.
+
+**Found, for his decision** (V227, nothing changed; put them to him in one short table when he comes back):
+1. "held in 0 %" for parts held in under 1 % of the draws (02's `part_rows`, `math.floor` of the share; also 03's and 04's
+   lists): titanium in type 3's frame, lithium and tantalum in type 4's sensors, magnesium in type 3's frame (03).
+2. 02's and 03's part lists choose their elements differently (02: the type's own elements held in 2.5 % of its draws;
+   03: those any type holds so), so magnesium in the frames of types 3 and 4 is in 03's lists only.
+3. 05, my fault: on the pages of an element one side alone holds (dysprosium, indium, magnesium, terbium, titanium the
+   robots; strontium the data centres; 18 pages), the legend names the side with no line, and the robots' line lies hidden
+   under "both together" (04's `log_panel` draws every series; 05's test counted an empty line as drawn). Best fixed with
+   the two cases, test first.
+4. The entry "What a robot type needs" (state of 2026-11-05) reads "164 with the Neo1 not drawn … 11": drawn are 163 and
+   10, the Neo1 an outlier listed in types 3 and 5.
+
+**Still open from before** (the entry of 2026-11-08 below holds each with its words): the thin boards' copper above what
+their layers hold (V223); the elements of one robot not validated (Optimus' NdFeB, CRU's copper second-hand); copying
+this project's six files of other projects into `data/raw/` (GitHub/CLAUDE.md §6), asked, not answered; collection and
+charging efficiency in 04, agreed, not built; RAWCLICVehicleElectronics' documents in mm², its code in cm².
+
+**Note for checks:** the contact sheets and the edge check of V227 were scratch scripts, gone with the scratch folder;
+the method is written in V227.
+
+## 2026-11-08, evening: where to start the next day
 
 **All of today committed and pushed to `main`** at the end of the day, on his word ("uodate the handover and then commit
-and push"): 19 changed files and 3 new ones (05, its test, the copy tool), by exact names; no data. The other Mac's git
-(in `$HOME/gitdirs/`) does not sync through iCloud: there run `git fetch` and `git status` first; while its git lags
-behind GitHub, never commit there, align it only on his word, and if any file differs from `origin/main`, it is
-uncommitted work: stop and ask (GitHub/CLAUDE.md §9).
+and push"): 19 changed files and 3 new ones (05, its test, the copy tool), by exact names; no data. On 2026-11-09 he
+stayed on this Mac ("Actually I stay at home"): its git is level with GitHub (`4392945`), clean, no file evicted. Should
+he move to the other Mac: its git (in `$HOME/gitdirs/`) does not sync through iCloud; there run `git fetch` and
+`git status` first, never commit while it lags behind GitHub, align it only on his word, and a file that differs from
+`origin/main` is uncommitted work: stop and ask (GitHub/CLAUDE.md §9).
 
 **His runs, in RAWCLICHumanoidRobots, in this order** (full paths under
 `/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICHumanoidRobots/`):
@@ -115,8 +222,8 @@ pages looked at; then his 02, 03 and 04 as below.
 - 02's check of every material's elements, which could never fail, fixed.
 - The verification and validation report: the first section of VERIFICATION.md (what the words mean, how each is done,
   every comparison with independent data).
-- The whole suite at the end: 681 tests, OK (V224). Sandbox of the whole chain at 2,000 draws: 667 pages, all within his
-  rules.
+- The whole suite after the taken-apart and capacitor work: 681 tests, OK (V224); sandbox of the whole chain at 2,000
+  draws: 667 pages, all within his rules. At the end of the day, with 05: 689 tests, OK (V226).
 - Late afternoon, "write 05 combination of results of 04 and 07 with the distributions", "Yes, build it": 05, the AI data
   centres (07, scenarios A, B, C) and the humanoid robots (04) together, draw i with draw i, 2025 to 2040, each element's
   in, stock and out, its distribution pages as 04's; 07's draws copied into `data/raw/` by a tool (E52, V226). The page
@@ -128,7 +235,7 @@ pages looked at; then his 02, 03 and 04 as below.
 - The elements of one robot are **not validated**: the only outside figures are second-hand and higher than the model
   for the NdFeB magnets (Optimus about 3.5 kg, the model 1.0 to 1.8 kg) and copper (CRU 4 to 8 kg per 60 kg, the model
   2.1 to 3.3 kg); a first-hand source (a second teardown, a maker's material declaration) would settle it.
-- Combining 07's and 04's distributions: **built** as 05 (V226); his runs above, item 5.
+- Combining 07's and 04's distributions: **built** as 05 (V226); his runs above, items 5 and 6.
 - Copying this project's six files of other projects into `data/raw/` (GitHub/CLAUDE.md §6): asked, not answered.
 - Collection and charging efficiency in 04: agreed (E46.1, E46.2), not built.
 - Found, not fixed: RAWCLICVehicleElectronics' documents give its board sizes in mm², its code in cm²; 02 and 03 keep a

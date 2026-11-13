@@ -211,13 +211,13 @@ class TestComparison(Compared):
         rows = composition.part_rows({(f'{two.number} {two.title}', part): v for part, v in two.by_part('Cu').items()})
         row = next(r for r in rows if r[2] == 'Frame')
         per, unit = composition.panel_unit(frame[frame > 0])
-        self.assertEqual(row[:4], [f'{two.number} {two.title}', 'Body', 'Frame', 'all draws'])
-        self.assertEqual(row[5], f'{composition.panel_number(frame[frame > 0].mean() / per)}\u00a0{unit}')
-        # The page of copper by group: robot type 2's panel its total's mean.
+        self.assertEqual(row[:4], [f'{two.number} {two.title}', 'Body', 'Frame', 'all runs'])
+        self.assertEqual(row[4], f'{composition.panel_number(np.median(frame[frame > 0]) / per)}\u00a0{unit}')
+        # The page of copper by group: robot type 2's panel its total's median (the mean until 2026-11-13).
         page = comparison.compare_page('Copper by group', robots, lambda r: r.by_group('Cu'), schemas.GROUP_COLOURS)
         numbers = [a.panel_numbers for a in page.axes if getattr(a, 'panel_numbers', None) is not None]
         per, unit = composition.panel_unit(cu)
-        self.assertAlmostEqual(numbers[1][3], cu.mean() / per, places=6)
+        self.assertAlmostEqual(numbers[1][2] / (np.median(cu) / per), 1.0, places=6)   # float32 draws: 7 digits
         composition.plt.close(page)
 
     def test_parts_that_do_not_add_up_stop_it(self):
@@ -244,7 +244,7 @@ class TestComparison(Compared):
         pages = dict(comparison.pages(robots, self.params))
         titles = {n: f._suptitle.get_text() for n, f in pages.items() if f._suptitle}
         name = next(n for n, t in titles.items() if t == 'Titanium (Ti) in the sensors of one robot of each robot type')
-        labels = {t.get_text() for legend in pages[name].legends for t in legend.get_texts()}
+        labels = colour_names(pages[name])
         self.assertEqual(labels, {composition.shown_name(composition.component_label(composition.CAMERAS)),
                                   composition.shown_name(composition.component_label(composition.OTHER_SENSORS))})
         self.assertIn('Titanium (Ti) held in the titanium alloy of one robot of each robot type', titles.values())
@@ -258,15 +258,19 @@ class TestComparison(Compared):
         legends = {}
         for name, figure in comparison.pages(robots, self.params):
             if figure._suptitle:
-                legends[figure._suptitle.get_text()] = {t.get_text() for g in figure.legends for t in g.get_texts()}
+                legends[figure._suptitle.get_text()] = colour_names(figure)
             composition.plt.close(figure)
         copper = next(v for k, v in legends.items() if k.startswith('Copper (Cu) in one robot'))
         nickel = next(v for k, v in legends.items() if k.startswith('Nickel (Ni) in one robot'))
         self.assertIn(composition.ELEMENT_PAGE_NAMES[composition.COPPER], copper)
         self.assertIn(composition.ELEMENT_PAGE_NAMES['Nickel'], nickel)
         self.assertFalse({composition.COPPER, 'Nickel'} & (copper | nickel))
+        # The page of the mass by material: since 2026-11-13 ("Yes, all") its six main materials (copper among them) by
+        # their names, nickel with every other material in "Other materials".
         total = legends['The mass of one robot of each robot type, by material']
-        self.assertTrue({composition.COPPER, 'Nickel'} <= total, sorted(total))
+        self.assertEqual(total, set(comparison.MAIN_MATERIALS) | {comparison.OTHER_MATERIALS})
+        self.assertIn(composition.COPPER, total)
+        self.assertNotIn('Nickel', total)
         self.assertFalse(set(composition.ELEMENT_PAGE_NAMES.values()) & total)
 
     def test_the_magnets_and_the_sensors_apart(self):
@@ -277,7 +281,7 @@ class TestComparison(Compared):
         titles = {}
         for name, figure in comparison.pages(robots, self.params):
             if figure._suptitle:
-                titles[figure._suptitle.get_text()] = {t.get_text() for g in figure.legends for t in g.get_texts()}
+                titles[figure._suptitle.get_text()] = colour_names(figure)
             composition.plt.close(figure)
         for e in MAGNETS_AND_SENSORS:
             label = composition.element_label(e)
@@ -391,7 +395,7 @@ class TestComparison(Compared):
                               ('Ti', 'Titanium (Ti) held in the titanium alloy of one robot of each robot type')):
             name = next(n for n, f in pages.items() if f._suptitle and f._suptitle.get_text() == words)
             figure = pages[name]
-            self.assertEqual(figure.legends, [], msg=name)
+            self.assertEqual(colour_names(figure), set(), msg=name)   # one colour: only the median and 95 % named
             rights = [a.get_title(loc='right') for a in figure.axes if a.axison]
             self.assertTrue(rights and not any('outside' in r or 'electronics' in r for r in rights), (name, rights))
             if symbol == 'Ti':
@@ -520,13 +524,23 @@ if __name__ == '__main__':
     unittest.main()
 
 
-def page_problems(figure, name: str, dpi=None) -> list:
+def colour_names(figure) -> set:
+    """The names in a page's legends of what is drawn in a colour: every entry but the samples of the median and the 95 %
+    interval, which every distribution page's legend names since 2026-11-13 (rule 3 of 2026-11-12: every mark its
+    sample)."""
+    return {t.get_text() for g in figure.legends for t in g.get_texts()
+            if not t.get_text().startswith('Median of') and t.get_text() != '95 % interval'}
+
+
+def page_problems(figure, name: str, dpi=None, tight: bool = False) -> list:
     """What breaks Matthias's figure rules on one page as it is saved (VERIFICATION.md V186, V188): a legend beyond the
     page; on a page with a legend, a colour a panel draws that the legend does not name; a panel or a text beyond the
     page; a panel whose median lies in the first LOG_BELOW of its bars (02's logarithmic axis, E36). [] where none.
     The page is laid out at `dpi`, the resolution it is saved with (the figure's own where None): a text grows a
     little with the resolution, and a note that fitted at the screen's 100 dpi ran off 05's page saved at 150 dpi
-    (VERIFICATION.md V226)."""
+    (VERIFICATION.md V226). `tight`: the page is saved with bbox_inches='tight', so that the saved picture grows to
+    hold every text and legend (04's and 05's distribution pages, as the data centres'): none of them is beyond it
+    (FigureTests' rule cut likewise)."""
     shown_at = figure.dpi
     if dpi is not None:
         figure.set_dpi(dpi)   # the page as it is saved
@@ -538,13 +552,17 @@ def page_problems(figure, name: str, dpi=None) -> list:
         width, height = figure.bbox.width, figure.bbox.height
         inside = lambda box: box.x0 >= -2 and box.x1 <= width + 2 and box.y0 >= -2 and box.y1 <= height + 2  # noqa: E731
         problems = [(name, 'a legend beyond the page') for legend in figure.legends
-                    if not inside(legend.get_window_extent(renderer))]
-        named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles}
+                    if not tight and not inside(legend.get_window_extent(renderer))]
+        # the filled samples of the legends (the line samples of the median and the 95 % interval, since 2026-11-13 in
+        # every legend of a distribution page, have no fill)
+        named = {to_hex(h.get_facecolor()) for legend in figure.legends for h in legend.legend_handles
+                 if hasattr(h, 'get_facecolor')}
         for axes in figure.axes:
             title = axes.get_title(loc='left')[:40]
             if axes.get_visible() and axes.axison and not inside(axes.get_tightbbox(renderer)):
                 problems.append((name, 'a panel beyond the page', title))
-            if figure.legends:
+            if named:   # a legend that names colours (a page of one colour, its titles naming it, has none since its
+                        # legend names only the median and the 95 % interval, 2026-11-13)
                 drawn = {to_hex(p.get_facecolor()) for p in axes.patches if isinstance(p, Rectangle)
                          and p.get_height() > 0 and p.get_width() > 0 and p.get_facecolor()[3] > 0}
                 if drawn - named:
@@ -555,7 +573,7 @@ def page_problems(figure, name: str, dpi=None) -> list:
                     problems.append((name, 'its median in the first 5 % of its bars', title, round(where, 4)))
         texts = [figure._suptitle, *figure.texts] + [t for axes in figure.axes if not axes.axison for t in axes.texts]
         problems += [(name, 'a text beyond the page', t.get_text()[:40]) for t in texts
-                     if t is not None and t.get_visible() and t.get_text().strip()
+                     if not tight and t is not None and t.get_visible() and t.get_text().strip()
                      and not inside(t.get_window_extent(renderer))]
         return problems
     finally:
@@ -588,7 +606,8 @@ class TestEveryPageOfTheSixTypes(unittest.TestCase):
 
         def checked(figure, path, *args, **kwargs):   # in place of Figure.savefig: check the page, write nothing
             cls.pages[stage[-1]] += 1
-            cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)), kwargs.get('dpi'))
+            cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)), kwargs.get('dpi'),
+                                                     kwargs.get('bbox_inches') == 'tight')
 
         with mock.patch.object(Figure, 'savefig', checked), redirect_stdout(StringIO()):
             for name, module in (('02', composition), ('03', comparison)):

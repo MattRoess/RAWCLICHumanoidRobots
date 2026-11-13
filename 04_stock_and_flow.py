@@ -8,7 +8,7 @@ at the root of the repository.
 
 The stock and flow of the humanoid robots in the world and of the critical and strategic elements in them, quarter by
 quarter from 2025 Q1 to 2040 Q4, reported by calendar year with the stocks at the end of each year, exactly as
-RAWCLICDataCenters' 07 follows the world's data centres, so that both can be combined (Matthias, 2026-11-08: "Both have
+RAWCLICDataCenters' 08 follows the world's data centres, so that both can be combined (Matthias, 2026-11-08: "Both have
 to be exactly the same, as we have to combine both data!!!", "Both have to be on the same x axis scale!!", "Yes!!"): the
 robots in use as the article ai-2040.com Plan A states them, each value at the end of its year ("Follow the artcile!!
 70 x 10E9"), 70 × 10⁹ at the end of 2040; each robot one unit with its lifetime; its
@@ -47,14 +47,14 @@ WHAT IT READS
     (`output.composition_dir`, 'elements.txt'). All six types with as many draws; draw i of each type is a robot of
     draw i.
   - The world's mine production in 2025 and reserves of each element, for the figures: RAWCLICDataCenters' sheet
-    ElementReference (`data.data_center_scenarios`, the values 07 draws), and USGS's data file (`data.usgs_commodities`)
+    ElementReference (`data.data_center_scenarios`, the values 08 draws), and USGS's data file (`data.usgs_commodities`)
     for magnesium, titanium and indium, which that sheet does not hold; both read where they lie.
 
-HOW IT COUNTS (every draw; quarter by quarter, as 07)
+HOW IT COUNTS (every draw; quarter by quarter, as 08)
 -------------
   1. The robots: in use at the end of each quarter, the article's values at the end of their years, the quarters
      between geometric
-     (V(y)^(1 − k/4) × V(y + 1)^(k/4), as 07). Each quarter's robots arrive in its middle and leave by the share of
+     (V(y)^(1 − k/4) × V(y + 1)^(k/4), as 08). Each quarter's robots arrive in its middle and leave by the share of
      them whose lifetime (the triangle 5 / 7 / 10 years, spread among them, times the draw's factor from the triangle
      0.7 / 1 / 1.2: "30% short and 20% longer") is shorter than their age; a quarter's
      inflow is the target less what the earlier quarters' robots still hold, never below 0. The robots of 1 January
@@ -83,7 +83,7 @@ HOW IT COUNTS (every draw; quarter by quarter, as 07)
      stock of its own, as many as the robots in use of its type, each set leaving when it wears out (its life the
      triangle 7,000 / 10,000 / 30,000 hours at the hours a day, spread among the sets, times the draw's own factor from
      the triangle 0.7 / 1 / 1.2, as the robots' and the packs') and replaced by a new one, as
-     07's units that follow the GPUs: a stock target with their own lifetimes.
+     08's units that follow the GPUs: a stock target with their own lifetimes.
   4. The battery packs: a robot holds as many as one day's work needs, the hours a day over a pack's runtime, rounded
      up (types 2, 4 and 6 their runtime in the workbook; types 1, 3 and 5 the setting's runtime of 2025 times their
      battery energy density over that of 2025; a straight line between the workbook's years, the last value held after
@@ -91,12 +91,12 @@ HOW IT COUNTS (every draw; quarter by quarter, as 07)
      charges, its charges to 80 % (spread among the packs, times the draw's own factor from the triangle 0.7 / 1 /
      1.2: "Also with the batteries") times (1 − the share) / 0.2, a straight-line fade (an approximation). A stock target, as the joint sets: the robots in use times the packs a robot needs. Where that
      need falls (longer runtimes), the packs in use stay until they wear out and the stock lies above the need.
-     07's approximation in both: the joint sets and the packs of a retired robot go on in a new robot until they wear
+     08's approximation in both: the joint sets and the packs of a retired robot go on in a new robot until they wear
      out, which makes their inflow and outflow slightly low.
   5. The elements: every flow and stock of robots, joint sets and packs of a type times one robot's kg of each element
      in 02's draw i: a robot its body (every kind of part but the joints and the battery pack), a joint set the joint
      kinds, a pack the kind Battery pack (02 builds one pack a robot). Sums on the raw draws, before any statistic.
-  6. The years, as 07's: the flows added up over the four quarters of each calendar year, 2025 to 2040; the stocks
+  6. The years, as 08's: the flows added up over the four quarters of each calendar year, 2025 to 2040; the stocks
      at the end of each year (the article's values: 10 M at the end of 2025, 70 × 10⁹ at the end of 2040).
 Each chunk of draws is checked (`check`): in every quarter the stock before + inflow − outflow = the stock, the outflow
 counted cohort by cohort apart from the stock; no flow below 0; the article's robots in use at the end of each year and 8.62 M at 1 January 2025; the joint
@@ -109,23 +109,25 @@ on all levels"), float32 (about 7 significant digits): units_in.npy and units_ou
 battery packs × robot type 1 to 6), units_stock.npy (draw × the end of 2025 to 2040 × the same), elements_in.npy,
 elements_out.npy (draw × year × the 14 parts of how a robot is taken apart, 01's TAKEN_APART, × element, kg) and
 elements_stock.npy (draw × year end × the same; Matthias, 2026-11-08, "Yes do it": about 4.2 GB each at 200,000 draws); article_in.npy, article_stock.npy, article_out.npy (draw × year: the article's robots built, in use and
-retired, at the draw's lifetime); their axes in draws.txt; summary.csv, each quantity's mean and 2.5 % and 97.5 % percentiles over the draws above
-0 and the share of the draws above 0, by year (as 07: a flow its calendar year, a stock the year's end), each element also by group
+retired, at the draw's lifetime); their axes in draws.txt; summary.csv, each quantity's median, 25 % and 75 % (the middle half) and 2.5 % and 97.5 % over
+the draws above 0 and the share of the draws above 0, by year (as 08: a flow its calendar year, a stock the year's end), each element also by group
 ('Copper, Electronics') and by part ('Copper, Electronics: Small PCB'). The elements of one robot type are its units
 times 02's draw i, each part with the unit that carries it (a joint's with the joint sets, the battery's with the packs,
 every other with the robots).
-Into `output.stock_and_flow_figures_dir` (`figures/stock_and_flow/`; not in git), as 07's, each an A4 landscape page:
-overview.png (the robots in use; built and retired; in use by robot type; the share of the robots built by robot type;
-the joint sets; the battery packs in use; built and worn out) and elements/<Element>.png (its stock beside the world's reserves; its inflow and outflow beside
-the world's mine production in 2025). Each line the mean over the draws above 0, its band 95 % of them; logarithmic
-axes. An element 0 in every draw has no page, and 04 says so. In distributions/ (Matthias, 2026-11-07: "I also want the
+Into `output.stock_and_flow_figures_dir` (`figures/stock_and_flow/`; not in git), as RAWCLICDataCenters' 08 draws its
+own (FigureTests' rules 1 to 11; Matthias, 2026-11-13: "test all the figures", "Yes, 1 to 7"), each an A4 landscape page
+at the dpi of the settings: overview.png (the robots in use; built and retired; in use by robot type; the share of the
+robots built by robot type; the joint sets; the battery packs in use; built and worn out) and elements/<Element>.png
+(what is in use beside the world's reserves; what is added and removed per year beside the world's mine production in
+2025). Each line the median of the runs above 0, its middle half the darker band, where 95 of 100 runs lie the lighter;
+logarithmic axes; one legend below the panels, the uncertainty as its grey samples; a foot of at most three sentences. An element 0 in every draw has no page, and 04 says so. In distributions/ (Matthias, 2026-11-07: "I also want the
 distributions"; 2026-11-08: "Exactkly the figures we have worked out for the data centers!!!", "Sorry end of goes away"):
 robots_in_use.png (the robots in use of 2025, 2030, 2035 and 2040, a panel a year, the six types one above the other,
 every draw on the axis, the robots in all in the title; followed by robots_in_use_numbers.png) and elements_<year>.png
 for 2025, 2030, 2035 and 2040, each exactly as RAWCLICDataCenters' 05 draws the elements of one data centre: a panel per
 element held in all robots in use, its draws' distribution, each bar split into the four groups of how a robot is taken
-apart (joints, battery, electronics, body), the mean a line with its number, 95 % dashed, the groups' means written in the
-panel; each followed by parts_<year>_<k>.png, every element in each of the 14 parts that holds it (2026-11-08, "I want a
+apart (joints, battery, electronics, body), the median a line with its number, the 95 % interval dashed, each group's
+median under the title; each followed by parts_<year>_<k>.png, every element in each of the 14 parts that holds it (2026-11-08, "I want a
 detailed list of the component ... to know how to take it apart!!!").
 Every figure a result of the run, never an input (GitHub/CLAUDE.md §5).
 
@@ -180,7 +182,7 @@ from matplotlib.patches import Patch  # noqa: E402  (a part's colour in a page's
 # The time, the parts of a robot, what it writes
 # ------------------------------------------------------------------------------------------------------
 
-# The years as RAWCLICDataCenters' 07 counts them (Matthias, 2026-11-08: "Both have to be exactly the same, as we have
+# The years as RAWCLICDataCenters' 08 counts them (Matthias, 2026-11-08: "Both have to be exactly the same, as we have
 # to combine both data!!!", "Both have to be on the same x axis scale!!", "Yes!!"): quarters from 2025 Q1 to 2040 Q4,
 # the flows of each calendar year, the stocks at the end of each year; the article's robots each at the end of its year
 # ("Follow the artcile!! 70 x 10E9").
@@ -220,7 +222,7 @@ OVERVIEW, ELEMENTS_DIR = 'overview.png', 'elements'
 DISTRIBUTIONS_DIR = 'distributions'   # the pages of the distributions of the draws, each followed by its numbers
 DISTRIBUTION_YEARS = (2025, 2030, 2035, 2040)    # the year ends of the distribution pages of robots and elements
 CHUNK = 10000                     # draws counted at once (memory measured in the sandbox: VERIFICATION.md V222)
-TOLERANCE = 1e-9                  # of the largest stock: a balance that misses by more is a fault (07's check_balance)
+TOLERANCE = 1e-9                  # of the largest stock: a balance that misses by more is a fault (08's check_balance)
 
 # The world's production and reserves of magnesium, titanium and indium, which RAWCLICDataCenters' sheet
 # ElementReference does not hold, from USGS's data file: for each, its commodity, its statistic, the share of the
@@ -248,7 +250,7 @@ USGS_PLAIN = 'USGS MCS 2026'      # a note of sheet ElementReference that adds n
 
 def triangle_cdf(x, low: float, mode: float, high: float):
     """The share of a triangle (min, mode, max) below x: of the units of one quarter, the share whose lifetime is
-    shorter than x (as 07's triangle_cdf)."""
+    shorter than x (as 08's triangle_cdf)."""
     x = np.asarray(x, dtype=float)
     with np.errstate(divide='ignore', invalid='ignore'):
         rising = (x - low) ** 2 / ((high - low) * (mode - low)) if mode > low else np.ones_like(x)
@@ -309,7 +311,7 @@ def start_robots(robots: dict) -> float:
 
 def targets(robots: dict) -> np.ndarray:
     """The robots in use at the end of each quarter, 2025 Q1 to 2040 Q4: each of the article's values at the end of
-    its year (Matthias, 2026-11-08: "Follow the artcile!! 70 x 10E9"), geometric between (as 07): V(y − 1)^(1 − k/4) ×
+    its year (Matthias, 2026-11-08: "Follow the artcile!! 70 x 10E9"), geometric between (as 08): V(y − 1)^(1 − k/4) ×
     V(y)^(k/4) at the end of quarter k of year y, V(2024) the start (`start_robots`); the end of 2040 the article's
     70 × 10⁹."""
     out = np.empty(QUARTERS)
@@ -336,7 +338,7 @@ class Flows(NamedTuple):
 
 
 def cohorts(survive: np.ndarray, start, growth: float, target=None, inflow=None, past=None) -> Flows:
-    """One stock, quarter by quarter, as 07's follow_target. `survive` (one row for all draws, or n rows, one a draw):
+    """One stock, quarter by quarter, as 08's follow_target. `survive` (one row for all draws, or n rows, one a draw):
     the share of a quarter's units still in use at the end of the quarter k quarters later (column k, ages()). Its
     units of 1 January 2025 (`start`, n or one number) arrived in the quarters before, as many as hold `start` with
     their survivals, the arrivals growing by `growth` a year (or `past`, given: n × the quarters before, oldest first).
@@ -691,7 +693,7 @@ def check(params: Params, counted: dict, needs: dict) -> list:
     """The faults of one chunk, in plain words ([] where none): a quarter whose stock before + inflow − outflow is not
     its stock (the outflow counted apart, cohort by cohort), a flow below 0, the article's frame not holding its robots
     in use at the end of a year (the article's value of the year) or at 1 January 2025 (`start_robots`), the six types not adding up to it, joint sets not as many as the robots, packs fewer than
-    needed. Each to TOLERANCE of the largest stock (07's check_balance)."""
+    needed. Each to TOLERANCE of the largest stock (08's check_balance)."""
     faults = []
     robots = {year: float(v) for year, v in params.stock_and_flow.robots}
     for (unit, t), f in counted.items():
@@ -724,7 +726,7 @@ def check(params: Params, counted: dict, needs: dict) -> list:
 
 
 def years_of(f: Flows) -> tuple:
-    """A stock by year, as 07's to_years: (inflow n × 16, the calendar years 2025 to 2040; the stock at the end of each
+    """A stock by year, as 08's to_years: (inflow n × 16, the calendar years 2025 to 2040; the stock at the end of each
     year, n × 16; outflow n × 16), the order of FLOWS."""
     n = f.built.shape[0]
     return f.built.reshape(n, -1, 4).sum(axis=2), f.stock[:, 3::4], f.gone.reshape(n, -1, 4).sum(axis=2)
@@ -737,7 +739,7 @@ def years_of(f: Flows) -> tuple:
 def references(params: Params) -> tuple:
     """The world's production in 2025 (kg a year) and reserves (kg) of each element: ({element: {'production' |
     'reserves': (min, mode, max, at least)}}, {element: [what the foot says of it]}): RAWCLICDataCenters' sheet
-    ElementReference as 07 reads it (t in the sheet; its note where it adds to the source), and USGS_ROWS from USGS's
+    ElementReference as 08 reads it (t in the sheet; its note where it adds to the source), and USGS_ROWS from USGS's
     data file. A file not on disk gives nothing, and the pages say so."""
     values, notes = {}, {}
     if os.path.exists(params.data.data_center_scenarios):
@@ -772,41 +774,36 @@ def references(params: Params) -> tuple:
 
 
 # ------------------------------------------------------------------------------------------------------
-# The summary: over the draws above 0 ("A 0 is not part of a distribution")
+# The summary: over the runs above 0 ("A 0 is not part of a distribution")
 # ------------------------------------------------------------------------------------------------------
 
+STATISTICS = ('median', 'p25', 'p75', 'low', 'high')    # the median, the middle half and where 95 of 100 runs lie
+
+
 def stats_of(values: np.ndarray) -> dict:
-    """Per column of `values` (draws × columns), over the draws above 0: the mean, the 2.5 % and 97.5 % percentiles,
-    and the share of the draws above 0 ('held'); NaN where no draw is above 0."""
-    out = {key: np.full(values.shape[1], np.nan) for key in ('mean', 'low', 'high')}
-    out['held'] = np.zeros(values.shape[1])
-    for c in range(values.shape[1]):
-        above = values[:, c][values[:, c] > 0]
-        if above.size:
-            out['mean'][c] = above.mean()
-            out['low'][c], out['high'][c] = np.percentile(above, (2.5, 97.5))
-            out['held'][c] = above.size / values.shape[0]
-    return out
+    """Per column of `values` (runs × columns), over the runs above 0: the median, the 25 % and 75 % (the middle half of
+    the runs), the 2.5 % and 97.5 % (where 95 of 100 lie), and the share of the runs above 0 ('held'); NaN where no run
+    is above 0. The median, not the mean (Matthias, 2026-11-10: "Not mean, but median"; RAWCLICDataCenters' 08)."""
+    median, p25, p75, low, high, held = column_stats(values)
+    return {'median': median, 'p25': p25, 'p75': p75, 'low': low, 'high': high, 'held': held}
 
 
 def column_stats(values: np.ndarray) -> tuple:
-    """stats_of() for every column of `values` (draws × columns) at once, over the draws above 0: (the mean, the 2.5 %
-    and the 97.5 % percentile, the share of the draws above 0), NaN where no draw is above 0. The same numbers as
-    stats_of (the same percentiles, numpy's default), for the elements of every part of a year in one go."""
+    """For every column of `values` (runs × columns) at once, over the runs above 0: (the median, the 25 %, 75 %, 2.5 %
+    and 97.5 % percentiles, the share of the runs above 0), NaN where no run is above 0 (numpy's percentiles)."""
     above = values > 0
     masked = np.where(above, values, np.nan)
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', RuntimeWarning)          # a column with no draw above 0: NaN, as stats_of
-        mean = np.nanmean(masked, axis=0)
-        low, high = np.nanpercentile(masked, (2.5, 97.5), axis=0)
-    return mean, low, high, above.mean(axis=0)
+        warnings.simplefilter('ignore', RuntimeWarning)          # a column with no run above 0: NaN
+        median, p25, p75, low, high = np.nanpercentile(masked, (50, 25, 75, 2.5, 97.5), axis=0)
+    return median, p25, p75, low, high, above.mean(axis=0)
 
 
 def element_summary(files: dict, elements: list) -> dict:
-    """Every element in all, by group and by part, each flow and year, over the draws above 0 (as stats_of): one year
-    of an element file read at a time (draws × parts × elements), its groups the sums of their parts draw by draw, its
+    """Every element in all, by group and by part, each flow and year, over the runs above 0 (as stats_of): one year
+    of an element file read at a time (runs × parts × elements), its groups the sums of their parts run by run, its
     total the sum of all parts. Keys ('element', symbol, flow), ('element group', (symbol, group), flow) and ('element
-    part', (symbol, part), flow), each {'mean', 'low', 'high', 'held'} over the years."""
+    part', (symbol, part), flow), each {'median', 'p25', 'p75', 'low', 'high', 'held'} over the years."""
     years = LAST - FIRST + 1
     members = [[PARTS.index(p) for p in PARTS if GROUP_OF[p] == g] for g in GROUPS]
     out = {}
@@ -815,56 +812,66 @@ def element_summary(files: dict, elements: list) -> dict:
                 + [('element group', (e, g), flow_name) for g in GROUPS for e in elements]
                 + [('element part', (e, p), flow_name) for p in PARTS for e in elements])
         for key in keys:
-            out[key] = {name: np.full(years, np.nan) for name in ('mean', 'low', 'high')}
+            out[key] = {name: np.full(years, np.nan) for name in STATISTICS}
             out[key]['held'] = np.zeros(years)
         for y in range(years):
-            block = np.asarray(files[element_name][:, y], dtype=np.float64)          # draws × parts × elements
+            block = np.asarray(files[element_name][:, y], dtype=np.float64)          # runs × parts × elements
             columns = np.concatenate([block.sum(axis=1)] + [block[:, idx].sum(axis=1) for idx in members]
                                      + [block[:, j] for j in range(len(PARTS))], axis=1)
             for key, *numbers in zip(keys, *column_stats(columns)):
-                for name, value in zip(('mean', 'low', 'high', 'held'), numbers):
+                for name, value in zip(STATISTICS + ('held',), numbers):
                     out[key][name][y] = value
     return out
 
 
-def held_words(held: np.ndarray) -> str:
-    """'' where a quantity is above 0 in every draw of every year it is held; else ', held in 56 % of the draws' (or
-    '56 % to 100 %'), its share over the years it is held, rounded down so that 100 % means every draw."""
-    shares = held[held > 0]
-    if not shares.size or shares.min() >= 1:
-        return ''
-    low, high = math.floor(100 * shares.min()), math.floor(100 * shares.max())
-    return f', held in {low} % of the draws' if low == high else f', held in {low} % to {high} % of the draws'
-
-
 # ------------------------------------------------------------------------------------------------------
-# The figures, as 07's
+# The figures, as RAWCLICDataCenters' 08 draws its own (Matthias, 2026-11-13: "test all the figures", "Yes, 1 to 7";
+# FigureTests' rules 1 to 11 of 2026-11-12 and his rule "Robots exactly as the data centres")
 # ------------------------------------------------------------------------------------------------------
 
-# Every figure one landscape A4 page with 07's print fonts (Matthias, 2026-10-22, for 07: "I want that the figures look
-# great on a landscpae A4 page").
+# Every figure one landscape A4 page with 08's print fonts (Matthias, 2026-10-22, for the data centres: "I want that the
+# figures look great on a landscpae A4 page"): titles 11 pt, axes and legends 9 pt (rule 9 of 2026-11-12).
 A4_LANDSCAPE = (297 / 25.4, 210 / 25.4)                    # inches
 PRINT_STYLE = {'font.size': 9, 'axes.titlesize': 11, 'axes.labelsize': 9, 'xtick.labelsize': 9, 'ytick.labelsize': 9,
-               'legend.fontsize': 8, 'legend.title_fontsize': 8, 'figure.titlesize': 13, 'lines.linewidth': 1.4}
-# Paul Tol's bright scheme (as published): in use blue, built green, out red; the six robot types its six colours.
-IN_USE, BUILT, GONE = '#4477AA', '#228833', '#EE6677'
-TYPE_COLOURS = ('#4477AA', '#66CCEE', '#228833', '#CCBB44', '#EE6677', '#AA3377')
-WORLD_SOURCE = 'U.S. Geological Survey, Mineral Commodity Summaries 2026 (ver. 1.3)'
-NOTE_WIDTH = 160                  # characters a line of a page's foot (07's save_figure)
-# Where a panel's legend goes: the upper left, as 07's; where a line of the panel runs under it there, or a value
-# written in the panel ("above the scale"), the next of these corners where none does (found 2026-11-06: indium's
-# world production ran under the legend).
-LEGEND_PLACES = ('upper left', 'lower right', 'upper right', 'lower left')
+               'legend.fontsize': 9, 'legend.title_fontsize': 9, 'figure.titlesize': 13, 'lines.linewidth': 1.4}
+# The colours of the three quantities and of the six robot types, from published schemes (Paul Tol's bright, vibrant and
+# muted, and Okabe & Ito's), chosen 2026-11-13 by FigureTests' colour rules (Matthias: "B", "Yes, build the three rules
+# as proposed"): every two of the three, and every two of the six, told apart by red-green colour-blind readers (at
+# least 10.5 in CAM02-UCS, the weakest pair 21.5) and by readers with normal vision (at least 21); every type at least 21
+# from every quantity, so that no colour means two things on the overview; each at least 2 : 1 against the white page.
+# In use Tol's muted indigo, built or added Tol's bright green, retired, worn out or removed Okabe-Ito's reddish purple;
+# the types Okabe-Ito's blue, Tol's vibrant cyan, Tol's muted teal, Okabe-Ito's orange, Tol's vibrant red and Tol's
+# muted wine. Until 2026-11-13: in use '#4477AA', retired '#EE6677', the types Tol's muted indigo to purple, two of them
+# too close for normal vision (wine and purple, 17.3).
+IN_USE, BUILT, GONE = '#332288', '#228833', '#CC79A7'
+TYPE_COLOURS = ('#0072B2', '#33BBEE', '#44AA99', '#E69F00', '#CC3311', '#882255')
+UNCERTAINTY = '0.35'                     # the grey of the samples of the uncertainty: median, 50 % and 95 % intervals
+PRODUCTION_STYLE, RESERVES_STYLE = '--', ':'               # the world's mine production dashed, its reserves dotted
+# The world's source as the data centres' figures name it (its version, 1.3, in EVIDENCE.md: "ver. 1.3" would end a
+# sentence of the foot for the rule of three sentences)
+WORLD_SOURCE = 'U.S. Geological Survey, Mineral Commodity Summaries 2026'
+FOOT_WIDTH = 170                         # characters a line of a page's foot (08's save_figure)
+TOGETHER = 0.10                          # two lines less than this share apart lie on one another (FigureTests)
+UNDER_WORDS = ('Where a line is not visible, it lies under the line drawn after it: the two do not differ there.')
+# The sentences at the foot (rule 6: at most three)
+AMOUNTS = ('Amounts added or removed are per year, amounts in use at the end of the year; each step of a scale is ten '
+           'times the one below.')                                                    # the element pages, 04's and 05's
+ROBOT_AMOUNTS = ('Amounts built, retired or worn out are per year, amounts in use at the end of the year; each step of a '
+                 'scale is ten times the one below.')                                  # the overview
+ROBOTS_FROM = ('The robots in use are the ai-2040 article\'s at the end of each year; each robot of the six types is one '
+               'model run of its type, with its joints, battery, electronics and body.')
 
 
 def decade_label(value: float, _position=None) -> str:
-    """A tick of a log axis of numbers: the decade as 10 to its power (07's decade_label)."""
+    """A tick of a log axis of numbers: the decade as 10 to its power ('$10^{6}$', drawn 10⁶), a few characters wide,
+    as 08's decade_label (Matthias, 2026-11-13, on the numbers written out in full that morning, '100,000,000,000': "the
+    y axis scales are shit they use all the space")."""
     return f'$10^{{{int(round(np.log10(value)))}}}$'
 
 
 def mass_label(value_kg: float, _position=None) -> str:
     """A tick of a log axis of kg: the power of ten in the unit that writes it as 1, 10 or 100 ('1 kt', '100 t'), as
-    07 and RAWCLICDataCenters' 03 write them (kg, not Mg)."""
+    the data centres write them (kg, not Mg)."""
     power = int(round(np.log10(value_kg)))
     for base, unit in ((9, 'Mt'), (6, 'kt'), (3, 't'), (0, 'kg'), (-3, 'g')):
         if power >= base:
@@ -874,7 +881,7 @@ def mass_label(value_kg: float, _position=None) -> str:
 
 def mass_text(value_kg: float) -> str:
     """A mass written in a figure: three significant digits in the unit that writes it from 1 up ('980 Mt', '55 kt',
-    '190 t'; Mt the largest; "4000 not 4k"), as 07's mass_text."""
+    '190 t'; Mt the largest; "4000 not 4k"), as the data centres' mass_text."""
     for factor, unit in ((1e9, 'Mt'), (1e6, 'kt'), (1e3, 't'), (1.0, 'kg'), (1e-3, 'g')):
         if value_kg >= factor or unit == 'g':
             v = float(f'{value_kg / factor:.3g}')
@@ -883,22 +890,43 @@ def mass_text(value_kg: float) -> str:
 
 
 def log_panel(axes, series: list, word: str, tick_label=decade_label) -> bool:
-    """One panel on a log axis, as 07's log_panel: each of `series` (years, stats of stats_of, label, colour) its mean
-    a line and 95 % of its draws above 0 a band, `word` the axis label; a year with no draw above 0 has no point. The
-    label says the share of the draws that hold it where not all do. A panel with nothing above 0 is not drawn.
-    Returns whether it was drawn."""
-    values = np.concatenate([np.concatenate([s[1]['mean'], s[1]['low']]) for s in series])
+    """One panel on a log axis, as 08's log_panel: each of `series` (years, stats of stats_of, colour, line style) as its
+    median, its middle half (the darker band) and where 95 of 100 runs lie (the lighter band), `word` the axis label.
+    The statistics are over the runs above 0: a year in which not every run holds it has an open circle on the line, and
+    each share is written once, beside the first circle that has it ('56 %'), not at every point; a year in which no run holds it has no point. A log axis has no 0: a band that reaches
+    0 runs to the foot of the panel, half the smallest value above 0. A panel with nothing above 0 is not drawn ("0 is
+    0"). Returns whether it was drawn."""
+    values = np.concatenate([np.concatenate([s[1]['median'], s[1]['low']]) for s in series])
     positive = values[np.isfinite(values) & (values > 0)]
     if not positive.size:
         axes.set_visible(False)
         return False
     foot = float(positive.min()) / 2.0
-    for years, stats, label, colour in series:
-        axes.plot(years, stats['mean'], '-', color=colour, label=label + held_words(stats['held']))
-        axes.fill_between(years, stats['low'], stats['high'], where=np.isfinite(stats['mean']), alpha=0.2,
-                          color=colour, linewidth=0)
+    for years, stats, colour, style in series:
+        shown = np.isfinite(stats['median']) & (stats['median'] > 0)
+        axes.plot(years, np.where(shown, stats['median'], np.nan), style, color=colour)
+        band = lambda a: np.where(np.isfinite(a) & (a > 0), a, foot)                          # noqa: E731
+        axes.fill_between(years, band(stats['low']), band(stats['high']), where=shown, alpha=0.12, color=colour,
+                          linewidth=0)
+        axes.fill_between(years, band(stats['p25']), band(stats['p75']), where=shown, alpha=0.3, color=colour,
+                          linewidth=0)
+        part = shown & (stats['held'] < 0.995)               # held in some runs only: an open circle and the share
+        if part.any():
+            xs, ys, shares = np.asarray(years)[part], stats['median'][part], stats['held'][part]
+            axes.plot(xs, ys, 'o', mfc='white', mec=colour, ms=4, mew=1, linestyle='None')
+            # Each share written once on its line, at the first circle that has it (Matthias, 2026-11-13: "I do not need
+            # so much numbers for each point espeially if they are the same. Do not label every point!!!"; FigureTests'
+            # rule repeated_label); beside its circle, where exactly found when the page is laid out (place_labels, in
+            # save_figure).
+            written = set()
+            for x, y, h in zip(xs, ys, shares):
+                text = composition.share_text(h)
+                if text not in written:
+                    axes.annotate(text, (x, y), xytext=(3, 3), textcoords='offset points', fontsize=8,
+                                  color=composition.readable(colour), gid='beside')     # its line's hue, readable
+                    written.add(text)
     axes.set_xlim(FIRST, LAST)
-    axes.set_xticks(range(FIRST, LAST + 1, 5))
+    axes.xaxis.set_major_locator(ticker.MultipleLocator(5))   # whole years, every fifth (rule 10 of 2026-11-12)
     axes.set_yscale('log')
     axes.set_ylim(bottom=foot)
     axes.yaxis.set_major_locator(ticker.LogLocator(base=10))
@@ -909,27 +937,24 @@ def log_panel(axes, series: list, word: str, tick_label=decade_label) -> bool:
 
 
 def share_panel(axes, series: list, word: str) -> None:
-    """One panel on a plain axis from 0, for shares in %: each of `series` (years, stats of stats_of, label, colour)
-    its mean a line and 95 % of its draws a band (Matthias, 2026-11-07: each type's range "one has to see it")."""
-    for years, stats, label, colour in series:
-        axes.plot(years, stats['mean'], '-', color=colour, label=label)
-        axes.fill_between(years, stats['low'], stats['high'], alpha=0.25, color=colour, linewidth=0)
+    """One panel on a plain axis from 0, for shares in %: each of `series` (years, stats of stats_of, colour, line style)
+    its median a line, its middle half the darker band and where 95 of 100 runs lie the lighter one (Matthias,
+    2026-11-07: each type's range "one has to see it")."""
+    for years, stats, colour, style in series:
+        axes.plot(years, stats['median'], style, color=colour)
+        axes.fill_between(years, stats['low'], stats['high'], alpha=0.12, color=colour, linewidth=0)
+        axes.fill_between(years, stats['p25'], stats['p75'], alpha=0.3, color=colour, linewidth=0)
     axes.set_xlim(FIRST, LAST)
-    axes.set_xticks(range(FIRST, LAST + 1, 5))
+    axes.xaxis.set_major_locator(ticker.MultipleLocator(5))
     axes.set_ylim(bottom=0)
     axes.set_ylabel(word)
 
 
-def held_in_label(axes) -> bool:
-    """Whether a label of the panel says the share of the draws that hold it: then the panel has a legend, also with
-    one line ("one colour, no legend" otherwise), so that the share is written beside it."""
-    return any('held in' in label for label in axes.get_legend_handles_labels()[1])
-
-
 def world_reference(axes, value: tuple | None, name: str, per_year: bool) -> None:
-    """The world's production (kg a year) or reserves (kg) in a panel drawn by log_panel, as 07's world_reference:
-    within the panel's scale a black dashed line (its min to max, where they differ, a grey band), the axis unchanged;
-    outside it the value written in the panel, at its top where above the scale, at its foot where below."""
+    """The world's production (kg a year, dashed) or reserves (kg, dotted) in a panel drawn by log_panel, as 08's
+    world_reference: within the panel's scale a black line, the width of the panel's lines (its min to max, where they
+    differ, a grey band), the axis unchanged; outside it the value written in the panel, at its top where above the
+    scale, at its foot where below."""
     if value is None or not axes.get_visible():
         return
     low, mode, high, at_least = value
@@ -938,7 +963,7 @@ def world_reference(axes, value: tuple | None, name: str, per_year: bool) -> Non
     text = f"{name}: {'at least ' if at_least else ''}{text}{' per year' if per_year else ''}"
     if bottom <= mode <= top:
         left, right = axes.get_xlim()
-        axes.plot([left, right], [mode, mode], 'k--', linewidth=1.2, label=name)
+        axes.plot([left, right], [mode, mode], PRODUCTION_STYLE if per_year else RESERVES_STYLE, color='black')
         if high > low:
             axes.fill_between([left, right], max(low, bottom), min(high, top), color='0.5', alpha=0.15, linewidth=0)
         axes.set_xlim(left, right)
@@ -949,161 +974,254 @@ def world_reference(axes, value: tuple | None, name: str, per_year: bool) -> Non
               transform=axes.transAxes, ha='right', va='top' if above else 'bottom', fontsize=8, color='0.2')
 
 
-def figure_note(draws: int) -> str:
-    """The words at the foot of every page: what its lines and bands are, the axes, where the robots come from."""
-    return (f'Lines: the mean of the draws above 0 of {draws:,} draws; bands: 95 % of them (2.5 % to 97.5 %); flows '
-            "per calendar year, stocks at the end of the year, as RAWCLICDataCenters' 07; logarithmic axes. Robots in "
-            "use: ai-2040.com Plan A, each value at the end of its year; each robot one of 02's draws of its robot "
-            "type.")
+def line_handle(label: str, colour, style: str = '-'):
+    """The legend sample of a line: its colour and style, named in words."""
+    return plt.Line2D([], [], color=colour, linestyle=style, label=label)
 
 
-def lines_under(axes, box, renderer=None) -> bool:
-    """Whether a line of the panel (a mean or a dashed world value) runs under the box (in the page's pixels): its
-    points and the points between them, 50 to a segment; with `renderer`, also whether a text written in the panel
-    overlaps it."""
-    if renderer is not None and any(text.get_visible() and text.get_window_extent(renderer).overlaps(box)
-                                    for text in axes.texts):
-        return True
-    for line in axes.get_lines():
-        xy = line.get_xydata()
-        xy = xy[np.isfinite(xy).all(axis=1)]
-        if len(xy) == 0:
+def uncertainty_handles(draws: int, figure=None) -> list:
+    """The samples of the uncertainty (rule 4), as 08's: the median of the runs, the 50 % and the 95 % interval, and,
+    when `figure` draws an open circle, what it means."""
+    handles = [plt.Line2D([], [], color=UNCERTAINTY, label=f'Median of {draws:,} model runs'),
+               Patch(color=UNCERTAINTY, alpha=0.3, label='50 % interval'),
+               Patch(color=UNCERTAINTY, alpha=0.12, label='95 % interval')]
+    circles = [line for axes in (figure.axes if figure is not None else []) for line in axes.lines
+               if line.get_marker() == 'o' and str(line.get_markerfacecolor()).lower() in ('white', '#ffffff', 'w')]
+    if circles:
+        handles.append(plt.Line2D([], [], marker='o', markerfacecolor='white', color=circles[-1].get_markeredgecolor(),
+                                  linestyle='None', label='Not every run has it that year (number: share of runs with it)'))
+    return handles
+
+
+def world_handles(figure) -> list:
+    """The samples of the world's lines a figure draws: its mine production of 2025 dashed, its reserves dotted."""
+    drawn = {line.get_linestyle() for axes in figure.axes for line in axes.lines
+             if plt.matplotlib.colors.to_hex(line.get_color()) == '#000000'}
+    out = []
+    if PRODUCTION_STYLE in drawn:
+        out.append(line_handle('World mine production of 2025', 'black', PRODUCTION_STYLE))
+    if RESERVES_STYLE in drawn:
+        out.append(line_handle('World reserves', 'black', RESERVES_STYLE))
+    return out
+
+
+def lies_under(line, later: list) -> bool:
+    """Whether `line` lies under a line drawn after it (another colour or style, less than TOGETHER apart at the same
+    years) at three or more years in a row, or at every year: one cannot see it there, so the page says so in a sentence
+    (UNDER_WORDS; Matthias, 2026-11-11, for the data centres: "where the hell are the green and blue dashed lines")."""
+    x, y = (np.asarray(v, dtype=float) for v in (line.get_xdata(), line.get_ydata()))
+    hidden = np.zeros(len(x), dtype=bool)
+    for other in later:
+        if (other.get_color(), other.get_linestyle()) == (line.get_color(), line.get_linestyle()):
             continue
-        if len(xy) > 1:
-            steps = np.linspace(0, 1, 50)[:, None, None]
-            xy = (xy[:-1][None] * (1 - steps) + xy[1:][None] * steps).reshape(-1, 2)
-        points = axes.transData.transform(xy)
-        inside = ((points[:, 0] >= box.x0) & (points[:, 0] <= box.x1) & (points[:, 1] >= box.y0)
-                  & (points[:, 1] <= box.y1))
-        if inside.any():
-            return True
-    return False
+        ox, oy = (np.asarray(v, dtype=float) for v in (other.get_xdata(), other.get_ydata()))
+        _, i, j = np.intersect1d(x, ox, return_indices=True)
+        a, b = y[i], oy[j]
+        close = np.isfinite(a) & np.isfinite(b) & (np.abs(a - b) <= TOGETHER * np.maximum(np.abs(a), np.abs(b)))
+        hidden[i[close]] = True
+    finite = np.isfinite(y)
+    run = longest = 0
+    for h in hidden:
+        run = run + 1 if h else 0
+        longest = max(longest, run)
+    return bool(finite.any() and hidden[finite].all()) or longest >= 3
 
 
-def place_legends(figure) -> None:
-    """Each panel's legend in the first of LEGEND_PLACES where no line runs under it (else matplotlib's 'best'), the
-    page laid out as it is saved. A place without a panel that only holds a legend (the overview's robot types) keeps
-    its legend as it is."""
-    figure.canvas.draw()
-    renderer = figure.canvas.get_renderer()
+def under_words(figure) -> str:
+    """UNDER_WORDS where a line of a panel lies under a later one (lies_under), else ''."""
     for axes in figure.axes:
-        if axes.get_legend() is None or not axes.axison:
-            continue
-        for place in LEGEND_PLACES:
-            legend = axes.legend(loc=place)
-            if not lines_under(axes, legend.get_window_extent(renderer), renderer):
+        # the lines drawn as lines: not the open circles of log_panel (markers on the median, the same values) nor a
+        # vertical mark
+        lines = [line for line in axes.lines if line.get_linestyle() not in ('None', '', ' ')
+                 and len(np.unique(np.asarray(line.get_xdata(), dtype=float))) > 1]
+        if any(lies_under(line, lines[k + 1:]) for k, line in enumerate(lines)):
+            return UNDER_WORDS
+    return ''
+
+
+def save_figure(figure, path: str, note: str, dpi: int, handles: list | None = None, ncol: int = 3) -> str:
+    """Write a page and close it, by the rules for science presentations (Matthias, 2026-11-12, "yes, 1 to 11"), as 08's
+    save_figure: the one legend of the page (`handles`) below the panels, outside them; under it the foot, at most three
+    sentences: the sentence on lines lying under others when there are any (under_words) and `note`. The foot and the
+    legend are measured: the legend has `ncol` columns, or fewer where it would run out of the page, and the panels
+    start above its measured top."""
+    lines = textwrap.wrap(' '.join(x for x in (under_words(figure), note.strip()) if x), FOOT_WIDTH)
+    foot = figure.text(0.5, 0.008, '\n'.join(lines), ha='center', va='bottom', fontsize=8.5)
+    renderer = figure.canvas.get_renderer()
+    to_figure = figure.transFigure.inverted()
+    bottom = foot.get_window_extent(renderer).transformed(to_figure).y1 + 0.008
+    if handles:
+        for columns in range(ncol, 0, -1):
+            legend = figure.legend(handles=handles, loc='lower center', bbox_to_anchor=(0.5, bottom), ncol=columns,
+                                   frameon=False, fontsize=9)
+            box = legend.get_window_extent(renderer).transformed(to_figure)
+            if (box.x0 >= 0.005 and box.x1 <= 0.995) or columns == 1:
                 break
-        else:
-            axes.legend(loc='best')
-
-
-def save_figure(figure, path: str, note: str, dpi: int, top: float = 1.0) -> str:
-    """Write a page with its note at the foot, wrapped within the page's width, and close it (07's save_figure); each
-    legend where no line runs under it (place_legends); `top` below 1 leaves room above the panels for a page's
-    legend."""
-    lines = textwrap.wrap(note, NOTE_WIDTH)
-    figure.text(0.5, 0.008, '\n'.join(lines), ha='center', va='bottom', fontsize=8)
-    figure.tight_layout(rect=(0, 0.012 + 0.02 * len(lines), 1, top))
-    place_legends(figure)
+            legend.remove()                                    # too wide for the page: one column fewer
+        bottom = box.y1 + 0.012
+    figure.tight_layout(rect=(0, bottom, 1, 0.97 if figure._suptitle is not None else 1))
+    place_labels(figure)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     figure.savefig(path, dpi=dpi, facecolor='white')
     plt.close(figure)
     return path
 
 
+# Where a share beside an open circle may stand, in points for 6-point text (scaled to its size): 08's SHARE_PLACES, and
+# four further from the point for a point at the panel's left edge, where every place of 08's was on the line or outside
+# (indium's first year on 05's pages, 2026-11-13)
+SHARE_PLACES = ((3, 3), (3, -9), (-3, 3), (-3, -9), (3, 11), (3, -17), (-3, 11), (-3, -17), (9, -3), (-9, -3),
+                (3, 19), (3, -25), (12, 11), (12, -17))
+
+
+def place_labels(figure) -> None:
+    """Move every label beside a point (an annotation with gid 'beside') to the first of SHARE_PLACES, scaled to its
+    font, where it lies on no line of its panel, on no other text and inside the panel; a label that says the same as one
+    already at its point is not written twice (08's place_labels: one design for both projects)."""
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    for axes in figure.axes:
+        labels = [t for t in axes.texts if t.get_gid() == 'beside']
+        if not labels:
+            continue
+        points = []
+        for line in axes.lines:
+            xy = np.asarray(line.get_xydata(), dtype=float)
+            xy = xy[np.all(np.isfinite(xy), axis=1)]
+            if line.get_linestyle() in ('None', '', ' ') or len(xy) < 2:
+                continue
+            pts = axes.transData.transform(xy)
+            steps = np.maximum(1, (np.hypot(*np.diff(pts, axis=0).T) / 3).astype(int))
+            points.append(np.vstack([np.linspace(pts[i], pts[i + 1], steps[i], endpoint=False)
+                                     for i in range(len(pts) - 1)] + [pts[-1:]]))
+        points = np.vstack(points) if points else np.zeros((0, 2))
+        frame = axes.get_window_extent(renderer)
+        taken = [t.get_window_extent(renderer) for t in axes.texts if t.get_gid() != 'beside' and t.get_text().strip()]
+        # and the numbers of every axis of the page (a share stood on an axis number of 05's page, 2026-11-13)
+        taken += [t.get_window_extent(renderer) for other in figure.axes for axis in (other.xaxis, other.yaxis)
+                  for t in axis.get_ticklabels() if t.get_visible() and t.get_text().strip()]
+        written = set()
+        for label in labels[::-1]:            # the label of the line drawn last first: the line one sees (rule 3)
+            key = (label.xy, label.get_text())
+            if key in written:
+                label.set_visible(False)
+                continue
+            written.add(key)
+            grow = label.get_fontsize() / 6.0                  # the places are for 6 pt; a larger label stands further
+            fallback = None                     # the first place inside the panel on no text, should every place be
+            for dx, dy in SHARE_PLACES:         # on a line (a point at the panel's edge: found 2026-11-13)
+                label.set_position((dx * grow, dy * grow))
+                label.set_ha('left' if dx >= 0 else 'right')
+                box = label.get_window_extent(renderer)
+                inside = frame.x0 <= box.x0 and box.x1 <= frame.x1 and frame.y0 <= box.y0 and box.y1 <= frame.y1
+                on_line = ((points[:, 0] > box.x0) & (points[:, 0] < box.x1)
+                           & (points[:, 1] > box.y0) & (points[:, 1] < box.y1)).any()
+                on_text = any(box.overlaps(b) for b in taken)
+                if inside and not on_text and fallback is None:
+                    fallback = (dx, dy)
+                if inside and not on_line and not on_text:
+                    break
+            else:
+                if fallback is not None:
+                    label.set_position((fallback[0] * grow, fallback[1] * grow))
+                    label.set_ha('left' if fallback[0] >= 0 else 'right')
+            taken.append(label.get_window_extent(renderer))
+
+
 def overview_page(summary: dict, names: dict, draws: int, path: str, dpi: int) -> str:
     """The overview, two rows of four: the robots in use; built and retired; in use by robot type; beside it each type's
     share of the robots built (Matthias, 2026-11-07, "Add it beside"); the joint sets; the battery packs in use; built
-    and worn out; the robot types' legend in the eighth place, for the two panels of the types."""
-    flows = stocks = np.arange(FIRST, LAST + 1)                     # every year at its year, as 07
+    and worn out. Every line the median of the runs with its 50 % and 95 % intervals; one legend below the panels, the
+    robot types named in it (rule 2)."""
+    years = np.arange(FIRST, LAST + 1)                     # every year at its year, as 08
 
-    def line(unit, t, flow, label, colour):
-        return (stocks if flow == 'stock' else flows, summary[(unit, t, flow)], label, colour)
+    def line(unit, t, flow, colour):
+        return years, summary[(unit, t, flow)], colour, '-'
 
     figure, grid = plt.subplots(2, 4, figsize=A4_LANDSCAPE)
     panels = (
-        (grid[0, 0], 'Robots in use', [line('robots', 0, 'stock', 'in use', IN_USE)], 'robots'),
-        (grid[0, 1], 'Robots built\nand retired', [line('robots', 0, 'in', 'built', BUILT),
-                                                 line('robots', 0, 'out', 'retired', GONE)], 'robots per year'),
-        (grid[0, 2], 'Robots in use\nby robot type', [line('robots', t, 'stock', f'robot type {t}', TYPE_COLOURS[k])
-                                                    for k, t in enumerate(TYPES)], 'robots'),
-        (grid[1, 0], 'Joint sets', [line('joint sets', 0, 'stock', 'in use', IN_USE),
-                                    line('joint sets', 0, 'in', 'built per year', BUILT),
-                                    line('joint sets', 0, 'out', 'worn out per year', GONE)], 'joint sets'),
-        (grid[1, 1], 'Battery packs\nin use', [line('battery packs', 0, 'stock', 'in use', IN_USE)], 'battery packs'),
-        (grid[1, 2], 'Battery packs\nbuilt and worn out', [line('battery packs', 0, 'in', 'built', BUILT),
-                                                         line('battery packs', 0, 'out', 'worn out', GONE)],
+        (grid[0, 0], 'Robots in use', [line('robots', 0, 'stock', IN_USE)], 'robots'),
+        (grid[0, 1], 'Robots built and retired', [line('robots', 0, 'in', BUILT), line('robots', 0, 'out', GONE)],
+         'robots per year'),
+        (grid[0, 2], 'Robots in use by robot type', [line('robots', t, 'stock', TYPE_COLOURS[k])
+                                                     for k, t in enumerate(TYPES)], 'robots'),
+        (grid[1, 0], 'Joint sets', [line('joint sets', 0, 'stock', IN_USE), line('joint sets', 0, 'in', BUILT),
+                                    line('joint sets', 0, 'out', GONE)], 'joint sets, or joint sets per year'),
+        (grid[1, 1], 'Battery packs in use', [line('battery packs', 0, 'stock', IN_USE)], 'battery packs'),
+        (grid[1, 2], 'Battery packs built and worn out', [line('battery packs', 0, 'in', BUILT),
+                                                          line('battery packs', 0, 'out', GONE)],
          'battery packs per year'))
     for axes, title, series, word in panels:
         if log_panel(axes, series, word):
             axes.set_title(title)
-            types_panel = title.startswith('Robots in use\nby')
-            if (len(series) > 1 and not types_panel) or held_in_label(axes):
-                axes.legend(loc='upper left')
-    share_panel(grid[0, 3], [line(SHARE_QUANTITY, t, 'in', f'robot type {t}', TYPE_COLOURS[k])
-                             for k, t in enumerate(TYPES)], '% of the robots built')
-    grid[0, 3].set_title('Share of the robots built\nby robot type')
-    # The eighth place: the legend of the robot types, for the two panels of the types beside each other.
+    share_panel(grid[0, 3], [line(SHARE_QUANTITY, t, 'in', TYPE_COLOURS[k]) for k, t in enumerate(TYPES)],
+                '% of the robots built')
+    grid[0, 3].set_title('Share by robot type')                  # its axis: % of the robots built
     grid[1, 3].axis('off')
-    grid[1, 3].legend(*grid[0, 3].get_legend_handles_labels(), loc='center', title='Robot types')
+    handles = [line_handle('In use (at the end of the year)', IN_USE), line_handle('Built per year', BUILT),
+               line_handle('Retired or worn out per year', GONE)]
+    handles += [line_handle(f'Robot type {t}: {names[t]}', TYPE_COLOURS[k]) for k, t in enumerate(TYPES)]
     figure.suptitle('Humanoid robots in the world')
-    types = '; '.join(f'{t} {names[t]}' for t in TYPES)
-    note = (figure_note(draws).replace('logarithmic axes.', 'logarithmic axes, the shares a plain one.')
-            + ' A joint set: the hip, knee, ankle, waist, arm and head joints of one robot. '
-            f'Robot types: {types}.')
-    return save_figure(figure, path, note, dpi)
+    note = (ROBOT_AMOUNTS + ' ' + ROBOTS_FROM[:-1] + '; a joint set is the hip, knee, ankle, waist, arm and head joints '
+            'of one robot.')
+    return save_figure(figure, path, note, dpi, handles + uncertainty_handles(draws, figure), ncol=3)
 
 
 def element_page(symbol: str, summary: dict, world: dict, notes: list, draws: int, path: str, dpi: int) -> str:
-    """One element: its stock beside the world's reserves; its inflow and outflow beside the world's mine production
-    in 2025 (07's element figure, without "collected")."""
-    flows = stocks = np.arange(FIRST, LAST + 1)                     # every year at its year, as 07
+    """One element, as 08's element figure: what is in use beside the world's reserves; what is added and removed per
+    year beside the world's mine production in 2025 (no "collected": the robots have none yet). One legend below."""
+    years = np.arange(FIRST, LAST + 1)                     # every year at its year, as 08
     figure, (left, right) = plt.subplots(1, 2, figsize=A4_LANDSCAPE)
-    if log_panel(left, [(stocks, summary[('element', symbol, 'stock')], 'stock', IN_USE)], '', mass_label):
-        left.set_title('Stock')
+    if log_panel(left, [(years, summary[('element', symbol, 'stock')], IN_USE, '-')], '', mass_label):
+        left.set_title('In use')
         world_reference(left, world.get('reserves'), 'World reserves', per_year=False)
-        if any('World' in label for label in left.get_legend_handles_labels()[1]) or held_in_label(left):
-            left.legend(loc='upper left')
-    if log_panel(right, [(flows, summary[('element', symbol, 'in')], 'inflow', BUILT),
-                         (flows, summary[('element', symbol, 'out')], 'outflow', GONE)], 'per year', mass_label):
-        right.set_title('Inflow and outflow')
+    if log_panel(right, [(years, summary[('element', symbol, 'in')], BUILT, '-'),
+                         (years, summary[('element', symbol, 'out')], GONE, '-')], 'per year', mass_label):
+        right.set_title('Added and removed per year')
         world_reference(right, world.get('production'), 'World production 2025', per_year=True)
-        right.legend(loc='upper left')
-    figure.suptitle(composition.ELEMENT_NAMES.get(symbol, symbol))
-    note = figure_note(draws) + ' All of every robot: its joints, battery, electronics and body.'
-    if world:
-        note += (" Dashed: the world's mine production in 2025 (inflow) and reserves (stock), " + WORLD_SOURCE
-                 + ('; ' + '; '.join(notes) if notes else '') + '; a value outside the scale is written in the panel.')
-    else:
-        note += ' No world production or reserves for it in the sources read.'
-    return save_figure(figure, path, note, dpi)
+    name = composition.ELEMENT_NAMES.get(symbol, symbol)
+    figure.suptitle(f"{name} in the world's humanoid robots")
+    handles = [line_handle('In use (at the end of the year)', IN_USE), line_handle('Added per year', BUILT),
+               line_handle('Removed per year', GONE)] + world_handles(figure)
+    note = AMOUNTS + ' ' + world_note(world, notes)
+    return save_figure(figure, path, note, dpi, handles + uncertainty_handles(draws, figure), ncol=4)
+
+
+def world_note(world: dict, notes: list) -> str:
+    """The one sentence of the foot on the world's lines: their source and its notes, or that the sources read give
+    none."""
+    if not world:
+        return 'No world production or reserves for it in the sources read.'
+    return ("The world's mine production of 2025 and its reserves: " + WORLD_SOURCE
+            + ('; ' + '; '.join(notes) if notes else '') + '; a value too large or too small for the scale is written '
+            'in the panel.')
 
 
 def element_file(symbol: str) -> str:
-    """The file name of an element's page: its name, as 07 writes it ('Copper.png')."""
+    """The file name of an element's page: its name, as 08 writes it ('Copper.png')."""
     return f"{composition.ELEMENT_NAMES.get(symbol, symbol).replace(' ', '_')}.png"
 
 
 # ------------------------------------------------------------------------------------------------------
 # The distribution pages (Matthias, 2026-11-07: "I also want the distributions", to the table "Yes, as recommended"), in
 # 02's form (its centre_lines, stacked_bars, mass_ticks, panel_rows: one copy of the code): bars of the share of the
-# draws, the median a solid line, the mean a dotted one, 2.5 % and 97.5 % dashed, no number on a panel; each page
-# followed by a page of its numbers (EVIDENCE.md E34). The elements split by the four groups of how a robot is taken
-# apart as RAWCLICDataCenters' 05 splits its elements by 03 and 04, the smaller lower, in 01's colours (GROUP_COLOURS);
-# their parts listed on the pages after.
+# runs, the median a solid line, the 95 % interval dashed, their samples in the page's legend; each page followed by a
+# page of its numbers (EVIDENCE.md E34). The elements split by the four groups of how a robot is taken apart as
+# RAWCLICDataCenters' 05 splits its elements by 03 and 04, the smaller lower, in 01's colours (GROUP_COLOURS); their
+# parts listed on the pages after.
 # ------------------------------------------------------------------------------------------------------
 
 PARTS_ROWS = 24                   # the rows of one list page of the elements part by part (parts_pages)
-PARTS_COLUMNS = (0.02, 0.15, 0.27, 0.50, 0.61, 0.72, 0.83)   # where each column of a list page starts, across the page
-PARTS_HEAD = ('Element', 'Group', 'Part', 'Held in', 'Median', 'Mean', '95 % of the draws')
-NUMBER_COLUMNS = (0.02, 0.21, 0.31, 0.45, 0.59, 0.79)    # where each column of a page of numbers starts, across the page
+PARTS_COLUMNS = (0.02, 0.15, 0.27, 0.48, 0.58, 0.70, 0.84)   # where each column of a list page starts, across the page
+PARTS_HEAD = composition.PART_LIST_HEAD                       # 02's columns: one copy
+NUMBER_COLUMNS = (0.02, 0.21, 0.31, 0.45, 0.62, 0.80)    # where each column of a page of numbers starts, across the page
 
 
 def count_unit(values: np.ndarray) -> tuple:
-    """The unit a panel of robots is written in, by the mean of its draws above 0, so that it reads from 1 up:
+    """The unit a panel of robots is written in, by the median of its runs above 0, so that it reads from 1 up:
     (robots in one unit, its words), e.g. (1e6, 'million robots')."""
     positive = values[values > 0]
-    typical = float(positive.mean()) if positive.size else 0.0
+    typical = float(np.median(positive)) if positive.size else 0.0
     for per, words in ((1e9, 'billion robots'), (1e6, 'million robots'), (1e3, 'thousand robots')):
         if typical >= per:
             return per, words
@@ -1111,10 +1229,10 @@ def count_unit(values: np.ndarray) -> tuple:
 
 
 def mass_unit(values_kg: np.ndarray) -> tuple:
-    """The unit a panel of kg is written in, by the mean of its draws above 0, so that it reads from 1 up (kg, not Mg;
-    Mt the largest, as mass_text): (kg in one unit, its symbol)."""
+    """The unit a panel of kg is written in, by the median of its runs above 0, so that it reads from 1 up (kg, not
+    Mg; Mt the largest, as mass_text): (kg in one unit, its symbol)."""
     positive = values_kg[values_kg > 0]
-    typical = float(positive.mean()) if positive.size else 0.0
+    typical = float(np.median(positive)) if positive.size else 0.0
     for per, unit in ((1e9, 'Mt'), (1e6, 'kt'), (1e3, 't'), (1.0, 'kg'), (1e-3, 'g')):
         if typical >= per:
             return per, unit
@@ -1123,8 +1241,8 @@ def mass_unit(values_kg: np.ndarray) -> tuple:
 
 def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
     """The page of numbers that follows a page of panels (EVIDENCE.md E34), A4 landscape as 04's pages: a row per panel
-    (02's panel_rows: its title, in what share of the draws it is held, the median, the mean, 95 % of the draws, the
-    draws beyond its axis), each under 02's column names (NUMBERS_HEAD)."""
+    (its title, in what share of the runs it is held, the median, the middle half, where 95 of 100 runs lie, the runs
+    beyond its axis), each under 02's column names (NUMBERS_HEAD)."""
     page = plt.figure(figsize=A4_LANDSCAPE)
     page.suptitle(heading)
     for x, words in zip(NUMBER_COLUMNS, composition.NUMBERS_HEAD):
@@ -1133,7 +1251,7 @@ def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
     for row in rows:
         page.add_artist(plt.Line2D([0.02, 0.98], [y + 0.007, y + 0.007], color=composition.GRID, linewidth=0.8))
         for x, cell in zip(NUMBER_COLUMNS, row):
-            page.text(x, y, cell, fontsize=8, va='top')
+            page.text(x, y, cell, fontsize=9, va='top')
         y -= step
     os.makedirs(os.path.dirname(path), exist_ok=True)
     page.savefig(path, dpi=dpi, facecolor='white')
@@ -1141,7 +1259,7 @@ def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
     return path
 
 
-RIDGE_BINS = 40                   # the bars of one type's row on the page of the robots in use, over its own draws
+RIDGE_BINS = 40                   # the bars of one type's row on the page of the robots in use, over its own runs
 
 
 def robots_text(value: float) -> str:
@@ -1152,33 +1270,33 @@ def robots_text(value: float) -> str:
 def robots_in_use_page(files: dict, draws: int, folder: str, dpi: int) -> list:
     """The robots in use at the end of 2025, 2030, 2035 and 2040, the six types in one panel a year (Matthias, 2026-11-08:
     "can you not combine the 6 types to 1", "I want to see at the end how many robots there are", "not 39 I want 2040",
-    "SHit it to 1st of July", "Yes"): each type a row, type 1 at the top, its robots in use over the draws, the bars of
-    its own draws scaled to the row, its median (solid), mean (dotted) and 2.5 % and 97.5 % (dashed) within the row; one
-    axis for the six, from the smallest to the largest draw of any type, so that no draw is cut ("why is the largest
-    part of the triangal cut off?"); the robots in all, the article's, in the panel's title. The results of the run,
-    nothing else (GitHub/CLAUDE.md §5). Followed by the page of each row's numbers."""
+    "SHit it to 1st of July", "Yes"): each type a row, type 1 at the top, its robots in use over the runs, the bars of
+    its own runs scaled to the row, its median (solid) and where 95 of 100 runs lie (dashed) within the row, their
+    samples in the page's legend; one axis for the six, from the smallest to the largest run of any type, so that no run
+    is cut ("why is the largest part of the triangal cut off?"); the robots in all, the article's, in the panel's title.
+    The results of the run, nothing else (GitHub/CLAUDE.md §5). Followed by the page of each row's numbers."""
     figure, grid = plt.subplots(2, 2, figsize=A4_LANDSCAPE)
     numbers = []
     for axes, year in zip(grid.flat, DISTRIBUTION_YEARS):
         robots = np.asarray(files['units_stock'][:, year - FIRST, UNITS.index('robots'), :], dtype=np.float64)
-        totals = np.asarray(files['article_stock'][:, year - FIRST], dtype=np.float64)   # all robots, each draw
+        totals = np.asarray(files['article_stock'][:, year - FIRST], dtype=np.float64)   # all robots, each run
         per, words = count_unit(robots.max(axis=1))
         axes.type_numbers = []
         for k, t in enumerate(TYPES):
             values = robots[:, k] / per
             base = len(TYPES) - 1 - k
-            counts, edges = np.histogram(values, bins=RIDGE_BINS)                     # every draw of the type
+            counts, edges = np.histogram(values, bins=RIDGE_BINS)                     # every run of the type
             axes.bar(edges[:-1], 0.85 * counts / counts.max(), width=np.diff(edges), align='edge', bottom=base,
                      color=TYPE_COLOURS[k], edgecolor='none')
-            median, mean = float(np.median(values)), float(values.mean())
-            low, high = (float(b) for b in np.percentile(values, (2.5, 97.5)))
-            for x, style, width in ((median, '-', 1.4), (mean, ':', 1.4), (low, '--', 0.9), (high, '--', 0.9)):
-                axes.plot([x, x], [base, base + 0.9], color=composition.APART_INK, linestyle=style, linewidth=width)
-            axes.type_numbers.append((f'Robot type {t}, {year}', median, mean, low, high, words))
-            numbers.append([f'Robot type {t}, {year}', 'all draws',
-                            f'{composition.panel_number(median)}\u00a0{words}',
-                            f'{composition.panel_number(mean)}\u00a0{words}',
-                            f'{composition.panel_number(low)} to {composition.panel_number(high)}\u00a0{words}', '–'])
+            median = float(np.median(values))
+            p25, p75, low, high = (float(b) for b in np.percentile(values, (25, 75, 2.5, 97.5)))
+            axes.plot([median, median], [base, base + 0.9], **composition.MEDIAN_MARK)
+            for x in (low, high):
+                axes.plot([x, x], [base, base + 0.9], **composition.BOUND_MARK)
+            axes.type_numbers.append((f'Robot type {t}, {year}', median, low, high, words))
+            numbers.append([f'Robot type {t}, {year}', 'all runs', f'{composition.panel_number(median)} {words}',
+                            f'{composition.panel_number(p25)} to {composition.panel_number(p75)} {words}',
+                            f'{composition.panel_number(low)} to {composition.panel_number(high)} {words}', '–'])
         smallest, largest = robots.min() / per, robots.max() / per
         margin = 0.02 * (largest - smallest)
         axes.set_xlim(smallest - margin, largest + margin)
@@ -1186,71 +1304,79 @@ def robots_in_use_page(files: dict, draws: int, folder: str, dpi: int) -> list:
         axes.set_yticks(np.arange(len(TYPES)) + 0.4)
         axes.set_yticklabels([f'robot type {t}' for t in reversed(TYPES)])
         axes.xaxis.set_major_locator(plt.MaxNLocator(6))
-        axes.xaxis.set_major_formatter(ticker.ScalarFormatter(useOffset=False))
-        axes.ticklabel_format(axis='x', style='plain', useOffset=False)
-        axes.tick_params(labelsize=8)
-        axes.set_xlabel(f'robots in use ({words})', fontsize=8)
+        axes.xaxis.set_major_formatter(plt.FuncFormatter(composition.panel_number))
+        axes.set_xlabel(f'robots in use ({words})')
         axes.grid(axis='x', alpha=0.3)
         for side in ('top', 'right'):
             axes.spines[side].set_visible(False)
-        # The robots in all: the article's, the same in every draw (written as a range, were it ever to vary).
+        # The robots in all: the article's, the same in every run (written as a range, were it ever to vary).
         if totals.max() - totals.min() <= 1e-6 * totals.max():
             words_in_all = robots_text(totals[0])
         else:
             low_all, high_all = np.percentile(totals, (2.5, 97.5))
             words_in_all = f'{robots_text(low_all)} to {robots_text(high_all)}'
-        axes.set_title(f'{year}: {words_in_all} robots', loc='left', fontsize=10, fontweight='bold')   # the year alone
-    figure.suptitle('Humanoid robots in use by robot type: the distribution of the draws')
-    note = ('Each row one robot type: its bars the draws of the run, the height scaled to the row; solid line: the '
-            'median; dotted: the mean; dashed: 2.5 % and 97.5 % (95 % of the draws); every draw on the axis. The six '
-            'types add up to the robots in use of ai-2040.com Plan A at the end of each year, the number in the '
-            f'title, the same in every draw; {draws:,} draws; the numbers of every row on the next page.')
+        axes.set_title(f'{year}: {words_in_all} robots', loc='left', fontsize=11, fontweight='bold')   # the year alone
+    figure.suptitle('Humanoid robots in use by robot type')
+    note = (f'Each row one robot type: how often each number of its robots came out in {draws:,} model runs, the height '
+            'scaled to the row, every run on the axis. The six types add up to the robots in use of the ai-2040 '
+            'article at the end of each year, the number in the title, the same in every run. The numbers of every row '
+            'are on the next page.')
     path = os.path.join(folder, 'robots_in_use.png')
     heading = figure._suptitle.get_text() + ': its numbers'
-    saved = save_figure(figure, path, note, dpi)
+    saved = save_figure(figure, path, note, dpi, composition.distribution_handles(draws), ncol=2)
     return [saved, numbers_page(heading, numbers, path[:-len('.png')] + '_numbers.png', dpi)]
+
+
+def part_words(name: str, kg: np.ndarray) -> str | None:
+    """A part of an element on a distribution panel: '<name>: <median>' over the runs in which the part holds it, with
+    their share in brackets when not all ('Joints: 25 kg (60 %)'); None when it holds none in any run (a 0 is not part
+    of a distribution: its 0 is not written), as the data centres' part_text."""
+    held = kg[kg > 0]
+    if not held.size:
+        return None
+    return f'{name}: {mass_text(float(np.median(held)))}{composition.held_words(held.size / kg.size, short=True)}'
 
 
 def element_panel(axes, groups: dict, title: str, share_label: bool, colours: dict | None = None) -> list:
     """One element in all robots in use in one year, exactly as RAWCLICDataCenters' 05 draws an element of a data centre
     (its `_stacked_panel`; Matthias, 2026-11-08: "Exactkly the figures we have worked out for the data centers!!!"):
-    the bars the distribution of the element's kg over the draws (the height the share of the draws, 70 bars over every
-    draw), each bar split into the kg its draws hold in each group of how a robot is taken apart (`groups`: joints,
-    battery, electronics, body), the group with the smaller mean at the bottom; the mean a solid line with its number,
-    the 2.5 % and 97.5 % dashed; the groups' means written top right. Over the draws that hold the element ("A 0 is not
-    part of a distribution"), their share written where it is not all of them. Returns the groups drawn (held in at
-    least 2.5 % of the draws). `colours` the colour of each split, 01's GROUP_COLOURS where none (05 splits by the data
-    centres and the humanoid robots)."""
+    the bars the distribution of the element's kg over the runs (the height the share of the runs, 70 bars over every
+    run), each bar split into the kg its runs hold in each part (`groups`: joints, battery, electronics, body; or the AI
+    data centres and the humanoid robots), the part with the smaller median at the bottom; the median a solid line with
+    its number, where 95 of 100 runs lie dashed (the samples in the page's legend); the median of each part that holds
+    it on a line under the title (part_words). Over the runs that hold the element ("A 0 is not part of a
+    distribution"), their share in the title where not all. Returns the parts drawn (held in at least 2.5 % of the
+    runs). `colours` the colour of each part, 01's GROUP_COLOURS where none."""
     colours = colours or schemas.GROUP_COLOURS
     total = sum(groups.values())
     inside = total > 0
     per, unit = mass_unit(total)
     values = total[inside] / per
     kept = {group: kg[inside] / per for group, kg in groups.items()}
-    mean = float(values.mean())
+    median = float(np.median(values))
     edges = np.histogram_bin_edges(values, bins=composition.APART_BINS)
-    index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)          # the bar each draw falls into
+    index = np.clip(np.digitize(values, edges[1:-1]), 0, len(edges) - 2)          # the bar each run falls into
     share_of_draws = np.bincount(index, minlength=len(edges) - 1) / values.size
     kg_all = np.bincount(index, weights=values, minlength=len(edges) - 1)
     drawn = [group for group in groups if composition.held(groups[group])]
     bottom = np.zeros(len(edges) - 1)
-    for group in sorted(drawn, key=lambda g: kept[g].mean()):                        # the smaller at the bottom
+    for group in sorted(drawn, key=lambda g: float(np.median(kept[g]))):            # the smaller at the bottom
         kg = np.bincount(index, weights=kept[group], minlength=len(edges) - 1)
         height = share_of_draws * np.divide(kg, kg_all, out=np.zeros_like(kg), where=kg_all > 0)
         axes.bar(edges[:-1], height, width=np.diff(edges), align='edge', bottom=bottom,
                  color=colours[group], edgecolor='none')
         bottom += height
     low, high = (float(b) for b in np.percentile(values, [2.5, 97.5]))
-    axes.axvline(mean, color='#222222', linewidth=1.8)
+    axes.axvline(median, **composition.MEDIAN_MARK)
     for bound in (low, high):
-        axes.axvline(bound, color='#222222', linewidth=1.2, linestyle='--')
-    axes.text(mean, 0.97, f' {composition.panel_number(mean)} {unit}', transform=axes.get_xaxis_transform(), ha='left',
-              va='top', fontsize=12, color='#222222', bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1))
-    words = [f'{group}: {mass_text(float(kept[group].mean()) * per)}' for group in drawn]
-    if not inside.all():
-        words.append(f'held in {math.floor(100 * inside.mean())} % of the draws')
-    axes.text(0.98, 0.80, '\n'.join(words), transform=axes.transAxes, ha='right', va='top', fontsize=10.5,
-              color='#222222', bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1))
+        axes.axvline(bound, **composition.BOUND_MARK)
+    axes.text(median, 0.97, f' {composition.panel_number(median)} {unit}', transform=axes.get_xaxis_transform(),
+              ha='left', va='top', fontsize=12, color='#222222', bbox=dict(facecolor='white', edgecolor='none',
+                                                                          alpha=0.8, pad=1))
+    # each part's median on a line under the title, above the panel, on no line (the design of 2026-11-12)
+    words = '   '.join(w for w in (part_words(g, np.asarray(groups[g], dtype=np.float64)[inside] * 1.0)
+                                    for g in drawn) if w)
+    axes.text(0.0, 1.015, words, transform=axes.transAxes, ha='left', va='bottom', fontsize=10, color='#222222')
     axes.xaxis.set_major_locator(plt.MaxNLocator(5))
     axes.xaxis.set_major_formatter(plt.FuncFormatter(composition.panel_number))
     axes.yaxis.set_major_locator(plt.MaxNLocator(4))
@@ -1258,25 +1384,27 @@ def element_panel(axes, groups: dict, title: str, share_label: bool, colours: di
     axes.tick_params(labelsize=11)
     axes.set_xlabel(f'mass ({unit})', fontsize=12)
     if share_label:
-        axes.set_ylabel('share of the draws', fontsize=12)
+        axes.set_ylabel('share of the runs', fontsize=12)
     axes.grid(axis='x', alpha=0.3)
-    axes.set_title(title, fontsize=13, fontweight='bold', loc='left')
-    axes.element_numbers = (title, mean, low, high, unit)
+    axes.set_title(title + composition.held_words(float(inside.mean()), short=True), fontsize=13, fontweight='bold',
+                   loc='left', pad=17)
+    axes.element_numbers = (title, median, low, high, unit)
     return drawn
 
 
 def split_elements_page(title: str, splits: dict, colours: dict, elements: list, note: str, path: str,
                         dpi: int) -> str:
     """One page of elements exactly as RAWCLICDataCenters' 05 draws the elements of one data centre: a panel per element
-    held in at least 2.5 % of the draws, in the order of `elements`, four across, each bar split into the kg of each of
-    `splits` ({name: draws × elements}, in the legend's order) in its `colours` (`element_panel`); one legend of the
-    splits drawn; `note` at the foot, its lines wrapped within the page's width. 04's pages (split by the four groups) and 05's (by the data centres and the
-    humanoid robots) are drawn by it: one copy."""
+    held in at least 2.5 % of the runs, in the order of `elements`, four across, each bar split into the kg of each of
+    `splits` ({name: runs × elements}, in the legend's order) in its `colours` (`element_panel`); one legend above the
+    panels: the parts drawn, the median and the 95 % interval; `note` at the foot (at most three sentences). 04's pages
+    (split by the four groups) and 05's (by the data centres and the humanoid robots) are drawn by it: one copy."""
     total = sum(np.asarray(v, dtype=np.float64) for v in splits.values())
     held = [e for e in range(len(elements)) if composition.held(total[:, e])]
     ncols = 4
     nrows = max(1, math.ceil(len(held) / ncols))
     drawn = set()
+    runs = total.shape[0]
     with plt.style.context('default'):
         figure, grid = plt.subplots(nrows, ncols, figsize=(4.8 * ncols, 3.1 * nrows + 1.3), squeeze=False)
         for k, e in enumerate(held):
@@ -1288,41 +1416,38 @@ def split_elements_page(title: str, splits: dict, colours: dict, elements: list,
             axes.axis('off')
         figure.suptitle(title, fontsize=18)
         handles = [Patch(color=colours[name], label=name) for name in splits if name in drawn]
-        figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.965), ncol=max(len(handles), 1),
+        handles += composition.distribution_handles(runs)
+        figure.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 0.965), ncol=len(handles),
                       frameon=False, fontsize=12)
-        # The note at the foot, each of its lines wrapped within the page's width: as many characters a line as 07's
-        # note holds (NOTE_WIDTH at 8 pt on an A4 page), scaled to this page's width and to the note's 11 pt; the
-        # panels end above its lines (about 0.2 inch a line). Until 2026-11-08 the note was one line, run off 05's
-        # page (VERIFICATION.md V226).
-        width = round(NOTE_WIDTH * (8 / 11) * figure.get_figwidth() / A4_LANDSCAPE[0])
-        lines = [line for paragraph in note.split('\n') for line in textwrap.wrap(paragraph, width)]
-        figure.text(0.5, 0.005, '\n'.join(lines), ha='center', va='bottom', fontsize=11, color='#555555')
-        figure.tight_layout(rect=(0, (0.15 + 0.2 * len(lines)) / figure.get_figheight(), 1, 0.93))
+        figure.text(0.5, -0.005, composition.foot_text(note.split('\n'), 150), ha='center', va='top', fontsize=11,
+                    color='#555555')
+        figure.tight_layout(rect=(0, 0, 1, 0.93))
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        figure.savefig(path, dpi=dpi, facecolor='white')
+        figure.savefig(path, dpi=dpi, facecolor='white', bbox_inches='tight')
         plt.close(figure)
     return path
 
 
 def elements_page(year: int, kg, elements: list, draws: int, path: str, dpi: int) -> str:
-    """The elements in all robots in use at `year` (`kg`: draws × PARTS × elements), one page, exactly as
+    """The elements in all robots in use at `year` (`kg`: runs × PARTS × elements), one page, exactly as
     RAWCLICDataCenters' 05 draws the elements of one data centre (split_elements_page): each bar split by the four
-    groups of how a robot is taken apart, the sums of their parts draw by draw, in their order."""
+    groups of how a robot is taken apart, the sums of their parts run by run, in their order."""
     splits = {g: np.asarray(kg[:, [PARTS.index(p) for p in PARTS if GROUP_OF[p] == g]], dtype=np.float64).sum(axis=1)
               for g in GROUPS}
-    note = (f'bars: the draws ({draws:,}), the height the share of the draws; solid line and number: the mean; dashed '
-            'lines: 2.5th and 97.5th percentile (the 95% interval);\neach panel on its own scale and unit; each bar split '
-            'into the kg of its draws in the joints, the battery, the electronics and the body; an element held in fewer '
-            'than 2.5% of the draws is not drawn; its parts on the pages after')
+    note = (f'How often each mass came out in {draws:,} model runs, each panel on its own scale and unit; each bar split '
+            'into the joints, the battery, the electronics and the body, the median of each under the title; an '
+            'element in fewer than 2.5 % of the runs is not drawn\n'
+            'A number in brackets: the share of the runs that have it, over which its bars are drawn\n'
+            'Its parts are listed on the pages after')
     return split_elements_page(f'{year}: elements in all humanoid robots in use', splits, schemas.GROUP_COLOURS,
                                elements, note, path, dpi)
 
 
 def parts_rows(kg, elements: list) -> list:
-    """The rows of the list of the elements part by part at one year (`kg`: draws × PARTS × elements): for each
-    element (02's order) each part that holds it in a draw at least, in the order of 01's parts, its group, the share of
-    the draws that hold it, its median, mean and 95 % over those draws, in its own unit (mass_unit): 02's part_rows, one
-    copy ("A 0 is not part of a distribution")."""
+    """The rows of the list of the elements part by part at one year (`kg`: runs × PARTS × elements): for each
+    element (02's order) each part that holds it in a run at least, in the order of 01's parts, its group, the share of
+    the runs that hold it, its median, middle half and 95 % interval over those runs, in its own unit (mass_unit): 02's
+    part_rows, one copy ("A 0 is not part of a distribution")."""
     return composition.part_rows({(composition.ELEMENT_NAMES.get(symbol, symbol), part): kg[:, j, e]
                                   for e, symbol in enumerate(elements) for j, part in enumerate(PARTS)}, unit=mass_unit)
 
@@ -1345,11 +1470,11 @@ def parts_pages(year: int, kg, elements: list, folder: str, dpi: int) -> list:
         for row in page_rows:
             page.add_artist(plt.Line2D([0.02, 0.98], [y + 0.007, y + 0.007], color=composition.GRID, linewidth=0.8))
             for x, cell in zip(PARTS_COLUMNS, row):
-                page.text(x, y, cell, fontsize=8, va='top')
+                page.text(x, y, cell, fontsize=9, va='top')
             y -= 0.034
         page.text(0.5, 0.02, 'Each row: one element in one part of how a robot is taken apart, in all humanoid robots '
-                  'in use at the end of the year; over the draws that hold it; each row in its own unit.',
-                  ha='center', va='bottom', fontsize=8, color='#555555')
+                  'in use at the end of the year, over the runs that hold it; each row in its own unit.',
+                  ha='center', va='bottom', fontsize=8.5, color='#555555')
         path = os.path.join(folder, f'parts_{year}_{k}.png')
         os.makedirs(folder, exist_ok=True)
         page.savefig(path, dpi=dpi, facecolor='white')
@@ -1393,7 +1518,7 @@ def run(params: Params) -> int:
           'half-width')
     folder = absolute(params.output.stock_and_flow_dir)
     os.makedirs(folder, exist_ok=True)
-    years = {flow_name: LAST - FIRST + 1 for flow_name in FLOWS}     # 2025 to 2040, as 07
+    years = {flow_name: LAST - FIRST + 1 for flow_name in FLOWS}     # 2025 to 2040, as 08
     files = {}
     for unit_name, element_name, flow_name in zip(UNIT_FILES, ELEMENT_FILES, FLOWS):
         files[unit_name] = np.lib.format.open_memmap(os.path.join(folder, f'{unit_name}.npy'), mode='w+',
@@ -1438,7 +1563,7 @@ def run(params: Params) -> int:
     for array in files.values():
         array.flush()
     with open(os.path.join(folder, AXES_FILE), 'w', encoding='utf-8') as handle:
-        handle.write(f"{', '.join(UNIT_FILES)}: draw; year {FIRST} to {LAST}, as RAWCLICDataCenters' 07 (in, out: the "
+        handle.write(f"{', '.join(UNIT_FILES)}: draw; year {FIRST} to {LAST}, as RAWCLICDataCenters' 08 (in, out: the "
                      f"calendar year; stock: its end); unit ({', '.join(UNITS)}); robot type "
                      f"({', '.join(map(str, TYPES))})\n")
         handle.write(f"{', '.join(ARTICLE_FILES)}: draw; year (the same); the article's robots built, in use, retired "
@@ -1467,8 +1592,8 @@ def run(params: Params) -> int:
     summary.update(element_summary(files, elements))
     with open(os.path.join(folder, SUMMARY), 'w', newline='', encoding='utf-8') as handle:
         writer = csv.writer(handle)
-        writer.writerow(('quantity', 'robot type', 'flow', 'year', 'mean', '2.5 %', '97.5 %',
-                         'held in % of the draws'))
+        writer.writerow(('quantity', 'robot type', 'flow', 'year', 'median', '25 %', '75 %', '2.5 %', '97.5 %',
+                         'held in % of the runs'))
         for (what, which, flow_name), stats in summary.items():
             if what == 'element':
                 quantity, robot_type = composition.ELEMENT_NAMES.get(which, which), 'all'
@@ -1479,10 +1604,9 @@ def run(params: Params) -> int:
                 robot_type = 'all'
             else:
                 quantity, robot_type = what, which if which else 'all'
-            for i in range(len(stats['mean'])):
-                cells = [f'{stats[key][i]:.6g}' if np.isfinite(stats[key][i]) else '–'
-                         for key in ('mean', 'low', 'high')]
-                # The year as 07: a flow its calendar year, a stock the end of the year.
+            for i in range(len(stats['median'])):
+                cells = [f'{stats[key][i]:.6g}' if np.isfinite(stats[key][i]) else '–' for key in STATISTICS]
+                # The year as 08: a flow its calendar year, a stock the end of the year.
                 writer.writerow((quantity, robot_type, flow_name, FIRST + i, *cells, f"{100 * stats['held'][i]:.1f}"))
     # The pages.
     figures = absolute(params.output.stock_and_flow_figures_dir)
@@ -1510,8 +1634,8 @@ def run(params: Params) -> int:
     without = [composition.ELEMENT_NAMES.get(s, s) for s in held if s not in world]
     if without:
         print(f"04: no world production or reserves for {', '.join(without)}; their pages say so.")
-    robots = [float(f'{v:.7g}') for v in summary[('robots', 0, 'stock')]['mean']]     # float32: 7 digits
-    print(f'04 done: {draws:,} draws; robots in use at the end of {FIRST} {robots[0]:,.0f}, of {LAST} {robots[-1]:,.0f} (mean); '
+    robots = [float(f'{v:.7g}') for v in summary[('robots', 0, 'stock')]['median']]     # float32: 7 digits
+    print(f'04 done: {draws:,} runs; robots in use at the end of {FIRST} {robots[0]:,.0f}, of {LAST} {robots[-1]:,.0f} (median); '
           f'the overview and {len(held)} element pages in {figures}.')
     return 0
 

@@ -220,19 +220,20 @@ class DataParams:
         default='/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/RAWCLICVehicleTractionMotor',
         metadata={'doc': "RAWCLICVehicleTractionMotor, whose own code draws the NdFeB elements of a grade class."})
 
-    # The AI data centres of RAWCLICDataCenters' 07 (Matthias, 2026-11-08: "write 05 combination of results of 04 and
-    # 07 with the distributions", "Yes, build it"; EVIDENCE.md E52). Every project reads its data from its own data/raw/
-    # (GitHub/CLAUDE.md §6): tools/copy_data_center_draws.py copies the element draws of 07's run from its file (the
-    # source, the only setting that names 07's folder, read by that tool alone) into this project's folder, which 05
-    # reads. SAFE TO CHANGE: the source only if 07's file moves; run the tool again whenever 07 has run again.
+    # The AI data centres of RAWCLICDataCenters' 08 (Matthias, 2026-11-08: "write 05 combination of results of 04 and
+    # 07 with the distributions", "Yes, build it"; EVIDENCE.md E52; the data centres' stock and flow their stage 07 then,
+    # 08 since 2026-11-12, its file the same). Every project reads its data from its own data/raw/
+    # (GitHub/CLAUDE.md §6): tools/copy_data_center_draws.py copies the element draws of 08's run from its file (the
+    # source, the only setting that names 08's folder, read by that tool alone) into this project's folder, which 05
+    # reads. SAFE TO CHANGE: the source only if 08's file moves; run the tool again whenever 08 has run again.
     data_center_stock_and_flow_source: str = field(
         default=('/Users/rm/Library/Mobile Documents/com~apple~CloudDocs/Documents/GitHub/'
                  'RAWCLICDataCenters/data/data_center_stock_and_flow/stock_flow_draws.csv'),
-        metadata={'doc': "RAWCLICDataCenters' 07, its draws (stock_flow_draws.csv): copied by "
+        metadata={'doc': "RAWCLICDataCenters' 08, its draws (stock_flow_draws.csv): copied by "
                          'tools/copy_data_center_draws.py, read by nothing else.'})
     data_center_draws_dir: str = field(
         default=os.path.join('data', 'raw', 'data_center_stock_and_flow'),
-        metadata={'doc': "The copy of 07's element draws in this project (element_draws.npy, elements.txt, "
+        metadata={'doc': "The copy of 08's element draws in this project (element_draws.npy, elements.txt, "
                          'source.txt): what 05 reads.'})
 
 
@@ -330,7 +331,7 @@ class StockFlowParams:
         metadata={'doc': "The robots in the world, ai-2040.com Plan A (its economics explorer's row Robots; EVIDENCE.md "
                          "E40), each at the end of its year, as the humanoid robots of 04."})
 
-    # A robot's lifetime, years, spread among the robots of each quarter as RAWCLICDataCenters' 07 spreads its GPUs'
+    # A robot's lifetime, years, spread among the robots of each quarter as RAWCLICDataCenters' 08 spreads its GPUs'
     # (min, mode, max of a triangle; Matthias, 2026-11-06: "have real lifetimes not something fixed like this", to the
     # table of 04, "Yes, build it"): CRU's "average of seven years (five to ten-year) life expectancy for humanoid
     # robots", Agility's assumed 5-year useful life of Digit and the article's "5-year robot life" (EVIDENCE.md E39.3).
@@ -492,20 +493,22 @@ class OutputParams:
         metadata={'doc': 'Where 04_stock_and_flow.py draws its overview and its page of each element.'})
 
     # What 05_combined_stock_and_flow.py writes: the AI data centres and the humanoid robots together, each scenario of
-    # 07 a folder, the draws and their summary; and its pages (EVIDENCE.md E52). Outputs: not in git.
+    # 08 a folder, the draws and their summary; and its pages (EVIDENCE.md E52). Outputs: not in git.
     combined_dir: str = field(
         default=os.path.join('data', 'combined_stock_and_flow'),
         metadata={'doc': 'Where 05_combined_stock_and_flow.py writes the draws of the data centres and the humanoid '
                          'robots together and their summary.'})
     combined_figures_dir: str = field(
         default=os.path.join('figures', 'combined_stock_and_flow'),
-        metadata={'doc': 'Where 05_combined_stock_and_flow.py draws its pages, a folder for each scenario of 07.'})
+        metadata={'doc': 'Where 05_combined_stock_and_flow.py draws its pages, a folder for each scenario of 08.'})
 
     # The resolution of every figure, in dots per inch. 150 keeps the text of a page sharp on a screen
     # and a page small enough to open quickly.
     dpi: int = field(
-        default=150,
-        metadata={'doc': 'Resolution of the figures in dots per inch.'})
+        default=300,
+        metadata={'doc': 'Resolution of the figures in dots per inch: 300, the data centres\' "best figure setting" '
+                         '(Matthias, 2026-11-12: "I want that we use the best figure setting!!!"; for this project '
+                         '2026-11-13: "test all the figures", "Yes, 1 to 7").'})
 
 
 @dataclass

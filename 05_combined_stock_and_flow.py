@@ -8,21 +8,22 @@ at the root of the repository.
 The elements in all AI data centres and all humanoid robots of the world together, 2025 to 2040, with their
 distributions. Matthias, 2026-11-08: "The distributions have to be combines 07 and 04 output", "Both have to be exactly
 the same, as we have to combine both data!!!", "write 05 combination of results of 04 and 07 with the distributions",
-the specification's rows 1 to 8, "Yes, build it" (documentation/claude/EVIDENCE.md E52). Press Run. No arguments; every
-setting is in `src/params_schema.py`.
+the specification's rows 1 to 8, "Yes, build it" (documentation/claude/EVIDENCE.md E52). RAWCLICDataCenters' stock and
+flow was its stage 07 then and is its stage 08 since 2026-11-12, its file and its columns the same (2026-11-13, "Yes, 1
+to 7", step 4). Press Run. No arguments; every setting is in `src/params_schema.py`.
 
 WHAT IT DOES
 ------------
-For each scenario of RAWCLICDataCenters' 07 (A, B, C) and each element of either model, in every draw and year: the
-kilograms in all AI data centres (07's draw i) and in all humanoid robots (04's draw i) added up, the stock at the end
-of the year, the inflow and the outflow of the calendar year, 2025 to 2040 (both models count so: 04 exactly as 07).
+For each scenario of RAWCLICDataCenters' 08 (A, B, C) and each element of either model, in every draw and year: the
+kilograms in all AI data centres (08's draw i) and in all humanoid robots (04's draw i) added up, the stock at the end
+of the year, the inflow and the outflow of the calendar year, 2025 to 2040 (both models count so: 04 exactly as 08).
 The two models are independent; draw i of one is added to draw i of the other, on the raw draws, before any statistic.
 An element only one model holds (magnesium, titanium, indium only the robots; strontium only the data centres) is that
-model's alone. 07's "collected" is left out: 04 has none yet.
+model's alone. 08's "collected" is left out: 04 has none yet.
 
 WHAT IT READS
 -------------
-- `data.data_center_draws_dir` (data/raw/data_center_stock_and_flow/): the copy of 07's element draws that
+- `data.data_center_draws_dir` (data/raw/data_center_stock_and_flow/): the copy of 08's element draws that
   tools/copy_data_center_draws.py made (element_draws.npy, elements.txt, source.txt); nothing of RAWCLICDataCenters
   itself (GitHub/CLAUDE.md §6).
 - `output.stock_and_flow_dir` (data/stock_and_flow/): 04's elements_in, elements_stock, elements_out (draw × year × part
@@ -34,14 +35,14 @@ WHAT IT WRITES
 Into `output.combined_dir` (data/combined_stock_and_flow/; not in git), the draws of every level ("keep the distribution
 on all levels"): for each scenario a folder <scenario>/ with elements_in.npy, elements_stock.npy and elements_out.npy
 (float32, draw × year 2025 to 2040 × element, kg, the data centres and the robots together; each model's own draws stay
-in 04's files and the copy of 07's), elements.txt; and summary.csv: for each scenario, element, source (AI data centres,
+in 04's files and the copy of 08's), elements.txt; and summary.csv: for each scenario, element, source (AI data centres,
 humanoid robots, together), flow and year, the mean and the 2.5 % and 97.5 % percentiles over the draws above 0 and the
 share of the draws above 0 ("A 0 is not part of a distribution").
 Into `output.combined_figures_dir` (figures/combined_stock_and_flow/; not in git), for each scenario <scenario>/:
   elements/<Element>.png          its stock, its inflow and its outflow, each a panel with three lines: the AI data
                                   centres, the humanoid robots and both together, each the mean of its draws above 0 and
                                   95 % of them as a band; logarithmic axes; the world's reserves and mine production
-                                  dashed (as 04 and 07)
+                                  dashed (as 04 and 08)
   distributions/elements_<year>.png
                                   2025, 2030, 2035 and 2040: exactly as RAWCLICDataCenters' 05 draws the elements of one
                                   data centre (04's split_elements_page, one copy): a panel per element held, its draws'
@@ -52,11 +53,11 @@ Every figure a result of the runs, never an input (GitHub/CLAUDE.md §5).
 WHAT IT CHECKS
 --------------
 That the two models' draws belong together before anything is written: the same number of draws, the years 2025 to 2040
-in both, 07's three flows in the copy, 04's 14 parts; the copy's source named (source.txt). Any problem stops it.
+in both, 08's three flows in the copy, 04's 14 parts; the copy's source named (source.txt). Any problem stops it.
 
 WHERE IT SITS
 -------------
-After 04_stock_and_flow.py and tools/copy_data_center_draws.py (which needs RAWCLICDataCenters' 07 to have run). Run
+After 04_stock_and_flow.py and tools/copy_data_center_draws.py (which needs RAWCLICDataCenters' 08 to have run). Run
 04 and the tool first; their outputs are read as they are.
 """
 
@@ -96,7 +97,13 @@ composition, schemas, plt = flow.composition, flow.schemas, flow.plt
 # What it combines
 # ------------------------------------------------------------------------------------------------------
 
-SCENARIOS = ('A', 'B', 'C')                      # 07's scenarios, in the order of the copy
+SCENARIOS = ('A', 'B', 'C')                      # 08's scenarios, in the order of the copy
+# Their names on the figures, as RAWCLICDataCenters' 08 writes them (its SCENARIO_NAMES, read 2026-11-13; rule 2 of
+# 2026-11-12: what each line is, in words a scientist outside the project reads; Matthias, 2026-11-13: "integrate the new
+# results with the robots", "Yes, 1 to 7").
+SCENARIO_NAMES = {'A': 'Scenario A: no new chip after Blackwell',
+                  'B': 'Scenario B: chips improve slowly, as lately',
+                  'C': 'Scenario C: chips improve as the ai-2040 article says'}
 FLOWS = flow.FLOWS                               # ('in', 'stock', 'out'): the copy's flows, 04's files, in one order
 YEARS = flow.LAST - flow.FIRST + 1               # 2025 to 2040: 16
 DATA_CENTRES, ROBOTS, TOGETHER = 'AI data centres', 'Humanoid robots', 'together'
@@ -110,7 +117,7 @@ ELEMENTS_DIR, DISTRIBUTIONS_DIR = 'elements', 'distributions'
 
 
 def read_inputs(params: Params) -> tuple:
-    """The copy of 07's element draws and 04's: (the copy, scenario × draw × year × flow × element; its elements; its
+    """The copy of 08's element draws and 04's: (the copy, scenario × draw × year × flow × element; its elements; its
     source in words; 04's three files {flow: draw × year × part × element}; 04's elements). Raises FileNotFoundError
     where a file is missing, ValueError where they do not belong together (WHAT IT CHECKS)."""
     folder = absolute(params.data.data_center_draws_dir)
@@ -135,17 +142,17 @@ def read_inputs(params: Params) -> tuple:
         robots[flow_name] = np.load(path, mmap_mode='r')
     shape = robots[FLOWS[0]].shape
     if centres.ndim != 5 or centres.shape[0] != len(SCENARIOS) or centres.shape[3] != len(FLOWS):
-        raise ValueError(f"the copy of 07's draws is {centres.shape}, not scenario × draw × year × flow × element.")
+        raise ValueError(f"the copy of 08's draws is {centres.shape}, not scenario × draw × year × flow × element.")
     if centres.shape[4] != len(centre_elements):
-        raise ValueError(f"the copy of 07's draws holds {centres.shape[4]} elements, its list {len(centre_elements)}.")
+        raise ValueError(f"the copy of 08's draws holds {centres.shape[4]} elements, its list {len(centre_elements)}.")
     if any(robots[f].shape != shape for f in FLOWS) or shape[2] != len(flow.PARTS) or shape[3] != len(robot_elements):
         raise ValueError(f"04's element files are {shape}, not draw × year × its {len(flow.PARTS)} parts × "
                          f'{len(robot_elements)} elements.')
     if centres.shape[1] != shape[0]:
-        raise ValueError(f"07's copy holds {centres.shape[1]:,} draws, 04 {shape[0]:,}: the two do not pair draw by "
+        raise ValueError(f"08's copy holds {centres.shape[1]:,} draws, 04 {shape[0]:,}: the two do not pair draw by "
                          'draw; run both with the same number of draws.')
     if centres.shape[2] != YEARS or shape[1] != YEARS:
-        raise ValueError(f"the years: 07's copy {centres.shape[2]}, 04's {shape[1]}, not {YEARS} ({flow.FIRST} to "
+        raise ValueError(f"the years: 08's copy {centres.shape[2]}, 04's {shape[1]}, not {YEARS} ({flow.FIRST} to "
                          f'{flow.LAST}).')
     return centres, centre_elements, source, robots, robot_elements
 
@@ -157,21 +164,25 @@ def columns_of(elements: list, own: list) -> tuple:
     return here, [own.index(elements[k]) for k in here]
 
 
+STATISTICS = flow.STATISTICS + ('held',)          # 04's: the median, 25 %, 75 %, 2.5 %, 97.5 %; the share above 0
+
+
 def stats_columns(values: np.ndarray) -> tuple:
-    """04's column_stats (one copy): the mean, 2.5 % and 97.5 % over the draws above 0, the share above 0."""
+    """04's column_stats (one copy): the median, 25 %, 75 %, 2.5 % and 97.5 % over the runs above 0, the share
+    above 0."""
     return flow.column_stats(values)
 
 
 def combine(params: Params, centres, centre_elements: list, robots: dict, robot_elements: list, folder: str,
-            figures: str) -> tuple:
+            figures: str, copied: str) -> tuple:
     """Add the data centres and the humanoid robots draw by draw for every scenario, flow and year; write the combined
     draws; draw the distribution pages of the year ends of DISTRIBUTION_YEARS; return (the elements, the statistics:
-    {(scenario, source, flow): {'mean', 'low', 'high', 'held'} each year × element})."""
+    {(scenario, source, flow): {'median', 'p25', 'p75', 'low', 'high', 'held'} each year × element})."""
     elements = composition.element_order(set(centre_elements) | set(robot_elements))
     n, e = centres.shape[1], len(elements)
     at_c, from_c = columns_of(elements, centre_elements)
     at_r, from_r = columns_of(elements, robot_elements)
-    stats = {(s, source, f): {key: np.full((YEARS, e), np.nan) for key in ('mean', 'low', 'high')}
+    stats = {(s, source, f): {key: np.full((YEARS, e), np.nan) for key in flow.STATISTICS}
              for s in SCENARIOS for source in SOURCES for f in FLOWS}
     for value in stats.values():
         value['held'] = np.zeros((YEARS, e))
@@ -194,72 +205,103 @@ def combine(params: Params, centres, centre_elements: list, robots: dict, robot_
                 together = centre + robot                                   # draw i with draw i, the raw draws
                 files[(s, f)][:, y] = together
                 for source, values in ((DATA_CENTRES, centre), (ROBOTS, robot), (TOGETHER, together)):
-                    for key, column in zip(('mean', 'low', 'high', 'held'), stats_columns(values)):
+                    for key, column in zip(STATISTICS, stats_columns(values)):
                         stats[(s, source, f)][key][y] = column
                 year = flow.FIRST + y
                 if f == 'stock' and year in flow.DISTRIBUTION_YEARS:
                     distribution_page(s, year, centre, robot, elements, n,
                                       os.path.join(figures, s, DISTRIBUTIONS_DIR, f'elements_{year}.png'),
-                                      params.output.dpi)
+                                      params.output.dpi, copied)
     for array in files.values():
         array.flush()
     return elements, stats
 
 
+def in_sentence(name: str) -> str:
+    """A scenario's name inside a sentence: its first letter small, nothing else changed ("scenario A: no new chip after
+    Blackwell"), as 08's in_sentence."""
+    return name[:1].lower() + name[1:]
+
+
 def distribution_page(scenario: str, year: int, centre: np.ndarray, robot: np.ndarray, elements: list, draws: int,
-                      path: str, dpi: int) -> str:
+                      path: str, dpi: int, source: str = '') -> str:
     """The elements in all AI data centres and humanoid robots in use at the end of `year`, exactly as
     RAWCLICDataCenters' 05 draws the elements of one data centre (04's split_elements_page): each bar split into the
-    data centres and the humanoid robots."""
-    note = (f'bars: the draws ({draws:,}), the height the share of the draws; solid line and number: the mean; dashed '
-            'lines: 2.5th and 97.5th percentile (the 95% interval);\neach panel on its own scale and unit; each bar split '
-            f"into the kg of its draws in the AI data centres (RAWCLICDataCenters' 07, scenario {scenario}) and in the "
-            'humanoid robots (04), draw i with draw i; an element held in fewer than 2.5% of the draws is not drawn')
-    return flow.split_elements_page(f'{year}: elements in all AI data centres (scenario {scenario}) and humanoid '
-                                    'robots in use', {DATA_CENTRES: centre, ROBOTS: robot},
+    data centres and the humanoid robots; the foot at most three sentences."""
+    note = (f'How often each mass came out in {draws:,} model runs, each panel on its own scale and unit; each bar split '
+            'into the AI data centres and the humanoid robots, run i with run i, the median of each under the title; an '
+            'element in fewer than 2.5 % of the runs is not drawn\n'
+            'A number in brackets: the share of the runs that have it, over which its bars are drawn\n'
+            f"The AI data centres in {in_sentence(SCENARIO_NAMES[scenario])}, their runs as copied ({copied_words(source)})")
+    return flow.split_elements_page(f'{year}: elements in all AI data centres and humanoid robots in use, '
+                                    f'{in_sentence(SCENARIO_NAMES[scenario])}', {DATA_CENTRES: centre, ROBOTS: robot},
                                     {name: COLOURS[name] for name in (DATA_CENTRES, ROBOTS)}, elements, note, path,
                                     dpi)
 
 
 def per_element(stats: dict, k: int) -> dict:
-    """One element's statistics over the years, {'mean', 'low', 'high', 'held'}, as 04's log_panel takes them."""
-    return {key: stats[key][:, k] for key in ('mean', 'low', 'high', 'held')}
+    """One element's statistics over the years, {'median', 'p25', 'p75', 'low', 'high', 'held'}, as 04's log_panel takes
+    them."""
+    return {key: stats[key][:, k] for key in STATISTICS}
+
+
+def holders(stats: dict, scenario: str, k: int) -> list:
+    """The sources a page of element `k` draws: the AI data centres and the humanoid robots where each holds it in some
+    run of some year and flow, and both together where both do. A side that holds none of it has no line and no
+    sample ("A 0 is not part of a distribution"); where one side alone holds it, both together would only repeat it, so
+    only that side is drawn (found 2026-11-09 on the pages of dysprosium, indium, magnesium, strontium, terbium and
+    titanium, VERIFICATION.md V227 point 3)."""
+    held = [source for source in (DATA_CENTRES, ROBOTS)
+            if any(stats[(scenario, source, f)]['held'][:, k].max() > 0 for f in FLOWS)]
+    return held + [TOGETHER] if len(held) == 2 else held
+
+
+def source_label(scenario: str, source: str) -> str:
+    """A source's name in the legend, in words (rule 2)."""
+    return {DATA_CENTRES: f"The world's AI data centres, {in_sentence(SCENARIO_NAMES[scenario])}",
+            ROBOTS: "The world's humanoid robots",
+            TOGETHER: 'Both together, added run by run'}[source]
 
 
 def element_page(scenario: str, symbol: str, k: int, stats: dict, world: dict, notes: list, draws: int, source: str,
                  path: str, dpi: int) -> str:
-    """One element of one scenario: its stock beside the world's reserves, its inflow beside the world's mine
-    production in 2025, its outflow; each panel the data centres, the humanoid robots and both together (04's
-    log_panel, world_reference and save_figure: one copy)."""
+    """One element of one scenario, as 04's (and 08's) element pages: what is added per year beside the world's mine
+    production in 2025, what is in use beside the world's reserves, what is removed per year; each panel the sources
+    that hold it (holders), one colour each, the median of the runs with its 50 % and 95 % intervals (04's log_panel,
+    world_reference and save_figure: one copy); one legend below the panels."""
     years = np.arange(flow.FIRST, flow.LAST + 1)
+    drawn = holders(stats, scenario, k)
     figure, panels = plt.subplots(1, 3, figsize=flow.A4_LANDSCAPE)
-    for axes, f, title, word in zip(panels, FLOWS, ('Inflow', 'Stock', 'Outflow'),
+    for axes, f, title, word in zip(panels, FLOWS, ('Added per year', 'In use', 'Removed per year'),
                                     ('per year', '', 'per year')):
-        series = [(years, per_element(stats[(scenario, source, f)], k), source if source != TOGETHER else 'both together',
-                   COLOURS[source]) for source in SOURCES]
+        series = [(years, per_element(stats[(scenario, s, f)], k), COLOURS[s], '-') for s in drawn]
         if flow.log_panel(axes, series, word, flow.mass_label):
             axes.set_title(title)
             if f == 'stock':
                 flow.world_reference(axes, world.get('reserves'), 'World reserves', per_year=False)
             if f == 'in':
                 flow.world_reference(axes, world.get('production'), 'World production 2025', per_year=True)
-            axes.legend(loc='upper left')
-    figure.suptitle(f'{composition.ELEMENT_NAMES.get(symbol, symbol)}: AI data centres (scenario {scenario}) and '
-                    'humanoid robots')
-    note = (f'Lines: the mean of the draws above 0 of {draws:,} draws; bands: 95 % of them (2.5 % to 97.5 %); flows per '
-            "calendar year, stocks at the end of the year, as RAWCLICDataCenters' 07; logarithmic axes. AI data centres: "
-            f"RAWCLICDataCenters' 07, scenario {scenario}, its draws as copied ({copied_words(source)}); humanoid robots: "
-            "04; both together: added draw by draw.")
-    if world:
-        note += (" Dashed: the world's mine production in 2025 (inflow) and reserves (stock), " + flow.WORLD_SOURCE
-                 + ('; ' + '; '.join(notes) if notes else '') + '; a value outside the scale is written in the panel.')
-    else:
-        note += ' No world production or reserves for it in the sources read.'
-    return flow.save_figure(figure, path, note, dpi)
+    name = composition.ELEMENT_NAMES.get(symbol, symbol)
+    figure.suptitle(f"{name} in the world's AI data centres and humanoid robots, {in_sentence(SCENARIO_NAMES[scenario])}")
+    handles = [flow.line_handle(source_label(scenario, s), COLOURS[s]) for s in drawn] + flow.world_handles(figure)
+    none = [w for s, w in ((DATA_CENTRES, 'the AI data centres'), (ROBOTS, 'the humanoid robots')) if s not in drawn]
+    amounts = (flow.AMOUNTS[:-1] + f"; the AI data centres' runs as copied ({copied_words(source)})"
+               + (f'; {none[0]} hold none of it' if none else '') + '.')
+    note = amounts + ' ' + flow.world_note(world, notes)
+    return flow.save_figure(figure, path, note, dpi, handles + flow.uncertainty_handles(draws, figure), ncol=3)
 
 
 def copied_words(source: str) -> str:
-    """The copy's source in words, from its source.txt: '<file> of <its modification time>, copied <when>'."""
+    """The copy's source in words for a figure, from its source.txt: 'the data-centre model's run of <the day its file
+    was written>, copied <the day>' (no file name: a figure writes no underscore and no code name, FigureTests' rule
+    "words"; the file is named in source.txt and in the console)."""
+    lines = dict(line.split(': ', 1) for line in source.splitlines() if ': ' in line)
+    day = lambda key: lines.get(key, '?').split(' ')[0]                                          # noqa: E731
+    return f"the data-centre model's run of {day('modified')}, copied {day('copied')}"
+
+
+def copied_file(source: str) -> str:
+    """The copy's source for the console: '<file> of <its modification time>, copied <when>'."""
     lines = dict(line.split(': ', 1) for line in source.splitlines() if ': ' in line)
     return (f"{os.path.basename(lines.get('source', '?'))} of {lines.get('modified', '?')}, copied "
             f"{lines.get('copied', '?')}")
@@ -269,13 +311,13 @@ def write_summary(path: str, elements: list, stats: dict) -> None:
     """summary.csv: a row for each scenario, element, source, flow and year; '–' where no draw is above 0."""
     with open(path, 'w', newline='', encoding='utf-8') as handle:
         writer = csv.writer(handle)
-        writer.writerow(('scenario', 'element', 'source', 'flow', 'year', 'mean', '2.5 %', '97.5 %',
-                         'held in % of the draws'))
+        writer.writerow(('scenario', 'element', 'source', 'flow', 'year', 'median', '25 %', '75 %', '2.5 %', '97.5 %',
+                         'held in % of the runs'))
         for (s, source, f), value in stats.items():
             for k, symbol in enumerate(elements):
                 for y in range(YEARS):
                     cells = [f'{value[key][y, k]:.6g}' if np.isfinite(value[key][y, k]) else '–'
-                             for key in ('mean', 'low', 'high')]
+                             for key in flow.STATISTICS]
                     writer.writerow((s, composition.ELEMENT_NAMES.get(symbol, symbol), source, f, flow.FIRST + y,
                                      *cells, f"{100 * value['held'][y, k]:.1f}"))
 
@@ -289,12 +331,12 @@ def run(params: Params) -> int:
         print(f'05 stopped: {error}')
         return 1
     n = centres.shape[1]
-    print(f"05: AI data centres, 07's draws as copied ({copied_words(source)}); humanoid robots, 04's; {n:,} draws, "
+    print(f"05: AI data centres, 08's draws as copied ({copied_file(source)}); humanoid robots, 04's; {n:,} draws, "
           f'scenarios {", ".join(SCENARIOS)} …', flush=True)
     folder, figures = absolute(params.output.combined_dir), absolute(params.output.combined_figures_dir)
     os.makedirs(folder, exist_ok=True)
     with plt.rc_context(flow.PRINT_STYLE):
-        elements, stats = combine(params, centres, centre_elements, robots, robot_elements, folder, figures)
+        elements, stats = combine(params, centres, centre_elements, robots, robot_elements, folder, figures, source)
     write_summary(os.path.join(folder, SUMMARY), elements, stats)
     world, notes = flow.references(params)
     pages = 0
