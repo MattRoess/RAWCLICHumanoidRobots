@@ -117,8 +117,8 @@ to know what the different components contribut already at this level", "Yes, ad
 | Joints | Magnets | NdFeB magnets of all motors and hydraulic pumps | material NdFeB magnets in a kind of the joints group (the six joint kinds, the wheeled base, the lift column, the hydraulics) |
 | | Motor windings and steel | rest of the motors: windings, steel, magnet carriers (the carriers aluminium: 392 g of type 1's aluminium, V222) | joint components Motor stator, Motor rotor, Magnet carrier |
 | | Gears and bearings | gear stages, their carriers, bearings inside the joints (stage 2's carrier 12.5 / 25 / 40 % aluminium) | Gear stage 1 and 2, Two small bearings |
-| | Housings and other parts | housings, end caps, flanges; wheels, casters, lift, hands | Housing, Two end caps, Output flange, Other; casters, the lift column's profile, hands and arm end pieces, the knee's copper strip |
-| | Hydraulics | actuators, valves, power unit, manifold, oil, hoses | rows named Hydraulic …, Digital hydraulic …, Servo valves, Actuator bodies; the kind Hydraulics |
+| | Housings and other parts | housings, end caps and flanges; wheels, casters, lift and hands | Housing, Two end caps, Output flange, Other; casters, the lift column's profile, hands and arm end pieces, the knee's copper strip |
+| | Hydraulics | actuators, valves, power unit, manifold, oil and hoses | rows named Hydraulic …, Digital hydraulic …, Servo valves, Actuator bodies; the kind Hydraulics |
 | Battery | Cells | the battery cells, NMC or LFP | material Battery cells; rows Battery cells, Auxiliary battery cells |
 | | Housing, busbars and wires | the pack's housing, nickel strips, busbars, wires | the row Battery housing |
 | Electronics | PCB | the computer and power boards, all fans and heat sinks | a circuit board in the kind Boards and computers; every fan; the heat sinks |

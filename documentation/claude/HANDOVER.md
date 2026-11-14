@@ -65,6 +65,56 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
+## 2026-11-14: the memory by the new rule, FigureTests 0.8.0 (start here)
+
+**State.** Matthias, 2026-11-14: "Yes, fix 1 and 2" (1: the memory by his rule of the day, "20 000 is enough. But you
+have to choose a conservative approach, which means have enough safety margins"; 2: FigureTests 0.7.0 on the robots'
+pages and the rule for a unit written twice). Both done; committed and pushed on his word ("Yes, commit and push"),
+FigureTests with its tag v0.8.0. The run table of 2026-11-13 below no longer holds: use this one.
+- Memory (V237): 02 draws each robot type in a process of its own, writes each robot's draws and each table to the disk
+  as it goes; 03 frees each page; 04 counts in chunks of 5,000 and reads its summary in parts. Measured at 5,000, 10,000
+  and 20,000, on the line through the two largest to 200,000, × 1.5: 02 8.2 GB, 03 1.6 GB, 04 6.8 GB, of 8.6 GB. 02's
+  check before drawing at 200,000: 8.0 GB, it starts. Outputs byte for byte as before (02: 597 files, but the six notes
+  pages whose templates sentence was reworded; 04: 52 files).
+- FigureTests 0.8.0 (V238; FigureTests' own VERIFICATION): unit_twice; the pages of 02's processes checked; box_rule no
+  longer taking bars, markers and a table's rows for boxes. Installed from the working copy; requirements.txt pins
+  v0.8.0. Pages fixed by the rules: the tables' foot (three sentences), the overview's cards, taken_apart.png, 03's notes.
+- Checks: every page of 01 to 05 at 200 runs, 752 pages, 0 faults; the whole suite of 751 tests run once (three failures,
+  each fixed and its tests run again: test_all_figures 56, test_comparison, test_schemas and test_composition 328, all
+  pass); tests/test_memory.py 5 tests pass; FigureTests 56 tests pass.
+
+**His run** (RAWCLICHumanoidRobots; all of 01 to 05: 01's pages changed today, figures/parts_taken_apart/ is empty since
+the killed run of 2026-11-13, and data/ holds 02 to 05 of 2026-11-08, older than the code):
+
+| # | Full path | Run? | Writes | About (on the line × 1.5) |
+|---|---|---|---|---|
+| – | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/00_parameters.py` | do not run: unchanged since 2026-10-26 | – | – |
+| 1 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` | run | figures/schemas/ (53 pages, rewritten) | 2 min |
+| 2 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/02_composition.py` | run (its memory check first) | data/consolidated/, data/parts_taken_apart/, figures/composition/, figures/parts_taken_apart/ | 8 min |
+| 3 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/03_comparison.py` | run | figures/comparison/ (208 pages) | 2 min |
+| 4 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/04_stock_and_flow.py` | run | data/stock_and_flow/, figures/stock_and_flow/ | 7 min |
+| 5 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/copy_data_center_draws.py` | run before 05 (copies RAWCLICDataCenters 08's draws of 2026-11-12 into data/raw/) | data/raw/data_center_stock_and_flow/ | 10 min (2026-11-13's table, not measured today) |
+| 6 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/05_combined_stock_and_flow.py` | run | data/combined_stock_and_flow/, figures/combined_stock_and_flow/ | 3 min (2026-11-13's table, not measured today) |
+| – | any stage of RAWCLICDataCenters | do not run | – | – |
+
+During his run: watch each stage's start, end and memory (footprint, 5 s), tell the next stage unprompted with its full
+path, check each stage's outputs at once.
+
+**Open, for him:**
+1. Done 2026-11-14: RAWCLICHumanoidRobots and FigureTests committed and pushed, FigureTests tagged v0.8.0 (67c37fd),
+   which requirements.txt pins.
+2. Leftovers of today's change, nothing reads them (grep of every .py): `same_elements` (02; run reads the columns
+   itself, write_kept), `DiskArrays.matrix` and `DiskArrays.table` (02; assemble writes straight into the files). To
+   remove on his word.
+3. 02's 8.2 GB is 0.4 GB below the line; the footprint of the same run varies by up to 0.2 GB at 20,000, so the memory
+   test may fail on another run. One more step would lower it (each file's shared draws kept only for its robots as
+   they are drawn), on his word.
+4. FigureTests 0.8.0 into RAWCLICDataCenters (it pins 0.7.0): its pin, its whole page check (the rule "every project's
+   pin").
+5. From 2026-11-13, still his: the last digits of some summary statistics between two runs (sums over Python sets); the
+   colours KINDS and SENSOR_KINDS in 02 (no reader). His 36 old pages in figures/parts_taken_apart/ are gone (the
+   folder is empty since the killed run).
+
 ## 2026-11-13, evening: handover — his run tomorrow (start here)
 
 **State.** Committed and pushed tonight (the commit named in Claude's last message). The checks: the whole suite (744

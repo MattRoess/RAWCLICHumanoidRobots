@@ -442,19 +442,26 @@ g on 2026-10-26 (HANDOVER.md).
 **Its memory (since 2026-11-13).** Matthias's run of 02 held 43 GB on his 16 GB computer and wrote nothing ("This is
 very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte Carlo", "It must
 adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4). 02 now holds one
-robot type at a time: drawn, checked, its tables and pages written, let go before the next; each robot's parts and
+robot type at a time, each in a process of its own since 2026-11-14 (`one_type_in_its_process`, `draw_one_type`): drawn,
+checked, its tables and pages written, its draws of the materials and elements kept in a file, and when the process
+ends all its memory goes back to the system (in one process the memory each type had let go stayed with the process
+and added up over the six types, measured: VERIFICATION V237); the kept draws are read back one type at a time, given
+the same element columns and written; each robot's parts and
 joints' structures only over its own draws (`PartBlocks`), so that the memory grows with the draws and the materials
 and elements, never with the number of robots; for a type over several parts files each file's shared draws only over
 its own robots' draws (`Shared.keep`, the random numbers as before); each table built only when it is written, each page
 written and freed before the next; its large draw tables kept on the disk, memory-mapped (`DiskArrays`), so that the
 system holds in memory only what is in use and writes the rest to the disk, never to its swap. Before any type is
 drawn, a trial of 2,000 draws of each gives the memory the run will need (`memory_needed`, on the safe side: the draws on
-the disk counted as if in memory, its peak twice the measured, the pages added); a run whose estimate passes 75 % of the
-computer's memory, where it would begin to swap, stops there, nothing drawn.
+the disk counted as if in memory, its peak twice the measured, the pages added; this process and one type's process
+counted together: `run_memory`); a run whose estimate passes half the computer's memory stops there, nothing drawn.
 Everything goes into staging folders ('<output folder>.writing') and reaches the output folders only when every type
-adds up. The outputs are byte for byte those of before (VERIFICATION V236). Measured at 200,000 draws (extrapolated
-from 50,000 and 100,000): about 7.3 GB; 03, which reads 02's tables memory-mapped, about 4.1 GB; tests/test_memory.py
-measures every stage at two sizes and fails where one would not fit.
+adds up. Since 2026-11-14 also: each robot's draws written to one file of its type as soon as it is drawn
+(`RobotSpill`), each table put together straight into its file (`DiskArrays.gathered`) and written block after block of
+draws (`save_float32`). The outputs are byte for byte those of before (VERIFICATION V236, V237). Measured by
+tests/test_memory.py at 5,000, 10,000 and 20,000 draws, on the line through the two largest to 200,000 draws and
+raised by half (the rule of 2026-11-14): 02 8.2 GB, 03 (which reads 02's tables memory-mapped and frees each page as it
+is written) 1.6 GB, 04 6.8 GB, each below half the computer's memory (8.6 GB); the test fails where one would not fit.
 
 In each draw:
 
@@ -1396,7 +1403,9 @@ of the robots built and nothing else (V206), is replaced.
 
 `04_stock_and_flow.py` follows RAWCLICDataCenters' 07 step by step, quarter by quarter from 2025 Q1 to 2040 Q4, its years
 exactly as 07's (since 2026-11-08, EVIDENCE.md E48: the flows of each calendar year, the stocks at its end), in
-chunks of 20,000 draws, every draw paired with 02's draw i of each robot type:
+chunks of 5,000 draws (`CHUNK`; 10,000 until 2026-11-14: the memory of a chunk does not grow with the draws, and its
+summary reads one unit and two elements of its draws at a time, VERIFICATION V237; the results the same), every draw
+paired with 02's draw i of each robot type:
 
 1. **The robots.** In use at the end of each quarter: the article's (AI Futures Project, *AI 2040: Plan A*, its economics
    explorer's row Robots, `stock_and_flow.robots`), each value at the end of its year (Matthias, 2026-11-08: "Follow the

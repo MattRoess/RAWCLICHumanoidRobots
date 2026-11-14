@@ -676,9 +676,9 @@ class TestTypeTwoPages(unittest.TestCase):
         # and names the one without, which is not in the evaluation; types 3 and 4, listed in the register, are drawn
         # from the workbook; a type without a sheet keeps its card as before (None here).
         self.assertEqual(schemas.type_card_text(2, 'Anchor', self.apart, self.register, True),
-                         'Its 96 robots of the register with a mass, each drawn from its own parts; their masses 29 to '
-                         '396 kg. The Xialan S0, with no mass, is not in the evaluation. Most of its robots rest on '
-                         'templates: the joints of 67 of its 102 robots and versions, the battery of 63.')
+                         'Its 96 robots of the register with a mass: each drawn from its own parts; their masses 29 to '
+                         '396 kg. The Xialan S0 with no mass is not in the evaluation. Most of its robots rest on '
+                         'templates: the joints of 67 of its 102 robots and versions; the battery of 63.')
         # 67 and 63 since E14 (2026-11-01): 13 robots' joints from their makers' models, THEMIS's battery its own.
         # 168 since 2026-11-01: the Reflex's catalogue "0.0" is not a mass (CLAUDE.md §7, VERIFICATION V126); 164 since
         # batch 3 (E15.7 point 5), and type 4's 124: the seven of E15.4 have no stated mass.
@@ -792,7 +792,7 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
         self.assertEqual(schemas.template_shares(self.views[3]), (137, 124, 173))
         self.assertEqual(schemas.template_shares(self.views[4]), (103, 98, 137))
         self.assertEqual(schemas.template_words(self.views[3]), 'Most of its robots rest on templates: the joints of '
-                                                                '137 of its 173 robots and versions, the battery of '
+                                                                '137 of its 173 robots and versions; the battery of '
                                                                 '124.')
         self.assertIn(schemas.template_words(self.views[4]),
                       schemas.type_card_text(4, 'Anchor', self.views[4], self.register, True))
@@ -833,7 +833,7 @@ class TestTypesThreeAndFourPages(unittest.TestCase):
             readable_pages(self, pages)
             # The card: the robots drawn and their masses without it, and the sentence saying so.
             card = schemas.type_card_text(n, 'Anchor', drawn, counted, True, [r for r in outliers if n in r.types])
-            self.assertIn(f'Its {robots} robots of the register with a mass, each drawn from its own parts', card)
+            self.assertIn(f'Its {robots} robots of the register with a mass: each drawn from its own parts', card)
             self.assertIn('The Neo1, an outlier, is not drawn and not counted.', card)
             self.assertNotIn('1200', card)
             self.assertEqual(schemas.taken_count(n, counted, drawn)[:2], (robots, robots))
@@ -3168,7 +3168,7 @@ class TestRobotsTables(unittest.TestCase):
             self.assertEqual(counts, sorted(counts, reverse=True), msg=n)
             for figure, lines in zip(pages, schemas.table_pages(rows)):
                 words = [t.get_text() for t in figure.findobj(Text)]
-                key = next((w for w in words if w.startswith('Two colours in a cell')), '').replace('\n', ' ')
+                key = next((w for w in words if w.startswith(schemas.TABLE_KEY[:30])), '').replace('\n', ' ')
                 on_page = {line[1].base for line in lines if line[0] == 'robot' and line[1].base}
                 for line in lines:
                     if line[0] == 'robot':

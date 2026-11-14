@@ -40,6 +40,7 @@ ipykernel==7.3.0
 # it can be used by me in all the projects and repositories", "Installed, pinned"; 2026-11-13: "There is now the package
 # for figure testing ... test all the figures", "Yes, 1 to 7"): its own repository FigureTests, pinned by its version
 # tag; tests/test_all_figures.py checks that the version installed is this one. Install it with --no-deps, so that the
-# pins above stay as they are (checked 2026-11-13: numpy, matplotlib, scipy and pandas unchanged by it):
-#   ./.venv/bin/pip install --no-deps "figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.6.0"
-figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.6.0
+# pins above stay as they are (checked 2026-11-13: numpy, matplotlib, scipy and pandas unchanged by it). 0.8.0 since
+# 2026-11-14: a unit written twice, and the figures of the processes a stage starts (02 draws each robot type in its own):
+#   ./.venv/bin/pip install --no-deps "figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.8.0"
+figure-tests @ git+https://github.com/MattRoess/FigureTests.git@v0.8.0

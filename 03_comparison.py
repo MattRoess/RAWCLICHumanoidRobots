@@ -67,6 +67,7 @@ Where it sits: after 02_composition.py; 04_stock_and_flow.py comes after it and 
 
 from __future__ import annotations
 
+import gc
 import importlib.util
 import math
 import os
@@ -484,7 +485,7 @@ def notes(robots: list, outliers: list, params: Params) -> list:
     n = len(robots[0].tables['total'][1])
     paragraphs = [
         'Each page one item, the six robot types side by side: the mass of one robot by material (the six materials '
-        'that hold most of it each in its colour, every other material together in grey), each material by the group '
+        'that hold most of it each in its colour, every other material together, as the legend shows), each material by the group '
         'of the kind of part it sits in, each element of interest by the material it comes from, the mass of one robot '
         'by part group and by body region, and copper, recycled as copper or fixed in alloys. One panel per robot type, '
         'in the form of the pages of each robot type (figures/composition/).',
@@ -510,9 +511,9 @@ def notes(robots: list, outliers: list, params: Params) -> list:
         'robot type: copper and nickel each its metal whole; the aluminium, magnesium and titanium alloys the metal '
         'they hold; the NdFeB magnets their rare earths, cobalt, boron, niobium and gallium; the battery cells their '
         'lithium, nickel, cobalt and manganese and the copper and aluminium of their foils and tabs; the boards and '
-        'components their metals of interest. Copper in all: the copper recycled as copper and, in pale grey, the '
-        'copper fixed in alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not '
-        'recovered as copper.',
+        'components their metals of interest. Copper in all: the copper recycled as copper and the copper fixed in '
+        'alloys (brass, the aluminium and magnesium alloys, the steels, the magnets), which is not recovered as '
+        'copper, each with its sample in the legend.',
         composition.LIGHT_ALLOY_NOTE,   # what the light alloys' panels leave out (E33)
         composition.MAGNETS_NOTE,   # the magnets' and the sensors' part of an element apart (E38 point 5)
         "The part groups and body regions: each robot type's kinds of part placed whole; rough where a kind holds parts "
@@ -676,6 +677,9 @@ def run(params: Params) -> int:
     for name, figure in pages(robots, params, outliers):
         figure.savefig(os.path.join(out, name), dpi=params.output.dpi, facecolor='white')
         plt.close(figure)
+        del figure
+        gc.collect()   # a figure refers to itself through its parts: only the collector frees it and the image of
+        #                52 MB it was drawn into; without it some seventy closed pages waited, 3.5 GB (VERIFICATION V237)
         written.append(name)
         print(f'  {name}', flush=True)
     for name in OLD_PAGES:

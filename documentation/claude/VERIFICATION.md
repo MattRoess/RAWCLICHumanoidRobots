@@ -108,6 +108,89 @@ material declaration). Until then the elements of one robot are **not validated*
 
 ## 2026-11-13
 
+### V238. FigureTests 0.8.0: a unit written twice, the pages of 02's processes, the rules of 0.7.0 on every page
+
+- **Why:** "Yes, fix 1 and 2" (2026-11-14), point 2: FigureTests 0.7.0 had been committed on 2026-11-13 at 14:33, the
+  robots still pinned 0.6.0, their pages never checked by 0.7.0's rules (boxes and their text, schema pages under the
+  foot rule, style words); and the rule for a unit written twice (Matthias, 2026-11-13: "There are units and the header
+  has units") not yet in FigureTests (HANDOVER 2026-11-13, open item 1).
+- **Built (FigureTests, its own VERIFICATION 2026-11-14):** 0.8.0: rule_unit_twice (proof first); FigureCheck checks
+  the figures of the Python processes a stage starts (02's robot-type processes, V237), a process of another Python
+  left as it is (the traction-motor project's environment that 02 runs); box_rule: a bar with no text, a marker
+  narrower than half its box, a table's strip one line high and a heading's band drawn on top of its box no longer
+  taken for faults (proofs first). Its suite: 56 tests, all pass. Built as a wheel from the working copy and installed
+  into this project's environment with --no-deps, byte for byte the working copy; requirements.txt pins v0.8.0 (the tag
+  exists on GitHub only once FigureTests is committed, tagged and pushed: his word).
+- **Found on the pages by 0.7.0's and 0.8.0's rules (tests/test_all_figures.py, 200 runs a type):** unit_twice: none.
+  box_rule 1,919 on 01's tables and 49 on 02's parts pages, then 311 on 01: all the rule's misreadings above, none a
+  fault of a page (looked at: 02's robot_type_2_overview_1.png, its lettered markers on the sketch). Faults of pages,
+  fixed: foot on 15 of 01's table pages (four or five sentences: now three at most, the marks in one sentence,
+  table_marks; every word kept); list_text on 01's overview (a card of seven comma-separated parts: its clauses
+  without commas, the templates' two counts after a semicolon) and on taken_apart.png (six items: the last two joined
+  by "and"); colour_words on 03's two notes pages ("in grey", "in pale grey": the legend names them).
+- **Checked:** 01 alone under the check: 53 pages, 0 faults; tests.test_comparison, tests.test_schemas,
+  tests.test_composition: 328 tests, all pass (the comparison's page check now draws 02's types in its own process with
+  draw_one_type, the function each type's process runs, so that its pages reach its check). Every page of 01 to 05
+  (tests.test_all_figures, 200 runs a type, 56 tests): 01 53 pages, 02 369 (those of its robot-type processes
+  included), 03 208, 04 41, 05 81: 752 pages, 0 faults, all pass. Looked at: a table page of type 2 (its foot of three
+  sentences), the overview's cards, taken_apart.png: every text in its place, nothing over its box.
+- **Not covered:** FigureTests 0.8.0 is not yet in RAWCLICDataCenters (it pins 0.7.0; raising it is the next step of the
+  rule "every project's pin", for that project's session or his word).
+
+### V237. The memory by the rule of 2026-11-14: measured up to 20,000 runs, the line through the two largest, × 1.5
+
+- **Why:** Matthias, 2026-11-14: "For MC you want currently to test with up to 50 000 runs. I do NOT want this. 20 000 is
+  enough. But you have to choose a conservative approach, which means have enough safety margins." (the GitHub
+  folder's CLAUDE.md §4: measured at growing numbers of runs, 20,000 at most; the straight line through the two
+  largest; the peak and the time raised by half; in half the computer's memory, 8.6 GB here). By it, V236's design
+  failed: 02 at about 6 to 9 GB at 200,000, 9 to 14 GB with the margin; tests/test_memory.py measured at 50,000 and
+  allowed 75 %; 02's check allowed 75 %. "Yes, fix 1 and 2".
+- **Found (the system's footprint, each stage in its own process on his inputs, sandboxes in Claude's scratch
+  folder):** (1) 02: after each robot type was let go, nothing of its draws was alive (no array above 1 MB, no
+  memory-mapped array, no folder on the disk), yet the process kept the memory: 0.77 to 1.15 GB after a type at 20,000
+  draws, robot type 6 (5 robots) at 1.44 GB after five types; releasing freed memory to the system
+  (malloc_zone_pressure_relief) gave back nothing. One type alone in its own process: 0.6 GB. (2) 02 within a type:
+  every robot's draws held until all were drawn; assemble making an array of the N draws for every robot and key, all
+  keys of a table at once, then a copy; each table written whole and copied into float32. (3) 03: each page closed but
+  not collected: a figure refers to itself, so the closed pages (52 MB each) waited for Python's occasional collection,
+  3.5 GB at 5,000 draws, 4.3 GB at 20,000. (4) 04: chunks of 10,000 draws (its kg and product arrays 0.8 GB each), its
+  summary reading whole files and a whole year of every element at once (about 3 GB at 200,000).
+- **Fixed:** 02: each robot type drawn, checked and written in a process of its own (one_type_in_its_process,
+  draw_one_type), its draws of the materials and elements kept in a file and read back one type at a time
+  (write_kept, widen_elements); assemble puts each table straight into its file (DiskArrays.gathered,
+  gathered_matrix); each robot's draws to one file of its type as soon as it is drawn (RobotSpill); the tables
+  written block after block of 5,000 draws (save_float32); the check counts this process and one type's process
+  (run_memory) against half the memory (MEMORY_SHARE 0.5), and 02 says each type's peak and its peak while drawing.
+  03: each page collected after it is written. 04: each page collected; CHUNK 5,000; its summary one unit and two
+  elements at a time (element_summary, SUMMARY_ELEMENTS).
+- **Proved the same:** 02 at 2,000 draws with PYTHONHASHSEED 0 against the committed code (290ef63), all 597 files of
+  its four output folders compared byte for byte (an Excel file's stored time apart): identical after the processes
+  per type, identical after the assemble change; after RobotSpill and save_float32 identical but for the six notes
+  pages, which carry the templates sentence reworded for FigureTests' rule list_text (V238). 04 at 20,000 draws: all
+  52 files identical with chunks of 10,000 and 5,000, and after the summary change. 03: its pages unchanged (only the
+  collection added).
+- **Measured (tests/test_memory.py, 2026-11-14, the peak footprint of each stage; 02 its own process and its largest
+  robot-type process together):**
+
+  | Stage | 5,000 | 10,000 | 20,000 | 200,000 on the line through 10,000 and 20,000, × 1.5 |
+  |---|---|---|---|---|
+  | 02 | 0.81 GB | 0.87 GB | 1.11 GB | 8.2 GB (while drawing 0.57, 0.66, 0.90 GB: 7.8 GB) |
+  | 03 | 0.81 GB | 0.84 GB | 0.85 GB | 1.6 GB |
+  | 04 | 1.88 GB | 2.07 GB | 2.20 GB | 6.8 GB |
+
+  Before today's changes: 02 1.23 GB at 20,000 (in one process; its line 9.8 GB with the margin), 03 2.64 and 4.30 GB
+  at 5,000 and 20,000 (36 GB on the line), 04 1.93 and 4.1 GB. 02's own check at 200,000 draws: 8.0 GB, of 8.6 GB:
+  it starts the run, and it is above what is measured (5.4 GB on the line, without the margin).
+- **Times (each stage alone at 5,000 and 20,000 draws, one after another, 2026-11-14), on the line to 200,000, × 1.5:**
+  02 180 and 190 s: about 8 min; 03 66 and 66 s: about 2 min; 04 32 and 52 s: about 7 min (its chunks of 5,000).
+- **Tests:** tests/test_memory.py: 5,000, 10,000 and 20,000 runs (SIZES), the line through the two largest, the larger
+  of 02's two lines (its peak and its peak while drawing), × MARGIN 1.5, below half the memory; 02's check never below
+  the measured. tests.test_composition.TestRun (02's steps, 10 tests) with the processes. All pass.
+- **Not covered:** the footprint of the same run varies between runs (02 at 20,000: 1.04, 1.11, 1.12, 1.15 and 1.23 GB in
+  five runs today), so 02's 8.2 GB, 0.4 GB below the line, may cross it in another run of the test; 01 and 05 are not
+  in the test (they do not grow with the draws: 01 2.8 GB, 05 1.4 to 1.6 GB at 20,000 and 50,000 on 2026-11-13); the
+  times are not measured by the test.
+
 ### V236. The memory of the stages at 200,000 draws: 02 held 43 GB; found, fixed, proved, measured
 
 - **What happened:** his run of 2026-11-13 15:02: 02 at 200,000 draws reached a memory footprint of 43 GB on his 16 GB

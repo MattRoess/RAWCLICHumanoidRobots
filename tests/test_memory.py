@@ -13,11 +13,14 @@ GitHub folder's CLAUDE.md §4):
 
 1. 02 holds each robot's parts over its own draws only (PartBlocks): their memory grows with the draws, not with the
    number of robots; parts.npy is written from them byte for byte as numpy writes the whole matrix.
-2. 02's own check before a run (memory_needed): the run at the settings' draws below MEMORY_SHARE of the memory.
-3. The stages 02, 03 and 04, each in a process of its own at 20,000 and 50,000 runs on his real inputs (its outputs in
-   a temporary folder), their peak memory measured by the system; extrapolated in a straight line to the settings'
-   draws (which overestimates 02: measured 4.6 GB at 100,000 against 6.2 extrapolated), each below the line where the
-   computer would begin to swap (MEMORY_SHARE of its memory). Slow (some ten minutes): it runs the stages.
+2. 02's own check before a run (memory_needed, run_memory): the run at the settings' draws in half the memory.
+3. The stages 02, 03 and 04, each in a process of its own at 5,000, 10,000 and 20,000 runs on his real inputs (its
+   outputs in a temporary folder), their peak memory measured by the system (02: its own process and the largest process of a robot
+   type, which it says); extrapolated on the safe side, the rule of 2026-11-14 (Matthias: "For MC you want currently
+   to test with up to 50 000 runs. I do NOT want this. 20 000 is enough. But you have to choose a conservative
+   approach, which means have enough safety margins."): along the straight line through the two largest measurements
+   to the settings' draws, raised by half (MARGIN), in half the computer's memory; and 02's check never below what is
+   measured. Slow (some ten minutes): it runs the stages.
 
 Run: ./.venv/bin/python -m unittest tests.test_memory
 """
@@ -42,8 +45,12 @@ sys.modules['composition'] = composition
 _spec.loader.exec_module(composition)
 
 LIMIT = composition.MEMORY_SHARE * os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')   # bytes
-# The two numbers of runs each stage is measured at (test 3).
-LOW, HIGH = 20000, 50000   # Matthias: "I do not want that you go beyond 50 000 runs"
+# The growing numbers of runs each stage is measured at (test 3), 20,000 at most (Matthias, 2026-11-14: "20 000 is
+# enough"); the straight line through the two largest; and the safety margin on the extrapolated peak ("enough safety
+# margins": the GitHub folder's CLAUDE.md §4, "raised by half (× 1.5)").
+SIZES = (5000, 10000, 20000)
+LOW, HIGH = SIZES[-2:]
+MARGIN = 1.5
 STAGES = ('02_composition', '03_comparison', '04_stock_and_flow')   # "have it done for 02, 03 and 04"
 # A stage run as by pressing Run, its outputs moved into a temporary folder, `runs` draws of each robot type, 05 on the
 # first `runs` draws of the data centres' copy (sandbox settings of tests/test_all_figures.py, with its own runs).
@@ -76,15 +83,25 @@ sys.exit(0 if error is None else error[-2000:])
 '''
 
 
-def peak_bytes(folder: str, runs: int, stage: str) -> float:
-    """The peak memory of `stage` run at `runs` draws in its own process, as the system measures it (/usr/bin/time -l:
-    its peak memory footprint). Raises AssertionError where the stage stopped."""
+def peak_bytes(folder: str, runs: int, stage: str) -> tuple:
+    """(the peak memory of `stage` run at `runs` draws, bytes; for 02 its peak while drawing, else the same; the
+    estimate of 02's own check or None), as the system measures it (/usr/bin/time -l: the peak memory footprint of the
+    stage's process), and for 02 the largest process of a robot type added, which 02 says ("The largest process of a
+    robot type held at most ... GB, while drawing at most ... GB"): the two run at the same time. The peak while
+    drawing grows with the draws faster than the peak of the pages, and takes over at more draws (VERIFICATION V237).
+    Raises AssertionError where the stage stopped."""
     run = subprocess.run(['/usr/bin/time', '-l', sys.executable, '-c', RUNNER.format(root=ROOT), folder, str(runs),
                           stage], capture_output=True, text=True, env={**os.environ, 'MPLBACKEND': 'Agg'})
     if run.returncode != 0:
         raise AssertionError(f'{stage} at {runs:,} runs stopped: {run.stderr[-1500:]}')
-    found = re.search(r'(\d+)\s+peak memory footprint', run.stderr)
-    return float(found.group(1))
+    peak = float(re.search(r'(\d+)\s+peak memory footprint', run.stderr).group(1))
+    largest = re.search(r'The largest process of a robot type held at most ([\d.]+) GB, while drawing at most '
+                        r'([\d.]+) GB', run.stdout)
+    check = re.search(r'the run at most about ([\d.]+) GB', run.stdout)
+    if largest:
+        return (peak + float(largest.group(1)) * 1e9, peak + float(largest.group(2)) * 1e9,
+                float(check.group(1)) * 1e9)
+    return peak, peak, None
 
 
 class TestPartsHeldRobotByRobot(unittest.TestCase):
@@ -145,24 +162,24 @@ class TestTheCheckBeforeARun(unittest.TestCase):
                 a = composition.read_apart_inputs(params, inputs, sheets[category.number], category, files)
                 needs.append(composition.memory_needed(a, category, inputs.lists, params))
         self.assertTrue(needs)
-        total = (composition.memory_in_use() + sum(kept for _, kept in needs) + max(peak for peak, _ in needs)
-                 + composition.PAGES_MEMORY)
+        total = composition.run_memory(dict(enumerate(needs)))
         self.assertLessEqual(total, LIMIT, msg=f'{total / 1e9:.1f} GB at {params.composition.draws:,} draws')
 
 
 class TestEveryStageFits(unittest.TestCase):
-    """3. Every stage at the settings' draws, extrapolated from its measured peak at LOW and HIGH runs, in half this
-    computer's memory."""
+    """3. Every stage at the settings' draws, extrapolated from its measured peak at LOW and HIGH runs along the straight
+    line and raised by MARGIN, in half this computer's memory; 02's check not below its measured peak."""
 
     @classmethod
     def setUpClass(cls):
         if not os.path.exists('/usr/bin/time'):
             raise unittest.SkipTest('/usr/bin/time is not on this computer')
-        cls.folders = {runs: tempfile.mkdtemp(prefix=f'memory_{runs}_') for runs in (LOW, HIGH)}
-        cls.peaks = {}
+        cls.folders = {runs: tempfile.mkdtemp(prefix=f'memory_{runs}_') for runs in SIZES}
+        cls.peaks, cls.drawing, cls.checks = {}, {}, {}
         for stage in STAGES:                 # in order: each stage reads what the stages before it wrote
             for runs, folder in cls.folders.items():
-                cls.peaks[(stage, runs)] = peak_bytes(folder, runs, stage)
+                cls.peaks[(stage, runs)], cls.drawing[(stage, runs)], cls.checks[(stage, runs)] = \
+                    peak_bytes(folder, runs, stage)
 
     @classmethod
     def tearDownClass(cls):
@@ -172,11 +189,21 @@ class TestEveryStageFits(unittest.TestCase):
     def test_each_stage_at_the_settings_draws(self):
         draws = current().composition.draws
         for stage in STAGES:
-            low, high = self.peaks[(stage, LOW)], self.peaks[(stage, HIGH)]
-            at_draws = high + max(high - low, 0.0) / (HIGH - LOW) * (draws - HIGH)
-            print(f'  {stage}: {low / 1e9:.2f} GB at {LOW:,} runs, {high / 1e9:.2f} GB at {HIGH:,}, about '
-                  f'{at_draws / 1e9:.1f} GB at {draws:,} (the limit: {LIMIT / 1e9:.1f} GB)', flush=True)
+            def line(peaks: dict) -> float:
+                """The straight line through the two largest measurements, at the settings' draws, never falling."""
+                low, high = peaks[(stage, LOW)], peaks[(stage, HIGH)]
+                return high + max(high - low, 0.0) / (HIGH - LOW) * (draws - HIGH)
+            at_draws = MARGIN * max(line(self.peaks), line(self.drawing))   # the larger: the pages' or the drawing's
+            measured = ', '.join(f'{self.peaks[(stage, runs)] / 1e9:.2f} GB at {runs:,}' for runs in SIZES)
+            if stage == '02_composition':
+                measured += ' (while drawing ' + ', '.join(f'{self.drawing[(stage, runs)] / 1e9:.2f}' for runs in SIZES) + ')'
+
+            print(f'  {stage}: {measured} runs; about {at_draws / 1e9:.1f} GB at {draws:,} with the margin (half the '
+                  f'memory: {LIMIT / 1e9:.1f} GB)', flush=True)
             self.assertLessEqual(at_draws, LIMIT, msg=stage)
+            for runs in SIZES:
+                if self.checks[(stage, runs)] is not None:      # 02's check: never below what the run holds
+                    self.assertGreaterEqual(self.checks[(stage, runs)], self.peaks[(stage, runs)], msg=(stage, runs))
 
 
 if __name__ == '__main__':

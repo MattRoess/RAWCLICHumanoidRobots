@@ -3626,8 +3626,8 @@ TAKEN_APART = {
         ('Magnets', 'NdFeB magnets of all motors and hydraulic pumps'),
         ('Motor windings and steel', 'rest of the motors: windings, steel, magnet carriers'),
         ('Gears and bearings', 'gear stages, their carriers, bearings inside the joints'),
-        ('Housings and other parts', 'housings, end caps, flanges; wheels, casters, lift, hands'),
-        ('Hydraulics', 'actuators, valves, power unit, manifold, oil, hoses')]),
+        ('Housings and other parts', 'housings, end caps and flanges; wheels, casters, lift and hands'),
+        ('Hydraulics', 'actuators, valves, power unit, manifold, oil and hoses')]),
     GROUP_BATTERY: ('the battery pack', [
         ('Cells', 'the battery cells, NMC or LFP'),
         ('Housing, busbars and wires', "the pack's housing, nickel strips, busbars, wires")]),
@@ -4332,7 +4332,7 @@ def template_words(apart) -> str:
     its robots rest on templates: ..." where either share is above half (the rule, at most half, broken), else "Its
     robots on templates: ..."."""
     joints, battery, total = template_shares(apart)
-    counts = f'the joints of {joints} of its {total} robots and versions, the battery of {battery}'
+    counts = f'the joints of {joints} of its {total} robots and versions; the battery of {battery}'
     return (f'Most of its robots rest on templates: {counts}.' if max(joints, battery) > total / 2 else
             f'Its robots on templates: {counts}.')
 
@@ -4374,8 +4374,8 @@ def type_card_text(n: int, anchor: str, apart, register: list | None, listed: bo
                     f'anchor robot, {anchor}, is one of them. {on_templates}')
         names = (without[0] if len(without) == 1 else ', '.join(without[:-1]) + ' and ' + without[-1]
                  if len(without) <= 3 else f'{len(without)} robots')
-        return (f'Its {total} robots of the register with a mass, each drawn from its own parts; {span}. The {names}, '
-                f"with no mass, {'is' if len(without) == 1 else 'are'} not in the evaluation. {on_templates}")
+        return (f'Its {total} robots of the register with a mass: each drawn from its own parts; {span}. The {names} '
+                f"with no mass {'is' if len(without) == 1 else 'are'} not in the evaluation. {on_templates}")
     if listed:
         return (f'Its {len(of_type)} robots of the register listed, {len(with_mass)} with a mass; drawn from the '
                 'workbook until they are taken apart.')
@@ -4628,10 +4628,14 @@ LIFT_MARK = '‡'     # beside the joints of a robot on wheels with a lift colum
 # 2026-11-05, "Yes, 3 to 5": "It keeps the Neo1, marked 'an outlier, not drawn'"; EVIDENCE.md E30 point 5), its reason
 # in the key.
 OUTLIER_MARK = '*'
-TABLE_KEY_OUTLIER = ' {mark} an outlier, not drawn: {reason}.'
-TABLE_KEY = ('Two colours in a cell: its numbers rest on both. Mass: the bar from the lowest to the highest, the dot '
-             f'the most likely. Battery: at the most likely values. {SHARES_MARK} joints a share of the mass.')
-TABLE_KEY_WHEELS = f' {LIFT_MARK} a lift column.'   # the base in its own plain words ("2 wheels, 2 casters")
+# The table's foot in three sentences at most (FigureTests' rule foot, 0.7.0; four and five sentences until 2026-11-14):
+# how to read a row; the cells of two colours; then every mark of the page in one sentence, each after a semicolon
+# (table_marks).
+TABLE_KEY_OUTLIER = '{mark} an outlier, not drawn: {reason}'
+TABLE_KEY = ('Mass: the bar from the lowest to the highest, the dot the most likely; battery at the most likely values. '
+             'Two colours in a cell: its numbers rest on both.')
+TABLE_KEY_SHARES = f'{SHARES_MARK} joints a share of the mass'
+TABLE_KEY_WHEELS = f'{LIFT_MARK} a lift column'   # the base in its own plain words ("2 wheels, 2 casters")
 # The table's places, in inches from the page's top left: the robot's name (its left edge; every other column placed
 # by table_fields since 2026-11-13); the first cell's middle and the step to the next; a cell's width and height; the
 # heading band's top and bottom; the first row's top and a row's height; the rows of a page, the groups' headings
@@ -4684,6 +4688,16 @@ class TableField:
 # next; each page's footnote names the bases of its rows (Matthias, 2026-11-13: "the base column is a wast of space, as
 # it is hard applicable. Have it as a footnote for the few robots"; a column of its own until then).
 BASE_MARKS = '¹²³⁴⁵⁶⁷⁸⁹'
+
+
+def table_marks(wheels: bool, bases: list, reasons) -> str:
+    """The last sentence of a table page's foot: what each mark of the page means, one after another after semicolons:
+    the joints a share of the mass, the lift column (`wheels`), each base of a robot on wheels (`bases`: (its mark, the
+    base in words)), each outlier's reason (`reasons`)."""
+    items = [TABLE_KEY_SHARES] + ([TABLE_KEY_WHEELS] if wheels else [])
+    items += [f'on wheels: {"; ".join(f"{mark} {base}" for mark, base in bases)}'] if bases else []
+    items += [TABLE_KEY_OUTLIER.format(mark=OUTLIER_MARK, reason=reason) for reason in reasons]
+    return '; '.join(items) + '.'
 
 
 def base_marks(rows: list) -> dict:
@@ -5035,9 +5049,8 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
         reasons = dict.fromkeys(outliers[line[1].name] for line in lines if line[0] == 'robot' and line[1].outlier)
         # The bases of the page's robots on wheels, each with its mark, in the order of the marks.
         bases = [b for b in marks if any(line[0] == 'robot' and line[1].base == b for line in lines)]
-        footnote = f' On wheels: {"; ".join(f"{marks[b]} {b}" for b in bases)}.' if bases else ''
-        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (TABLE_KEY_WHEELS if wheels else '') + footnote
-                    + ''.join(TABLE_KEY_OUTLIER.format(mark=OUTLIER_MARK, reason=reason) for reason in reasons), 15.2)
+        screen_text(axes, 0.4, y + 0.36, f'{TABLE_KEY} {table_marks(wheels, [(marks[b], b) for b in bases], reasons)}',
+                    15.2)
         figures.append(figure)
     return figures
 

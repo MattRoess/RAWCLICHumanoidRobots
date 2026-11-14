@@ -19,6 +19,7 @@ texts within Matthias's rules, no median pressed into the first 5 % of a panel's
 
 import importlib.util
 import os
+import pickle
 import sys
 import tempfile
 import unittest
@@ -613,11 +614,29 @@ class TestEveryPageOfTheSixTypes(unittest.TestCase):
             cls.problems[stage[-1]] += page_problems(figure, os.path.basename(str(path)), kwargs.get('dpi'),
                                                      kwargs.get('bbox_inches') == 'tight')
 
+        def run_02_here(params) -> int:
+            """02 as run() runs it, but each robot type drawn in this process (draw_one_type, the function run() gives
+            each type's own process), so that its pages reach the check here; then written as run() writes them
+            (write_kept). Since 2026-11-14 run() draws each type in a process of its own (VERIFICATION V237)."""
+            inputs = composition.read_inputs(params)
+            staged = composition.staging_folders(params)
+            jobs = tempfile.mkdtemp(dir=cls.folder.name)
+            kept = []
+            for category in inputs.book.categories:
+                job = os.path.join(jobs, str(category.number))
+                os.makedirs(job)
+                with open(os.path.join(job, 'job.pkl'), 'wb') as file:
+                    pickle.dump((params, category.number, staged), file)
+                if composition.draw_one_type(job) != 0:
+                    return 1
+                kept.append(os.path.join(job, 'composition.pkl'))
+            return composition.write_kept(kept, params, staged, composition.Steps())
+
         with mock.patch.object(Figure, 'savefig', checked), redirect_stdout(StringIO()):
-            for name, module in (('02', composition), ('03', comparison)):
+            for name, run in (('02', run_02_here), ('03', comparison.run)):
                 stage.append(name)
                 cls.pages[name], cls.problems[name] = 0, []
-                cls.codes[name] = module.run(params)
+                cls.codes[name] = run(params)
 
     @classmethod
     def tearDownClass(cls):

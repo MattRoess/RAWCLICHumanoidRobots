@@ -181,9 +181,12 @@ MEMORY (Matthias, 2026-11-13, after his run of 02 held 43 GB on his 16 GB comput
 nothing: "This is very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte
 Carlo", "It must adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4).
 Before any type is drawn, a trial of MEMORY_TRIAL draws of each robot type taken apart gives the memory it will need
-at `composition.draws` (memory_needed); a type that would need more than MEMORY_SHARE of the computer's memory stops
-the run there, nothing drawn. One robot type is held at a time: drawn, checked, its tables part by part and its
-figures written, and its draws part by part let go before the next. Each robot's parts and joints' structures are held
+at `composition.draws` (memory_needed, run_memory); a run that would need more than MEMORY_SHARE of the computer's
+memory (half) stops there, nothing drawn. One robot type is held at a time, each in a process of its own
+(one_type_in_its_process, draw_one_type): drawn, checked, its tables part by part and its figures written, its draws
+of the materials and elements kept in a file; when the process ends, all its memory goes back to the system (in one
+process the memory each type let go stayed with the process and added up over the six types: measured 2026-11-14,
+VERIFICATION V237). Then the kept draws are read back one type at a time, given the same element columns and written. Each robot's parts and joints' structures are held
 over its own draws only (PartBlocks), so the memory grows with the draws and the materials and elements, not with the
 number of robots; parts.npy is written robot by robot straight into the file. Everything goes into staging folders
 ('<output folder>.writing') and is moved into the output folders only when every type has added up: a run stopped by a
@@ -230,6 +233,7 @@ import importlib.util
 import math
 import gc
 import os
+import pickle
 import resource
 import shutil
 import weakref
@@ -238,6 +242,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import threading
 import time
 from dataclasses import dataclass, fields, replace
 from types import SimpleNamespace
@@ -1538,6 +1543,35 @@ class DiskArrays:
         kept[...] = values
         return kept
 
+    def gathered(self, keys, done: list, store: str, n: int) -> dict:
+        """The robots' draws of `store` (a dict of each Robot: key -> kg over its own draws) put together over the N
+        draws straight into one file, memory-mapped, a row a key in the order of `keys`: key -> its row. Each robot's
+        draws added into its rows (a draw is one robot: its rows are its own, 0 elsewhere), so that no array of the N
+        draws is made in memory for a robot or a key (until 2026-11-14 an array of the N draws for every robot holding a
+        key, then all keys at once, then a copy: VERIFICATION V237). The values as before: 0 plus the robot's kg."""
+        keys = list(keys)
+        if not keys:
+            return {}
+        kept = self.gathered_matrix(keys, done, store, n, by_rows=True)
+        return {k: kept[j] for j, k in enumerate(keys)}
+
+    def gathered_matrix(self, keys: list, done: list, store: str, n: int, by_rows: bool = False) -> np.ndarray:
+        """The robots' draws of `store` put together straight into one file, memory-mapped: the N draws × the keys
+        (a column a key, in the order of `keys`), or with `by_rows` the keys × the N draws; zeros where a robot holds
+        no draw of a key (as gathered)."""
+        place = {k: j for j, k in enumerate(keys)}
+        path = os.path.join(self.folder, f'{self.files}.npy')
+        self.files += 1
+        shape = (len(keys), n) if by_rows else (n, len(keys))
+        kept = np.lib.format.open_memmap(path, mode='w+', dtype=np.float64, shape=shape)   # zeros
+        for r in done:
+            for key, kg in getattr(r, store).items():
+                if by_rows:
+                    kept[place[key], r.rows] += kg
+                else:
+                    kept[r.rows, place[key]] += kg
+        return kept
+
     def table(self, arrays: dict) -> dict:
         """Every array of `arrays` (key -> the N draws) a row of one file, memory-mapped: key -> its row."""
         if not arrays:
@@ -1547,9 +1581,71 @@ class DiskArrays:
         return {k: kept[j] for j, k in enumerate(keys)}
 
 
+# The dicts of a Robot whose draws go to the disk once the robot is drawn (RobotSpill): every one assemble puts together.
+ROBOT_STORES = ('parts', 'materials', 'elements', 'recipe_elements', 'estimated', 'places', 'places_estimated', 'taken',
+                'taken_kg', 'structures', 'followed', 'by_material', 'fixed', 'in_recipes', 'elements_of', 'details')
+
+
+class RobotSpill:
+    """The robots' draws of a robot type kept on the disk while the type is drawn: each robot's draws (every array of
+    its ROBOT_STORES) written to one file of the type's folder (DiskArrays) as soon as the robot is drawn, and read
+    back memory-mapped, the same values, when all are drawn (load), so that the robots drawn are not held in memory
+    until the last is (in memory until 2026-11-14: about 8 kB a draw, growing with the draws; VERIFICATION V237). One
+    file for all robots: a memory-mapped file holds a file of the system open, and a type has some 170 robots."""
+
+    def __init__(self, disk: DiskArrays):
+        self.path = os.path.join(disk.folder, 'robots.bin')
+        self.file = open(self.path, 'wb')
+        self.size = 0
+        self.places = []      # (robot, its dict, key, where its draws begin in the file, how many)
+
+    def spill(self, r) -> None:
+        """Robot `r`'s draws written to the file; each array in its dicts left as a place-holder until load()."""
+        for store in ROBOT_STORES:
+            values = getattr(r, store)
+            for key, kg in values.items():
+                if isinstance(kg, np.ndarray) and kg.ndim == 1 and kg.dtype == np.float64:
+                    self.file.write(np.ascontiguousarray(kg).tobytes())
+                    self.places.append((values, key, self.size, kg.size))
+                    self.size += kg.size
+                    values[key] = None          # the key keeps its place in the dict
+
+    def load(self) -> None:
+        """Every robot's draws read back from the file, memory-mapped and read only, into its dicts, as they were."""
+        self.file.close()
+        if not self.size:
+            return
+        data = np.memmap(self.path, dtype=np.float64, mode='r', shape=(self.size,))
+        for values, key, start, size in self.places:
+            values[key] = data[start:start + size]
+        self.places = []
+
+
 # The draws written at a time into parts.npy (PartBlocks.save): 5,000 draws × every robot's columns in float32, some
 # 50 MB for robot type 3.
 SAVE_ROWS = 5000
+
+
+def save_float32(path: str, source, n: int) -> None:
+    """A table of the N draws written as np.save writes it in float32 (its header, its bytes), block after block of
+    SAVE_ROWS draws, so that at most one block is made in memory whatever the draws (until 2026-11-14 each table was
+    made whole, then copied into float32: some 1.2 GB for robot type 3's largest table at 200,000 draws, VERIFICATION
+    V237). `source`: the table's columns as a list of arrays of the N draws (or numbers), or a matrix of the N draws ×
+    its columns (also memory-mapped)."""
+    width = len(source) if isinstance(source, list) else source.shape[1]
+    header = {'descr': np.lib.format.dtype_to_descr(np.dtype(np.float32)), 'fortran_order': False,
+              'shape': (n, width)}
+    with open(path, 'wb') as file:
+        np.lib.format.write_array_header_1_0(file, header)
+        for start in range(0, n, SAVE_ROWS):
+            stop = min(start + SAVE_ROWS, n)
+            if isinstance(source, list):
+                block = np.empty((stop - start, width), dtype=np.float32)
+                for j, column in enumerate(source):
+                    block[:, j] = column[start:stop] if np.ndim(column) else column
+            else:
+                block = np.asarray(source[start:stop], dtype=np.float32)
+            file.write(np.ascontiguousarray(block).tobytes())
 
 
 @dataclass
@@ -2166,6 +2262,8 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
         shared_of = {name: per_file[t] for name, t in file_of.items()}
     mass = np.zeros(n)
     done = []
+    disk = DiskArrays()          # the type's folder on the disk: its robots' draws, then the draws put together
+    spill = RobotSpill(disk)
     for k, name in enumerate(names):
         rows = np.flatnonzero(robot == k)
         constants = apart.constants[name]
@@ -2177,6 +2275,7 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
         rest = robot_kg - sum(r.parts.values())
         r.piece(f'{name}: {frame.name}', KIND_OF[frame.kind], frame.name, frame.material, rest,
                 frame.label.startswith('E'), grade=frame.grade)
+        spill.spill(r)           # its draws to the disk: the robots drawn are not held until the last is
         done.append(r)
         if say is not None and (k + 1) % 10 == 0:
             say(k + 1, len(names), name)
@@ -2188,7 +2287,8 @@ def draw_taken_apart(inputs: ApartInputs, params: Params, magnets: dict, say=Non
     for r in done:
         r.shared = None
     shared = shared_of = per_file = None
-    d = assemble(n, names, robot, mass, done, apart, heat)
+    spill.load()
+    d = assemble(n, names, robot, mass, done, apart, heat, disk)
     done = None
     check_taken(d)   # every element of each kind in its parts of how a robot is taken apart, adding up to the kind
     check_recipes(d)   # every material's elements adding up to its kilograms whose elements are drawn
@@ -2520,20 +2620,18 @@ def draw_robot(r: Robot, inputs: ApartInputs, constants: dict, rng: np.random.Ge
                     housing.label.startswith('E'), grade=housing.grade)
 
 
-def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: list, apart, shared: Shared) -> Draws:
-    """The robots' draws put together into the N draws, in the order the data file names things. Each quantity's
-    draws of the robots let go once it is put together (let_go), so that the robots' draws and the draws put together
-    are not held whole at the same time (2026-11-13: the peak of drawing robot type 3 was both)."""
-    def put(key, store, r):
-        values = np.zeros(n)
-        values[r.rows] = store[key]
-        return values
-
+def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: list, apart, shared: Shared,
+             disk: DiskArrays) -> Draws:
+    """The robots' draws put together into the N draws, in the order the data file names things, each quantity
+    straight into its file on the disk (DiskArrays.gathered). Each quantity's draws of the robots let go once it is put
+    together (let_go), so that the robots' draws and the draws put together are not held whole at the same time
+    (2026-11-13: the peak of drawing robot type 3 was both)."""
     def let_go(name: str) -> None:
         for r in done:
             setattr(r, name, None)
 
-    disk = DiskArrays()   # the draws put together kept on the disk, memory-mapped (DiskArrays)
+    # `disk`: the type's folder on the disk (DiskArrays), where its robots' draws are (RobotSpill) and the draws put
+    # together go, memory-mapped
 
     # The parts and the joints' structures robot by robot (PartBlocks): only each robot's own draws are held.
     part_columns, blocks = [], []
@@ -2547,62 +2645,34 @@ def assemble(n: int, names: list, robot: np.ndarray, mass: np.ndarray, done: lis
     structure_blocks = {c: (r.rows, r.structures[c] * np.ones(r.n)) for r in done for c in r.structures}
     let_go('structures')
     material_keys = sorted({k for r in done for k in r.materials}, key=lambda k: (list(KINDS).index(k[0]), k[1]))
-    materials = np.column_stack([sum((put(k, r.materials, r) for r in done if k in r.materials), np.zeros(n))
-                                 for k in material_keys])
-    materials = disk.matrix(materials)
+    materials = disk.gathered_matrix(material_keys, done, 'materials', n)
     let_go('materials')
-    elements = {k: sum((put(k, r.elements, r) for r in done if k in r.elements), np.zeros(n))
-                for k in {k for r in done for k in r.elements}}
-    elements = disk.table(elements)
+    elements = disk.gathered({k for r in done for k in r.elements}, done, 'elements', n)
     let_go('elements')
-    estimated = {k: sum((put(k, r.estimated, r) for r in done if k in r.estimated), np.zeros(n))
-                 for k in {k for r in done for k in r.estimated}}
-    estimated = disk.table(estimated)
+    estimated = disk.gathered({k for r in done for k in r.estimated}, done, 'estimated', n)
     let_go('estimated')
     hot = schemas.hot_kinds(apart)
-    followed = {m: sum((put(m, r.followed, r) for r in done if m in r.followed), np.zeros(n))
-                for m in {m for r in done for m in r.followed}}
-    followed = disk.table(followed)
+    followed = disk.gathered({m for r in done for m in r.followed}, done, 'followed', n)
     let_go('followed')
-    details = {k: sum((put(k, r.details, r) for r in done if k in r.details), np.zeros(n))
-               for k in {k for r in done for k in r.details}}
-    details = disk.table(details)
+    details = disk.gathered({k for r in done for k in r.details}, done, 'details', n)
     let_go('details')
-    recipe_elements = {k: sum((put(k, r.recipe_elements, r) for r in done if k in r.recipe_elements), np.zeros(n))
-                       for k in {k for r in done for k in r.recipe_elements}}
-    recipe_elements = disk.table(recipe_elements)
+    recipe_elements = disk.gathered({k for r in done for k in r.recipe_elements}, done, 'recipe_elements', n)
     let_go('recipe_elements')
-    in_recipes = {m: sum((put(m, r.in_recipes, r) for r in done if m in r.in_recipes), np.zeros(n))
-                  for m in {m for r in done for m in r.in_recipes}}
-    in_recipes = disk.table(in_recipes)
+    in_recipes = disk.gathered({m for r in done for m in r.in_recipes}, done, 'in_recipes', n)
     let_go('in_recipes')
-    elements_of = {m: sum((put(m, r.elements_of, r) for r in done if m in r.elements_of), np.zeros(n))
-                   for m in {m for r in done for m in r.elements_of}}
-    elements_of = disk.table(elements_of)
+    elements_of = disk.gathered({m for r in done for m in r.elements_of}, done, 'elements_of', n)
     let_go('elements_of')
-    by_material = {k: sum((put(k, r.by_material, r) for r in done if k in r.by_material), np.zeros(n))
-                   for k in {k for r in done for k in r.by_material}}
-    by_material = disk.table(by_material)
+    by_material = disk.gathered({k for r in done for k in r.by_material}, done, 'by_material', n)
     let_go('by_material')
-    fixed = {k: sum((put(k, r.fixed, r) for r in done if k in r.fixed), np.zeros(n))
-             for k in {k for r in done for k in r.fixed}}
-    fixed = disk.table(fixed)
+    fixed = disk.gathered({k for r in done for k in r.fixed}, done, 'fixed', n)
     let_go('fixed')
-    places = {k: sum((put(k, r.places, r) for r in done if k in r.places), np.zeros(n))
-              for k in {k for r in done for k in r.places}}
-    places = disk.table(places)
+    places = disk.gathered({k for r in done for k in r.places}, done, 'places', n)
     let_go('places')
-    places_estimated = {k: sum((put(k, r.places_estimated, r) for r in done if k in r.places_estimated), np.zeros(n))
-                        for k in {k for r in done for k in r.places_estimated}}
-    places_estimated = disk.table(places_estimated)
+    places_estimated = disk.gathered({k for r in done for k in r.places_estimated}, done, 'places_estimated', n)
     let_go('places_estimated')
-    taken = {k: sum((put(k, r.taken, r) for r in done if k in r.taken), np.zeros(n))
-             for k in {k for r in done for k in r.taken}}
-    taken = disk.table(taken)
+    taken = disk.gathered({k for r in done for k in r.taken}, done, 'taken', n)
     let_go('taken')
-    taken_kg = {k: sum((put(k, r.taken_kg, r) for r in done if k in r.taken_kg), np.zeros(n))
-                for k in {k for r in done for k in r.taken_kg}}
-    taken_kg = disk.table(taken_kg)
+    taken_kg = disk.gathered({k for r in done for k in r.taken_kg}, done, 'taken_kg', n)
     let_go('taken_kg')
     layer_check = {k: tuple(sum(r.layer_check[k][i] for r in done if k in r.layer_check) for i in (0, 1))
                    for k in {k for r in done for k in r.layer_check}}
@@ -2728,7 +2798,7 @@ def by_material_table(d: Draws) -> tuple:
         for material in sorted((m for m, e in fixed if e == element), key=material_key):
             columns.append(f'{element}: {material}{FIXED_MARK}')
             draws.append(fixed[(material, element)])
-    return columns, np.column_stack(draws) if draws else np.zeros((d.n, 0))
+    return columns, draws     # the columns' draws, a list (save_float32 writes them block after block)
 
 
 def taken_keys(d: Draws) -> list:
@@ -2772,40 +2842,41 @@ def write_taken_apart(d: Draws, folder: str) -> None:
     element_keys = [(kind, e) for kind in KINDS for e in element_order({e for k, e in d.elements if k == kind})]
     grade_keys = sorted(d.details, key=lambda key: (list(KINDS).index(key[0]), key[1], key[2]))
     # Each table built only when it is written and let go after (until 2026-11-13 all built first: a second copy of
-    # the type's draws held while writing, 3 GB for robot type 3 at 200,000 draws).
+    # the type's draws held while writing, 3 GB for robot type 3 at 200,000 draws), its columns written block after
+    # block of draws (save_float32; since 2026-11-14).
     tables = {
         'robots': lambda: ([f'Robot drawn ({names})', 'Mass (kg)', 'Robot of the register'],
-                   np.column_stack([d.robot, d.mass, d.register_robot])),
+                   [d.robot, d.mass, d.register_robot]),
         'parts': lambda: (d.part_blocks.columns, d.part_blocks),   # written robot by robot (PartBlocks.save)
         'materials': lambda: ([f'{KINDS[k][0]}: {m}' for k, m in d.materials[0]], d.materials[1]),
         # Each material by its grade, alloy or magnet grade class ('<kind>: <material>: <grade>'; a material whole
         # without the third part): the draws behind the material pages.
         'grades': lambda: ([f'{KINDS[k][0]}: {m}' + (f': {x}' if x else '') for k, m, x in grade_keys],
-                   np.column_stack([d.details[key] for key in grade_keys])),
+                   [d.details[key] for key in grade_keys]),
         'elements': lambda: ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
-                     np.column_stack([d.elements[k] for k in element_keys])),
+                     [d.elements[k] for k in element_keys]),
         'estimated': lambda: ([f'{KINDS[k][0]}: {e}' for k, e in element_keys],
-                      np.column_stack([d.estimated.get(k, np.zeros(d.n)) for k in element_keys])),
+                      [d.estimated.get(k, 0.0) for k in element_keys]),
         'by_material': lambda: by_material_table(d),
         # Each element of interest by its place (PLACES): a kind of part, or the electronics' component, '<place>: <e>'.
         'places': lambda: ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
-                   np.column_stack([d.places[k] for k in place_keys(d)])),
+                   [d.places[k] for k in place_keys(d)]),
         'places_estimated': lambda: ([f'{place_label(p)}: {e}' for p, e in place_keys(d)],
-                             np.column_stack([d.places_estimated.get(k, np.zeros(d.n)) for k in place_keys(d)])),
+                             [d.places_estimated.get(k, 0.0) for k in place_keys(d)]),
         # Each element of interest by its kind and its part of how a robot is taken apart ('<kind>: <part>: <e>'), in
         # the order of the kinds, of 01's TAKEN_PARTS and of the elements: what 04 counts the elements in use by.
         'taken_apart': lambda: ([f'{KINDS[k][0]}: {part}: {e}' for k, part, e in taken_keys(d)],
-                        np.column_stack([d.taken[k] for k in taken_keys(d)])),
+                        [d.taken[k] for k in taken_keys(d)]),
         # The mass of each kind by its part of how a robot is taken apart ('<kind>: <part>'), all its materials.
         'taken_apart_mass': lambda: ([f'{KINDS[k][0]}: {part}' for k, part in taken_mass_keys(d)],
-                             np.column_stack([d.taken_kg[k] for k in taken_mass_keys(d)])),
+                             [d.taken_kg[k] for k in taken_mass_keys(d)]),
     }
     for table in APART_TABLES:
         columns, draws = tables[table]()
         if isinstance(draws, PartBlocks):
             draws.save(os.path.join(folder, f'{table}.npy'))
         else:
-            np.save(os.path.join(folder, f'{table}.npy'), np.asarray(draws, dtype=np.float32))
+            save_float32(os.path.join(folder, f'{table}.npy'), draws, d.n)   # block after block
         with open(os.path.join(folder, f'{table}.txt'), 'w', encoding='utf-8') as file:
             file.write('\n'.join(columns) + '\n')
         columns = draws = None   # let go before the next table is built
@@ -2898,14 +2969,25 @@ def same_elements(drawn: list) -> None:
     table of atomic masses: 0 kg where a robot type's materials hold none of an element so far (its summary says which
     materials are in the elements). 03 compares robot types column by column. The elements of interest so, and the
     elements by the recipes."""
-    for table in ('elements', 'recipe_elements'):
-        columns = element_order(set().union(*(set(c.tables[table][0]) for c in drawn)))
-        for c in drawn:
-            own, draws = c.tables[table]
-            full = np.zeros((draws.shape[0], len(columns)))
-            for k, name in enumerate(own):
-                full[:, columns.index(name)] = draws[:, k]
-            c.tables[table] = (columns, full)
+    columns = {table: element_order(set().union(*(set(c.tables[table][0]) for c in drawn)))
+               for table in ELEMENT_TABLES}
+    for c in drawn:
+        widen_elements(c, columns)
+
+
+# The two tables of elements whose columns are made the same for every robot type.
+ELEMENT_TABLES = ('elements', 'recipe_elements')
+
+
+def widen_elements(c: Composition, columns: dict) -> None:
+    """One robot type's two tables of elements given the columns `columns` (table -> every element any robot type
+    holds, in the order of 01's table of atomic masses): its own columns at their places, 0 kg in the others."""
+    for table, names in columns.items():
+        own, draws = c.tables[table]
+        full = np.zeros((draws.shape[0], len(names)))
+        for k, name in enumerate(own):
+            full[:, names.index(name)] = draws[:, k]
+        c.tables[table] = (names, full)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -4654,10 +4736,10 @@ class Steps:
 # The memory check before a run (Step 3), on the safe side: the trial's draws; its estimate counts the draws kept on the
 # disk (DiskArrays) as if all were in memory, and PEAK_FACTOR (what drawing a type holds at its peak, as a multiple of
 # what it holds when done: measured 1.2 on robot type 3, set at 2), and the pages' PAGES_MEMORY, so that it is never
-# below what the run holds (measured 2026-11-13: 2.4 GB at 50,000 draws against its 3.2); the run stops before any type
-# is drawn where that estimate passes MEMORY_SHARE of the computer's memory, the line where it would begin to swap
-# (VERIFICATION V236).
-MEMORY_TRIAL, MEMORY_SHARE, PEAK_FACTOR = 2000, 0.75, 2.0
+# below what the run holds (VERIFICATION V236, V237); the run stops before any type is drawn where that estimate passes
+# MEMORY_SHARE of the computer's memory: half, the GitHub folder's CLAUDE.md §4 ("that peak fits in half the computer's
+# memory").
+MEMORY_TRIAL, MEMORY_SHARE, PEAK_FACTOR = 2000, 0.5, 2.0
 # What drawing the pages holds beyond the draws (matplotlib, its images), measured 2026-11-13: about 1 GB at 20,000 to
 # 50,000 draws; added to the check so that it never says less than the run holds (VERIFICATION V236).
 PAGES_MEMORY = 1.0e9
@@ -4692,6 +4774,139 @@ def memory_in_use() -> float:
     """The bytes this process has held at most so far, as the system counts them (its peak resident memory)."""
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     return float(peak if sys.platform == 'darwin' else peak * 1024)   # bytes on macOS, kilobytes elsewhere
+
+
+def run_memory(needs: dict) -> float:
+    """The bytes the run will hold at most, on the safe side, from `needs` (robot type -> memory_needed): this process
+    as it is (memory_in_use), the process of one robot type, which reads the same inputs (memory_in_use again) and
+    draws the type at its peak (the largest peak of any type: one type's process at a time), and the pages
+    (PAGES_MEMORY). What a type's process keeps goes into a file and is read back one type at a time (Step 5)."""
+    return 2 * memory_in_use() + max((peak for peak, _ in needs.values()), default=0.0) + PAGES_MEMORY
+
+
+def own_peak() -> float:
+    """The most memory this process has held so far, bytes, as the system counts it: on macOS its peak memory footprint
+    (the number /usr/bin/time -l gives: proc_pid_rusage, RUSAGE_INFO_V4, ri_lifetime_max_phys_footprint), elsewhere
+    its peak resident memory."""
+    if sys.platform == 'darwin':
+        import ctypes
+        info = ctypes.create_string_buffer(512)
+        if ctypes.CDLL('/usr/lib/libproc.dylib').proc_pid_rusage(os.getpid(), 4, info) == 0:
+            return float(int.from_bytes(info.raw[240:248], 'little'))
+    return memory_in_use()
+
+
+# The program a robot type's process runs (one_type_in_its_process): 02 loaded from its path, as pressing Run loads it,
+# and draw_one_type called with the folder of the type's job.
+ONE_TYPE = '''
+import importlib.util, sys
+path, job = sys.argv[1], sys.argv[2]
+spec = importlib.util.spec_from_file_location("composition_one_type", path)
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+sys.exit(module.draw_one_type(job))
+'''
+
+
+def relay(stream, name: str) -> None:
+    """Every line a robot type's process says, said on at once by this one (`name`: 'stdout' or 'stderr'), so that the
+    console shows it while the type is drawn."""
+    for line in stream:
+        target = getattr(sys, name)
+        target.write(line)
+        target.flush()
+
+
+def one_type_in_its_process(params: Params, number: int, staged: dict, folder: str) -> tuple | None:
+    """Robot type `number` drawn, checked and written into the staging folders `staged` in a process of its own
+    (draw_one_type), its lines said here as it goes. When the process ends, every byte it held goes back to the
+    system: in one process the memory a robot type had let go stayed with the process and added up over the six types
+    (measured 2026-11-14 at 20,000 draws: 0.6 GB for a type alone, 1.45 GB by type 6; VERIFICATION V237). Returns (the
+    file of its Composition, its process's peak memory in bytes, its peak until its draws were checked, before its
+    tables and pages), or None where its draws did not add up or it stopped (it says why)."""
+    job = os.path.join(folder, str(number))
+    os.makedirs(job)
+    with open(os.path.join(job, 'job.pkl'), 'wb') as file:
+        pickle.dump((params, number, staged), file, protocol=pickle.HIGHEST_PROTOCOL)
+    with subprocess.Popen([sys.executable, '-c', ONE_TYPE, os.path.abspath(__file__), job],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                          env={**os.environ, 'PYTHONUNBUFFERED': '1'}) as child:   # its pipes closed at the end
+        errors = threading.Thread(target=relay, args=(child.stderr, 'stderr'))
+        errors.start()
+        relay(child.stdout, 'stdout')
+        errors.join()
+        ended = child.wait()
+    if ended != 0:
+        return None
+    with open(os.path.join(job, 'peak.txt'), encoding='utf-8') as file:
+        peak, drawing = map(float, file.read().split())
+    print(f'  Robot type {number}: its process held at most {peak / 1e9:.2f} GB, {drawing / 1e9:.2f} GB while drawing.',
+          flush=True)
+    return os.path.join(job, 'composition.pkl'), peak, drawing
+
+
+def load_composition(path: str) -> tuple:
+    """(the Composition a robot type's process kept in `path`, whether it was drawn part by part)."""
+    with open(path, 'rb') as file:
+        kept = pickle.load(file)
+    return Composition(**kept['composition']), kept['taken']
+
+
+def draw_one_type(job: str) -> int:
+    """In a robot type's own process (one_type_in_its_process): the type of the job in folder `job` drawn (part by part
+    where its robots are taken apart, every tenth robot said as it is drawn; from the workbook until all its robots
+    with a mass are taken apart, Q2), its draws checked, its tables part by part and its figures written into the
+    staging folders, and its draws of the materials and elements (Composition) kept in the job's file
+    composition.pkl, with the process's peak memory in peak.txt. The inputs are read as the run read them (the run has
+    checked them). 0 when written, 1 when its draws did not add up (nothing of it kept)."""
+    with open(os.path.join(job, 'job.pkl'), 'rb') as file:
+        params, number, staged = pickle.load(file)
+    steps = Steps()
+    draws = params.composition.draws
+    inputs = read_inputs(params)
+    path = absolute(params.data.register)
+    sheets = {n: schemas.read_type_sheet(path, n) for n in schemas.type_sheet_numbers(path)}
+    category = next(c for c in inputs.book.categories if c.number == number)
+    a = (read_apart_inputs(params, inputs, sheets[number], category, read_parts_files(params, inputs))
+         if number in sheets and schemas.drawn_part_by_part(sheets[number]) else None)
+    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"; type 2 since 2026-10-30
+    d = None
+    if a is not None:
+        versions = len(a.apart.robots)
+        steps.begin(f'Robot type {number}: drawing part by part over its {len(a.robots)} robots'
+                    + (f' ({versions} with their versions)' if versions != len(a.robots) else '')
+                    + f', {draws:,} draws')
+        magnets = magnet_fractions(params, grade_classes(a), draws)
+        d = draw_taken_apart(a, params, magnets,
+                             say=lambda done, of, name: print(f'  robot {done} of {of} drawn: {name}', flush=True))
+        c = compose_taken_apart(category, d, inputs.lists) if not a.later else None
+        steps.end('  done in {}.')
+    if a is None or a.later:
+        steps.begin(f'Robot type {number}: drawing from the workbook, {draws:,} draws'
+                    + (' (its draws until all its robots with a mass are taken apart)' if a is not None else ''))
+        c = compose(category, inputs, params)
+        steps.end('  done in {}.')
+    # Its draws checked; nothing is written unless all add up.
+    steps.begin(f'Robot type {number}: checking that its draws add up')
+    problems = draw_faults(c)
+    if problems:
+        print('The draws do not add up; nothing is written.', file=sys.stderr)
+        for problem in problems:
+            print(f'  {problem}', file=sys.stderr)
+        return 1
+    for report in remainder_reports(c):
+        print(f'  robot type {c.number}: {report} (reported, not cut).', flush=True)
+    steps.end('  they add up, in {}.')
+    drawing = own_peak()   # the peak while drawing: it grows with the draws faster than the pages' (VERIFICATION V237)
+    if d is not None:
+        write_part_by_part(category, d, a, c, inputs, params, staged, with_pages, steps)
+    with open(os.path.join(job, 'composition.pkl'), 'wb') as file:
+        pickle.dump({'composition': {f.name: getattr(c, f.name) for f in fields(c)}, 'taken': d is not None}, file,
+                    protocol=pickle.HIGHEST_PROTOCOL)
+    with open(os.path.join(job, 'peak.txt'), 'w', encoding='utf-8') as file:
+        file.write(f'{own_peak()!r} {drawing!r}')
+    return 0
 
 
 def staging_folders(params: Params) -> dict:
@@ -4835,8 +5050,7 @@ def run(params: Params) -> int:
              for n, a in aparts.items()}
     for n, (peak, kept) in needs.items():
         print(f'  robot type {n}: about {peak / 1e9:.1f} GB at its peak', flush=True)
-    total = (memory_in_use() + sum(kept for _, kept in needs.values())
-             + max((peak for peak, _ in needs.values()), default=0.0) + PAGES_MEMORY)
+    total = run_memory(needs)
     print(f'  the run at most about {total / 1e9:.1f} GB, of {budget / 1e9:.1f} GB ({MEMORY_SHARE:.0%} of this '
           'computer\'s memory)', flush=True)
     if total > budget:
@@ -4845,63 +5059,52 @@ def run(params: Params) -> int:
         return steps.stopped()
     steps.end('  it fits, in {}.')
 
-    # Step 4: one robot type after another, drawn (part by part where its robots are taken apart, every tenth robot
-    # said as it is drawn; from the workbook until all its robots with a mass are taken apart, Q2), its draws checked,
-    # its tables part by part and its figures written into the staging folders (staged), and its draws part by part let
-    # go before the next type is drawn, so that one type at a time is held (until 2026-11-13 all six at once). What is
-    # kept of each type is its draws of the materials and elements (Composition), whose element columns are made the
-    # same for all types once all are drawn (same_elements); nothing reaches the output folders unless every type adds
-    # up (Step 6).
+    # Step 4: one robot type after another, each in a process of its own (one_type_in_its_process, draw_one_type):
+    # drawn (part by part where its robots are taken apart; from the workbook until all its robots with a mass are
+    # taken apart, Q2), its draws checked, its tables part by part and its figures written into the staging folders
+    # (staged), its draws of the materials and elements (Composition) kept in a file of the run's temporary folder.
+    # When a type's process ends, all the memory it held goes back to the system, so one type at a time is held (in
+    # one process the memory let go by each type stayed with it: VERIFICATION V237). Nothing reaches the output folders
+    # unless every type adds up (Step 6).
     staged = staging_folders(params)
     print(f'{draws:,} draws per robot type, seed {params.composition.seed}.', flush=True)
-    drawn, taken = [], set()
-    with_pages = params.output.robot_types_with_pages   # Matthias, 2026-10-29: "Type 1 only"; type 2 since 2026-10-30
-    for category in inputs.book.categories:
-        a = aparts.get(category.number)
-        d = None
-        if a is not None:
-            versions = len(a.apart.robots)
-            steps.begin(f'Robot type {category.number}: drawing part by part over its {len(a.robots)} robots'
-                        + (f' ({versions} with their versions)' if versions != len(a.robots) else '')
-                        + f', {draws:,} draws')
-            magnets = magnet_fractions(params, grade_classes(a), draws)
-            d = draw_taken_apart(a, params, magnets,
-                                 say=lambda done, of, name: print(f'  robot {done} of {of} drawn: {name}', flush=True))
-            taken.add(category.number)
-            c = compose_taken_apart(category, d, inputs.lists) if not a.later else None
-            steps.end('  done in {}.')
-        if a is None or a.later:
-            steps.begin(f'Robot type {category.number}: drawing from the workbook, {draws:,} draws'
-                        + (' (its draws until all its robots with a mass are taken apart)'
-                           if a is not None else ''))
-            c = compose(category, inputs, params)
-            steps.end('  done in {}.')
-        # Its draws checked; nothing is written unless all add up.
-        steps.begin(f'Robot type {category.number}: checking that its draws add up')
-        problems = draw_faults(c)
-        if problems:
-            print('The draws do not add up; nothing is written.', file=sys.stderr)
-            for problem in problems:
-                print(f'  {problem}', file=sys.stderr)
-            clear_staging(staged)
-            return steps.stopped()
-        for report in remainder_reports(c):
-            print(f'  robot type {c.number}: {report} (reported, not cut).', flush=True)
-        steps.end('  they add up, in {}.')
-        if d is not None:
-            write_part_by_part(category, d, a, c, inputs, params, staged, with_pages, steps)
-            del d   # its draws part by part let go: one robot type at a time in memory
-            gc.collect()
-        drawn.append(c)
+    kept_folder = tempfile.mkdtemp(prefix='humanoid_02_types_')
+    try:
+        kept, largest, drawing = [], 0.0, 0.0
+        for category in inputs.book.categories:
+            done = one_type_in_its_process(params, category.number, staged, kept_folder)
+            if done is None:
+                clear_staging(staged)
+                return steps.stopped()
+            kept.append(done[0])
+            largest, drawing = max(largest, done[1]), max(drawing, done[2])
+        print(f'  The largest process of a robot type held at most {largest / 1e9:.2f} GB, while drawing at most '
+              f'{drawing / 1e9:.2f} GB.', flush=True)
+        return write_kept(kept, params, staged, steps)
+    finally:
+        shutil.rmtree(kept_folder, ignore_errors=True)
 
-    # Step 5: every robot type's draws of the materials and elements, their element columns the same for all
-    # (same_elements), written with their pages into the staging folders.
-    same_elements(drawn)
-    for c in drawn:
+
+def write_kept(kept: list, params: Params, staged: dict, steps) -> int:
+    """Steps 5 to 7 of run(): every robot type's draws of the materials and elements, kept in the files `kept` by the
+    types' processes, given the same element columns (every element any type holds: same_elements), written with their
+    pages into the staging folders one type at a time; then everything staged moved into the output folders; 0."""
+    # Step 5: the element columns of all types, then each type read back, widened to them, written and let go.
+    columns = {table: set() for table in ELEMENT_TABLES}
+    for path in kept:
+        c, _ = load_composition(path)
+        for table in ELEMENT_TABLES:
+            columns[table] |= set(c.tables[table][0])
+        del c
+    columns = {table: element_order(names) for table, names in columns.items()}
+    with_pages = params.output.robot_types_with_pages
+    for path in kept:
+        c, taken = load_composition(path)
+        widen_elements(c, columns)
         steps.begin(f'Robot type {c.number}: writing its draws')
         write(c, os.path.join(staged['composition_dir'], c.name))
         steps.end('  written in {}.')
-        if c.number in with_pages and c.number not in taken:
+        if c.number in with_pages and not taken:
             steps.begin(f'Robot type {c.number}: drawing its page')
             draw_page(c, params.composition.draws, os.path.join(staged['composition_figures_dir'], c.name + '.png'),
                       params)
@@ -4909,11 +5112,12 @@ def run(params: Params) -> int:
         rows = {r['Name']: r for r in summary(c) if r['Kind'] == 'Material'}
         stats = statistics_of(c.column('total', 'Total'))
         partly = [name for name, r in rows.items() if r['In the elements'] == 'Partly']
-        kept = [name for name, r in rows.items() if r['In the elements'] == 'No' and name != NOT_ALLOCATED]
+        staying = [name for name, r in rows.items() if r['In the elements'] == 'No' and name != NOT_ALLOCATED]
         print(f"  {c.number} {c.title}: {stats['Mean (kg)']:.1f} kg at the mean (95 %: {stats['2.5 % (kg)']:.1f} to "
               f"{stats['97.5 % (kg)']:.1f}); Not allocated below zero in "
               f"{rows[NOT_ALLOCATED]['Draws below zero (%)']:.1f} % of the draws; elements of interest in part: "
-              f"{', '.join(partly) or 'none'}; staying materials: {', '.join(kept) or 'none'}.")
+              f"{', '.join(partly) or 'none'}; staying materials: {', '.join(staying) or 'none'}.")
+        del c   # one robot type at a time in memory
 
     # Step 6: every type has added up: everything staged moved into the output folders, a file there of the same name
     # replaced, every other file there left as it is.

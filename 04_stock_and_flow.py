@@ -137,6 +137,7 @@ Where it sits: after 03_comparison.py; it reads 02's draws and nothing of 03.
 from __future__ import annotations
 
 import csv
+import gc
 import importlib.util
 import math
 import os
@@ -221,7 +222,10 @@ SHARE_QUANTITY = 'share of the robots built, %'   # each type's share of a year'
 OVERVIEW, ELEMENTS_DIR = 'overview.png', 'elements'
 DISTRIBUTIONS_DIR = 'distributions'   # the pages of the distributions of the draws, each followed by its numbers
 DISTRIBUTION_YEARS = (2025, 2030, 2035, 2040)    # the year ends of the distribution pages of robots and elements
-CHUNK = 10000                     # draws counted at once (memory measured in the sandbox: VERIFICATION.md V222)
+# Draws counted at once: the memory of the counting grows with it, not with the draws (each chunk's kg of every part
+# and element over the years, some 0.8 GB at 5,000; 10,000 until 2026-11-14, which the rule's measurements at 5,000
+# and 20,000 draws read as growing with the draws: VERIFICATION.md V222, V237). The results the same.
+CHUNK = 5000
 TOLERANCE = 1e-9                  # of the largest stock: a balance that misses by more is a fault (08's check_balance)
 
 # The world's production and reserves of magnesium, titanium and indium, which RAWCLICDataCenters' sheet
@@ -799,11 +803,17 @@ def column_stats(values: np.ndarray) -> tuple:
     return median, p25, p75, low, high, above.mean(axis=0)
 
 
+# The elements of an element file read at a time by element_summary (2 at least, so that the parts are added up as
+# when all were read): its memory grows with them and the draws, some 0.3 GB at 200,000 draws (VERIFICATION V237).
+SUMMARY_ELEMENTS = 2
+
+
 def element_summary(files: dict, elements: list) -> dict:
     """Every element in all, by group and by part, each flow and year, over the runs above 0 (as stats_of): one year
-    of an element file read at a time (runs × parts × elements), its groups the sums of their parts run by run, its
-    total the sum of all parts. Keys ('element', symbol, flow), ('element group', (symbol, group), flow) and ('element
-    part', (symbol, part), flow), each {'median', 'p25', 'p75', 'low', 'high', 'held'} over the years."""
+    and SUMMARY_ELEMENTS elements of an element file read at a time (runs × parts × those elements; until 2026-11-14 a
+    year with all elements, some 3 GB at 200,000 draws with the statistics), its groups the sums of their parts run by
+    run, its total the sum of all parts. Keys ('element', symbol, flow), ('element group', (symbol, group), flow) and
+    ('element part', (symbol, part), flow), each {'median', 'p25', 'p75', 'low', 'high', 'held'} over the years."""
     years = LAST - FIRST + 1
     members = [[PARTS.index(p) for p in PARTS if GROUP_OF[p] == g] for g in GROUPS]
     out = {}
@@ -815,12 +825,22 @@ def element_summary(files: dict, elements: list) -> dict:
             out[key] = {name: np.full(years, np.nan) for name in STATISTICS}
             out[key]['held'] = np.zeros(years)
         for y in range(years):
-            block = np.asarray(files[element_name][:, y], dtype=np.float64)          # runs × parts × elements
-            columns = np.concatenate([block.sum(axis=1)] + [block[:, idx].sum(axis=1) for idx in members]
-                                     + [block[:, j] for j in range(len(PARTS))], axis=1)
-            for key, *numbers in zip(keys, *column_stats(columns)):
-                for name, value in zip(STATISTICS + ('held',), numbers):
-                    out[key][name][y] = value
+            # the elements in groups of SUMMARY_ELEMENTS, a last one left alone joining the group before it
+            starts = list(range(0, len(elements), SUMMARY_ELEMENTS))
+            if len(starts) > 1 and len(elements) - starts[-1] < 2:
+                starts.pop()
+            for first, stop in zip(starts, starts[1:] + [len(elements)]):
+                these = elements[first:stop]
+                block = np.array(files[element_name][:, y, :, first:first + len(these)], dtype=np.float64)
+                columns = np.concatenate([block.sum(axis=1)] + [block[:, idx].sum(axis=1) for idx in members]
+                                         + [block[:, j] for j in range(len(PARTS))], axis=1)   # runs × parts × these
+                its_keys = ([('element', e, flow_name) for e in these]
+                            + [('element group', (e, g), flow_name) for g in GROUPS for e in these]
+                            + [('element part', (e, p), flow_name) for p in PARTS for e in these])
+                for key, *numbers in zip(its_keys, *column_stats(columns)):
+                    for name, value in zip(STATISTICS + ('held',), numbers):
+                        out[key][name][y] = value
+                del block, columns
     return out
 
 
@@ -1067,6 +1087,8 @@ def save_figure(figure, path: str, note: str, dpi: int, handles: list | None = N
     os.makedirs(os.path.dirname(path), exist_ok=True)
     figure.savefig(path, dpi=dpi, facecolor='white')
     plt.close(figure)
+    gc.collect()   # the pages closed before: a figure refers to itself through its parts, so only the
+    #                collector frees it and its image of 52 MB (VERIFICATION V237)
     return path
 
 
@@ -1259,6 +1281,8 @@ def numbers_page(heading: str, rows: list, path: str, dpi: int) -> str:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     page.savefig(path, dpi=dpi, facecolor='white')
     plt.close(page)
+    gc.collect()   # the pages closed before: a figure refers to itself through its parts, so only the
+    #                collector frees it and its image of 52 MB (VERIFICATION V237)
     return path
 
 
@@ -1468,6 +1492,8 @@ def split_elements_page(title: str, splits: dict, colours: dict, elements: list,
         os.makedirs(os.path.dirname(path), exist_ok=True)
         figure.savefig(path, dpi=dpi, facecolor='white', bbox_inches='tight')
         plt.close(figure)
+        gc.collect()   # the pages closed before: a figure refers to itself through its parts, so only the
+        #                collector frees it and its image of 52 MB (VERIFICATION V237)
     return path
 
 
@@ -1522,6 +1548,8 @@ def parts_pages(year: int, kg, elements: list, folder: str, dpi: int) -> list:
         os.makedirs(folder, exist_ok=True)
         page.savefig(path, dpi=dpi, facecolor='white')
         plt.close(page)
+        gc.collect()   # the pages closed before: a figure refers to itself through its parts, so only the
+        #                collector frees it and its image of 52 MB (VERIFICATION V237)
         written.append(path)
     return written
 
@@ -1614,17 +1642,20 @@ def run(params: Params) -> int:
         handle.write(f"{', '.join(ELEMENT_FILES)}: draw; year (the same); part of how a robot is taken apart "
                      f"({', '.join(f'{p} ({GROUP_OF[p]})' for p in PARTS)}); element ({', '.join(elements)}); kg\n")
     # The summary, over the draws above 0: every unit of all types and of each type; every element of all three parts.
+    # One unit of a file read at a time (draws × years × types), so that the memory does not grow with the draws as a
+    # whole file would (VERIFICATION V237).
     summary = {}
     for unit_name, flow_name in zip(UNIT_FILES, FLOWS):
-        values = np.array(files[unit_name], dtype=np.float64)
         for j, unit in enumerate(UNITS):
+            values = np.array(files[unit_name][:, :, j, :], dtype=np.float64)
             # All robots: the article's (each type its own share of them, not their sum); joint sets and packs: the
             # types' added up.
             total = (np.array(files[ARTICLE_FILES[FLOWS.index(flow_name)]], dtype=np.float64) if unit == 'robots'
-                     else values[:, :, j, :].sum(axis=2))
+                     else values.sum(axis=2))
             summary[(unit, 0, flow_name)] = stats_of(total)
             for k, t in enumerate(TYPES):
-                summary[(unit, t, flow_name)] = stats_of(values[:, :, j, k])
+                summary[(unit, t, flow_name)] = stats_of(values[:, :, k])
+            del values, total
     # Each type's share of the robots built in a year, %, draw by draw (Matthias, 2026-11-07, the panel "Add it
     # beside" the robots in use by type): its robots built over the article's robots built, its own drawn share.
     built = np.array(files['units_in'][:, :, UNITS.index('robots'), :], dtype=np.float64)
