@@ -65,7 +65,7 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time (start here)
+## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time; the fixes (start here)
 
 **His run, 2026-11-15, all checked as each stage ended:** 01 at 08:59 (53 pages); 02 twice at once at 09:00 (terminal
 and console), one stopped on a file the other had moved, so he ran it again, alone, 09:12:58 to 09:18:11 (all 597
@@ -86,9 +86,15 @@ same). The memory test alone, measured at 2,000, 5,000 and 20,000 draws and extr
 (the line through 5,000 and 20,000, × 1.5; nothing is run at 200,000): 02 4.1, 03 1.2, 04 4.8 GB, of 8.6 GB. No run of
 Claude's goes beyond 20,000 draws.
 
-**His run after these fixes:** only `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (about 2 min): its
-table pages' foot changed. Do not run 02 to 05: 02's and 04's outputs are byte for byte those of his run of
-2026-11-15 (02: the removed functions were never called; 04: the chunks change nothing), 03 and 05 unchanged.
+**His run after these fixes:** `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py`, run by him 10:59:37 to
+10:59:49: 53 pages, no iCloud copies; type 3's first table page checked, its foot without † and ‡ (no row of the page
+carries them). 02 to 05 not run again: their outputs are byte for byte those the code at 82d6213 writes (02: the removed
+functions were never called; 04: the chunks change nothing; 03 and 05 unchanged).
+
+**State at the end of 2026-11-15:** every output of 01 to 05 is current and checked (01 at 10:59, 02 to 05 this
+morning); the repository is clean and on GitHub; the memory test passes (02 4.1, 03 1.2, 04 4.8 GB extrapolated to the
+run's 200,000 draws, × 1.5, of 8.6 GB); every page of 01 to 05 passes FigureTests 0.8.0 (752 pages, 0 faults). Nothing
+to run.
 
 **Open, for him:**
 1. Done 2026-11-15: today's fixes committed and pushed on his word ("Yes, commit and push").
@@ -96,7 +102,7 @@ table pages' foot changed. Do not run 02 to 05: 02's and 04's outputs are byte f
 3. From 2026-11-13: the last digits of some summary statistics between two runs (sums over Python sets); the colours
    KINDS and SENSOR_KINDS in 02 (no reader).
 
-## 2026-11-14: the memory by the new rule, FigureTests 0.8.0 (start here)
+## 2026-11-14: the memory by the new rule, FigureTests 0.8.0
 
 **State.** Matthias, 2026-11-14: "Yes, fix 1 and 2" (1: the memory by his rule of the day, "20 000 is enough. But you
 have to choose a conservative approach, which means have enough safety margins"; 2: FigureTests 0.7.0 on the robots'
@@ -147,7 +153,7 @@ path, check each stage's outputs at once.
    colours KINDS and SENSOR_KINDS in 02 (no reader). His 36 old pages in figures/parts_taken_apart/ are gone (the
    folder is empty since the killed run).
 
-## 2026-11-13, evening: handover — his run tomorrow (start here)
+## 2026-11-13, evening: handover — his run tomorrow
 
 **State.** Committed and pushed tonight (the commit named in Claude's last message). The checks: the whole suite (744
 tests, every page of 01 to 05 at 200 runs, 0 faults; two tests failed in it, both from before fixes made while it ran,
