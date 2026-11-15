@@ -65,6 +65,29 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
+## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time (start here)
+
+**His run, 2026-11-15, all checked as each stage ended:** 01 at 08:59 (53 pages); 02 twice at once at 09:00 (terminal
+and console), one stopped on a file the other had moved, so he ran it again, alone, 09:12:58 to 09:18:11 (all 597
+files from that run; each robot type's process at most 1.5 to 3.0 GB); 03 09:21 to 09:22 (208 pages); 04 09:28 to 09:35
+(its draws, summary and 41 pages); 05 first started without the copy and stopped; the copy tool 09:37 to 09:38 (the data
+centres' draws of 2026-11-12 11:57:57); 05 09:39:53 to 09:45:05 (13 files, 81 pages, naming that copy). The swap rose to
+0.8 GB while two 02 ran at once, and stayed there; no memory problem with one run.
+
+**Built during his run (V239):** 02 runs once at a time (claim_run, release_run; data/consolidated.running): a second
+run stops before touching anything. Tests first (TestOneRunAtATime, 3), with TestRun 13 pass. Committed and pushed.
+
+**Open, for him:**
+1. Done 2026-11-15: the guard committed and pushed on his word ("Yes, commit and push").
+2. iCloud's copies: 669 files named "<name> 2.<ext>" or "<name> 3.<ext>" in data/ (332) and figures/ (337), older
+   versions of 02's outputs that iCloud put back while the files were replaced (196 in figures/composition, the rest in
+   data/parts_taken_apart, data/consolidated and figures/parts_taken_apart/*/sources). No stage reads them. His files:
+   to remove on his word, by exact name.
+3. The tables' foot (01) explains † and ‡ on pages without a row that has the mark (it did so before today): to name
+   only the marks of each page, on his word.
+4. From 2026-11-14: the leftovers same_elements, DiskArrays.matrix and DiskArrays.table; 02's 8.2 GB close to the line;
+   FigureTests 0.8.0 for RAWCLICDataCenters.
+
 ## 2026-11-14: the memory by the new rule, FigureTests 0.8.0 (start here)
 
 **State.** Matthias, 2026-11-14: "Yes, fix 1 and 2" (1: the memory by his rule of the day, "20 000 is enough. But you

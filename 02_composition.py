@@ -177,6 +177,12 @@ draws that hold it, and the share of the draws that hold it).
 The draws keep their zeros (a robot without a part holds 0 kg in it), since sums are made on raw draws; only the
 statistics, the tables and the pages leave them out.
 
+ONE RUN AT A TIME (Matthias, 2026-11-15, after two runs of 02 at once, in a terminal and in Positron's console, wrote
+into the same staging folders: "Damit these are bugs!!!"). A run first makes its mark, data/consolidated.running
+beside its staging folders, with its process number (claim_run); a second run started while that process is going
+stops before it touches anything and says so; the mark goes when the run ends, however it ends (release_run); the
+mark of a run whose process is gone is taken over (VERIFICATION V239).
+
 MEMORY (Matthias, 2026-11-13, after his run of 02 held 43 GB on his 16 GB computer, swapped for 48 minutes and wrote
 nothing: "This is very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte
 Carlo", "It must adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4).
@@ -4990,7 +4996,79 @@ def write_part_by_part(category, d: Draws, a, c, inputs: Inputs, params: Params,
               f'{folder}/.')
 
 
+def run_mark(params: Params) -> str:
+    """The file that marks a run of 02 as going: '<composition_dir>.running', beside its staging folders, holding the
+    number of the run's process and when it began (claim_run)."""
+    return absolute(params.output.composition_dir).rstrip(os.sep) + '.running'
+
+
+def process_going(pid: int) -> bool:
+    """Whether process `pid` is alive and a Python, as a run of 02 is (a terminal's python, Positron's console)."""
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    command = subprocess.run(['ps', '-o', 'command=', '-p', str(pid)], capture_output=True, text=True).stdout
+    return 'python' in command.lower()
+
+
+def claim_run(params: Params) -> str | None:
+    """One run of 02 at a time (Matthias, 2026-11-15, after two runs of 02 at once, one in a terminal and one in
+    Positron's console, wrote into the same staging folders and one stopped on a file the other had moved: "Damit these
+    are bugs!!!"): the mark (run_mark) made, holding this process's number, and its path returned; None, said on the
+    error stream, where the mark of another run whose process is going is there: this run then touches nothing. The
+    mark of a run whose process is gone (killed before it could remove it) is taken over."""
+    path = run_mark(params)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    for _ in range(3):
+        try:
+            handle = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)   # made only where no mark is there
+        except FileExistsError:
+            try:
+                with open(path, encoding='utf-8') as file:
+                    number, began = file.read().split(' ', 1)
+                pid = int(number)
+            except (OSError, ValueError):
+                pid, began = 0, ''
+            if pid and pid != os.getpid() and process_going(pid):
+                print(f'02 is already running (process {pid}, begun {began.strip()}); this run stops before it touches '
+                      'anything. Wait for that run to end, or stop it, then press Run again.', file=sys.stderr,
+                      flush=True)
+                return None
+            try:
+                os.remove(path)          # the mark of a run whose process is gone: taken over
+            except FileNotFoundError:
+                pass
+            continue
+        with os.fdopen(handle, 'w', encoding='utf-8') as file:
+            file.write(f'{os.getpid()} {time.strftime("%Y-%m-%d %H:%M:%S")}')
+        return path
+    raise OSError(f'the mark of a run of 02 ({path}) could not be made')
+
+
+def release_run(path: str) -> None:
+    """The mark of this run removed (claim_run): the next run may go."""
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
+
 def run(params: Params) -> int:
+    """Press Run, with the settings `params`: one run of 02 at a time (claim_run), then run_alone; the mark removed when
+    the run ends, however it ends (also stopped by a fault or by hand). 0 when it has written, 1 when it stopped."""
+    mark = claim_run(params)
+    if mark is None:
+        return Steps().stopped()
+    try:
+        return run_alone(params)
+    finally:
+        release_run(mark)
+
+
+def run_alone(params: Params) -> int:
     """Reads and checks the inputs, checks the memory each robot type will need, then draws, checks and writes one
     robot type after another into staging folders, and moves everything into the output folders only when every type
     has added up (MEMORY in the docstring at the top). 0 when it has written, 1 when a fault stopped it (nothing

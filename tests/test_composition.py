@@ -341,6 +341,58 @@ class TestRecipes(Drawn):
         self.assertIn("'Test recipe' follows the energy of a cell", faults[0].text)
 
 
+class TestOneRunAtATime(Drawn):
+    """One run of 02 at a time (Matthias, 2026-11-15, after two runs of 02, one in a terminal and one in Positron's
+    console, wrote into the same staging folders and the second stopped on a file the first had moved: "Damit these are
+    bugs!!!"): while a run of 02 is going, a second stops before it touches anything and says so; the mark of a run
+    whose process is gone (killed) does not stop the next; the mark goes when the run ends."""
+
+    @staticmethod
+    def mark_of(params) -> str:
+        return composition.run_mark(params)
+
+    def test_a_second_run_stops_while_one_is_going(self):
+        import subprocess
+        params = self.write()
+        other = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'])   # the run going: a Python
+        try:
+            with open(self.mark_of(params), 'w', encoding='utf-8') as file:
+                file.write(f'{other.pid} 2026-11-15 09:00:00')
+            staging = composition.absolute(params.output.composition_dir).rstrip(os.sep) + '.writing'
+            os.makedirs(staging)
+            with open(os.path.join(staging, 'its_file.txt'), 'w', encoding='utf-8') as file:
+                file.write('written by the run going')
+            said = io.StringIO()
+            with contextlib.redirect_stderr(said), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(composition.run(params), 1)
+            self.assertIn(f'02 is already running (process {other.pid}', said.getvalue())
+            with open(os.path.join(staging, 'its_file.txt'), encoding='utf-8') as file:   # its files untouched
+                self.assertEqual(file.read(), 'written by the run going')
+            self.assertFalse(os.path.exists(os.path.join(params.output.composition_dir, '1_small')))
+            self.assertTrue(os.path.exists(self.mark_of(params)))          # the mark of the run going kept
+        finally:
+            other.kill()
+            other.wait()
+
+    def test_the_mark_of_a_run_gone_does_not_stop_the_next(self):
+        import subprocess
+        params = self.write()
+        gone = subprocess.Popen([sys.executable, '-c', 'pass'])
+        gone.wait()                                                         # its process has ended
+        with open(self.mark_of(params), 'w', encoding='utf-8') as file:
+            file.write(f'{gone.pid} 2026-11-15 09:00:00')
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(composition.run(params), 0)
+        self.assertTrue(os.path.exists(os.path.join(params.output.composition_dir, '1_small', 'materials.npy')))
+        self.assertFalse(os.path.exists(self.mark_of(params)))
+
+    def test_the_mark_goes_when_the_run_ends(self):
+        params = self.write()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(composition.run(params), 0)
+        self.assertFalse(os.path.exists(self.mark_of(params)))
+
+
 class TestRun(Drawn):
     """Point 10, 11 and 16: 02 run as by pressing Run, on the small files."""
 

@@ -439,6 +439,11 @@ Masses are rounded to three decimals on the pages; the checks use the workbook's
 thousand). The same code serves all six robot types. Matthias agreed the specification and its recommendations a to
 g on 2026-10-26 (HANDOVER.md).
 
+**One run at a time (since 2026-11-15).** A run of 02 marks itself first (`claim_run`: the file
+`data/consolidated.running`, beside its staging folders, with its process number); a second run started while that
+process is going stops before it touches anything and says so, and the mark goes when the run ends, however it ends.
+Two runs at once had written into the same staging folders (VERIFICATION V239).
+
 **Its memory (since 2026-11-13).** Matthias's run of 02 held 43 GB on his 16 GB computer and wrote nothing ("This is
 very very bad designe!!!", "Fix it damit and this never ever happens again. We always do Monte Carlo", "It must
 adopte, so if data are added, it still works!!!"; the rule in the GitHub folder's CLAUDE.md §4). 02 now holds one

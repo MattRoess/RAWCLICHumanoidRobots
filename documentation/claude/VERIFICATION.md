@@ -108,6 +108,27 @@ material declaration). Until then the elements of one robot are **not validated*
 
 ## 2026-11-13
 
+### V239. One run of 02 at a time (2026-11-15, during his run)
+
+- **What happened:** his run of 2026-11-15: 02 was started twice at 08:59 to 09:00, in a terminal (zsh, process 20149)
+  and in Positron's console (process 3024). Both drew all six types into the same staging folders, the same draws (the
+  same seed); at the end one moved the files into place, and the other stopped on a file already moved
+  (FileNotFoundError in move_staged, data/consolidated.writing/1_compact_research_developer/total.txt). Nothing was
+  lost (every file of the six types in place, no staging folder left), but 02 should not have started twice. Matthias:
+  "Damit these are bugs!!!". Claude's fault: 02 did not guard against a second run.
+- **Fixed:** run() claims a mark first (claim_run: '<composition_dir>.running', made only where none is, holding the
+  run's process number and its start); a second run that finds the mark of a living Python process stops before it
+  touches anything ("02 is already running (process …)"); the mark of a process gone (killed) is taken over; the mark is
+  removed when the run ends, however it ends (release_run in a finally). The body of the run is run_alone. Written into
+  02 in one step (os.replace), as 03 to 05 load 02 when they start.
+- **Tests (tests.test_composition.TestOneRunAtATime, failing first: no run_mark):** a second run while a Python process
+  holds the mark: returns 1, says so, leaves the other run's staging file and the mark as they were, writes nothing;
+  the mark of a process that has ended: the run goes and writes, the mark gone after; a run alone: the mark gone after.
+  With TestRun: 13 tests, all pass.
+- **Not covered:** his rerun of 02 at 09:12:58 began a few seconds before the guard was written (09:13:08) and runs
+  without it (alone, so it does not need it); a process number taken by another Python after a run was killed would
+  stop the next run with a clear message (the mark is the file data/consolidated.running, to be removed by hand then).
+
 ### V238. FigureTests 0.8.0: a unit written twice, the pages of 02's processes, the rules of 0.7.0 on every page
 
 - **Why:** "Yes, fix 1 and 2" (2026-11-14), point 2: FigureTests 0.7.0 had been committed on 2026-11-13 at 14:33, the
