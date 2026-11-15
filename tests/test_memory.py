@@ -14,8 +14,8 @@ GitHub folder's CLAUDE.md §4):
 1. 02 holds each robot's parts over its own draws only (PartBlocks): their memory grows with the draws, not with the
    number of robots; parts.npy is written from them byte for byte as numpy writes the whole matrix.
 2. 02's own check before a run (memory_needed, run_memory): the run at the settings' draws in half the memory.
-3. The stages 02, 03 and 04, each in a process of its own at 5,000, 10,000 and 20,000 runs on his real inputs (its
-   outputs in a temporary folder), their peak memory measured by the system (02: its own process and the largest process of a robot
+3. The stages 02, 03 and 04, each in a process of its own at 2,000, 5,000 and 20,000 runs on his real inputs (its
+   outputs in a temporary folder; 05's copy of the data centres made before, not in a measured process), their peak memory measured by the system (02: its own process and the largest process of a robot
    type, which it says); extrapolated on the safe side, the rule of 2026-11-14 (Matthias: "For MC you want currently
    to test with up to 50 000 runs. I do NOT want this. 20 000 is enough. But you have to choose a conservative
    approach, which means have enough safety margins."): along the straight line through the two largest measurements
@@ -46,9 +46,11 @@ _spec.loader.exec_module(composition)
 
 LIMIT = composition.MEMORY_SHARE * os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')   # bytes
 # The growing numbers of runs each stage is measured at (test 3), 20,000 at most (Matthias, 2026-11-14: "20 000 is
-# enough"); the straight line through the two largest; and the safety margin on the extrapolated peak ("enough safety
-# margins": the GitHub folder's CLAUDE.md §4, "raised by half (× 1.5)").
-SIZES = (5000, 10000, 20000)
+# enough"), the GitHub folder's CLAUDE.md §4 own example (2,000, 5,000 and 20,000; 5,000, 10,000 and 20,000 on
+# 2026-11-14: the line through 5,000 and 20,000 was the steeper of the two, so the more cautious, VERIFICATION V240);
+# the straight line through the two largest; and the safety margin on the extrapolated peak ("enough safety margins":
+# "raised by half (× 1.5)").
+SIZES = (2000, 5000, 20000)
 LOW, HIGH = SIZES[-2:]
 MARGIN = 1.5
 STAGES = ('02_composition', '03_comparison', '04_stock_and_flow')   # "have it done for 02, 03 and 04"
@@ -67,20 +69,32 @@ import src.params_schema as ps
 folder, runs, stage = Path(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
 real = ps.current()
 moved = {{f.name: str(folder / getattr(real.output, f.name)) for f in fields(real.output) if f.name.endswith("_dir")}}
-copy = folder / "data_center_draws"
-if not copy.exists():
-    copy.mkdir(parents=True)
-    source = ps.absolute(real.data.data_center_draws_dir)
-    np.save(copy / "element_draws.npy", np.ascontiguousarray(np.load(os.path.join(source, "element_draws.npy"),
-                                                                     mmap_mode="r")[:, :runs]))
-    for name in ("elements.txt", "source.txt"):
-        (copy / name).write_bytes(Path(source, name).read_bytes())
+copy = folder / "data_center_draws"     # made by copy_of_the_data_centres before any stage is measured
 settings = replace(real, output=replace(real.output, **moved), composition=replace(real.composition, draws=runs),
                    data=replace(real.data, data_center_draws_dir=str(copy)))
 ps.current = lambda: settings
 error = ft.run_main(Path({root!r}) / (stage + ".py"), "memory_" + stage)
 sys.exit(0 if error is None else error[-2000:])
 '''
+
+
+def copy_of_the_data_centres(folder: str, runs: int) -> None:
+    """05's copy of the data centres' runs cut to the first `runs` draws, written into `folder` before any stage is
+    measured, scenario by scenario (memory-mapped): until 2026-11-15 the first stage's process made it, 0.25 GB at 20,000
+    draws counted as 02's own memory (VERIFICATION V240)."""
+    params = current()
+    source = absolute(params.data.data_center_draws_dir)
+    copy = os.path.join(folder, 'data_center_draws')
+    os.makedirs(copy, exist_ok=True)
+    draws = np.load(os.path.join(source, 'element_draws.npy'), mmap_mode='r')
+    out = np.lib.format.open_memmap(os.path.join(copy, 'element_draws.npy'), mode='w+', dtype=draws.dtype,
+                                    shape=(draws.shape[0], runs) + draws.shape[2:])
+    for scenario in range(draws.shape[0]):
+        out[scenario] = draws[scenario, :runs]
+    out.flush()
+    del out
+    for name in ('elements.txt', 'source.txt'):
+        shutil.copyfile(os.path.join(source, name), os.path.join(copy, name))
 
 
 def peak_bytes(folder: str, runs: int, stage: str) -> tuple:
@@ -175,6 +189,8 @@ class TestEveryStageFits(unittest.TestCase):
         if not os.path.exists('/usr/bin/time'):
             raise unittest.SkipTest('/usr/bin/time is not on this computer')
         cls.folders = {runs: tempfile.mkdtemp(prefix=f'memory_{runs}_') for runs in SIZES}
+        for runs, folder in cls.folders.items():          # not in a measured process
+            copy_of_the_data_centres(folder, runs)
         cls.peaks, cls.drawing, cls.checks = {}, {}, {}
         for stage in STAGES:                 # in order: each stage reads what the stages before it wrote
             for runs, folder in cls.folders.items():
@@ -198,8 +214,8 @@ class TestEveryStageFits(unittest.TestCase):
             if stage == '02_composition':
                 measured += ' (while drawing ' + ', '.join(f'{self.drawing[(stage, runs)] / 1e9:.2f}' for runs in SIZES) + ')'
 
-            print(f'  {stage}: {measured} runs; about {at_draws / 1e9:.1f} GB at {draws:,} with the margin (half the '
-                  f'memory: {LIMIT / 1e9:.1f} GB)', flush=True)
+            print(f'  {stage}: measured {measured} runs; extrapolated to the {draws:,} draws of the real run (not run) '
+                  f'with the margin: about {at_draws / 1e9:.1f} GB (half the memory: {LIMIT / 1e9:.1f} GB)', flush=True)
             self.assertLessEqual(at_draws, LIMIT, msg=stage)
             for runs in SIZES:
                 if self.checks[(stage, runs)] is not None:      # 02's check: never below what the run holds

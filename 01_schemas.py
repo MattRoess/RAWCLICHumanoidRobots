@@ -4690,14 +4690,15 @@ class TableField:
 BASE_MARKS = '¹²³⁴⁵⁶⁷⁸⁹'
 
 
-def table_marks(wheels: bool, bases: list, reasons) -> str:
-    """The last sentence of a table page's foot: what each mark of the page means, one after another after semicolons:
-    the joints a share of the mass, the lift column (`wheels`), each base of a robot on wheels (`bases`: (its mark, the
-    base in words)), each outlier's reason (`reasons`)."""
-    items = [TABLE_KEY_SHARES] + ([TABLE_KEY_WHEELS] if wheels else [])
+def table_marks(shares: bool, lift: bool, bases: list, reasons) -> str:
+    """The last sentence of a table page's foot: what each mark of the page means, one after another after semicolons,
+    only the marks its rows carry (Matthias, 2026-11-15, "Do the fixes": until then † and ‡ on every page of a type):
+    the joints a share of the mass (`shares`), the lift column (`lift`), each base of a robot on wheels (`bases`: (its
+    mark, the base in words)), each outlier's reason (`reasons`); '' where the page's rows carry none."""
+    items = ([TABLE_KEY_SHARES] if shares else []) + ([TABLE_KEY_WHEELS] if lift else [])
     items += [f'on wheels: {"; ".join(f"{mark} {base}" for mark, base in bases)}'] if bases else []
     items += [TABLE_KEY_OUTLIER.format(mark=OUTLIER_MARK, reason=reason) for reason in reasons]
-    return '; '.join(items) + '.'
+    return '; '.join(items) + '.' if items else ''
 
 
 def base_marks(rows: list) -> dict:
@@ -4937,7 +4938,6 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
     # Its columns, each its own field (table_fields); a robot on wheels its base's mark after its name. The mass's
     # scale to the largest robot drawn: an outlier (not drawn) keeps its row and its mass written, no bar (Matthias,
     # 2026-11-05, "Yes, all ten", open item 4: the Neo1's 1,200 kg ran the axis to 1,600 kg).
-    wheels = any(r.base for r in rows)
     marks = base_marks(rows)
     fields = table_fields(rows, marks)
     mass, battery = [k for k, f in enumerate(fields) if f.entry is None]
@@ -5049,8 +5049,11 @@ def robots_table_pages(apart: PartsTakenApart, robot_type: int = 1, taken: int |
         reasons = dict.fromkeys(outliers[line[1].name] for line in lines if line[0] == 'robot' and line[1].outlier)
         # The bases of the page's robots on wheels, each with its mark, in the order of the marks.
         bases = [b for b in marks if any(line[0] == 'robot' and line[1].base == b for line in lines)]
-        screen_text(axes, 0.4, y + 0.36, f'{TABLE_KEY} {table_marks(wheels, [(marks[b], b) for b in bases], reasons)}',
-                    15.2)
+        # The marks the page's rows carry, and only those, explained after the key.
+        on_page = [line[1] for line in lines if line[0] == 'robot']
+        explained = table_marks(any(r.shares for r in on_page), any(r.lift for r in on_page),
+                                [(marks[b], b) for b in bases], reasons)
+        screen_text(axes, 0.4, y + 0.36, TABLE_KEY + (f' {explained}' if explained else ''), 15.2)
         figures.append(figure)
     return figures
 

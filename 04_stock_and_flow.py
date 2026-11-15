@@ -223,9 +223,9 @@ OVERVIEW, ELEMENTS_DIR = 'overview.png', 'elements'
 DISTRIBUTIONS_DIR = 'distributions'   # the pages of the distributions of the draws, each followed by its numbers
 DISTRIBUTION_YEARS = (2025, 2030, 2035, 2040)    # the year ends of the distribution pages of robots and elements
 # Draws counted at once: the memory of the counting grows with it, not with the draws (each chunk's kg of every part
-# and element over the years, some 0.8 GB at 5,000; 10,000 until 2026-11-14, which the rule's measurements at 5,000
-# and 20,000 draws read as growing with the draws: VERIFICATION.md V222, V237). The results the same.
-CHUNK = 5000
+# and element over the years: some 1.6 GB at 5,000, 0.65 GB at 2,000; 10,000 until 2026-11-14, 5,000 until 2026-11-15:
+# VERIFICATION.md V222, V237, V240). The results the same.
+CHUNK = 2000
 TOLERANCE = 1e-9                  # of the largest stock: a balance that misses by more is a fault (08's check_balance)
 
 # The world's production and reserves of magnesium, titanium and indium, which RAWCLICDataCenters' sheet

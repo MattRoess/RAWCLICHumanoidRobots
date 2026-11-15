@@ -464,9 +464,10 @@ Everything goes into staging folders ('<output folder>.writing') and reaches the
 adds up. Since 2026-11-14 also: each robot's draws written to one file of its type as soon as it is drawn
 (`RobotSpill`), each table put together straight into its file (`DiskArrays.gathered`) and written block after block of
 draws (`save_float32`). The outputs are byte for byte those of before (VERIFICATION V236, V237). Measured by
-tests/test_memory.py at 5,000, 10,000 and 20,000 draws, on the line through the two largest to 200,000 draws and
-raised by half (the rule of 2026-11-14): 02 8.2 GB, 03 (which reads 02's tables memory-mapped and frees each page as it
-is written) 1.6 GB, 04 6.8 GB, each below half the computer's memory (8.6 GB); the test fails where one would not fit.
+tests/test_memory.py at 2,000, 5,000 and 20,000 draws (never more), extrapolated along the line through the two largest
+to the 200,000 draws of the real run and raised by half (the rule of 2026-11-14; measured 2026-11-15): 02 4.1 GB, 03 (which reads 02's tables memory-mapped and
+frees each page as it is written) 1.2 GB, 04 4.8 GB, each below half the computer's memory (8.6 GB); the test fails
+where one would not fit.
 
 In each draw:
 
@@ -1408,7 +1409,7 @@ of the robots built and nothing else (V206), is replaced.
 
 `04_stock_and_flow.py` follows RAWCLICDataCenters' 07 step by step, quarter by quarter from 2025 Q1 to 2040 Q4, its years
 exactly as 07's (since 2026-11-08, EVIDENCE.md E48: the flows of each calendar year, the stocks at its end), in
-chunks of 5,000 draws (`CHUNK`; 10,000 until 2026-11-14: the memory of a chunk does not grow with the draws, and its
+chunks of 2,000 draws (`CHUNK`; 10,000 until 2026-11-14, 5,000 until 2026-11-15: the memory of a chunk does not grow with the draws, and its
 summary reads one unit and two elements of its draws at a time, VERIFICATION V237; the results the same), every draw
 paired with 02's draw i of each robot type:
 

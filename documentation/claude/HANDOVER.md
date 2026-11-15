@@ -77,16 +77,24 @@ centres' draws of 2026-11-12 11:57:57); 05 09:39:53 to 09:45:05 (13 files, 81 pa
 **Built during his run (V239):** 02 runs once at a time (claim_run, release_run; data/consolidated.running): a second
 run stops before touching anything. Tests first (TestOneRunAtATime, 3), with TestRun 13 pass. Committed and pushed.
 
+**Then "Do the fixes" (2026-11-15, all four chosen; V240):** iCloud's 669 copies moved into the Trash (folder
+"RAWCLICHumanoidRobots iCloud copies 2026-11-15", 21 GB, recoverable until emptied); same_elements, DiskArrays.matrix and
+DiskArrays.table removed from 02; the tables' foot names only the marks of its page's rows (test first); 02's margin:
+the step offered would not have helped (type 5, one parts file, is as large as type 3) and was not built; instead the
+memory test made 05's copy inside 02's measured process (fixed) and 04 counts in chunks of 2,000 (byte for byte the
+same). The memory test alone, measured at 2,000, 5,000 and 20,000 draws and extrapolated to his run's 200,000 draws
+(the line through 5,000 and 20,000, × 1.5; nothing is run at 200,000): 02 4.1, 03 1.2, 04 4.8 GB, of 8.6 GB. No run of
+Claude's goes beyond 20,000 draws.
+
+**His run after these fixes:** only `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/01_schemas.py` (about 2 min): its
+table pages' foot changed. Do not run 02 to 05: 02's and 04's outputs are byte for byte those of his run of
+2026-11-15 (02: the removed functions were never called; 04: the chunks change nothing), 03 and 05 unchanged.
+
 **Open, for him:**
-1. Done 2026-11-15: the guard committed and pushed on his word ("Yes, commit and push").
-2. iCloud's copies: 669 files named "<name> 2.<ext>" or "<name> 3.<ext>" in data/ (332) and figures/ (337), older
-   versions of 02's outputs that iCloud put back while the files were replaced (196 in figures/composition, the rest in
-   data/parts_taken_apart, data/consolidated and figures/parts_taken_apart/*/sources). No stage reads them. His files:
-   to remove on his word, by exact name.
-3. The tables' foot (01) explains † and ‡ on pages without a row that has the mark (it did so before today): to name
-   only the marks of each page, on his word.
-4. From 2026-11-14: the leftovers same_elements, DiskArrays.matrix and DiskArrays.table; 02's 8.2 GB close to the line;
-   FigureTests 0.8.0 for RAWCLICDataCenters.
+1. Done 2026-11-15: today's fixes committed and pushed on his word ("Yes, commit and push").
+2. FigureTests 0.8.0 for RAWCLICDataCenters (it pins 0.7.0).
+3. From 2026-11-13: the last digits of some summary statistics between two runs (sums over Python sets); the colours
+   KINDS and SENSOR_KINDS in 02 (no reader).
 
 ## 2026-11-14: the memory by the new rule, FigureTests 0.8.0 (start here)
 
@@ -96,8 +104,9 @@ pages and the rule for a unit written twice). Both done; committed and pushed on
 FigureTests with its tag v0.8.0. The run table of 2026-11-13 below no longer holds: use this one.
 - Memory (V237): 02 draws each robot type in a process of its own, writes each robot's draws and each table to the disk
   as it goes; 03 frees each page; 04 counts in chunks of 5,000 and reads its summary in parts. Measured at 5,000, 10,000
-  and 20,000, on the line through the two largest to 200,000, × 1.5: 02 8.2 GB, 03 1.6 GB, 04 6.8 GB, of 8.6 GB. 02's
-  check before drawing at 200,000: 8.0 GB, it starts. Outputs byte for byte as before (02: 597 files, but the six notes
+  and 20,000, extrapolated along the line through the two largest to the real run's 200,000 draws (not run), × 1.5:
+  02 8.2 GB, 03 1.6 GB, 04 6.8 GB, of 8.6 GB. 02's own check before drawing, its estimate for 200,000 draws (from
+  trials of 2,000): 8.0 GB, it starts. Outputs byte for byte as before (02: 597 files, but the six notes
   pages whose templates sentence was reworded; 04: 52 files).
 - FigureTests 0.8.0 (V238; FigureTests' own VERIFICATION): unit_twice; the pages of 02's processes checked; box_rule no
   longer taking bars, markers and a table's rows for boxes. Installed from the working copy; requirements.txt pins

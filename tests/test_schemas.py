@@ -3178,6 +3178,19 @@ class TestRobotsTables(unittest.TestCase):
                 for base, mark in marks.items():
                     self.assertEqual(f'{mark} {base}' in key, base in on_page, msg=(n, base))
 
+    def test_8_the_foot_names_the_marks_of_its_page(self):
+        # Matthias, 2026-11-15, "Do the fixes" (Table foot: page's marks only): a page's foot explains † (joints a share
+        # of the mass) and ‡ (a lift column) only where a row of that page carries the mark, as it names only the bases
+        # of its rows (test 7).
+        from matplotlib.text import Text
+        for n, (rows, fields, pages) in self.tables.items():
+            for figure, lines in zip(pages, schemas.table_pages(rows)):
+                words = [t.get_text() for t in figure.findobj(Text)]
+                key = next((w for w in words if w.startswith(schemas.TABLE_KEY[:30])), '').replace('\n', ' ')
+                robots = [line[1] for line in lines if line[0] == 'robot']
+                self.assertEqual(schemas.TABLE_KEY_SHARES in key, any(r.shares for r in robots), msg=(n, key[-120:]))
+                self.assertEqual(schemas.TABLE_KEY_WHEELS in key, any(r.lift for r in robots), msg=(n, key[-120:]))
+
     def test_6_no_width_left_empty(self):
         for n, (rows, fields, pages) in self.tables.items():
             self.assertAlmostEqual(fields[-1].right + schemas.TABLE_GAP, schemas.T_CELLS[0] - schemas.T_CELL[0] / 2,

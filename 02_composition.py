@@ -1541,14 +1541,6 @@ class DiskArrays:
         self.files = 0
         weakref.finalize(self, shutil.rmtree, self.folder, True)   # the folder removed when the draws are let go
 
-    def matrix(self, values: np.ndarray) -> np.ndarray:
-        """`values` written to a file of the folder and read back memory-mapped."""
-        path = os.path.join(self.folder, f'{self.files}.npy')
-        self.files += 1
-        kept = np.lib.format.open_memmap(path, mode='w+', dtype=values.dtype, shape=values.shape)
-        kept[...] = values
-        return kept
-
     def gathered(self, keys, done: list, store: str, n: int) -> dict:
         """The robots' draws of `store` (a dict of each Robot: key -> kg over its own draws) put together over the N
         draws straight into one file, memory-mapped, a row a key in the order of `keys`: key -> its row. Each robot's
@@ -1577,14 +1569,6 @@ class DiskArrays:
                 else:
                     kept[r.rows, place[key]] += kg
         return kept
-
-    def table(self, arrays: dict) -> dict:
-        """Every array of `arrays` (key -> the N draws) a row of one file, memory-mapped: key -> its row."""
-        if not arrays:
-            return arrays
-        keys = list(arrays)
-        kept = self.matrix(np.stack([arrays[k] for k in keys]))
-        return {k: kept[j] for j, k in enumerate(keys)}
 
 
 # The dicts of a Robot whose draws go to the disk once the robot is drawn (RobotSpill): every one assemble puts together.
@@ -2970,18 +2954,10 @@ def compose_taken_apart(category, d: Draws, lists) -> Composition:
                        stack(materials, in_recipes, n), None, None, remainders_below(d))
 
 
-def same_elements(drawn: list) -> None:
-    """Every robot type's elements with the same columns, all the elements any of them holds, in the order of 01's
-    table of atomic masses: 0 kg where a robot type's materials hold none of an element so far (its summary says which
-    materials are in the elements). 03 compares robot types column by column. The elements of interest so, and the
-    elements by the recipes."""
-    columns = {table: element_order(set().union(*(set(c.tables[table][0]) for c in drawn)))
-               for table in ELEMENT_TABLES}
-    for c in drawn:
-        widen_elements(c, columns)
-
-
-# The two tables of elements whose columns are made the same for every robot type.
+# The two tables of elements whose columns are made the same for every robot type (write_kept): every robot type's
+# elements with the same columns, all the elements any of them holds, in the order of 01's table of atomic masses, 0 kg
+# where a robot type's materials hold none of an element so far (its summary says which materials are in the elements);
+# 03 compares robot types column by column.
 ELEMENT_TABLES = ('elements', 'recipe_elements')
 
 
@@ -5165,7 +5141,7 @@ def run_alone(params: Params) -> int:
 
 def write_kept(kept: list, params: Params, staged: dict, steps) -> int:
     """Steps 5 to 7 of run(): every robot type's draws of the materials and elements, kept in the files `kept` by the
-    types' processes, given the same element columns (every element any type holds: same_elements), written with their
+    types' processes, given the same element columns (every element any type holds: ELEMENT_TABLES), written with their
     pages into the staging folders one type at a time; then everything staged moved into the output folders; 0."""
     # Step 5: the element columns of all types, then each type read back, widened to them, written and let go.
     columns = {table: set() for table in ELEMENT_TABLES}

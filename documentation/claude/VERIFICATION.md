@@ -108,6 +108,50 @@ material declaration). Until then the elements of one robot are **not validated*
 
 ## 2026-11-13
 
+### V240. "Do the fixes" (2026-11-15): iCloud's copies, three functions, the tables' foot, 02's margin
+
+Matthias chose all four (2026-11-15): "Table foot: page's marks only", "02 memory: more margin", "Remove 3 unused
+functions", "Remove iCloud's 669 copies".
+- **iCloud's copies:** 669 files named '<name> 2.<ext>' or '<name> 3.<ext>' in data/ and figures/, every one with its
+  original beside it (checked file by file), 23 GB: moved by exact name into the Trash, folder "RAWCLICHumanoidRobots
+  iCloud copies 2026-11-15", their folders kept (recoverable until the Trash is emptied). Left: 0; data/consolidated
+  84 files, data/parts_taken_apart 144, figures/composition 228, figures/parts_taken_apart 141, as 02 writes them.
+- **Three functions removed from 02:** same_elements, DiskArrays.matrix, DiskArrays.table (no reader since 2026-11-14,
+  every .py searched); what same_elements said is kept with ELEMENT_TABLES. tests.test_composition and
+  tests.test_schemas: 312 tests, all pass.
+- **The tables' foot (01):** it explained † (joints a share of the mass) and ‡ (a lift column) on every page of a robot
+  type, also on pages where no row carries the mark; now only the marks of the page's rows (table_marks: shares, lift,
+  bases, outliers; '' where none). Test first: TestRobotsTables.test_8_the_foot_names_the_marks_of_its_page failed
+  (type 1's pages named † with no row carrying it), passes after; the table tests 9, all pass.
+- **02's margin, not built:** the step offered (each parts file's shared draws kept only for its robots as they are
+  drawn) lowers only robot types 3 and 4 (several parts files). Measured alone at 10,000 and 20,000 draws: type 3 0.53
+  and 0.61 GB, type 5 (one file) 0.49 and 0.61 GB, the largest of the six 0.53 and 0.61 GB; in his real run (200,000 draws) type
+  5 was the largest (3.02 GB). So the step would not give 02 more margin; Claude's offer had promised it without
+  checking.
+- **Then the memory test alone (nothing else running):** 02 0.72, 0.88, 1.08 GB at 5,000, 10,000, 20,000 (8.5 GB on
+  the line × 1.5), 04 1.84, 1.97, 2.18 GB (8.8 GB: failed). Found: (1) the test made 05's copy of the data centres'
+  runs inside the first measured process, 02's: 0.25 GB at 20,000, growing with the draws, counted as 02's memory;
+  02's own process measured apart: 0.24 GB at 10,000 and at 20,000, flat (so its tables need no processes of their
+  own, which Claude had announced: not built); (2) 04's counting holds about 1.6 GB a chunk of 5,000 draws.
+  Fixed: the copy made by the test before any stage is measured, memory-mapped, scenario by scenario
+  (copy_of_the_data_centres); 04 CHUNK 2,000 (04 at 20,000: 52 files byte for byte those of chunks of 5,000; its peak
+  2.18 to 1.45 GB, 48 s); the sizes the rule's own example, 2,000, 5,000 and 20,000 (the line through 5,000 and 20,000
+  was the steeper of the two in the runs of 2026-11-14 and 2026-11-15, so the more cautious).
+- **Measured (tests/test_memory.py alone, 2026-11-15):**
+
+  | Stage | 2,000 | 5,000 | 20,000 | Extrapolated to his run's 200,000 draws (line through 5,000 and 20,000, × 1.5; not run) |
+  |---|---|---|---|---|
+  | 02 | 0.61 GB | 0.76 GB | 0.88 GB | 4.1 GB (while drawing 0.46, 0.52, 0.69 GB) |
+  | 03 | 0.83 GB | 0.84 GB | 0.82 GB | 1.2 GB |
+  | 04 | 1.20 GB | 1.29 GB | 1.44 GB | 4.8 GB |
+
+  Half the memory 8.6 GB: all pass, 5 tests. No run of Claude's went beyond 20,000 draws; 200,000 is reached only by the
+  extrapolation. Against what his real run of 2026-11-15 (200,000 draws) measured: 02's largest type process 3.02 GB
+  with its own 0.24 GB, below the 4.1 GB. tests.test_stock_and_flow and tests.test_combined_stock_and_flow: 55 pass.
+- **Every page after the fixes (tests.test_all_figures, 200 runs a type, 56 tests):** 01 53 pages, 02 369, 03 208, 04
+  41, 05 81: 752 pages, 0 faults, all pass. Looked at: type 1's first table page, its foot without † (no row of the
+  page carries it).
+
 ### V239. One run of 02 at a time (2026-11-15, during his run)
 
 - **What happened:** his run of 2026-11-15: 02 was started twice at 08:59 to 09:00, in a terminal (zsh, process 20149)
