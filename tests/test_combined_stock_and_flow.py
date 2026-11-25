@@ -10,6 +10,10 @@ Matthias, 2026-11-08: "write 05 combination of results of 04 and 07 with the dis
 it" (documentation/claude/EVIDENCE.md E52). Made-up draws in temporary folders, every kilogram by hand: the copy of a
 made-up file in 08's form; 05 on made-up draws of 08 and 04; its checks, each with a deliberate fault. Nothing in data/
 or figures/ is touched.
+
+Since 2026-11-24 the two series are aligned by one year (Matthias: "Align the two series by one year in stage 05"; the
+data centres back, their 2024 copied, their line shifted as in the sum; EVIDENCE.md E53): the copy holds 2024 to 2040,
+and 05 adds the data centres' year y - 1 to the robots' year y.
 """
 
 import dataclasses
@@ -45,11 +49,17 @@ from src.params_schema import Params, absolute  # noqa: E402
 N = 30
 ROBOT_ELEMENTS = ['Li', 'Al', 'Cu', 'Nd']          # 04's (made up): neodymium 0 in every draw
 CENTRE_ELEMENTS = ['Cu', 'Al', 'Sr']               # 08's (made up): strontium the data centres' only
-YEARS = 16
+YEARS = 16                                         # 04's years, 2025 to 2040
+COPY_YEARS = YEARS + 1                             # the copy's years, 2024 to 2040: the data centres one year earlier
+
+
+def copy_index(year):
+    """Where `year` stands in the copy, whose first year is 2024."""
+    return year - 2024
 
 
 def centre_value(s, d, y, f, e):
-    """A made-up kg of 08's copy: scenario s, draw d, year y, flow f, element e (08's order)."""
+    """A made-up kg of 08's copy: scenario s, draw d, year y of the copy (0 = 2024), flow f, element e (08's order)."""
     return (s + 1) * (1 + d / N) * (y + 1) * (f + 1) * (e + 1) * 1e3
 
 
@@ -58,8 +68,8 @@ def robot_value(d, y, p, e):
     return 0.0 if ROBOT_ELEMENTS[e] == 'Nd' else (1 + d) * (y + 1) * (p + 1) * (e + 1) * 10.0
 
 
-def write_inputs(params: Params, draws: int = N, years: int = YEARS) -> None:
-    """The made-up copy of 08's draws and 04's draws where 05 reads them (params' folders)."""
+def write_inputs(params: Params, draws: int = N, years: int = COPY_YEARS) -> None:
+    """The made-up copy of 08's draws (`years` years from 2024) and 04's draws where 05 reads them (params' folders)."""
     copy = absolute(params.data.data_center_draws_dir)
     os.makedirs(copy)
     s, d, y, f, e = np.meshgrid(*(np.arange(k) for k in (3, draws, years, 3, len(CENTRE_ELEMENTS))), indexing='ij')
@@ -94,8 +104,8 @@ def settings(folder: str) -> Params:
 
 
 class TestTheCopy(unittest.TestCase):
-    """tools/copy_data_center_draws.py on a made-up file in 08's form: every number copied, 2022 to 2024 and the
-    collected left out; a missing or doubled row stops it."""
+    """tools/copy_data_center_draws.py on a made-up file in 08's form: every number of 2024 to 2040 copied, 2022, 2023
+    and the collected left out; a missing or doubled row stops it, a missing row of 2024 too."""
 
     def write_csv(self, path: str, rows_left_out=(), row_twice=None) -> None:
         elements = ['Cu', 'Al']
@@ -121,28 +131,30 @@ class TestTheCopy(unittest.TestCase):
             self.write_csv(source)
             path = T.copy(source, os.path.join(folder, 'copy'))
             draws = np.load(path)
-            self.assertEqual(draws.shape, (3, 4, 16, 3, 2))
-            # Scenario B (1), draw 2, 2030 (year 8 of the copy, 2030 - 2022 = 8 of the file), Al (element 1), out
+            self.assertEqual(draws.shape, (3, 4, 17, 3, 2))                         # 2024 to 2040
+            # Scenario B (1), draw 2, 2030 (year 6 of the copy, 2030 - 2022 = 8 of the file), Al (element 1), out
             # (flow 2): its column k = 1 × 4 + 2 = 6 of the file's element columns.
-            self.assertAlmostEqual(float(draws[1, 2, 2030 - 2025, 2, 1]), 2 * 100 + 2 * 10 + 8 + 0.6, places=3)
-            self.assertAlmostEqual(float(draws[0, 0, 0, 0, 0]), 100 + 3 + 0.0, places=3)   # A, 0, 2025, in, Cu
+            self.assertAlmostEqual(float(draws[1, 2, copy_index(2030), 2, 1]), 2 * 100 + 2 * 10 + 8 + 0.6, places=3)
+            self.assertAlmostEqual(float(draws[0, 0, 0, 0, 0]), 100 + 2 + 0.0, places=3)   # A, 0, 2024, in, Cu
+            self.assertAlmostEqual(float(draws[2, 3, copy_index(2040), 1, 0]), 3 * 100 + 3 * 10 + 18 + 0.1, places=3)
             with open(os.path.join(folder, 'copy', T.ELEMENTS_FILE), encoding='utf-8') as handle:
                 self.assertEqual(handle.read().split(), ['Cu', 'Al'])
             with open(os.path.join(folder, 'copy', T.SOURCE_FILE), encoding='utf-8') as handle:
                 words = handle.read()
             self.assertIn(f'source: {source}', words)
             self.assertIn('draws: 4', words)
-            self.assertIn('years: 2025 to 2040', words)
+            self.assertIn('years: 2024 to 2040', words)
 
     def test_a_missing_or_doubled_row_stops_it(self):
-        for kwargs in ({'rows_left_out': {('C', 3, 2031)}}, {'row_twice': ('A', 1, 2026)}):
+        for kwargs in ({'rows_left_out': {('C', 3, 2031)}}, {'row_twice': ('A', 1, 2026)},
+                       {'rows_left_out': {('A', 2, 2024)}}):                     # 2024 is copied: missing, it stops
             with tempfile.TemporaryDirectory() as folder:
                 source = os.path.join(folder, 'stock_flow_draws.csv')
                 self.write_csv(source, **kwargs)
                 with self.assertRaises(ValueError, msg=kwargs):
                     T.copy(source, os.path.join(folder, 'copy'))
                 self.assertFalse(os.path.exists(os.path.join(folder, 'copy', T.SOURCE_FILE)))
-        # A row before 2025 left out does not matter: only 2025 to 2040 is copied.
+        # A row before 2024 left out does not matter: only 2024 to 2040 is copied.
         with tempfile.TemporaryDirectory() as folder:
             source = os.path.join(folder, 'stock_flow_draws.csv')
             self.write_csv(source, rows_left_out={('B', 0, 2023)})
@@ -196,8 +208,10 @@ class TestTheCombination(unittest.TestCase):
                     expected = np.zeros((N, YEARS))
                     for d in range(N):
                         for y in range(YEARS):
+                            year = 2025 + y                    # the robots' year; the data centres' is the one before
                             if symbol in CENTRE_ELEMENTS:
-                                expected[d, y] += centre_value(s, d, y, f, CENTRE_ELEMENTS.index(symbol))
+                                expected[d, y] += centre_value(s, d, copy_index(year - 1), f,
+                                                               CENTRE_ELEMENTS.index(symbol))
                             if symbol in ROBOT_ELEMENTS:
                                 expected[d, y] += (f + 1) * sum(robot_value(d, y, p, ROBOT_ELEMENTS.index(symbol))
                                                                 for p in range(len(C.flow.PARTS)))
@@ -209,9 +223,9 @@ class TestTheCombination(unittest.TestCase):
         with open(os.path.join(self.params.output.combined_dir, C.SUMMARY), newline='', encoding='utf-8') as handle:
             rows = list(csv.DictReader(handle))
         # Scenario B, copper, together, stock, 2030: the median, 2.5 % and 97.5 % of the runs by hand (the mean until
-        # 2026-11-13).
-        values = np.array([centre_value(1, d, 5, 1, 0) + 2 * sum(robot_value(d, 5, p, 2)
-                                                                 for p in range(len(C.flow.PARTS)))
+        # 2026-11-13): the data centres of 2029 (one year earlier) with the robots of 2030 (04's year 5).
+        values = np.array([centre_value(1, d, copy_index(2029), 1, 0) + 2 * sum(robot_value(d, 5, p, 2)
+                                                                                for p in range(len(C.flow.PARTS)))
                            for d in range(N)])
         row = next(r for r in rows if r['scenario'] == 'B' and r['element'] == 'Copper' and r['source'] == 'together'
                    and r['flow'] == 'stock' and r['year'] == '2030')
@@ -239,6 +253,49 @@ class TestTheCombination(unittest.TestCase):
                          [C.DATA_CENTRES, C.ROBOTS, f'Median of {N:,} model runs', '95 % interval'])
 
 
+class TestResiduesBelowOneMilligram(unittest.TestCase):
+    """An amount below 1 mg counts as none in the summary and on the pages; the stored sums stay raw. Matthias,
+    2026-11-24: "Below 1 mg counts as none" (the data centres' outflow of 2024 held rounding residues of 10^-12 to 10^-9
+    kg; VERIFICATION.md V241). Made up: the data centres' copper outflow of 2024 (05's year 2025) a residue of 1e-11 kg
+    in draws 0 to 14 and 5 kg in draws 15 to 29."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.folder = tempfile.TemporaryDirectory()
+        cls.params = settings(cls.folder.name)
+        write_inputs(cls.params)
+        path = os.path.join(absolute(cls.params.data.data_center_draws_dir), C.COPY_DRAWS)
+        copy = np.load(path)
+        cu, out = CENTRE_ELEMENTS.index('Cu'), 2
+        copy[:, :N // 2, copy_index(2024), out, cu] = 1e-11
+        copy[:, N // 2:, copy_index(2024), out, cu] = 5.0
+        np.save(path, copy)
+        with redirect_stdout(StringIO()):
+            cls.code = C.run(cls.params)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.folder.cleanup()
+
+    def test_a_residue_is_not_held(self):
+        import csv
+        self.assertEqual(self.code, 0)
+        with open(os.path.join(self.params.output.combined_dir, C.SUMMARY), newline='', encoding='utf-8') as handle:
+            rows = list(csv.DictReader(handle))
+        row = next(r for r in rows if (r['scenario'], r['element'], r['source'], r['flow'], r['year'])
+                   == ('A', 'Copper', C.DATA_CENTRES, 'out', '2025'))
+        self.assertEqual(row['held in % of the runs'], '50.0')              # the 15 draws of 5 kg, not the residues
+        self.assertAlmostEqual(float(row['median']), 5.0, places=5)
+
+    def test_the_stored_sums_stay_raw(self):
+        elements = C.composition.element_order(set(ROBOT_ELEMENTS) | set(CENTRE_ELEMENTS))
+        together = np.load(os.path.join(self.params.output.combined_dir, 'A', 'elements_out.npy')).astype(np.float64)
+        robots = np.array([3 * sum(robot_value(d, 0, p, ROBOT_ELEMENTS.index('Cu')) for p in range(len(C.flow.PARTS)))
+                           for d in range(N)])
+        centre = np.where(np.arange(N) < N // 2, 1e-11, 5.0)
+        np.testing.assert_allclose(together[:, 0, elements.index('Cu')], robots + centre, rtol=1e-6)
+
+
 class TestItsChecks(unittest.TestCase):
     """05 stops, writing nothing, where the two models' draws do not belong together: each a deliberate fault."""
 
@@ -252,7 +309,9 @@ class TestItsChecks(unittest.TestCase):
             return code, out.getvalue(), os.path.exists(params.output.combined_dir)
 
     def test_other_numbers_of_draws_or_years(self):
-        for kwargs, words in (({'draws': N + 1}, 'do not pair draw by draw'), ({'years': YEARS - 1}, 'the years')):
+        # A copy of 2025 to 2040 (16 years, made before the alignment) lacks the data centres' 2024: it stops too.
+        for kwargs, words in (({'draws': N + 1}, 'do not pair draw by draw'), ({'years': YEARS - 1}, 'the years'),
+                              ({'years': YEARS}, '2024 to 2040')):
             code, printed, written = self.run_on(**kwargs)
             self.assertEqual(code, 1, printed)
             self.assertIn('05 stopped', printed)

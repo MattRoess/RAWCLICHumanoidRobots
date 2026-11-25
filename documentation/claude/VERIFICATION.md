@@ -106,6 +106,66 @@ material declaration). Until then the elements of one robot are **not validated*
 95 % ranges.
 
 
+## 2026-11-24
+
+### V241. 05: the two series aligned by one year ("Align the two series by one year in stage 05"; EVIDENCE.md E53)
+
+- **Tests first:** tests/test_combined_stock_and_flow.py changed to the specification before the code: the copy holds
+  2024 to 2040 and a missing row of 2024 stops it; every kilogram by hand as the data centres' year y - 1 plus the
+  robots' year y; the summary likewise (scenario B, copper, 2030: the data centres of 2029); a copy without 2024 (made
+  before the alignment) stops 05. Against the code before the change 7 of the 8 tests failed (the eighth, no copy at
+  all, does not depend on it); after the change all 8 pass.
+- **Deliberate faults, each in a scratch copy of the repository, 3 of 3 caught:** the data centres paired with their
+  own year instead of the year before (the every-kilogram and summary tests fail); the copy tool back at 2025 (both copy
+  tests fail); the check of the copy's years switched off (the years test errs).
+- **Sandbox on his real inputs** (Claude's scratch folder; nothing in data/ or figures/): the data centres' file
+  (RAWCLICDataCenters' stock_flow_draws.csv of 2026-11-12 11:57:57) cut to its first 2,000, 5,000, 10,000 and 20,000
+  runs of every scenario (one read), each cut copied by the new tool; 04's element draws of his run of 2026-11-15, their
+  first runs. At 2,000 runs: the new copy's 2025 to 2040 equal the copy on disk (its first 2,000 runs, every scenario,
+  flow and element: identical), so the tool only adds 2024; every stored sum equals the copy's year y - 1 plus the
+  robots' 14 parts of year y, in every run, scenario, flow, year and element (within 6.0e-8, float32), 0 where both are
+  0; the summary's data-centre line at 2040 is their 2039 (scenario C, copper: the median of the copy's 2039 runs);
+  05 says the pairing ("their 2024 to 2039 with the robots' 2025 to 2040") and wrote its 69 element pages and 12
+  distribution pages. Looked at: scenario C's copper page (the data-centre line one year later than before; the note
+  on five lines inside the page) and its distribution page of 2040 (the note on five lines inside).
+- **Memory and time** (the GitHub folder's CLAUDE.md §4; each step in its own process, one after another, the peak
+  memory footprint by /usr/bin/time -l, as tests/test_memory.py measures):
+
+  | Step | 2,000 | 5,000 | 10,000 | 20,000 | 200,000 on the line through 10,000 and 20,000, × 1.5 |
+  |---|---|---|---|---|---|
+  | the copy tool | 0.23 GB, 1.0 s | 0.48 GB, 1.7 s | 0.76 GB, 3.1 s | 0.95 GB, 5.7 s | 6.6 GB, about 1.3 min |
+  | 05 | 0.97 GB, 74 s | 1.19 and 1.27 GB, 74 and 73 s | 1.27 GB, 77 s | 1.00 and 0.83 GB, 78 and 75 s | does not grow with the runs: 1.9 GB (the largest measured, × 1.5); about 2 min |
+
+  Both below half the computer's memory (8 GB). The copy tool reads its file in blocks of 400,000 rows: from 10,000
+  runs on every block is full, so its line is drawn through 10,000 and 20,000 (through 5,000 and 20,000, where the one
+  block of 5,000 runs is smaller, it would be steeper than the copy grows). 05's footprint varies by about 0.2 GB
+  between runs at the same size and does not rise with the runs (as on 2026-11-13: 1.4 to 1.6 GB at 20,000 and 50,000,
+  V237); a line through its noise would fall, so the largest value measured is taken, × 1.5. The maximum resident set
+  size, which counts the pages of the memory-mapped files the system may drop at any time, is larger (05 2.67 GB at
+  20,000). His run of 2026-11-15 took 05 5 minutes and the copy about 1 minute at 200,000 runs, longer than the lines
+  give for 05: the run table states his times.
+- **The whole suite, first run** (every test file; the tests that read the data centres' copy given the sandbox's copy
+  of 2024 to 2040 at 20,000 runs, since the copy on disk holds 2025 to 2040 until his run of the tool; 51 minutes):
+  761 tests, 760 pass, 1 fails: the figure test of 05 (its pages at 200 runs: 01 to 04 0 faults; 05 81 pages, 15
+  faults), all [number_format]: the lithium, cobalt and manganese pages of A, B and C write "1e-08 g", "1e-05 g",
+  "1e-06 g" in the panel of what is removed per year.
+- **Its cause, found:** the data centres' outflow of 2024 holds 1.9e-12 to 1.4e-9 kg of lithium, cobalt and
+  manganese in 26.3 % of the runs (the sandbox's 20,000 runs, every scenario); 08 computes the outflow as a balance
+  (stock before + inflow - stock), and where nothing leaves (no battery of the UPS at its lifetime yet) a rounding
+  residue of about 1e-16 of the stock is left. Since the alignment this year falls into 05's 2025, below the panel's
+  scale, and the panel writes it out. Every other amount of either model, in all 20,000 runs, every scenario, flow,
+  year and element, is at least 1 g.
+- **His choice** (of three: below 1 mg counts as none; fix it in the data-centre model; write them in ng): "Below 1 mg
+  counts as none". Tests first: TestResiduesBelowOneMilligram (the data centres' copper outflow of 2024 a residue of
+  1e-11 kg in half the draws, 5 kg in the other half: the summary's data-centre line held in 50 %, its median 5 kg; the
+  stored sum the raw sum, residue included) failed against the code (held 100 %), then `FLOOR` (1 mg) and `counted`:
+  the statistics and the distribution pages count an amount below 1 mg as none; the stored sums stay raw. All 10 tests
+  of 05 pass. Deliberate fault (the floor switched off, in a scratch copy): caught. Left as a finding for him: the
+  residues stay in the data-centre model's own outflows (08), where a fix would remove them at their source.
+- **The whole suite, second run** (with the floor; 2026-11-24, 13:03 to 13:54; the copy given as in the first run):
+  763 tests, all pass; every page of 01 to 05 at 200 runs, 0 faults (05: 81 pages).
+- **Not covered:** his runs of the copy tool and 05 at 200,000 runs (the run table in HANDOVER.md, 2026-11-24).
+
 ## 2026-11-13
 
 ### V240. "Do the fixes" (2026-11-15): iCloud's copies, three functions, the tables' foot, 02's margin

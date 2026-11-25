@@ -653,16 +653,26 @@ Matthias, 2026-11-08: "write 05 combination of results of 04 and 07 with the dis
 (EVIDENCE.md E52).
 
 1. **The copy of 07's draws.** `tools/copy_data_center_draws.py` reads RAWCLICDataCenters' 07 draws
-   (stock_flow_draws.csv) and writes their element columns of 2025 to 2040, in, stock and out, scenario by scenario and
-   draw by draw, into `data/raw/data_center_stock_and_flow/`, with its source and date; it stops where a scenario, draw or
-   year is missing or comes twice. Nothing else in this project reads 07's folder (GitHub/CLAUDE.md §6).
+   (stock_flow_draws.csv) and writes their element columns of 2024 to 2040 (2025 to 2040 until 2026-11-24), in, stock
+   and out, scenario by scenario and draw by draw, into `data/raw/data_center_stock_and_flow/`, with its source and
+   date; it stops where a scenario, draw or year is missing or comes twice. Nothing else in this project reads 07's
+   folder (GitHub/CLAUDE.md §6).
 2. **The check.** 05 stops, writing nothing, where the copy and 04's draws do not belong together: another number of
-   draws, other years, not 07's three flows, not 04's 14 parts.
-3. **The sum.** For each scenario A, B, C, flow and year, in every draw: the data centres' kilograms of each element
-   (07's draw i) + the humanoid robots' (04's draw i, its parts of how a robot is taken apart added up). An element
-   only one model holds is its alone. The two models are independent, so draw i + draw i is a draw of the sum.
+   draws, other years (the copy 2024 to 2040, 04 2025 to 2040), not 07's three flows, not 04's 14 parts.
+3. **The sum.** For each scenario A, B, C, flow and year y, in every draw: the data centres' kilograms of each element
+   of the year before (07's draw i of year y - 1) + the humanoid robots' of year y (04's draw i, its parts of how a
+   robot is taken apart added up). An element only one model holds is its alone. The two models are independent, so
+   draw i + draw i is a draw of the sum.
+   **The two series aligned by one year (since 2026-11-24; Matthias, "Align the two series by one year in stage 05";
+   EVIDENCE.md E53).** The data-centre model takes the ai-2040 article's compute as the stock at 1 January of each year,
+   so its stock at the end of a year is the article's value of the next year; 04 puts each of the article's values at
+   the end of its year. Adding the data centres' year y - 1 to the robots' year y, both hold the article's value of
+   year y at the end of year y. The data centres' line on 05's pages and in its summary is the one added; each page's
+   foot says so.
 4. **What it writes.** The sums, draw by draw, and a summary of the data centres, the robots and both together over
-   the draws above 0; for each scenario the page of each element (stock, inflow, outflow; three lines each; world
+   the draws above 0 (since 2026-11-24 an amount below 1 mg counts as none there and on the pages, the stored sums raw:
+   Matthias, "Below 1 mg counts as none", for the rounding residues of the data centres' outflow of 2024; EVIDENCE.md
+   E53, row 4); for each scenario the page of each element (stock, inflow, outflow; three lines each; world
    reserves and production dashed, as 04) and the distributions of the year ends 2025, 2030, 2035 and 2040 as
    RAWCLICDataCenters' 05 draws them, each bar split into the data centres and the humanoid robots.
 5. **Left out:** 07's "collected" (04 has none yet).

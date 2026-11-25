@@ -21,11 +21,27 @@ The two models are independent; draw i of one is added to draw i of the other, o
 An element only one model holds (magnesium, titanium, indium only the robots; strontium only the data centres) is that
 model's alone. 08's "collected" is left out: 04 has none yet.
 
+THE TWO SERIES ALIGNED BY ONE YEAR (since 2026-11-24)
+-----------------------------------------------------
+Matthias, 2026-11-24: "Align the two series by one year in stage 05"; to the three questions, the data centres back,
+their 2024 copied, their line shifted as in the sum (EVIDENCE.md E53). 08 takes the ai-2040 article's compute as the
+stock at 1 January of each year, so its stock at the end of a year is the article's value of the next year; 04 puts each
+of the article's values at the end of its year. So 05 adds the data centres' year y - 1 (`SHIFT`) to the robots' year
+y, flows and stocks alike: at the end of year y both hold the article's value of year y. The data centres' line on the
+pages and in summary.csv is the one added, one year earlier than 08 dates it; each page says so.
+
+AN AMOUNT BELOW 1 MG COUNTS AS NONE (since 2026-11-24)
+-------------------------------------------------------
+Matthias, 2026-11-24: "Below 1 mg counts as none". In the statistics (summary.csv, the lines of the pages, who holds an
+element) and on the distribution pages, an amount below `FLOOR` (1 mg) is none: the data centres' outflow of 2024 holds
+rounding residues of 10^-12 to 10^-9 kg of lithium, cobalt and manganese in 26 % of the runs, which since the alignment
+fall into 05's 2025; every real amount of either model is at least 1 g. The stored sums stay raw.
+
 WHAT IT READS
 -------------
 - `data.data_center_draws_dir` (data/raw/data_center_stock_and_flow/): the copy of 08's element draws that
-  tools/copy_data_center_draws.py made (element_draws.npy, elements.txt, source.txt); nothing of RAWCLICDataCenters
-  itself (GitHub/CLAUDE.md §6).
+  tools/copy_data_center_draws.py made (element_draws.npy, elements.txt, source.txt), the years 2024 to 2040; nothing
+  of RAWCLICDataCenters itself (GitHub/CLAUDE.md §6).
 - `output.stock_and_flow_dir` (data/stock_and_flow/): 04's elements_in, elements_stock, elements_out (draw × year × part
   of how a robot is taken apart × element), its elements those of 02 (`output.composition_dir`, elements.txt).
 - The world's mine production and reserves of each element, as 04 reads them (04's `references`).
@@ -52,8 +68,9 @@ Every figure a result of the runs, never an input (GitHub/CLAUDE.md §5).
 
 WHAT IT CHECKS
 --------------
-That the two models' draws belong together before anything is written: the same number of draws, the years 2025 to 2040
-in both, 08's three flows in the copy, 04's 14 parts; the copy's source named (source.txt). Any problem stops it.
+That the two models' draws belong together before anything is written: the same number of draws, the years 2024 to 2040
+in the copy and 2025 to 2040 in 04 (a copy without 2024, made before the alignment, stops it), 08's three flows in the
+copy, 04's 14 parts; the copy's source named (source.txt). Any problem stops it.
 
 WHERE IT SITS
 -------------
@@ -106,12 +123,25 @@ SCENARIO_NAMES = {'A': 'Scenario A: no new chip after Blackwell',
                   'C': 'Scenario C: chips improve as the ai-2040 article says'}
 FLOWS = flow.FLOWS                               # ('in', 'stock', 'out'): the copy's flows, 04's files, in one order
 YEARS = flow.LAST - flow.FIRST + 1               # 2025 to 2040: 16
+SHIFT = 1                                        # the data centres one year earlier: their year y - 1 with the
+                                                 # robots' year y (THE TWO SERIES ALIGNED BY ONE YEAR)
+COPY_FIRST = flow.FIRST - SHIFT                  # the copy's first year, 2024
+COPY_YEARS = YEARS + SHIFT                       # the copy's years, 2024 to 2040: 17
+# 1 mg, in kg: an amount below it is a residue of the arithmetic and counts as none in the statistics and on the
+# pages; the stored sums stay raw. Matthias, 2026-11-24: "Below 1 mg counts as none". Why: the data centres' outflow of
+# 2024 (05's 2025, since the alignment) holds 1.9e-12 to 1.4e-9 kg of lithium, cobalt and manganese in 26 % of the runs,
+# residues of 08's balance (outflow = stock before + inflow - stock, where nothing leaves); every real amount of either
+# model is at least 1 g (VERIFICATION.md V241).
+FLOOR = 1e-6
 DATA_CENTRES, ROBOTS, TOGETHER = 'AI data centres', 'Humanoid robots', 'together'
 SOURCES = (DATA_CENTRES, ROBOTS, TOGETHER)
 # The colours of the two models and of both together (Paul Tol's "bright" scheme, as published, its red and its blue;
 # both together black), on the element pages and the distribution pages.
 COLOURS = {DATA_CENTRES: '#EE6677', ROBOTS: '#4477AA', TOGETHER: '#222222'}
 COPY_DRAWS, COPY_ELEMENTS, COPY_SOURCE = 'element_draws.npy', 'elements.txt', 'source.txt'
+# The alignment in words for the foot of every page (rule 2: words a scientist outside the project reads).
+ALIGNED = ("the data-centre model sets the ai-2040 article's compute at 1 January, the robot model each of its values at "
+           "the end of the year, so both hold the article's value of the same year")
 SUMMARY = 'summary.csv'
 ELEMENTS_DIR, DISTRIBUTIONS_DIR = 'elements', 'distributions'
 
@@ -151,9 +181,12 @@ def read_inputs(params: Params) -> tuple:
     if centres.shape[1] != shape[0]:
         raise ValueError(f"08's copy holds {centres.shape[1]:,} draws, 04 {shape[0]:,}: the two do not pair draw by "
                          'draw; run both with the same number of draws.')
-    if centres.shape[2] != YEARS or shape[1] != YEARS:
-        raise ValueError(f"the years: 08's copy {centres.shape[2]}, 04's {shape[1]}, not {YEARS} ({flow.FIRST} to "
-                         f'{flow.LAST}).')
+    if centres.shape[2] != COPY_YEARS:
+        raise ValueError(f"the years: 08's copy holds {centres.shape[2]}, not {COPY_YEARS} ({COPY_FIRST} to "
+                         f'{flow.LAST}: the data centres one year earlier, their {COPY_FIRST} with the robots\' '
+                         f'{flow.FIRST}); run tools/copy_data_center_draws.py again.')
+    if shape[1] != YEARS:
+        raise ValueError(f"the years: 04's {shape[1]}, not {YEARS} ({flow.FIRST} to {flow.LAST}).")
     return centres, centre_elements, source, robots, robot_elements
 
 
@@ -167,10 +200,16 @@ def columns_of(elements: list, own: list) -> tuple:
 STATISTICS = flow.STATISTICS + ('held',)          # 04's: the median, 25 %, 75 %, 2.5 %, 97.5 %; the share above 0
 
 
+def counted(values: np.ndarray) -> np.ndarray:
+    """`values` with every amount below FLOOR (1 mg) as 0: what the statistics and the pages count. The stored sums are
+    never taken from it."""
+    return np.where(values >= FLOOR, values, 0.0)
+
+
 def stats_columns(values: np.ndarray) -> tuple:
     """04's column_stats (one copy): the median, 25 %, 75 %, 2.5 % and 97.5 % over the runs above 0, the share
-    above 0."""
-    return flow.column_stats(values)
+    above 0; `values` as counted (an amount below 1 mg is none)."""
+    return flow.column_stats(counted(values))
 
 
 def combine(params: Params, centres, centre_elements: list, robots: dict, robot_elements: list, folder: str,
@@ -199,9 +238,12 @@ def combine(params: Params, centres, centre_elements: list, robots: dict, robot_
             # The humanoid robots: all their parts of how a robot is taken apart added up, draw by draw.
             robot = np.zeros((n, e))
             robot[:, at_r] = np.asarray(robots[f][:, y], dtype=np.float64).sum(axis=1)[:, from_r]
+            # The data centres one year earlier: their year flow.FIRST + y - SHIFT with the robots' year flow.FIRST + y.
+            centre_year = flow.FIRST + y - SHIFT
             for s_index, s in enumerate(SCENARIOS):
                 centre = np.zeros((n, e))
-                centre[:, at_c] = np.asarray(centres[s_index, :, y, k, :], dtype=np.float64)[:, from_c]
+                centre[:, at_c] = np.asarray(centres[s_index, :, centre_year - COPY_FIRST, k, :],
+                                             dtype=np.float64)[:, from_c]
                 together = centre + robot                                   # draw i with draw i, the raw draws
                 files[(s, f)][:, y] = together
                 for source, values in ((DATA_CENTRES, centre), (ROBOTS, robot), (TOGETHER, together)):
@@ -209,7 +251,7 @@ def combine(params: Params, centres, centre_elements: list, robots: dict, robot_
                         stats[(s, source, f)][key][y] = column
                 year = flow.FIRST + y
                 if f == 'stock' and year in flow.DISTRIBUTION_YEARS:
-                    distribution_page(s, year, centre, robot, elements, n,
+                    distribution_page(s, year, counted(centre), counted(robot), elements, n,
                                       os.path.join(figures, s, DISTRIBUTIONS_DIR, f'elements_{year}.png'),
                                       params.output.dpi, copied)
     for array in files.values():
@@ -232,7 +274,8 @@ def distribution_page(scenario: str, year: int, centre: np.ndarray, robot: np.nd
             'into the AI data centres and the humanoid robots, run i with run i, the median of each under the title; an '
             'element in fewer than 2.5 % of the runs is not drawn\n'
             'A number in brackets: the share of the runs that have it, over which its bars are drawn\n'
-            f"The AI data centres in {in_sentence(SCENARIO_NAMES[scenario])}, their runs as copied ({copied_words(source)})")
+            f"The AI data centres in {in_sentence(SCENARIO_NAMES[scenario])}, their runs as copied ({copied_words(source)}), "
+            f"counted one year earlier: {ALIGNED}")
     return flow.split_elements_page(f'{year}: elements in all AI data centres and humanoid robots in use, '
                                     f'{in_sentence(SCENARIO_NAMES[scenario])}', {DATA_CENTRES: centre, ROBOTS: robot},
                                     {name: COLOURS[name] for name in (DATA_CENTRES, ROBOTS)}, elements, note, path,
@@ -285,8 +328,8 @@ def element_page(scenario: str, symbol: str, k: int, stats: dict, world: dict, n
     figure.suptitle(f"{name} in the world's AI data centres and humanoid robots, {in_sentence(SCENARIO_NAMES[scenario])}")
     handles = [flow.line_handle(source_label(scenario, s), COLOURS[s]) for s in drawn] + flow.world_handles(figure)
     none = [w for s, w in ((DATA_CENTRES, 'the AI data centres'), (ROBOTS, 'the humanoid robots')) if s not in drawn]
-    amounts = (flow.AMOUNTS[:-1] + f"; the AI data centres' runs as copied ({copied_words(source)})"
-               + (f'; {none[0]} hold none of it' if none else '') + '.')
+    amounts = (flow.AMOUNTS[:-1] + f"; the AI data centres' runs as copied ({copied_words(source)}), counted one year "
+               f"earlier: {ALIGNED}" + (f'; {none[0]} hold none of it' if none else '') + '.')
     note = amounts + ' ' + flow.world_note(world, notes)
     return flow.save_figure(figure, path, note, dpi, handles + flow.uncertainty_handles(draws, figure), ncol=3)
 
@@ -331,7 +374,8 @@ def run(params: Params) -> int:
         print(f'05 stopped: {error}')
         return 1
     n = centres.shape[1]
-    print(f"05: AI data centres, 08's draws as copied ({copied_file(source)}); humanoid robots, 04's; {n:,} draws, "
+    print(f"05: AI data centres, 08's draws as copied ({copied_file(source)}), one year earlier (their {COPY_FIRST} to "
+          f"{flow.LAST - SHIFT} with the robots' {flow.FIRST} to {flow.LAST}); humanoid robots, 04's; {n:,} draws, "
           f'scenarios {", ".join(SCENARIOS)} …', flush=True)
     folder, figures = absolute(params.output.combined_dir), absolute(params.output.combined_figures_dir)
     os.makedirs(folder, exist_ok=True)

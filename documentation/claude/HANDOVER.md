@@ -65,7 +65,53 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
-## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time; the fixes (start here)
+## 2026-11-24: 05 aligns the two series by one year; below 1 mg counts as none — his two runs next (start here)
+
+**His words, in order:** "Align the two series by one year in stage 05" (in RAWCLICDataCenters' session; to its three
+questions: the data centres back, 2024 copied too, their line shifted as in the sum); "Tell me then what I have to run";
+when the figure test failed on rounding residues, "Below 1 mg counts as none"; "write handover, commit and push I will
+run it tomorrw"; 2026-11-25: "write handover as I want to restart the computer".
+
+**Built (EVIDENCE.md E53, VERIFICATION.md V241; committed and pushed 2026-11-25):**
+1. `tools/copy_data_center_draws.py` copies the years 2024 to 2040 (`FIRST = 2024`).
+2. 05 adds the data centres' year y - 1 to the robots' year y (`SHIFT`, `COPY_FIRST`, `COPY_YEARS`), flows and stocks,
+   so that both hold the ai-2040 article's value of the same year; it stops on a copy without 2024 ("run
+   tools/copy_data_center_draws.py again"); it says the pairing in the console and on the foot of every page.
+3. 05 counts an amount below 1 mg (`FLOOR`) as none in its statistics and distribution pages (`counted`); the stored
+   sums stay raw. The residues: the data centres' outflow of 2024, 10^-12 to 10^-9 kg of lithium, cobalt and manganese
+   in 26 % of the runs (08's balance); every real amount of either model is at least 1 g.
+4. Tests first (tests/test_combined_stock_and_flow.py, 10 tests, all pass); 4 deliberate faults caught; a sandbox on
+   his inputs at 2,000 to 20,000 runs checked by hand; memory measured (the copy 6.6 GB, 05 1.9 GB at 200,000 runs,
+   × 1.5, of 8 GB).
+5. The whole suite: 763 tests, all pass (2026-11-24, 13:03 to 13:54; every page of 01 to 05 at 200 runs, 0 faults).
+   The tests that read the copy were given a sandbox copy of 2024 to 2040: the copy on disk holds 2025 to 2040 until
+   his run of the tool, so the figure test of 05 passes on the real copy only after it.
+
+**His runs, in this order (nothing else to run):**
+
+| # | Full path | Run? | What it writes | About |
+|---|---|---|---|---|
+| 1 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/tools/copy_data_center_draws.py` | run first | rewrites `data/raw/data_center_stock_and_flow/` (`element_draws.npy`, 2024 to 2040, about 2.4 GB; `elements.txt`; `source.txt`) | about 1 min |
+| 2 | `/Users/rm/Documents/GitHub/RAWCLICHumanoidRobots/05_combined_stock_and_flow.py` | run second, after 1 | rewrites `data/combined_stock_and_flow/` and `figures/combined_stock_and_flow/` (69 element pages, 12 distribution pages) | about 5 min |
+| – | `00_parameters.py` to `04_stock_and_flow.py` (same folder) | do not run | – | unchanged since his run of 2026-11-15 (82d6213); about 14 min |
+| – | RAWCLICDataCenters, every stage | do not run | – | unchanged; the copy reads its run of 2026-11-12 |
+
+**After his runs (Claude, read only), as each ends:** the copy is 3 × 200,000 × 17 × 3 × 20 (2024 to 2040) and its
+`source.txt` names the data centres' file of 2026-11-12 11:57:57; 05 printed the pairing ("their 2024 to 2039 with the
+robots' 2025 to 2040"); every stored sum of 05 equals the copy's year y - 1 plus the robots' 14 parts of year y, in
+every run, scenario, flow, year and element; the summary's medians equal those of the stored runs; 69 element pages and
+12 distribution pages, looked at. Then RAWCLICDataCenters' Part C (its handover of 2026-11-24) and its PDF.
+
+**Open, for him:** (1) the residues at their source: RAWCLICDataCenters' 08 computes the outflow as a balance and leaves
+about 10^-16 of the stock where nothing leaves; (2) 04 and 05 read the world's production and reserves from
+RAWCLICDataCenters (`data/researched/05_DataCenterScenarios.xlsx`, `documentation/sources/MCS2026_Commodities_Data.csv`),
+not from this project's `data/raw/` (the requirement of 2026-11-08); (3) 05's docstring says "the mean" for the summary
+and the pages, while the code and the figures give the median; (4) from 2026-11-15: FigureTests 0.8.0 for
+RAWCLICDataCenters; the last digits of some summary statistics; KINDS and SENSOR_KINDS in 02.
+
+Nothing of Claude's is running; the scratch folder (the sandbox) is not needed and goes with a restart.
+
+## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time; the fixes
 
 **His run, 2026-11-15, all checked as each stage ended:** 01 at 08:59 (53 pages); 02 twice at once at 09:00 (terminal
 and console), one stopped on a file the other had moved, so he ran it again, alone, 09:12:58 to 09:18:11 (all 597

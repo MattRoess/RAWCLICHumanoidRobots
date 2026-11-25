@@ -8,6 +8,26 @@ How each source is judged follows Matthias's rules for sources (`GitHub/CLAUDE.m
   first-hand or second-hand;
 - **read myself:** the source was opened and read, not judged from a search summary.
 
+## E53. The two series aligned by one year in 05 (2026-11-24). Built
+
+His words: "Align the two series by one year in stage 05"; to the three questions put to him, the data centres back,
+2024 copied too, their line shifted as in the sum (each the recommended choice).
+
+**Why** (RAWCLICDataCenters' Supplementary Information, S17.2): the data centres' stock and flow (RAWCLICDataCenters'
+08) takes the ai-2040 article's compute as the stock at 1 January of each year (the stock at the end of quarter k of
+year y lies between the article's values of y and y + 1), so its stock at the end of a year is the article's value of
+the next year. 04 puts each of the article's values at the end of its year. Added year by year, the data centres were
+those of the article's next year.
+
+**Built, as agreed:**
+
+| # | Row | Built |
+|---|---|---|
+| 1 | Which moves | the data centres back by one year: 05 adds their year y - 1 to the robots' year y (`SHIFT = 1`), flows and stocks alike; at the end of year y both hold the article's value of year y. The robots forward would have needed 2041, which neither 04 nor the article has |
+| 2 | 2025 | the copy holds 2024 to 2040 (`tools/copy_data_center_draws.py`, `FIRST = 2024`; the data centres' file holds 2022 to 2040); 05 stops on a copy without 2024 and says to run the tool again |
+| 3 | The data centres' line | on the pages and in `summary.csv` the line that is added, one year earlier than the data-centre model dates it; the foot of every page says so in words |
+| 4 | Below 1 mg | his choice when the figure test failed on the residues the alignment brought in (the data centres' outflow of 2024: 10^-12 to 10^-9 kg of lithium, cobalt and manganese in 26 % of the runs, rounding residues of their balance), "Below 1 mg counts as none": in 05's statistics and distribution pages an amount below 1 mg (`FLOOR`) is none; the stored sums stay raw (VERIFICATION.md V241) |
+
 ## E52. 05: the AI data centres of RAWCLICDataCenters' 07 and the humanoid robots of 04 together (2026-11-08). Built
 
 His words: "The distributions have to be combines 07 and 04 output", "Both have to be exactly the same, as we have to

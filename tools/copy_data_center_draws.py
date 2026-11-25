@@ -23,13 +23,21 @@ data/data_center_stock_and_flow/stock_flow_draws.csv, about 9 GB): a row for eac
 WHAT IT WRITES
 --------------
 Into the setting `data.data_center_draws_dir` (data/raw/data_center_stock_and_flow/, not in git):
-  element_draws.npy   float32, scenario (A, B, C) × draw × year (2025 to 2040, as 04 counts them: the flows of the
-                      calendar year, the stock at its end, as 08 writes them) × flow (in, stock, out) × element, kg;
-                      08's numbers as they are, nothing computed (its "collected" left out: 04 has none yet)
+  element_draws.npy   float32, scenario (A, B, C) × draw × year (2024 to 2040: 04's years and the year before them,
+                      since 05 adds the data centres' year y - 1 to the robots' year y; the flows of the calendar
+                      year, the stock at its end, as 08 writes them) × flow (in, stock, out) × element, kg; 08's
+                      numbers as they are, nothing computed (its "collected" left out: 04 has none yet)
   elements.txt        the elements, one a line, in 08's order
   source.txt          where the copy comes from: the source file, its size and modification time, when it was copied,
                       the scenarios, draws, years and flows copied
-It stops, writing no source.txt, where a scenario, draw or year of 2025 to 2040 is missing or comes twice.
+It stops, writing no source.txt, where a scenario, draw or year of 2024 to 2040 is missing or comes twice.
+
+WHY 2024 (since 2026-11-24)
+---------------------------
+Matthias, 2026-11-24: "Align the two series by one year in stage 05" (the data centres back, their 2024 copied, their
+line shifted as in the sum; EVIDENCE.md E53). 08 takes the ai-2040 article's compute as the stock at 1 January, so its
+stock at the end of a year is the article's value of the next year; 04 puts each of the article's values at the end of
+its year. 05 therefore adds 08's year y - 1 to 04's year y, and for 04's first year, 2025, it needs 08's 2024.
 
 HOW TO RUN IT
 -------------
@@ -56,7 +64,7 @@ import pandas as pd  # noqa: E402
 
 from src.params_schema import ParameterError, absolute, current  # noqa: E402
 
-FIRST, LAST = 2025, 2040                  # the years copied: 04's, as 08 counts them
+FIRST, LAST = 2024, 2040                  # the years copied: 04's 2025 to 2040 and the year before (WHY 2024)
 SCENARIOS = ('A', 'B', 'C')               # 08's scenarios, in its order
 FLOWS = ('in', 'stock', 'out')            # the flows copied; 08's "collected" left out (04 has none yet)
 DRAWS_FILE, ELEMENTS_FILE, SOURCE_FILE = 'element_draws.npy', 'elements.txt', 'source.txt'
