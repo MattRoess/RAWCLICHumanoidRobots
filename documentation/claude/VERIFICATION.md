@@ -106,6 +106,29 @@ material declaration). Until then the elements of one robot are **not validated*
 95 % ranges.
 
 
+## 2026-11-25
+
+### V242. The dated inputs of 04 against the ai-2040 article (read only; his "Option 1, yes to the tests and the rules")
+
+His words, 2026-11-25: "Option 1, yes to the tests and the rules", "I do NOT want that this repeats itself again", "You
+know I want this to be 200% correct and verified and validated!!!". Option 1: every part on the article's years, "2040"
+the article's 2040, the stock it dates 1 January 2040. Read in 04's code (`targets`, `start_robots`, `along`, `between`,
+`share_times`, `check`, `years_of`) and its settings:
+
+- **The article's robots:** at the end of their year since 2026-11-08 (E48; `targets`: the end of 2040 is the article's
+  70 × 10⁹), one year later than the article dates them: its code, read again today at
+  https://ai-2040.com/econ-explorer/model/costSide.js, "scenario H100e / Q_robot are Jan-1 (start-of-year) stocks".
+- **His workbook's years** (the types' shares, the trajectories; `along`) and type 1's mode (`between`): each at its
+  1 January, unchanged on 2026-11-08 (E48, "as before"). So inside 04 the article's robots of a year stand one year after
+  the workbook's values of the same year: the robots of the end of 2025 (the article's 2025) meet the workbook's 2026.
+  The two sources of 04 have been one year apart since 2026-11-08; no test compares their dates.
+- **The settings' comment** on `stock_and_flow.robots` still says "at 1 January of each year"; its doc says "each at the
+  end of its year" (the code).
+- **02 and 03:** no calendar year in their code; Option 1 does not touch them.
+- **So:** under Option 1 the numbers of 04 (and of Part B) change too, not only its words; said to him today,
+  correcting what Claude had written the hour before ("Part B and Part C keep their numbers"). Not covered: his
+  workbook's own meaning of a year (shipped in the year, or at its start), his to settle.
+
 ## 2026-11-24
 
 ### V241. 05: the two series aligned by one year ("Align the two series by one year in stage 05"; EVIDENCE.md E53)
@@ -164,7 +187,13 @@ material declaration). Until then the elements of one robot are **not validated*
   residues stay in the data-centre model's own outflows (08), where a fix would remove them at their source.
 - **The whole suite, second run** (with the floor; 2026-11-24, 13:03 to 13:54; the copy given as in the first run):
   763 tests, all pass; every page of 01 to 05 at 200 runs, 0 faults (05: 81 pages).
-- **Not covered:** his runs of the copy tool and 05 at 200,000 runs (the run table in HANDOVER.md, 2026-11-24).
+- **His runs, read back (2026-11-25):** first RAWCLICDataCenters' 08 anew (his choice; its file byte for byte that of
+  2026-11-12, its VERIFICATION 1zzo); the copy tool, 09:11:29 (from the file of 08:42:11; 3 × 200,000 × 17 × 3 × 20,
+  2024 to 2040; scenario A, run 0, copper of 2024 and 2025 equal to the file's rows to six digits); 05, 09:12 to 09:16
+  (69 element pages, 12 distribution pages). Every stored sum equals the copy's year y - 1 plus the robots' 14 parts of
+  year y, in all 200,000 runs, 3 scenarios, 3 flows, 16 years, 23 elements (within 6.0e-8); the summary's median of
+  scenario C's copper in use in 2040 equals that of the stored runs (5.54041e11 kg); the data centres' lithium, cobalt
+  and manganese removed in 2025 held in 0 % of the runs (the residues counted as none).
 
 ## 2026-11-13
 

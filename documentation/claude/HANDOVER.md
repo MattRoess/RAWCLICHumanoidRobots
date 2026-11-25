@@ -65,6 +65,37 @@ robots (E11, built on "Yes, build it", E11.8, V114), and the robots of types 1 a
 type 3 drawn part by part over 72 of its 169 robots with a mass, type 4 over 33 of its 131; 151 still to do, so their
 draws for stock-and-flow stay the workbook's; step 9 their pages as type 2's (01 and 02, by test and in the sandbox).
 
+## 2026-11-25: Option 1, every part on the ai-2040 article's years; the tests and rules agreed (start here)
+
+**His words** (in RAWCLICDataCenters' session, where the whole day is in its handover of 2026-11-25): "Option 1, yes to
+the tests and the rules", "I do NOT want that this repeats itself again", "You know I want this to be 200% correct and
+verified and validated!!!", "wite handover and comit and push. I will have to run all datacenter on the other Mac,
+because I do not belive things are rigth!!".
+
+**Found (VERIFICATION.md V242, read only):** the article's code dates its robots at 1 January ("scenario H100e /
+Q_robot are Jan-1 (start-of-year) stocks", read again today). Since 2026-11-08 (E48) 04 puts each of the article's
+values at the end of its year, one year later than the article, while his workbook's years (the types' shares, the
+trajectories, type 1's mode) stay at their 1 January: inside 04 the two sources are one year apart, and no test compares
+their dates. 05's `SHIFT = 1` pairs the data centres' year y - 1 with the robots' year y: both the article's values of
+the same year, under the robots' label "end of y", one year later than the article dates them.
+
+**Decided:** Option 1: every part on the article's years, "2040" the article's 2040, the stock it dates 1 January 2040,
+nothing beyond its last value. So 04's numbers change too (its two sources on one date), not only its words. The tests:
+05 checks the join against the article (the copy carries the data centres' compute; 05 stops unless, in every year it
+adds, the compute and the robots are the article's values of the same date; the fixed `SHIFT` goes); 04 checks its
+robots against the article at the article's dates and its workbook's years at the same dates; deliberate faults of
+meaning. The rules: in `GitHub/CLAUDE.md` §§ 2 and 3.
+
+**Open, his to settle, blocking 04, the copy tool and 05** (the questions 1 to 3 of RAWCLICDataCenters' handover of
+2026-11-25): the flows' years (named by the 1 January they build, recommended, or by the calendar year in which they
+happen); the robots' start (1 January 2024, 8.62 M, E, as now, recommended, or the article's 10 M on 1 January 2025);
+his workbook's years (at 1 January of their year, the date of the article's robots of the same year, recommended, or
+another date). Still open from before: (2) of 2026-11-24 below (04 and 05 read the world's production and reserves from
+RAWCLICDataCenters, not from this project's `data/raw/`); (3) 05's docstring says "the mean".
+
+**Nothing to run here now:** every stage waits for Option 1. A run of RAWCLICDataCenters on his other Mac with today's
+code reproduces today's data centres; the copy tool and 05 would give today's results again.
+
 ## 2026-11-24: 05 aligns the two series by one year; below 1 mg counts as none — his two runs next (start here)
 
 **His words, in order:** "Align the two series by one year in stage 05" (in RAWCLICDataCenters' session; to its three
@@ -110,6 +141,10 @@ and the pages, while the code and the figures give the median; (4) from 2026-11-
 RAWCLICDataCenters; the last digits of some summary statistics; KINDS and SENSOR_KINDS in 02.
 
 Nothing of Claude's is running; the scratch folder (the sandbox) is not needed and goes with a restart.
+
+**2026-11-25, done:** his runs (first RAWCLICDataCenters' 08 anew, his choice; then the copy tool at 09:11, 05 at
+09:12 to 09:16), all read back and correct (VERIFICATION.md V241). Every output of 01 to 05 is current. Next, in
+RAWCLICDataCenters: Part C and its PDF from 05's new outputs.
 
 ## 2026-11-15: his run of 00 to 05 done; one run of 02 at a time; the fixes
 
